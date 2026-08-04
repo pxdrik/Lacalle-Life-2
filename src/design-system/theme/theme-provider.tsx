@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
-import { resolveTheme, THEME_ATTRIBUTE, type ResolvedTheme, type ThemePreference } from "./theme";
+import { resolveTheme, THEME_ATTRIBUTE, type ThemePreference } from "./theme";
 import {
   getPreference,
   getServerPreference,
@@ -16,10 +16,14 @@ import {
 interface ThemeContextValue {
   /** What the user chose, which may be `system`. */
   readonly preference: ThemePreference;
-  /** What is actually painted. */
-  readonly resolved: ResolvedTheme;
   readonly setPreference: (preference: ThemePreference) => void;
 }
+
+/**
+ * The resolved theme is computed here but deliberately not exposed. Nothing
+ * needs to branch on it yet — the tokens do that work in CSS — and an unused
+ * context field is API surface that has to be kept correct for no one.
+ */
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -56,9 +60,7 @@ export function ThemeProvider({
   }, [resolved]);
 
   return (
-    <ThemeContext value={{ preference, resolved, setPreference }}>
-      {children}
-    </ThemeContext>
+    <ThemeContext value={{ preference, setPreference }}>{children}</ThemeContext>
   );
 }
 

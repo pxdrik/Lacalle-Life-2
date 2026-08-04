@@ -61,7 +61,6 @@ export function Button({
       type={type}
       disabled={disabled === true || pending}
       aria-busy={pending || undefined}
-      data-pending={pending || undefined}
       className={cn(BASE, VARIANTS[variant], SIZES[size], className)}
       {...props}
     />
