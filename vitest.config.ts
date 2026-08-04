@@ -11,10 +11,11 @@ export default defineConfig({
     },
   },
   test: {
-    environment: "node",
+    // One environment for everything. The storage tests run fine under jsdom
+    // and the cost is a few hundred milliseconds, which buys a config with no
+    // per-file environment rules to get wrong.
+    environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
-    // `fake-indexeddb/auto` installs a spec-compliant IndexedDB onto
-    // globalThis, so the real adapter is exercised rather than mocked away.
     setupFiles: ["./vitest.setup.ts"],
   },
 });

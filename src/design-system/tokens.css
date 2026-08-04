@@ -1,0 +1,145 @@
+/**
+ * Design tokens.
+ *
+ * Identity rule: colour is spent only where it carries meaning. The primary
+ * action is the inverted foreground — near-black on white, near-white on
+ * black — so hue is reserved for data (macros), danger, and focus. That is
+ * what keeps a screen full of numbers calm.
+ *
+ * Values are OKLCH because it is perceptually uniform: a lightness step reads
+ * as the same step at any hue, which is what makes the light and dark scales
+ * mirror each other honestly instead of by eye.
+ *
+ * Contrast ratios of every foreground/background pair are asserted in
+ * `tokens.test.ts`, parsed from this file. Editing a value here without
+ * meeting WCAG AA fails the build.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces, from furthest back to closest. */
+  --canvas: oklch(1 0 0);
+  --surface: oklch(1 0 0);
+  --elevated: oklch(1 0 0);
+  --muted: oklch(0.97 0 0);
+
+  /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder. */
+  --ink: oklch(0.145 0 0);
+  --ink-muted: oklch(0.44 0 0);
+  /* 0.55, not the 0.58 that looked right by eye: below this the ratio against
+     white drops under 4.5:1. Placeholder text is still text. */
+  --ink-subtle: oklch(0.55 0 0);
+
+  --line: oklch(0.922 0 0);
+  --line-strong: oklch(0.84 0 0);
+
+  /* Primary action: the foreground, inverted. */
+  --accent: oklch(0.145 0 0);
+  --accent-ink: oklch(1 0 0);
+
+  --danger: oklch(0.51 0.21 27);
+  --danger-ink: oklch(1 0 0);
+
+  --focus: oklch(0.55 0.2 258);
+
+  /* Data. A blue/amber/violet triad stays separable under deuteranopia and
+     protanopia, where a green/red pair collapses. */
+  --protein: oklch(0.55 0.16 250);
+  --carbs: oklch(0.62 0.14 62);
+  --fat: oklch(0.52 0.19 305);
+
+  --overlay: oklch(0.145 0 0 / 0.45);
+
+  /* Named `elevation`, not `shadow`: `--shadow-*` is Tailwind's own theme
+     namespace, and reusing it here would make the mapping below a circular
+     reference to itself. */
+  --elevation-sm: 0 1px 2px oklch(0.145 0 0 / 0.06);
+  --elevation-md:
+    0 4px 12px oklch(0.145 0 0 / 0.08), 0 1px 3px oklch(0.145 0 0 / 0.04);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Dark surfaces lift by getting lighter. Shadows do not read on black, so
+     depth is carried by surface value instead. */
+  --canvas: oklch(0.145 0 0);
+  --surface: oklch(0.185 0 0);
+  --elevated: oklch(0.215 0 0);
+  --muted: oklch(0.235 0 0);
+
+  --ink: oklch(0.985 0 0);
+  --ink-muted: oklch(0.72 0 0);
+  --ink-subtle: oklch(0.6 0 0);
+
+  --line: oklch(0.275 0 0);
+  --line-strong: oklch(0.37 0 0);
+
+  --accent: oklch(0.985 0 0);
+  --accent-ink: oklch(0.145 0 0);
+
+  --danger: oklch(0.7 0.18 25);
+  --danger-ink: oklch(0.145 0 0);
+
+  --focus: oklch(0.72 0.16 258);
+
+  --protein: oklch(0.72 0.14 250);
+  --carbs: oklch(0.79 0.13 68);
+  --fat: oklch(0.71 0.16 305);
+
+  --overlay: oklch(0 0 0 / 0.65);
+
+  --elevation-sm: 0 1px 2px oklch(0 0 0 / 0.4);
+  --elevation-md: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
+}
+
+/**
+ * `inline` because every value above is a `var()` that changes per theme:
+ * it makes utilities resolve to the variable itself rather than baking in
+ * whichever value happened to be current at build time.
+ */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-muted: var(--muted);
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+
+  --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
+
+  --color-focus: var(--focus);
+
+  --color-protein: var(--protein);
+  --color-carbs: var(--carbs);
+  --color-fat: var(--fat);
+
+  --color-overlay: var(--overlay);
+
+  --shadow-sm: var(--elevation-sm);
+  --shadow-md: var(--elevation-md);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Soft, generous corners. */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+
+  /* Motion. The expo-out curve leaves fast and settles slowly, which is what
+     makes an interface feel responsive rather than merely animated. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}

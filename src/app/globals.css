@@ -1,5 +1,56 @@
 @import "tailwindcss";
+@import "../design-system/tokens.css";
 
-/* Design tokens and the type scale land in the next stage. Nothing is
-   declared here yet so that the identity is designed as a whole rather than
-   accumulated by accident. */
+/**
+ * Dark mode is driven by `data-theme` on <html>, set before first paint by
+ * the pre-hydration script. An attribute rather than a class so the value is
+ * three-state-aware at the source (`light` / `dark`, resolved from a
+ * preference that may be `system`) and never collides with utility classes.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  html {
+    /* Tabular figures everywhere by default: this app is a column of numbers,
+       and digits that change width make totals jitter as they update. */
+    font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* One focus treatment for the whole app, visible on every surface, and
+     only for keyboard users — pointer users never see a ring.
+
+     No `border-radius` here: an outline already follows the element's own
+     corners, and setting it would reshape the element the moment it is
+     focused. */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  /* Honour the OS setting rather than overriding it. Animation is a nicety;
+     for some people it is a symptom trigger. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
