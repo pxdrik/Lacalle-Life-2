@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { describeDataError } from "@/core/domain/describe-data-error";
 import { revise } from "@/core/domain/entity";
 
 import { useFoodRepository } from "../data/food-repository-context";
-import { describeDataError } from "../services/describe-data-error";
 import type { Food } from "../types/food";
 
 /**

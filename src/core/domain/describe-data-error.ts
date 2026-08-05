@@ -1,11 +1,14 @@
-import { DataError } from "@/core/domain/data-error";
+import { DataError } from "./data-error";
 
 /**
  * Turns a failure code into something a person can act on.
  *
  * Each message names the cause and the next step, because "erro ao salvar"
- * tells someone nothing they can do about it. The blocked-storage and
- * quota cases are the two that actually happen in a browser-only app.
+ * tells someone nothing they can do about it. Blocked storage and a full quota
+ * are the two that actually happen in a browser-only app.
+ *
+ * Lives in `core/` rather than in a feature: every feature that touches data
+ * needs it, and features cannot reach into each other.
  */
 export function describeDataError(error: unknown): string {
   if (error instanceof DataError) {

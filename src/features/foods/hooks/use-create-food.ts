@@ -2,9 +2,10 @@
 
 import { useCallback, useState } from "react";
 
+import { describeDataError } from "@/core/domain/describe-data-error";
+
 import { useFoodRepository } from "../data/food-repository-context";
 import { createCustomFood } from "../services/create-food";
-import { describeDataError } from "../services/describe-data-error";
 import type { CustomFoodInput } from "../validation/food-schema";
 
 export interface CreateFood {

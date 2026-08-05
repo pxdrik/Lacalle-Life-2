@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { FoodDataProvider } from "@/composition/food-data-provider";
+import { FoodDataProvider } from "@/composition/data-providers";
 import { CustomFoodForm } from "@/features/foods/components/custom-food-form";
 
 export const metadata: Metadata = {

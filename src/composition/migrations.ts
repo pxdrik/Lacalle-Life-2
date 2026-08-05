@@ -1,4 +1,5 @@
 import type { Migration } from "@/core/storage/schema";
+import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 
 export const DATABASE_NAME = "lacalle-life";
@@ -24,5 +25,10 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 1,
     description: "Food catalogue and user-created foods.",
     createStores: [FOODS_STORE],
+  },
+  {
+    version: 2,
+    description: "Diets, with their meals and items nested inside.",
+    createStores: [DIETS_STORE],
   },
 ];

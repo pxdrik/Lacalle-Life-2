@@ -13,7 +13,7 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
  * unfinished, which is worse than a short menu.
  */
 const LINKS: readonly { href: Route; label: string }[] = [
-  { href: "/", label: "Início" },
+  { href: "/dietas", label: "Dietas" },
   { href: "/alimentos", label: "Alimentos" },
 ];
 
@@ -27,9 +27,10 @@ export function AppNav() {
           Lacalle Life
         </Link>
 
+        {/* Home is reached through the wordmark, so it is not repeated here. */}
         <nav aria-label="Principal" className="flex-1">
           <ul className="flex gap-1">
-            {LINKS.filter((link) => link.href !== "/").map((link) => {
+            {LINKS.map((link) => {
               const active = pathname.startsWith(link.href);
 
               return (

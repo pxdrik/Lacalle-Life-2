@@ -2,6 +2,10 @@ import type { IDBPDatabase } from "idb";
 
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import type { DietRepository } from "@/features/diet/data/diet-repository";
+import { DIETS_STORE } from "@/features/diet/data/diet-store";
+import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
+import type { Diet } from "@/features/diet/types/diet";
 import { seedCatalogue } from "@/features/foods/data/catalogue";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
@@ -23,11 +27,17 @@ import { DATABASE_NAME, MIGRATIONS } from "./migrations";
  */
 export interface Repositories {
   readonly foods: FoodRepository;
+  readonly diets: DietRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
   return {
-    foods: new LocalFoodRepository(new IndexedDbStore<Food>(db, FOODS_STORE.name)),
+    foods: new LocalFoodRepository(
+      new IndexedDbStore<Food>(db, FOODS_STORE.name),
+    ),
+    diets: new LocalDietRepository(
+      new IndexedDbStore<Diet>(db, DIETS_STORE.name),
+    ),
   };
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { FoodDataProvider } from "@/composition/food-data-provider";
+import { FoodDataProvider } from "@/composition/data-providers";
 import { FoodBrowser } from "@/features/foods/components/food-browser";
 
 export const metadata: Metadata = {

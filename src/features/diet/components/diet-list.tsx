@@ -1,0 +1,146 @@
+"use client";
+
+import { Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
+import { Button } from "@/design-system/components/button";
+import { Input } from "@/design-system/components/input";
+
+import { useDietList } from "../hooks/use-diet-list";
+import { dietMacros } from "../services/diet-macros";
+import type { Diet } from "../types/diet";
+import { MacroSummary } from "./macro-summary";
+
+export function DietList() {
+  const router = useRouter();
+  const { state, writeError, create, remove } = useDietList();
+  const [name, setName] = useState("");
+  const [creating, setCreating] = useState(false);
+
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    if (name.trim() === "") return;
+
+    setCreating(true);
+    const id = await create(name);
+    setCreating(false);
+
+    // Straight into the editor: creating a diet and then having to find it in
+    // a list is two steps where the intent was one.
+    if (id !== null) router.push(`/dietas/${id}`);
+  }
+
+  return (
+    <div className="space-y-5">
+      <form onSubmit={(event) => void handleCreate(event)} className="flex gap-2">
+        <Input
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          placeholder="Nome da nova dieta"
+          aria-label="Nome da nova dieta"
+          autoComplete="off"
+        />
+        <Button type="submit" size="lg" pending={creating} disabled={name.trim() === ""}>
+          <Plus aria-hidden className="size-4" />
+          Criar
+        </Button>
+      </form>
+
+      {writeError !== null && (
+        <p
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
+        >
+          {writeError}
+        </p>
+      )}
+
+      {state.status === "loading" && <ListSkeleton />}
+
+      {state.status === "error" && (
+        <div
+          role="alert"
+          className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
+        >
+          <p className="text-ink">Não foi possível carregar suas dietas.</p>
+          <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
+        </div>
+      )}
+
+      {state.status === "ready" &&
+        (state.diets.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+            <p className="text-ink">Nenhuma dieta ainda.</p>
+            <p className="mt-1.5 text-sm text-ink-subtle">
+              Dê um nome acima e comece a montar.
+            </p>
+          </div>
+        ) : (
+          <ul className="space-y-2">
+            {state.diets.map((diet) => (
+              <DietRow
+                key={diet.id}
+                diet={diet}
+                onRemove={() => void remove(diet)}
+              />
+            ))}
+          </ul>
+        ))}
+    </div>
+  );
+}
+
+function DietRow({
+  diet,
+  onRemove,
+}: {
+  readonly diet: Diet;
+  readonly onRemove: () => void;
+}) {
+  const macros = dietMacros(diet);
+  const meals = diet.meals.length;
+
+  return (
+    <li className="group relative rounded-xl border border-line bg-surface transition-colors duration-150 ease-out hover:border-line-strong">
+      <Link href={`/dietas/${diet.id}`} className="flex items-center gap-4 p-4">
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-medium text-ink">
+            {diet.name === "" ? "Dieta sem nome" : diet.name}
+          </p>
+          <p className="mt-0.5 text-xs text-ink-subtle">
+            {meals} {meals === 1 ? "refeição" : "refeições"}
+          </p>
+        </div>
+        <div className="hidden shrink-0 sm:block">
+          <MacroSummary macros={macros} />
+        </div>
+        <span className="w-8 shrink-0" />
+      </Link>
+
+      {/* Outside the link: a delete button nested in an anchor is invalid and
+          swallows the click on the row. */}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Excluir ${diet.name}`}
+        className="absolute top-1/2 right-4 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger"
+      >
+        <Trash2 aria-hidden className="size-4" />
+      </button>
+    </li>
+  );
+}
+
+function ListSkeleton() {
+  return (
+    <ul aria-hidden className="space-y-2">
+      {[0, 1, 2].map((index) => (
+        <li key={index} className="h-[4.5rem] rounded-xl bg-muted" />
+      ))}
+    </ul>
+  );
+}

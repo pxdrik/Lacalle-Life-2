@@ -34,7 +34,9 @@ export default defineConfig([
    */
   {
     files: ["src/features/**/*.{ts,tsx}", "src/app/**/*.{ts,tsx}"],
-    ignores: ["src/features/*/data/**"],
+    // `data/` is the layer that implements the boundary. Tests wire real
+    // implementations on purpose — see the note on the next block.
+    ignores: ["src/features/*/data/**", "src/**/*.test.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -61,6 +63,13 @@ export default defineConfig([
    */
   {
     files: ["src/features/**/*.{ts,tsx}", "src/design-system/**/*.{ts,tsx}"],
+    /**
+     * A test is the composition root of its own scenario: it wires real
+     * implementations together precisely to prove they fit. Holding it to the
+     * production boundary would force it to test through a mock instead, which
+     * is the opposite of what it is for.
+     */
+    ignores: ["src/**/*.test.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -72,9 +81,13 @@ export default defineConfig([
                 "The composition root supplies dependencies; it is never imported by what it wires. Expose a provider/context from this feature's data/ folder and let composition fill it.",
             },
             {
-              group: ["@/features/*/!(types)/**"],
+              // Blocks anything deeper than `@/features/<name>`, which is the
+              // feature's `index.ts`. A feature publishes a surface and keeps
+              // the rest private; reach past it and the two stop being
+              // separable.
+              group: ["@/features/*/*", "@/features/*/*/**"],
               message:
-                "Reach into another feature's internals and the two stop being separable. Share through core/ instead.",
+                "Import another feature through its index.ts, not its internals. If what you need is not exported there, decide whether it should be public or whether it belongs in core/.",
             },
           ],
         },
