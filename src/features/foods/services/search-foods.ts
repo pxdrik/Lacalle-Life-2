@@ -3,6 +3,7 @@ import type { Food, FoodCategory } from "../types/food";
 export interface FoodQuery {
   readonly text: string;
   readonly category: FoodCategory | null;
+  readonly favoritesOnly: boolean;
 }
 
 /**
@@ -47,17 +48,18 @@ export function searchFoods(
   foods: readonly Food[],
   query: FoodQuery,
 ): readonly Food[] {
-  const byCategory =
-    query.category === null
-      ? foods
-      : foods.filter((food) => food.category === query.category);
+  const filtered = foods.filter(
+    (food) =>
+      (query.category === null || food.category === query.category) &&
+      (!query.favoritesOnly || food.isFavorite),
+  );
 
   const terms = normalize(query.text).split(/\s+/).filter(Boolean);
-  if (terms.length === 0) return byCategory;
+  if (terms.length === 0) return filtered;
 
   const firstTerm = terms[0]!;
 
-  return byCategory
+  return filtered
     .map((food) => ({ food, name: normalize(food.name) }))
     .filter(({ name }) => matches(name, terms))
     .map(({ food, name }) => ({ food, score: rank(name, firstTerm) }))

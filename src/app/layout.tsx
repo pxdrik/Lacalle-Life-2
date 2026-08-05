@@ -5,6 +5,8 @@ import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
+import { AppNav } from "./_components/app-nav";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -42,7 +44,10 @@ export default function RootLayout({
     >
       <body>
         <ThemeScript />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AppNav />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

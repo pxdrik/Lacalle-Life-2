@@ -29,3 +29,20 @@ export interface Entity {
 export function createEntityId(): EntityId {
   return crypto.randomUUID();
 }
+
+/**
+ * Applies changes and stamps `updatedAt`.
+ *
+ * Every mutation goes through here so that bumping the timestamp is never
+ * something a caller can forget — the future sync layer's last-write-wins
+ * ordering is only as good as the field's discipline.
+ *
+ * `id` and `createdAt` are excluded from `changes`: revising an entity must
+ * never be able to change which entity it is.
+ */
+export function revise<T extends Entity>(
+  entity: T,
+  changes: Partial<Omit<T, keyof Entity>>,
+): T {
+  return { ...entity, ...changes, updatedAt: Date.now() };
+}

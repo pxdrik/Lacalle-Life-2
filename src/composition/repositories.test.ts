@@ -23,6 +23,7 @@ describe("createRepositories", () => {
       category: "protein",
       per100g: { kcal: 143, proteinG: 13, carbsG: 1, fatG: 10 },
       isCustom: false,
+      isFavorite: false,
       createdAt: 1,
       updatedAt: 1,
     });

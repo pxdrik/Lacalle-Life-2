@@ -37,4 +37,11 @@ export interface Food extends Entity {
    * CSV import should not care where a food came from.
    */
   readonly isCustom: boolean;
+
+  /**
+   * Marked by the user. Only custom foods can be deleted, but anything can be
+   * favourited — which is how someone makes a 216-row catalogue feel like the
+   * fifteen things they actually eat.
+   */
+  readonly isFavorite: boolean;
 }

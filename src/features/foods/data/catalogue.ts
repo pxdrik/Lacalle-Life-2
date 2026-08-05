@@ -28,6 +28,7 @@ export async function seedCatalogue(repository: FoodRepository): Promise<void> {
     createdAt: now,
     updatedAt: now,
     isCustom: false,
+    isFavorite: false,
   }));
 
   await repository.saveMany(foods);

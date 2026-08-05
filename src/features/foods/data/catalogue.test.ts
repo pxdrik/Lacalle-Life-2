@@ -94,6 +94,7 @@ describe("seedCatalogue", () => {
       category: "protein",
       per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
       isCustom: true,
+      isFavorite: false,
       createdAt: 1,
       updatedAt: 1,
     });

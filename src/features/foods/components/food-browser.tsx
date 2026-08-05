@@ -1,5 +1,7 @@
 "use client";
 
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Input } from "@/design-system/components/input";
@@ -7,26 +9,27 @@ import { Input } from "@/design-system/components/input";
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { searchFoods } from "../services/search-foods";
 import type { FoodCategory } from "../types/food";
-import { FoodCategoryFilter } from "./food-category-filter";
+import { FoodFilters } from "./food-filters";
 import { FoodList } from "./food-list";
 import { FoodListSkeleton } from "./food-list-skeleton";
 
 export function FoodBrowser() {
-  const catalogue = useFoodCatalogue();
+  const { state, writeError, toggleFavorite, removeFood } = useFoodCatalogue();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
-  // Filtering runs on every render rather than in state. The catalogue is a
-  // few hundred rows, so it costs microseconds — and derived state that can
-  // fall out of sync with its inputs is a bug waiting to happen.
+  // Filtering runs on every render rather than living in state. The catalogue
+  // is a few hundred rows, so it costs microseconds — and derived state that
+  // can fall out of sync with its inputs is a bug waiting to happen.
   const results =
-    catalogue.status === "ready"
-      ? searchFoods(catalogue.foods, { text, category })
+    state.status === "ready"
+      ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
 
   return (
     <div className="space-y-5">
-      <div className="space-y-3">
+      <div className="flex gap-2">
         <Input
           type="search"
           value={text}
@@ -36,18 +39,41 @@ export function FoodBrowser() {
           placeholder="Buscar alimento"
           aria-label="Buscar alimento"
           autoComplete="off"
-          disabled={catalogue.status !== "ready"}
+          disabled={state.status !== "ready"}
         />
-        <FoodCategoryFilter value={category} onChange={setCategory} />
+        <Link
+          href="/alimentos/novo"
+          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
+        >
+          <Plus aria-hidden className="size-4" />
+          <span className="hidden sm:inline">Novo</span>
+          <span className="sr-only sm:hidden">Novo alimento</span>
+        </Link>
       </div>
 
-      {catalogue.status === "loading" && <FoodListSkeleton />}
+      <FoodFilters
+        category={category}
+        favoritesOnly={favoritesOnly}
+        onCategoryChange={setCategory}
+        onFavoritesOnlyChange={setFavoritesOnly}
+      />
 
-      {catalogue.status === "error" && <ErrorState message={catalogue.message} />}
+      {writeError !== null && (
+        <p
+          role="alert"
+          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
+        >
+          {writeError}
+        </p>
+      )}
 
-      {catalogue.status === "ready" && (
+      {state.status === "loading" && <FoodListSkeleton />}
+
+      {state.status === "error" && <ErrorState message={state.message} />}
+
+      {state.status === "ready" && (
         <>
-          {/* Announced rather than shown alone, so a screen-reader user knows
+          {/* Announced rather than only shown, so a screen-reader user knows
               the list changed as they type. */}
           <p className="text-sm text-ink-subtle" role="status" aria-live="polite">
             {results.length === 0
@@ -56,9 +82,16 @@ export function FoodBrowser() {
           </p>
 
           {results.length === 0 ? (
-            <EmptyState hasFilters={text !== "" || category !== null} />
+            <EmptyState
+              favoritesOnly={favoritesOnly}
+              hasFilters={text !== "" || category !== null}
+            />
           ) : (
-            <FoodList foods={results} />
+            <FoodList
+              foods={results}
+              onToggleFavorite={(food) => void toggleFavorite(food)}
+              onRemove={(food) => void removeFood(food)}
+            />
           )}
         </>
       )}
@@ -66,21 +99,43 @@ export function FoodBrowser() {
   );
 }
 
-function EmptyState({ hasFilters }: { readonly hasFilters: boolean }) {
+function EmptyState({
+  favoritesOnly,
+  hasFilters,
+}: {
+  readonly favoritesOnly: boolean;
+  readonly hasFilters: boolean;
+}) {
+  const { title, hint } = emptyCopy(favoritesOnly, hasFilters);
+
   return (
     <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
-      <p className="text-ink">
-        {hasFilters
-          ? "Nenhum alimento corresponde à busca."
-          : "Nenhum alimento no banco."}
-      </p>
-      <p className="mt-1.5 text-sm text-ink-subtle">
-        {hasFilters
-          ? "Tente outro termo ou remova o filtro de categoria."
-          : "O banco será preenchido automaticamente na próxima vez que você abrir esta página."}
-      </p>
+      <p className="text-ink">{title}</p>
+      <p className="mt-1.5 text-sm text-ink-subtle">{hint}</p>
     </div>
   );
+}
+
+/** Each empty case names what to do next, rather than only what is missing. */
+function emptyCopy(favoritesOnly: boolean, hasFilters: boolean) {
+  if (favoritesOnly && !hasFilters) {
+    return {
+      title: "Você ainda não favoritou nenhum alimento.",
+      hint: "Toque na estrela ao lado de um alimento para tê-lo sempre à mão.",
+    };
+  }
+
+  if (favoritesOnly || hasFilters) {
+    return {
+      title: "Nenhum alimento corresponde aos filtros.",
+      hint: "Tente outro termo, ou remova um dos filtros ativos.",
+    };
+  }
+
+  return {
+    title: "Nenhum alimento no banco.",
+    hint: "Recarregue a página para preencher o banco automaticamente.",
+  };
 }
 
 function ErrorState({ message }: { readonly message: string }) {

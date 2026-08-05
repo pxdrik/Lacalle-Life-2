@@ -51,5 +51,36 @@ export default defineConfig([
     },
   },
 
+  /**
+   * The dependency arrow, enforced.
+   *
+   * `composition/` is the top of the graph: it is the only module that knows
+   * which implementation backs each interface. A feature importing it would
+   * invert that and make the feature unusable without the whole app wired up.
+   * Features declare how they receive a dependency; composition supplies it.
+   */
+  {
+    files: ["src/features/**/*.{ts,tsx}", "src/design-system/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/composition", "@/composition/**"],
+              message:
+                "The composition root supplies dependencies; it is never imported by what it wires. Expose a provider/context from this feature's data/ folder and let composition fill it.",
+            },
+            {
+              group: ["@/features/*/!(types)/**"],
+              message:
+                "Reach into another feature's internals and the two stop being separable. Share through core/ instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);

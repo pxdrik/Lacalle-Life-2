@@ -38,16 +38,16 @@ const ADAPTERS: readonly { name: string; create: () => Promise<Store<Food>> }[] 
     },
   ];
 
-function food(name: string, overrides: Partial<Food> = {}): Food {
+function food(name: string, isCustom = false): Food {
   return {
     id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
     category: "protein",
     per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
-    isCustom: false,
+    isCustom,
+    isFavorite: false,
     createdAt: 1,
     updatedAt: 1,
-    ...overrides,
   };
 }
 
@@ -120,12 +120,24 @@ describe.each(ADAPTERS)("LocalFoodRepository — $name", ({ create }) => {
   });
 
   it("keeps custom foods alongside catalogue ones", async () => {
-    await repository.saveMany([
-      food("Arroz"),
-      food("Bolo da vó", { isCustom: true }),
-    ]);
+    await repository.saveMany([food("Arroz"), food("Bolo da vó", true)]);
 
     const all = await repository.listAll();
     expect(all.map((f) => f.isCustom)).toEqual([false, true]);
+  });
+
+  describe("forward compatibility", () => {
+    it("fills in a field a record predates", async () => {
+      // A browser that installed an older version holds records without
+      // `isFavorite`. Reading must not hand the app an undefined.
+      const legacy = food("Arroz");
+      const withoutFavorite: Record<string, unknown> = { ...legacy };
+      delete withoutFavorite["isFavorite"];
+
+      await repository.save(withoutFavorite as unknown as Food);
+
+      const [stored] = await repository.listAll();
+      expect(stored?.isFavorite).toBe(false);
+    });
   });
 });

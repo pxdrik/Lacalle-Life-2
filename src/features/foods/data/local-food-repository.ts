@@ -20,11 +20,12 @@ export class LocalFoodRepository implements FoodRepository {
 
   async listAll(): Promise<readonly Food[]> {
     const foods = await this.#store.getAll();
-    return foods.sort(byName);
+    return foods.map(normalize).sort(byName);
   }
 
-  getById(id: EntityId): Promise<Food | undefined> {
-    return this.#store.get(id);
+  async getById(id: EntityId): Promise<Food | undefined> {
+    const food = await this.#store.get(id);
+    return food === undefined ? undefined : normalize(food);
   }
 
   save(food: Food): Promise<void> {
@@ -42,6 +43,18 @@ export class LocalFoodRepository implements FoodRepository {
   async isEmpty(): Promise<boolean> {
     return (await this.#store.count()) === 0;
   }
+}
+
+/**
+ * A record written by an earlier version of the app can be missing a field
+ * that has since been added — a local store keeps whatever shape it was given,
+ * and the browser holding it may have skipped several releases.
+ *
+ * Filling defaults on the way out means the rest of the app can treat `Food`
+ * as complete, and no destructive migration is ever needed to add a field.
+ */
+function normalize(food: Food): Food {
+  return { ...food, isFavorite: food.isFavorite ?? false };
 }
 
 /**
