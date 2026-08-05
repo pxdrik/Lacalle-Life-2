@@ -15,6 +15,7 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 const LINKS: readonly { href: Route; label: string }[] = [
   { href: "/dietas", label: "Dietas" },
   { href: "/alimentos", label: "Alimentos" },
+  { href: "/perfil", label: "Perfil" },
 ];
 
 export function AppNav() {

@@ -1,6 +1,7 @@
 import type { Migration } from "@/core/storage/schema";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
+import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 
 export const DATABASE_NAME = "lacalle-life";
 
@@ -30,5 +31,10 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 2,
     description: "Diets, with their meals and items nested inside.",
     createStores: [DIETS_STORE],
+  },
+  {
+    version: 3,
+    description: "Optional physical profile, the input to calorie targets.",
+    createStores: [PROFILE_STORE],
   },
 ];

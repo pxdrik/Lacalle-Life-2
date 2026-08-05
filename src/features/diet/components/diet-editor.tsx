@@ -4,6 +4,7 @@ import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 
 import type { Food } from "@/features/foods";
+import { useNutritionTargets } from "@/features/profile";
 
 import { useDietEditor } from "../hooks/use-diet-editor";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
@@ -19,10 +20,13 @@ import {
 } from "../services/edit-diet";
 import { MealCard } from "./meal-card";
 import { InlineText } from "./inline-text";
+import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 
 export function DietEditor({ dietId }: { readonly dietId: string }) {
   const { state, saveError, apply } = useDietEditor(dietId);
+  // `null` whenever no profile is filled in, which is the normal case.
+  const targets = useNutritionTargets();
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -64,7 +68,11 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
       {/* Sticky, because the totals are the reason the screen exists: every
           portion change is a question about them. */}
       <div className="sticky top-0 z-10 -mx-6 mt-4 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
-        <MacroSummary macros={totals} size="lg" />
+        {targets === null ? (
+          <MacroSummary macros={totals} size="lg" />
+        ) : (
+          <MacroProgress totals={totals} targets={targets} />
+        )}
       </div>
 
       {saveError !== null && (

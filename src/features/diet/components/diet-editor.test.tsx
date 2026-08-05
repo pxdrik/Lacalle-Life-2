@@ -72,6 +72,16 @@ async function addChicken() {
 }
 
 describe("DietEditor", () => {
+  it("works with no profile feature wired in at all", async () => {
+    // The harness mounts diet and food repositories only — no profile
+    // provider. Building a diet must never depend on the profile feature
+    // being present, so this test deliberately omits it.
+    const diet = createDiet("Cutting");
+    mount(diet.id, diet);
+
+    expect(await screen.findByLabelText("Nome da dieta")).toHaveValue("Cutting");
+  });
+
   it("reports a diet that does not exist, rather than showing an empty one", async () => {
     mount("nunca-existiu");
 

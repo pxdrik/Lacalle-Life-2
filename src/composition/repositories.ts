@@ -11,6 +11,12 @@ import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { LocalFoodRepository } from "@/features/foods/data/local-food-repository";
 import type { Food } from "@/features/foods/types/food";
+import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
+import {
+  PROFILE_STORE,
+  type ProfileRepository,
+} from "@/features/profile/data/profile-repository";
+import type { Profile } from "@/features/profile/types/profile";
 
 import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 
@@ -28,6 +34,7 @@ import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 export interface Repositories {
   readonly foods: FoodRepository;
   readonly diets: DietRepository;
+  readonly profile: ProfileRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
@@ -37,6 +44,9 @@ export function createRepositories(db: IDBPDatabase): Repositories {
     ),
     diets: new LocalDietRepository(
       new IndexedDbStore<Diet>(db, DIETS_STORE.name),
+    ),
+    profile: new LocalProfileRepository(
+      new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
     ),
   };
 }

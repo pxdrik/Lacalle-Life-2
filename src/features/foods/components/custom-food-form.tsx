@@ -3,15 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { parseDecimal } from "@/core/format/decimal";
 import { Button } from "@/design-system/components/button";
+import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 
 import { useCreateFood } from "../hooks/use-create-food";
 import { estimateKcal } from "../services/create-food";
 import { FOOD_CATEGORIES, FOOD_CATEGORY_LABELS } from "../types/food";
 import { customFoodSchema } from "../validation/food-schema";
-import { Field } from "./field";
-import { parseDecimal } from "./parse-decimal";
 
 const MACROS = [
   { key: "proteinG", label: "Proteína" },

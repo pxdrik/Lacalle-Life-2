@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parseDecimal } from "./parse-decimal";
+import { parseDecimal } from "./decimal";
 
 describe("parseDecimal", () => {
   it("reads a plain number", () => {

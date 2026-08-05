@@ -3,6 +3,8 @@ interface Props {
   readonly id: string;
   readonly error?: string | undefined;
   readonly hint?: string | undefined;
+  /** Dims the label alongside the control it names. */
+  readonly disabled?: boolean;
   readonly children: (control: {
     readonly id: string;
     readonly describedBy: string | undefined;
@@ -21,16 +23,13 @@ interface Props {
  * through `aria-describedby`. Taking a plain `ReactNode` would mean the
  * message is visible but unannounced — the field would look accessible while
  * a screen reader reads the label and stops.
- *
- * Lives in the feature rather than the design system: it has one consumer. It
- * moves to `design-system/` the day a second form needs it.
  */
-export function Field({ label, id, error, hint, children }: Props) {
+export function Field({ label, id, error, hint, disabled, children }: Props) {
   const message = error ?? hint;
   const messageId = `${id}-message`;
 
   return (
-    <div className="space-y-1.5">
+    <div className={disabled === true ? "space-y-1.5 opacity-45" : "space-y-1.5"}>
       <label htmlFor={id} className="block text-sm font-medium text-ink">
         {label}
       </label>

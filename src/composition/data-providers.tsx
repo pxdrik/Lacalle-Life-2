@@ -4,6 +4,8 @@ import { DietRepositoryProvider } from "@/features/diet/data/diet-repository-con
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
+import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repository-context";
+import type { ProfileRepository } from "@/features/profile/data/profile-repository";
 
 import { getRepositories } from "./repositories";
 
@@ -43,6 +45,22 @@ const dietRepository = once<DietRepository>(async () => {
   return (await getRepositories()).diets;
 });
 
+const profileRepository = once<ProfileRepository>(async () => {
+  return (await getRepositories()).profile;
+});
+
+export function ProfileDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <ProfileRepositoryProvider repository={profileRepository()}>
+      {children}
+    </ProfileRepositoryProvider>
+  );
+}
+
 export function FoodDataProvider({
   children,
 }: {
@@ -68,9 +86,10 @@ export function DietDataProvider({
 }
 
 /**
- * The diet editor picks foods, so it needs both. Composed here rather than
- * nested at the page, so a route never has to know which repositories a
- * screen's components happen to reach for.
+ * The diet editor picks foods and, when a profile exists, compares its totals
+ * against that profile's targets. Composed here rather than nested at the
+ * page, so a route never has to know which repositories a screen's components
+ * happen to reach for.
  */
 export function DietEditorDataProvider({
   children,
@@ -79,7 +98,9 @@ export function DietEditorDataProvider({
 }) {
   return (
     <DietDataProvider>
-      <FoodDataProvider>{children}</FoodDataProvider>
+      <FoodDataProvider>
+        <ProfileDataProvider>{children}</ProfileDataProvider>
+      </FoodDataProvider>
     </DietDataProvider>
   );
 }
