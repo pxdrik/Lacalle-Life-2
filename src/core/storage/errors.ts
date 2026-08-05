@@ -1,30 +1,11 @@
+import { DataError, type DataErrorCode } from "@/core/domain/data-error";
+
 /**
- * Storage failures the application is expected to handle differently.
- *
- * Everything a browser can throw at us collapses into one of these, so that
- * callers branch on a closed set instead of sniffing `DOMException` names.
+ * Translates what the browser's storage APIs throw into the domain's closed
+ * set of failure codes, so that callers branch on a known set instead of
+ * sniffing `DOMException` names.
  */
-export type StorageErrorCode =
-  /** IndexedDB is missing or refused — private browsing, disabled storage. */
-  | "UNAVAILABLE"
-  /** Another tab holds an older connection open and blocks the upgrade. */
-  | "BLOCKED"
-  /** The origin's storage quota is full. Only writes produce this. */
-  | "QUOTA_EXCEEDED"
-  /** The transaction aborted for any other reason. */
-  | "TRANSACTION_FAILED";
-
-export class StorageError extends Error {
-  readonly code: StorageErrorCode;
-
-  constructor(code: StorageErrorCode, message: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = "StorageError";
-    this.code = code;
-  }
-}
-
-const DOM_EXCEPTION_CODES: Readonly<Record<string, StorageErrorCode>> = {
+const DOM_EXCEPTION_CODES: Readonly<Record<string, DataErrorCode>> = {
   QuotaExceededError: "QUOTA_EXCEEDED",
   InvalidStateError: "UNAVAILABLE",
   SecurityError: "UNAVAILABLE",
@@ -33,18 +14,17 @@ const DOM_EXCEPTION_CODES: Readonly<Record<string, StorageErrorCode>> = {
 };
 
 /**
- * Normalises anything thrown by the IndexedDB layer into a `StorageError`.
- * Already-normalised errors pass through untouched so that wrapping nested
- * calls never double-wraps.
+ * Already-normalised errors pass through untouched, so wrapping nested calls
+ * never double-wraps.
  */
-export function toStorageError(cause: unknown): StorageError {
-  if (cause instanceof StorageError) return cause;
+export function toDataError(cause: unknown): DataError {
+  if (cause instanceof DataError) return cause;
 
   if (cause instanceof DOMException) {
-    const code = DOM_EXCEPTION_CODES[cause.name] ?? "TRANSACTION_FAILED";
-    return new StorageError(code, cause.message || cause.name, { cause });
+    const code = DOM_EXCEPTION_CODES[cause.name] ?? "FAILED";
+    return new DataError(code, cause.message || cause.name, { cause });
   }
 
   const message = cause instanceof Error ? cause.message : String(cause);
-  return new StorageError("TRANSACTION_FAILED", message, { cause });
+  return new DataError("FAILED", message, { cause });
 }

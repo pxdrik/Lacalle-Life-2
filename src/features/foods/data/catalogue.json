@@ -1,0 +1,2378 @@
+[
+  {
+    "id": "abacate",
+    "name": "Abacate",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 160,
+      "proteinG": 2,
+      "carbsG": 9,
+      "fatG": 15
+    }
+  },
+  {
+    "id": "abacaxi",
+    "name": "Abacaxi",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 50,
+      "proteinG": 0.5,
+      "carbsG": 13,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abobora-cozida",
+    "name": "Abóbora cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 1,
+      "carbsG": 8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abobora-crua",
+    "name": "Abóbora crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 26,
+      "proteinG": 1,
+      "carbsG": 6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abobrinha-cozida",
+    "name": "Abobrinha cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 17,
+      "proteinG": 1.2,
+      "carbsG": 3.5,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "abobrinha-crua",
+    "name": "Abobrinha crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 21,
+      "proteinG": 1.5,
+      "carbsG": 3.5,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "acai",
+    "name": "Açaí",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 70,
+      "proteinG": 1.5,
+      "carbsG": 5,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "acelga-cozida",
+    "name": "Acelga cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 1.8,
+      "carbsG": 3.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "acelga-crua",
+    "name": "Acelga crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 1.8,
+      "carbsG": 3.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "aipim-cozido",
+    "name": "Aipim cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 160,
+      "proteinG": 1,
+      "carbsG": 38,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "alface",
+    "name": "Alface",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 15,
+      "proteinG": 1.4,
+      "carbsG": 2.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "alface-americana",
+    "name": "Alface americana",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 15,
+      "proteinG": 1.4,
+      "carbsG": 2.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "alface-roxa",
+    "name": "Alface roxa",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 15,
+      "proteinG": 1.4,
+      "carbsG": 2.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "alho",
+    "name": "Alho",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 149,
+      "proteinG": 6.4,
+      "carbsG": 33,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "ameixa",
+    "name": "Ameixa",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 46,
+      "proteinG": 0.7,
+      "carbsG": 11,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "amendoa",
+    "name": "Amêndoa",
+    "category": "fat",
+    "per100g": {
+      "kcal": 579,
+      "proteinG": 21,
+      "carbsG": 22,
+      "fatG": 50
+    }
+  },
+  {
+    "id": "amendoim",
+    "name": "Amendoim",
+    "category": "fat",
+    "per100g": {
+      "kcal": 567,
+      "proteinG": 26,
+      "carbsG": 16,
+      "fatG": 49
+    }
+  },
+  {
+    "id": "amora",
+    "name": "Amora",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 43,
+      "proteinG": 1.4,
+      "carbsG": 10,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "arroz-branco-cozido",
+    "name": "Arroz branco cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 130,
+      "proteinG": 2.7,
+      "carbsG": 28,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "arroz-com-feijao",
+    "name": "Arroz com feijão",
+    "category": "carb",
+    "per100g": {
+      "kcal": 130,
+      "proteinG": 4.5,
+      "carbsG": 25,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "arroz-integral-cozido",
+    "name": "Arroz integral cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 124,
+      "proteinG": 2.6,
+      "carbsG": 26,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "arroz-parboilizado-cozido",
+    "name": "Arroz parboilizado cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 128,
+      "proteinG": 2.5,
+      "carbsG": 28,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "arroz-selvagem-cozido",
+    "name": "Arroz selvagem cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 101,
+      "proteinG": 3.9,
+      "carbsG": 21,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "atum-em-agua",
+    "name": "Atum em água",
+    "category": "protein",
+    "per100g": {
+      "kcal": 116,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "aveia-com-leite",
+    "name": "Aveia com leite",
+    "category": "carb",
+    "per100g": {
+      "kcal": 120,
+      "proteinG": 5,
+      "carbsG": 20,
+      "fatG": 2
+    }
+  },
+  {
+    "id": "aveia-em-flocos",
+    "name": "Aveia em flocos",
+    "category": "carb",
+    "per100g": {
+      "kcal": 389,
+      "proteinG": 17,
+      "carbsG": 66,
+      "fatG": 7
+    }
+  },
+  {
+    "id": "azeite-de-oliva",
+    "name": "Azeite de oliva",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "azeitona-preta",
+    "name": "Azeitona preta",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 145,
+      "proteinG": 1.1,
+      "carbsG": 3.8,
+      "fatG": 15
+    }
+  },
+  {
+    "id": "azeitona-verde",
+    "name": "Azeitona verde",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 145,
+      "proteinG": 1.1,
+      "carbsG": 3.8,
+      "fatG": 15
+    }
+  },
+  {
+    "id": "bacalhau",
+    "name": "Bacalhau",
+    "category": "protein",
+    "per100g": {
+      "kcal": 82,
+      "proteinG": 18,
+      "carbsG": 0,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "banana",
+    "name": "Banana",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 89,
+      "proteinG": 1.1,
+      "carbsG": 23,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "batata-doce-assada",
+    "name": "Batata doce assada",
+    "category": "carb",
+    "per100g": {
+      "kcal": 90,
+      "proteinG": 1.6,
+      "carbsG": 21,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "batata-doce-cozida",
+    "name": "Batata doce cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 86,
+      "proteinG": 1.6,
+      "carbsG": 20,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "batata-inglesa-cozida",
+    "name": "Batata inglesa cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 86,
+      "proteinG": 2,
+      "carbsG": 20,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "batata-inglesa-frita",
+    "name": "Batata inglesa frita",
+    "category": "carb",
+    "per100g": {
+      "kcal": 365,
+      "proteinG": 3.4,
+      "carbsG": 48,
+      "fatG": 17
+    }
+  },
+  {
+    "id": "batata-baroa-cozida",
+    "name": "Batata-baroa cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 92,
+      "proteinG": 2,
+      "carbsG": 21,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "batata-doce-frita",
+    "name": "Batata-doce frita",
+    "category": "carb",
+    "per100g": {
+      "kcal": 320,
+      "proteinG": 2,
+      "carbsG": 40,
+      "fatG": 16
+    }
+  },
+  {
+    "id": "beterraba-cozida",
+    "name": "Beterraba cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 44,
+      "proteinG": 1.7,
+      "carbsG": 10,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "beterraba-crua",
+    "name": "Beterraba crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 43,
+      "proteinG": 1.6,
+      "carbsG": 10,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "biscoito-agua-e-sal",
+    "name": "Biscoito água e sal",
+    "category": "carb",
+    "per100g": {
+      "kcal": 400,
+      "proteinG": 9,
+      "carbsG": 76,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "biscoito-doce",
+    "name": "Biscoito doce",
+    "category": "carb",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 6,
+      "carbsG": 70,
+      "fatG": 16
+    }
+  },
+  {
+    "id": "biscoito-integral",
+    "name": "Biscoito integral",
+    "category": "carb",
+    "per100g": {
+      "kcal": 380,
+      "proteinG": 9,
+      "carbsG": 65,
+      "fatG": 8
+    }
+  },
+  {
+    "id": "blueberry",
+    "name": "Blueberry",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 0.7,
+      "carbsG": 14,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "broa-de-milho",
+    "name": "Broa de milho",
+    "category": "carb",
+    "per100g": {
+      "kcal": 290,
+      "proteinG": 6,
+      "carbsG": 58,
+      "fatG": 2
+    }
+  },
+  {
+    "id": "brocolis-cozido",
+    "name": "Brócolis cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 35,
+      "proteinG": 2.4,
+      "carbsG": 7,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "brocolis-cru",
+    "name": "Brócolis cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 2.8,
+      "carbsG": 7,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "broto-de-feijao",
+    "name": "Broto de feijão",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 3,
+      "carbsG": 6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "camarao",
+    "name": "Camarão",
+    "category": "protein",
+    "per100g": {
+      "kcal": 99,
+      "proteinG": 24,
+      "carbsG": 0,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "caqui",
+    "name": "Caqui",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 70,
+      "proteinG": 0.6,
+      "carbsG": 18,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "cara-cozido",
+    "name": "Cará cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 110,
+      "proteinG": 1.5,
+      "carbsG": 26,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "carne-bovina-cozida",
+    "name": "Carne bovina cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 215,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 11
+    }
+  },
+  {
+    "id": "carne-bovina-magra",
+    "name": "Carne bovina magra",
+    "category": "protein",
+    "per100g": {
+      "kcal": 200,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 10
+    }
+  },
+  {
+    "id": "carne-de-cordeiro-magra",
+    "name": "Carne de cordeiro magra",
+    "category": "protein",
+    "per100g": {
+      "kcal": 182,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 8.5
+    }
+  },
+  {
+    "id": "carne-de-frango-moida",
+    "name": "Carne de frango moída",
+    "category": "protein",
+    "per100g": {
+      "kcal": 165,
+      "proteinG": 30,
+      "carbsG": 0,
+      "fatG": 4.5
+    }
+  },
+  {
+    "id": "carne-de-porco-cozida",
+    "name": "Carne de porco cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 242,
+      "proteinG": 27,
+      "carbsG": 0,
+      "fatG": 14
+    }
+  },
+  {
+    "id": "carne-de-porco-magra",
+    "name": "Carne de porco magra",
+    "category": "protein",
+    "per100g": {
+      "kcal": 150,
+      "proteinG": 27,
+      "carbsG": 0,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "carne-suina-magra",
+    "name": "Carne suína magra",
+    "category": "protein",
+    "per100g": {
+      "kcal": 143,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "carne-vermelha-cozida",
+    "name": "Carne vermelha cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 250,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 15
+    }
+  },
+  {
+    "id": "carne-vermelha-magra",
+    "name": "Carne vermelha magra",
+    "category": "protein",
+    "per100g": {
+      "kcal": 165,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 6.5
+    }
+  },
+  {
+    "id": "castanha-de-caju",
+    "name": "Castanha de caju",
+    "category": "fat",
+    "per100g": {
+      "kcal": 553,
+      "proteinG": 18,
+      "carbsG": 30,
+      "fatG": 44
+    }
+  },
+  {
+    "id": "castanha-do-para",
+    "name": "Castanha do pará",
+    "category": "fat",
+    "per100g": {
+      "kcal": 656,
+      "proteinG": 14,
+      "carbsG": 12,
+      "fatG": 66
+    }
+  },
+  {
+    "id": "cebola-cozida",
+    "name": "Cebola cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 35,
+      "proteinG": 0.9,
+      "carbsG": 8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "cebola-crua",
+    "name": "Cebola crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 40,
+      "proteinG": 1.1,
+      "carbsG": 9,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "cenoura-cozida",
+    "name": "Cenoura cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 35,
+      "proteinG": 0.7,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "cenoura-crua",
+    "name": "Cenoura crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 41,
+      "proteinG": 0.9,
+      "carbsG": 10,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "cereal-matinal-integral",
+    "name": "Cereal matinal integral",
+    "category": "carb",
+    "per100g": {
+      "kcal": 360,
+      "proteinG": 10,
+      "carbsG": 73,
+      "fatG": 2
+    }
+  },
+  {
+    "id": "cereja",
+    "name": "Cereja",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 63,
+      "proteinG": 1.1,
+      "carbsG": 16,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "cevada-cozida",
+    "name": "Cevada cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 123,
+      "proteinG": 2.3,
+      "carbsG": 28,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "chuchu-cozido",
+    "name": "Chuchu cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 0.8,
+      "carbsG": 4.5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "chuchu-cru",
+    "name": "Chuchu cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 0.8,
+      "carbsG": 4.5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "clara-de-ovo",
+    "name": "Clara de ovo",
+    "category": "protein",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 11,
+      "carbsG": 0.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "cogumelo-cozido",
+    "name": "Cogumelo cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 22,
+      "proteinG": 3.1,
+      "carbsG": 3.3,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "cogumelo-cru",
+    "name": "Cogumelo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 22,
+      "proteinG": 3.1,
+      "carbsG": 3.3,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "cottage-cheese",
+    "name": "Cottage cheese",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 98,
+      "proteinG": 11,
+      "carbsG": 4.3,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "couve-cozida",
+    "name": "Couve cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 3.3,
+      "carbsG": 9,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "couve-crua",
+    "name": "Couve crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 3.3,
+      "carbsG": 9,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "couve-flor-cozida",
+    "name": "Couve-flor cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 1.9,
+      "carbsG": 5,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "couve-flor-crua",
+    "name": "Couve-flor crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 1.9,
+      "carbsG": 5,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "couve-rabano",
+    "name": "Couve-rábano",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 27,
+      "proteinG": 1.7,
+      "carbsG": 6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "coxa-de-frango-com-pele",
+    "name": "Coxa de frango com pele",
+    "category": "protein",
+    "per100g": {
+      "kcal": 209,
+      "proteinG": 23,
+      "carbsG": 0,
+      "fatG": 12
+    }
+  },
+  {
+    "id": "creme-de-leite",
+    "name": "Creme de leite",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 340,
+      "proteinG": 2.1,
+      "carbsG": 2.8,
+      "fatG": 35
+    }
+  },
+  {
+    "id": "cuscuz-cozido",
+    "name": "Cuscuz cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 112,
+      "proteinG": 3.8,
+      "carbsG": 25,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "ervilha-cozida",
+    "name": "Ervilha cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 84,
+      "proteinG": 5.4,
+      "carbsG": 15,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "espaguete-cozido",
+    "name": "Espaguete cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 5,
+      "carbsG": 25,
+      "fatG": 1.1
+    }
+  },
+  {
+    "id": "espinafre-cozido",
+    "name": "Espinafre cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 23,
+      "proteinG": 2.9,
+      "carbsG": 3.6,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "espinafre-cru",
+    "name": "Espinafre cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 23,
+      "proteinG": 2.7,
+      "carbsG": 3.6,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "feijao-carioca-cozido",
+    "name": "Feijão carioca cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 76,
+      "proteinG": 4.8,
+      "carbsG": 14,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "feijao-cozido",
+    "name": "Feijão cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 76,
+      "proteinG": 4.8,
+      "carbsG": 14,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "feijao-preto-cozido",
+    "name": "Feijão preto cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 84,
+      "proteinG": 5.2,
+      "carbsG": 15,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "figo",
+    "name": "Figo",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 74,
+      "proteinG": 0.8,
+      "carbsG": 19,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "flocos-de-milho",
+    "name": "Flocos de milho",
+    "category": "carb",
+    "per100g": {
+      "kcal": 380,
+      "proteinG": 8,
+      "carbsG": 85,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "framboesa",
+    "name": "Framboesa",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 1.2,
+      "carbsG": 12,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "framboesa-congelada",
+    "name": "Framboesa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 1.2,
+      "carbsG": 12,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "framboesa-preta",
+    "name": "Framboesa preta",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 1.2,
+      "carbsG": 12,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "frango-coxa-sem-pele",
+    "name": "Frango coxa sem pele",
+    "category": "protein",
+    "per100g": {
+      "kcal": 174,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 8
+    }
+  },
+  {
+    "id": "frango-desfiado",
+    "name": "Frango desfiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 165,
+      "proteinG": 31,
+      "carbsG": 0,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "frango-inteiro-com-pele",
+    "name": "Frango inteiro com pele",
+    "category": "protein",
+    "per100g": {
+      "kcal": 209,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 11
+    }
+  },
+  {
+    "id": "fusilli-cozida",
+    "name": "Fusilli cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 5,
+      "carbsG": 25,
+      "fatG": 1.1
+    }
+  },
+  {
+    "id": "gema-de-ovo",
+    "name": "Gema de ovo",
+    "category": "protein",
+    "per100g": {
+      "kcal": 322,
+      "proteinG": 16,
+      "carbsG": 0.6,
+      "fatG": 26
+    }
+  },
+  {
+    "id": "goiaba",
+    "name": "Goiaba",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 68,
+      "proteinG": 2.6,
+      "carbsG": 14,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "granola-caseira",
+    "name": "Granola caseira",
+    "category": "carb",
+    "per100g": {
+      "kcal": 471,
+      "proteinG": 13,
+      "carbsG": 64,
+      "fatG": 19
+    }
+  },
+  {
+    "id": "grao-de-bico-cozido",
+    "name": "Grão de bico cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 164,
+      "proteinG": 8.9,
+      "carbsG": 27,
+      "fatG": 2.6
+    }
+  },
+  {
+    "id": "inhame-cozido",
+    "name": "Inhame cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 116,
+      "proteinG": 1.5,
+      "carbsG": 28,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "iogurte-com-frutas",
+    "name": "Iogurte com frutas",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 85,
+      "proteinG": 3.2,
+      "carbsG": 15,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "iogurte-grego-natural",
+    "name": "Iogurte grego natural",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 59,
+      "proteinG": 10,
+      "carbsG": 3.3,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "iogurte-integral",
+    "name": "Iogurte integral",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 61,
+      "proteinG": 3.5,
+      "carbsG": 4.7,
+      "fatG": 3.3
+    }
+  },
+  {
+    "id": "iogurte-natural-desnatado",
+    "name": "Iogurte natural desnatado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 40,
+      "proteinG": 3.5,
+      "carbsG": 5.2,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "jabuticaba",
+    "name": "Jabuticaba",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 47,
+      "proteinG": 0.7,
+      "carbsG": 12,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "kiwi",
+    "name": "Kiwi",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 61,
+      "proteinG": 1.1,
+      "carbsG": 15,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "laranja",
+    "name": "Laranja",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 47,
+      "proteinG": 0.9,
+      "carbsG": 12,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "leite-de-cabra",
+    "name": "Leite de cabra",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 61,
+      "proteinG": 3.2,
+      "carbsG": 4.6,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "leite-desnatado",
+    "name": "Leite desnatado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 35,
+      "proteinG": 3.4,
+      "carbsG": 5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "leite-integral",
+    "name": "Leite integral",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 61,
+      "proteinG": 3.2,
+      "carbsG": 4.8,
+      "fatG": 3.3
+    }
+  },
+  {
+    "id": "leite-semi-desnatado",
+    "name": "Leite semi-desnatado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 3.3,
+      "carbsG": 4.9,
+      "fatG": 1.6
+    }
+  },
+  {
+    "id": "lentilha-cozida",
+    "name": "Lentilha cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 116,
+      "proteinG": 9,
+      "carbsG": 20,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "limao",
+    "name": "Limão",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 29,
+      "proteinG": 1.1,
+      "carbsG": 9,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "linguado",
+    "name": "Linguado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 91,
+      "proteinG": 19,
+      "carbsG": 0,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "lula-cozida",
+    "name": "Lula cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 92,
+      "proteinG": 16,
+      "carbsG": 3,
+      "fatG": 1.4
+    }
+  },
+  {
+    "id": "maca-com-casca",
+    "name": "Maçã com casca",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 0.3,
+      "carbsG": 14,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "maca-verde",
+    "name": "Maçã verde",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 0.3,
+      "carbsG": 14,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "maca-vermelha",
+    "name": "Maçã vermelha",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 0.3,
+      "carbsG": 14,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "macarrao-com-ovos",
+    "name": "Macarrão com ovos",
+    "category": "carb",
+    "per100g": {
+      "kcal": 371,
+      "proteinG": 13,
+      "carbsG": 75,
+      "fatG": 1.1
+    }
+  },
+  {
+    "id": "macarrao-cozido",
+    "name": "Macarrão cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 157,
+      "proteinG": 5.8,
+      "carbsG": 31,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "macarrao-integral-cozido",
+    "name": "Macarrão integral cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 124,
+      "proteinG": 5.3,
+      "carbsG": 24,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "mandioca-cozida",
+    "name": "Mandioca cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 125,
+      "proteinG": 1,
+      "carbsG": 30,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "manga",
+    "name": "Manga",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 60,
+      "proteinG": 0.8,
+      "carbsG": 15,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "manteiga",
+    "name": "Manteiga",
+    "category": "fat",
+    "per100g": {
+      "kcal": 717,
+      "proteinG": 0.9,
+      "carbsG": 0.1,
+      "fatG": 81
+    }
+  },
+  {
+    "id": "manteiga-de-garrafa",
+    "name": "Manteiga de garrafa",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 717,
+      "proteinG": 0.9,
+      "carbsG": 0.1,
+      "fatG": 81
+    }
+  },
+  {
+    "id": "melancia",
+    "name": "Melancia",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 0.6,
+      "carbsG": 7.6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "melancia-amarela",
+    "name": "Melancia amarela",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 0.6,
+      "carbsG": 7.6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "melancia-vermelha",
+    "name": "Melancia vermelha",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 0.6,
+      "carbsG": 7.6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "melao",
+    "name": "Melão",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 0.8,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "melao-amarelo",
+    "name": "Melão amarelo",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 0.8,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "melao-cantaloupe",
+    "name": "Melão Cantaloupe",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 0.8,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "milho-cozido",
+    "name": "Milho cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 86,
+      "proteinG": 3.3,
+      "carbsG": 19,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "milho-doce-cozido",
+    "name": "Milho doce cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 86,
+      "proteinG": 3.3,
+      "carbsG": 19,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "milho-em-lata",
+    "name": "Milho em lata",
+    "category": "carb",
+    "per100g": {
+      "kcal": 86,
+      "proteinG": 3.2,
+      "carbsG": 19,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "milho-verde-cozido",
+    "name": "Milho verde cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 111,
+      "proteinG": 3.5,
+      "carbsG": 25,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "mirtilo",
+    "name": "Mirtilo",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 0.7,
+      "carbsG": 14,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "mirtilo-congelado",
+    "name": "Mirtilo congelado",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 0.7,
+      "carbsG": 14,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "mirtilo-selvagem",
+    "name": "Mirtilo selvagem",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 0.7,
+      "carbsG": 14,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "morango",
+    "name": "Morango",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 32,
+      "proteinG": 0.8,
+      "carbsG": 7.7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "morango-congelado",
+    "name": "Morango congelado",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 32,
+      "proteinG": 0.8,
+      "carbsG": 7.7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "muesli",
+    "name": "Muesli",
+    "category": "carb",
+    "per100g": {
+      "kcal": 380,
+      "proteinG": 12,
+      "carbsG": 70,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "nabo-cozido",
+    "name": "Nabo cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 36,
+      "proteinG": 1.1,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "nectarina",
+    "name": "Nectarina",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 44,
+      "proteinG": 1.1,
+      "carbsG": 11,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "noz",
+    "name": "Noz",
+    "category": "fat",
+    "per100g": {
+      "kcal": 654,
+      "proteinG": 9,
+      "carbsG": 14,
+      "fatG": 65
+    }
+  },
+  {
+    "id": "oleo-de-canola",
+    "name": "Óleo de canola",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "oleo-de-coco",
+    "name": "Óleo de coco",
+    "category": "fat",
+    "per100g": {
+      "kcal": 892,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "oleo-de-girassol",
+    "name": "Óleo de girassol",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "ovo-inteiro",
+    "name": "Ovo inteiro",
+    "category": "protein",
+    "per100g": {
+      "kcal": 143,
+      "proteinG": 13,
+      "carbsG": 1,
+      "fatG": 10
+    }
+  },
+  {
+    "id": "palmito",
+    "name": "Palmito",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 2.5,
+      "carbsG": 4,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "pao-de-centeio",
+    "name": "Pão de centeio",
+    "category": "carb",
+    "per100g": {
+      "kcal": 259,
+      "proteinG": 8.5,
+      "carbsG": 48,
+      "fatG": 3.3
+    }
+  },
+  {
+    "id": "pao-de-forma-branco",
+    "name": "Pão de forma branco",
+    "category": "carb",
+    "per100g": {
+      "kcal": 265,
+      "proteinG": 9,
+      "carbsG": 49,
+      "fatG": 3.3
+    }
+  },
+  {
+    "id": "pao-de-milho",
+    "name": "Pão de milho",
+    "category": "carb",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 7,
+      "carbsG": 55,
+      "fatG": 2.5
+    }
+  },
+  {
+    "id": "pao-de-queijo",
+    "name": "Pão de queijo",
+    "category": "carb",
+    "per100g": {
+      "kcal": 335,
+      "proteinG": 11,
+      "carbsG": 30,
+      "fatG": 19
+    }
+  },
+  {
+    "id": "pao-frances",
+    "name": "Pão francês",
+    "category": "carb",
+    "per100g": {
+      "kcal": 300,
+      "proteinG": 8,
+      "carbsG": 58,
+      "fatG": 3
+    }
+  },
+  {
+    "id": "pao-integral",
+    "name": "Pão integral",
+    "category": "carb",
+    "per100g": {
+      "kcal": 247,
+      "proteinG": 13,
+      "carbsG": 41,
+      "fatG": 4.2
+    }
+  },
+  {
+    "id": "pao-sirio-integral",
+    "name": "Pão sírio integral",
+    "category": "carb",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 10,
+      "carbsG": 48,
+      "fatG": 2.5
+    }
+  },
+  {
+    "id": "papaia",
+    "name": "Papaia",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 43,
+      "proteinG": 0.5,
+      "carbsG": 11,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pargo",
+    "name": "Pargo",
+    "category": "protein",
+    "per100g": {
+      "kcal": 96,
+      "proteinG": 20,
+      "carbsG": 0,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "pasta-de-amendoim",
+    "name": "Pasta de amendoim",
+    "category": "fat",
+    "per100g": {
+      "kcal": 588,
+      "proteinG": 25,
+      "carbsG": 20,
+      "fatG": 50
+    }
+  },
+  {
+    "id": "patinho-moido",
+    "name": "Patinho moído",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 8
+    }
+  },
+  {
+    "id": "peito-de-frango-cozido",
+    "name": "Peito de frango cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 165,
+      "proteinG": 31,
+      "carbsG": 0,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "peito-de-frango-grelhado",
+    "name": "Peito de frango grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 165,
+      "proteinG": 31,
+      "carbsG": 0,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "peito-de-peru",
+    "name": "Peito de peru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 109,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 1.6
+    }
+  },
+  {
+    "id": "peixe-branco-cozido",
+    "name": "Peixe branco cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 120,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "penne-cozida",
+    "name": "Penne cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 5,
+      "carbsG": 25,
+      "fatG": 1.1
+    }
+  },
+  {
+    "id": "pepino",
+    "name": "Pepino",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 16,
+      "proteinG": 0.7,
+      "carbsG": 3.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "pepino-cru",
+    "name": "Pepino cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 16,
+      "proteinG": 0.7,
+      "carbsG": 3.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "pera",
+    "name": "Pera",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 0.4,
+      "carbsG": 15,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "pessego",
+    "name": "Pêssego",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 39,
+      "proteinG": 0.9,
+      "carbsG": 10,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-amarelo",
+    "name": "Pimentão amarelo",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 1,
+      "carbsG": 7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-amarelo-cru",
+    "name": "Pimentão amarelo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 1,
+      "carbsG": 7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-verde",
+    "name": "Pimentão verde",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 0.9,
+      "carbsG": 7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-verde-cru",
+    "name": "Pimentão verde cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 0.9,
+      "carbsG": 7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-vermelho",
+    "name": "Pimentão vermelho",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 1,
+      "carbsG": 6,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pimentao-vermelho-cru",
+    "name": "Pimentão vermelho cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 1,
+      "carbsG": 6,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pitanga",
+    "name": "Pitanga",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 52,
+      "proteinG": 1.2,
+      "carbsG": 12,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "polenta-com-queijo",
+    "name": "Polenta com queijo",
+    "category": "carb",
+    "per100g": {
+      "kcal": 150,
+      "proteinG": 6,
+      "carbsG": 20,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "polenta-cozida",
+    "name": "Polenta cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 82,
+      "proteinG": 1.8,
+      "carbsG": 18,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "polvo-cozido",
+    "name": "Polvo cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 82,
+      "proteinG": 15,
+      "carbsG": 2,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "queijo-branco",
+    "name": "Queijo branco",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 290,
+      "proteinG": 20,
+      "carbsG": 3,
+      "fatG": 23
+    }
+  },
+  {
+    "id": "queijo-cheddar",
+    "name": "Queijo cheddar",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 403,
+      "proteinG": 25,
+      "carbsG": 1.3,
+      "fatG": 33
+    }
+  },
+  {
+    "id": "queijo-meia-cura",
+    "name": "Queijo meia cura",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 356,
+      "proteinG": 25,
+      "carbsG": 1.3,
+      "fatG": 28
+    }
+  },
+  {
+    "id": "queijo-mozzarella",
+    "name": "Queijo mozzarella",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 28,
+      "carbsG": 3.1,
+      "fatG": 17
+    }
+  },
+  {
+    "id": "queijo-parmesao",
+    "name": "Queijo parmesão",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 431,
+      "proteinG": 38,
+      "carbsG": 4.1,
+      "fatG": 29
+    }
+  },
+  {
+    "id": "queijo-ricota",
+    "name": "Queijo ricota",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 174,
+      "proteinG": 11,
+      "carbsG": 3.1,
+      "fatG": 13
+    }
+  },
+  {
+    "id": "quinoa-cozida",
+    "name": "Quinoa cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 120,
+      "proteinG": 4.4,
+      "carbsG": 21,
+      "fatG": 2.4
+    }
+  },
+  {
+    "id": "rabanete",
+    "name": "Rabanete",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 16,
+      "proteinG": 0.7,
+      "carbsG": 3.4,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "repolho-cozido",
+    "name": "Repolho cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 23,
+      "proteinG": 1.3,
+      "carbsG": 5.2,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "repolho-cru",
+    "name": "Repolho cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 1.3,
+      "carbsG": 5.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "requeijao",
+    "name": "Requeijão",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 340,
+      "proteinG": 18,
+      "carbsG": 2,
+      "fatG": 28
+    }
+  },
+  {
+    "id": "risoto-de-frango",
+    "name": "Risoto de frango",
+    "category": "carb",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 8,
+      "carbsG": 25,
+      "fatG": 5
+    }
+  },
+  {
+    "id": "roma",
+    "name": "Romã",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 83,
+      "proteinG": 1.7,
+      "carbsG": 19,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "rucula",
+    "name": "Rúcula",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 2.6,
+      "carbsG": 3.7,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "rucula-crua",
+    "name": "Rúcula crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 2.6,
+      "carbsG": 3.7,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "salmao",
+    "name": "Salmão",
+    "category": "protein",
+    "per100g": {
+      "kcal": 208,
+      "proteinG": 20,
+      "carbsG": 0,
+      "fatG": 13
+    }
+  },
+  {
+    "id": "sardinha",
+    "name": "Sardinha",
+    "category": "protein",
+    "per100g": {
+      "kcal": 208,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 11
+    }
+  },
+  {
+    "id": "sementes-de-abobora",
+    "name": "Sementes de abóbora",
+    "category": "fat",
+    "per100g": {
+      "kcal": 559,
+      "proteinG": 25,
+      "carbsG": 15,
+      "fatG": 49
+    }
+  },
+  {
+    "id": "sementes-de-girassol",
+    "name": "Sementes de girassol",
+    "category": "fat",
+    "per100g": {
+      "kcal": 584,
+      "proteinG": 20,
+      "carbsG": 20,
+      "fatG": 51
+    }
+  },
+  {
+    "id": "soja-cozida",
+    "name": "Soja cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 141,
+      "proteinG": 11,
+      "carbsG": 11,
+      "fatG": 6
+    }
+  },
+  {
+    "id": "tangerina",
+    "name": "Tangerina",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 47,
+      "proteinG": 0.7,
+      "carbsG": 12,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "tapioca-goma",
+    "name": "Tapioca (goma)",
+    "category": "carb",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 0.2,
+      "carbsG": 82,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "tempeh",
+    "name": "Tempeh",
+    "category": "protein",
+    "per100g": {
+      "kcal": 192,
+      "proteinG": 19,
+      "carbsG": 7.6,
+      "fatG": 11
+    }
+  },
+  {
+    "id": "tilapia",
+    "name": "Tilápia",
+    "category": "protein",
+    "per100g": {
+      "kcal": 128,
+      "proteinG": 26,
+      "carbsG": 0,
+      "fatG": 2.7
+    }
+  },
+  {
+    "id": "tofu",
+    "name": "Tofu",
+    "category": "protein",
+    "per100g": {
+      "kcal": 76,
+      "proteinG": 8,
+      "carbsG": 1.9,
+      "fatG": 4.8
+    }
+  },
+  {
+    "id": "tomate",
+    "name": "Tomate",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 18,
+      "proteinG": 0.9,
+      "carbsG": 3.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "tomate-cereja",
+    "name": "Tomate cereja",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 18,
+      "proteinG": 0.9,
+      "carbsG": 3.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "tortilla-de-trigo",
+    "name": "Tortilla de trigo",
+    "category": "carb",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 8,
+      "carbsG": 52,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "trigo-sarraceno-cozido",
+    "name": "Trigo sarraceno cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 155,
+      "proteinG": 5.7,
+      "carbsG": 33,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "truta",
+    "name": "Truta",
+    "category": "protein",
+    "per100g": {
+      "kcal": 141,
+      "proteinG": 20,
+      "carbsG": 0,
+      "fatG": 6
+    }
+  },
+  {
+    "id": "uva",
+    "name": "Uva",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 67,
+      "proteinG": 0.7,
+      "carbsG": 17,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "uva-branca",
+    "name": "Uva branca",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 67,
+      "proteinG": 0.7,
+      "carbsG": 17,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "uva-preta",
+    "name": "Uva preta",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 67,
+      "proteinG": 0.7,
+      "carbsG": 17,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "whey-protein",
+    "name": "Whey protein",
+    "category": "protein",
+    "per100g": {
+      "kcal": 400,
+      "proteinG": 80,
+      "carbsG": 8,
+      "fatG": 7
+    }
+  }
+]

@@ -1,0 +1,28 @@
+import type { Migration } from "@/core/storage/schema";
+import { FOODS_STORE } from "@/features/foods/data/food-store";
+
+export const DATABASE_NAME = "lacalle-life";
+
+/**
+ * The application's schema history.
+ *
+ * It lives here, not in `core/storage`, because assembling it requires knowing
+ * every feature — and a core module that imports features has its dependencies
+ * backwards. Features declare the *shape* of their stores; this file decides
+ * which version introduces them, since IndexedDB has one version counter for
+ * the whole database and no feature can own that number alone.
+ *
+ * Rules:
+ *   1. Append only. Never edit or renumber a released entry — an installed
+ *      browser may hold any earlier version, and the path from it has to keep
+ *      working.
+ *   2. Entries are data. If a migration ever needs to transform existing rows,
+ *      extend `Migration` rather than smuggling code in here.
+ */
+export const MIGRATIONS: readonly Migration[] = [
+  {
+    version: 1,
+    description: "Food catalogue and user-created foods.",
+    createStores: [FOODS_STORE],
+  },
+];

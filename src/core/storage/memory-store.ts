@@ -1,6 +1,6 @@
+import { DataError } from "@/core/domain/data-error";
 import type { Entity, EntityId } from "@/core/domain/entity";
 
-import { StorageError } from "./errors";
 import type { StoreDefinition } from "./schema";
 import {
   compareIndexKeys,
@@ -52,8 +52,8 @@ export class MemoryStore<T extends Entity> implements Store<T> {
   async getAllByIndex(index: string, query: IndexQuery): Promise<T[]> {
     const keyPath = this.#indexes.get(index);
     if (keyPath === undefined) {
-      throw new StorageError(
-        "TRANSACTION_FAILED",
+      throw new DataError(
+        "FAILED",
         `Unknown index "${index}" on store "${this.#name}".`,
       );
     }

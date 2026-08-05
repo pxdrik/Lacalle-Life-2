@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { DataError } from "@/core/domain/data-error";
 import type { Entity } from "@/core/domain/entity";
 
-import { StorageError } from "../errors";
 import { databaseVersion, sortedMigrations, type Migration } from "../schema";
 import { openDatabase } from "./database";
 import { IndexedDbStore } from "./indexeddb-store";
@@ -166,11 +166,11 @@ describe("openDatabase", () => {
 });
 
 describe("error normalisation", () => {
-  it("reports an unknown store as a StorageError", async () => {
+  it("reports an unknown store as a DataError", async () => {
     const db = await openDatabase(uniqueName(), [V1]);
     const store = new IndexedDbStore<Row>(db, "does-not-exist");
 
-    await expect(store.getAll()).rejects.toBeInstanceOf(StorageError);
+    await expect(store.getAll()).rejects.toBeInstanceOf(DataError);
     db.close();
   });
 });

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { DataError } from "@/core/domain/data-error";
 import type { Entity } from "@/core/domain/entity";
 
-import { StorageError } from "./errors";
 import { openDatabase } from "./indexeddb/database";
 import { IndexedDbStore } from "./indexeddb/indexeddb-store";
 import { MemoryStore } from "./memory-store";
@@ -225,10 +225,10 @@ describe.each(ADAPTERS)("Store contract — $name", ({ create }) => {
       expect(found).toEqual([]);
     });
 
-    it("rejects with a StorageError for an unknown index", async () => {
+    it("rejects with a DataError for an unknown index", async () => {
       await expect(
         store.getAllByIndex("byNothing", { equals: "x" }),
-      ).rejects.toBeInstanceOf(StorageError);
+      ).rejects.toBeInstanceOf(DataError);
     });
   });
 });

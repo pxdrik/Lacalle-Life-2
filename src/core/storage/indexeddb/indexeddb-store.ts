@@ -2,14 +2,14 @@ import type { IDBPDatabase } from "idb";
 
 import type { Entity, EntityId } from "@/core/domain/entity";
 
-import { toStorageError } from "../errors";
+import { toDataError } from "../errors";
 import type { IndexQuery, Store } from "../store";
 
 /**
  * `Store` backed by an IndexedDB object store.
  *
  * Every operation funnels through `run` so that no `DOMException` escapes into
- * feature code: callers see `StorageError` with a code they can branch on.
+ * feature code: callers see `DataError` with a code they can branch on.
  */
 export class IndexedDbStore<T extends Entity> implements Store<T> {
   readonly #db: IDBPDatabase;
@@ -72,7 +72,7 @@ async function run<R>(operation: () => Promise<R>): Promise<R> {
   try {
     return await operation();
   } catch (cause) {
-    throw toStorageError(cause);
+    throw toDataError(cause);
   }
 }
 

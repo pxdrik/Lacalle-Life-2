@@ -1,6 +1,6 @@
 import { openDB, type IDBPDatabase } from "idb";
 
-import { toStorageError } from "../errors";
+import { toDataError } from "../errors";
 import { databaseVersion, sortedMigrations, type Migration } from "../schema";
 
 /**
@@ -63,6 +63,6 @@ export async function openDatabase(
       },
     });
   } catch (cause) {
-    throw toStorageError(cause);
+    throw toDataError(cause);
   }
 }
