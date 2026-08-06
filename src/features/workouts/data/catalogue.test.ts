@@ -18,7 +18,7 @@ import {
   type CatalogueEntry,
 } from "../validation/exercise-schema";
 import aliases from "./aliases.json";
-import { CATALOGUE, CATALOGUE_BY_REGION } from "./catalogue";
+import { CATALOGUE, CATALOGUE_BY_REGION } from "./catalogue/catalogue";
 import publishedIds from "./ids.lock.json";
 
 /**

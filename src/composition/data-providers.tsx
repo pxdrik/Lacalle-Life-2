@@ -6,6 +6,8 @@ import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-co
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repository-context";
 import type { ProfileRepository } from "@/features/profile/data/profile-repository";
+import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
+import { ExerciseRepositoryProvider } from "@/features/workouts/data/exercise-repository-context";
 
 import { getRepositories } from "./repositories";
 
@@ -49,6 +51,10 @@ const profileRepository = once<ProfileRepository>(async () => {
   return (await getRepositories()).profile;
 });
 
+const exerciseRepository = once<ExerciseRepository>(async () => {
+  return (await getRepositories()).exercises;
+});
+
 export function ProfileDataProvider({
   children,
 }: {
@@ -58,6 +64,18 @@ export function ProfileDataProvider({
     <ProfileRepositoryProvider repository={profileRepository()}>
       {children}
     </ProfileRepositoryProvider>
+  );
+}
+
+export function ExerciseDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <ExerciseRepositoryProvider repository={exerciseRepository()}>
+      {children}
+    </ExerciseRepositoryProvider>
   );
 }
 

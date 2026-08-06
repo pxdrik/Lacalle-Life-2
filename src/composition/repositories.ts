@@ -17,6 +17,13 @@ import {
   type ProfileRepository,
 } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
+import {
+  EXERCISES_STORE,
+  type ExerciseRepository,
+} from "@/features/workouts/data/exercise-repository";
+import { LocalExerciseRepository } from "@/features/workouts/data/local-exercise-repository";
+import { seedExerciseCatalogue } from "@/features/workouts/data/seed-exercises";
+import type { Exercise } from "@/features/workouts/types/exercise";
 
 import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 
@@ -35,6 +42,7 @@ export interface Repositories {
   readonly foods: FoodRepository;
   readonly diets: DietRepository;
   readonly profile: ProfileRepository;
+  readonly exercises: ExerciseRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
@@ -47,6 +55,9 @@ export function createRepositories(db: IDBPDatabase): Repositories {
     ),
     profile: new LocalProfileRepository(
       new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
+    ),
+    exercises: new LocalExerciseRepository(
+      new IndexedDbStore<Exercise>(db, EXERCISES_STORE.name),
     ),
   };
 }
@@ -75,7 +86,12 @@ async function build(): Promise<Repositories> {
   const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
   const repositories = createRepositories(db);
 
-  await seedCatalogue(repositories.foods);
+  // Both seeds skip themselves once their store holds anything, so this is
+  // first-run work only. Run together because they are independent.
+  await Promise.all([
+    seedCatalogue(repositories.foods),
+    seedExerciseCatalogue(repositories.exercises),
+  ]);
 
   return repositories;
 }
