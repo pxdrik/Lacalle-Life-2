@@ -3,6 +3,8 @@ import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
+import { ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
+import { SESSIONS_STORE } from "@/features/workouts/data/session-repository";
 
 export const DATABASE_NAME = "lacalle-life";
 
@@ -42,5 +44,11 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 4,
     description: "Curated exercise catalogue and user-created exercises.",
     createStores: [EXERCISES_STORE],
+  },
+  {
+    version: 5,
+    description:
+      "Routines (the plan) and sessions (what happened), kept apart on purpose.",
+    createStores: [ROUTINES_STORE, SESSIONS_STORE],
   },
 ];

@@ -13,9 +13,10 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
  * unfinished, which is worse than a short menu.
  */
 const LINKS: readonly { href: Route; label: string }[] = [
+  { href: "/treinos", label: "Treinos" },
   { href: "/dietas", label: "Dietas" },
-  { href: "/alimentos", label: "Alimentos" },
   { href: "/exercicios", label: "Exercícios" },
+  { href: "/alimentos", label: "Alimentos" },
   { href: "/perfil", label: "Perfil" },
 ];
 

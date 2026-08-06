@@ -1,9 +1,10 @@
 "use client";
 
-import { SlidersHorizontal } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
+import { Button } from "@/design-system/components/button";
 import { Input } from "@/design-system/components/input";
 
 import { useExerciseCatalogue } from "../hooks/use-exercise-catalogue";
@@ -11,6 +12,7 @@ import { useExerciseQuery } from "../hooks/use-exercise-query";
 import { filterExercises } from "../services/filter-exercises";
 import { searchExercises } from "../services/search-exercises";
 import type { Exercise } from "../types/exercise";
+import { CustomExerciseForm } from "./custom-exercise-form";
 import { ExerciseFilterBar } from "./exercise-filter-bar";
 import { ExerciseRow } from "./exercise-row";
 
@@ -23,13 +25,25 @@ interface Props {
    * instead of growing a second, divergent exercise list.
    */
   readonly onSelect?: (exercise: Exercise) => void;
+
+  /**
+   * Whether the search and filters are mirrored into the URL.
+   *
+   * True on the catalogue page, where a filtered view is worth bookmarking.
+   * False inside a picker, where they are scratch state and would otherwise
+   * bury the routine's own URL under `?m=chest&e=barbell`.
+   */
+  readonly persistQuery?: boolean;
 }
 
-export function ExerciseBrowser({ onSelect }: Props) {
-  const { state, writeError, toggleFavorite } = useExerciseCatalogue();
+export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
+  const { state, writeError, toggleFavorite, createExercise } =
+    useExerciseCatalogue();
   const { query, activeFilterCount, setText, setFilters, clear } =
-    useExerciseQuery();
+    useExerciseQuery(persistQuery);
   const [showFilters, setShowFilters] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Search then filter, both on every render. The catalogue is a few hundred
   // rows over a prepared index, so this costs microseconds — and derived state
@@ -98,6 +112,31 @@ export function ExerciseBrowser({ onSelect }: Props) {
         </p>
       )}
 
+      {creating && (
+        <CustomExerciseForm
+          initialName={query.text}
+          pending={saving}
+          onCancel={() => {
+            setCreating(false);
+          }}
+          onSubmit={(input) => {
+            setSaving(true);
+            void createExercise(input).then((created) => {
+              setSaving(false);
+              if (created === null) return;
+
+              setCreating(false);
+              // Clearing the search is what makes the new exercise visible:
+              // it rarely matches the term that failed to find anything.
+              setText("");
+              // In selection mode it goes straight into the routine, so
+              // "not in the catalogue" costs one detour and not two.
+              onSelect?.(created);
+            });
+          }}
+        />
+      )}
+
       {state.status === "loading" && <Skeleton />}
 
       {state.status === "error" && (
@@ -120,8 +159,12 @@ export function ExerciseBrowser({ onSelect }: Props) {
 
           {results.length === 0 ? (
             <EmptyState
+              searchText={query.text}
               hasQuery={query.text !== "" || activeFilterCount > 0}
               onClear={clear}
+              onCreate={() => {
+                setCreating(true);
+              }}
             />
           ) : (
             <div className="overflow-hidden rounded-xl border border-line bg-surface">
@@ -143,33 +186,55 @@ export function ExerciseBrowser({ onSelect }: Props) {
   );
 }
 
+/**
+ * Coming up empty is the moment someone is most likely to give up, so it is
+ * the moment the escape hatch has to be most obvious: creating the exercise is
+ * the primary action here, not a footnote under "try another term".
+ */
 function EmptyState({
+  searchText,
   hasQuery,
   onClear,
+  onCreate,
 }: {
+  readonly searchText: string;
   readonly hasQuery: boolean;
   readonly onClear: () => void;
+  readonly onCreate: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="rounded-xl border border-dashed border-line px-6 py-12 text-center">
       <p className="text-ink">
         {hasQuery
           ? "Nenhum exercício corresponde à busca."
           : "Nenhum exercício no banco."}
       </p>
-      <p className="mt-1.5 text-sm text-ink-subtle">
-        {hasQuery
-          ? "Tente outro termo ou remova alguns filtros."
-          : "Recarregue a página para preencher o banco automaticamente."}
-      </p>
-      {hasQuery && (
-        <button
-          type="button"
-          onClick={onClear}
-          className="mt-4 text-sm text-ink underline underline-offset-4"
-        >
-          Limpar busca e filtros
-        </button>
+
+      {hasQuery ? (
+        <>
+          <p className="mt-1.5 text-sm text-ink-subtle">
+            O que você faz não está no catálogo? Crie e use agora mesmo.
+          </p>
+          <div className="mt-5 flex flex-col items-center gap-3">
+            <Button onClick={onCreate}>
+              <Plus aria-hidden className="size-4" />
+              {searchText.trim() === ""
+                ? "Criar exercício"
+                : `Criar “${searchText.trim()}”`}
+            </Button>
+            <button
+              type="button"
+              onClick={onClear}
+              className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
+            >
+              Limpar busca e filtros
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="mt-1.5 text-sm text-ink-subtle">
+          Recarregue a página para preencher o banco automaticamente.
+        </p>
       )}
     </div>
   );

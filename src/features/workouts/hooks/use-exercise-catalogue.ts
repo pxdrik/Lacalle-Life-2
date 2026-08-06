@@ -6,11 +6,13 @@ import { describeDataError } from "@/core/domain/describe-data-error";
 import { revise } from "@/core/domain/entity";
 
 import { useExerciseRepository } from "../data/exercise-repository-context";
+import { createCustomExercise } from "../services/create-exercise";
 import {
   buildExerciseIndex,
   type ExerciseIndex,
 } from "../services/search-exercises";
 import type { Exercise } from "../types/exercise";
+import type { CustomExerciseInput } from "../validation/custom-exercise-schema";
 
 export type ExerciseCatalogueState =
   | { readonly status: "loading" }
@@ -25,6 +27,13 @@ export interface ExerciseCatalogue {
   readonly state: ExerciseCatalogueState;
   readonly writeError: string | null;
   readonly toggleFavorite: (exercise: Exercise) => Promise<void>;
+  /**
+   * Creates a user's own exercise and puts it into the list immediately.
+   *
+   * Resolves to the exercise so the caller can use it at once — the whole
+   * point is that "not in the catalogue" never becomes a dead end mid-routine.
+   */
+  readonly createExercise: (input: CustomExerciseInput) => Promise<Exercise | null>;
 }
 
 /**
@@ -86,6 +95,31 @@ export function useExerciseCatalogue(): ExerciseCatalogue {
     [repository],
   );
 
+  const createExercise = useCallback(
+    async (input: CustomExerciseInput): Promise<Exercise | null> => {
+      setWriteError(null);
+      const exercise = createCustomExercise(input);
+
+      try {
+        await (await repository).save(exercise);
+        // Inserted locally rather than re-read: the list is already sorted and
+        // a full reload would cost a round trip for one row.
+        setExercises((current) =>
+          current === null
+            ? [exercise]
+            : [...current, exercise].sort((a, b) =>
+                collator.compare(a.name, b.name),
+              ),
+        );
+        return exercise;
+      } catch (cause) {
+        setWriteError(describeDataError(cause));
+        return null;
+      }
+    },
+    [repository],
+  );
+
   const state: ExerciseCatalogueState =
     error !== null
       ? { status: "error", message: error }
@@ -93,5 +127,8 @@ export function useExerciseCatalogue(): ExerciseCatalogue {
         ? { status: "loading" }
         : { status: "ready", exercises, index };
 
-  return { state, writeError, toggleFavorite };
+  return { state, writeError, toggleFavorite, createExercise };
 }
+
+/** Same collation the repository sorts by, so a new row lands where it belongs. */
+const collator = new Intl.Collator("pt-BR", { sensitivity: "base" });

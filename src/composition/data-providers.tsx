@@ -8,6 +8,10 @@ import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repos
 import type { ProfileRepository } from "@/features/profile/data/profile-repository";
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
 import { ExerciseRepositoryProvider } from "@/features/workouts/data/exercise-repository-context";
+import {
+  WorkoutRepositoryProvider,
+  type WorkoutRepositories,
+} from "@/features/workouts/data/workout-repository-context";
 
 import { getRepositories } from "./repositories";
 
@@ -67,6 +71,11 @@ export function ProfileDataProvider({
   );
 }
 
+const workoutRepositories = once<WorkoutRepositories>(async () => {
+  const { routines, sessions } = await getRepositories();
+  return { routines, sessions };
+});
+
 export function ExerciseDataProvider({
   children,
 }: {
@@ -76,6 +85,23 @@ export function ExerciseDataProvider({
     <ExerciseRepositoryProvider repository={exerciseRepository()}>
       {children}
     </ExerciseRepositoryProvider>
+  );
+}
+
+/**
+ * The routine builder picks exercises, so it needs the catalogue as well as
+ * routines and sessions. Composed here so a route never has to know which
+ * repositories a screen's components happen to reach for.
+ */
+export function WorkoutDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <WorkoutRepositoryProvider repositories={workoutRepositories()}>
+      <ExerciseDataProvider>{children}</ExerciseDataProvider>
+    </WorkoutRepositoryProvider>
   );
 }
 

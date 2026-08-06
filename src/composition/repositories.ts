@@ -22,8 +22,20 @@ import {
   type ExerciseRepository,
 } from "@/features/workouts/data/exercise-repository";
 import { LocalExerciseRepository } from "@/features/workouts/data/local-exercise-repository";
+import {
+  LocalRoutineRepository,
+  ROUTINES_STORE,
+  type RoutineRepository,
+} from "@/features/workouts/data/routine-repository";
 import { seedExerciseCatalogue } from "@/features/workouts/data/seed-exercises";
+import {
+  LocalSessionRepository,
+  SESSIONS_STORE,
+  type SessionRepository,
+} from "@/features/workouts/data/session-repository";
 import type { Exercise } from "@/features/workouts/types/exercise";
+import type { Routine } from "@/features/workouts/types/routine";
+import type { Session } from "@/features/workouts/types/session";
 
 import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 
@@ -43,6 +55,8 @@ export interface Repositories {
   readonly diets: DietRepository;
   readonly profile: ProfileRepository;
   readonly exercises: ExerciseRepository;
+  readonly routines: RoutineRepository;
+  readonly sessions: SessionRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
@@ -58,6 +72,12 @@ export function createRepositories(db: IDBPDatabase): Repositories {
     ),
     exercises: new LocalExerciseRepository(
       new IndexedDbStore<Exercise>(db, EXERCISES_STORE.name),
+    ),
+    routines: new LocalRoutineRepository(
+      new IndexedDbStore<Routine>(db, ROUTINES_STORE.name),
+    ),
+    sessions: new LocalSessionRepository(
+      new IndexedDbStore<Session>(db, SESSIONS_STORE.name),
     ),
   };
 }

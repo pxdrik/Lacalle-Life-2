@@ -33,25 +33,31 @@ export interface ExerciseQueryState {
  * The URL is updated with `history.replaceState`: no navigation, no history
  * entry per letter typed, and a refresh still restores the view.
  */
-export function useExerciseQuery(): ExerciseQueryState {
+export function useExerciseQuery(persist = true): ExerciseQueryState {
   const searchParams = useSearchParams();
 
   // Read once, on mount. Afterwards this hook owns the value; the URL is an
   // output. Reading it continuously would fight the user's typing.
   const [query, setQuery] = useState<ExerciseQuery>(() =>
-    parseExerciseQuery(new URLSearchParams(searchParams.toString())),
+    persist
+      ? parseExerciseQuery(new URLSearchParams(searchParams.toString()))
+      : EMPTY_QUERY,
   );
 
-  const apply = useCallback((next: ExerciseQuery) => {
-    setQuery(next);
+  const apply = useCallback(
+    (next: ExerciseQuery) => {
+      setQuery(next);
+      if (!persist) return;
 
-    const search = serializeExerciseQuery(next);
-    window.history.replaceState(
-      null,
-      "",
-      search === "" ? window.location.pathname : `?${search}`,
-    );
-  }, []);
+      const search = serializeExerciseQuery(next);
+      window.history.replaceState(
+        null,
+        "",
+        search === "" ? window.location.pathname : `?${search}`,
+      );
+    },
+    [persist],
+  );
 
   return {
     query,
