@@ -95,5 +95,16 @@ export default defineConfig([
     },
   },
 
+  /**
+   * Maintenance scripts are command-line tools. `no-console` exists to stop a
+   * stray log reaching a user's browser; here printing a report *is* the job.
+   */
+  {
+    files: ["scripts/**/*.mjs"],
+    rules: {
+      "no-console": "off",
+    },
+  },
+
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 ]);

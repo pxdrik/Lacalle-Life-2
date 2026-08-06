@@ -1,0 +1,10 @@
+{
+  "supino-reto-barra": ["Supino", "Bench Press", "Supino Livre"],
+  "supino-inclinado-barra": ["Inclinado com Barra"],
+  "crucifixo-maquina": ["Voador", "Peck Deck", "Peck Fly"],
+  "cross-over-polia": ["Crossover", "Crucifixo na Polia Alta", "Cross"],
+  "flexao-de-braco": ["Flexão", "Push Up", "Apoio"],
+  "mergulho-paralelas": ["Paralelas", "Dips", "Fundos"],
+  "press-svend": ["Bolacha", "Svend Press"],
+  "supino-no-chao-barra": ["Floor Press"]
+}

@@ -1,0 +1,1857 @@
+[
+  {
+    "id": "rosca-21",
+    "name": "Rosca 21",
+    "category": "Bíceps"
+  },
+  {
+    "id": "abdominal-tesoura",
+    "name": "Abdominal Tesoura",
+    "category": "Abdominais"
+  },
+  {
+    "id": "roda-abdominal",
+    "name": "Roda Abdominal",
+    "category": "Abdominais"
+  },
+  {
+    "id": "aerobico",
+    "name": "Aeróbico",
+    "category": "Cardio"
+  },
+  {
+    "id": "bicicleta-de-ar",
+    "name": "Bicicleta de Ar",
+    "category": "Cardio"
+  },
+  {
+    "id": "arnold-press-dumbbell",
+    "name": "Arnold Press (Dumbbell)",
+    "category": "Ombros"
+  },
+  {
+    "id": "volta-ao-mundo",
+    "name": "Volta Ao Mundo",
+    "category": "Peito"
+  },
+  {
+    "id": "agachamento-pistola-com-assistencia",
+    "name": "Agachamento Pistola Com Assistência",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "hiperextensao",
+    "name": "Hiperextensão",
+    "category": "Lombar"
+  },
+  {
+    "id": "lombar-extensao",
+    "name": "Lombar Extensão",
+    "category": "Lombar"
+  },
+  {
+    "id": "maquina",
+    "name": "Maquina",
+    "category": "Lombar"
+  },
+  {
+    "id": "com-peso",
+    "name": "Com Peso",
+    "category": "Lombar"
+  },
+  {
+    "id": "corpo-inteiro-band-pullaparts",
+    "name": "Corpo Inteiro Band Pullaparts",
+    "category": "Ombros"
+  },
+  {
+    "id": "batida-simultanea",
+    "name": "Batida Simultânea",
+    "category": "Cardio"
+  },
+  {
+    "id": "de-punho-invertida-barra",
+    "name": "de Punho Invertida (Barra)",
+    "category": "Antebraços"
+  },
+  {
+    "id": "the-back-curl-cable",
+    "name": "the Back Curl (Cable)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "belt-squat-machine",
+    "name": "Belt Squat (Machine)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "bench-dip",
+    "name": "Bench Dip",
+    "category": "Tríceps"
+  },
+  {
+    "id": "supino-barra",
+    "name": "Supino (Barra)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-maquina",
+    "name": "Supino (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-halter",
+    "name": "Supino (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-no-smith-maquina",
+    "name": "Supino no Smith (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-com-pega-junta",
+    "name": "Supino Com Pega Junta",
+    "category": "Tríceps"
+  },
+  {
+    "id": "pegada-aberta-barra",
+    "name": "- Pegada Aberta (Barra)",
+    "category": "Peito"
+  },
+  {
+    "id": "superiores-rosca-direta-barra",
+    "name": "Superiores Rosca Direta (Barra)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-direta-na-polia",
+    "name": "Rosca Direta na Polia",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-direta-halter",
+    "name": "Rosca Direta (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-direta-maquina",
+    "name": "Rosca Direta (Máquina)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "bicep-curl-trx",
+    "name": "Bicep Curl Trx",
+    "category": "Bíceps"
+  },
+  {
+    "id": "atras-do-corpo-polia",
+    "name": "atrás do corpo polia",
+    "category": "Bíceps"
+  },
+  {
+    "id": "personalizado-abdominal-em-bicicleta",
+    "name": "Personalizado Abdominal Em Bicicleta",
+    "category": "Abdominais"
+  },
+  {
+    "id": "bicicleta-com-pernas-levantadas",
+    "name": "Bicicleta Com Pernas Levantadas",
+    "category": "Abdominais"
+  },
+  {
+    "id": "bird-dog",
+    "name": "Bird Dog",
+    "category": "Glúteos"
+  },
+  {
+    "id": "salto-no-banco",
+    "name": "Salto no Banco",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-com-banco-barra",
+    "name": "Agachamento com Banco (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "boxe",
+    "name": "Boxe",
+    "category": "Cardio"
+  },
+  {
+    "id": "agachamento-bulgaro",
+    "name": "Agachamento Búlgaro",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "corpo-inteiro-pec-deck",
+    "name": "Corpo Inteiro Pec Deck",
+    "category": "Peito"
+  },
+  {
+    "id": "press-pallof",
+    "name": "Press Pallof",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-corda",
+    "name": "Abdominal (Corda)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "crucifixo-na-polia-maquina",
+    "name": "Crucifixo na Polia (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "cable-pull-through",
+    "name": "Cable Pull Through",
+    "category": "Glúteos"
+  },
+  {
+    "id": "baixo-para-cima",
+    "name": "(Baixo Para Cima )",
+    "category": "Abdominais"
+  },
+  {
+    "id": "cabo-cima-para-baixo",
+    "name": "Cabo (Cima Para Baixo)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "extensao-de-panturrilha-maquina",
+    "name": "Extensão de Panturrilha (Máquina)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "no-leg-press-45",
+    "name": "no Leg Press 45º",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "peito-na-paralela",
+    "name": "Peito na Paralela",
+    "category": "Peito"
+  },
+  {
+    "id": "paralela-do-graviton-maquina",
+    "name": "Paralela do Graviton (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "na-paralela-com-peso",
+    "name": "na Paralela com Peso",
+    "category": "Peito"
+  },
+  {
+    "id": "crucifixo-elastico",
+    "name": "Crucifixo (Elástico)",
+    "category": "Peito"
+  },
+  {
+    "id": "crucifixo-reto-halter",
+    "name": "Crucifixo Reto (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "crucifixo-no-voador-maquina",
+    "name": "Crucifixo no Voador (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "aberturas-no-trx",
+    "name": "Aberturas No Trx",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-elastico",
+    "name": "Supino (Elástico)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-sentado-maquina",
+    "name": "Supino Sentado (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "remada-inclinada-apoiada-no",
+    "name": "Remada Inclinada Apoiada No",
+    "category": "Peito"
+  },
+  {
+    "id": "superiores-aberturas-invertidas-halter",
+    "name": "Superiores Aberturas Invertidas (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "y-com-apoio-no",
+    "name": "Y com Apoio no",
+    "category": "Peito"
+  },
+  {
+    "id": "halter",
+    "name": "(Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "fixa-pronada-elevacao-pega-pronada",
+    "name": "Fixa Pronada(Elevação Pega Pronada)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "barra-fixa-pronada-assistida",
+    "name": "Barra Fixa Pronada Assistida",
+    "category": "Dorsais"
+  },
+  {
+    "id": "fixa-pronada-com-peso",
+    "name": "Fixa Pronada Com Peso",
+    "category": "Dorsais"
+  },
+  {
+    "id": "concha",
+    "name": "Concha",
+    "category": "Glúteos"
+  },
+  {
+    "id": "flexao-batendo-palmas",
+    "name": "Flexão Batendo Palmas",
+    "category": "Peito"
+  },
+  {
+    "id": "pull-corpo-inteiro-escalada",
+    "name": "Pull Corpo Inteiro Escalada",
+    "category": "Cardio"
+  },
+  {
+    "id": "rosca-concentrada-halter",
+    "name": "Rosca Concentrada (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-martelo-alternada",
+    "name": "Rosca Martelo Alternada",
+    "category": "Bíceps"
+  },
+  {
+    "id": "crucifixo-invertido-polia",
+    "name": "crucifixo invertido polia",
+    "category": "Ombros"
+  },
+  {
+    "id": "personalizado-abdominal",
+    "name": "Personalizado Abdominal",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-na-maquina",
+    "name": "Abdominal Na Máquina",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-com-peso",
+    "name": "Abdominal (Com Peso)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "curtsy-lunge-dumbbell",
+    "name": "Curtsy Lunge (Dumbbell)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "ciclismo",
+    "name": "Ciclismo",
+    "category": "Cardio"
+  },
+  {
+    "id": "dead-bug",
+    "name": "Dead Bug",
+    "category": "Abdominais"
+  },
+  {
+    "id": "superiores-levantamento-terra-elastico",
+    "name": "Superiores Levantamento Terra (Elástico)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "levantamento-terra-barra",
+    "name": "Levantamento Terra (Barra)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "levantamento-terra-halter",
+    "name": "Levantamento Terra (Halter)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "terra-no-smith-maquina",
+    "name": "Terra no Smith (Máquina)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "levantamento-terra-barra-hexagonal",
+    "name": "Levantamento Terra (Barra Hexagonal)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "inteiro-supino-declinado-barra",
+    "name": "Inteiro Supino Declinado (Barra)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-declinado-halter",
+    "name": "Supino Declinado (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-declinado-maquina",
+    "name": "Supino Declinado (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "declinado-no-smith-maquina",
+    "name": "Declinado no Smith (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "crucifixo-de",
+    "name": "Crucifixo de",
+    "category": "Peito"
+  },
+  {
+    "id": "declinado-halter",
+    "name": "Declinado (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "abdominal-declinado",
+    "name": "Abdominal Declinado",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-declinado-com-peso",
+    "name": "Abdominal Declinado (Com Peso)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "flexao-declinada",
+    "name": "Flexão Declinada",
+    "category": "Peito"
+  },
+  {
+    "id": "flexao-pegada-diamante",
+    "name": "Flexão Pegada Diamante",
+    "category": "Tríceps"
+  },
+  {
+    "id": "corpo-inteiro-drag-curl",
+    "name": "Corpo Inteiro Drag Curl",
+    "category": "Bíceps"
+  },
+  {
+    "id": "bandeira-do-dragao",
+    "name": "Bandeira do Dragão",
+    "category": "Abdominais"
+  },
+  {
+    "id": "dragonfly",
+    "name": "Dragonfly",
+    "category": "Abdominais"
+  },
+  {
+    "id": "remada-halter",
+    "name": "Remada (Halter)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "de-halteres-pega-junta",
+    "name": "De Halteres (Pega Junta)",
+    "category": "Peito"
+  },
+  {
+    "id": "step-up-halter",
+    "name": "Step Up (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "cotovelo-ao-joelho",
+    "name": "Cotovelo Ao Joelho",
+    "category": "Abdominais"
+  },
+  {
+    "id": "eliptico",
+    "name": "Elíptico",
+    "category": "Cardio"
+  },
+  {
+    "id": "extensao-de-punho-cientifica",
+    "name": "Extensão De Punho Científica",
+    "category": "Antebraços"
+  },
+  {
+    "id": "direta-na-barra-w",
+    "name": "Direta na Barra W",
+    "category": "Bíceps"
+  },
+  {
+    "id": "puxada-alta-no-cabo",
+    "name": "Puxada Alta No Cabo",
+    "category": "Ombros"
+  },
+  {
+    "id": "up-bench-press-barbell",
+    "name": "Up Bench Press (Barbell)",
+    "category": "Peito"
+  },
+  {
+    "id": "hidrante",
+    "name": "Hidrante",
+    "category": "Glúteos"
+  },
+  {
+    "id": "flexao-samsulek",
+    "name": "Flexão Samsulek",
+    "category": "Antebraços"
+  },
+  {
+    "id": "supino-no-chao-barra",
+    "name": "Supino No Chão (Barra)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-no-chao-halter",
+    "name": "Supino No Chão (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "fundos-no-chao",
+    "name": "Fundos No Chão",
+    "category": "Tríceps"
+  },
+  {
+    "id": "flutter-kicks",
+    "name": "Flutter Kicks",
+    "category": "Abdominais"
+  },
+  {
+    "id": "frog-jumps",
+    "name": "Frog Jumps",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "frog-jumps-halter",
+    "name": "Frog Jumps (Halter)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "elevacao-frontal-banda-elastica",
+    "name": "Elevação Frontal (Banda Elástica)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-frontal-barra",
+    "name": "Elevação Frontal (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-frontal-cabo",
+    "name": "Elevação Frontal (Cabo)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-frontal-halter",
+    "name": "Elevação Frontal (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-frontal-com-trx",
+    "name": "Elevação Frontal Com Trx",
+    "category": "Ombros"
+  },
+  {
+    "id": "agachamento-frontal",
+    "name": "Agachamento Frontal",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-profundo",
+    "name": "Agachamento Profundo",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "elevacao-pelvica-no-solo",
+    "name": "Elevação Pélvica no Solo",
+    "category": "Glúteos"
+  },
+  {
+    "id": "glute-ham-raise",
+    "name": "Glute Ham Raise",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "gluteo-coice-maquina",
+    "name": "Glúteo Coice (Máquina)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "gluteo-4-apoios",
+    "name": "Glúteo 4 Apoios",
+    "category": "Glúteos"
+  },
+  {
+    "id": "agachamento-goblet",
+    "name": "Agachamento Goblet",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "good-morning-barra",
+    "name": "Good Morning (Barra)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "superiores-agachamento-hack-barra",
+    "name": "Superiores Agachamento Hack (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-hack-maquina",
+    "name": "Agachamento Hack (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "rosca-martelo-elastico",
+    "name": "Rosca Martelo (Elástico)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "com-corda-na-polia",
+    "name": "com Corda na Polia",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-martelo-halter",
+    "name": "Rosca Martelo (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "flexao-de-ponta-cabeca",
+    "name": "Flexão de Ponta Cabeça",
+    "category": "Ombros"
+  },
+  {
+    "id": "joelhos-na-barra-fixa",
+    "name": "Joelhos Na Barra Fixa",
+    "category": "Abdominais"
+  },
+  {
+    "id": "pernas-na-barra-fixa",
+    "name": "Pernas Na Barra Fixa",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-toque-no-calcanhar",
+    "name": "Abdominal Toque No Calcanhar",
+    "category": "Abdominais"
+  },
+  {
+    "id": "press-hexagonal-halter",
+    "name": "Press Hexagonal (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "cintura-corpo-inteiro-hiit",
+    "name": "Cintura Corpo Inteiro HIIT",
+    "category": "Cardio"
+  },
+  {
+    "id": "trilha",
+    "name": "Trilha",
+    "category": "Cardio"
+  },
+  {
+    "id": "cadeira-abdutora-maquina",
+    "name": "Cadeira Abdutora (Máquina)",
+    "category": "Abdutores"
+  },
+  {
+    "id": "cadeira-adutora-maquina",
+    "name": "Cadeira Adutora (Máquina)",
+    "category": "Adutores"
+  },
+  {
+    "id": "elevacao-pelvica",
+    "name": "Elevação Pélvica",
+    "category": "Glúteos"
+  },
+  {
+    "id": "elevacao-pelvica-barra",
+    "name": "Elevação Pélvica (Barra)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "elevacao-de-quadril-maquina",
+    "name": "Elevação de Quadril (Máquina)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "hip-thrust-smith-machine",
+    "name": "Hip Thrust (Smith Machine)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "hollow-rock",
+    "name": "Hollow Rock",
+    "category": "Abdominais"
+  },
+  {
+    "id": "supino-inclinado-barra",
+    "name": "Supino Inclinado (Barra)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-inclinado-halter",
+    "name": "Supino Inclinado (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "inclinado-no-smith-maquina",
+    "name": "Inclinado no Smith (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "aberturas-de",
+    "name": "Aberturas De",
+    "category": "Peito"
+  },
+  {
+    "id": "inclinadas-halter",
+    "name": "Inclinadas (Halter)",
+    "category": "Peito"
+  },
+  {
+    "id": "supino-inclinado-na-maquina",
+    "name": "Supino Inclinado Na Máquina",
+    "category": "Peito"
+  },
+  {
+    "id": "flexao-inclinada",
+    "name": "Flexão Inclinada",
+    "category": "Peito"
+  },
+  {
+    "id": "costas-superiores-press-de",
+    "name": "Costas Superiores Press De",
+    "category": "Peito"
+  },
+  {
+    "id": "iso-lateral-maquina",
+    "name": "Iso-Lateral (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "remadas-altas-iso-lateral-maquina",
+    "name": "Remadas Altas Iso-Lateral (Máquina)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "superiores-canivete-no-trx",
+    "name": "Superiores Canivete (No Trx)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-canivete",
+    "name": "Abdominal Canivete",
+    "category": "Abdominais"
+  },
+  {
+    "id": "press-jm-barra",
+    "name": "Press JM (Barra)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "pular-corda",
+    "name": "Pular Corda",
+    "category": "Cardio"
+  },
+  {
+    "id": "inteiro-agachamento-com-salto",
+    "name": "Inteiro Agachamento Com Salto",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "inteiro-afundo-com-salto",
+    "name": "Inteiro Afundo com Salto",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "kettlebell-around-the-world",
+    "name": "Kettlebell Around the World",
+    "category": "Ombros"
+  },
+  {
+    "id": "inteiro-rosca-com-kettlebell",
+    "name": "Inteiro Rosca com Kettlebell",
+    "category": "Bíceps"
+  },
+  {
+    "id": "agachamento-goblet-com-kettlebell",
+    "name": "Agachamento Goblet com Kettlebell",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "kettlebell-halo",
+    "name": "Kettlebell Halo",
+    "category": "Ombros"
+  },
+  {
+    "id": "corpo-inteiro-press-de",
+    "name": "Corpo Inteiro Press De",
+    "category": "Ombros"
+  },
+  {
+    "id": "kettlebell",
+    "name": "(Kettlebell)",
+    "category": "Ombros"
+  },
+  {
+    "id": "corpo-inteiro-elevacao-kipping",
+    "name": "Corpo Inteiro Elevação Kipping",
+    "category": "Dorsais"
+  },
+  {
+    "id": "joelhos-nas-barras-paralelas",
+    "name": "Joelhos Nas Barras Paralelas",
+    "category": "Abdominais"
+  },
+  {
+    "id": "de-joelhos-banda-elastica",
+    "name": "De Joelhos (Banda Elástica)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "com-apoio-dos-joelhos",
+    "name": "com Apoio dos Joelhos",
+    "category": "Peito"
+  },
+  {
+    "id": "abdominal-em-l",
+    "name": "Abdominal Em L",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-alternado-barra",
+    "name": "Abdominal Alternado (Barra)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "inteiro-puxada-alta-elastico",
+    "name": "Inteiro Puxada Alta (Elástico)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "alta-na-polia-maquina",
+    "name": "Alta na Polia (Máquina)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "puxada-alta-maquina",
+    "name": "Puxada Alta (Máquina)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "alta-pegada-triangulo",
+    "name": "Alta - Pegada Triângulo",
+    "category": "Dorsais"
+  },
+  {
+    "id": "andar-lateral-elastico",
+    "name": "Andar Lateral (Elástico)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "para-a-caixa-lateral",
+    "name": "Para A Caixa Lateral",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "levantamento-lateral-de-perna",
+    "name": "Levantamento Lateral De Perna",
+    "category": "Glúteos"
+  },
+  {
+    "id": "lunge-lateral",
+    "name": "Lunge Lateral",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "elevacao-lateral-elastico",
+    "name": "Elevação Lateral (Elástico)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-lateral-cabo",
+    "name": "Elevação Lateral (Cabo)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-lateral-halter",
+    "name": "Elevação Lateral (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "elevacao-lateral-maquina",
+    "name": "Elevação Lateral (Máquina)",
+    "category": "Ombros"
+  },
+  {
+    "id": "agachamento-lateral",
+    "name": "Agachamento Lateral",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "cadeira-extensora-maquina",
+    "name": "Cadeira Extensora (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "leg-press-45-maquina",
+    "name": "Leg Press 45º (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "leg-press-horizontal-maquina",
+    "name": "Leg Press Horizontal (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "pernas-em-barras-paralelas",
+    "name": "Pernas Em Barras Paralelas",
+    "category": "Abdominais"
+  },
+  {
+    "id": "baixo-na-polia-maquina",
+    "name": "Baixo na Polia (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "trx-costas-superiores-afundo",
+    "name": "Trx Costas Superiores Afundo",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "afundo-barra",
+    "name": "Afundo (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "afundo-halter",
+    "name": "Afundo (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "com-as-pernas-elevadas",
+    "name": "Com As Pernas Elevadas",
+    "category": "Abdominais"
+  },
+  {
+    "id": "mesa-flexora-maquina",
+    "name": "Mesa Flexora (Máquina)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "elevacao-de-pernas-deitado",
+    "name": "Elevação De Pernas (Deitado)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "flexao-de",
+    "name": "Flexão de",
+    "category": "Pescoço"
+  },
+  {
+    "id": "deitado",
+    "name": "Deitado",
+    "category": "Pescoço"
+  },
+  {
+    "id": "deitado-com-peso",
+    "name": "Deitado (Com Peso)",
+    "category": "Pescoço"
+  },
+  {
+    "id": "extensao-de",
+    "name": "Extensão de",
+    "category": "Pescoço"
+  },
+  {
+    "id": "inteiro-barra-fixa-negativa",
+    "name": "Inteiro Barra Fixa Negativa",
+    "category": "Dorsais"
+  },
+  {
+    "id": "flexao-de-perna-nordica",
+    "name": "Flexão de Perna Nórdica",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "abdominal-obliquo",
+    "name": "Abdominal Oblíquo",
+    "category": "Abdominais"
+  },
+  {
+    "id": "flexao-com-um-braco",
+    "name": "Flexão Com Um Braço",
+    "category": "Peito"
+  },
+  {
+    "id": "na-polia-alta-maquina",
+    "name": "na Polia Alta (Máquina)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "cima-da-cabeca-halter",
+    "name": "Cima Da Cabeça (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "overhead-plate-raise",
+    "name": "Overhead Plate Raise",
+    "category": "Ombros"
+  },
+  {
+    "id": "desenvolvimento-barra",
+    "name": "Desenvolvimento (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "desenvolvimento-halter",
+    "name": "Desenvolvimento (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "desenvolvimento-no-smith-maquina",
+    "name": "Desenvolvimento no Smith (Máquina)",
+    "category": "Ombros"
+  },
+  {
+    "id": "overhead-triceps-extension-cable",
+    "name": "Overhead Triceps Extension (Cable)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "partial-glute-bridge-barbell",
+    "name": "Partial Glute Bridge (Barbell)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "agachamento-com-pausa-barra",
+    "name": "Agachamento com Pausa (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "superiores-agachamento-pendulo-maquina",
+    "name": "Superiores Agachamento Pêndulo (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "flexao-pike",
+    "name": "Flexão Pike",
+    "category": "Ombros"
+  },
+  {
+    "id": "agachamento-pistol",
+    "name": "Agachamento Pistol",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "prancha-abdominal",
+    "name": "Prancha Abdominal",
+    "category": "Abdominais"
+  },
+  {
+    "id": "plank-pushup",
+    "name": "Plank Pushup",
+    "category": "Peito"
+  },
+  {
+    "id": "rosca-com-anilha",
+    "name": "Rosca com Anilha",
+    "category": "Bíceps"
+  },
+  {
+    "id": "elevacao-frontal-da-bolacha",
+    "name": "Elevação Frontal Da Bolacha",
+    "category": "Ombros"
+  },
+  {
+    "id": "press-de-bolacha",
+    "name": "Press De Bolacha",
+    "category": "Peito"
+  },
+  {
+    "id": "bolacha-press-de-svend",
+    "name": "Bolacha (Press De Svend)",
+    "category": "Peito"
+  },
+  {
+    "id": "inteiro-rosca-scott-barra",
+    "name": "Inteiro Rosca Scott (Barra)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-scott-halter",
+    "name": "Rosca Scott (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-scott-maquina",
+    "name": "Rosca Scott (Máquina)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "corpo-inteiro-barra-fixa",
+    "name": "Corpo Inteiro Barra Fixa",
+    "category": "Dorsais"
+  },
+  {
+    "id": "fixa-no-graviton-maquina",
+    "name": "Fixa no Graviton (Máquina)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "barra-fixa-elastico",
+    "name": "Barra Fixa (Elástico)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "barra-fixa-com-peso",
+    "name": "Barra Fixa (Com Peso)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "pullover-halter",
+    "name": "Pullover (Halter)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "pullover-maquina",
+    "name": "Pullover (Máquina)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "push-press",
+    "name": "Push Press",
+    "category": "Ombros"
+  },
+  {
+    "id": "flexao",
+    "name": "Flexão",
+    "category": "Peito"
+  },
+  {
+    "id": "flexao-com-peso",
+    "name": "Flexão com Peso",
+    "category": "Peito"
+  },
+  {
+    "id": "flexao-fechada",
+    "name": "Flexão Fechada",
+    "category": "Peito"
+  },
+  {
+    "id": "superiores-aberturas-invertidas-corda",
+    "name": "Superiores Aberturas Invertidas (Corda)",
+    "category": "Ombros"
+  },
+  {
+    "id": "dobradas",
+    "name": "Dobradas",
+    "category": "Ombros"
+  },
+  {
+    "id": "ombro-posterior-na-maquina",
+    "name": "Ombro Posterior (Na Máquina)",
+    "category": "Ombros"
+  },
+  {
+    "id": "rear-kick-machine",
+    "name": "Rear Kick (Machine)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "costas-superiores-abdominal-invertido",
+    "name": "Costas Superiores Abdominal Invertido",
+    "category": "Abdominais"
+  },
+  {
+    "id": "rosca-invertida-barra",
+    "name": "Rosca Invertida (Barra)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-invertida-cabo",
+    "name": "Rosca Invertida (Cabo)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-invertida-halter",
+    "name": "Rosca Invertida (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "com-um-braco-corda",
+    "name": "Com Um Braço (Corda)",
+    "category": "Ombros"
+  },
+  {
+    "id": "rosca-concentrada-reversa-halter",
+    "name": "Rosca Concentrada Reversa (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "puxada-com-pega-inversa",
+    "name": "Puxada Com Pega Inversa",
+    "category": "Dorsais"
+  },
+  {
+    "id": "hiperextensao-reversa",
+    "name": "Hiperextensão Reversa",
+    "category": "Glúteos"
+  },
+  {
+    "id": "afundo-reverso",
+    "name": "Afundo Reverso",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "afundo-reverso-barra",
+    "name": "Afundo Reverso (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "afundo-reverso-halter",
+    "name": "Afundo Reverso (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "prancha-invertida",
+    "name": "Prancha Invertida",
+    "category": "Abdominais"
+  },
+  {
+    "id": "fundos-nas-argolas",
+    "name": "Fundos Nas Argolas",
+    "category": "Peito"
+  },
+  {
+    "id": "ring-pull-up",
+    "name": "Ring Pull Up",
+    "category": "Dorsais"
+  },
+  {
+    "id": "ring-push-up",
+    "name": "Ring Push Up",
+    "category": "Peito"
+  },
+  {
+    "id": "levantamento-terra-romeno-barra",
+    "name": "Levantamento Terra Romeno (Barra)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "levantamento-terra-romeno-halter",
+    "name": "Levantamento Terra Romeno (Halter)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "rosca-com-corda-maquina",
+    "name": "Rosca com Corda (Máquina)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "com-bracos-esticados-corda",
+    "name": "Com Braços Esticados (Corda)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "maquina-de-remo",
+    "name": "Máquina De Remo",
+    "category": "Cardio"
+  },
+  {
+    "id": "corrida",
+    "name": "Corrida",
+    "category": "Cardio"
+  },
+  {
+    "id": "giro-russo-peso-corporal",
+    "name": "Giro Russo (Peso Corporal)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "corpo-russas-com-peso",
+    "name": "Corpo (Russas) (Com Peso)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "de-panturrilha-sentado-maquina",
+    "name": "de Panturrilha Sentado (Máquina)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "crucifixo-sentado-cabo",
+    "name": "Crucifixo Sentado (Cabo)",
+    "category": "Peito"
+  },
+  {
+    "id": "maquina-de-fundos-sentado",
+    "name": "Máquina De Fundos Sentado",
+    "category": "Tríceps"
+  },
+  {
+    "id": "rosca-inclinada-halter",
+    "name": "Rosca Inclinada (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "de-pesos-sentado-halter",
+    "name": "De Pesos Sentado (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "cadeira-flexora-maquina",
+    "name": "Cadeira Flexora (Máquina)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "press-de",
+    "name": "Press De",
+    "category": "Ombros"
+  },
+  {
+    "id": "sentada-barra",
+    "name": "(Sentada) (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "sentada-halter",
+    "name": "(Sentada) (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "rosca-de-punho-halter",
+    "name": "Rosca de Punho (Halter)",
+    "category": "Antebraços"
+  },
+  {
+    "id": "costas-superiores-prensa-de",
+    "name": "Costas Superiores Prensa De",
+    "category": "Ombros"
+  },
+  {
+    "id": "sentada-maquina",
+    "name": "(Sentada) (Máquina)",
+    "category": "Ombros"
+  },
+  {
+    "id": "press-de-triceps-sentado",
+    "name": "Press De Triceps Sentado",
+    "category": "Tríceps"
+  },
+  {
+    "id": "extensao-de-punho-barra",
+    "name": "Extensão de Punho (Barra)",
+    "category": "Antebraços"
+  },
+  {
+    "id": "shoulder-press-barra",
+    "name": "Shoulder Press (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "desenvolvimento-de",
+    "name": "Desenvolvimento de",
+    "category": "Ombros"
+  },
+  {
+    "id": "maquina-de-placas",
+    "name": "(Máquina de Placas)",
+    "category": "Ombros"
+  },
+  {
+    "id": "com-toque-no-ombro",
+    "name": "com Toque no Ombro",
+    "category": "Ombros"
+  },
+  {
+    "id": "encolhimento-barra",
+    "name": "Encolhimento (Barra)",
+    "category": "Trapézio"
+  },
+  {
+    "id": "encolhimento-corda",
+    "name": "Encolhimento (Corda)",
+    "category": "Trapézio"
+  },
+  {
+    "id": "encolhimento-halter",
+    "name": "Encolhimento (Halter)",
+    "category": "Trapézio"
+  },
+  {
+    "id": "encolhimento-maquina",
+    "name": "Encolhimento (Máquina)",
+    "category": "Trapézio"
+  },
+  {
+    "id": "encolhimento-maquina-smith",
+    "name": "Encolhimento (Máquina Smith)",
+    "category": "Trapézio"
+  },
+  {
+    "id": "inclinacao-lateral-de-abdomen",
+    "name": "Inclinação Lateral de Abdômen",
+    "category": "Abdominais"
+  },
+  {
+    "id": "dobra-lateral-halter",
+    "name": "Dobra Lateral (Halter)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "prancha-lateral",
+    "name": "Prancha Lateral",
+    "category": "Abdominais"
+  },
+  {
+    "id": "unilateral-na-polia-maquina",
+    "name": "Unilateral na Polia (Máquina)",
+    "category": "Peito"
+  },
+  {
+    "id": "superiores-rosca-unilateral-cabo",
+    "name": "Superiores Rosca Unilateral (Cabo)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "arm-landmine-press-barbell",
+    "name": "Arm Landmine Press (Barbell)",
+    "category": "Ombros"
+  },
+  {
+    "id": "puxada-unilateral",
+    "name": "Puxada Unilateral",
+    "category": "Dorsais"
+  },
+  {
+    "id": "elevacao-lateral-unilateral-cabo",
+    "name": "Elevação Lateral Unilateral (Cabo)",
+    "category": "Ombros"
+  },
+  {
+    "id": "unilateral-halter",
+    "name": "Unilateral (Halter)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "unilateral-cabo",
+    "name": "Unilateral (Cabo)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "de-perna-unilateral-maquina",
+    "name": "De Perna Unilateral (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "pelvica-unitateral-no-solo",
+    "name": "Pélvica Unitateral no Solo",
+    "category": "Glúteos"
+  },
+  {
+    "id": "impulso-de-quadril-unilateral",
+    "name": "Impulso De Quadril Unilateral",
+    "category": "Glúteos"
+  },
+  {
+    "id": "de-quadril-unilateral-halter",
+    "name": "de Quadril Unilateral (Halter)",
+    "category": "Glúteos"
+  },
+  {
+    "id": "leg-press-unilateral-maquina",
+    "name": "Leg Press Unilateral (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "morto-romano-unilateral-barra",
+    "name": "Morto Romano Unilateral (Barra)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "morto-romano-unilateral-halter",
+    "name": "Morto Romano Unilateral (Halter)",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "de-panturrilha-em-pe",
+    "name": "de Panturrilha em Pé",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "panturrilha-em-pe-barra",
+    "name": "Panturrilha em Pé (Barra)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "panturrilha-em-pe-halter",
+    "name": "Panturrilha em Pé (Halter)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "panturrilha-em-pe-maquina",
+    "name": "Panturrilha em Pé (Máquina)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "agachamento-sissy-com-peso",
+    "name": "Agachamento Sissy (Com Peso)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "abdominal-tradicional",
+    "name": "Abdominal Tradicional",
+    "category": "Abdominais"
+  },
+  {
+    "id": "abdominal-tradicional-com-peso",
+    "name": "Abdominal Tradicional (Com Peso)",
+    "category": "Abdominais"
+  },
+  {
+    "id": "patinacao",
+    "name": "Patinação",
+    "category": "Cardio"
+  },
+  {
+    "id": "ski",
+    "name": "Ski",
+    "category": "Cardio"
+  },
+  {
+    "id": "triceps-testa-barra",
+    "name": "Triceps Testa (Barra)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "triceps-testa-halter",
+    "name": "Triceps Testa (Halter)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "snatch-corpo-inteiro-snowboard",
+    "name": "Snatch Corpo Inteiro Snowboard",
+    "category": "Cardio"
+  },
+  {
+    "id": "rosca-spider-barra",
+    "name": "Rosca Spider (Barra)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "rosca-spider-halter",
+    "name": "Rosca Spider (Halter)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "homem-aranha",
+    "name": "Homem Aranha",
+    "category": "Abdominais"
+  },
+  {
+    "id": "bicicleta",
+    "name": "Bicicleta",
+    "category": "Cardio"
+  },
+  {
+    "id": "inteiro-agachamento-afundo-halter",
+    "name": "Inteiro Agachamento Afundo (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "corrida-sprint",
+    "name": "Corrida Sprint",
+    "category": "Cardio"
+  },
+  {
+    "id": "agachamento-elastico",
+    "name": "Agachamento (Elástico)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-barra",
+    "name": "Agachamento (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento",
+    "name": "Agachamento",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-halter",
+    "name": "Agachamento (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-maquina",
+    "name": "Agachamento (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-no-smith-maquina",
+    "name": "Agachamento no Smith (Máquina)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-trx",
+    "name": "Agachamento (Trx)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "inteiro-simulador-de-escadas",
+    "name": "Inteiro Simulador De Escadas",
+    "category": "Cardio"
+  },
+  {
+    "id": "simulador-de-escadas",
+    "name": "Simulador De Escadas",
+    "category": "Cardio"
+  },
+  {
+    "id": "pontapes-traseiros-com-elastico",
+    "name": "Pontapés Traseiros Com Elástico",
+    "category": "Glúteos"
+  },
+  {
+    "id": "panturrilha-em-pe-smith",
+    "name": "Panturrilha em Pé (Smith)",
+    "category": "Panturrilhas"
+  },
+  {
+    "id": "de-pernas-em-pe",
+    "name": "de Pernas em Pé",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "militar-de-pe-barra",
+    "name": "Militar (De Pé) (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "step-up",
+    "name": "Step Up",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "esterno-elevacao-de-gironda",
+    "name": "Esterno (Elevação De Gironda)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "o-braco-reto-corda",
+    "name": "O Braço Reto (Corda)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "morto-com-pernas-esticadas",
+    "name": "Morto Com Pernas Esticadas",
+    "category": "Isquiossurais"
+  },
+  {
+    "id": "alongamentos",
+    "name": "Alongamentos",
+    "category": "Outro"
+  },
+  {
+    "id": "levantamento-terra-sumo",
+    "name": "Levantamento Terra Sumô",
+    "category": "Glúteos"
+  },
+  {
+    "id": "agachamento-sumo",
+    "name": "Agachamento Sumô",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-em-sumo-barra",
+    "name": "Agachamento Em Sumo (Barra)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-sumo-halter",
+    "name": "Agachamento Sumô (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-sumo-kettlebell",
+    "name": "Agachamento Sumô (Kettlebell)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "ou-elevacao-dos-lombares",
+    "name": "(Ou Elevação Dos Lombares)",
+    "category": "Lombar"
+  },
+  {
+    "id": "natacao",
+    "name": "Natação",
+    "category": "Cardio"
+  },
+  {
+    "id": "inteiro-tocar-nos-pes",
+    "name": "Inteiro Tocar Nos Pés",
+    "category": "Abdominais"
+  },
+  {
+    "id": "pes-a-barra",
+    "name": "Pés À Barra",
+    "category": "Abdominais"
+  },
+  {
+    "id": "rotacao-de-tronco",
+    "name": "Rotação de Tronco",
+    "category": "Abdominais"
+  },
+  {
+    "id": "esteira",
+    "name": "Esteira",
+    "category": "Cardio"
+  },
+  {
+    "id": "triceps-na-paralela",
+    "name": "Tríceps na Paralela",
+    "category": "Tríceps"
+  },
+  {
+    "id": "barra",
+    "name": "(Barra)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "na-polia-maquina",
+    "name": "na Polia (Máquina)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "suspensao-trx",
+    "name": "(Suspensão / Trx)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "atras-cabo",
+    "name": "Atrás (Cabo)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "triceps-coice",
+    "name": "Tríceps Coice",
+    "category": "Tríceps"
+  },
+  {
+    "id": "puxada-de",
+    "name": "Puxada De",
+    "category": "Tríceps"
+  },
+  {
+    "id": "triceps",
+    "name": "Tríceps",
+    "category": "Tríceps"
+  },
+  {
+    "id": "na-polia",
+    "name": "na Polia",
+    "category": "Tríceps"
+  },
+  {
+    "id": "na-polia-com-corda",
+    "name": "na Polia com Corda",
+    "category": "Tríceps"
+  },
+  {
+    "id": "triceps-testa-polia",
+    "name": "triceps testa polia",
+    "category": "Tríceps"
+  },
+  {
+    "id": "personalizado-remada-alta-barra",
+    "name": "Personalizado Remada Alta (Barra)",
+    "category": "Ombros"
+  },
+  {
+    "id": "remada-alta-corda",
+    "name": "Remada Alta (Corda)",
+    "category": "Ombros"
+  },
+  {
+    "id": "remada-alta-halter",
+    "name": "Remada Alta (Halter)",
+    "category": "Ombros"
+  },
+  {
+    "id": "vertical-traction-machine",
+    "name": "Vertical Traction (Machine)",
+    "category": "Dorsais"
+  },
+  {
+    "id": "waiter-curl-dumbbell",
+    "name": "Waiter Curl (Dumbbell)",
+    "category": "Bíceps"
+  },
+  {
+    "id": "caminhada",
+    "name": "Caminhada",
+    "category": "Cardio"
+  },
+  {
+    "id": "passada-caminhando",
+    "name": "Passada Caminhando",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "passada-caminhando-halter",
+    "name": "Passada Caminhando (Halter)",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "agachamento-isometrico-na-parede",
+    "name": "Agachamento Isométrico na Parede",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "corpo-inteiro-elevacao-largas",
+    "name": "Corpo Inteiro Elevação Largas",
+    "category": "Dorsais"
+  },
+  {
+    "id": "wide-elbow-triceps-press-dumbbell",
+    "name": "Wide-Elbow Triceps Press (Dumbbell)",
+    "category": "Tríceps"
+  },
+  {
+    "id": "rolo-antebraco",
+    "name": "Rolo Antebraço",
+    "category": "Antebraços"
+  },
+  {
+    "id": "corpo-inteiro-agachamento-zercher",
+    "name": "Corpo Inteiro Agachamento Zercher",
+    "category": "Quadríceps"
+  },
+  {
+    "id": "rosca-zottman-halter",
+    "name": "Rosca Zottman (Halter)",
+    "category": "Bíceps"
+  }
+]
