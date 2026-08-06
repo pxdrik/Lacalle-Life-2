@@ -64,7 +64,17 @@ export interface Exercise extends Entity {
   /** Trained one side at a time. `null` when undecided. */
   readonly isUnilateral: boolean | null;
 
-  /** Crosses more than one joint. `null` when undecided. */
+  /**
+   * Moves the load through more than one joint acting together.
+   *
+   * Not a strict joint count. A Romanian deadlift is dominated by the hip and
+   * nobody would call it isolation; a hip thrust is programmed as a main lift.
+   * The checkable half of the rule lives in the schema instead: an exercise
+   * marked isolated must name exactly one primary muscle, which forces a
+   * decision rather than a hedge.
+   *
+   * `null` when undecided.
+   */
   readonly isCompound: boolean | null;
 
   readonly classification: ClassificationSource;
