@@ -69,5 +69,30 @@
   "cadeira-adutora": ["Adutora", "Adução"],
   "caminhada-lateral-elastico": ["Monster Walk", "Andar Lateral"],
   "panturrilha-em-pe-maquina": ["Panturrilha em Pé", "Gêmeos em Pé", "Calf Raise"],
-  "panturrilha-sentado": ["Sóleo", "Seated Calf Raise"]
+  "panturrilha-sentado": ["Sóleo", "Seated Calf Raise"],
+
+  "prancha": ["Plank", "Prancha Abdominal", "Prancha Isométrica"],
+  "prancha-lateral": ["Side Plank"],
+  "abdominal-tradicional": ["Abdominal", "Crunch", "Abdominal Supra"],
+  "abdominal-polia": ["Abdominal na Corda", "Cable Crunch"],
+  "abdominal-infra": ["Reverse Crunch", "Abdominal Invertido"],
+  "elevacao-pernas-barra-fixa": ["Hanging Leg Raise", "Pernas na Barra"],
+  "elevacao-joelhos-paralelas": ["Elevação de Joelhos", "Knee Raise"],
+  "canivete": ["V-Up", "Abdominal Canivete"],
+  "roda-abdominal": ["Ab Wheel", "Rodinha Abdominal"],
+  "rotacao-russa": ["Russian Twist", "Giro Russo", "Abdominal Russo"],
+  "rotacao-tronco-polia": ["Lenhador", "Wood Chop", "Chop na Polia"],
+  "flexao-lateral-halter": ["Side Bend", "Inclinação Lateral"],
+  "hiperextensao": ["Banco Romano", "Extensão Lombar", "Back Extension"],
+  "bird-dog": ["Cão Pássaro", "Quatro Apoios Alternado"],
+
+  "esteira": ["Treadmill", "Corrida na Esteira"],
+  "tiro-corrida": ["Sprint", "Corrida de Velocidade"],
+  "bicicleta-ergometrica": ["Bike", "Bicicleta", "Spinning"],
+  "bicicleta-de-ar": ["Air Bike", "Assault Bike"],
+  "eliptico": ["Transport", "Elliptical"],
+  "maquina-de-remo": ["Remo Ergômetro", "Rowing", "Remoergômetro"],
+  "simulador-de-escadas": ["Escada", "Stair Master", "Stepper"],
+  "pular-corda": ["Jump Rope"],
+  "escalador": ["Mountain Climber", "Alpinista"]
 }
