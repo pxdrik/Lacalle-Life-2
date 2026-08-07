@@ -27,12 +27,19 @@ import {
   updateExercise,
   updateSet,
 } from "../services/edit-routine";
+import { useExerciseLookup } from "../hooks/use-exercise-lookup";
 import { ExerciseBrowser } from "./exercise-browser";
+import {
+  ExerciseDetailDialog,
+  useExerciseDetail,
+} from "./exercise-detail-dialog";
 import { RoutineExerciseCard } from "./routine-exercise-card";
 
 export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   const router = useRouter();
   const { state, saveError, apply, start } = useRoutineEditor(routineId);
+  const catalogue = useExerciseLookup();
+  const detail = useExerciseDetail();
   const [picking, setPicking] = useState(false);
   const [starting, setStarting] = useState(false);
 
@@ -124,6 +131,8 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
               {(dragHandle) => (
           <RoutineExerciseCard
             exercise={exercise}
+            catalogue={catalogue.get(exercise.exerciseId)}
+            onOpenDetail={detail.show}
             position={index}
             total={routine.exercises.length}
             dragHandle={dragHandle}
@@ -202,6 +211,8 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           </button>
         )}
       </div>
+
+      <ExerciseDetailDialog control={detail} />
     </div>
   );
 }

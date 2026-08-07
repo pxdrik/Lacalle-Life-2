@@ -13,7 +13,12 @@ import {
   uncompleteSet,
   updatePerformedSet,
 } from "../services/edit-session";
+import { useExerciseLookup } from "../hooks/use-exercise-lookup";
 import type { Session } from "../types/session";
+import {
+  ExerciseDetailDialog,
+  useExerciseDetail,
+} from "./exercise-detail-dialog";
 import { SessionExerciseCard } from "./session-exercise-card";
 
 interface Props {
@@ -36,6 +41,9 @@ interface Props {
  * next-set highlight, and both are simply absent here.
  */
 export function SessionEditor({ session, apply, onDone }: Props) {
+  const catalogue = useExerciseLookup();
+  const detail = useExerciseDetail();
+
   return (
     <div>
       <p className="text-sm text-ink-muted">Editando treino concluído</p>
@@ -63,6 +71,8 @@ export function SessionEditor({ session, apply, onDone }: Props) {
           <SessionExerciseCard
             key={exercise.id}
             exercise={exercise}
+            catalogue={catalogue.get(exercise.exerciseId)}
+            onOpenDetail={detail.show}
             nextSetId={null}
             lastTime={undefined}
             onSetChange={(setId, changes) => {
@@ -97,6 +107,8 @@ export function SessionEditor({ session, apply, onDone }: Props) {
         A data e a duração do treino não mudam. Elas registram quando ele
         aconteceu, não quando foi corrigido.
       </p>
+
+      <ExerciseDetailDialog control={detail} />
     </div>
   );
 }

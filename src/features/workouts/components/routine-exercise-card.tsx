@@ -14,11 +14,16 @@ import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import type { ExerciseChanges, SetChanges } from "../services/edit-routine";
+import type { Exercise } from "../types/exercise";
 import type { RoutineExercise } from "../types/routine";
+import { ExerciseIdentity } from "./exercise-identity";
 import { PlannedSetRow } from "./planned-set-row";
 
 interface Props {
   readonly exercise: RoutineExercise;
+  /** The catalogue entry behind `exerciseId`, when it could be resolved. */
+  readonly catalogue: Exercise | undefined;
+  readonly onOpenDetail: (exercise: Exercise) => void;
   readonly position: number;
   readonly total: number;
   /** Props for the drag handle, when the card sits inside a sortable list. */
@@ -38,6 +43,8 @@ interface Props {
 
 export function RoutineExerciseCard({
   exercise,
+  catalogue,
+  onOpenDetail,
   position,
   total,
   dragHandle,
@@ -71,13 +78,14 @@ export function RoutineExerciseCard({
           </button>
         )}
 
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate font-medium text-ink">{exercise.name}</h3>
-          <p className="mt-0.5 text-xs text-ink-subtle">
-            {exercise.sets.length}{" "}
-            {exercise.sets.length === 1 ? "série" : "séries"}
-          </p>
-        </div>
+        <ExerciseIdentity
+          name={exercise.name}
+          catalogue={catalogue}
+          onOpenDetail={onOpenDetail}
+        >
+          {exercise.sets.length}{" "}
+          {exercise.sets.length === 1 ? "série" : "séries"}
+        </ExerciseIdentity>
 
         {/* The arrows stay. Dragging a card with one thumb at the gym is worse
             than tapping an arrow, and a handle alone would make reordering a

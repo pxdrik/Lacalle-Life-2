@@ -13,6 +13,10 @@ import { filterExercises } from "../services/filter-exercises";
 import { searchExercises } from "../services/search-exercises";
 import type { Exercise } from "../types/exercise";
 import { CustomExerciseForm } from "./custom-exercise-form";
+import {
+  ExerciseDetailDialog,
+  useExerciseDetail,
+} from "./exercise-detail-dialog";
 import { ExerciseFilterBar } from "./exercise-filter-bar";
 import { ExerciseRow } from "./exercise-row";
 import { THUMBNAIL_BOX } from "./exercise-thumbnail";
@@ -43,6 +47,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
     useExerciseCatalogue();
   const { query, activeFilterCount, setText, setFilters, clear } =
     useExerciseQuery(persistQuery);
+  const detail = useExerciseDetail();
   const [showFilters, setShowFilters] = useState(false);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -177,6 +182,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                     exercise={exercise}
                     onToggleFavorite={(item) => void toggleFavorite(item)}
                     onSelect={onSelect}
+                    onOpenDetail={detail.show}
                   />
                 ))}
               </ul>
@@ -187,6 +193,8 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           {results.some((exercise) => exercise.media !== null) && (
             <MediaAttribution />
           )}
+
+          <ExerciseDetailDialog control={detail} />
         </>
       )}
     </div>

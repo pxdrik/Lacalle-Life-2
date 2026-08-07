@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 
+import { useExerciseLookup } from "../hooks/use-exercise-lookup";
 import { useRestTimer } from "../hooks/use-rest-timer";
 import { useSessionHistory } from "../hooks/use-session-history";
 import { useSessionRunner } from "../hooks/use-session-runner";
@@ -29,6 +30,10 @@ import {
   sessionVolumeKg,
 } from "../services/session-stats";
 import type { Session } from "../types/session";
+import {
+  ExerciseDetailDialog,
+  useExerciseDetail,
+} from "./exercise-detail-dialog";
 import { RestTimerBar } from "./rest-timer-bar";
 import { SessionEditor } from "./session-editor";
 import { SessionExerciseCard } from "./session-exercise-card";
@@ -38,6 +43,8 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const router = useRouter();
   const { state, saveError, apply, remove } = useSessionRunner(sessionId);
   const history = useSessionHistory();
+  const catalogue = useExerciseLookup();
+  const detail = useExerciseDetail();
   const timer = useRestTimer();
   const [editing, setEditing] = useState(false);
 
@@ -150,6 +157,8 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
             <SessionExerciseCard
               key={exercise.id}
               exercise={exercise}
+              catalogue={catalogue.get(exercise.exerciseId)}
+              onOpenDetail={detail.show}
               nextSetId={next?.exerciseId === exercise.id ? next.setId : null}
               lastTime={lastTimes.get(exercise.exerciseId)}
               onSetChange={(setId, changes) => {
@@ -211,6 +220,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       )}
 
       <RestTimerBar timer={timer} />
+      <ExerciseDetailDialog control={detail} />
     </div>
   );
 }

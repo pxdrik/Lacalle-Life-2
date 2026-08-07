@@ -1,0 +1,107 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+
+import type { Exercise } from "../types/exercise";
+import { ExercisePhotos } from "./exercise-photos";
+
+function stubMotionPreference(reduced: boolean) {
+  vi.stubGlobal("matchMedia", () => ({
+    matches: reduced,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  }));
+}
+
+function exercise(images: string[]): Exercise {
+  return {
+    id: "supino-reto-barra",
+    name: "Supino Reto com Barra",
+    aliases: [],
+    primaryMuscles: ["chest"],
+    secondaryMuscles: [],
+    stabilizerMuscles: [],
+    equipment: ["barbell"],
+    movementPattern: null,
+    movementPlanes: [],
+    technicalDifficulty: null,
+    isUnilateral: null,
+    isCompound: null,
+    media: images.length === 0 ? null : { source: "free-exercise-db", images },
+    classification: "catalogue",
+    isCustom: false,
+    isFavorite: false,
+    createdAt: 1,
+    updatedAt: 1,
+  };
+}
+
+describe("ExercisePhotos", () => {
+  it("renders nothing when the exercise has no photo", () => {
+    stubMotionPreference(false);
+    const { container } = render(<ExercisePhotos exercise={exercise([])} />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("offers both positions when the source gives two frames", () => {
+    stubMotionPreference(false);
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
+
+    expect(screen.getByRole("button", { name: "Início" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Fim" })).toBeInTheDocument();
+  });
+
+  it("hides the controls for a single frame, which has nothing to alternate", () => {
+    stubMotionPreference(false);
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg"])} />);
+
+    expect(screen.queryByRole("button", { name: "Início" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /animar/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("stops animating when a position is chosen by hand", async () => {
+    stubMotionPreference(false);
+    const user = userEvent.setup();
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
+
+    // Starts playing, so the control offers to pause.
+    expect(screen.getByRole("button", { name: "Pausar animação" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Fim" }));
+
+    expect(screen.getByRole("button", { name: "Animar movimento" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Fim" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("does not animate, or offer to, when the system asks for reduced motion", () => {
+    // The CSS rule in globals.css cannot reach this: the movement here is a
+    // component swapping frames on a timer, not a property the browser eases.
+    stubMotionPreference(true);
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
+
+    expect(
+      screen.queryByRole("button", { name: /animação|movimento/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Início" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("describes only the visible frame, so it is not announced twice", () => {
+    stubMotionPreference(true);
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
+
+    const described = screen.getAllByRole("img");
+    expect(described).toHaveLength(1);
+    expect(described[0]).toHaveAccessibleName(
+      "Supino Reto com Barra: posição Início",
+    );
+  });
+});

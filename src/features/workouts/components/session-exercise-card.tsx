@@ -4,11 +4,16 @@ import { Plus } from "lucide-react";
 
 import type { PerformedSetChanges } from "../services/edit-session";
 import type { LastPerformance } from "../services/history";
+import type { Exercise } from "../types/exercise";
 import type { SessionExercise } from "../types/session";
+import { ExerciseIdentity } from "./exercise-identity";
 import { PerformedSetRow } from "./performed-set-row";
 
 interface Props {
   readonly exercise: SessionExercise;
+  /** The catalogue entry behind `exerciseId`, when it could be resolved. */
+  readonly catalogue: Exercise | undefined;
+  readonly onOpenDetail: (exercise: Exercise) => void;
   readonly nextSetId: string | null;
   /** What was done the last time this exercise was trained, if ever. */
   readonly lastTime: LastPerformance | undefined;
@@ -21,6 +26,8 @@ interface Props {
 
 export function SessionExerciseCard({
   exercise,
+  catalogue,
+  onOpenDetail,
   nextSetId,
   lastTime,
   onSetChange,
@@ -34,10 +41,19 @@ export function SessionExerciseCard({
 
   return (
     <section className="rounded-xl border border-line bg-surface p-3 sm:p-4">
-      <header className="flex items-baseline justify-between gap-3">
-        <h2 className="min-w-0 flex-1 truncate font-medium text-ink">
-          {exercise.name}
-        </h2>
+      {/* Thumbnail-sized and no larger. This card is read standing up between
+          sets: a big photo here would push the set rows off the screen, which
+          costs more than the photo adds. Tapping it opens the detail. */}
+      <header className="flex items-center justify-between gap-3">
+        <ExerciseIdentity
+          name={exercise.name}
+          catalogue={catalogue}
+          onOpenDetail={onOpenDetail}
+        >
+          {exercise.restSeconds === null
+            ? null
+            : `Descanso de ${String(exercise.restSeconds)}s`}
+        </ExerciseIdentity>
         <span className="shrink-0 font-mono text-xs tabular-nums text-ink-subtle">
           {done}/{exercise.sets.length}
           {isComplete && <span className="ml-1.5 text-accent">✓</span>}
@@ -53,12 +69,6 @@ export function SessionExerciseCard({
             Última vez, {formatShortDate(lastTime.performedAt)}:{" "}
           </span>
           {lastTime.sets.map(describeSet).join(" · ")}
-        </p>
-      )}
-
-      {exercise.restSeconds !== null && (
-        <p className="mt-0.5 text-xs text-ink-subtle">
-          Descanso de {exercise.restSeconds}s
         </p>
       )}
 
