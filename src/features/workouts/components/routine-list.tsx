@@ -10,6 +10,7 @@ import { Input } from "@/design-system/components/input";
 
 import { useRoutineList } from "../hooks/use-routine-list";
 import type { Routine } from "../types/routine";
+import { InProgressBanner } from "./in-progress-banner";
 
 export function RoutineList() {
   const router = useRouter();
@@ -32,6 +33,10 @@ export function RoutineList() {
 
   return (
     <div className="space-y-5">
+      {/* Above everything: a workout left open is the most urgent thing on
+          this screen, and until now it was unreachable. */}
+      <InProgressBanner />
+
       <form onSubmit={(event) => void handleCreate(event)} className="flex gap-2">
         <Input
           value={name}

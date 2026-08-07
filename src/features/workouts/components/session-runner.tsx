@@ -6,8 +6,10 @@ import Link from "next/link";
 import { Button } from "@/design-system/components/button";
 
 import { useRestTimer } from "../hooks/use-rest-timer";
+import { useSessionHistory } from "../hooks/use-session-history";
 import { useSessionRunner } from "../hooks/use-session-runner";
 import { useTicker } from "../hooks/use-ticker";
+import { lastPerformanceByExercise } from "../services/history";
 import {
   addPerformedSet,
   completeSet,
@@ -31,10 +33,21 @@ import { SessionSummary } from "./session-summary";
 
 export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const { state, saveError, apply } = useSessionRunner(sessionId);
+  const history = useSessionHistory();
   const timer = useRestTimer();
 
   const running = state.status === "ready" && state.session.finishedAt === null;
   const now = useTicker(running);
+
+  // Excludes this session, so a workout cannot answer questions about itself.
+  const lastTimes =
+    state.status === "ready" && history.status === "ready"
+      ? lastPerformanceByExercise(
+          history.sessions,
+          state.session.exercises.map((exercise) => exercise.exerciseId),
+          state.session.id,
+        )
+      : new Map();
 
   if (state.status === "loading") return <RunnerSkeleton />;
 
@@ -110,6 +123,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
               key={exercise.id}
               exercise={exercise}
               nextSetId={next?.exerciseId === exercise.id ? next.setId : null}
+              lastTime={lastTimes.get(exercise.exerciseId)}
               onSetChange={(setId, changes) => {
                 apply((current) =>
                   updatePerformedSet(current, exercise.id, setId, changes),

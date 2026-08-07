@@ -15,6 +15,7 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 const LINKS: readonly { href: Route; label: string }[] = [
   { href: "/treinos", label: "Treinos" },
   { href: "/dietas", label: "Dietas" },
+  { href: "/evolucao", label: "Evolução" },
   { href: "/exercicios", label: "Exercícios" },
   { href: "/alimentos", label: "Alimentos" },
   { href: "/perfil", label: "Perfil" },

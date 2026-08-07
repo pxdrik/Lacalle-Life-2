@@ -3,12 +3,15 @@
 import { Plus } from "lucide-react";
 
 import type { PerformedSetChanges } from "../services/edit-session";
+import type { LastPerformance } from "../services/history";
 import type { SessionExercise } from "../types/session";
 import { PerformedSetRow } from "./performed-set-row";
 
 interface Props {
   readonly exercise: SessionExercise;
   readonly nextSetId: string | null;
+  /** What was done the last time this exercise was trained, if ever. */
+  readonly lastTime: LastPerformance | undefined;
   readonly onSetChange: (setId: string, changes: PerformedSetChanges) => void;
   readonly onToggleComplete: (setId: string) => void;
   readonly onRemoveSet: (setId: string) => void;
@@ -19,6 +22,7 @@ interface Props {
 export function SessionExerciseCard({
   exercise,
   nextSetId,
+  lastTime,
   onSetChange,
   onToggleComplete,
   onRemoveSet,
@@ -39,6 +43,18 @@ export function SessionExerciseCard({
           {isComplete && <span className="ml-1.5 text-accent">✓</span>}
         </span>
       </header>
+
+      {/* The question this app is opened to answer: what did I do last time.
+          One compact line, above the sets, so it is read before the first rep
+          and not hunted for afterwards. */}
+      {lastTime !== undefined && (
+        <p className="mt-1 truncate font-mono text-xs tabular-nums text-ink-muted">
+          <span className="font-sans text-ink-subtle">
+            Última vez, {formatShortDate(lastTime.performedAt)}:{" "}
+          </span>
+          {lastTime.sets.map(describeSet).join(" · ")}
+        </p>
+      )}
 
       {exercise.restSeconds !== null && (
         <p className="mt-0.5 text-xs text-ink-subtle">
@@ -90,4 +106,20 @@ export function SessionExerciseCard({
       </div>
     </section>
   );
+}
+
+const shortDate = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "short",
+});
+
+function formatShortDate(timestamp: number): string {
+  return shortDate.format(new Date(timestamp));
+}
+
+function describeSet(set: { reps: number | null; weightKg: number | null }): string {
+  const reps = set.reps ?? "—";
+  return set.weightKg === null
+    ? `${String(reps)}`
+    : `${String(reps)}×${String(set.weightKg)}`;
 }
