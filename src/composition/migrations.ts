@@ -1,4 +1,5 @@
 import type { Migration } from "@/core/storage/schema";
+import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
@@ -50,5 +51,11 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Routines (the plan) and sessions (what happened), kept apart on purpose.",
     createStores: [ROUTINES_STORE, SESSIONS_STORE],
+  },
+  {
+    version: 6,
+    description:
+      "Body log: weight and tape measurements, one entry per day, indexed by day.",
+    createStores: [BODY_ENTRIES_STORE],
   },
 ];

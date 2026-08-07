@@ -2,6 +2,12 @@ import type { IDBPDatabase } from "idb";
 
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import {
+  BODY_ENTRIES_STORE,
+  type BodyRepository,
+} from "@/features/body/data/body-repository";
+import { LocalBodyRepository } from "@/features/body/data/local-body-repository";
+import type { BodyEntry } from "@/features/body/types/body-entry";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
@@ -54,6 +60,7 @@ import { DATABASE_NAME, MIGRATIONS } from "./migrations";
  * core module that imports features has its dependencies backwards.
  */
 export interface Repositories {
+  readonly body: BodyRepository;
   readonly foods: FoodRepository;
   readonly diets: DietRepository;
   readonly profile: ProfileRepository;
@@ -64,6 +71,9 @@ export interface Repositories {
 
 export function createRepositories(db: IDBPDatabase): Repositories {
   return {
+    body: new LocalBodyRepository(
+      new IndexedDbStore<BodyEntry>(db, BODY_ENTRIES_STORE.name),
+    ),
     foods: new LocalFoodRepository(
       new IndexedDbStore<Food>(db, FOODS_STORE.name),
     ),

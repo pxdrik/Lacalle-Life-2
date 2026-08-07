@@ -52,6 +52,7 @@ function normalize(exercise: Exercise): Exercise {
     stabilizerMuscles: exercise.stabilizerMuscles ?? [],
     equipment: exercise.equipment ?? [],
     movementPlanes: exercise.movementPlanes ?? [],
+    media: exercise.media ?? null,
     isFavorite: exercise.isFavorite ?? false,
   };
 }

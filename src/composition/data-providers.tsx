@@ -1,5 +1,7 @@
 "use client";
 
+import type { BodyRepository } from "@/features/body/data/body-repository";
+import { BodyRepositoryProvider } from "@/features/body/data/body-repository-context";
 import { DietRepositoryProvider } from "@/features/diet/data/diet-repository-context";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
@@ -41,6 +43,22 @@ function once<T>(resolve: () => Promise<T>): () => Promise<T> {
 
     return cached;
   };
+}
+
+const bodyRepository = once<BodyRepository>(async () => {
+  return (await getRepositories()).body;
+});
+
+export function BodyDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <BodyRepositoryProvider repository={bodyRepository()}>
+      {children}
+    </BodyRepositoryProvider>
+  );
 }
 
 const foodRepository = once<FoodRepository>(async () => {

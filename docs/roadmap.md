@@ -25,6 +25,7 @@ depender da memória de nenhuma conversa.
 | Drag and drop | Refeições, itens e exercícios da rotina — setas mantidas |
 | Duplicar e copiar | Refeição, alimento entre refeições, exercício, rotina e dieta inteiras |
 | Detalhe do exercício | Duas fases do movimento animadas, curadoria completa, fotos no treino |
+| Evolução corporal | Peso, gordura e 9 medidas por dia, gráfico de tendência com média móvel |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -61,18 +62,30 @@ caminhos, e a escolha é de produto:
 
 Gerar por IA está fora: contradiz a regra fundadora do projeto.
 
-### 3. Evolução corporal
+### 3. Fotos de progresso
 
-Peso corporal, medidas, fotos, gráficos de tendência. Entidades novas e escopo
-próprio.
+A metade da evolução corporal que ficou de fora. Exige infraestrutura que
+ainda não existe: redimensionar a imagem antes de guardar (uma foto de celular
+tem 4 MB, e uma por semana enche o IndexedDB em um ano) e um store separado,
+para que ler um peso não arraste blobs junto.
 
-### 4. PWA e offline completo
+### 4. Sugerir atualizar o peso do perfil
+
+Hoje o registro corporal e o perfil são independentes de propósito: o peso do
+perfil é **entrada** do cálculo de metas, e o registro é a **história**. Mas um
+perfil parado em 84 kg enquanto a última pesagem diz 80 kg calcula metas
+erradas em silêncio.
+
+O passo certo é oferecer, não sincronizar: "seu perfil usa 84 kg, sua última
+medição é 80 kg — atualizar?". Mantém a dieta sem depender de nada opcional.
+
+### 5. PWA e offline completo
 
 Service worker cacheando o shell. O dado já é local e funciona offline; falta
 a aplicação abrir sem rede — e, agora, as fotos. Passar pelo otimizador do
 Next deixou as URLs same-origin justamente pensando nisso.
 
-### 5. Sincronização
+### 6. Sincronização
 
 A camada de repositório foi desenhada para isto desde o primeiro commit:
 `updatedAt` em toda entidade, ids gerados no cliente, e a raiz de composição
