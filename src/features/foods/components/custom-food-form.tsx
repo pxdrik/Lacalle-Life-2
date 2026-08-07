@@ -8,10 +8,13 @@ import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 
-import { useCreateFood } from "../hooks/use-create-food";
 import { estimateKcal } from "../services/create-food";
+import type { Food } from "../types/food";
 import { FOOD_CATEGORIES, FOOD_CATEGORY_LABELS } from "../types/food";
-import { customFoodSchema } from "../validation/food-schema";
+import {
+  customFoodSchema,
+  type CustomFoodInput,
+} from "../validation/food-schema";
 
 const MACROS = [
   { key: "proteinG", label: "Proteína" },
@@ -33,10 +36,33 @@ const EMPTY: Draft = {
   fatG: "",
 };
 
-export function CustomFoodForm() {
+/** Numbers reach the field the way a Brazilian types them, with a comma. */
+function draftFrom(food: Food | null): Draft {
+  if (food === null) return EMPTY;
+
+  const text = (value: number) => String(value).replace(".", ",");
+
+  return {
+    name: food.name,
+    category: food.category,
+    kcal: text(food.per100g.kcal),
+    proteinG: text(food.per100g.proteinG),
+    carbsG: text(food.per100g.carbsG),
+    fatG: text(food.per100g.fatG),
+  };
+}
+
+interface Props {
+  /** The food being corrected, or `null` when creating a new one. */
+  readonly initial: Food | null;
+  readonly save: (input: CustomFoodInput) => Promise<boolean>;
+  readonly pending: boolean;
+  readonly error: string | null;
+}
+
+export function CustomFoodForm({ initial, save, pending, error }: Props) {
   const router = useRouter();
-  const { save, pending, error } = useCreateFood();
-  const [draft, setDraft] = useState<Draft>(EMPTY);
+  const [draft, setDraft] = useState<Draft>(() => draftFrom(initial));
   const [issues, setIssues] = useState<Readonly<Record<string, string>>>({});
 
   function update(key: keyof Draft, value: string) {
@@ -185,7 +211,7 @@ export function CustomFoodForm() {
 
       <div className="flex gap-3">
         <Button type="submit" size="lg" pending={pending}>
-          Salvar alimento
+          {initial === null ? "Salvar alimento" : "Salvar alterações"}
         </Button>
         <Button
           type="button"

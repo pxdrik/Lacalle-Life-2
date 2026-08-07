@@ -1,6 +1,7 @@
 "use client";
 
-import { Star, Trash2 } from "lucide-react";
+import { Pencil, Star, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
@@ -66,9 +67,24 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
         <span className="w-9 text-right text-fat">{format(fatG)}</span>
       </div>
 
-      {/* Only the user's own foods can be deleted. The catalogue is shared
-          ground and stays intact; unwanted entries are handled by search. */}
-      <div className="w-8 shrink-0">
+      {/* Only the user's own foods can be edited or deleted. The catalogue is
+          shared ground and stays intact; unwanted entries are handled by
+          search. */}
+      <div className="flex w-16 shrink-0 justify-end">
+        {food.isCustom && (
+          <Link
+            href={`/alimentos/${food.id}/editar`}
+            aria-label={`Editar ${food.name}`}
+            className={cn(
+              "flex size-8 items-center justify-center rounded-md text-ink-subtle",
+              "transition-colors duration-150 ease-out hover:bg-muted hover:text-ink",
+              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
+            )}
+          >
+            <Pencil aria-hidden className="size-4" />
+          </Link>
+        )}
+
         {food.isCustom && (
           <ConfirmButton
             onConfirm={() => {

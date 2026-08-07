@@ -1,4 +1,4 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, revise } from "@/core/domain/entity";
 
 import type { Food } from "../types/food";
 import type { CustomFoodInput } from "../validation/food-schema";
@@ -23,6 +23,28 @@ export function createCustomFood(input: CustomFoodInput): Food {
     createdAt: now,
     updatedAt: now,
   };
+}
+
+/**
+ * Applies an edit to a food the user created.
+ *
+ * Keeps the id, so every diet already pointing at this food follows the
+ * correction instead of being orphaned — a typo in the protein value is fixed
+ * everywhere it was ever used. Keeps `createdAt` and `isFavorite` for the same
+ * reason: neither is what the person came here to change.
+ *
+ * Note what this does **not** do: `MealItem` copies macros at the moment a
+ * food is added to a meal, so editing a food does not retroactively rewrite
+ * meals built with it. That is deliberate and predates this function — a diet
+ * from March should not silently change because a number was corrected in
+ * August.
+ */
+export function updateCustomFood(food: Food, input: CustomFoodInput): Food {
+  return revise(food, {
+    name: input.name.trim(),
+    category: input.category,
+    per100g: input.per100g,
+  });
 }
 
 /**

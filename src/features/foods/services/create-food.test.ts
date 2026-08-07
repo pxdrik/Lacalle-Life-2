@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import type { Food } from "../types/food";
 import { customFoodSchema } from "../validation/food-schema";
-import { createCustomFood, estimateKcal } from "./create-food";
+import { createCustomFood, estimateKcal, updateCustomFood } from "./create-food";
 
 const VALID = {
   name: "Whey protein",
@@ -38,6 +39,46 @@ describe("createCustomFood", () => {
     const food = createCustomFood({ ...VALID, name: "  Whey  " });
 
     expect(food.name).toBe("Whey");
+  });
+});
+
+describe("updateCustomFood", () => {
+  const stored: Food = {
+    id: "food-1",
+    name: "Whey",
+    category: "protein",
+    per100g: { kcal: 380, proteinG: 75, carbsG: 10, fatG: 5 },
+    isCustom: true,
+    isFavorite: true,
+    createdAt: 1000,
+    updatedAt: 1000,
+  };
+
+  it("keeps the id, so diets pointing at this food follow the correction", () => {
+    // The reason editing exists at all: before it, fixing a typo meant
+    // deleting the food and creating a new one under a new id, which orphaned
+    // every diet that referenced the old one.
+    expect(updateCustomFood(stored, VALID).id).toBe("food-1");
+  });
+
+  it("applies the new values and trims the name", () => {
+    const updated = updateCustomFood(stored, { ...VALID, name: "  Whey X  " });
+
+    expect(updated.name).toBe("Whey X");
+    expect(updated.per100g).toEqual(VALID.per100g);
+  });
+
+  it("keeps createdAt and the favourite mark", () => {
+    // Neither is what somebody came to this screen to change, and losing the
+    // favourite on every correction would be its own small betrayal.
+    const updated = updateCustomFood(stored, VALID);
+
+    expect(updated.createdAt).toBe(1000);
+    expect(updated.isFavorite).toBe(true);
+  });
+
+  it("moves updatedAt forward", () => {
+    expect(updateCustomFood(stored, VALID).updatedAt).toBeGreaterThan(1000);
   });
 });
 

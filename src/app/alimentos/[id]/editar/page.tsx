@@ -7,17 +7,25 @@ import { FoodEditorScreen } from "@/features/foods/components/food-editor-screen
 import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
-  title: "Novo alimento · Lacalle Life",
+  title: "Editar alimento · Lacalle Life",
 };
 
 /**
- * A route rather than a dialog.
+ * A route, for the same reasons `/alimentos/novo` is one: no focus trap, no
+ * scroll lock, no fight with the phone keyboard, and the back button does the
+ * obvious thing.
  *
- * A page needs no focus trap, no scroll lock and no escape handling, it works
- * on a phone without fighting the keyboard, and the back button does the
- * obvious thing. A modal would have been more code for a worse result.
+ * Editing keeps the food's id, so a correction reaches every diet already
+ * pointing at it. Before this route existed, fixing a typo meant deleting the
+ * food and creating it again — which orphaned exactly those diets.
  */
-export default function NewFoodPage() {
+export default async function EditFoodPage({
+  params,
+}: {
+  readonly params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
   return (
     <main className="mx-auto max-w-lg px-6 py-10 sm:py-14">
       <Link
@@ -29,14 +37,14 @@ export default function NewFoodPage() {
       </Link>
 
       <PageHeader
-        title="Novo alimento"
-        subtitle="Para o que o banco não tem — seu suplemento, a marca que você compra, a receita da sua casa."
+        title="Editar alimento"
+        subtitle="A correção vale para todas as dietas que usam este alimento daqui para frente."
         className="mt-4"
       />
 
       <div className="mt-8">
         <FoodDataProvider>
-          <FoodEditorScreen id={null} />
+          <FoodEditorScreen id={id} />
         </FoodDataProvider>
       </div>
     </main>
