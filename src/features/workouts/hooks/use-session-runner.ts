@@ -18,6 +18,8 @@ export interface SessionRunner {
   readonly state: SessionRunnerState;
   readonly saveError: string | null;
   readonly apply: (change: (session: Session) => Session) => void;
+  /** Resolves `true` once the session is gone, so the caller can navigate. */
+  readonly remove: () => Promise<boolean>;
 }
 
 /**
@@ -79,5 +81,19 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
     [state, repositories],
   );
 
-  return { state, saveError, apply };
+  const remove = useCallback(async (): Promise<boolean> => {
+    setSaveError(null);
+
+    try {
+      // The routine is untouched. Deleting a workout that happened does not
+      // delete the plan it came from.
+      await (await repositories).sessions.remove(sessionId);
+      return true;
+    } catch (cause) {
+      setSaveError(describeDataError(cause));
+      return false;
+    }
+  }, [repositories, sessionId]);
+
+  return { state, saveError, apply, remove };
 }

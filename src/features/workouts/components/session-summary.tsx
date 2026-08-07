@@ -1,4 +1,10 @@
+"use client";
+
+import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
+
+import { Button } from "@/design-system/components/button";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import {
   comparePlanned,
@@ -9,22 +15,53 @@ import {
 } from "../services/session-stats";
 import type { Session } from "../types/session";
 
+interface Props {
+  readonly session: Session;
+  readonly onEdit: () => void;
+  readonly onDelete: () => void;
+}
+
 /**
  * What the workout was, once it is over.
  *
- * The plan-versus-reality column is the reason the session carries a frozen
- * `planned` on every set: "I planned 8 at RPE 8 and did 6 at RPE 9" is the
- * sentence that makes next week's plan better, and it is unrecoverable if the
- * routine is consulted instead.
+ * The plan-versus-reality column is the reason every set carries a frozen
+ * `planned`: "I planned 8 at RPE 8 and did 6 at RPE 9" is the sentence that
+ * makes next week's plan better, and it is unrecoverable if the routine is
+ * consulted instead.
  */
-export function SessionSummary({ session }: { readonly session: Session }) {
+export function SessionSummary({ session, onEdit, onDelete }: Props) {
   const progress = sessionProgress(session);
   const volume = sessionVolumeKg(session);
 
   return (
     <div>
-      <p className="text-sm text-ink-muted">Treino concluído</p>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">{session.name}</h1>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-sm text-ink-muted">
+            Treino concluído
+            <span className="mx-1.5 text-line-strong">·</span>
+            {formatDate(session.startedAt)}
+          </p>
+          <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">
+            {session.name}
+          </h1>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <Button variant="ghost" size="sm" onClick={onEdit}>
+            <Pencil aria-hidden className="size-4" />
+            Editar
+          </Button>
+          <ConfirmButton
+            onConfirm={onDelete}
+            label={`Excluir treino ${session.name}`}
+            confirmLabel="Excluir?"
+            className="h-8 min-w-8"
+          >
+            <Trash2 aria-hidden className="size-4" />
+          </ConfirmButton>
+        </div>
+      </div>
 
       <dl className="mt-6 grid grid-cols-3 gap-4 rounded-xl border border-line bg-surface p-5">
         <Figure
@@ -68,7 +105,7 @@ export function SessionSummary({ session }: { readonly session: Session }) {
                       <span className="text-ink-subtle">não realizada</span>
                     )}
 
-                    {/* Only shown when it differs — a delta of zero is noise. */}
+                    {/* Shown only when it differs — a delta of zero is noise. */}
                     {rpeDelta !== null && rpeDelta !== 0 && (
                       <span
                         className={rpeDelta > 0 ? "text-danger" : "text-ink-subtle"}
@@ -91,10 +128,16 @@ export function SessionSummary({ session }: { readonly session: Session }) {
 
       <div className="mt-6 flex gap-3">
         <Link
-          href="/treinos"
+          href="/evolucao"
           className="inline-flex h-11 items-center rounded-lg bg-accent px-5 text-sm font-medium text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
         >
-          Voltar para os treinos
+          Ver histórico
+        </Link>
+        <Link
+          href="/treinos"
+          className="inline-flex h-11 items-center rounded-lg border border-line px-5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          Treinos
         </Link>
       </div>
     </div>
@@ -114,4 +157,14 @@ function Figure({
       <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
     </div>
   );
+}
+
+const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+});
+
+function formatDate(timestamp: number): string {
+  return dateFormatter.format(new Date(timestamp));
 }

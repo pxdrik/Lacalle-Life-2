@@ -2,6 +2,8 @@
 
 import { ArrowLeft, Flag } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 
@@ -28,13 +30,16 @@ import {
 } from "../services/session-stats";
 import type { Session } from "../types/session";
 import { RestTimerBar } from "./rest-timer-bar";
+import { SessionEditor } from "./session-editor";
 import { SessionExerciseCard } from "./session-exercise-card";
 import { SessionSummary } from "./session-summary";
 
 export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
-  const { state, saveError, apply } = useSessionRunner(sessionId);
+  const router = useRouter();
+  const { state, saveError, apply, remove } = useSessionRunner(sessionId);
   const history = useSessionHistory();
   const timer = useRestTimer();
+  const [editing, setEditing] = useState(false);
 
   const running = state.status === "ready" && state.session.finishedAt === null;
   const now = useTicker(running);
@@ -64,7 +69,30 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   }
 
   const { session } = state;
-  if (session.finishedAt !== null) return <SessionSummary session={session} />;
+
+  if (session.finishedAt !== null) {
+    return editing ? (
+      <SessionEditor
+        session={session}
+        apply={apply}
+        onDone={() => {
+          setEditing(false);
+        }}
+      />
+    ) : (
+      <SessionSummary
+        session={session}
+        onEdit={() => {
+          setEditing(true);
+        }}
+        onDelete={() => {
+          void remove().then((deleted) => {
+            if (deleted) router.push("/evolucao");
+          });
+        }}
+      />
+    );
+  }
 
   const next = nextIncompleteSet(session);
   const progress = sessionProgress(session);

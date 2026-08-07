@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
 
 import { useRoutineList } from "../hooks/use-routine-list";
@@ -125,14 +126,14 @@ function RoutineRow({
 
       {/* Outside the link: a button nested in an anchor is invalid and eats
           the click on the row. */}
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Excluir ${routine.name}`}
-        className="absolute top-1/2 right-4 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger"
+      <ConfirmButton
+        onConfirm={onRemove}
+        label={`Excluir ${routine.name}`}
+        confirmLabel="Excluir?"
+        className="absolute top-1/2 right-4 h-8 min-w-8 -translate-y-1/2"
       >
         <Trash2 aria-hidden className="size-4" />
-      </button>
+      </ConfirmButton>
     </li>
   );
 }

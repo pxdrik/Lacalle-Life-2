@@ -3,6 +3,7 @@
 import { Star, Trash2 } from "lucide-react";
 
 import { cn } from "@/design-system/cn";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import type { Food } from "../types/food";
 import { FOOD_CATEGORY_LABELS } from "../types/food";
@@ -69,23 +70,21 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
           ground and stays intact; unwanted entries are handled by search. */}
       <div className="w-8 shrink-0">
         {food.isCustom && (
-          <button
-            type="button"
-            onClick={() => {
+          <ConfirmButton
+            onConfirm={() => {
               onRemove(food);
             }}
-            aria-label={`Excluir ${food.name}`}
+            label={`Excluir ${food.name}`}
+            confirmLabel="Excluir?"
             className={cn(
-              "flex size-8 items-center justify-center rounded-md text-ink-subtle",
-              "transition-colors duration-150 ease-out",
-              "hover:bg-danger/10 hover:text-danger",
+              "h-8 min-w-8",
               // Revealed on hover for pointers, but always present for keyboard
               // and touch — hiding it behind hover would strand both.
               "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
             )}
           >
             <Trash2 aria-hidden className="size-4" />
-          </button>
+          </ConfirmButton>
         )}
       </div>
     </li>
