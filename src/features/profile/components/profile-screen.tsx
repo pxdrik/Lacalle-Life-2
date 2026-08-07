@@ -4,6 +4,7 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import { useProfile } from "../hooks/use-profile";
 import { PlanSummary } from "./plan-summary";
@@ -68,15 +69,29 @@ export function ProfileScreen() {
             >
               Editar dados
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
+            {/* Two taps, and the word says what happens.
+                "Desativar" promised a switch and delivered a delete: one
+                click erased sex, age, height, weight, activity and goal with
+                no confirmation and no undo, from a ghost button sitting
+                beside "Editar dados". Every other destructive action in the
+                app already went through `ConfirmButton`; the one that
+                destroyed the most did not. */}
+            <ConfirmButton
+              onConfirm={() => {
                 void clear();
               }}
+              label="Apagar dados do perfil"
+              confirmLabel="Apagar tudo?"
+              className="h-(--control-h) px-4 text-sm"
             >
-              Desativar metas
-            </Button>
+              Apagar dados
+            </ConfirmButton>
           </div>
+
+          <p className="text-xs text-ink-subtle">
+            Apagar remove seus dados e as metas junto. Montar dieta continua
+            funcionando igual.
+          </p>
         </>
       )}
     </div>
