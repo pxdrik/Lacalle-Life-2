@@ -1,3 +1,4 @@
+import { reorderById, shiftById } from "@/core/domain/collection";
 import { revise, type EntityId } from "@/core/domain/entity";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
@@ -57,6 +58,41 @@ export function removeItem(
     ...meal,
     items: meal.items.filter((item) => item.id !== itemId),
   }));
+}
+
+/** Moves a meal by `offset`, clamped. What the arrow buttons report. */
+export function moveMeal(diet: Diet, mealId: EntityId, offset: number): Diet {
+  const meals = shiftById(diet.meals, mealId, offset);
+  if (meals === diet.meals) return diet;
+
+  return revise(diet, { meals });
+}
+
+/** Puts one meal where another is. What a drag reports. */
+export function reorderMeals(
+  diet: Diet,
+  activeId: EntityId,
+  overId: EntityId,
+): Diet {
+  const meals = reorderById(diet.meals, activeId, overId);
+  if (meals === diet.meals) return diet;
+
+  return revise(diet, { meals });
+}
+
+export function reorderMealItems(
+  diet: Diet,
+  mealId: EntityId,
+  activeId: EntityId,
+  overId: EntityId,
+): Diet {
+  const meal = diet.meals.find((item) => item.id === mealId);
+  if (meal === undefined) return diet;
+
+  const items = reorderById(meal.items, activeId, overId);
+  if (items === meal.items) return diet;
+
+  return mapMeal(diet, mealId, (current) => ({ ...current, items }));
 }
 
 export function setItemGrams(

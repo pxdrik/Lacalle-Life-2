@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import {
+  SortableItem,
+  SortableList,
+} from "@/design-system/components/sortable-list";
 
 import { useRoutineEditor } from "../hooks/use-routine-editor";
 import { createRoutineExercise } from "../services/create-routine";
@@ -16,6 +20,7 @@ import {
   removeExercise,
   removeSet,
   renameRoutine,
+  reorderExercises,
   updateExercise,
   updateSet,
 } from "../services/edit-routine";
@@ -100,13 +105,25 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         </p>
       )}
 
-      <div className="mt-5 space-y-3">
-        {routine.exercises.map((exercise, index) => (
+      <SortableList
+        ids={routine.exercises.map((exercise) => exercise.id)}
+        describe={(id) =>
+          routine.exercises.find((exercise) => exercise.id === id)?.name ??
+          "exercício"
+        }
+        onReorder={(activeId, overId) => {
+          apply((current) => reorderExercises(current, activeId, overId));
+        }}
+      >
+        <div className="mt-5 space-y-3">
+          {routine.exercises.map((exercise, index) => (
+            <SortableItem key={exercise.id} id={exercise.id}>
+              {(dragHandle) => (
           <RoutineExerciseCard
-            key={exercise.id}
             exercise={exercise}
             position={index}
             total={routine.exercises.length}
+            dragHandle={dragHandle}
             onChange={(changes) => {
               apply((current) => updateExercise(current, exercise.id, changes));
             }}
@@ -126,8 +143,11 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
               apply((current) => updateSet(current, exercise.id, setId, changes));
             }}
           />
-        ))}
-      </div>
+              )}
+            </SortableItem>
+          ))}
+        </div>
+      </SortableList>
 
       <div className="mt-4">
         {picking ? (

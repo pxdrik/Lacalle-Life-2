@@ -1,3 +1,4 @@
+import { reorderById, shiftById } from "@/core/domain/collection";
 import { revise, type EntityId } from "@/core/domain/entity";
 
 import type { PlannedSet, Routine, RoutineExercise } from "../types/routine";
@@ -86,21 +87,26 @@ export function updateSet(
   }));
 }
 
-/** Moves an exercise by `offset`, clamped. Reordering without drag-and-drop. */
+/** Moves an exercise by `offset`, clamped. What the arrow buttons report. */
 export function moveExercise(
   routine: Routine,
   exerciseId: EntityId,
   offset: number,
 ): Routine {
-  const from = routine.exercises.findIndex((item) => item.id === exerciseId);
-  if (from === -1) return routine;
+  const exercises = shiftById(routine.exercises, exerciseId, offset);
+  if (exercises === routine.exercises) return routine;
 
-  const to = Math.min(Math.max(from + offset, 0), routine.exercises.length - 1);
-  if (to === from) return routine;
+  return revise(routine, { exercises });
+}
 
-  const exercises = [...routine.exercises];
-  const [moved] = exercises.splice(from, 1);
-  exercises.splice(to, 0, moved!);
+/** Puts one exercise where another is. What a drag reports. */
+export function reorderExercises(
+  routine: Routine,
+  activeId: EntityId,
+  overId: EntityId,
+): Routine {
+  const exercises = reorderById(routine.exercises, activeId, overId);
+  if (exercises === routine.exercises) return routine;
 
   return revise(routine, { exercises });
 }

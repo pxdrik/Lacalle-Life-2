@@ -1,12 +1,19 @@
 "use client";
 
-import { X } from "lucide-react";
+import { GripVertical, X } from "lucide-react";
+
+import { cn } from "@/design-system/cn";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
 
 interface Props {
   readonly item: MealItem;
+  readonly dragHandle: {
+    readonly attributes: React.HTMLAttributes<HTMLElement>;
+    readonly listeners: Record<string, unknown> | undefined;
+    readonly isDragging: boolean;
+  };
   readonly onGramsChange: (grams: number) => void;
   readonly onRemove: () => void;
 }
@@ -18,11 +25,34 @@ interface Props {
  * adjusting a portion is the single most repeated action in building a diet,
  * and the macros beside it move as you type.
  */
-export function MealItemRow({ item, onGramsChange, onRemove }: Props) {
+export function MealItemRow({
+  item,
+  dragHandle,
+  onGramsChange,
+  onRemove,
+}: Props) {
   const macros = itemMacros(item);
 
   return (
-    <li className="group flex items-center gap-2 py-1.5">
+    <li
+      className={cn(
+        "group flex items-center gap-2 py-1.5",
+        dragHandle.isDragging && "rounded-lg bg-muted",
+      )}
+    >
+      {/* Only within a meal, and only by dragging: the order of foods inside a
+          meal is cosmetic, and two arrow buttons per row would cost more than
+          the reordering is worth. The keyboard sensor still covers it. */}
+      <button
+        type="button"
+        aria-label={`Reordenar ${item.name}`}
+        {...dragHandle.attributes}
+        {...dragHandle.listeners}
+        className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+      >
+        <GripVertical aria-hidden className="size-3.5" />
+      </button>
+
       <span className="min-w-0 flex-1 truncate text-sm text-ink">
         {item.name}
       </span>

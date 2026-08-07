@@ -3,6 +3,10 @@
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 
+import {
+  SortableItem,
+  SortableList,
+} from "@/design-system/components/sortable-list";
 import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
@@ -12,9 +16,12 @@ import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
   addMeal,
+  moveMeal,
   removeItem,
   removeMeal,
   renameDiet,
+  reorderMealItems,
+  reorderMeals,
   setItemGrams,
   updateMeal,
 } from "../services/edit-diet";
@@ -84,16 +91,37 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
         </p>
       )}
 
-      <div className="mt-5 space-y-3">
-        {diet.meals.map((meal) => (
+      <SortableList
+        ids={diet.meals.map((meal) => meal.id)}
+        describe={(id) =>
+          diet.meals.find((meal) => meal.id === id)?.name ?? "refeição"
+        }
+        onReorder={(activeId, overId) => {
+          apply((current) => reorderMeals(current, activeId, overId));
+        }}
+      >
+        <div className="mt-5 space-y-3">
+          {diet.meals.map((meal, index) => (
+            <SortableItem key={meal.id} id={meal.id}>
+              {(dragHandle) => (
           <MealCard
-            key={meal.id}
             meal={meal}
+            position={index}
+            total={diet.meals.length}
+            dragHandle={dragHandle}
             onChange={(changes) => {
               apply((current) => updateMeal(current, meal.id, changes));
             }}
             onRemove={() => {
               apply((current) => removeMeal(current, meal.id));
+            }}
+            onMove={(offset) => {
+              apply((current) => moveMeal(current, meal.id, offset));
+            }}
+            onReorderItems={(activeId, overId) => {
+              apply((current) =>
+                reorderMealItems(current, meal.id, activeId, overId),
+              );
             }}
             onAddFood={(food: Food) => {
               apply((current) =>
@@ -116,8 +144,11 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
               apply((current) => removeItem(current, meal.id, itemId));
             }}
           />
-        ))}
-      </div>
+              )}
+            </SortableItem>
+          ))}
+        </div>
+      </SortableList>
 
       <button
         type="button"

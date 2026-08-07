@@ -120,13 +120,30 @@ describe("DietEditor", () => {
     expect(screen.getAllByLabelText("Nome da refeição")).toHaveLength(2);
   });
 
-  it("removes a meal", async () => {
+  it("does not remove a meal on a single tap", async () => {
+    // Deleting a meal takes its foods with it and cannot be undone, so the
+    // button asks before it acts.
+    const diet = createDiet("Cutting");
+    mount(diet.id, diet);
+    await screen.findByLabelText("Nome da dieta");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Excluir Refeição 1" }),
+    );
+
+    expect(screen.getByLabelText("Nome da refeição")).toBeInTheDocument();
+  });
+
+  it("removes a meal once the deletion is confirmed", async () => {
     const diet = createDiet("Cutting");
     const { diets } = mount(diet.id, diet);
     await screen.findByLabelText("Nome da dieta");
 
     await userEvent.click(
       screen.getByRole("button", { name: "Excluir Refeição 1" }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }),
     );
 
     expect(screen.queryByLabelText("Nome da refeição")).not.toBeInTheDocument();

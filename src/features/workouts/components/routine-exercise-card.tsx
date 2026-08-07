@@ -1,8 +1,10 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from "lucide-react";
 
 import { parseDecimal } from "@/core/format/decimal";
+import { cn } from "@/design-system/cn";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import type { ExerciseChanges, SetChanges } from "../services/edit-routine";
 import type { RoutineExercise } from "../types/routine";
@@ -12,6 +14,12 @@ interface Props {
   readonly exercise: RoutineExercise;
   readonly position: number;
   readonly total: number;
+  /** Props for the drag handle, when the card sits inside a sortable list. */
+  readonly dragHandle?: {
+    readonly attributes: React.HTMLAttributes<HTMLElement>;
+    readonly listeners: Record<string, unknown> | undefined;
+    readonly isDragging: boolean;
+  };
   readonly onChange: (changes: ExerciseChanges) => void;
   readonly onRemove: () => void;
   readonly onMove: (offset: number) => void;
@@ -24,6 +32,7 @@ export function RoutineExerciseCard({
   exercise,
   position,
   total,
+  dragHandle,
   onChange,
   onRemove,
   onMove,
@@ -32,8 +41,27 @@ export function RoutineExerciseCard({
   onSetChange,
 }: Props) {
   return (
-    <section className="rounded-xl border border-line bg-surface p-4">
+    <section
+      className={cn(
+        "rounded-xl border bg-surface p-4 transition-shadow duration-150 ease-out",
+        dragHandle?.isDragging === true
+          ? "border-accent shadow-md"
+          : "border-line",
+      )}
+    >
       <header className="flex items-start gap-2">
+        {dragHandle !== undefined && (
+          <button
+            type="button"
+            aria-label={`Reordenar ${exercise.name}`}
+            {...dragHandle.attributes}
+            {...dragHandle.listeners}
+            className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
+          >
+            <GripVertical aria-hidden className="size-4" />
+          </button>
+        )}
+
         <div className="min-w-0 flex-1">
           <h3 className="truncate font-medium text-ink">{exercise.name}</h3>
           <p className="mt-0.5 text-xs text-ink-subtle">
@@ -42,9 +70,9 @@ export function RoutineExerciseCard({
           </p>
         </div>
 
-        {/* Arrows rather than drag: they work with a keyboard, with a screen
-            reader and with one thumb, and they cost nothing to build. Drag
-            joins them later as an accelerator, not as the only way. */}
+        {/* The arrows stay. Dragging a card with one thumb at the gym is worse
+            than tapping an arrow, and a handle alone would make reordering a
+            pointer-shaped affordance in a screen used one-handed. */}
         <div className="flex shrink-0 items-center">
           <IconButton
             label={`Mover ${exercise.name} para cima`}
@@ -64,9 +92,14 @@ export function RoutineExerciseCard({
           >
             <ChevronDown aria-hidden className="size-4" />
           </IconButton>
-          <IconButton label={`Remover ${exercise.name}`} onClick={onRemove} danger>
+          <ConfirmButton
+            onConfirm={onRemove}
+            label={`Remover ${exercise.name}`}
+            confirmLabel="Remover?"
+            className="h-8 min-w-8"
+          >
             <Trash2 aria-hidden className="size-4" />
-          </IconButton>
+          </ConfirmButton>
         </div>
       </header>
 
