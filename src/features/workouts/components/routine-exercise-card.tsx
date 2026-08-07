@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  GripVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 import { parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
@@ -22,6 +29,7 @@ interface Props {
   };
   readonly onChange: (changes: ExerciseChanges) => void;
   readonly onRemove: () => void;
+  readonly onDuplicate: () => void;
   readonly onMove: (offset: number) => void;
   readonly onAddSet: () => void;
   readonly onRemoveSet: (setId: string) => void;
@@ -35,6 +43,7 @@ export function RoutineExerciseCard({
   dragHandle,
   onChange,
   onRemove,
+  onDuplicate,
   onMove,
   onAddSet,
   onRemoveSet,
@@ -74,6 +83,9 @@ export function RoutineExerciseCard({
             than tapping an arrow, and a handle alone would make reordering a
             pointer-shaped affordance in a screen used one-handed. */}
         <div className="flex shrink-0 items-center">
+          <IconButton label={`Duplicar ${exercise.name}`} onClick={onDuplicate}>
+            <Copy aria-hidden className="size-4" />
+          </IconButton>
           <IconButton
             label={`Mover ${exercise.name} para cima`}
             disabled={position === 0}

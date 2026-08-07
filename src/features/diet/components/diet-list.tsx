@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -16,7 +16,7 @@ import { MacroSummary } from "./macro-summary";
 
 export function DietList() {
   const router = useRouter();
-  const { state, writeError, create, remove } = useDietList();
+  const { state, writeError, create, duplicate, remove } = useDietList();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -86,6 +86,7 @@ export function DietList() {
               <DietRow
                 key={diet.id}
                 diet={diet}
+                onDuplicate={() => void duplicate(diet)}
                 onRemove={() => void remove(diet)}
               />
             ))}
@@ -97,9 +98,11 @@ export function DietList() {
 
 function DietRow({
   diet,
+  onDuplicate,
   onRemove,
 }: {
   readonly diet: Diet;
+  readonly onDuplicate: () => void;
   readonly onRemove: () => void;
 }) {
   const macros = dietMacros(diet);
@@ -119,19 +122,30 @@ function DietRow({
         <div className="hidden shrink-0 sm:block">
           <MacroSummary macros={macros} />
         </div>
-        <span className="w-8 shrink-0" />
+        <span className="w-16 shrink-0" />
       </Link>
 
-      {/* Outside the link: a delete button nested in an anchor is invalid and
-          swallows the click on the row. */}
-      <ConfirmButton
-        onConfirm={onRemove}
-        label={`Excluir ${diet.name}`}
-        confirmLabel="Excluir?"
-        className="absolute top-1/2 right-4 h-8 min-w-8 -translate-y-1/2"
-      >
-        <Trash2 aria-hidden className="size-4" />
-      </ConfirmButton>
+      {/* Outside the link: buttons nested in an anchor are invalid and swallow
+          the click on the row. */}
+      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
+        <button
+          type="button"
+          onClick={onDuplicate}
+          aria-label={`Duplicar ${diet.name}`}
+          className="flex size-8 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+        >
+          <Copy aria-hidden className="size-4" />
+        </button>
+
+        <ConfirmButton
+          onConfirm={onRemove}
+          label={`Excluir ${diet.name}`}
+          confirmLabel="Excluir?"
+          className="h-8 min-w-8"
+        >
+          <Trash2 aria-hidden className="size-4" />
+        </ConfirmButton>
+      </div>
     </li>
   );
 }

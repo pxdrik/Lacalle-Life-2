@@ -14,8 +14,10 @@ interface Props {
     readonly listeners: Record<string, unknown> | undefined;
     readonly isDragging: boolean;
   };
+  readonly otherMeals: readonly { readonly id: string; readonly name: string }[];
   readonly onGramsChange: (grams: number) => void;
   readonly onRemove: () => void;
+  readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
 }
 
 /**
@@ -28,8 +30,10 @@ interface Props {
 export function MealItemRow({
   item,
   dragHandle,
+  otherMeals,
   onGramsChange,
   onRemove,
+  onSend,
 }: Props) {
   const macros = itemMacros(item);
 
@@ -78,6 +82,39 @@ export function MealItemRow({
         <span className="text-carbs">{macros.carbsG}</span>
         <span className="text-fat">{macros.fatG}</span>
       </div>
+
+      {/* A native select rather than a custom menu: it is keyboard operable,
+          it opens the OS picker on a phone, and it costs one control instead
+          of two buttons on an already dense row. Hidden when there is nowhere
+          to send the food. */}
+      {otherMeals.length > 0 && (
+        <select
+          value=""
+          aria-label={`Mover ou copiar ${item.name} para outra refeição`}
+          onChange={(event) => {
+            const [mode, mealId] = event.target.value.split(":");
+            if (mode === undefined || mealId === undefined) return;
+            onSend(mealId, mode === "copy" ? "copy" : "move");
+          }}
+          className="w-7 shrink-0 rounded-md border border-transparent bg-transparent text-xs text-ink-subtle transition-colors duration-150 ease-out hover:border-line hover:text-ink"
+        >
+          <option value="">⋯</option>
+          <optgroup label="Mover para">
+            {otherMeals.map((meal) => (
+              <option key={`move:${meal.id}`} value={`move:${meal.id}`}>
+                {meal.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Copiar para">
+            {otherMeals.map((meal) => (
+              <option key={`copy:${meal.id}`} value={`copy:${meal.id}`}>
+                {meal.name}
+              </option>
+            ))}
+          </optgroup>
+        </select>
+      )}
 
       <button
         type="button"

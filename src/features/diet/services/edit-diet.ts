@@ -1,5 +1,5 @@
 import { reorderById, shiftById } from "@/core/domain/collection";
-import { revise, type EntityId } from "@/core/domain/entity";
+import { createEntityId, revise, type EntityId } from "@/core/domain/entity";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
 import { createMeal } from "./create-diet";
@@ -93,6 +93,50 @@ export function reorderMealItems(
   if (items === meal.items) return diet;
 
   return mapMeal(diet, mealId, (current) => ({ ...current, items }));
+}
+
+/**
+ * Copies a food into another meal, leaving the original where it is.
+ *
+ * A fresh id on the copy, so adjusting the portion in one meal does not move
+ * the other. The macros travel with it — a meal item already carries its own
+ * copy of them, so nothing is looked up and nothing can drift.
+ */
+export function copyItemToMeal(
+  diet: Diet,
+  fromMealId: EntityId,
+  itemId: EntityId,
+  toMealId: EntityId,
+): Diet {
+  const item = findItem(diet, fromMealId, itemId);
+  if (item === undefined || fromMealId === toMealId) return diet;
+  if (!diet.meals.some((meal) => meal.id === toMealId)) return diet;
+
+  return addItem(diet, toMealId, { ...item, id: createEntityId() });
+}
+
+/** Moves a food to another meal. The id travels with it; it is the same food. */
+export function moveItemToMeal(
+  diet: Diet,
+  fromMealId: EntityId,
+  itemId: EntityId,
+  toMealId: EntityId,
+): Diet {
+  const item = findItem(diet, fromMealId, itemId);
+  if (item === undefined || fromMealId === toMealId) return diet;
+  if (!diet.meals.some((meal) => meal.id === toMealId)) return diet;
+
+  return addItem(removeItem(diet, fromMealId, itemId), toMealId, item);
+}
+
+function findItem(
+  diet: Diet,
+  mealId: EntityId,
+  itemId: EntityId,
+): MealItem | undefined {
+  return diet.meals
+    .find((meal) => meal.id === mealId)
+    ?.items.find((item) => item.id === itemId);
 }
 
 export function setItemGrams(

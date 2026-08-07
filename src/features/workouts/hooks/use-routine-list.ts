@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { describeDataError } from "@/core/domain/describe-data-error";
 
 import { useWorkoutRepositories } from "../data/workout-repository-context";
-import { createRoutine } from "../services/create-routine";
+import { createRoutine, duplicateRoutine } from "../services/create-routine";
 import type { Routine } from "../types/routine";
 
 export type RoutineListState =
@@ -18,6 +18,8 @@ export interface RoutineList {
   readonly writeError: string | null;
   /** Resolves to the new routine's id so the caller can open it straight away. */
   readonly create: (name: string) => Promise<string | null>;
+  /** Copies a whole routine. Stays on the list — you copied it to keep both. */
+  readonly duplicate: (routine: Routine) => Promise<void>;
   readonly remove: (routine: Routine) => Promise<void>;
 }
 
@@ -66,6 +68,25 @@ export function useRoutineList(): RoutineList {
     [repositories],
   );
 
+  const duplicate = useCallback(
+    async (routine: Routine) => {
+      setWriteError(null);
+      const copy = duplicateRoutine(routine);
+
+      try {
+        await (await repositories).routines.save(copy);
+        setState((current) =>
+          current.status === "ready"
+            ? { status: "ready", routines: [copy, ...current.routines] }
+            : current,
+        );
+      } catch (cause) {
+        setWriteError(describeDataError(cause));
+      }
+    },
+    [repositories],
+  );
+
   const remove = useCallback(
     async (routine: Routine) => {
       setWriteError(null);
@@ -89,5 +110,5 @@ export function useRoutineList(): RoutineList {
     [repositories],
   );
 
-  return { state, writeError, create, remove };
+  return { state, writeError, create, duplicate, remove };
 }

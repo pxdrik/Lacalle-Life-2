@@ -11,11 +11,17 @@ import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useDietEditor } from "../hooks/use-diet-editor";
-import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
+import {
+  createMealItem,
+  DEFAULT_GRAMS,
+  duplicateMeal,
+} from "../services/create-diet";
 import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
   addMeal,
+  copyItemToMeal,
+  moveItemToMeal,
   moveMeal,
   removeItem,
   removeMeal,
@@ -115,8 +121,21 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
             onRemove={() => {
               apply((current) => removeMeal(current, meal.id));
             }}
+            onDuplicate={() => {
+              apply((current) => duplicateMeal(current, meal.id));
+            }}
             onMove={(offset) => {
               apply((current) => moveMeal(current, meal.id, offset));
+            }}
+            otherMeals={diet.meals
+              .filter((other) => other.id !== meal.id)
+              .map((other) => ({ id: other.id, name: other.name }))}
+            onSendItem={(itemId, targetMealId, mode) => {
+              apply((current) =>
+                mode === "copy"
+                  ? copyItemToMeal(current, meal.id, itemId, targetMealId)
+                  : moveItemToMeal(current, meal.id, itemId, targetMealId),
+              );
             }}
             onReorderItems={(activeId, overId) => {
               apply((current) =>

@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronUp, GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  GripVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -28,11 +35,19 @@ interface Props {
   };
   readonly onChange: (changes: Partial<Pick<Meal, "name" | "time" | "notes">>) => void;
   readonly onRemove: () => void;
+  readonly onDuplicate: () => void;
   readonly onMove: (offset: number) => void;
   readonly onAddFood: (food: Food) => void;
   readonly onItemGramsChange: (itemId: string, grams: number) => void;
   readonly onRemoveItem: (itemId: string) => void;
   readonly onReorderItems: (activeId: string, overId: string) => void;
+  /** The other meals a food can be sent to. Empty when this is the only one. */
+  readonly otherMeals: readonly { readonly id: string; readonly name: string }[];
+  readonly onSendItem: (
+    itemId: string,
+    targetMealId: string,
+    mode: "copy" | "move",
+  ) => void;
 }
 
 export function MealCard({
@@ -42,11 +57,14 @@ export function MealCard({
   dragHandle,
   onChange,
   onRemove,
+  onDuplicate,
   onMove,
   onAddFood,
   onItemGramsChange,
   onRemoveItem,
   onReorderItems,
+  otherMeals,
+  onSendItem,
 }: Props) {
   const [picking, setPicking] = useState(false);
   const macros = mealMacros(meal);
@@ -102,6 +120,13 @@ export function MealCard({
               dragging is an accelerator, not the only path. */}
           <div className="flex items-center">
             <MoveButton
+              label={`Duplicar ${meal.name}`}
+              disabled={false}
+              onClick={onDuplicate}
+            >
+              <Copy aria-hidden className="size-4" />
+            </MoveButton>
+            <MoveButton
               label={`Mover ${meal.name} para cima`}
               disabled={position === 0}
               onClick={() => {
@@ -146,11 +171,15 @@ export function MealCard({
                   <MealItemRow
                     item={item}
                     dragHandle={handle}
+                    otherMeals={otherMeals}
                     onGramsChange={(grams) => {
                       onItemGramsChange(item.id, grams);
                     }}
                     onRemove={() => {
                       onRemoveItem(item.id);
+                    }}
+                    onSend={(targetMealId, mode) => {
+                      onSendItem(item.id, targetMealId, mode);
                     }}
                   />
                 )}

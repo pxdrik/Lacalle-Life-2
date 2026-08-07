@@ -1,4 +1,4 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, revise } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
@@ -46,6 +46,55 @@ export function createMeal(position: number): Meal {
  * The copy is the point: a diet records what the user decided, and editing or
  * deleting the catalogue entry afterwards must not rewrite it.
  */
+/**
+ * A copy of a whole diet.
+ *
+ * Every id is minted fresh, down to the individual food in a meal. Reusing
+ * them would make the two diets share identity: editing a portion in one would
+ * be indistinguishable from editing it in the other to anything that addresses
+ * by id, and a future sync would treat them as the same record.
+ *
+ * The name gains a suffix because the copy sits next to the original in a
+ * list, where two identical names are a coin toss.
+ */
+export function duplicateDiet(diet: Diet): Diet {
+  const now = Date.now();
+
+  return {
+    id: createEntityId(),
+    name: `${diet.name} (cópia)`,
+    meals: diet.meals.map(copyMeal),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * A copy of one meal, inserted directly below the original.
+ *
+ * The name is left alone, unlike a duplicated diet: inside a document the copy
+ * is obviously distinct by its position, and someone duplicating "Almoço" is
+ * usually about to make it "Jantar" — a "(cópia)" they would have to delete
+ * first is work, not help.
+ */
+export function duplicateMeal(diet: Diet, mealId: string): Diet {
+  const index = diet.meals.findIndex((meal) => meal.id === mealId);
+  if (index === -1) return diet;
+
+  const meals = [...diet.meals];
+  meals.splice(index + 1, 0, copyMeal(diet.meals[index]!));
+
+  return revise(diet, { meals });
+}
+
+function copyMeal(meal: Meal): Meal {
+  return {
+    ...meal,
+    id: createEntityId(),
+    items: meal.items.map((item) => ({ ...item, id: createEntityId() })),
+  };
+}
+
 export function createMealItem(source: {
   readonly foodId: string | null;
   readonly name: string;

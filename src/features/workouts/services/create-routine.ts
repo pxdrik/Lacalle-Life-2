@@ -1,4 +1,4 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, revise } from "@/core/domain/entity";
 
 import type { PlannedSet, Routine, RoutineExercise } from "../types/routine";
 
@@ -33,6 +33,56 @@ export function createPlannedSet(previous?: PlannedSet): PlannedSet {
     reps: previous?.reps ?? null,
     weightKg: previous?.weightKg ?? null,
     rpe: previous?.rpe ?? null,
+  };
+}
+
+/**
+ * A copy of a whole routine.
+ *
+ * Every id is minted fresh, down to the individual set. Reusing them would
+ * make the two routines share identity, and editing one would be
+ * indistinguishable from editing the other to anything addressing by id.
+ *
+ * The name gains a suffix because the copy sits beside the original in a list.
+ */
+export function duplicateRoutine(routine: Routine): Routine {
+  const now = Date.now();
+
+  return {
+    id: createEntityId(),
+    name: `${routine.name} (cópia)`,
+    notes: routine.notes,
+    exercises: routine.exercises.map(copyExercise),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * A copy of one exercise, inserted directly below the original.
+ *
+ * The name is left alone: inside a routine the copy is obviously distinct by
+ * position, and duplicating an exercise is usually how a drop set or a second
+ * variation gets added.
+ */
+export function duplicateRoutineExercise(
+  routine: Routine,
+  exerciseId: string,
+): Routine {
+  const index = routine.exercises.findIndex((item) => item.id === exerciseId);
+  if (index === -1) return routine;
+
+  const exercises = [...routine.exercises];
+  exercises.splice(index + 1, 0, copyExercise(routine.exercises[index]!));
+
+  return revise(routine, { exercises });
+}
+
+function copyExercise(exercise: RoutineExercise): RoutineExercise {
+  return {
+    ...exercise,
+    id: createEntityId(),
+    sets: exercise.sets.map((set) => ({ ...set, id: createEntityId() })),
   };
 }
 

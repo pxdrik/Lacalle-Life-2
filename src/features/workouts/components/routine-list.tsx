@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +15,7 @@ import { InProgressBanner } from "./in-progress-banner";
 
 export function RoutineList() {
   const router = useRouter();
-  const { state, writeError, create, remove } = useRoutineList();
+  const { state, writeError, create, duplicate, remove } = useRoutineList();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -89,6 +89,7 @@ export function RoutineList() {
               <RoutineRow
                 key={routine.id}
                 routine={routine}
+                onDuplicate={() => void duplicate(routine)}
                 onRemove={() => void remove(routine)}
               />
             ))}
@@ -100,9 +101,11 @@ export function RoutineList() {
 
 function RoutineRow({
   routine,
+  onDuplicate,
   onRemove,
 }: {
   readonly routine: Routine;
+  readonly onDuplicate: () => void;
   readonly onRemove: () => void;
 }) {
   const exercises = routine.exercises.length;
@@ -121,19 +124,30 @@ function RoutineRow({
               : `${exercises} ${exercises === 1 ? "exercício" : "exercícios"} · ${sets} ${sets === 1 ? "série" : "séries"}`}
           </p>
         </div>
-        <span className="w-8 shrink-0" />
+        <span className="w-16 shrink-0" />
       </Link>
 
-      {/* Outside the link: a button nested in an anchor is invalid and eats
-          the click on the row. */}
-      <ConfirmButton
-        onConfirm={onRemove}
-        label={`Excluir ${routine.name}`}
-        confirmLabel="Excluir?"
-        className="absolute top-1/2 right-4 h-8 min-w-8 -translate-y-1/2"
-      >
-        <Trash2 aria-hidden className="size-4" />
-      </ConfirmButton>
+      {/* Outside the link: buttons nested in an anchor are invalid and eat the
+          click on the row. */}
+      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
+        <button
+          type="button"
+          onClick={onDuplicate}
+          aria-label={`Duplicar ${routine.name}`}
+          className="flex size-8 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+        >
+          <Copy aria-hidden className="size-4" />
+        </button>
+
+        <ConfirmButton
+          onConfirm={onRemove}
+          label={`Excluir ${routine.name}`}
+          confirmLabel="Excluir?"
+          className="h-8 min-w-8"
+        >
+          <Trash2 aria-hidden className="size-4" />
+        </ConfirmButton>
+      </div>
     </li>
   );
 }

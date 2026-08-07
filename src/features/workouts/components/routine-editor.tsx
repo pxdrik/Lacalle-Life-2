@@ -12,7 +12,10 @@ import {
 } from "@/design-system/components/sortable-list";
 
 import { useRoutineEditor } from "../hooks/use-routine-editor";
-import { createRoutineExercise } from "../services/create-routine";
+import {
+  createRoutineExercise,
+  duplicateRoutineExercise,
+} from "../services/create-routine";
 import {
   addExercise,
   addSet,
@@ -129,6 +132,9 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
             }}
             onRemove={() => {
               apply((current) => removeExercise(current, exercise.id));
+            }}
+            onDuplicate={() => {
+              apply((current) => duplicateRoutineExercise(current, exercise.id));
             }}
             onMove={(offset) => {
               apply((current) => moveExercise(current, exercise.id, offset));

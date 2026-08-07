@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { describeDataError } from "@/core/domain/describe-data-error";
 
 import { useDietRepository } from "../data/diet-repository-context";
-import { createDiet } from "../services/create-diet";
+import { createDiet, duplicateDiet } from "../services/create-diet";
 import type { Diet } from "../types/diet";
 
 export type DietListState =
@@ -18,6 +18,8 @@ export interface DietList {
   readonly writeError: string | null;
   /** Resolves to the new diet's id so the caller can navigate straight into it. */
   readonly create: (name: string) => Promise<string | null>;
+  /** Copies a whole diet. Stays on the list — you copied it to keep both. */
+  readonly duplicate: (diet: Diet) => Promise<void>;
   readonly remove: (diet: Diet) => Promise<void>;
 }
 
@@ -68,6 +70,25 @@ export function useDietList(): DietList {
     [repository],
   );
 
+  const duplicate = useCallback(
+    async (diet: Diet) => {
+      setWriteError(null);
+      const copy = duplicateDiet(diet);
+
+      try {
+        await (await repository).save(copy);
+        setState((current) =>
+          current.status === "ready"
+            ? { status: "ready", diets: [copy, ...current.diets] }
+            : current,
+        );
+      } catch (error) {
+        setWriteError(describeDataError(error));
+      }
+    },
+    [repository],
+  );
+
   const remove = useCallback(
     async (diet: Diet) => {
       setWriteError(null);
@@ -89,5 +110,5 @@ export function useDietList(): DietList {
     [repository],
   );
 
-  return { state, writeError, create, remove };
+  return { state, writeError, create, duplicate, remove };
 }
