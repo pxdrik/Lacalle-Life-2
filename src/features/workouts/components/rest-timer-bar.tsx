@@ -1,0 +1,83 @@
+"use client";
+
+import { X } from "lucide-react";
+
+import { cn } from "@/design-system/cn";
+
+import type { RestTimer } from "../hooks/use-rest-timer";
+import { formatDuration } from "../services/session-stats";
+
+/**
+ * The rest countdown, pinned to the bottom of the screen.
+ *
+ * Bottom because that is where a thumb reaches, and because the top of the
+ * screen is where the sets are. It covers nothing that matters: the set just
+ * finished is above it, and the next one is scrolled into the middle.
+ */
+export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
+  const { remainingSeconds, totalSeconds, isFinished } = timer;
+  if (remainingSeconds === null || totalSeconds === null) return null;
+
+  const progress = totalSeconds === 0 ? 1 : 1 - remainingSeconds / totalSeconds;
+
+  return (
+    <div
+      role="status"
+      aria-live="off"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/95 backdrop-blur"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
+      <div
+        aria-hidden
+        className={cn(
+          "h-0.5 origin-left transition-transform duration-200 ease-out",
+          isFinished ? "bg-accent" : "bg-line-strong",
+        )}
+        style={{ transform: `scaleX(${String(progress)})` }}
+      />
+
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-[0.6875rem] tracking-wide text-ink-subtle uppercase">
+            {isFinished ? "Descanso concluído" : "Descanso"}
+          </p>
+          <p
+            className={cn(
+              "font-mono text-2xl tabular-nums",
+              isFinished ? "text-accent" : "text-ink",
+            )}
+          >
+            {formatDuration(remainingSeconds * 1000)}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            timer.adjust(-15);
+          }}
+          className="h-11 rounded-lg border border-line px-3 font-mono text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          −15s
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            timer.adjust(15);
+          }}
+          className="h-11 rounded-lg border border-line px-3 font-mono text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          +15s
+        </button>
+        <button
+          type="button"
+          onClick={timer.stop}
+          aria-label="Encerrar descanso"
+          className="flex size-11 items-center justify-center rounded-lg border border-line text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          <X aria-hidden className="size-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
