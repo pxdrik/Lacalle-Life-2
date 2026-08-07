@@ -66,7 +66,7 @@ export async function seedExerciseCatalogue(
  * the first time: seeding skips itself once anything is stored, so everyone
  * already using it would keep the medialess copy they seeded months ago.
  */
-const MEDIA_REVISION = 1;
+const MEDIA_REVISION = 2;
 const REVISION_KEY = "lacalle-life:exercise-media-revision";
 
 /**

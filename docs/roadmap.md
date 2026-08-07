@@ -45,9 +45,17 @@ entregue; o resto continua adiado:
 
 ### 2. Cobertura de fotos
 
-78 exercícios sem imagem. `wger` tem licença por imagem e cerca de 360 fotos —
-serve para preencher lacunas, uma a uma, com a mesma regra do catálogo: **foto
-errada é pior que foto nenhuma.** Nunca por casamento automático.
+**31 exercícios sem imagem**, de 78 na primeira rodada. A segunda passagem no
+`free-exercise-db` fechou 47.
+
+O que sobrou não é preguiça de busca: são versões em máquina de exercícios que
+o dataset só tem na forma livre, movimentos que ele simplesmente não cobre, e
+casos onde a foto disponível apagaria uma distinção real (búlgaro × split
+squat, romeno × stiff-legged). A lista completa e o motivo de cada um estão em
+`docs/catalogo-exercicios.md`.
+
+Próxima fonte: `wger`, licença por imagem e cerca de 360 fotos — mesma regra,
+uma a uma, nunca por casamento automático.
 
 ### 3. Evolução corporal
 

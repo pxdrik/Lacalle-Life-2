@@ -247,7 +247,7 @@ e custa uma linha de crédito — renderizada a partir do mesmo registro que ger
 a URL, em `taxonomy/media-sources.ts`, para que não exista um segundo lugar
 onde a atribuição possa se perder.
 
-### Cobertura: 105 de 183
+### Cobertura: 152 de 183
 
 O casamento automático propôs 75 pares. Revisando um a um, **cerca de metade
 estava errada** de um jeito que só humano percebe:
@@ -258,12 +258,29 @@ estava errada** de um jeito que só humano percebe:
 - `hiperextensao` → "**Reverse** Hyperextension" (que já é outro registro nosso)
 
 O script foi descartado como fonte e mantido apenas como gerador de propostas.
-Os 105 pares que valem estão escritos à mão em `scripts/build-exercise-media.mjs`;
+Os pares que valem estão escritos à mão em `scripts/build-exercise-media.mjs`;
 os caminhos das imagens saem do próprio dataset, nunca digitados.
 
-Os outros 78 exercícios ficam sem foto, o que o modelo já trata como estado
-legítimo. É a mesma regra da classificação: **foto errada é pior que foto
-nenhuma** — ela ensina o movimento errado para quem está aprendendo.
+A primeira rodada cobriu 105. Uma segunda passagem, buscando o dataset por
+termo em vez de confiar no ranking, encontrou **mais 47 equivalentes que a
+conservadoria da primeira rodada tinha deixado passar** — o dataset tem 873
+exercícios e estávamos usando 105. Total: 152.
+
+Os 31 restantes ficam sem foto, o que o modelo já trata como estado legítimo.
+É a mesma regra da classificação: **foto errada é pior que foto nenhuma** —
+ela ensina o movimento errado para quem está aprendendo.
+
+### Os 31 sem foto, e por quê
+
+| Caso | Exemplos | Motivo |
+| --- | --- | --- |
+| Versão em máquina de um exercício que só existe livre no dataset | Puxada Alta na Máquina, Pullover na Máquina, Elevação Lateral na Máquina, Coice na Máquina, Elevação Pélvica na Máquina/Smith, Leg Press Horizontal/Unilateral | Usar a foto do equivalente livre trocaria o equipamento, que é justamente o que distingue as duas entradas |
+| Movimento ausente do dataset | Hollow Hold, Bird Dog, Burpee, Natação, Agachamento Pistol, Agachamento Isométrico na Parede, Desenvolvimento Landmine, Caminhada Lateral com Elástico | Não existe |
+| Distinção real que a foto apagaria | Agachamento Búlgaro (o dataset só tem split squat com pé no chão), Terra Romeno com Halteres (só existe stiff-legged), Elevação Pélvica Unilateral (só existe ponte no chão) | São exercícios diferentes, não sinônimos |
+| Mesma execução de outra entrada | Rosca 21, Abdominal Infra | A foto já pertence à entrada equivalente, e duas entradas dividindo a mesma imagem é sinal de casamento por semelhança |
+
+O próximo passo para fechar essa lacuna é o `wger`, que traz licença por
+imagem e cerca de 360 fotos — mesma regra, uma a uma.
 
 ### Entrega
 

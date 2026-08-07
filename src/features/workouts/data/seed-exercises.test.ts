@@ -3,13 +3,30 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { EntityId } from "@/core/domain/entity";
 
 import type { Exercise } from "../types/exercise";
+import { CATALOGUE } from "./catalogue/catalogue";
+import media from "./exercise-media.json";
 import type { ExerciseRepository } from "./exercise-repository";
 import { refreshExerciseMedia, seedExerciseCatalogue } from "./seed-exercises";
 
-/** An exercise the curated mapping has an illustration for. */
+/** An exercise the curated mapping has a photo for. */
 const MAPPED_ID = "supino-reto-barra";
-/** One it deliberately has none for. */
-const UNMAPPED_ID = "rosca-alternada";
+
+/**
+ * One it deliberately has none for, read from the mapping rather than named.
+ *
+ * A hardcoded id here rots the moment that exercise gains a photo — which is
+ * exactly what happened the first time. Deriving it keeps the test honest, and
+ * the throw below means "everything is covered now" fails loudly instead of
+ * passing on an empty fixture.
+ */
+const UNMAPPED_ID = (() => {
+  const covered = new Set(Object.keys(media));
+  const first = CATALOGUE.find((exercise) => !covered.has(exercise.id));
+  if (first === undefined) {
+    throw new Error("Todo exercício tem foto: escolha outro caso de teste.");
+  }
+  return first.id;
+})();
 
 class FakeRepository implements ExerciseRepository {
   readonly rows = new Map<EntityId, Exercise>();

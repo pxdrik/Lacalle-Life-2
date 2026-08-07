@@ -40,6 +40,9 @@ const PAIRS = {
   "flexao-declinada": "Decline Push-Up",
   "mergulho-paralelas": "Dips - Chest Version",
   "press-svend": "Svend Press",
+  "supino-inclinado-maquina": "Leverage Incline Chest Press",
+  "supino-no-chao-barra": "Floor Press",
+  "flexao-com-palmas": "Plyo Push-up",
 
   // Costas
   "barra-fixa-pronada": "Pullups",
@@ -57,6 +60,12 @@ const PAIRS = {
   "remada-invertida": "Inverted Row",
   "encolhimento-barra": "Barbell Shrug",
   "encolhimento-halteres": "Dumbbell Shrug",
+  "pullover-halter": "Bent-Arm Dumbbell Pullover",
+  "remada-cavalinho": "T-Bar Row with Handle",
+  "remada-baixa-polia": "Seated Cable Rows",
+  "remada-maquina": "Leverage Iso Row",
+  "remada-articulada": "Leverage High Row",
+  "encolhimento-maquina": "Leverage Shrug",
 
   // Ombros
   "desenvolvimento-halteres": "Dumbbell Shoulder Press",
@@ -71,6 +80,12 @@ const PAIRS = {
   "face-pull": "Face Pull",
   "remada-alta-barra": "Upright Barbell Row",
   "remada-alta-polia": "Upright Cable Row",
+  "desenvolvimento-militar-barra": "Standing Military Press",
+  "desenvolvimento-barra-sentado": "Seated Barbell Military Press",
+  "desenvolvimento-maquina": "Machine Shoulder (Military) Press",
+  "desenvolvimento-smith": "Smith Machine Overhead Shoulder Press",
+  "crucifixo-inverso-halteres": "Reverse Flyes",
+  "crucifixo-inverso-polia": "Cable Rear Delt Fly",
 
   // Braços
   "rosca-direta-barra": "Barbell Curl",
@@ -86,6 +101,18 @@ const PAIRS = {
   "triceps-maquina": "Machine Triceps Extension",
   "triceps-banco": "Bench Dips",
   "supino-fechado": "Close-Grip Barbell Bench Press",
+  "rosca-direta-halteres": "Dumbbell Bicep Curl",
+  "rosca-alternada": "Dumbbell Alternate Bicep Curl",
+  "rosca-polia-baixa": "Standing Biceps Cable Curl",
+  "rosca-inversa": "Reverse Barbell Curl",
+  "triceps-testa-halteres": "Lying Dumbbell Tricep Extension",
+  "triceps-polia-barra": "Triceps Pushdown",
+  "triceps-frances": "Standing Overhead Barbell Triceps Extension",
+  "triceps-coice": "Tricep Dumbbell Kickback",
+  "flexao-diamante": "Push-Ups - Close Triceps Position",
+  "rosca-punho-barra": "Seated Palm-Up Barbell Wrist Curl",
+  "rosca-punho-invertida": "Seated Palms-Down Barbell Wrist Curl",
+  "caminhada-fazendeiro": "Farmer's Walk",
 
   // Pernas
   "agachamento-livre-barra": "Barbell Squat",
@@ -112,6 +139,18 @@ const PAIRS = {
   "panturrilha-leg-press": "Calf Press On The Leg Press Machine",
   "panturrilha-em-pe-maquina": "Standing Calf Raises",
   "panturrilha-smith": "Smith Machine Calf Raise",
+  "agachamento-hack": "Hack Squat",
+  "agachamento-com-salto": "Freehand Jump Squat",
+  "agachamento-sissy": "Weighted Sissy Squat",
+  "leg-press-45": "Leg Press",
+  "afundo-reverso": "Dumbbell Rear Lunge",
+  "passada-caminhando": "Bodyweight Walking Lunge",
+  "subida-no-banco": "Dumbbell Step Ups",
+  "levantamento-terra-hexagonal": "Trap Bar Deadlift",
+  "terra-romeno-barra": "Romanian Deadlift",
+  "flexao-nordica": "Natural Glute Ham Raise",
+  "ponte-de-gluteo": "Butt Lift (Bridge)",
+  "panturrilha-halteres": "Standing Dumbbell Calf Raise",
 
   // Core
   prancha: "Plank",
@@ -128,6 +167,12 @@ const PAIRS = {
   "hiperextensao-reversa": "Reverse Hyperextension",
   superman: "Superman",
   canivete: "Jackknife Sit-Up",
+  "prancha-lateral": "Side Bridge",
+  "elevacao-pernas-deitado": "Flat Bench Lying Leg Raise",
+  "elevacao-pernas-barra-fixa": "Hanging Leg Raise",
+  "elevacao-joelhos-paralelas": "Knee/Hip Raise On Parallel Bars",
+  "abdominal-bicicleta": "Air Bike",
+  "flexao-lateral-halter": "Dumbbell Side Bend",
 
   // Cardio
   esteira: "Jogging, Treadmill",
@@ -138,6 +183,8 @@ const PAIRS = {
   "simulador-de-escadas": "Stairmaster",
   "pular-corda": "Rope Jumping",
   escalador: "Mountain Climbers",
+  corrida: "Trail Running/Walking",
+  "tiro-corrida": "Wind Sprints",
 };
 
 const source = JSON.parse(readFileSync(CACHE, "utf8"));

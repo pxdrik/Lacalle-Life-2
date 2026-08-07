@@ -132,6 +132,27 @@
       "Svend_Press/1.jpg"
     ]
   },
+  "supino-inclinado-maquina": {
+    "source": "free-exercise-db",
+    "images": [
+      "Leverage_Incline_Chest_Press/0.jpg",
+      "Leverage_Incline_Chest_Press/1.jpg"
+    ]
+  },
+  "supino-no-chao-barra": {
+    "source": "free-exercise-db",
+    "images": [
+      "Floor_Press/0.jpg",
+      "Floor_Press/1.jpg"
+    ]
+  },
+  "flexao-com-palmas": {
+    "source": "free-exercise-db",
+    "images": [
+      "Plyo_Push-up/0.jpg",
+      "Plyo_Push-up/1.jpg"
+    ]
+  },
   "barra-fixa-pronada": {
     "source": "free-exercise-db",
     "images": [
@@ -237,6 +258,48 @@
       "Dumbbell_Shrug/1.jpg"
     ]
   },
+  "pullover-halter": {
+    "source": "free-exercise-db",
+    "images": [
+      "Bent-Arm_Dumbbell_Pullover/0.jpg",
+      "Bent-Arm_Dumbbell_Pullover/1.jpg"
+    ]
+  },
+  "remada-cavalinho": {
+    "source": "free-exercise-db",
+    "images": [
+      "T-Bar_Row_with_Handle/0.jpg",
+      "T-Bar_Row_with_Handle/1.jpg"
+    ]
+  },
+  "remada-baixa-polia": {
+    "source": "free-exercise-db",
+    "images": [
+      "Seated_Cable_Rows/0.jpg",
+      "Seated_Cable_Rows/1.jpg"
+    ]
+  },
+  "remada-maquina": {
+    "source": "free-exercise-db",
+    "images": [
+      "Leverage_Iso_Row/0.jpg",
+      "Leverage_Iso_Row/1.jpg"
+    ]
+  },
+  "remada-articulada": {
+    "source": "free-exercise-db",
+    "images": [
+      "Leverage_High_Row/0.jpg",
+      "Leverage_High_Row/1.jpg"
+    ]
+  },
+  "encolhimento-maquina": {
+    "source": "free-exercise-db",
+    "images": [
+      "Leverage_Shrug/0.jpg",
+      "Leverage_Shrug/1.jpg"
+    ]
+  },
   "desenvolvimento-halteres": {
     "source": "free-exercise-db",
     "images": [
@@ -319,6 +382,48 @@
     "images": [
       "Upright_Cable_Row/0.jpg",
       "Upright_Cable_Row/1.jpg"
+    ]
+  },
+  "desenvolvimento-militar-barra": {
+    "source": "free-exercise-db",
+    "images": [
+      "Standing_Military_Press/0.jpg",
+      "Standing_Military_Press/1.jpg"
+    ]
+  },
+  "desenvolvimento-barra-sentado": {
+    "source": "free-exercise-db",
+    "images": [
+      "Seated_Barbell_Military_Press/0.jpg",
+      "Seated_Barbell_Military_Press/1.jpg"
+    ]
+  },
+  "desenvolvimento-maquina": {
+    "source": "free-exercise-db",
+    "images": [
+      "Machine_Shoulder_Military_Press/0.jpg",
+      "Machine_Shoulder_Military_Press/1.jpg"
+    ]
+  },
+  "desenvolvimento-smith": {
+    "source": "free-exercise-db",
+    "images": [
+      "Smith_Machine_Overhead_Shoulder_Press/0.jpg",
+      "Smith_Machine_Overhead_Shoulder_Press/1.jpg"
+    ]
+  },
+  "crucifixo-inverso-halteres": {
+    "source": "free-exercise-db",
+    "images": [
+      "Reverse_Flyes/0.jpg",
+      "Reverse_Flyes/1.jpg"
+    ]
+  },
+  "crucifixo-inverso-polia": {
+    "source": "free-exercise-db",
+    "images": [
+      "Cable_Rear_Delt_Fly/0.jpg",
+      "Cable_Rear_Delt_Fly/1.jpg"
     ]
   },
   "rosca-direta-barra": {
@@ -410,6 +515,90 @@
     "images": [
       "Close-Grip_Barbell_Bench_Press/0.jpg",
       "Close-Grip_Barbell_Bench_Press/1.jpg"
+    ]
+  },
+  "rosca-direta-halteres": {
+    "source": "free-exercise-db",
+    "images": [
+      "Dumbbell_Bicep_Curl/0.jpg",
+      "Dumbbell_Bicep_Curl/1.jpg"
+    ]
+  },
+  "rosca-alternada": {
+    "source": "free-exercise-db",
+    "images": [
+      "Dumbbell_Alternate_Bicep_Curl/0.jpg",
+      "Dumbbell_Alternate_Bicep_Curl/1.jpg"
+    ]
+  },
+  "rosca-polia-baixa": {
+    "source": "free-exercise-db",
+    "images": [
+      "Standing_Biceps_Cable_Curl/0.jpg",
+      "Standing_Biceps_Cable_Curl/1.jpg"
+    ]
+  },
+  "rosca-inversa": {
+    "source": "free-exercise-db",
+    "images": [
+      "Reverse_Barbell_Curl/0.jpg",
+      "Reverse_Barbell_Curl/1.jpg"
+    ]
+  },
+  "triceps-testa-halteres": {
+    "source": "free-exercise-db",
+    "images": [
+      "Lying_Dumbbell_Tricep_Extension/0.jpg",
+      "Lying_Dumbbell_Tricep_Extension/1.jpg"
+    ]
+  },
+  "triceps-polia-barra": {
+    "source": "free-exercise-db",
+    "images": [
+      "Triceps_Pushdown/0.jpg",
+      "Triceps_Pushdown/1.jpg"
+    ]
+  },
+  "triceps-frances": {
+    "source": "free-exercise-db",
+    "images": [
+      "Standing_Overhead_Barbell_Triceps_Extension/0.jpg",
+      "Standing_Overhead_Barbell_Triceps_Extension/1.jpg"
+    ]
+  },
+  "triceps-coice": {
+    "source": "free-exercise-db",
+    "images": [
+      "Tricep_Dumbbell_Kickback/0.jpg",
+      "Tricep_Dumbbell_Kickback/1.jpg"
+    ]
+  },
+  "flexao-diamante": {
+    "source": "free-exercise-db",
+    "images": [
+      "Push-Ups_-_Close_Triceps_Position/0.jpg",
+      "Push-Ups_-_Close_Triceps_Position/1.jpg"
+    ]
+  },
+  "rosca-punho-barra": {
+    "source": "free-exercise-db",
+    "images": [
+      "Seated_Palm-Up_Barbell_Wrist_Curl/0.jpg",
+      "Seated_Palm-Up_Barbell_Wrist_Curl/1.jpg"
+    ]
+  },
+  "rosca-punho-invertida": {
+    "source": "free-exercise-db",
+    "images": [
+      "Seated_Palms-Down_Barbell_Wrist_Curl/0.jpg",
+      "Seated_Palms-Down_Barbell_Wrist_Curl/1.jpg"
+    ]
+  },
+  "caminhada-fazendeiro": {
+    "source": "free-exercise-db",
+    "images": [
+      "Farmers_Walk/0.jpg",
+      "Farmers_Walk/1.jpg"
     ]
   },
   "agachamento-livre-barra": {
@@ -580,6 +769,90 @@
       "Smith_Machine_Calf_Raise/1.jpg"
     ]
   },
+  "agachamento-hack": {
+    "source": "free-exercise-db",
+    "images": [
+      "Hack_Squat/0.jpg",
+      "Hack_Squat/1.jpg"
+    ]
+  },
+  "agachamento-com-salto": {
+    "source": "free-exercise-db",
+    "images": [
+      "Freehand_Jump_Squat/0.jpg",
+      "Freehand_Jump_Squat/1.jpg"
+    ]
+  },
+  "agachamento-sissy": {
+    "source": "free-exercise-db",
+    "images": [
+      "Weighted_Sissy_Squat/0.jpg",
+      "Weighted_Sissy_Squat/1.jpg"
+    ]
+  },
+  "leg-press-45": {
+    "source": "free-exercise-db",
+    "images": [
+      "Leg_Press/0.jpg",
+      "Leg_Press/1.jpg"
+    ]
+  },
+  "afundo-reverso": {
+    "source": "free-exercise-db",
+    "images": [
+      "Dumbbell_Rear_Lunge/0.jpg",
+      "Dumbbell_Rear_Lunge/1.jpg"
+    ]
+  },
+  "passada-caminhando": {
+    "source": "free-exercise-db",
+    "images": [
+      "Bodyweight_Walking_Lunge/0.jpg",
+      "Bodyweight_Walking_Lunge/1.jpg"
+    ]
+  },
+  "subida-no-banco": {
+    "source": "free-exercise-db",
+    "images": [
+      "Dumbbell_Step_Ups/0.jpg",
+      "Dumbbell_Step_Ups/1.jpg"
+    ]
+  },
+  "levantamento-terra-hexagonal": {
+    "source": "free-exercise-db",
+    "images": [
+      "Trap_Bar_Deadlift/0.jpg",
+      "Trap_Bar_Deadlift/1.jpg"
+    ]
+  },
+  "terra-romeno-barra": {
+    "source": "free-exercise-db",
+    "images": [
+      "Romanian_Deadlift/0.jpg",
+      "Romanian_Deadlift/1.jpg"
+    ]
+  },
+  "flexao-nordica": {
+    "source": "free-exercise-db",
+    "images": [
+      "Natural_Glute_Ham_Raise/0.jpg",
+      "Natural_Glute_Ham_Raise/1.jpg"
+    ]
+  },
+  "ponte-de-gluteo": {
+    "source": "free-exercise-db",
+    "images": [
+      "Butt_Lift_Bridge/0.jpg",
+      "Butt_Lift_Bridge/1.jpg"
+    ]
+  },
+  "panturrilha-halteres": {
+    "source": "free-exercise-db",
+    "images": [
+      "Standing_Dumbbell_Calf_Raise/0.jpg",
+      "Standing_Dumbbell_Calf_Raise/1.jpg"
+    ]
+  },
   "prancha": {
     "source": "free-exercise-db",
     "images": [
@@ -678,6 +951,48 @@
       "Jackknife_Sit-Up/1.jpg"
     ]
   },
+  "prancha-lateral": {
+    "source": "free-exercise-db",
+    "images": [
+      "Side_Bridge/0.jpg",
+      "Side_Bridge/1.jpg"
+    ]
+  },
+  "elevacao-pernas-deitado": {
+    "source": "free-exercise-db",
+    "images": [
+      "Flat_Bench_Lying_Leg_Raise/0.jpg",
+      "Flat_Bench_Lying_Leg_Raise/1.jpg"
+    ]
+  },
+  "elevacao-pernas-barra-fixa": {
+    "source": "free-exercise-db",
+    "images": [
+      "Hanging_Leg_Raise/0.jpg",
+      "Hanging_Leg_Raise/1.jpg"
+    ]
+  },
+  "elevacao-joelhos-paralelas": {
+    "source": "free-exercise-db",
+    "images": [
+      "Knee_Hip_Raise_On_Parallel_Bars/0.jpg",
+      "Knee_Hip_Raise_On_Parallel_Bars/1.jpg"
+    ]
+  },
+  "abdominal-bicicleta": {
+    "source": "free-exercise-db",
+    "images": [
+      "Air_Bike/0.jpg",
+      "Air_Bike/1.jpg"
+    ]
+  },
+  "flexao-lateral-halter": {
+    "source": "free-exercise-db",
+    "images": [
+      "Dumbbell_Side_Bend/0.jpg",
+      "Dumbbell_Side_Bend/1.jpg"
+    ]
+  },
   "esteira": {
     "source": "free-exercise-db",
     "images": [
@@ -732,6 +1047,20 @@
     "images": [
       "Mountain_Climbers/0.jpg",
       "Mountain_Climbers/1.jpg"
+    ]
+  },
+  "corrida": {
+    "source": "free-exercise-db",
+    "images": [
+      "Trail_Running_Walking/0.jpg",
+      "Trail_Running_Walking/1.jpg"
+    ]
+  },
+  "tiro-corrida": {
+    "source": "free-exercise-db",
+    "images": [
+      "Wind_Sprints/0.jpg",
+      "Wind_Sprints/1.jpg"
     ]
   }
 }
