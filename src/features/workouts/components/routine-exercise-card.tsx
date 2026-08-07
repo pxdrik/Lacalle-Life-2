@@ -18,6 +18,7 @@ import type { Exercise } from "../types/exercise";
 import type { RoutineExercise } from "../types/routine";
 import { ExerciseIdentity } from "./exercise-identity";
 import { PlannedSetRow } from "./planned-set-row";
+import { Card } from "@/design-system/components/card";
 
 interface Props {
   readonly exercise: RoutineExercise;
@@ -57,12 +58,11 @@ export function RoutineExerciseCard({
   onSetChange,
 }: Props) {
   return (
-    <section
+    <Card
+      as="section"
       className={cn(
-        "rounded-xl border bg-surface p-4 transition-shadow duration-150 ease-out",
-        dragHandle?.isDragging === true
-          ? "border-accent shadow-md"
-          : "border-line",
+        "transition-shadow duration-150 ease-out",
+        dragHandle?.isDragging === true && "border-accent shadow-md",
       )}
     >
       <header className="flex items-start gap-2">
@@ -192,7 +192,7 @@ export function RoutineExerciseCard({
           className="min-w-40 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm text-ink-muted transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
         />
       </div>
-    </section>
+    </Card>
   );
 }
 

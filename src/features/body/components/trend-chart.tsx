@@ -1,3 +1,5 @@
+import { Card } from "@/design-system/components/card";
+
 import { formatShortDay, type TrendPoint } from "../services/body-log";
 
 interface Props {
@@ -49,7 +51,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
   const smooth = average.map((point, index) => `${x(index)},${y(point.value)}`);
 
   return (
-    <figure className="rounded-xl border border-line bg-surface p-4">
+    <Card as="figure">
       <svg
         aria-hidden
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -123,6 +125,6 @@ export function TrendChart({ points, average, unit, label }: Props) {
           </tbody>
         </table>
       </figcaption>
-    </figure>
+    </Card>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
+import { CARD_SURFACE } from "@/design-system/components/card";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 
@@ -70,7 +71,7 @@ export function CustomExerciseForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-xl border border-line bg-surface p-4"
+      className={cn(CARD_SURFACE, "space-y-4")}
     >
       <Field label="Nome do exercício" id="custom-exercise-name" error={error}>
         {({ id, describedBy, invalid }) => (

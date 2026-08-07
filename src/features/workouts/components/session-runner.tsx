@@ -38,6 +38,7 @@ import { RestTimerBar } from "./rest-timer-bar";
 import { SessionEditor } from "./session-editor";
 import { SessionExerciseCard } from "./session-exercise-card";
 import { SessionSummary } from "./session-summary";
+import { Card } from "@/design-system/components/card";
 
 export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const router = useRouter();
@@ -200,7 +201,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       )}
 
       {allDone && (
-        <div className="mt-6 rounded-xl border border-line bg-surface p-5 text-center">
+        <Card className="mt-6 text-center">
           <p className="text-ink">Todas as séries concluídas.</p>
           <p className="mt-1 text-sm text-ink-subtle">
             {sessionVolumeKg(session).toLocaleString("pt-BR")} kg movidos.
@@ -216,7 +217,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
             <Flag aria-hidden className="size-4" />
             Finalizar treino
           </Button>
-        </div>
+        </Card>
       )}
 
       <RestTimerBar timer={timer} />

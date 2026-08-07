@@ -82,6 +82,10 @@
   --elevation-md:
     0 4px 12px oklch(0.17 0.03 180 / 0.08), 0 1px 3px oklch(0.17 0.03 180 / 0.04);
 
+  /* A hairline along a card's top edge, drawn by the `Card` primitive.
+     Transparent here: in light mode the border already separates the card from
+     the page, and a second line would only muddy it. */
+  --card-top-light: transparent;
 }
 
 [data-theme="dark"] {
@@ -124,6 +128,11 @@
 
   --elevation-sm: 0 1px 2px oklch(0 0 0 / 0.4);
   --elevation-md: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
+
+  /* Here it does the work shadows cannot: on a near-black page a shadow is
+     invisible, and this single lit edge is what reads as "raised" instead of
+     "cut out". */
+  --card-top-light: oklch(1 0 0 / 0.06);
 }
 
 /**

@@ -8,6 +8,7 @@ import type { Exercise } from "../types/exercise";
 import type { SessionExercise } from "../types/session";
 import { ExerciseIdentity } from "./exercise-identity";
 import { PerformedSetRow } from "./performed-set-row";
+import { Card } from "@/design-system/components/card";
 
 interface Props {
   readonly exercise: SessionExercise;
@@ -40,7 +41,7 @@ export function SessionExerciseCard({
   const isComplete = done === exercise.sets.length && exercise.sets.length > 0;
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-3 sm:p-4">
+    <Card as="section">
       {/* Thumbnail-sized and no larger. This card is read standing up between
           sets: a big photo here would push the set rows off the screen, which
           costs more than the photo adds. Tapping it opens the detail. */}
@@ -114,7 +115,7 @@ export function SessionExerciseCard({
           className="min-w-40 flex-1 rounded-md border border-transparent bg-transparent px-1.5 py-1 text-sm text-ink-muted transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
         />
       </div>
-    </section>
+    </Card>
   );
 }
 

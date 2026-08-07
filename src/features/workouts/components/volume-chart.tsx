@@ -1,3 +1,5 @@
+import { Card } from "@/design-system/components/card";
+
 import type { VolumePoint } from "../services/history";
 
 interface Props {
@@ -22,7 +24,7 @@ export function VolumeChart({ points, format }: Props) {
   const peak = Math.max(...chronological.map((point) => point.volumeKg), 1);
 
   return (
-    <div className="rounded-xl border border-line bg-surface p-4">
+    <Card>
       <ul className="flex h-40 items-end gap-1.5">
         {chronological.map((point) => {
           const height = (point.volumeKg / peak) * 100;
@@ -62,6 +64,6 @@ export function VolumeChart({ points, format }: Props) {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

@@ -1,4 +1,5 @@
 import type { NutritionPlan, PlanResult } from "@/core/nutrition";
+import { Card } from "@/design-system/components/card";
 
 const FIGURES = [
   { key: "proteinG", label: "Proteína", color: "text-protein" },
@@ -39,7 +40,7 @@ export function PlanSummary({ result }: { readonly result: PlanResult }) {
 function Plan({ plan }: { readonly plan: NutritionPlan }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-line bg-surface p-5">
+      <Card>
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-3xl font-medium tabular-nums text-ink">
             {plan.targets.kcal}
@@ -78,7 +79,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
             kg por semana.
           </p>
         )}
-      </div>
+      </Card>
 
       {plan.advisories.length > 0 && (
         <ul className="space-y-2">

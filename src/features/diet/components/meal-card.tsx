@@ -23,6 +23,7 @@ import type { Meal, MealItem } from "../types/diet";
 import { InlineText } from "./inline-text";
 import { MacroSummary } from "./macro-summary";
 import { MealItemRow } from "./meal-item-row";
+import { Card } from "@/design-system/components/card";
 
 interface Props {
   readonly meal: Meal;
@@ -70,10 +71,11 @@ export function MealCard({
   const macros = mealMacros(meal);
 
   return (
-    <section
+    <Card
+      as="section"
       className={cn(
-        "rounded-xl border bg-surface p-4 transition-shadow duration-150 ease-out",
-        dragHandle.isDragging ? "border-accent shadow-md" : "border-line",
+        "transition-shadow duration-150 ease-out",
+        dragHandle.isDragging && "border-accent shadow-md",
       )}
     >
       <header className="flex items-start gap-2">
@@ -222,7 +224,7 @@ export function MealCard({
           className="w-full text-sm text-ink-muted"
         />
       </div>
-    </section>
+    </Card>
   );
 }
 

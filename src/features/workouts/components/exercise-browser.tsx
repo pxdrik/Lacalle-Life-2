@@ -21,6 +21,7 @@ import { ExerciseFilterBar } from "./exercise-filter-bar";
 import { ExerciseRow } from "./exercise-row";
 import { THUMBNAIL_BOX } from "./exercise-thumbnail";
 import { MediaAttribution } from "./media-attribution";
+import { Card } from "@/design-system/components/card";
 
 interface Props {
   /**
@@ -100,14 +101,14 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
       </div>
 
       {showFilters && (
-        <div className="rounded-xl border border-line bg-surface p-4">
+        <Card>
           <ExerciseFilterBar
             filters={query.filters}
             activeCount={activeFilterCount}
             onChange={setFilters}
             onClear={clear}
           />
-        </div>
+        </Card>
       )}
 
       {writeError !== null && (

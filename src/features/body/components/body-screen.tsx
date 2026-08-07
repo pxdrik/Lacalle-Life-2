@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { cn } from "@/design-system/cn";
 
 import { useBodyLog } from "../hooks/use-body-log";
@@ -122,7 +123,7 @@ export function BodyScreen() {
       )}
 
       {editing !== null && (
-        <div className="rounded-xl border border-line bg-surface p-4">
+        <Card>
           <BodyEntryForm
             entry={entryFor(editing)}
             pending={saving}
@@ -137,7 +138,7 @@ export function BodyScreen() {
               });
             }}
           />
-        </div>
+        </Card>
       )}
 
       {entries.length === 0 ? (

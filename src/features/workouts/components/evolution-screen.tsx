@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 
+import { cn } from "@/design-system/cn";
+import { CARD_SURFACE } from "@/design-system/components/card";
+
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
   finishedSessions,
@@ -136,7 +139,10 @@ function SessionRow({ session }: { readonly session: Session }) {
     <li>
       <Link
         href={`/sessao/${session.id}`}
-        className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4 transition-colors duration-150 ease-out hover:border-line-strong"
+        className={cn(
+          CARD_SURFACE,
+          "flex items-center gap-4 transition-colors duration-150 ease-out hover:border-line-strong",
+        )}
       >
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">{session.name}</p>

@@ -14,6 +14,7 @@ import {
   sessionVolumeKg,
 } from "../services/session-stats";
 import type { Session } from "../types/session";
+import { Card } from "@/design-system/components/card";
 
 interface Props {
   readonly session: Session;
@@ -63,7 +64,7 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
         </div>
       </div>
 
-      <dl className="mt-6 grid grid-cols-3 gap-4 rounded-xl border border-line bg-surface p-5">
+      <Card as="dl" className="mt-6 grid grid-cols-3 gap-4">
         <Figure
           label="Duração"
           value={formatDuration(sessionDurationMs(session) ?? 0)}
@@ -73,14 +74,11 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
           value={`${String(progress.completed)}/${String(progress.total)}`}
         />
         <Figure label="Volume" value={`${volume.toLocaleString("pt-BR")} kg`} />
-      </dl>
+      </Card>
 
       <div className="mt-4 space-y-3">
         {session.exercises.map((exercise) => (
-          <section
-            key={exercise.id}
-            className="rounded-xl border border-line bg-surface p-4"
-          >
+          <Card as="section" key={exercise.id}>
             <h2 className="font-medium text-ink">{exercise.name}</h2>
 
             <ul className="mt-2 space-y-1">
@@ -122,7 +120,7 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
             {exercise.notes !== "" && (
               <p className="mt-2 text-sm text-ink-muted">{exercise.notes}</p>
             )}
-          </section>
+          </Card>
         ))}
       </div>
 
