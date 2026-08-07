@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { BodyDataProvider, WorkoutDataProvider } from "@/composition/data-providers";
 import { BodyScreen } from "@/features/body/components/body-screen";
 import { EvolutionScreen } from "@/features/workouts/components/evolution-screen";
+import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
   title: "Evolução · Lacalle Life",
@@ -22,10 +23,10 @@ export const metadata: Metadata = {
 export default function EvolutionPage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
-      <h1 className="text-2xl font-semibold tracking-tight">Evolução</h1>
-      <p className="mt-1.5 text-ink-muted">
-        Seu corpo e seus treinos, ao longo do tempo.
-      </p>
+      <PageHeader
+        title="Evolução"
+        subtitle="Seu corpo e seus treinos, ao longo do tempo."
+      />
 
       <div className="mt-8">
         <BodyDataProvider>

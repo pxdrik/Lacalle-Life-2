@@ -26,6 +26,8 @@ depender da memória de nenhuma conversa.
 | Duplicar e copiar | Refeição, alimento entre refeições, exercício, rotina e dieta inteiras |
 | Detalhe do exercício | Duas fases do movimento animadas, curadoria completa, fotos no treino |
 | Evolução corporal | Peso, gordura e 9 medidas por dia, gráfico de tendência com média móvel |
+| Identidade visual | Esmeralda da V1, neutros tingidos, contraste asserido nos dois temas |
+| Densidade por contexto | Cartão no celular, Compacto no desktop — um conjunto de tokens, dois valores |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.

@@ -16,12 +16,16 @@ const VARIANTS = {
   danger: "bg-danger text-danger-ink hover:opacity-90 active:opacity-80",
 } satisfies Record<ButtonVariant, string>;
 
+/**
+ * Heights come from the density tokens, so a button is a comfortable thumb
+ * target on a phone and a compact control at a desk without either size being
+ * spelled out here. `lg` is the mid-set tap — finishing a workout, marking a
+ * set — and stays the largest in both worlds.
+ */
 const SIZES = {
-  sm: "h-8 gap-1.5 rounded-md px-3 text-sm",
-  md: "h-10 gap-2 rounded-md px-4 text-sm",
-  // 44px, the minimum comfortable touch target — this is the size the
-  // workout screen uses, where the tap happens one-handed and mid-set.
-  lg: "h-11 gap-2 rounded-lg px-5 text-base",
+  sm: "h-(--control-h-sm) gap-1.5 rounded-md px-3 text-sm",
+  md: "h-(--control-h) gap-2 rounded-md px-(--control-px) text-sm",
+  lg: "h-(--control-h-lg) gap-2 rounded-lg px-5 text-base md:text-sm",
 } satisfies Record<ButtonSize, string>;
 
 const BASE =
