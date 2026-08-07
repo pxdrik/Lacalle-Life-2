@@ -56,7 +56,7 @@ export function SessionExerciseCard({
         </ExerciseIdentity>
         <span className="shrink-0 font-mono text-xs tabular-nums text-ink-subtle">
           {done}/{exercise.sets.length}
-          {isComplete && <span className="ml-1.5 text-accent">✓</span>}
+          {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}
         </span>
       </header>
 

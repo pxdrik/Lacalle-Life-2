@@ -1,10 +1,20 @@
 /**
  * Design tokens.
  *
- * Identity rule: colour is spent only where it carries meaning. The primary
- * action is the inverted foreground — near-black on white, near-white on
- * black — so hue is reserved for data (macros), danger, and focus. That is
- * what keeps a screen full of numbers calm.
+ * **Identity: the emerald carries over from V1, and nothing else does.** The
+ * brand hue is 167 — the same `oklch(58% 0.2 167)` the first version shipped —
+ * because a product's colour is its identity, not its layout. Everything
+ * around it is new.
+ *
+ * Colour is spent only where it carries meaning: the primary action, the live
+ * state, and data. A screen that is mostly numbers stays calm only if the
+ * numbers are the loudest thing on it.
+ *
+ * **The neutrals are tinted, not grey.** Every surface and text token carries a
+ * few thousandths of chroma at hue 180, a cool teal that sits next to the
+ * emerald on the wheel. Pure `chroma: 0` grey is what a framework gives you
+ * for free, and it reads that way. V1 tinted its neutrals blue (hue 240) while
+ * its accent was green, which is why the two never quite settled together.
  *
  * Values are OKLCH because it is perceptually uniform: a lightness step reads
  * as the same step at any hue, which is what makes the light and dark scales
@@ -18,69 +28,91 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces, from furthest back to closest. */
-  --canvas: oklch(1 0 0);
+  /* Surfaces, from furthest back to closest. The canvas is faintly tinted and
+     cards are pure white, so a card lifts off the page without a shadow. */
+  --canvas: oklch(0.988 0.004 180);
   --surface: oklch(1 0 0);
   --elevated: oklch(1 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.963 0.006 180);
 
   /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder. */
-  --ink: oklch(0.145 0 0);
-  --ink-muted: oklch(0.44 0 0);
+  --ink: oklch(0.17 0.014 180);
+  --ink-muted: oklch(0.45 0.014 180);
   /* 0.55, not the 0.58 that looked right by eye: below this the ratio against
-     white drops under 4.5:1. Placeholder text is still text. */
-  --ink-subtle: oklch(0.55 0 0);
+     the canvas drops under 4.5:1. Placeholder text is still text. */
+  --ink-subtle: oklch(0.55 0.012 180);
 
-  --line: oklch(0.922 0 0);
-  --line-strong: oklch(0.84 0 0);
+  --line: oklch(0.915 0.008 180);
+  --line-strong: oklch(0.83 0.011 180);
 
-  /* Primary action: the foreground, inverted. */
-  --accent: oklch(0.145 0 0);
+  /* The brand.
+
+     Deeper here than in dark mode, and the reason is a genuine conflict: an
+     emerald light enough to carry near-black text is too light to be seen as
+     a chart line on a near-white page. One of the two has to give, and a
+     line nobody can see is the worse failure. So light mode takes a deeper
+     emerald with white on it; dark mode keeps the vivid one. */
+  --accent: oklch(0.53 0.14 167);
   --accent-ink: oklch(1 0 0);
+
+  /* The emerald as *text*, which needs 4.5:1 rather than the 3:1 a graphic
+     needs. Used for the completed mark and the finished timer. */
+  --accent-text: oklch(0.47 0.12 167);
 
   --danger: oklch(0.51 0.21 27);
   --danger-ink: oklch(1 0 0);
 
+  /* Deliberately not the brand hue: a focus ring drawn in emerald disappears
+     the moment it lands on the emerald button. */
   --focus: oklch(0.55 0.2 258);
 
   /* Data. A blue/amber/violet triad stays separable under deuteranopia and
-     protanopia, where a green/red pair collapses. */
+     protanopia, where a green/red pair collapses — and none of the three
+     collides with the emerald. */
   --protein: oklch(0.55 0.16 250);
   --carbs: oklch(0.62 0.14 62);
   --fat: oklch(0.52 0.19 305);
 
-  --overlay: oklch(0.145 0 0 / 0.45);
+  --overlay: oklch(0.17 0.014 180 / 0.45);
 
   /* Named `elevation`, not `shadow`: `--shadow-*` is Tailwind's own theme
      namespace, and reusing it here would make the mapping below a circular
      reference to itself. */
-  --elevation-sm: 0 1px 2px oklch(0.145 0 0 / 0.06);
+  --elevation-sm: 0 1px 2px oklch(0.17 0.03 180 / 0.06);
   --elevation-md:
-    0 4px 12px oklch(0.145 0 0 / 0.08), 0 1px 3px oklch(0.145 0 0 / 0.04);
+    0 4px 12px oklch(0.17 0.03 180 / 0.08), 0 1px 3px oklch(0.17 0.03 180 / 0.04);
+
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Dark surfaces lift by getting lighter. Shadows do not read on black, so
-     depth is carried by surface value instead. */
-  --canvas: oklch(0.145 0 0);
-  --surface: oklch(0.185 0 0);
-  --elevated: oklch(0.215 0 0);
-  --muted: oklch(0.235 0 0);
+  /* Dark surfaces lift by getting lighter. Shadows do not read on near-black,
+     so depth is carried by surface value and the top hairline instead. */
+  --canvas: oklch(0.165 0.008 180);
+  --surface: oklch(0.205 0.009 180);
+  --elevated: oklch(0.235 0.01 180);
+  --muted: oklch(0.255 0.01 180);
 
-  --ink: oklch(0.985 0 0);
-  --ink-muted: oklch(0.72 0 0);
-  --ink-subtle: oklch(0.6 0 0);
+  --ink: oklch(0.97 0.004 180);
+  --ink-muted: oklch(0.73 0.011 180);
+  --ink-subtle: oklch(0.61 0.013 180);
 
-  --line: oklch(0.275 0 0);
-  --line-strong: oklch(0.37 0 0);
+  --line: oklch(0.285 0.011 180);
+  --line-strong: oklch(0.39 0.013 180);
 
-  --accent: oklch(0.985 0 0);
-  --accent-ink: oklch(0.145 0 0);
+  /* The vivid one, kept: on a dark ground it can be bright enough to read as
+     a chart line *and* still carry near-black text. Light mode has no such
+     luxury — see the note there. */
+  --accent: oklch(0.76 0.16 167);
+  --accent-ink: oklch(0.165 0.008 180);
+
+  /* On a dark ground the emerald clears 4.5:1 as text while bright, so this
+     goes brighter than its light-theme counterpart rather than darker. */
+  --accent-text: oklch(0.82 0.14 167);
 
   --danger: oklch(0.7 0.18 25);
-  --danger-ink: oklch(0.145 0 0);
+  --danger-ink: oklch(0.165 0.008 180);
 
   --focus: oklch(0.72 0.16 258);
 
@@ -114,6 +146,7 @@
 
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
 
   --color-danger: var(--danger);
   --color-danger-ink: var(--danger-ink);

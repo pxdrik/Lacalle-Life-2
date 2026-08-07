@@ -44,7 +44,7 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
           <p
             className={cn(
               "font-mono text-2xl tabular-nums",
-              isFinished ? "text-accent" : "text-ink",
+              isFinished ? "text-accent-text" : "text-ink",
             )}
           >
             {formatDuration(remainingSeconds * 1000)}
