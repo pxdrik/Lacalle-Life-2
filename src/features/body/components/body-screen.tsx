@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -64,7 +65,7 @@ export function BodyScreen() {
   const [editing, setEditing] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  if (state.status === "loading") return <Skeleton />;
+  if (state.status === "loading") return <BodySkeleton />;
 
   if (state.status === "error") {
     return (
@@ -259,12 +260,12 @@ function EmptyState() {
   );
 }
 
-function Skeleton() {
+function BodySkeleton() {
   return (
     <div aria-hidden className="space-y-4">
-      <div className="h-12 w-40 rounded bg-muted" />
-      <div className="h-48 w-full rounded-xl bg-muted" />
-      <div className="h-32 w-full rounded-xl bg-muted" />
+      <Skeleton className="h-12 w-40" />
+      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
     </div>
   );
 }

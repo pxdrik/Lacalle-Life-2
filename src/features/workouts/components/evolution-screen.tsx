@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import Link from "next/link";
 
 import { cn } from "@/design-system/cn";
@@ -29,8 +30,8 @@ export function EvolutionScreen() {
   if (state.status === "loading") {
     return (
       <div aria-hidden className="space-y-4">
-        <div className="h-40 w-full rounded-xl bg-muted" />
-        <div className="h-64 w-full rounded-xl bg-muted" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
       </div>
     );
   }

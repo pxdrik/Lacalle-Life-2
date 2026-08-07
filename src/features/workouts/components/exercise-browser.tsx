@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 
@@ -145,7 +146,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
         />
       )}
 
-      {state.status === "loading" && <Skeleton />}
+      {state.status === "loading" && <ListSkeleton />}
 
       {state.status === "error" && (
         <div
@@ -255,7 +256,7 @@ function EmptyState({
   );
 }
 
-function Skeleton() {
+function ListSkeleton() {
   const widths = ["w-48", "w-64", "w-40", "w-56", "w-44", "w-52", "w-36", "w-60"];
 
   return (
@@ -266,10 +267,10 @@ function Skeleton() {
       <ul className="divide-y divide-line">
         {widths.map((width, index) => (
           <li key={index} className="flex items-center gap-3 px-3 py-2.5">
-            <div className={`${THUMBNAIL_BOX} shrink-0 rounded-md bg-muted`} />
+            <Skeleton className={`${THUMBNAIL_BOX} shrink-0`} />
             <div className="flex-1 space-y-2">
-              <div className={`h-3.5 ${width} rounded bg-muted`} />
-              <div className="h-2.5 w-32 rounded bg-muted" />
+              <Skeleton className={`h-3.5 ${width}`} />
+              <Skeleton className="h-2.5 w-32" />
             </div>
           </li>
         ))}

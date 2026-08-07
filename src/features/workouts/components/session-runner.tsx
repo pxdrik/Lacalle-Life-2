@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Flag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -261,11 +262,11 @@ function Notice({
 function RunnerSkeleton() {
   return (
     <div aria-hidden className="space-y-4">
-      <div className="h-4 w-32 rounded bg-muted" />
-      <div className="h-8 w-48 rounded bg-muted" />
-      <div className="h-14 w-full rounded bg-muted" />
-      <div className="h-56 w-full rounded-xl bg-muted" />
-      <div className="h-56 w-full rounded-xl bg-muted" />
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-14 w-full" />
+      <Skeleton className="h-56 w-full rounded-xl" />
+      <Skeleton className="h-56 w-full rounded-xl" />
     </div>
   );
 }

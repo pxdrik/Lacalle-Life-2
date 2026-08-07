@@ -112,7 +112,12 @@ export function PerformedSetRow({
             : `Concluir série ${String(number)} de ${exerciseName}`
         }
         className={cn(
-          "flex size-11 shrink-0 items-center justify-center rounded-lg border transition-colors duration-150 ease-out",
+          "flex size-11 shrink-0 items-center justify-center rounded-lg border",
+          "transition-[background-color,border-color,color,scale] duration-150 ease-out",
+          // The one bit of tactile feedback in the app, on the one action
+          // repeated dozens of times per workout. It has to answer the tap
+          // before the state even changes.
+          "active:scale-90",
           set.isCompleted
             ? "border-accent bg-accent text-accent-ink"
             : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",

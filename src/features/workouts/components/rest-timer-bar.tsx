@@ -24,7 +24,10 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
     <div
       role="status"
       aria-live="off"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/95 backdrop-blur"
+      // Rises in: it appears the instant a set is marked done, and sliding up
+      // from the edge says where it came from. Popping into place mid-workout
+      // reads as a glitch.
+      className="animate-rise fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/95 backdrop-blur"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <div

@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
@@ -14,7 +15,7 @@ export function ProfileScreen() {
   const [saving, setSaving] = useState(false);
 
   if (state.status === "loading") {
-    return <div aria-hidden className="h-72 rounded-xl bg-muted" />;
+    return <Skeleton className="h-72 rounded-xl" />;
   }
 
   if (state.status === "error") {

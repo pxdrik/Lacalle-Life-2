@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Play, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -241,11 +242,11 @@ function Notice({
 function EditorSkeleton() {
   return (
     <div aria-hidden className="space-y-4">
-      <div className="h-4 w-16 rounded bg-muted" />
-      <div className="h-8 w-64 rounded bg-muted" />
-      <div className="h-10 w-full rounded bg-muted" />
-      <div className="h-48 w-full rounded-xl bg-muted" />
-      <div className="h-48 w-full rounded-xl bg-muted" />
+      <Skeleton className="h-4 w-16" />
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-xl" />
     </div>
   );
 }

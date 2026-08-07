@@ -1,5 +1,6 @@
 "use client";
 
+import { Skeleton } from "@/design-system/components/skeleton";
 import { Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -156,7 +157,9 @@ function ListSkeleton() {
   return (
     <ul aria-hidden className="space-y-2">
       {[0, 1, 2].map((index) => (
-        <li key={index} className="h-[4.5rem] rounded-xl bg-muted" />
+        <li key={index}>
+          <Skeleton className="h-[4.5rem] rounded-xl" />
+        </li>
       ))}
     </ul>
   );

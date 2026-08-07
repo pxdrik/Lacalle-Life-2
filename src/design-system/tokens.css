@@ -231,7 +231,41 @@
   --radius-xl: var(--corner-xl);
 
   /* Motion. The expo-out curve leaves fast and settles slowly, which is what
-     makes an interface feel responsive rather than merely animated. */
+     makes an interface feel responsive rather than merely animated.
+
+     Mapping these onto Tailwind's own `--ease-*` namespace is deliberate: it
+     means every `ease-out` already written across the app uses this curve
+     instead of the framework default, with nothing to migrate. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Something arriving: a rest timer, a banner, a panel. It rises a short
+     distance because motion from below reads as "this came to you", where a
+     drop reads as "this fell on you". */
+  --animate-rise: rise 240ms var(--ease-out) both;
+
+  /* Loading. Slower and shallower than the usual pulse — a skeleton that
+     flashes competes with the content it is standing in for. */
+  --animate-pulse-soft: pulse-soft 1.9s var(--ease-in-out) infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
