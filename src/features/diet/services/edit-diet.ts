@@ -1,59 +1,78 @@
 import { reorderById, shiftById } from "@/core/domain/collection";
-import { createEntityId, revise, type EntityId } from "@/core/domain/entity";
+import {
+  createEntityId,
+  revise,
+  type Entity,
+  type EntityId,
+} from "@/core/domain/entity";
 
-import type { Diet, Meal, MealItem } from "../types/diet";
+import type { Diet, Meal, MealItem, MealOwner } from "../types/diet";
 import { createMeal } from "./create-diet";
 
 /**
- * Every edit is a pure function from one diet to the next.
+ * Every edit is a pure function from one meal owner to the next.
  *
- * No component reaches inside a diet to splice an array. That keeps the
- * invariants in one testable place, and it means `updatedAt` is stamped by
- * `revise` on every path — including the ones added later.
+ * **The parameter is called `diet` for history, but the type is `MealOwner`**
+ * — these run on a plan and on a day's log alike. Widening them is what let
+ * the food log reuse the whole editing layer, and `MealCard` with it, instead
+ * of growing a parallel copy that would drift.
  *
- * An operation naming a meal or item that is not there returns the diet
+ * No component reaches inside to splice an array. That keeps the invariants in
+ * one testable place, and it means `updatedAt` is stamped by `revise` on every
+ * path — including the ones added later.
+ *
+ * An operation naming a meal or item that is not there returns the input
  * unchanged rather than throwing. These are addressed by id from a UI that may
  * be a frame behind the data; a stale click should be a no-op, not a crash.
  */
+
+/**
+ * `revise` with the meal list replaced.
+ *
+ * The assertion lives here and nowhere else. TypeScript cannot prove that a
+ * plain `readonly Meal[]` satisfies `T["meals"]` for an arbitrary
+ * `T extends MealOwner`, because a subtype could narrow it further. None does,
+ * and confining the claim to one line keeps the assumption visible instead of
+ * repeating it at five call sites.
+ */
+function withMeals<T extends MealOwner>(owner: T, meals: readonly Meal[]): T {
+  return revise(owner, { meals } as Partial<Omit<T, keyof Entity>>);
+}
 
 export function renameDiet(diet: Diet, name: string): Diet {
   return revise(diet, { name });
 }
 
-export function addMeal(diet: Diet): Diet {
-  return revise(diet, {
-    meals: [...diet.meals, createMeal(diet.meals.length + 1)],
-  });
+export function addMeal<T extends MealOwner>(diet: T): T {
+  return withMeals(diet, [...diet.meals, createMeal(diet.meals.length + 1)]);
 }
 
-export function removeMeal(diet: Diet, mealId: EntityId): Diet {
-  return revise(diet, {
-    meals: diet.meals.filter((meal) => meal.id !== mealId),
-  });
+export function removeMeal<T extends MealOwner>(diet: T, mealId: EntityId): T {
+  return withMeals(diet, diet.meals.filter((meal) => meal.id !== mealId));
 }
 
 export type MealChanges = Partial<Pick<Meal, "name" | "time" | "notes">>;
 
-export function updateMeal(
-  diet: Diet,
+export function updateMeal<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   changes: MealChanges,
-): Diet {
+): T {
   return mapMeal(diet, mealId, (meal) => ({ ...meal, ...changes }));
 }
 
-export function addItem(diet: Diet, mealId: EntityId, item: MealItem): Diet {
+export function addItem<T extends MealOwner>(diet: T, mealId: EntityId, item: MealItem): T {
   return mapMeal(diet, mealId, (meal) => ({
     ...meal,
     items: [...meal.items, item],
   }));
 }
 
-export function removeItem(
-  diet: Diet,
+export function removeItem<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   itemId: EntityId,
-): Diet {
+): T {
   return mapMeal(diet, mealId, (meal) => ({
     ...meal,
     items: meal.items.filter((item) => item.id !== itemId),
@@ -61,31 +80,31 @@ export function removeItem(
 }
 
 /** Moves a meal by `offset`, clamped. What the arrow buttons report. */
-export function moveMeal(diet: Diet, mealId: EntityId, offset: number): Diet {
+export function moveMeal<T extends MealOwner>(diet: T, mealId: EntityId, offset: number): T {
   const meals = shiftById(diet.meals, mealId, offset);
   if (meals === diet.meals) return diet;
 
-  return revise(diet, { meals });
+  return withMeals(diet, meals);
 }
 
 /** Puts one meal where another is. What a drag reports. */
-export function reorderMeals(
-  diet: Diet,
+export function reorderMeals<T extends MealOwner>(
+  diet: T,
   activeId: EntityId,
   overId: EntityId,
-): Diet {
+): T {
   const meals = reorderById(diet.meals, activeId, overId);
   if (meals === diet.meals) return diet;
 
-  return revise(diet, { meals });
+  return withMeals(diet, meals);
 }
 
-export function reorderMealItems(
-  diet: Diet,
+export function reorderMealItems<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   activeId: EntityId,
   overId: EntityId,
-): Diet {
+): T {
   const meal = diet.meals.find((item) => item.id === mealId);
   if (meal === undefined) return diet;
 
@@ -102,12 +121,12 @@ export function reorderMealItems(
  * the other. The macros travel with it — a meal item already carries its own
  * copy of them, so nothing is looked up and nothing can drift.
  */
-export function copyItemToMeal(
-  diet: Diet,
+export function copyItemToMeal<T extends MealOwner>(
+  diet: T,
   fromMealId: EntityId,
   itemId: EntityId,
   toMealId: EntityId,
-): Diet {
+): T {
   const item = findItem(diet, fromMealId, itemId);
   if (item === undefined || fromMealId === toMealId) return diet;
   if (!diet.meals.some((meal) => meal.id === toMealId)) return diet;
@@ -116,12 +135,12 @@ export function copyItemToMeal(
 }
 
 /** Moves a food to another meal. The id travels with it; it is the same food. */
-export function moveItemToMeal(
-  diet: Diet,
+export function moveItemToMeal<T extends MealOwner>(
+  diet: T,
   fromMealId: EntityId,
   itemId: EntityId,
   toMealId: EntityId,
-): Diet {
+): T {
   const item = findItem(diet, fromMealId, itemId);
   if (item === undefined || fromMealId === toMealId) return diet;
   if (!diet.meals.some((meal) => meal.id === toMealId)) return diet;
@@ -129,8 +148,8 @@ export function moveItemToMeal(
   return addItem(removeItem(diet, fromMealId, itemId), toMealId, item);
 }
 
-function findItem(
-  diet: Diet,
+function findItem<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   itemId: EntityId,
 ): MealItem | undefined {
@@ -139,12 +158,12 @@ function findItem(
     ?.items.find((item) => item.id === itemId);
 }
 
-export function setItemGrams(
-  diet: Diet,
+export function setItemGrams<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   itemId: EntityId,
   grams: number,
-): Diet {
+): T {
   return mapMeal(diet, mealId, (meal) => ({
     ...meal,
     items: meal.items.map((item) =>
@@ -159,14 +178,12 @@ export function setItemGrams(
  * Returns the original diet — same reference, same `updatedAt` — when the meal
  * is absent, so a no-op never looks like a write to the sync layer.
  */
-function mapMeal(
-  diet: Diet,
+function mapMeal<T extends MealOwner>(
+  diet: T,
   mealId: EntityId,
   change: (meal: Meal) => Meal,
-): Diet {
+): T {
   if (!diet.meals.some((meal) => meal.id === mealId)) return diet;
 
-  return revise(diet, {
-    meals: diet.meals.map((meal) => (meal.id === mealId ? change(meal) : meal)),
-  });
+  return withMeals(diet, diet.meals.map((meal) => (meal.id === mealId ? change(meal) : meal)));
 }

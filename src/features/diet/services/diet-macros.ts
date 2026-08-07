@@ -5,7 +5,7 @@ import {
   type Macros,
 } from "@/core/domain/macros";
 
-import type { Diet, Meal, MealItem } from "../types/diet";
+import type { Meal, MealItem, MealOwner } from "../types/diet";
 
 /**
  * What one portion contributes, at display precision.
@@ -21,6 +21,7 @@ export function mealMacros(meal: Meal): Macros {
   return sumMacros(meal.items.map(itemMacros));
 }
 
-export function dietMacros(diet: Diet): Macros {
-  return sumMacros(diet.meals.map(mealMacros));
+/** Totals for anything that owns meals — a plan or a day that happened. */
+export function dietMacros(owner: MealOwner): Macros {
+  return sumMacros(owner.meals.map(mealMacros));
 }

@@ -1,6 +1,7 @@
 import type { Migration } from "@/core/storage/schema";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
+import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
@@ -57,5 +58,11 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Body log: weight and tape measurements, one entry per day, indexed by day.",
     createStores: [BODY_ENTRIES_STORE],
+  },
+  {
+    version: 7,
+    description:
+      "Food log: what was eaten each day, kept apart from the diet that planned it.",
+    createStores: [FOOD_LOGS_STORE],
   },
 ];

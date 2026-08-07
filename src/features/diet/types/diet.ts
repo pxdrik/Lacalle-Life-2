@@ -37,6 +37,16 @@ export interface Meal {
  * own. The whole document is a few kilobytes, which makes reordering an array
  * move, makes every write atomic, and makes opening the editor a single read.
  */
+/**
+ * Anything that owns a list of meals.
+ *
+ * Two things do: a `Diet`, which is the plan, and a `FoodLog`, which is a day
+ * that happened. Every meal operation in `edit-diet.ts` is written against
+ * this rather than against `Diet`, which is why the log needed no second
+ * editing layer and no second `MealCard`.
+ */
+export type MealOwner = Entity & { readonly meals: readonly Meal[] };
+
 export interface Diet extends Entity {
   readonly name: string;
   readonly meals: readonly Meal[];

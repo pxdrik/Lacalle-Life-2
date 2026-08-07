@@ -78,7 +78,11 @@ export function MealCard({
         dragHandle.isDragging && "border-accent shadow-md",
       )}
     >
-      <header className="flex items-start gap-2">
+      {/* Wraps on a phone. The macro summary and four buttons are `shrink-0`
+          and together need more room than a 390px screen has, so without this
+          the whole page scrolled sideways — on the one screen that exists to
+          be used on a phone. */}
+      <header className="flex flex-wrap items-start gap-2">
         <button
           type="button"
           aria-label={`Reordenar ${meal.name}`}
@@ -115,7 +119,7 @@ export function MealCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:flex-wrap max-sm:justify-between max-sm:gap-y-1">
           <MacroSummary macros={macros} />
 
           {/* Arrows alongside the handle, for the same reason as in a routine:

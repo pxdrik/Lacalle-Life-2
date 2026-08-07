@@ -10,8 +10,14 @@ import { LocalBodyRepository } from "@/features/body/data/local-body-repository"
 import type { BodyEntry } from "@/features/body/types/body-entry";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
+import {
+  FOOD_LOGS_STORE,
+  type FoodLogRepository,
+} from "@/features/diet/data/food-log-repository";
 import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
+import { LocalFoodLogRepository } from "@/features/diet/data/local-food-log-repository";
 import type { Diet } from "@/features/diet/types/diet";
+import type { FoodLog } from "@/features/diet/types/food-log";
 import { seedCatalogue } from "@/features/foods/data/catalogue";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
@@ -61,6 +67,7 @@ import { DATABASE_NAME, MIGRATIONS } from "./migrations";
  */
 export interface Repositories {
   readonly body: BodyRepository;
+  readonly foodLogs: FoodLogRepository;
   readonly foods: FoodRepository;
   readonly diets: DietRepository;
   readonly profile: ProfileRepository;
@@ -73,6 +80,9 @@ export function createRepositories(db: IDBPDatabase): Repositories {
   return {
     body: new LocalBodyRepository(
       new IndexedDbStore<BodyEntry>(db, BODY_ENTRIES_STORE.name),
+    ),
+    foodLogs: new LocalFoodLogRepository(
+      new IndexedDbStore<FoodLog>(db, FOOD_LOGS_STORE.name),
     ),
     foods: new LocalFoodRepository(
       new IndexedDbStore<Food>(db, FOODS_STORE.name),

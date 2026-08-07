@@ -3,6 +3,8 @@
 import type { BodyRepository } from "@/features/body/data/body-repository";
 import { BodyRepositoryProvider } from "@/features/body/data/body-repository-context";
 import { DietRepositoryProvider } from "@/features/diet/data/diet-repository-context";
+import type { FoodLogRepository } from "@/features/diet/data/food-log-repository";
+import { FoodLogRepositoryProvider } from "@/features/diet/data/food-log-repository-context";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
@@ -64,6 +66,31 @@ export function BodyDataProvider({
 const foodRepository = once<FoodRepository>(async () => {
   return (await getRepositories()).foods;
 });
+
+const foodLogRepository = once<FoodLogRepository>(async () => {
+  return (await getRepositories()).foodLogs;
+});
+
+/**
+ * The food log needs the foods (to add one to a meal) and the diets (to start
+ * a day from one), so it carries all three rather than making the route
+ * remember which.
+ */
+export function FoodLogDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <FoodLogRepositoryProvider repository={foodLogRepository()}>
+      <DietRepositoryProvider repository={dietRepository()}>
+        <FoodRepositoryProvider repository={foodRepository()}>
+          {children}
+        </FoodRepositoryProvider>
+      </DietRepositoryProvider>
+    </FoodLogRepositoryProvider>
+  );
+}
 
 const dietRepository = once<DietRepository>(async () => {
   return (await getRepositories()).diets;
