@@ -22,10 +22,14 @@ conhecimento de modelos:
 3. **Fronteira de persistência.** Componentes, hooks e services jamais importam
    `@/core/storage/*` ou `idb`. Eles usam a interface de repositório da própria
    feature. O ESLint bloqueia o contrário.
-4. **`src/core/storage/migrations.ts` é append-only.** Nunca edite ou renumere
+4. **`src/composition/migrations.ts` é append-only.** Nunca edite ou renumere
    uma entrada já existente.
 5. **Portão.** `npm run verify` precisa passar. Não avance com ele vermelho.
 6. **Tamanho.** Arquivos até ~250 linhas.
+
+O processo de trabalho — como implementar, o que verificar antes de dizer
+"pronto" e os erros que já custaram tempo neste projeto — está em
+`CLAUDE.md`.
 
 ## Antes de considerar uma feature pronta
 
