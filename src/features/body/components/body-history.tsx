@@ -4,7 +4,8 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
-import { formatDay } from "../services/body-log";
+import { formatDay } from "@/core/format/day";
+
 import {
   MEASUREMENT_SITE_LABELS,
   MEASUREMENT_SITES,

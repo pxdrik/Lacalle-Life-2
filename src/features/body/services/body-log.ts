@@ -6,21 +6,6 @@ export const EMPTY_MEASUREMENTS: Measurements = Object.fromEntries(
   MEASUREMENT_SITES.map((site) => [site, null]),
 ) as Measurements;
 
-/**
- * The local calendar day, as `YYYY-MM-DD`.
- *
- * Built from the local parts rather than `toISOString()`, which converts to UTC
- * first: someone logging at 21:00 in São Paulo would have their weight filed
- * under tomorrow.
- */
-export function dayKey(date: Date): string {
-  const year = String(date.getFullYear()).padStart(4, "0");
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
 export function createBodyEntry(day: string): BodyEntry {
   const now = Date.now();
 
@@ -115,17 +100,13 @@ export function movingAverage(
   });
 }
 
-/** Formats `YYYY-MM-DD` for display, without going through `Date`. */
-export function formatDay(day: string): string {
-  const [year, month, date] = day.split("-");
-  if (year === undefined || month === undefined || date === undefined) return day;
-
-  return `${date}/${month}/${year}`;
-}
-
-export function formatShortDay(day: string): string {
-  const [, month, date] = day.split("-");
-  if (month === undefined || date === undefined) return day;
-
-  return `${date}/${month}`;
+/**
+ * Moves a day's record to a different day.
+ *
+ * The id **is** the day, so this mints a different entity rather than editing
+ * one — which is why the caller has to delete the original. Everything the
+ * person typed comes along; only the identity changes.
+ */
+export function moveEntryToDay(entry: BodyEntry, day: string): BodyEntry {
+  return { ...entry, id: day, day };
 }

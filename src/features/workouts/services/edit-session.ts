@@ -96,6 +96,52 @@ export function setSessionExerciseNotes(
   return mapExercise(session, exerciseId, (exercise) => ({ ...exercise, notes }));
 }
 
+/**
+ * Moves a workout to the day it actually happened.
+ *
+ * Exists because the app could only ever stamp "now". Someone who trained on
+ * Saturday and logged it on Sunday had a choice between a wrong date and no
+ * record — and a wrong date is worse, because volume-per-week and "última vez"
+ * both read from these timestamps.
+ *
+ * **Duration is preserved, not recomputed.** The gap between start and finish
+ * is what was measured; only the calendar day is being corrected. Shifting
+ * both stamps by the same amount keeps a 47-minute workout 47 minutes long.
+ *
+ * **The time of day is preserved too.** A workout logged at 07:12 stays at
+ * 07:12 on the new date — the person is fixing which day, not what time.
+ *
+ * A session still running has no `finishedAt`, and only its start moves.
+ */
+export function moveSessionToDay(session: Session, day: string): Session {
+  const [year, month, date] = day.split("-").map(Number);
+  if (year === undefined || month === undefined || date === undefined) {
+    return session;
+  }
+
+  const started = new Date(session.startedAt);
+  const moved = new Date(
+    year,
+    month - 1,
+    date,
+    started.getHours(),
+    started.getMinutes(),
+    started.getSeconds(),
+    started.getMilliseconds(),
+  );
+
+  const startedAt = moved.getTime();
+  if (Number.isNaN(startedAt) || startedAt === session.startedAt) return session;
+
+  const shift = startedAt - session.startedAt;
+
+  return revise(session, {
+    startedAt,
+    finishedAt:
+      session.finishedAt === null ? null : session.finishedAt + shift,
+  });
+}
+
 export function renameSession(session: Session, name: string): Session {
   return revise(session, { name });
 }

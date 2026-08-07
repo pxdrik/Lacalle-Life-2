@@ -23,8 +23,16 @@ export interface BodyLog {
    * An entry that ends up recording nothing is removed instead of stored: a
    * day with no weight, no measurements and no note is not a day you logged,
    * it is a day you cleared.
+   *
+   * `previousDay` is the day the form opened on. When it differs, the record
+   * moved to another date and the original has to go — the id **is** the day,
+   * so a move is a create plus a delete, and skipping the delete would leave
+   * the same weigh-in on two dates.
    */
-  readonly saveDay: (entry: BodyEntry) => Promise<boolean>;
+  readonly saveDay: (
+    entry: BodyEntry,
+    previousDay?: string,
+  ) => Promise<boolean>;
   readonly removeDay: (day: string) => Promise<boolean>;
   /** The stored entry for a day, or a blank one ready to fill in. */
   readonly entryFor: (day: string) => BodyEntry;
@@ -84,17 +92,34 @@ export function useBodyLog(): BodyLog {
   // Declared after `removeEntry` because it calls it, which keeps the
   // dependency honest instead of silenced.
   const saveDay = useCallback(
-    async (entry: BodyEntry): Promise<boolean> => {
+    async (entry: BodyEntry, previousDay?: string): Promise<boolean> => {
       setWriteError(null);
 
-      if (isEmptyEntry(entry)) return removeEntry(entry.day);
+      if (isEmptyEntry(entry)) {
+        const cleared = await removeEntry(entry.day);
+        // A moved-then-emptied record still has to release the day it left.
+        if (previousDay !== undefined && previousDay !== entry.day) {
+          return (await removeEntry(previousDay)) && cleared;
+        }
+        return cleared;
+      }
 
       const updated = revise(entry, {});
+      const moved = previousDay !== undefined && previousDay !== updated.day;
 
       try {
-        await (await repository).save(updated);
+        const store = await repository;
+
+        // Write first, delete second. If the delete fails the worst case is a
+        // duplicate the user can see and remove; the other order risks losing
+        // the record entirely.
+        await store.save(updated);
+        if (moved) await store.remove(previousDay);
+
         setEntries((current) => {
-          const rest = (current ?? []).filter((item) => item.day !== updated.day);
+          const rest = (current ?? []).filter(
+            (item) => item.day !== updated.day && (!moved || item.day !== previousDay),
+          );
           return [...rest, updated].sort((a, b) => a.day.localeCompare(b.day));
         });
         return true;

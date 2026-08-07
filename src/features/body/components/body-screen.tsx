@@ -1,5 +1,6 @@
 "use client";
 
+import { dayKey } from "@/core/format/day";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -11,7 +12,6 @@ import { cn } from "@/design-system/cn";
 import { useBodyLog } from "../hooks/use-body-log";
 import {
   changeIn,
-  dayKey,
   movingAverage,
   seriesOf,
   type TrendPoint,
@@ -128,12 +128,13 @@ export function BodyScreen() {
           <BodyEntryForm
             entry={entryFor(editing)}
             pending={saving}
+            takenDays={entries.map((item) => item.day)}
             onCancel={() => {
               setEditing(null);
             }}
-            onSubmit={(entry) => {
+            onSubmit={(entry, previousDay) => {
               setSaving(true);
-              void saveDay(entry).then((ok) => {
+              void saveDay(entry, previousDay).then((ok) => {
                 setSaving(false);
                 if (ok) setEditing(null);
               });

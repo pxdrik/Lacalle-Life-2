@@ -4,9 +4,8 @@ import {
   changeIn,
   chronological,
   createBodyEntry,
-  dayKey,
   EMPTY_MEASUREMENTS,
-  formatDay,
+  moveEntryToDay,
   movingAverage,
   seriesOf,
 } from "./body-log";
@@ -17,18 +16,28 @@ function entry(day: string, over: Partial<BodyEntry> = {}): BodyEntry {
   return { ...createBodyEntry(day), ...over };
 }
 
-describe("dayKey", () => {
-  it("uses the local calendar day, not UTC", () => {
-    // 21:00 in São Paulo is already tomorrow in UTC. Filing that weigh-in
-    // under the next day would put two readings on one date and none on
-    // another, which is a kink in the trend line that never happened.
-    const late = new Date(2026, 7, 7, 21, 30);
+describe("moveEntryToDay", () => {
+  it("changes the identity, because the id is the day", () => {
+    const moved = moveEntryToDay(entry("2026-08-07", { weightKg: 81 }), "2026-08-05");
 
-    expect(dayKey(late)).toBe("2026-08-07");
+    expect(moved.id).toBe("2026-08-05");
+    expect(moved.day).toBe("2026-08-05");
   });
 
-  it("pads single-digit months and days, so the key sorts as text", () => {
-    expect(dayKey(new Date(2026, 0, 5))).toBe("2026-01-05");
+  it("carries everything that was typed", () => {
+    const original = entry("2026-08-07", {
+      weightKg: 81,
+      bodyFatPercent: 17,
+      notes: "em jejum",
+      measurements: { ...EMPTY_MEASUREMENTS, waist: 84 },
+    });
+
+    const moved = moveEntryToDay(original, "2026-08-05");
+
+    expect(moved.weightKg).toBe(81);
+    expect(moved.bodyFatPercent).toBe(17);
+    expect(moved.notes).toBe("em jejum");
+    expect(moved.measurements.waist).toBe(84);
   });
 });
 
@@ -172,12 +181,3 @@ describe("movingAverage", () => {
   });
 });
 
-describe("formatDay", () => {
-  it("reads as a Brazilian date", () => {
-    expect(formatDay("2026-08-07")).toBe("07/08/2026");
-  });
-
-  it("returns anything unparseable unchanged instead of throwing", () => {
-    expect(formatDay("hoje")).toBe("hoje");
-  });
-});

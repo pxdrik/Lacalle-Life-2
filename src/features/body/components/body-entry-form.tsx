@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 
+import { dayKey, formatDay, isFutureDay } from "@/core/format/day";
 import { parseDecimal } from "@/core/format/decimal";
 import { Button } from "@/design-system/components/button";
+
+import { moveEntryToDay } from "../services/body-log";
 
 import {
   MEASUREMENT_SITE_HINTS,
@@ -15,7 +18,9 @@ import type { BodyEntry } from "../types/body-entry";
 interface Props {
   readonly entry: BodyEntry;
   readonly pending: boolean;
-  readonly onSubmit: (entry: BodyEntry) => void;
+  /** Days that already hold a record, so the form can warn before replacing. */
+  readonly takenDays: readonly string[];
+  readonly onSubmit: (entry: BodyEntry, previousDay: string) => void;
   readonly onCancel: () => void;
 }
 
@@ -30,7 +35,14 @@ interface Props {
  * Every field may be left blank. Blank means not measured, and a blank day is
  * deleted rather than stored — see `useBodyLog`.
  */
-export function BodyEntryForm({ entry, pending, onSubmit, onCancel }: Props) {
+export function BodyEntryForm({
+  entry,
+  pending,
+  takenDays,
+  onSubmit,
+  onCancel,
+}: Props) {
+  const [day, setDay] = useState(entry.day);
   const [weight, setWeight] = useState(text(entry.weightKg));
   const [fat, setFat] = useState(text(entry.bodyFatPercent));
   const [notes, setNotes] = useState(entry.notes);
@@ -43,25 +55,64 @@ export function BodyEntryForm({ entry, pending, onSubmit, onCancel }: Props) {
     MEASUREMENT_SITES.some((site) => entry.measurements[site] !== null),
   );
 
+  const future = isFutureDay(day);
+  // Only a warning, never a block: replacing a day is a legitimate correction,
+  // and the person is better placed than the app to know that.
+  const replacing = day !== entry.day && takenDays.includes(day);
+
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        onSubmit({
-          ...entry,
-          weightKg: parseDecimal(weight),
-          bodyFatPercent: parseDecimal(fat),
-          notes: notes.trim(),
-          measurements: Object.fromEntries(
-            MEASUREMENT_SITES.map((site) => [
-              site,
-              parseDecimal(sites[site] ?? ""),
-            ]),
-          ) as BodyEntry["measurements"],
-        });
+        if (future) return;
+
+        onSubmit(
+          {
+            ...moveEntryToDay(entry, day),
+            weightKg: parseDecimal(weight),
+            bodyFatPercent: parseDecimal(fat),
+            notes: notes.trim(),
+            measurements: Object.fromEntries(
+              MEASUREMENT_SITES.map((site) => [
+                site,
+                parseDecimal(sites[site] ?? ""),
+              ]),
+            ) as BodyEntry["measurements"],
+          },
+          entry.day,
+        );
       }}
       className="space-y-5"
     >
+      {/* The date leads, because the reason this field exists is somebody
+          recording a weigh-in they took days ago. */}
+      <label className="block">
+        <span className="text-xs text-ink-subtle">Data</span>
+        <input
+          type="date"
+          value={day}
+          max={dayKey(new Date())}
+          onChange={(event) => {
+            setDay(event.target.value);
+          }}
+          aria-invalid={future || undefined}
+          className="mt-1 h-(--control-h) rounded-lg border border-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+        />
+      </label>
+
+      {future && (
+        <p role="alert" className="text-xs text-danger">
+          Essa data ainda não chegou.
+        </p>
+      )}
+
+      {replacing && (
+        <p className="text-xs text-ink-muted">
+          Já existe um registro em {formatDay(day)}. Salvar substitui o que
+          está lá.
+        </p>
+      )}
+
       <div className="grid grid-cols-2 gap-3">
         <Number
           label="Peso"

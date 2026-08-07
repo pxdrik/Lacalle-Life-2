@@ -1,6 +1,8 @@
 import { Card } from "@/design-system/components/card";
 
-import { formatShortDay, type TrendPoint } from "../services/body-log";
+import { formatShortDay } from "@/core/format/day";
+
+import type { TrendPoint } from "../services/body-log";
 
 interface Props {
   readonly points: readonly TrendPoint[];

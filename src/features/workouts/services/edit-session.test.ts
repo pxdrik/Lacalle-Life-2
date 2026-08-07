@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+﻿import { describe, expect, it } from "vitest";
 
 import { createRoutine, createRoutineExercise } from "./create-routine";
 import { addExercise, updateExercise, updateSet } from "./edit-routine";
@@ -6,6 +6,7 @@ import {
   addPerformedSet,
   completeSet,
   finishSession,
+  moveSessionToDay,
   removePerformedSet,
   reopenSession,
   setSessionExerciseNotes,
@@ -21,6 +22,7 @@ import {
   sessionVolumeKg,
 } from "./session-stats";
 import { startSession } from "./start-session";
+import type { Session } from "../types/session";
 
 function runningSession() {
   let routine = createRoutine("Treino A");
@@ -268,5 +270,58 @@ describe("stale references", () => {
     expect(completeSet(session, "gone", setIds[0]!)).toBe(session);
     expect(completeSet(session, exerciseId, "gone")).toBe(session);
     expect(addPerformedSet(session, "gone")).toBe(session);
+  });
+});
+
+describe("moveSessionToDay", () => {
+  /** A session that started on 07/08/2026 at 07:12 and ran `minutes`. */
+  function trainedOn(minutes: number): Session {
+    const startedAt = new Date(2026, 7, 7, 7, 12).getTime();
+
+    return {
+      ...runningSession().session,
+      startedAt,
+      finishedAt: startedAt + minutes * 60_000,
+    };
+  }
+
+  it("preserves the duration, because only the calendar day is wrong", () => {
+    // The gap between start and finish is what was actually measured. A
+    // 47-minute workout stays 47 minutes long on whatever day it is filed.
+    const moved = moveSessionToDay(trainedOn(47), "2026-08-05");
+
+    expect(sessionDurationMs(moved)).toBe(47 * 60_000);
+  });
+
+  it("keeps the time of day", () => {
+    // Somebody is fixing which day they trained, not what time they trained.
+    const started = new Date(
+      moveSessionToDay(trainedOn(30), "2026-08-05").startedAt,
+    );
+
+    expect(started.getDate()).toBe(5);
+    expect(started.getHours()).toBe(7);
+    expect(started.getMinutes()).toBe(12);
+  });
+
+  it("moves only the start of a session still running", () => {
+    const moved = moveSessionToDay(runningSession().session, "2026-08-05");
+
+    expect(moved.finishedAt).toBeNull();
+    expect(new Date(moved.startedAt).getDate()).toBe(5);
+  });
+
+  it("returns the same session for a day it is already on", () => {
+    // No write, no bumped `updatedAt`, no pointless sync later.
+    const session = trainedOn(30);
+
+    expect(moveSessionToDay(session, "2026-08-07")).toBe(session);
+  });
+
+  it("ignores an unparseable day rather than producing an invalid date", () => {
+    const session = trainedOn(30);
+
+    expect(moveSessionToDay(session, "")).toBe(session);
+    expect(moveSessionToDay(session, "ontem")).toBe(session);
   });
 });

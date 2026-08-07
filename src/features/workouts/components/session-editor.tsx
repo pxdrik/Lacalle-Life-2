@@ -4,9 +4,12 @@ import { Check } from "lucide-react";
 
 import { Button } from "@/design-system/components/button";
 
+import { dayKey, isFutureDay } from "@/core/format/day";
+
 import {
   addPerformedSet,
   completeSet,
+  moveSessionToDay,
   removePerformedSet,
   renameSession,
   setSessionExerciseNotes,
@@ -58,6 +61,29 @@ export function SessionEditor({ session, apply, onDone }: Props) {
         }}
         className="-mx-1.5 mt-1 w-full rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-2xl font-semibold tracking-tight transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
       />
+
+      {/* Correcting the day a workout happened, which the app could not do
+          before: it only ever stamped "now", so a Saturday session logged on
+          Sunday landed in the wrong week — and volume-per-week and "última
+          vez" both read from this. */}
+      <label className="mt-4 flex items-center gap-3">
+        <span className="text-xs text-ink-subtle">Data do treino</span>
+        <input
+          type="date"
+          value={dayKey(new Date(session.startedAt))}
+          max={dayKey(new Date())}
+          onChange={(event) => {
+            const day = event.target.value;
+            if (day === "" || isFutureDay(day)) return;
+
+            apply((current) => moveSessionToDay(current, day));
+          }}
+          className="h-(--control-h) rounded-lg border border-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+        />
+        <span className="text-xs text-ink-subtle">
+          A duração não muda — só o dia.
+        </span>
+      </label>
 
       <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center justify-end border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
         <Button size="sm" onClick={onDone}>
