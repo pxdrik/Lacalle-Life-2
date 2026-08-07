@@ -45,6 +45,11 @@ const nextConfig: NextConfig = {
         hostname: "cdn.jsdelivr.net",
         pathname: "/gh/yuhonas/free-exercise-db@*/exercises/**",
       },
+      {
+        protocol: "https",
+        hostname: "wger.de",
+        pathname: "/media/exercise-images/**",
+      },
     ],
   },
 };

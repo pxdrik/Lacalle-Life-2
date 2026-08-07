@@ -1,64 +1,111 @@
 import { describe, expect, it } from "vitest";
 
-import media from "../data/exercise-media.json";
 import { CATALOGUE } from "../data/catalogue/catalogue";
+import media from "../data/exercise-media.json";
 import {
+  creditsFor,
   MEDIA_SOURCES,
-  mediaAttribution,
   mediaUrl,
+  resolveCredit,
   type ExerciseMedia,
 } from "./media-sources";
 
 const entries = Object.entries(media) as [string, ExerciseMedia][];
 
+const anyMedia = (over: Partial<ExerciseMedia> = {}): ExerciseMedia => ({
+  source: "free-exercise-db",
+  images: ["a/0.jpg"],
+  credit: null,
+  ...over,
+});
+
 describe("mediaUrl", () => {
   it("joins the source's base url to the stored path", () => {
-    const url = mediaUrl({
-      source: "free-exercise-db",
-      images: ["Barbell_Bench_Press_-_Medium_Grip/0.jpg"],
-    });
-
-    expect(url).toBe(
+    expect(
+      mediaUrl(anyMedia({ images: ["Barbell_Bench_Press_-_Medium_Grip/0.jpg"] })),
+    ).toBe(
       "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
     );
   });
 
+  it("uses each source's own base url", () => {
+    expect(
+      mediaUrl({ source: "wger", images: ["exercise-images/1/a.png"], credit: null }),
+    ).toBe("https://wger.de/media/exercise-images/1/a.png");
+  });
+
   it("returns null past the end instead of a url with 'undefined' in it", () => {
-    expect(mediaUrl({ source: "free-exercise-db", images: [] })).toBeNull();
-    expect(mediaUrl({ source: "free-exercise-db", images: ["a.jpg"] }, 1)).toBeNull();
+    expect(mediaUrl(anyMedia({ images: [] }))).toBeNull();
+    expect(mediaUrl(anyMedia(), 1)).toBeNull();
   });
 });
 
-describe("attribution", () => {
-  it("carries everything CC-BY-SA asks us to name", () => {
-    for (const source of Object.values(MEDIA_SOURCES)) {
-      expect(source.author).not.toBe("");
-      expect(source.license).not.toBe("");
-      expect(source.licenseUrl).toMatch(/^https:\/\//);
-      expect(source.sourceUrl).toMatch(/^https:\/\//);
-      expect(source.authorUrl).toMatch(/^https:\/\//);
-      expect(source.repository).not.toBe("");
-    }
+describe("resolveCredit", () => {
+  it("falls back to the source when the photo names no author", () => {
+    expect(resolveCredit(anyMedia())?.author).toBe("Everkinetic");
   });
 
-  it("resolves for every source the mapping actually uses", () => {
-    for (const [, entry] of entries) {
-      expect(mediaAttribution(entry).license).toBe("CC BY-SA 4.0");
-    }
+  it("prefers the photo's own credit, for sources that licence per image", () => {
+    const credit = resolveCredit({
+      source: "wger",
+      images: ["exercise-images/1/a.png"],
+      credit: {
+        author: "roneydya",
+        license: "CC BY-SA 4.0",
+        licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+      },
+    });
+
+    expect(credit?.author).toBe("roneydya");
+    expect(credit?.repository).toBe("wger");
+  });
+
+  it("returns null when nothing can be credited", () => {
+    // wger has no source-level credit, so a photo without its own would be
+    // unattributable — the build script refuses to emit one.
+    expect(
+      resolveCredit({ source: "wger", images: ["exercise-images/1/a.png"], credit: null }),
+    ).toBeNull();
+  });
+});
+
+describe("creditsFor", () => {
+  it("lists nothing when no photo is on screen", () => {
+    expect(creditsFor([null, null])).toEqual([]);
+  });
+
+  it("collapses repeats, so one author is credited once", () => {
+    expect(creditsFor([anyMedia(), anyMedia(), null])).toHaveLength(1);
+  });
+
+  it("keeps the same author apart under different licences", () => {
+    // Everkinetic appears under 4.0 via free-exercise-db and 3.0 via wger, and
+    // the two licences are not interchangeable.
+    const credits = creditsFor([
+      anyMedia(),
+      {
+        source: "wger",
+        images: ["exercise-images/125/Leg-raises-1.png"],
+        credit: {
+          author: "Everkinetic",
+          license: "CC BY-SA 3.0",
+          licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+        },
+      },
+    ]);
+
+    expect(credits).toHaveLength(2);
+    expect(credits.map((c) => c.license).sort()).toEqual([
+      "CC BY-SA 3.0",
+      "CC BY-SA 4.0",
+    ]);
   });
 });
 
 describe("exercise-media.json", () => {
   it("maps only ids that exist in the catalogue", () => {
     const ids = new Set(CATALOGUE.map((exercise) => exercise.id));
-    const orphans = entries
-      .map(([id]) => id)
-      .filter((id) => !ids.has(id));
-
-    // A renamed or removed exercise leaves its picture pointing at nothing.
-    // Silently dropping it would be fine; noticing is better, because the
-    // mapping is hand-verified and a lost pair is work thrown away.
-    expect(orphans).toEqual([]);
+    expect(entries.map(([id]) => id).filter((id) => !ids.has(id))).toEqual([]);
   });
 
   it("declares a known source and at least one image per entry", () => {
@@ -68,9 +115,15 @@ describe("exercise-media.json", () => {
     }
   });
 
+  it("can credit every photo it ships", () => {
+    // The licences involved are all attribution licences. An entry nobody can
+    // be credited for is one we are not allowed to display.
+    for (const [id, entry] of entries) {
+      expect(resolveCredit(entry), id).not.toBeNull();
+    }
+  });
+
   it("stores relative paths, never absolute urls", () => {
-    // The base url belongs to the source record. A path that smuggles in its
-    // own host would survive a source migration and quietly keep hotlinking.
     for (const [id, entry] of entries) {
       for (const path of entry.images) {
         expect(path, id).not.toMatch(/^https?:\/\//);
@@ -79,10 +132,9 @@ describe("exercise-media.json", () => {
     }
   });
 
-  it("does not give two exercises the same illustration", () => {
+  it("does not give two exercises the same photo", () => {
     // Distinct movements sharing a picture means a match was made by
-    // resemblance rather than by identity — exactly the failure mode the
-    // hand-verification exists to prevent.
+    // resemblance rather than by identity.
     const seen = new Map<string, string>();
 
     for (const [id, entry] of entries) {

@@ -35,3 +35,4 @@ yarn-error.log*
 # truth — the reviewed pairs live in scripts/build-exercise-media.mjs.
 scripts/.cache-*.json
 scripts/.matches.json
+scripts/.cache-wger.json

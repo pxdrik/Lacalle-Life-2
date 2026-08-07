@@ -89,7 +89,11 @@ describe("ExerciseDetail", () => {
     rerender(
       <ExerciseDetail
         exercise={exercise({
-          media: { source: "free-exercise-db", images: ["a/0.jpg", "a/1.jpg"] },
+          media: {
+            source: "free-exercise-db",
+            images: ["a/0.jpg", "a/1.jpg"],
+            credit: null,
+          },
         })}
       />,
     );

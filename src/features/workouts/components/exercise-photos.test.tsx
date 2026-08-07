@@ -27,7 +27,10 @@ function exercise(images: string[]): Exercise {
     technicalDifficulty: null,
     isUnilateral: null,
     isCompound: null,
-    media: images.length === 0 ? null : { source: "free-exercise-db", images },
+    media:
+      images.length === 0
+        ? null
+        : { source: "free-exercise-db", images, credit: null },
     classification: "catalogue",
     isCustom: false,
     isFavorite: false,

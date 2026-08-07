@@ -45,17 +45,21 @@ entregue; o resto continua adiado:
 
 ### 2. Cobertura de fotos
 
-**31 exercícios sem imagem**, de 78 na primeira rodada. A segunda passagem no
-`free-exercise-db` fechou 47.
+**25 exercícios sem imagem**, de 78 originais. A segunda passagem no
+`free-exercise-db` fechou 47 e o `wger` fechou 6.
 
-O que sobrou não é preguiça de busca: são versões em máquina de exercícios que
-o dataset só tem na forma livre, movimentos que ele simplesmente não cobre, e
-casos onde a foto disponível apagaria uma distinção real (búlgaro × split
-squat, romeno × stiff-legged). A lista completa e o motivo de cada um estão em
-`docs/catalogo-exercicios.md`.
+As duas fontes livres estão esgotadas. Para os 25 restantes existem três
+caminhos, e a escolha é de produto:
 
-Próxima fonte: `wger`, licença por imagem e cerca de 360 fotos — mesma regra,
-uma a uma, nunca por casamento automático.
+1. **Deixar sem foto.** O modelo trata isso como estado legítimo e a tela de
+   detalhe funciona sem imagem. Custo zero, lacuna permanente.
+2. **Permitir que uma foto sirva a mais de uma entrada** quando o movimento é
+   o mesmo e só o equipamento muda — leg press horizontal usando a foto do
+   45°, elevação pélvica na máquina usando a da barra. Fecharia cerca de 12.
+   Custo: a foto mostra um equipamento diferente do que o nome promete.
+3. **Fotografar ou ilustrar sob encomenda.** Fecha tudo, com custo real.
+
+Gerar por IA está fora: contradiz a regra fundadora do projeto.
 
 ### 3. Evolução corporal
 

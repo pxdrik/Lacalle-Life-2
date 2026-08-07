@@ -19,7 +19,11 @@ function exercise(overrides: Partial<Exercise> = {}): Exercise {
     technicalDifficulty: null,
     isUnilateral: null,
     isCompound: null,
-    media: { source: "free-exercise-db", images: ["a/0.jpg", "a/1.jpg"] },
+    media: {
+      source: "free-exercise-db",
+      images: ["a/0.jpg", "a/1.jpg"],
+      credit: null,
+    },
     classification: "catalogue",
     isCustom: false,
     isFavorite: false,

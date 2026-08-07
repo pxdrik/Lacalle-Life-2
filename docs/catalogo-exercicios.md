@@ -247,7 +247,26 @@ e custa uma linha de crédito — renderizada a partir do mesmo registro que ger
 a URL, em `taxonomy/media-sources.ts`, para que não exista um segundo lugar
 onde a atribuição possa se perder.
 
-### Cobertura: 152 de 183
+### Segunda fonte: wger, 6 fotos de 10 candidatas
+
+O wger licencia **por imagem**, com autor próprio em cada uma — por isso o
+modelo carrega `credit` na entrada, e a atribuição na tela é derivada das
+fotos visíveis, não de uma lista fixa de fontes.
+
+Dos 360 arquivos, 87 não declaram autor. Licença de atribuição sem autor é
+inutilizável: não dá para creditar quem não se sabe quem é. Sobram 273.
+
+**A flag `is_ai_generated` do wger não é confiável.** Entre as candidatas
+marcadas como `false` havia uma ilustração gerada de *bird dog* ambientada
+dentro de uma nave espacial, e duas pinturas geradas de wall sit e terra
+romeno unilateral. Por isso toda imagem vinda do wger é **baixada e olhada**
+antes de entrar — foi o que reduziu 10 candidatas a 6.
+
+Isso também respeita a regra fundadora do projeto: nada de IA. Ela foi escrita
+sobre funcionalidades, e conteúdo gerado num app definido como livre de IA é
+no mínimo uma decisão do dono do projeto, não minha.
+
+### Cobertura: 158 de 183
 
 O casamento automático propôs 75 pares. Revisando um a um, **cerca de metade
 estava errada** de um jeito que só humano percebe:

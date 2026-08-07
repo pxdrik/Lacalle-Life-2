@@ -18,6 +18,9 @@ const CACHE = "scripts/.cache-free-exercise-db.json";
 const CATALOGUE = "src/features/workouts/data/catalogue";
 const OUT = "src/features/workouts/data/exercise-media.json";
 
+const CC_BY_SA_4 = "https://creativecommons.org/licenses/by-sa/4.0/";
+const CC_BY_SA_3 = "https://creativecommons.org/licenses/by-sa/3.0/";
+
 /** our id -> the dataset's exact `name`. Verified one by one. */
 const PAIRS = {
   // Peito
@@ -187,6 +190,50 @@ const PAIRS = {
   "tiro-corrida": "Wind Sprints",
 };
 
+/**
+ * wger, added one photo at a time and **each one looked at**.
+ *
+ * Its `is_ai_generated` flag cannot be trusted: several images marked `false`
+ * are plainly generated, including a bird dog performed inside a spaceship.
+ * Every entry below was downloaded and viewed before being written here, and
+ * ten candidates became six.
+ *
+ * Credit is per photo because wger takes uploads from many people under
+ * several licences.
+ */
+const WGER = {
+  "agachamento-bulgaro": {
+    images: ["exercise-images/1706/0c5243cc-2539-4005-aee0-d3a8c5d3a32c.jfif"],
+    credit: { author: "AlucardEvil40", license: "CC BY-SA 4.0", licenseUrl: CC_BY_SA_4 },
+  },
+  "terra-romeno-halteres": {
+    images: ["exercise-images/1652/0306c8c0-70cc-45d4-92de-6fa72ceaa834.webp"],
+    credit: { author: "AlucardEvil40", license: "CC BY-SA 4.0", licenseUrl: CC_BY_SA_4 },
+  },
+  "agachamento-lateral": {
+    images: ["exercise-images/1653/c10c4e17-1e14-4cf9-930b-cc3a614f15dd.webp"],
+    credit: { author: "AlucardEvil40", license: "CC BY-SA 4.0", licenseUrl: CC_BY_SA_4 },
+  },
+  "elevacao-lateral-maquina": {
+    images: ["exercise-images/1654/aa724a58-b3b5-4522-b278-1155416236a5.jpg"],
+    credit: { author: "roneydya", license: "CC BY-SA 4.0", licenseUrl: CC_BY_SA_4 },
+  },
+  "agachamento-pistol": {
+    images: ["exercise-images/456/3b681e59-377b-40db-9113-ca5873ce084b.jpg"],
+    credit: { author: "wakanda90", license: "CC BY-SA 4.0", licenseUrl: CC_BY_SA_4 },
+  },
+  "abdominal-infra": {
+    // Everkinetic again, but the older line-art set and under 3.0 — a
+    // different licence from the same author, which is why credit is compared
+    // by author *and* licence.
+    images: [
+      "exercise-images/125/Leg-raises-1.png",
+      "exercise-images/125/Leg-raises-2.png",
+    ],
+    credit: { author: "Everkinetic", license: "CC BY-SA 3.0", licenseUrl: CC_BY_SA_3 },
+  },
+};
+
 const source = JSON.parse(readFileSync(CACHE, "utf8"));
 const byName = new Map(source.map((entry) => [entry.name, entry]));
 
@@ -216,10 +263,33 @@ for (const [id, name] of Object.entries(PAIRS)) {
     continue;
   }
 
-  media[id] = { source: "free-exercise-db", images: entry.images };
+  media[id] = { source: "free-exercise-db", images: entry.images, credit: null };
 }
 
-writeFileSync(OUT, JSON.stringify(media, null, 2) + "\n");
+for (const [id, entry] of Object.entries(WGER)) {
+  if (!ourIds.has(id)) {
+    problems.push(`id inexistente no catálogo: ${id}`);
+    continue;
+  }
+  if (media[id] !== undefined) {
+    problems.push(`já coberto pelo free-exercise-db: ${id}`);
+    continue;
+  }
+  if (entry.credit === undefined || !entry.credit.author) {
+    // Every wger licence is an attribution licence. No author, no photo.
+    problems.push(`sem autor para creditar: ${id}`);
+    continue;
+  }
+
+  media[id] = { source: "wger", images: entry.images, credit: entry.credit };
+}
+
+// Sorted so a rebuild produces a stable diff rather than reshuffling.
+const sorted = Object.fromEntries(
+  Object.entries(media).sort(([a], [b]) => a.localeCompare(b)),
+);
+
+writeFileSync(OUT, JSON.stringify(sorted, null, 2) + "\n");
 
 console.log(`catálogo:   ${String(ourIds.size)}`);
 console.log(`mapeados:   ${String(Object.keys(media).length)}`);

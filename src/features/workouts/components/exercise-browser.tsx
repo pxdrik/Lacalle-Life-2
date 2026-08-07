@@ -189,10 +189,9 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             </div>
           )}
 
-          {/* Credit is owed where the work is shown, and only there. */}
-          {results.some((exercise) => exercise.media !== null) && (
-            <MediaAttribution />
-          )}
+          {/* Credit is owed where the work is shown, and only there — so it
+              is derived from the rows on screen, not from a fixed list. */}
+          <MediaAttribution media={results.map((exercise) => exercise.media)} />
 
           <ExerciseDetailDialog control={detail} />
         </>

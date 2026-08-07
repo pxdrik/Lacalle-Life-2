@@ -1,48 +1,58 @@
-import { MEDIA_SOURCES } from "../taxonomy/media-sources";
+import { creditsFor, type ExerciseMedia } from "../taxonomy/media-sources";
 
 /**
- * The credit line CC-BY-SA obliges us to show wherever the photos are.
+ * The credit CC-BY-SA obliges us to show wherever the photos are.
  *
- * Rendered from `MEDIA_SOURCES`, so adding a source adds its attribution and
- * there is no second place to keep in sync. Quiet by design — a licence is a
- * duty to the author, not a banner for the user.
+ * Takes the photos actually on screen rather than listing every source we have
+ * ever used: crediting an author whose work is not being shown is noise, and
+ * failing to credit one whose work *is* being shown is a licence breach. The
+ * list is derived, so a new photo brings its own credit with it and there is
+ * no second place to keep in sync.
+ *
+ * Renders nothing when nothing on screen needs crediting.
  */
-export function MediaAttribution() {
+export function MediaAttribution({
+  media,
+}: {
+  readonly media: readonly (ExerciseMedia | null)[];
+}) {
+  const credits = creditsFor(media);
+  if (credits.length === 0) return null;
+
   return (
     <p className="px-3 py-4 text-xs text-ink-subtle">
       Fotos dos exercícios por{" "}
-      {Object.values(MEDIA_SOURCES).map((source, index) => (
-        <span key={source.sourceUrl}>
-          {index > 0 && ", "}
-          <a
-            href={source.authorUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline underline-offset-2 hover:text-ink"
-          >
-            {source.author}
-          </a>
+      {credits.map((credit, index) => (
+        <span key={`${credit.author}|${credit.license}`}>
+          {index > 0 && (index === credits.length - 1 ? " e " : ", ")}
+          {credit.author}
+          {" ("}
+          <Link href={credit.licenseUrl}>{credit.license}</Link>
           {", via "}
-          <a
-            href={source.sourceUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline underline-offset-2 hover:text-ink"
-          >
-            {source.repository}
-          </a>
-          {", sob "}
-          <a
-            href={source.licenseUrl}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="underline underline-offset-2 hover:text-ink"
-          >
-            {source.license}
-          </a>
+          <Link href={credit.sourceUrl}>{credit.repository}</Link>
+          {")"}
         </span>
       ))}
       .
     </p>
+  );
+}
+
+function Link({
+  href,
+  children,
+}: {
+  readonly href: string;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="underline underline-offset-2 hover:text-ink"
+    >
+      {children}
+    </a>
   );
 }

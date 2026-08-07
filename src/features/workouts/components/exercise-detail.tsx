@@ -94,7 +94,7 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
 
       {hasPhotos && (
         <div className="-mx-5 -mb-5 border-t border-line">
-          <MediaAttribution />
+          <MediaAttribution media={[exercise.media]} />
         </div>
       )}
     </div>
