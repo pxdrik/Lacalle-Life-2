@@ -72,9 +72,15 @@ const foodLogRepository = once<FoodLogRepository>(async () => {
 });
 
 /**
- * The food log needs the foods (to add one to a meal) and the diets (to start
- * a day from one), so it carries all three rather than making the route
- * remember which.
+ * The food log needs the foods (to add one to a meal), the diets (to start a
+ * day from one) and the profile (to compare the day against a target).
+ *
+ * **The profile is the one that was missed, and it failed silently.**
+ * `useNutritionTargets` reads through `useOptionalProfileRepository`, which
+ * returns null without a provider rather than throwing — the design that keeps
+ * the diet editor working for someone who never filled a profile in. Here that
+ * same tolerance turned a wiring mistake into "the targets just never show
+ * up", on the screen whose whole point is comparing what was eaten to a goal.
  */
 export function FoodLogDataProvider({
   children,
@@ -85,7 +91,9 @@ export function FoodLogDataProvider({
     <FoodLogRepositoryProvider repository={foodLogRepository()}>
       <DietRepositoryProvider repository={dietRepository()}>
         <FoodRepositoryProvider repository={foodRepository()}>
-          {children}
+          <ProfileRepositoryProvider repository={profileRepository()}>
+            {children}
+          </ProfileRepositoryProvider>
         </FoodRepositoryProvider>
       </DietRepositoryProvider>
     </FoodLogRepositoryProvider>

@@ -137,6 +137,29 @@ describe("customFoodSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("answers in Portuguese, including for a blank number", () => {
+    // A blank field arrives as `NaN`, and Zod's own message for that is
+    // "Invalid input: expected number, received NaN" — library text, in
+    // English, shown to somebody at the exact moment they got something
+    // wrong. Every message this schema can emit has to be ours.
+    const result = customFoodSchema.safeParse({
+      name: "",
+      category: "protein",
+      per100g: {
+        kcal: Number.NaN,
+        proteinG: Number.NaN,
+        carbsG: -1,
+        fatG: 200,
+      },
+    });
+
+    expect(result.success).toBe(false);
+    for (const issue of result.error!.issues) {
+      expect(issue.message, issue.path.join(".")).not.toMatch(/Invalid input/i);
+      expect(issue.message, issue.path.join(".")).not.toMatch(/expected/i);
+    }
+  });
+
   it("rejects negative values", () => {
     const result = customFoodSchema.safeParse({
       ...VALID,

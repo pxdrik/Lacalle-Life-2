@@ -18,18 +18,18 @@ export const nutritionProfileSchema = z.object({
   sex: z.enum(BIOLOGICAL_SEXES),
 
   ageYears: z
-    .number()
+    .number({ error: "Preencha a idade." })
     .int("Idade deve ser um número inteiro.")
     .min(INPUT_BOUNDS.ageYears.min, `Idade mínima: ${INPUT_BOUNDS.ageYears.min} anos.`)
     .max(INPUT_BOUNDS.ageYears.max, `Idade máxima: ${INPUT_BOUNDS.ageYears.max} anos.`),
 
   heightCm: z
-    .number()
+    .number({ error: "Preencha a altura." })
     .min(INPUT_BOUNDS.heightCm.min, `Altura mínima: ${INPUT_BOUNDS.heightCm.min} cm.`)
     .max(INPUT_BOUNDS.heightCm.max, `Altura máxima: ${INPUT_BOUNDS.heightCm.max} cm.`),
 
   weightKg: z
-    .number()
+    .number({ error: "Preencha o peso." })
     .min(INPUT_BOUNDS.weightKg.min, `Peso mínimo: ${INPUT_BOUNDS.weightKg.min} kg.`)
     .max(INPUT_BOUNDS.weightKg.max, `Peso máximo: ${INPUT_BOUNDS.weightKg.max} kg.`),
 
@@ -42,9 +42,15 @@ export const nutritionProfileSchema = z.object({
    * weight-only formula.
    */
   bodyFatPercent: z
-    .number()
-    .min(INPUT_BOUNDS.bodyFatPercent.min)
-    .max(INPUT_BOUNDS.bodyFatPercent.max)
+    .number({ error: "Gordura corporal precisa ser um número." })
+    .min(
+      INPUT_BOUNDS.bodyFatPercent.min,
+      `Gordura corporal mínima: ${INPUT_BOUNDS.bodyFatPercent.min}%.`,
+    )
+    .max(
+      INPUT_BOUNDS.bodyFatPercent.max,
+      `Gordura corporal máxima: ${INPUT_BOUNDS.bodyFatPercent.max}%.`,
+    )
     .optional(),
 
   /**
@@ -52,9 +58,15 @@ export const nutritionProfileSchema = z.object({
    * The engine clamps it to a sustainable rate and says when it did.
    */
   weeklyChangeKg: z
-    .number()
-    .min(INPUT_BOUNDS.weeklyChangeKg.min)
-    .max(INPUT_BOUNDS.weeklyChangeKg.max)
+    .number({ error: "Ritmo precisa ser um número." })
+    .min(
+      INPUT_BOUNDS.weeklyChangeKg.min,
+      `Ritmo mínimo: ${INPUT_BOUNDS.weeklyChangeKg.min} kg por semana.`,
+    )
+    .max(
+      INPUT_BOUNDS.weeklyChangeKg.max,
+      `Ritmo máximo: ${INPUT_BOUNDS.weeklyChangeKg.max} kg por semana.`,
+    )
     .optional(),
 });
 

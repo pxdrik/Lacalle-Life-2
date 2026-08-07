@@ -3,15 +3,31 @@ import { z } from "zod";
 import { FOOD_CATEGORIES } from "../types/food";
 
 /**
+ * A required number, in Portuguese.
+ *
+ * The `error` is the point. A blank field reaches the schema as `NaN`, and
+ * without a message of our own Zod answers "Invalid input: expected number,
+ * received NaN" — library text, in English, in an app that is entirely in
+ * Portuguese. It is the one place the product broke character, and it broke it
+ * at the worst moment: the first time somebody gets something wrong.
+ */
+function required(label: string, max: number, unit: string) {
+  return z
+    .number({ error: `Preencha ${label}.` })
+    .min(0, `${label} não pode ser negativo.`)
+    .max(max, `${label}: no máximo ${String(max)} ${unit} por 100 g.`);
+}
+
+/**
  * Bounds are physical rather than arbitrary: nothing edible exceeds 900 kcal
  * per 100 g (pure fat is 900), and no single macro can exceed 100 g in 100 g
  * of food.
  */
 const macrosSchema = z.object({
-  kcal: z.number().min(0).max(900),
-  proteinG: z.number().min(0).max(100),
-  carbsG: z.number().min(0).max(100),
-  fatG: z.number().min(0).max(100),
+  kcal: required("as calorias", 900, "kcal"),
+  proteinG: required("a proteína", 100, "g"),
+  carbsG: required("o carboidrato", 100, "g"),
+  fatG: required("a gordura", 100, "g"),
 });
 
 /**
