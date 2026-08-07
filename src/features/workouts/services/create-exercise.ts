@@ -29,6 +29,7 @@ export function createCustomExercise(input: CustomExerciseInput): Exercise {
     technicalDifficulty: null,
     isUnilateral: null,
     isCompound: null,
+    media: null,
     classification: "user",
     isCustom: true,
     isFavorite: false,

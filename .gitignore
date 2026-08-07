@@ -29,3 +29,9 @@ yarn-error.log*
 # env
 .env
 .env*.local
+
+# scratch files from the exercise-media scripts: an 846 KB download cache and
+# the matcher's raw proposals. Both are regenerable and neither is a source of
+# truth — the reviewed pairs live in scripts/build-exercise-media.mjs.
+scripts/.cache-*.json
+scripts/.matches.json

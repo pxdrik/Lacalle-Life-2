@@ -27,6 +27,26 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
 
   poweredByHeader: false,
+
+  /**
+   * Exercise photos are served from the source repository through
+   * jsDelivr — never copied into this repo, never re-hosted.
+   *
+   * They are routed through Next's optimizer rather than linked directly
+   * because the originals are 850x567 and we draw them at 64px wide. Straight
+   * `<img>` tags would ship roughly two hundred times the pixels needed. The
+   * optimizer also makes the URLs same-origin, which is what a service worker
+   * will need to cache when offline support lands.
+   */
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.jsdelivr.net",
+        pathname: "/gh/yuhonas/free-exercise-db@*/exercises/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

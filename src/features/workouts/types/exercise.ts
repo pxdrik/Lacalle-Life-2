@@ -1,6 +1,7 @@
 import type { Entity } from "@/core/domain/entity";
 
 import type { Equipment } from "../taxonomy/equipment";
+import type { ExerciseMedia } from "../taxonomy/media-sources";
 import type {
   MovementPattern,
   MovementPlane,
@@ -76,6 +77,17 @@ export interface Exercise extends Entity {
    * `null` when undecided.
    */
   readonly isCompound: boolean | null;
+
+  /**
+   * Photographs of the movement, when a source has them under terms we can
+   * honour.
+   *
+   * `null` for most of the catalogue, and that is fine: an exercise with a
+   * trustworthy name and no picture is a good entry, while a picture of the
+   * wrong movement teaches the wrong movement. Only verified matches carry
+   * media — see `data/exercise-media.json`.
+   */
+  readonly media: ExerciseMedia | null;
 
   readonly classification: ClassificationSource;
   readonly isCustom: boolean;

@@ -220,3 +220,63 @@ confiar. Estimo 160 a 200 registros.
 
 Depois da aprovação, entrego em lotes por região, para você revisar sem
 precisar ler duzentos registros de uma vez.
+
+---
+
+## 8. Fotos dos exercícios
+
+### Escolha da fonte
+
+Quatro repositórios avaliados. O critério foi licença, não quantidade:
+
+| Repositório | Licença das imagens | Decisão |
+| --- | --- | --- |
+| `hasaneyldrm/exercises-dataset` | © Gym visual, exige licença própria | ❌ recusado |
+| `yuhonas/free-exercise-db` | Unlicense declarada; imagens são da Everkinetic, **CC BY-SA 4.0** | ✅ adotado |
+| `joao-gugel/exercicios-bd-ptbr` | imagens removidas pelo próprio autor por direito autoral | ➖ nada a somar |
+| `wger-project/wger` | licença por imagem, ~360 imagens | reserva |
+
+O primeiro tem o melhor material — GIFs animados — e é justamente o que não
+podemos usar. Estar redistribuído em outro repositório não muda os termos.
+
+O adotado declara Unlicense, e essa declaração não se sustenta: as imagens vêm
+da Everkinetic sob CC BY-SA 4.0, e ninguém relicencia obra de terceiro para
+domínio público. Duas perguntas sobre isso no issue tracker seguem sem
+resposta. Tratamos as imagens como o que elas são, o que permite uso comercial
+e custa uma linha de crédito — renderizada a partir do mesmo registro que gera
+a URL, em `taxonomy/media-sources.ts`, para que não exista um segundo lugar
+onde a atribuição possa se perder.
+
+### Cobertura: 105 de 183
+
+O casamento automático propôs 75 pares. Revisando um a um, **cerca de metade
+estava errada** de um jeito que só humano percebe:
+
+- `supino-reto-barra` → "Barbell **Guillotine** Bench Press"
+- `cadeira-flexora` → "**Ball** Leg Curl"
+- `levantamento-terra` → "**Axle** Deadlift"
+- `hiperextensao` → "**Reverse** Hyperextension" (que já é outro registro nosso)
+
+O script foi descartado como fonte e mantido apenas como gerador de propostas.
+Os 105 pares que valem estão escritos à mão em `scripts/build-exercise-media.mjs`;
+os caminhos das imagens saem do próprio dataset, nunca digitados.
+
+Os outros 78 exercícios ficam sem foto, o que o modelo já trata como estado
+legítimo. É a mesma regra da classificação: **foto errada é pior que foto
+nenhuma** — ela ensina o movimento errado para quem está aprendendo.
+
+### Entrega
+
+Via jsDelivr, sem copiar nada para este repositório. As imagens passam pelo
+otimizador do Next porque o original tem 850×567 e desenhamos a 64 px de
+largura; `<img>` direto enviaria cerca de duzentas vezes os pixels
+necessários. De quebra, as URLs ficam same-origin, que é do que o service
+worker vai precisar quando o offline entrar.
+
+### Migração
+
+Semear pula banco já populado, então quem usava o app antes disso nunca veria
+foto alguma. `refreshExerciseMedia` preenche as linhas guardadas, uma vez por
+revisão do mapeamento. Linhas escritas antes deste campo **não têm a chave
+`media`** — `undefined`, não `null` — e essa distinção é o que a função precisa
+enxergar para não pular exatamente as linhas que existe para corrigir.

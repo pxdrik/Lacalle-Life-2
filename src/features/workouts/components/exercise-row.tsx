@@ -8,6 +8,7 @@ import { EQUIPMENT_LABELS } from "../taxonomy/equipment";
 import { TECHNICAL_DIFFICULTY_LABELS } from "../taxonomy/movement";
 import { MUSCLE_LABELS } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
+import { ExerciseThumbnail } from "./exercise-thumbnail";
 
 interface Props {
   readonly exercise: Exercise;
@@ -22,29 +23,7 @@ export function ExerciseRow({ exercise, onToggleFavorite, onSelect }: Props) {
 
   return (
     <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
-      <button
-        type="button"
-        onClick={() => {
-          onToggleFavorite(exercise);
-        }}
-        aria-pressed={exercise.isFavorite}
-        aria-label={
-          exercise.isFavorite
-            ? `Remover ${exercise.name} dos favoritos`
-            : `Favoritar ${exercise.name}`
-        }
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-md",
-          "transition-colors duration-150 ease-out hover:bg-line",
-          exercise.isFavorite ? "text-ink" : "text-ink-subtle/50",
-        )}
-      >
-        <Star
-          aria-hidden
-          className="size-4"
-          fill={exercise.isFavorite ? "currentColor" : "none"}
-        />
-      </button>
+      <ExerciseThumbnail exercise={exercise} />
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.9375rem] text-ink">{exercise.name}</p>
@@ -63,6 +42,37 @@ export function ExerciseRow({ exercise, onToggleFavorite, onSelect }: Props) {
           <Tag>{TECHNICAL_DIFFICULTY_LABELS[exercise.technicalDifficulty]}</Tag>
         )}
       </div>
+
+      {/*
+        The star sits with the other actions rather than in the first column.
+        Favouriting is the rarest thing anyone does to a row, and it was
+        occupying the position the eye lands on first.
+      */}
+      <button
+        type="button"
+        onClick={() => {
+          onToggleFavorite(exercise);
+        }}
+        aria-pressed={exercise.isFavorite}
+        aria-label={
+          exercise.isFavorite
+            ? `Remover ${exercise.name} dos favoritos`
+            : `Favoritar ${exercise.name}`
+        }
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-md",
+          "transition-colors duration-150 ease-out hover:bg-line",
+          exercise.isFavorite
+            ? "text-ink"
+            : "text-ink-subtle/40 group-hover:text-ink-subtle/70",
+        )}
+      >
+        <Star
+          aria-hidden
+          className="size-4"
+          fill={exercise.isFavorite ? "currentColor" : "none"}
+        />
+      </button>
 
       {onSelect !== undefined && (
         <button

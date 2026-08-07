@@ -15,6 +15,8 @@ import type { Exercise } from "../types/exercise";
 import { CustomExerciseForm } from "./custom-exercise-form";
 import { ExerciseFilterBar } from "./exercise-filter-bar";
 import { ExerciseRow } from "./exercise-row";
+import { THUMBNAIL_BOX } from "./exercise-thumbnail";
+import { MediaAttribution } from "./media-attribution";
 
 interface Props {
   /**
@@ -180,6 +182,11 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
               </ul>
             </div>
           )}
+
+          {/* Credit is owed where the work is shown, and only there. */}
+          {results.some((exercise) => exercise.media !== null) && (
+            <MediaAttribution />
+          )}
         </>
       )}
     </div>
@@ -251,7 +258,7 @@ function Skeleton() {
       <ul className="divide-y divide-line">
         {widths.map((width, index) => (
           <li key={index} className="flex items-center gap-3 px-3 py-2.5">
-            <div className="size-8 shrink-0 rounded-md bg-muted" />
+            <div className={`${THUMBNAIL_BOX} shrink-0 rounded-md bg-muted`} />
             <div className="flex-1 space-y-2">
               <div className={`h-3.5 ${width} rounded bg-muted`} />
               <div className="h-2.5 w-32 rounded bg-muted" />

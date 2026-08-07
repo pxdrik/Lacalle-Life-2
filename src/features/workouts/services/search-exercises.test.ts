@@ -17,6 +17,7 @@ function exercise(name: string, aliases: string[] = []): Exercise {
     technicalDifficulty: null,
     isUnilateral: null,
     isCompound: null,
+    media: null,
     classification: "catalogue",
     isCustom: false,
     isFavorite: false,

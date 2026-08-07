@@ -27,7 +27,10 @@ import {
   ROUTINES_STORE,
   type RoutineRepository,
 } from "@/features/workouts/data/routine-repository";
-import { seedExerciseCatalogue } from "@/features/workouts/data/seed-exercises";
+import {
+  refreshExerciseMedia,
+  seedExerciseCatalogue,
+} from "@/features/workouts/data/seed-exercises";
 import {
   LocalSessionRepository,
   SESSIONS_STORE,
@@ -110,7 +113,11 @@ async function build(): Promise<Repositories> {
   // first-run work only. Run together because they are independent.
   await Promise.all([
     seedCatalogue(repositories.foods),
-    seedExerciseCatalogue(repositories.exercises),
+    // Seed then refresh, in order: on a first run the seed already writes the
+    // current illustrations and the refresh finds nothing to do.
+    seedExerciseCatalogue(repositories.exercises).then(() =>
+      refreshExerciseMedia(repositories.exercises),
+    ),
   ]);
 
   return repositories;
