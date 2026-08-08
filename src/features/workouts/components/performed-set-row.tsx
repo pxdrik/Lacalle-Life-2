@@ -3,7 +3,7 @@
 import { Check, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { parseDecimal } from "@/core/format/decimal";
+import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 
 import type { PerformedSetChanges } from "../services/edit-session";
@@ -147,7 +147,7 @@ function Planned({
 }) {
   return (
     <p className="mt-0.5 h-3 text-center font-mono text-[0.625rem] tabular-nums text-ink-subtle">
-      {value === null ? "" : `${String(value)} ${suffix}`}
+      {value === null ? "" : `${formatDecimal(value)} ${suffix}`}
     </p>
   );
 }

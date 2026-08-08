@@ -3,6 +3,7 @@
 import { Pencil, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
@@ -109,5 +110,5 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
 
 /** Whole numbers stay whole; only fractional values spend a decimal place. */
 function format(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1);
+  return Number.isInteger(value) ? formatDecimal(value) : formatDecimal(value, 1);
 }

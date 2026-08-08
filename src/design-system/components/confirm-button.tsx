@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { cn } from "@/design-system/cn";
+import { useArmed } from "@/design-system/hooks/use-armed";
 
 interface Props {
   readonly onConfirm: () => void;
@@ -13,18 +12,11 @@ interface Props {
   readonly children: React.ReactNode;
 }
 
-/** How long the armed state waits before giving up on its own. */
-const DISARM_AFTER_MS = 4000;
-
 /**
  * A destructive action that takes two taps.
  *
- * Not a dialog: a modal for "are you sure" steals focus, traps the keyboard
- * and needs an escape route, all to ask a question the button can ask itself.
- * The first tap arms it and changes what it says; the second does the thing.
- *
- * It disarms on its own after a few seconds and on blur, so an armed button
- * left behind by a mis-tap cannot fire later by accident.
+ * The two-tap behaviour lives in `useArmed`; this is the small icon button
+ * that wears it.
  */
 export function ConfirmButton({
   onConfirm,
@@ -33,34 +25,15 @@ export function ConfirmButton({
   className,
   children,
 }: Props) {
-  const [armed, setArmed] = useState(false);
-
-  useEffect(() => {
-    if (!armed) return;
-
-    const id = setTimeout(() => {
-      setArmed(false);
-    }, DISARM_AFTER_MS);
-
-    return () => {
-      clearTimeout(id);
-    };
-  }, [armed]);
+  const { armed, confirm, disarm } = useArmed();
 
   return (
     <button
       type="button"
       aria-label={armed ? `${confirmLabel}: ${label}` : label}
-      onBlur={() => {
-        setArmed(false);
-      }}
+      onBlur={disarm}
       onClick={() => {
-        if (armed) {
-          setArmed(false);
-          onConfirm();
-        } else {
-          setArmed(true);
-        }
+        confirm(onConfirm);
       }}
       className={cn(
         "inline-flex items-center justify-center gap-1.5 rounded-md transition-colors duration-150 ease-out",

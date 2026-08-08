@@ -1,4 +1,5 @@
 import type { Macros } from "@/core/domain/macros";
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 
 interface Props {
@@ -30,7 +31,7 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
     >
       <div className="flex items-baseline gap-1">
         <dd className={cn("text-ink", large ? "text-xl font-medium" : "text-sm")}>
-          {macros.kcal}
+          {formatDecimal(macros.kcal)}
         </dd>
         <dt className={cn("text-ink-subtle", large ? "text-xs" : "text-[0.6875rem]")}>
           kcal
@@ -40,7 +41,7 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
       {MACROS.map(({ key, label, color }) => (
         <div key={key} className="flex items-baseline gap-1">
           <dd className={cn(color, large ? "text-xl font-medium" : "text-sm")}>
-            {macros[key]}
+            {formatDecimal(macros[key])}
           </dd>
           <dt
             className={cn(

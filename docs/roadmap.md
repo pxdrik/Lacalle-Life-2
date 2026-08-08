@@ -28,6 +28,7 @@ depender da memória de nenhuma conversa.
 | Evolução corporal | Peso, gordura e 9 medidas por dia, gráfico de tendência com média móvel |
 | Identidade visual | Esmeralda da V1, neutros tingidos, contraste asserido nos dois temas |
 | Densidade por contexto | Cartão no celular, Compacto no desktop — um conjunto de tokens, dois valores |
+| Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -81,13 +82,29 @@ erradas em silêncio.
 O passo certo é oferecer, não sincronizar: "seu perfil usa 84 kg, sua última
 medição é 80 kg — atualizar?". Mantém a dieta sem depender de nada opcional.
 
-### 5. PWA e offline completo
+### 5. Fibra rastreável
+
+Hoje o perfil calcula uma meta de fibra (14 g por 1000 kcal) que o app não tem
+como conferir: **nenhum dos 216 alimentos carrega fibra**. A tela passou a
+dizer isso em voz alta — é referência para ler no rótulo, não meta acompanhada
+— porque um número ao lado de proteína, carboidrato e gordura promete uma
+medição que nunca chega.
+
+Fechar de verdade exige fibra na fonte, e a fonte é o problema: inventar valor
+para 216 alimentos contraria a regra de omitir na dúvida. O caminho realista é
+uma tabela que já traga o dado (a TACO traz) e uma migração que acrescente o
+campo, com `null` para o que não for encontrado.
+
+Meia solução é pior que nenhuma: somar só os alimentos que tiverem fibra
+mostraria "12 g de 31" para quem comeu 25 — um número errado com cara de certo.
+
+### 6. PWA e offline completo
 
 Service worker cacheando o shell. O dado já é local e funciona offline; falta
 a aplicação abrir sem rede — e, agora, as fotos. Passar pelo otimizador do
 Next deixou as URLs same-origin justamente pensando nisso.
 
-### 6. Sincronização
+### 7. Sincronização
 
 A camada de repositório foi desenhada para isto desde o primeiro commit:
 `updatedAt` em toda entidade, ids gerados no cliente, e a raiz de composição

@@ -1,4 +1,5 @@
 import type { Macros } from "@/core/domain/macros";
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 
 interface Props {
@@ -25,7 +26,11 @@ const BARS = [
  */
 export function MacroProgress({ totals, targets }: Props) {
   return (
-    <dl className="grid grid-cols-4 gap-3">
+    // Two columns on a phone. Four of these never fit a 360px screen — a
+    // column gets ~70px and "1.256/2.220" needs ~90 — so the calorie figure
+    // used to run under the protein one. Four across from `sm`, where there is
+    // room for a single glanceable line.
+    <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-4 sm:gap-3">
       {BARS.map(({ key, label, fill, unit }) => {
         const value = totals[key];
         const target = targets[key];
@@ -37,9 +42,9 @@ export function MacroProgress({ totals, targets }: Props) {
             <dt className="sr-only">{label}</dt>
             <dd>
               <div className="flex items-baseline gap-1 font-mono text-sm tabular-nums">
-                <span className="text-ink">{value}</span>
+                <span className="text-ink">{formatDecimal(value)}</span>
                 <span className="text-ink-subtle">
-                  /{target}
+                  /{formatDecimal(target)}
                   {unit}
                 </span>
               </div>
@@ -47,7 +52,7 @@ export function MacroProgress({ totals, targets }: Props) {
               <div
                 className="mt-1.5 h-1 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
-                aria-label={`${label}: ${value} de ${target}${unit}`}
+                aria-label={`${label}: ${formatDecimal(value)} de ${formatDecimal(target)}${unit}`}
                 aria-valuenow={value}
                 aria-valuemin={0}
                 aria-valuemax={target}

@@ -1,3 +1,4 @@
+import { formatDecimal } from "@/core/format/decimal";
 import type { NutritionPlan, PlanResult } from "@/core/nutrition";
 import { Card } from "@/design-system/components/card";
 
@@ -43,7 +44,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
       <Card>
         <div className="flex items-baseline gap-2">
           <span className="font-mono text-3xl font-medium tabular-nums text-ink">
-            {plan.targets.kcal}
+            {formatDecimal(plan.targets.kcal)}
           </span>
           <span className="text-sm text-ink-subtle">kcal por dia</span>
         </div>
@@ -52,7 +53,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
           {FIGURES.map(({ key, label, color }) => (
             <div key={key}>
               <dd className={`font-mono text-xl tabular-nums ${color}`}>
-                {plan.targets[key]}
+                {formatDecimal(plan.targets[key])}
                 <span className="ml-0.5 text-xs text-ink-subtle">g</span>
               </dd>
               <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
@@ -61,20 +62,37 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
         </dl>
 
         <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
-          <Derivation label="TMB" value={`${Math.round(plan.bmrKcal)} kcal`} />
-          <Derivation label="TDEE" value={`${Math.round(plan.tdeeKcal)} kcal`} />
-          <Derivation label="Fibra" value={`${plan.fiberG} g`} />
+          <Derivation
+            label="TMB"
+            value={`${formatDecimal(Math.round(plan.bmrKcal))} kcal`}
+          />
+          <Derivation
+            label="TDEE"
+            value={`${formatDecimal(Math.round(plan.tdeeKcal))} kcal`}
+          />
+          <Derivation label="Fibra" value={`${formatDecimal(plan.fiberG)} g`} />
         </dl>
+
+        {/* Said out loud because the number looks like the three above it and
+            is not the same kind of thing. Protein, carbs and fat are targets
+            the app checks against what you ate; fibre is a recommendation it
+            cannot check, because no food in the catalogue carries a fibre
+            value. Showing it silently beside tracked targets promises a
+            measurement that never arrives. */}
+        <p className="mt-2 text-xs text-ink-subtle">
+          A fibra é uma referência (14 g por 1000 kcal) para conferir no rótulo
+          — o app ainda não soma a fibra dos alimentos.
+        </p>
 
         {plan.energyBalanceKcal !== 0 && (
           <p className="mt-4 border-t border-line pt-4 text-sm text-ink-muted">
             {plan.energyBalanceKcal < 0 ? "Déficit" : "Superávit"} de{" "}
             <span className="font-mono tabular-nums">
-              {Math.abs(plan.energyBalanceKcal)}
+              {formatDecimal(Math.abs(plan.energyBalanceKcal))}
             </span>{" "}
             kcal por dia — cerca de{" "}
             <span className="font-mono tabular-nums">
-              {Math.abs(plan.projectedWeeklyChangeKg).toFixed(2)}
+              {formatDecimal(Math.abs(plan.projectedWeeklyChangeKg), 2)}
             </span>{" "}
             kg por semana.
           </p>

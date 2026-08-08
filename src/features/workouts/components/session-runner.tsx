@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { useArmed } from "@/design-system/hooks/use-armed";
 
 import { useExerciseLookup } from "../hooks/use-exercise-lookup";
 import { useRestTimer } from "../hooks/use-rest-timer";
@@ -48,6 +49,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const catalogue = useExerciseLookup();
   const detail = useExerciseDetail();
   const timer = useRestTimer();
+  const finish = useArmed();
   const [editing, setEditing] = useState(false);
 
   const running = state.status === "ready" && state.session.finishedAt === null;
@@ -106,6 +108,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const next = nextIncompleteSet(session);
   const progress = sessionProgress(session);
   const allDone = progress.completed === progress.total && progress.total > 0;
+  const pending = progress.total - progress.completed;
 
   return (
     <div className="pb-32">
@@ -124,16 +127,47 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         <Stat label="Tempo" value={formatDuration(sessionElapsedMs(session, now))} />
         <Stat label="Séries" value={`${String(progress.completed)}/${String(progress.total)}`} />
         <div className="flex-1" />
+        {/* Two taps while sets are still open, one when everything is done:
+            ending a workout at set 1 of 8 used to be a single accidental tap
+            on a button that sits where a thumb rests while scrolling.
+
+            The visible label stays short: measured at 360px the bar leaves
+            152px for this button and "Encerrar assim?" takes 129, while
+            spelling out the count ("Encerrar com 7 pendentes?") needs about
+            180 and pushes the bar sideways. The count is already two
+            centimetres to the left in "Séries", so the accessible name carries
+            it for anyone who cannot see that stat — and starts with the
+            visible text, so voice control still matches what is on screen. */}
         <Button
           size="sm"
-          variant={allDone ? "primary" : "secondary"}
+          variant={allDone ? "primary" : finish.armed ? "danger" : "secondary"}
+          aria-label={
+            finish.armed && !allDone
+              ? `Encerrar assim? ${String(pending)} ${pending === 1 ? "série ainda pendente" : "séries ainda pendentes"}.`
+              : undefined
+          }
+          onBlur={finish.disarm}
           onClick={() => {
-            timer.stop();
-            apply(finishSession);
+            if (allDone) {
+              timer.stop();
+              apply(finishSession);
+              return;
+            }
+
+            finish.confirm(() => {
+              timer.stop();
+              apply(finishSession);
+            });
           }}
         >
-          <Flag aria-hidden className="size-4" />
-          Finalizar
+          {finish.armed && !allDone ? (
+            "Encerrar assim?"
+          ) : (
+            <>
+              <Flag aria-hidden className="size-4" />
+              Finalizar
+            </>
+          )}
         </Button>
       </div>
 

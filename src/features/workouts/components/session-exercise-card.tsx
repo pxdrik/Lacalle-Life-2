@@ -2,6 +2,8 @@
 
 import { Plus } from "lucide-react";
 
+import { formatDecimal } from "@/core/format/decimal";
+
 import type { PerformedSetChanges } from "../services/edit-session";
 import type { LastPerformance } from "../services/history";
 import type { Exercise } from "../types/exercise";
@@ -132,5 +134,5 @@ function describeSet(set: { reps: number | null; weightKg: number | null }): str
   const reps = set.reps ?? "—";
   return set.weightKg === null
     ? `${String(reps)}`
-    : `${String(reps)}×${String(set.weightKg)}`;
+    : `${String(reps)}×${formatDecimal(set.weightKg)}`;
 }

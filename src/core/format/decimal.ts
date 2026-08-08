@@ -16,3 +16,33 @@ export function parseDecimal(input: string): number | null {
 
   return Number.isFinite(value) ? value : null;
 }
+
+/**
+ * Writes a number the way it is read in Brazil.
+ *
+ * The mirror of `parseDecimal`, and the half that was missing: the app already
+ * accepted "3,6" and then printed it back as "3.6". Worse, it did both at
+ * once — the body log wrote 84,2 while the diet beside it wrote 2.7/180, so
+ * the same screen used two conventions for the same kind of number.
+ *
+ * By default this only changes separators, never digits: whatever precision is
+ * stored is what appears. `fractionDigits` is for the few places that want a
+ * fixed width — a projected weekly change reads better as 0,61 than 0,6.
+ *
+ * Non-finite input becomes an em dash rather than "NaN". Corrupt data is the
+ * display layer's job to contain; nobody should have to decode a stack of
+ * letters where a weight belongs.
+ */
+export function formatDecimal(value: number, fractionDigits?: number): string {
+  if (!Number.isFinite(value)) return "—";
+
+  return value.toLocaleString(
+    "pt-BR",
+    fractionDigits === undefined
+      ? undefined
+      : {
+          minimumFractionDigits: fractionDigits,
+          maximumFractionDigits: fractionDigits,
+        },
+  );
+}

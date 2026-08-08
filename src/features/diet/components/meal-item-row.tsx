@@ -2,6 +2,7 @@
 
 import { GripVertical, X } from "lucide-react";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 
 import { itemMacros } from "../services/diet-macros";
@@ -40,7 +41,11 @@ export function MealItemRow({
   return (
     <li
       className={cn(
-        "group flex items-center gap-2 py-1.5",
+        // Wraps on a phone: seven controls in one line need ~290px and a
+        // 360px screen leaves the row about 250, so it used to run off the
+        // card. Below `sm` the portion stays with the name and the numbers
+        // take a second line.
+        "group flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 sm:flex-nowrap sm:gap-2",
         dragHandle.isDragging && "rounded-lg bg-muted",
       )}
     >
@@ -76,11 +81,20 @@ export function MealItemRow({
         <span className="text-xs text-ink-subtle">g</span>
       </div>
 
-      <div className="flex w-40 shrink-0 items-baseline justify-end gap-3 font-mono text-xs tabular-nums sm:w-48 sm:gap-4">
-        <span className="text-ink-muted">{macros.kcal}</span>
-        <span className="text-protein">{macros.proteinG}</span>
-        <span className="text-carbs">{macros.carbsG}</span>
-        <span className="text-fat">{macros.fatG}</span>
+      {/* Forces the wrap here and nowhere else. A zero-height item with a
+          full-width basis cannot share a line, so everything after it lands on
+          the second row together — the alternative is letting flex choose, and
+          flex breaks wherever the longest name happens to leave off. */}
+      <div aria-hidden className="basis-full sm:hidden" />
+
+      {/* `ms-auto` pins the numbers to the right edge of the wrapped line, so
+          they stay in a column across items instead of drifting with the
+          width of each name. */}
+      <div className="ms-auto flex w-40 shrink-0 items-baseline justify-end gap-3 font-mono text-xs tabular-nums sm:w-48 sm:gap-4">
+        <span className="text-ink-muted">{formatDecimal(macros.kcal)}</span>
+        <span className="text-protein">{formatDecimal(macros.proteinG)}</span>
+        <span className="text-carbs">{formatDecimal(macros.carbsG)}</span>
+        <span className="text-fat">{formatDecimal(macros.fatG)}</span>
       </div>
 
       {/* A native select rather than a custom menu: it is keyboard operable,
