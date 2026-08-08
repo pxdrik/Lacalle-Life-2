@@ -67,6 +67,25 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
 
   function update(key: keyof Draft, value: string) {
     setDraft((current) => ({ ...current, [key]: value }));
+
+    // Drop the stale message for this field. Validation only runs on submit,
+    // so without this the form goes on saying "Nome muito longo." beside a
+    // name the person already shortened — the app contradicting what is on
+    // screen, at the exact moment it asked for a correction.
+    setIssues((current) => {
+      const numeric = key !== "name" && key !== "category";
+      const field = numeric ? `per100g.${key}` : key;
+      // `per100g` holds the cross-field rule (the macros summing past 100 g),
+      // which any numeric edit can be the one that resolves.
+      const clearsSum = numeric && current["per100g"] !== undefined;
+
+      if (current[field] === undefined && !clearsSum) return current;
+
+      const next = { ...current };
+      delete next[field];
+      if (clearsSum) delete next["per100g"];
+      return next;
+    });
   }
 
   const proteinG = parseDecimal(draft.proteinG);

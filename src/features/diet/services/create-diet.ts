@@ -1,4 +1,4 @@
-import { createEntityId, revise } from "@/core/domain/entity";
+import { createEntityId } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
@@ -70,24 +70,14 @@ export function duplicateDiet(diet: Diet): Diet {
 }
 
 /**
- * A copy of one meal, inserted directly below the original.
+ * A meal with fresh ids at every depth.
  *
- * The name is left alone, unlike a duplicated diet: inside a document the copy
- * is obviously distinct by its position, and someone duplicating "Almoço" is
- * usually about to make it "Jantar" — a "(cópia)" they would have to delete
- * first is work, not help.
+ * Exported for `duplicateMeal`, which lives with the other meal operations in
+ * `edit-diet` — it edits an owner's meal list, and keeping it here while the
+ * rest was widened to `MealOwner` is exactly how the food log ended up wiring
+ * its "duplicate" button to "add empty meal".
  */
-export function duplicateMeal(diet: Diet, mealId: string): Diet {
-  const index = diet.meals.findIndex((meal) => meal.id === mealId);
-  if (index === -1) return diet;
-
-  const meals = [...diet.meals];
-  meals.splice(index + 1, 0, copyMeal(diet.meals[index]!));
-
-  return revise(diet, { meals });
-}
-
-function copyMeal(meal: Meal): Meal {
+export function copyMeal(meal: Meal): Meal {
   return {
     ...meal,
     id: createEntityId(),

@@ -12,16 +12,13 @@ import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useDietEditor } from "../hooks/use-diet-editor";
-import {
-  createMealItem,
-  DEFAULT_GRAMS,
-  duplicateMeal,
-} from "../services/create-diet";
+import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
   addMeal,
   copyItemToMeal,
+  duplicateMeal,
   moveItemToMeal,
   moveMeal,
   removeItem,

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createDiet, createMealItem, duplicateDiet, duplicateMeal } from "./create-diet";
+import { createDiet, createMealItem, duplicateDiet } from "./create-diet";
 import {
   addItem,
   addMeal,
+  duplicateMeal,
   copyItemToMeal,
   moveItemToMeal,
   setItemGrams,

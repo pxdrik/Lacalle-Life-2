@@ -23,6 +23,7 @@ import {
   addItem,
   addMeal,
   copyItemToMeal,
+  duplicateMeal,
   moveItemToMeal,
   moveMeal,
   removeItem,
@@ -203,7 +204,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                           apply((current) => removeMeal(current, meal.id));
                         }}
                         onDuplicate={() => {
-                          apply((current) => addMeal(current));
+                          apply((current) => duplicateMeal(current, meal.id));
                         }}
                         onMove={(offset) => {
                           apply((current) => moveMeal(current, meal.id, offset));

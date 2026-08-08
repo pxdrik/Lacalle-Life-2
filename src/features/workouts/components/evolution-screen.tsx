@@ -3,6 +3,7 @@
 import { Skeleton } from "@/design-system/components/skeleton";
 import Link from "next/link";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { CARD_SURFACE } from "@/design-system/components/card";
 
@@ -109,10 +110,10 @@ export function EvolutionScreen() {
                   {record.name}
                 </span>
                 <span className="shrink-0 font-mono text-sm tabular-nums text-ink">
-                  {record.repsAtHeaviest} × {record.heaviestKg} kg
+                  {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)} kg
                 </span>
                 <span className="w-20 shrink-0 text-right font-mono text-xs tabular-nums text-ink-muted">
-                  1RM {record.bestOneRepMax}
+                  1RM {formatDecimal(record.bestOneRepMax)}
                 </span>
               </li>
             ))}

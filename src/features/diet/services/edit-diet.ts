@@ -7,7 +7,7 @@ import {
 } from "@/core/domain/entity";
 
 import type { Diet, Meal, MealItem, MealOwner } from "../types/diet";
-import { createMeal } from "./create-diet";
+import { copyMeal, createMeal } from "./create-diet";
 
 /**
  * Every edit is a pure function from one meal owner to the next.
@@ -49,6 +49,27 @@ export function addMeal<T extends MealOwner>(diet: T): T {
 
 export function removeMeal<T extends MealOwner>(diet: T, mealId: EntityId): T {
   return withMeals(diet, diet.meals.filter((meal) => meal.id !== mealId));
+}
+
+/**
+ * A copy of one meal, inserted directly below the original.
+ *
+ * The name is left alone, unlike a duplicated diet: inside a document the copy
+ * is obviously distinct by its position, and someone duplicating "Almoço" is
+ * usually about to make it "Jantar" — a "(cópia)" they would have to delete
+ * first is work, not help.
+ */
+export function duplicateMeal<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+): T {
+  const index = diet.meals.findIndex((meal) => meal.id === mealId);
+  if (index === -1) return diet;
+
+  const meals = [...diet.meals];
+  meals.splice(index + 1, 0, copyMeal(diet.meals[index]!));
+
+  return withMeals(diet, meals);
 }
 
 export type MealChanges = Partial<Pick<Meal, "name" | "time" | "notes">>;

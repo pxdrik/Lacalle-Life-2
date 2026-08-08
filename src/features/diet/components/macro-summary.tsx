@@ -25,8 +25,12 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
   return (
     <dl
       className={cn(
-        "flex items-baseline font-mono tabular-nums",
-        large ? "gap-5" : "gap-3.5",
+        // Wraps rather than pushing past the card. On a 320px screen the meal
+        // header puts these four figures beside four buttons in ~250px, and
+        // "2.023 kcal 83 Prot 316 Carb 40 Gord" does not fit on one line — it
+        // used to overflow by ~32px and drag the page into sideways scroll.
+        "flex flex-wrap items-baseline font-mono tabular-nums",
+        large ? "gap-x-5 gap-y-1" : "gap-x-3.5 gap-y-0.5",
       )}
     >
       <div className="flex items-baseline gap-1">
