@@ -32,6 +32,8 @@ depender da memória de nenhuma conversa.
 | Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
 | Navegação no celular | Barra inferior de 5 abas ao alcance do polegar; o resto atrás de "Mais" |
 | PWA e offline | Instalável, e abre sem rede — shell, assets e payloads de rota em cache |
+| Incremento rápido | −1/+1 rep e ∓2,5 kg na série em execução, partindo do planejado quando o campo está vazio |
+| Peso decimal digitável | O separador era engolido ao ser digitado: 6·2·vírgula·5 gravava 625 kg |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -113,6 +115,49 @@ muda implementações de adapter, nunca portas nem UI.
 
 ---
 
+## Ajustes pendentes
+
+Achados verificados que não entraram em nenhum item acima. Cada um é pequeno o
+bastante para caber numa sessão; nenhum exige redesenho. Marcados com a origem,
+porque saber quem apontou ajuda a decidir se ainda vale.
+
+### Comportamento
+
+| O quê | Onde | Por quê |
+| --- | --- | --- |
+| **Toast de confirmação** | Salvar perfil, criar alimento | Não existe nenhum toast no app. Editar gramas se auto-evidencia — o número muda na frente da pessoa — mas salvar perfil e criar alimento só confirmam navegando de volta, que é feedback fraco para escrita |
+| **Aviso antes do timeout** | `useArmed` | O botão armado volta ao normal em 4 s sem contador nem transição. Quem hesita perde a ação em silêncio e precisa clicar de novo — justamente num momento de decisão |
+| **Nome do exercício em duas linhas** | Editor de rotina | "Supino Declinado com Barra" vira "Supi…" numa linha só. Na montagem do treino, que é quando se escolhe |
+| **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |
+| **Placeholder que parece preenchido** | Perfil | `30`, `180`, `80` são valores plausíveis. A cor está certa (`ink-subtle`), o conteúdo é que engana — trocar por texto que não possa ser confundido com dado |
+
+### Consistência
+
+| O quê | Estado medido |
+| --- | --- |
+| **Rótulo de confirmação** | 5× `"Excluir?"`, 1× `"Remover?"`, 1 sem rótulo caindo no `"Confirmar"` genérico (`body-history`) |
+| **Botão de criar entre catálogos** | Treinos, Dietas e Alimentos têm botão fixo; Exercícios só oferece criar depois de busca sem resultado. A solução do Exercícios é melhor — escolher uma e aplicar às quatro |
+| **Tabela vs cartão** | Alimentos usa colunas, Exercícios usa cartão com foto. São a mesma coisa conceitual: catálogo de referência com busca e filtro |
+| **Modal vs painel inline** | A distinção existe e é coerente (modal = consulta, inline = edição), mas não está escrita em lugar nenhum. Sem regra registrada, a próxima tela decide sozinha |
+
+### Robustez
+
+| O quê | Por quê |
+| --- | --- |
+| **Guarda de macro inválido na escrita** | Não há nenhum `isFinite` em `features/foods`, `features/diet` ou `core/domain`. A tela está protegida — `formatDecimal` mostra travessão —, mas o dado não: um macro corrompido entra no `sumMacros` e contamina o total |
+| **Página 404 própria** | Não existe `not-found.tsx`. A página padrão do Next não tem link de volta nem a navegação do app |
+| **`apple-touch-icon`** | O manifesto tem SVG, que o Android usa. iOS quer PNG — sem ele, a tela inicial do iPhone usa uma captura da página |
+
+### Identidade
+
+O app tem voz e comportamento reconhecíveis, mas nenhum elemento gráfico
+exclusivo além da cor: tirando o nome do topo, não há uma forma, ícone ou
+ilustração que seja só dele. É oportunidade, não defeito — um gesto visual
+pequeno (marca no anel de progresso, ilustração para estado vazio) transformaria
+"app calmo e técnico" em algo identificável à primeira vista.
+
+---
+
 ## Fora de escopo, permanentemente
 
 Nada de IA, chat, geração automática de dieta ou treino, prompts, embeddings
@@ -143,3 +188,12 @@ do rótulo, nunca aplicada sozinha. É aritmética, não opinião sobre o que co
 ## Infraestrutura
 
 Repositório em `github.com/pxdrik/Lacalle-Life-2`, `main` sincronizada.
+
+**`next dev` quebrado nesta máquina.** Falha com `0xc0000142` — erro do Windows
+ao inicializar processo — centenas de vezes: os workers do Turbopack não sobem.
+Não é o código; `npm run build` e a suíte inteira passam. É a máquina sem
+recursos para criar processos, depois de muitos ciclos de build e teste. Um
+reinício do Windows costuma resolver.
+
+Enquanto isso, `npm run build && npm run start` serve normalmente — com a
+diferença de que **não recarrega ao editar**.
