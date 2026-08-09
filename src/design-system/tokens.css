@@ -13,13 +13,17 @@
  * **The surfaces are emerald, not grey.** They used to carry a few thousandths
  * of chroma — technically tinted, indistinguishable from grey in use. The
  * owner compared the two versions and said it plainly: V1's colours are more
- * alive. He was right, and the measurement agreed — V1's panel sat at chroma
- * 0.08 against 0.009 here, roughly ten times the colour.
+ * alive.
  *
- * So the surfaces moved onto the brand hue at chroma people can actually see
- * (0.03 on the canvas, 0.055 on a card in the dark theme). The text tokens
- * stay near-neutral on purpose: tinting a surface reads as a material, while
- * tinting body copy just reads as a display that needs calibrating.
+ * He was right about the impression, and measuring V1 showed where it actually
+ * comes from: not the cards, which are neutral there (chroma 0.01), but a
+ * 256px emerald sidebar at 0.08 and an accent at 0.20. This version has no
+ * sidebar, so the colour it would have carried is spread across the surfaces
+ * instead — 0.03 on the canvas, 0.055 on a card in the dark theme.
+ *
+ * The text tokens stay near-neutral on purpose: tinting a surface reads as a
+ * material, while tinting body copy just reads as a display that needs
+ * calibrating.
  *
  * Values are OKLCH because it is perceptually uniform: a lightness step reads
  * as the same step at any hue, which is what makes the light and dark scales
@@ -50,18 +54,17 @@
   --line: oklch(0.9 0.035 167);
   --line-strong: oklch(0.79 0.055 167);
 
-  /* The brand.
-
-     Deeper here than in dark mode, and the reason is a genuine conflict: an
-     emerald light enough to carry near-black text is too light to be seen as
-     a chart line on a near-white page. One of the two has to give, and a
-     line nobody can see is the worse failure. So light mode takes a deeper
-     emerald with white on it; dark mode keeps the vivid one. */
-  /* 0.52, not the 0.54 that the extra chroma tempted: white on it measured
-     4.39:1, and the button label is text. Saturation is free here, lightness
-     is not. */
-  --accent: oklch(0.52 0.16 167);
-  --accent-ink: oklch(1 0 0);
+  /**
+   * The brand, and the same value in both themes: `oklch(0.58 0.2 167)`,
+   * sampled from V1.
+   *
+   * Earlier this was deeper here than in the dark theme, derived so that white
+   * would sit on it. That reasoning produced two greens for one brand. Taking
+   * V1's measured colour and putting near-black on it satisfies both themes at
+   * once, so the identity is now a colour rather than a pair of compromises.
+   */
+  --accent: oklch(0.58 0.2 167);
+  --accent-ink: oklch(0.165 0.008 180);
 
   /* The emerald as *text*, which needs 4.5:1 rather than the 3:1 a graphic
      needs. Used for the completed mark and the finished timer. */
@@ -113,10 +116,20 @@
   --line: oklch(0.36 0.07 167);
   --line-strong: oklch(0.46 0.085 167);
 
-  /* The vivid one, kept: on a dark ground it can be bright enough to read as
-     a chart line *and* still carry near-black text. Light mode has no such
-     luxury — see the note there. */
-  --accent: oklch(0.78 0.19 167);
+  /**
+   * V1's green, sampled from the running app: `oklch(0.58 0.2 167)`.
+   *
+   * The previous value sat at 0.78 lightness — the same hue and nearly the
+   * same chroma, but a pale mint. That is what "the green looks weaker" meant:
+   * not less saturated, lighter. A brand colour is a specific colour, so this
+   * is now the measured one rather than one derived to be convenient.
+   *
+   * The ink stays near-black, and here we part from V1 on purpose. V1 puts
+   * white on this green, which measures 3.54:1 — its own primary button does
+   * not clear AA. Near-black on the same green measures about 5.9:1. Same
+   * colour, legible label.
+   */
+  --accent: oklch(0.58 0.2 167);
   --accent-ink: oklch(0.165 0.008 180);
 
   /* On a dark ground the emerald clears 4.5:1 as text while bright, so this

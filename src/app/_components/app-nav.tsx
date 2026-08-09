@@ -66,8 +66,12 @@ export function AppNav() {
                     className={cn(
                       "block rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap",
                       "transition-colors duration-150 ease-out",
+                      // Solid emerald, as in V1, where the active item is one
+                      // of the few large blocks of brand colour on screen.
+                      // A muted pill said "selected" accurately and said
+                      // nothing about whose app this is.
                       active
-                        ? "bg-muted text-ink"
+                        ? "bg-accent font-medium text-accent-ink"
                         : "text-ink-muted hover:text-ink",
                     )}
                   >
