@@ -36,6 +36,41 @@ export function formatDay(day: string): string {
   return `${date}/${month}/${year}`;
 }
 
+/**
+ * `2026-08-07` → `sexta-feira, 7 de agosto`.
+ *
+ * For the one place a date is read rather than scanned: the heading of the
+ * screen you open in the morning. `Intl` is given the parts explicitly instead
+ * of parsing the string, because `new Date("2026-08-07")` is read as UTC
+ * midnight and prints the day before for anyone west of Greenwich.
+ */
+export function formatLongDay(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  if (year === undefined || month === undefined || date === undefined) return day;
+
+  const parsed = new Date(year, month - 1, date);
+
+  /**
+   * Rejects a date the constructor quietly repaired. `new Date(2026, 12, 45)`
+   * is not an error — it rolls forward into February and returns a perfectly
+   * valid Sunday. A malformed day rendering as a plausible wrong date is worse
+   * than rendering as itself, so the parts have to survive the round trip.
+   */
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== date
+  ) {
+    return day;
+  }
+
+  return parsed.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
+
 /** `2026-08-07` → `07/08`, for axis labels where the year is implied. */
 export function formatShortDay(day: string): string {
   const [, month, date] = day.split("-");

@@ -2,17 +2,25 @@ import type { Macros } from "@/core/domain/macros";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 
-interface Props {
-  readonly totals: Macros;
-  readonly targets: Macros;
-}
-
 const BARS = [
   { key: "kcal", label: "kcal", fill: "bg-ink", unit: "" },
   { key: "proteinG", label: "Prot", fill: "bg-protein", unit: "g" },
   { key: "carbsG", label: "Carb", fill: "bg-carbs", unit: "g" },
   { key: "fatG", label: "Gord", fill: "bg-fat", unit: "g" },
 ] as const;
+
+interface Props {
+  readonly totals: Macros;
+  readonly targets: Macros;
+  /**
+   * Which figures to draw, in this order. Defaults to all four.
+   *
+   * The home screen passes the three macros and leaves `kcal` out, because the
+   * ring beside these bars is already the calorie figure — drawing it twice
+   * would make the same number look like two measurements.
+   */
+  readonly figures?: readonly (typeof BARS)[number]["key"][];
+}
 
 /**
  * How the diet compares to the profile's targets.
@@ -24,14 +32,25 @@ const BARS = [
  * Values are announced as text as well as drawn, because a bar alone tells a
  * screen reader nothing.
  */
-export function MacroProgress({ totals, targets }: Props) {
+export function MacroProgress({ totals, targets, figures }: Props) {
+  const bars =
+    figures === undefined
+      ? BARS
+      : figures.map((key) => BARS.find((bar) => bar.key === key)!);
+
   return (
     // Two columns on a phone. Four of these never fit a 360px screen — a
     // column gets ~70px and "1.256/2.220" needs ~90 — so the calorie figure
     // used to run under the protein one. Four across from `sm`, where there is
-    // room for a single glanceable line.
-    <dl className="grid grid-cols-2 gap-x-5 gap-y-3 sm:grid-cols-4 sm:gap-3">
-      {BARS.map(({ key, label, fill, unit }) => {
+    // room for a single glanceable line. Three figures get their own column
+    // each, which is why the count comes from the list rather than a constant.
+    <dl
+      className={cn(
+        "grid gap-x-5 gap-y-3 sm:gap-3",
+        bars.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
+      )}
+    >
+      {bars.map(({ key, label, fill, unit }) => {
         const value = totals[key];
         const target = targets[key];
         const ratio = target === 0 ? 0 : value / target;

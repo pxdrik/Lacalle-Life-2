@@ -183,6 +183,32 @@ export function DietDataProvider({
 }
 
 /**
+ * The home screen reads across the app and writes nothing.
+ *
+ * Deliberately narrower than the screens it summarises: it needs today's food
+ * log, the profile behind the targets, and the sessions — but not the foods
+ * (it adds nothing to a meal), not the diets (it starts no day from one) and
+ * not the exercise catalogue (it names sessions, never their exercises).
+ * Wiring those in anyway would cost four IndexedDB opens on the first screen
+ * of the app for data nothing on it reads.
+ */
+export function HomeDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <FoodLogRepositoryProvider repository={foodLogRepository()}>
+      <ProfileRepositoryProvider repository={profileRepository()}>
+        <WorkoutRepositoryProvider repositories={workoutRepositories()}>
+          {children}
+        </WorkoutRepositoryProvider>
+      </ProfileRepositoryProvider>
+    </FoodLogRepositoryProvider>
+  );
+}
+
+/**
  * The diet editor picks foods and, when a profile exists, compares its totals
  * against that profile's targets. Composed here rather than nested at the
  * page, so a route never has to know which repositories a screen's components

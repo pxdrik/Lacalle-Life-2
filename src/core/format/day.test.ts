@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { dayKey, formatDay, formatShortDay, isFutureDay } from "./day";
+import {
+  dayKey,
+  formatDay,
+  formatLongDay,
+  formatShortDay,
+  isFutureDay,
+} from "./day";
 
 describe("dayKey", () => {
   it("uses the local calendar day, not UTC", () => {
@@ -55,5 +61,22 @@ describe("isFutureDay", () => {
 
   it("accepts any past day", () => {
     expect(isFutureDay("2025-12-31", now)).toBe(false);
+  });
+});
+
+describe("formatLongDay", () => {
+  it("names the weekday and the month in Portuguese", () => {
+    expect(formatLongDay("2026-08-07")).toBe("sexta-feira, 7 de agosto");
+  });
+
+  it("does not slip a day west of Greenwich", () => {
+    // `new Date("2026-08-01")` parses as UTC midnight, which is 31 July at
+    // 21:00 in Sao Paulo — the whole reason this builds the date from parts.
+    expect(formatLongDay("2026-08-01")).toContain("1 de agosto");
+  });
+
+  it("returns anything unparseable unchanged, rather than inventing a date", () => {
+    expect(formatLongDay("nao e um dia")).toBe("nao e um dia");
+    expect(formatLongDay("2026-13-45")).toBe("2026-13-45");
   });
 });

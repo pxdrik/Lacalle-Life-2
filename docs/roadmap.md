@@ -29,6 +29,7 @@ depender da memória de nenhuma conversa.
 | Identidade visual | Esmeralda da V1, neutros tingidos, contraste asserido nos dois temas |
 | Densidade por contexto | Cartão no celular, Compacto no desktop — um conjunto de tokens, dois valores |
 | Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
+| Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -37,30 +38,7 @@ salvar → executar → rever no histórico.
 
 ## Roadmap
 
-### 1. Tela de "hoje" (o Dashboard que falta)
-
-A `/` diz uma frase e nada mais. O comentário em `src/app/page.tsx` explica o
-porquê: *"a dashboard appears when there is data to summarise; scaffolding one
-now would be decoration."*
-
-**Essa condição expirou.** Hoje existem dieta, diário, sessões, pesagens e
-metas — há o que resumir. O item mais à esquerda do menu é "Diário", que
-responde só pela metade alimentar: quem abre o app de manhã não tem em tela
-nenhuma a resposta para "como estou indo hoje, no geral".
-
-Foi o único achado da análise comparativa com a V1 (agosto de 2026) que
-apontou algo que o V2 não tem e deveria ter. O resto das críticas de lá partia
-de premissa errada — a de que a interface inteira é monoespaçada (são 30
-elementos sans para 9 mono numa tela típica, e todos os mono são números) e a
-de que o catálogo tem dado de teste (as 216 entradas versionadas estão limpas;
-o lixo estava no IndexedDB do navegador de quem auditou).
-
-O que a V1 faz e vale copiar: anel de calorias como única métrica em destaque
-máximo, macros ao lado, treino e refeições do dia em cards paralelos, alertas
-contextuais. O que **não** vale copiar de lá: estimar caloria gasta a partir de
-"Leve/Moderado/Pesado" — é número inventado com cara de medição.
-
-### 2. Refinamentos restantes de `/exercicios`
+### 1. Refinamentos restantes de `/exercicios`
 
 Levantados na auditoria de UX. O detalhe do exercício saiu daqui e foi
 entregue; o resto continua adiado:
@@ -70,7 +48,7 @@ entregue; o resto continua adiado:
 - Reduzir o ruído da linha (três tags por linha)
 - Recentes e mais usados
 
-### 3. Cobertura de fotos
+### 2. Cobertura de fotos
 
 **25 exercícios sem imagem**, de 78 originais. A segunda passagem no
 `free-exercise-db` fechou 47 e o `wger` fechou 6.
@@ -88,14 +66,14 @@ caminhos, e a escolha é de produto:
 
 Gerar por IA está fora: contradiz a regra fundadora do projeto.
 
-### 4. Fotos de progresso
+### 3. Fotos de progresso
 
 A metade da evolução corporal que ficou de fora. Exige infraestrutura que
 ainda não existe: redimensionar a imagem antes de guardar (uma foto de celular
 tem 4 MB, e uma por semana enche o IndexedDB em um ano) e um store separado,
 para que ler um peso não arraste blobs junto.
 
-### 5. Sugerir atualizar o peso do perfil
+### 4. Sugerir atualizar o peso do perfil
 
 Hoje o registro corporal e o perfil são independentes de propósito: o peso do
 perfil é **entrada** do cálculo de metas, e o registro é a **história**. Mas um
@@ -105,7 +83,7 @@ erradas em silêncio.
 O passo certo é oferecer, não sincronizar: "seu perfil usa 84 kg, sua última
 medição é 80 kg — atualizar?". Mantém a dieta sem depender de nada opcional.
 
-### 6. Fibra rastreável
+### 5. Fibra rastreável
 
 Hoje o perfil calcula uma meta de fibra (14 g por 1000 kcal) que o app não tem
 como conferir: **nenhum dos 216 alimentos carrega fibra**. A tela passou a
@@ -121,13 +99,13 @@ campo, com `null` para o que não for encontrado.
 Meia solução é pior que nenhuma: somar só os alimentos que tiverem fibra
 mostraria "12 g de 31" para quem comeu 25 — um número errado com cara de certo.
 
-### 7. PWA e offline completo
+### 6. PWA e offline completo
 
 Service worker cacheando o shell. O dado já é local e funciona offline; falta
 a aplicação abrir sem rede — e, agora, as fotos. Passar pelo otimizador do
 Next deixou as URLs same-origin justamente pensando nisso.
 
-### 8. Sincronização
+### 7. Sincronização
 
 A camada de repositório foi desenhada para isto desde o primeiro commit:
 `updatedAt` em toda entidade, ids gerados no cliente, e a raiz de composição
