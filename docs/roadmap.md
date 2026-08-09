@@ -31,6 +31,7 @@ depender da memória de nenhuma conversa.
 | Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
 | Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
 | Navegação no celular | Barra inferior de 5 abas ao alcance do polegar; o resto atrás de "Mais" |
+| PWA e offline | Instalável, e abre sem rede — shell, assets e payloads de rota em cache |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -100,13 +101,7 @@ campo, com `null` para o que não for encontrado.
 Meia solução é pior que nenhuma: somar só os alimentos que tiverem fibra
 mostraria "12 g de 31" para quem comeu 25 — um número errado com cara de certo.
 
-### 6. PWA e offline completo
-
-Service worker cacheando o shell. O dado já é local e funciona offline; falta
-a aplicação abrir sem rede — e, agora, as fotos. Passar pelo otimizador do
-Next deixou as URLs same-origin justamente pensando nisso.
-
-### 7. Sincronização
+### 6. Sincronização
 
 A camada de repositório foi desenhada para isto desde o primeiro commit:
 `updatedAt` em toda entidade, ids gerados no cliente, e a raiz de composição

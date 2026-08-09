@@ -1,4 +1,5 @@
 import { defineConfig, globalIgnores } from "eslint/config";
+import globals from "globals";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 
@@ -103,6 +104,28 @@ export default defineConfig([
     files: ["scripts/**/*.mjs"],
     rules: {
       "no-console": "off",
+    },
+  },
+
+  /**
+   * The service worker is the one script here that ships unbundled and
+   * untyped. It runs in its own global scope, so it cannot import from `src/`
+   * and TypeScript never sees it — which left it as the single file in the
+   * project with nothing checking it at all.
+   *
+   * `no-undef` with the service worker globals is the cheapest thing that
+   * closes that: a typo in `caches` or `clients` would otherwise ship, and it
+   * would fail while offline, which is precisely when nobody is watching a
+   * console.
+   */
+  {
+    files: ["public/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: globals.serviceworker,
+    },
+    rules: {
+      "no-undef": "error",
     },
   },
 

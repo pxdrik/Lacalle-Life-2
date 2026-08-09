@@ -29,6 +29,27 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   /**
+   * The one file that must never be cached by HTTP.
+   *
+   * A service worker updates only when the browser fetches a *different*
+   * `sw.js`. If an intermediary is allowed to hold the old copy, the offline
+   * shell it installs becomes permanent — every future deploy invisible to
+   * anyone who already visited. The caching this file performs is deliberate;
+   * caching the file itself is a trap.
+   */
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
+
+  /**
    * Exercise photos are served from the source repository through
    * jsDelivr — never copied into this repo, never re-hosted.
    *

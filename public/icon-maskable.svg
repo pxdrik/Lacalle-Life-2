@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Full bleed, unlike icon.svg: Android applies its own mask (circle,
+       squircle, teardrop depending on the launcher), and rounded corners baked
+       into the artwork would appear as a rounded square floating inside that
+       mask. The mark stays inside the 80% safe zone (3.2–28.8) so no launcher
+       shape can clip it. -->
+  <rect width="32" height="32" fill="#0a0a0a" />
+  <path d="M11 7h4.6v13.4H22V25H11z" fill="#ffffff" />
+</svg>

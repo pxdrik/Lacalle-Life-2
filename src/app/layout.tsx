@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
 import { AppNav } from "./_components/app-nav";
+import { ServiceWorker } from "./_components/service-worker";
 
 import "./globals.css";
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AppNav />
           {children}
+          <ServiceWorker />
         </ThemeProvider>
       </body>
     </html>
