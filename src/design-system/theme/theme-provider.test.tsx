@@ -57,12 +57,12 @@ afterEach(() => {
 });
 
 describe("ThemeProvider", () => {
-  it("follows the OS when no preference was ever chosen", () => {
-    installMatchMedia(true);
+  it("starts dark when no preference was ever chosen, even on a light OS", () => {
+    installMatchMedia(false);
     renderToggle();
 
     expect(theme()).toBe("dark");
-    expect(screen.getByRole("radio", { name: "Sistema" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "Escuro" })).toBeChecked();
   });
 
   it("applies a stored preference over the OS setting", () => {
@@ -74,6 +74,10 @@ describe("ThemeProvider", () => {
   });
 
   it("keeps tracking the OS while the preference is system", () => {
+    // `system` has to be chosen now that it is no longer the default, which
+    // is the point: the option still works, it just is not what you get for
+    // free any more.
+    window.localStorage.setItem(THEME_STORAGE_KEY, "system");
     const media = installMatchMedia(false);
     renderToggle();
     expect(theme()).toBe("light");
@@ -100,9 +104,12 @@ describe("ThemeProvider", () => {
     installMatchMedia(false);
     renderToggle();
 
-    await userEvent.click(screen.getByRole("radio", { name: "Escuro" }));
+    // "Claro", not "Escuro": dark is the default now, so clicking it selects
+    // what is already selected and fires no change at all — the test would
+    // pass on a component that persisted nothing.
+    await userEvent.click(screen.getByRole("radio", { name: "Claro" }));
 
-    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
   });
 
   it("sets color-scheme alongside the attribute", async () => {
@@ -146,11 +153,11 @@ describe("ThemeToggle", () => {
     // between them. All of it is native behaviour — which is the reason this
     // is built on real radios instead of buttons with aria-checked.
     await userEvent.tab();
-    expect(screen.getByRole("radio", { name: "Sistema" })).toHaveFocus();
+    expect(screen.getByRole("radio", { name: "Escuro" })).toHaveFocus();
 
     await userEvent.keyboard("{ArrowLeft}");
 
-    expect(screen.getByRole("radio", { name: "Escuro" })).toBeChecked();
-    expect(theme()).toBe("dark");
+    expect(screen.getByRole("radio", { name: "Claro" })).toBeChecked();
+    expect(theme()).toBe("light");
   });
 });

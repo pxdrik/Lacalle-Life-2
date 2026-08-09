@@ -50,7 +50,7 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
         style={{ transform: `scaleX(${String(progress)})` }}
       />
 
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-3">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3">
         <div className="min-w-0 flex-1">
           <p className="text-[0.6875rem] tracking-wide text-ink-subtle uppercase">
             {isFinished ? "Descanso concluído" : "Descanso"}

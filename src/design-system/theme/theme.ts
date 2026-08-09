@@ -22,15 +22,29 @@ export const THEME_PREFERENCES: readonly ThemePreference[] = [
 ];
 
 /**
+ * The theme somebody gets before they have chosen one.
+ *
+ * `dark`, not `system`: this is a product decision, not a technical default.
+ * The emerald identity was designed on a dark ground and is what the app is
+ * supposed to look like the first time you see it — following the OS instead
+ * means half the visitors meet a version nobody chose for them.
+ *
+ * Three places have to agree on this value — here, `getServerPreference`, and
+ * the pre-hydration script. If they diverge the page paints one theme and
+ * then swaps to the other.
+ */
+export const DEFAULT_THEME: ThemePreference = "dark";
+
+/**
  * Storage is user-writable and survives across app versions, so anything read
- * from it is untrusted input. An unrecognised value falls back to `system`
+ * from it is untrusted input. An unrecognised value falls back to the default
  * rather than throwing — a corrupt preference must never cost someone their
  * app.
  */
 export function parseThemePreference(value: unknown): ThemePreference {
   return THEME_PREFERENCES.includes(value as ThemePreference)
     ? (value as ThemePreference)
-    : "system";
+    : DEFAULT_THEME;
 }
 
 export function resolveTheme(

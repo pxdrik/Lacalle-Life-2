@@ -1,4 +1,5 @@
 import {
+  DEFAULT_THEME,
   parseThemePreference,
   THEME_STORAGE_KEY,
   type ThemePreference,
@@ -74,7 +75,7 @@ export function getPreference(): ThemePreference {
  * the painted theme was correct the whole time.
  */
 export function getServerPreference(): ThemePreference {
-  return "system";
+  return DEFAULT_THEME;
 }
 
 export function setPreference(preference: ThemePreference): void {

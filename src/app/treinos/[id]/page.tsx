@@ -21,7 +21,7 @@ export default async function RoutinePage({
   const { id } = await params;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       {/* The exercise picker reads search params, so it needs a boundary for
           the shell to stay prerenderable. */}
       <Suspense fallback={null}>

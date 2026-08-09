@@ -1,4 +1,4 @@
-import { THEME_ATTRIBUTE, THEME_STORAGE_KEY } from "./theme";
+import { DEFAULT_THEME, THEME_ATTRIBUTE, THEME_STORAGE_KEY } from "./theme";
 
 /**
  * Applies the theme before the browser paints anything.
@@ -13,7 +13,7 @@ import { THEME_ATTRIBUTE, THEME_STORAGE_KEY } from "./theme";
  */
 const source = `(function(){try{
 var s=localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});
-var p=(s==="light"||s==="dark"||s==="system")?s:"system";
+var p=(s==="light"||s==="dark"||s==="system")?s:${JSON.stringify(DEFAULT_THEME)};
 var d=p==="dark"||(p==="system"&&window.matchMedia("(prefers-color-scheme: dark)").matches);
 var t=d?"dark":"light";
 var e=document.documentElement;

@@ -18,7 +18,7 @@ import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
  */
 export default function DiaryPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-6 sm:py-10">
+    <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
       <PageHeader
         title="Diário"
         subtitle="O que você comeu, dia a dia. A dieta é o plano; isto é o que aconteceu."

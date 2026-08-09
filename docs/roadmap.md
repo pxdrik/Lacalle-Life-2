@@ -26,8 +26,8 @@ depender da memória de nenhuma conversa.
 | Duplicar e copiar | Refeição, alimento entre refeições, exercício, rotina e dieta inteiras |
 | Detalhe do exercício | Duas fases do movimento animadas, curadoria completa, fotos no treino |
 | Evolução corporal | Peso, gordura e 9 medidas por dia, gráfico de tendência com média móvel |
-| Identidade visual | Esmeralda da V1, neutros tingidos, contraste asserido nos dois temas |
-| Densidade por contexto | Cartão no celular, Compacto no desktop — um conjunto de tokens, dois valores |
+| Identidade visual | Esmeralda da V1 nas superfícies, escuro por padrão, contraste asserido nos dois temas |
+| Densidade por contexto | Desktop mais denso que o celular, não menor — 1152px de conteúdo, cartão de 24px |
 | Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
 | Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
 | Navegação no celular | Barra inferior de 5 abas ao alcance do polegar; o resto atrás de "Mais" |

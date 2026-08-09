@@ -28,7 +28,7 @@ export default function HomePage() {
   const today = dayKey(new Date());
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-6 sm:py-10">
+    <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
       <PageHeader title="Hoje" subtitle={capitalise(formatLongDay(today))} />
 
       <div className="mt-6 space-y-3">

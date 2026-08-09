@@ -48,11 +48,14 @@ describe("theme script", () => {
     expect(theme()).toBe("dark");
   });
 
-  it("defaults to light when the OS has no dark preference", () => {
+  it("paints dark before anyone has chosen, whatever the OS says", () => {
+    // The default is a product decision, not a deference to the OS: the
+    // emerald identity was designed on a dark ground, and this script is what
+    // decides the very first paint.
     stubSystemPrefersDark(false);
     runThemeScript();
 
-    expect(theme()).toBe("light");
+    expect(theme()).toBe("dark");
   });
 
   it.each([

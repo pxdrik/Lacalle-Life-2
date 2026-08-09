@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function FoodsPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <PageHeader title="Alimentos" subtitle="O banco que suas dietas usam." />
 
       <div className="mt-8">

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function ExercisesPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <PageHeader
         title="Exercícios"
         subtitle="O catálogo que seus treinos usam."

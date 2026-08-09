@@ -10,11 +10,16 @@
  * state, and data. A screen that is mostly numbers stays calm only if the
  * numbers are the loudest thing on it.
  *
- * **The neutrals are tinted, not grey.** Every surface and text token carries a
- * few thousandths of chroma at hue 180, a cool teal that sits next to the
- * emerald on the wheel. Pure `chroma: 0` grey is what a framework gives you
- * for free, and it reads that way. V1 tinted its neutrals blue (hue 240) while
- * its accent was green, which is why the two never quite settled together.
+ * **The surfaces are emerald, not grey.** They used to carry a few thousandths
+ * of chroma — technically tinted, indistinguishable from grey in use. The
+ * owner compared the two versions and said it plainly: V1's colours are more
+ * alive. He was right, and the measurement agreed — V1's panel sat at chroma
+ * 0.08 against 0.009 here, roughly ten times the colour.
+ *
+ * So the surfaces moved onto the brand hue at chroma people can actually see
+ * (0.03 on the canvas, 0.055 on a card in the dark theme). The text tokens
+ * stay near-neutral on purpose: tinting a surface reads as a material, while
+ * tinting body copy just reads as a display that needs calibrating.
  *
  * Values are OKLCH because it is perceptually uniform: a lightness step reads
  * as the same step at any hue, which is what makes the light and dark scales
@@ -30,10 +35,10 @@
 
   /* Surfaces, from furthest back to closest. The canvas is faintly tinted and
      cards are pure white, so a card lifts off the page without a shadow. */
-  --canvas: oklch(0.988 0.004 180);
-  --surface: oklch(1 0 0);
-  --elevated: oklch(1 0 0);
-  --muted: oklch(0.963 0.006 180);
+  --canvas: oklch(0.986 0.014 167);
+  --surface: oklch(0.999 0.004 167);
+  --elevated: oklch(0.999 0.004 167);
+  --muted: oklch(0.957 0.026 167);
 
   /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder. */
   --ink: oklch(0.17 0.014 180);
@@ -42,8 +47,8 @@
      the canvas drops under 4.5:1. Placeholder text is still text. */
   --ink-subtle: oklch(0.55 0.012 180);
 
-  --line: oklch(0.915 0.008 180);
-  --line-strong: oklch(0.83 0.011 180);
+  --line: oklch(0.9 0.035 167);
+  --line-strong: oklch(0.79 0.055 167);
 
   /* The brand.
 
@@ -52,12 +57,15 @@
      a chart line on a near-white page. One of the two has to give, and a
      line nobody can see is the worse failure. So light mode takes a deeper
      emerald with white on it; dark mode keeps the vivid one. */
-  --accent: oklch(0.53 0.14 167);
+  /* 0.52, not the 0.54 that the extra chroma tempted: white on it measured
+     4.39:1, and the button label is text. Saturation is free here, lightness
+     is not. */
+  --accent: oklch(0.52 0.16 167);
   --accent-ink: oklch(1 0 0);
 
   /* The emerald as *text*, which needs 4.5:1 rather than the 3:1 a graphic
      needs. Used for the completed mark and the finished timer. */
-  --accent-text: oklch(0.47 0.12 167);
+  --accent-text: oklch(0.47 0.14 167);
 
   --danger: oklch(0.51 0.21 27);
   --danger-ink: oklch(1 0 0);
@@ -93,27 +101,27 @@
 
   /* Dark surfaces lift by getting lighter. Shadows do not read on near-black,
      so depth is carried by surface value and the top hairline instead. */
-  --canvas: oklch(0.165 0.008 180);
-  --surface: oklch(0.205 0.009 180);
-  --elevated: oklch(0.235 0.01 180);
-  --muted: oklch(0.255 0.01 180);
+  --canvas: oklch(0.185 0.03 167);
+  --surface: oklch(0.245 0.055 167);
+  --elevated: oklch(0.275 0.06 167);
+  --muted: oklch(0.3 0.065 167);
 
   --ink: oklch(0.97 0.004 180);
   --ink-muted: oklch(0.73 0.011 180);
   --ink-subtle: oklch(0.61 0.013 180);
 
-  --line: oklch(0.285 0.011 180);
-  --line-strong: oklch(0.39 0.013 180);
+  --line: oklch(0.36 0.07 167);
+  --line-strong: oklch(0.46 0.085 167);
 
   /* The vivid one, kept: on a dark ground it can be bright enough to read as
      a chart line *and* still carry near-black text. Light mode has no such
      luxury — see the note there. */
-  --accent: oklch(0.76 0.16 167);
+  --accent: oklch(0.78 0.19 167);
   --accent-ink: oklch(0.165 0.008 180);
 
   /* On a dark ground the emerald clears 4.5:1 as text while bright, so this
      goes brighter than its light-theme counterpart rather than darker. */
-  --accent-text: oklch(0.82 0.14 167);
+  --accent-text: oklch(0.84 0.16 167);
 
   --danger: oklch(0.7 0.18 25);
   --danger-ink: oklch(0.165 0.008 180);
@@ -191,17 +199,26 @@
 
 @media (width >= 48rem) {
   :root {
-    /* Compacto: the desk, a mouse, the whole workout on one screen. */
-    --corner-sm: 0.3125rem;
-    --corner-md: 0.4375rem;
-    --corner-lg: 0.625rem;
-    --corner-xl: 0.875rem;
+    /**
+     * Desktop is denser than a phone, not smaller.
+     *
+     * The first version of this shrank everything — 15px card padding, 36px
+     * controls — and the result read as a phone screen stretched across a
+     * monitor rather than an application. Pulling back: still tighter than
+     * the phone, because a mouse is precise and a desk shows more at once,
+     * but close to the 24px padding and 16px corners of the app this one is
+     * modelled on.
+     */
+    --corner-sm: 0.5rem;
+    --corner-md: 0.625rem;
+    --corner-lg: 0.875rem;
+    --corner-xl: 1rem;
 
-    --control-h: 2.25rem;
-    --control-h-sm: 1.875rem;
-    --control-h-lg: 2.75rem;
-    --control-px: 0.8125rem;
-    --card-p: 0.9375rem;
+    --control-h: 2.5rem;
+    --control-h-sm: 2.125rem;
+    --control-h-lg: 2.875rem;
+    --control-px: 0.9375rem;
+    --card-p: 1.5rem;
   }
 }
 

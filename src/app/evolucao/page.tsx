@@ -22,7 +22,7 @@ export const metadata: Metadata = {
  */
 export default function EvolutionPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <PageHeader
         title="Evolução"
         subtitle="Seu corpo e seus treinos, ao longo do tempo."

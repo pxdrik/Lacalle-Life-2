@@ -20,7 +20,7 @@ export default async function DietPage({
   const { id } = await params;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10 sm:py-14">
+    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <DietEditorDataProvider>
         <DietEditor dietId={id} />
       </DietEditorDataProvider>
