@@ -35,6 +35,7 @@ depender da memória de nenhuma conversa.
 | Incremento rápido | −1/+1 rep e ∓2,5 kg na série em execução, partindo do planejado quando o campo está vazio |
 | Peso decimal digitável | O separador era engolido ao ser digitado: 6·2·vírgula·5 gravava 625 kg |
 | Total à prova de dado corrompido | Um valor ilegível some da soma em vez de virar `NaN` e levar a tela inteira |
+| Aviso de peso desatualizado | O perfil oferece usar a última pesagem quando divergem em 1 kg ou mais — oferece, não sincroniza |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -78,17 +79,7 @@ ainda não existe: redimensionar a imagem antes de guardar (uma foto de celular
 tem 4 MB, e uma por semana enche o IndexedDB em um ano) e um store separado,
 para que ler um peso não arraste blobs junto.
 
-### 4. Sugerir atualizar o peso do perfil
-
-Hoje o registro corporal e o perfil são independentes de propósito: o peso do
-perfil é **entrada** do cálculo de metas, e o registro é a **história**. Mas um
-perfil parado em 84 kg enquanto a última pesagem diz 80 kg calcula metas
-erradas em silêncio.
-
-O passo certo é oferecer, não sincronizar: "seu perfil usa 84 kg, sua última
-medição é 80 kg — atualizar?". Mantém a dieta sem depender de nada opcional.
-
-### 5. Fibra rastreável
+### 4. Fibra rastreável
 
 Hoje o perfil calcula uma meta de fibra (14 g por 1000 kcal) que o app não tem
 como conferir: **nenhum dos 216 alimentos carrega fibra**. A tela passou a
@@ -104,7 +95,7 @@ campo, com `null` para o que não for encontrado.
 Meia solução é pior que nenhuma: somar só os alimentos que tiverem fibra
 mostraria "12 g de 31" para quem comeu 25 — um número errado com cara de certo.
 
-### 6. Sincronização
+### 5. Sincronização
 
 A camada de repositório foi desenhada para isto desde o primeiro commit:
 `updatedAt` em toda entidade, ids gerados no cliente, e a raiz de composição

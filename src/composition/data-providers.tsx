@@ -112,6 +112,24 @@ const exerciseRepository = once<ExerciseRepository>(async () => {
   return (await getRepositories()).exercises;
 });
 
+/**
+ * The profile screen also reads the body log, to notice when the weight behind
+ * someone's targets has gone stale. Composed here rather than nested at the
+ * route, so a page never has to know which repositories a screen's components
+ * happen to reach for.
+ */
+export function ProfileScreenDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <ProfileDataProvider>
+      <BodyDataProvider>{children}</BodyDataProvider>
+    </ProfileDataProvider>
+  );
+}
+
 export function ProfileDataProvider({
   children,
 }: {

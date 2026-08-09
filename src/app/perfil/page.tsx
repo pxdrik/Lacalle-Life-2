@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ProfileDataProvider } from "@/composition/data-providers";
+import { ProfileScreenDataProvider } from "@/composition/data-providers";
 import { ProfileScreen } from "@/features/profile/components/profile-screen";
 import { PageHeader } from "@/design-system/components/page-header";
 
@@ -17,9 +17,9 @@ export default function ProfilePage() {
       />
 
       <div className="mt-8">
-        <ProfileDataProvider>
+        <ProfileScreenDataProvider>
           <ProfileScreen />
-        </ProfileDataProvider>
+        </ProfileScreenDataProvider>
       </div>
     </main>
   );

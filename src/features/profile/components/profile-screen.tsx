@@ -9,6 +9,7 @@ import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { useProfile } from "../hooks/use-profile";
 import { PlanSummary } from "./plan-summary";
 import { ProfileForm } from "./profile-form";
+import { StaleWeightNotice } from "./stale-weight-notice";
 
 export function ProfileScreen() {
   const { state, writeError, save, clear } = useProfile();
@@ -58,6 +59,20 @@ export function ProfileScreen() {
         />
       ) : (
         <>
+          {/* Above the targets, because it is the reason to doubt them. */}
+          {state.status === "ready" && (
+            <StaleWeightNotice
+              profile={state.profile.nutrition}
+              pending={saving}
+              onApply={(weightKg) => {
+                setSaving(true);
+                void save({ ...state.profile.nutrition, weightKg }).then(() => {
+                  setSaving(false);
+                });
+              }}
+            />
+          )}
+
           <PlanSummary result={state.result} />
 
           <div className="flex gap-3">
