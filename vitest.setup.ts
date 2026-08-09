@@ -12,3 +12,16 @@ afterEach(cleanup);
 // rather than per test: it is a gap in the environment, not a fact about any
 // one component.
 Element.prototype.scrollIntoView = () => undefined;
+
+// Same story for `<dialog>`: jsdom implements the element but none of the
+// modal behaviour, so `showModal()` is missing entirely and anything that
+// opens a dialog throws on mount. Stubbed to do the part that is observable
+// from the outside — set `open`, and fire `close` on close, which is the event
+// our own listener depends on.
+HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+  this.open = true;
+};
+HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+  this.open = false;
+  this.dispatchEvent(new Event("close"));
+};

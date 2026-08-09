@@ -23,6 +23,11 @@
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+
+    /* Room for the tab bar, which is fixed and would otherwise cover the last
+       card on every screen. Zero from `sm` up, where the bar is not rendered —
+       one declaration instead of a padding class on each of eleven pages. */
+    padding-bottom: var(--bottom-nav-h);
   }
 
   /* One focus treatment for the whole app, visible on every surface, and

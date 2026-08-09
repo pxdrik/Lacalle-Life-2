@@ -30,6 +30,7 @@ depender da memória de nenhuma conversa.
 | Densidade por contexto | Cartão no celular, Compacto no desktop — um conjunto de tokens, dois valores |
 | Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
 | Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
+| Navegação no celular | Barra inferior de 5 abas ao alcance do polegar; o resto atrás de "Mais" |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.

@@ -7,6 +7,8 @@ import type { Route } from "next";
 import { cn } from "@/design-system/cn";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
+import { BottomNav } from "./bottom-nav";
+
 /**
  * Only routes that exist. Diet and workouts join this list when they are real
  * screens — a nav item that leads to a placeholder teaches people the app is
@@ -29,7 +31,10 @@ export function AppNav() {
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex max-w-3xl items-center gap-4 px-6 py-3.5">
+      {/* `justify-between` on a phone, where the links are gone and the
+          wordmark would otherwise sit next to the theme toggle with a gap the
+          size of the screen between them and the edge. */}
+      <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-6 py-3.5 sm:justify-start">
         {/* `shrink-0` and no wrapping: the wordmark broke onto two lines the
             moment a seventh link was added, which shoved the whole header
             taller on a screen that was merely narrow. */}
@@ -41,12 +46,13 @@ export function AppNav() {
         </Link>
 
         {/* Home is reached through the wordmark, so it is not repeated here.
-            The list scrolls sideways instead of wrapping: seven links do not
-            fit a phone, and a header that grows a second row pushes the
-            content down on every screen. */}
+            Hidden on phones, where `BottomNav` carries navigation: seven links
+            do not fit 360px, and the sideways scroll this used to fall back on
+            hid destinations behind a gesture nobody performs — at the top of
+            the screen, which is the hardest place to reach one-handed. */}
         <nav
           aria-label="Principal"
-          className="-mx-1 min-w-0 flex-1 overflow-x-auto px-1"
+          className="-mx-1 hidden min-w-0 flex-1 overflow-x-auto px-1 sm:block"
         >
           <ul className="flex w-max gap-1">
             {LINKS.map((link) => {
@@ -75,6 +81,8 @@ export function AppNav() {
 
         <ThemeToggle />
       </div>
+
+      <BottomNav />
     </header>
   );
 }

@@ -1,23 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { Dialog } from "./dialog";
 
 /**
  * jsdom implements `<dialog>` but not the modal parts of it, so `showModal()`
- * is stubbed to do what a browser does: set `open`. Everything asserted below
- * is our own logic — when we open, when we close, what we clean up.
+ * and `close()` are stubbed in `vitest.setup.ts` — a gap in the environment
+ * rather than a fact about this component, and one that any test rendering a
+ * dialog runs into. Everything asserted below is our own logic: when we open,
+ * when we close, what we clean up.
  */
-beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
-    this.open = true;
-  };
-  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
-    this.open = false;
-    this.dispatchEvent(new Event("close"));
-  };
-});
 
 function open() {
   return document.querySelector("dialog")?.open === true;

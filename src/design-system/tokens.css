@@ -166,6 +166,27 @@
   --control-h-lg: 3.25rem;
   --control-px: 1rem;
   --card-p: 1.25rem;
+
+  /**
+   * How much of the bottom of the screen the tab bar owns.
+   *
+   * A token rather than a number in one component, because three things have
+   * to agree on it: the bar's own height, the padding that stops the last card
+   * hiding underneath it, and the rest timer, which is pinned to the bottom
+   * during a workout and would otherwise sit on top of the navigation.
+   *
+   * The safe-area inset is inside the value so that the iPhone home indicator
+   * is accounted for once, here, instead of at each of those three places.
+   */
+  --bottom-nav-h: calc(3.5rem + env(safe-area-inset-bottom));
+}
+
+@media (width >= 40rem) {
+  :root {
+    /* The tab bar is a phone affordance. From `sm` up the links are in the
+       header, where there is room for all seven. */
+    --bottom-nav-h: 0rem;
+  }
 }
 
 @media (width >= 48rem) {

@@ -27,8 +27,19 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
       // Rises in: it appears the instant a set is marked done, and sliding up
       // from the edge says where it came from. Popping into place mid-workout
       // reads as a glitch.
-      className="animate-rise fixed inset-x-0 bottom-0 z-20 border-t border-line bg-canvas/95 backdrop-blur"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      // Sits *above* the tab bar rather than on top of it: mid-workout both
+      // matter, and a countdown covering the navigation would trap someone in
+      // the session screen for the length of their rest.
+      //
+      // The safe-area padding applies only from `sm`, where there is no tab
+      // bar beneath. Below that the offset already clears the inset, because
+      // `--bottom-nav-h` contains it — padding it again here would count the
+      // home indicator twice and leave a gap under the countdown.
+      className={cn(
+        "animate-rise fixed inset-x-0 bottom-(--bottom-nav-h) z-20",
+        "border-t border-line bg-canvas/95 backdrop-blur",
+        "sm:pb-[env(safe-area-inset-bottom)]",
+      )}
     >
       <div
         aria-hidden
