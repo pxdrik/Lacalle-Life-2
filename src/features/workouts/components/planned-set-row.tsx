@@ -2,11 +2,10 @@
 
 import { X } from "lucide-react";
 
-import { parseDecimal } from "@/core/format/decimal";
-
 import type { PlannedSet } from "../types/routine";
 import type { SetChanges } from "../services/edit-routine";
 import { RpeSelect } from "./rpe-select";
+import { WeightField } from "./weight-field";
 
 interface Props {
   readonly set: PlannedSet;
@@ -46,14 +45,11 @@ export function PlannedSetRow({
         className={`${CELL} flex-1`}
       />
 
-      <input
-        type="text"
-        inputMode="decimal"
-        value={set.weightKg === null ? "" : String(set.weightKg)}
-        aria-label={`Peso da série ${String(number)} de ${exerciseName}`}
-        placeholder="—"
-        onChange={(event) => {
-          onChange({ weightKg: parseDecimal(event.target.value) });
+      <WeightField
+        value={set.weightKg}
+        label={`Peso da série ${String(number)} de ${exerciseName}`}
+        onChange={(weightKg) => {
+          onChange({ weightKg });
         }}
         className={`${CELL} flex-1`}
       />
