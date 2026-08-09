@@ -2,6 +2,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 
+import { ToastProvider } from "@/design-system/components/toast";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
@@ -46,9 +47,11 @@ export default function RootLayout({
       <body>
         <ThemeScript />
         <ThemeProvider>
-          <AppNav />
-          {children}
-          <ServiceWorker />
+          <ToastProvider>
+            <AppNav />
+            {children}
+            <ServiceWorker />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

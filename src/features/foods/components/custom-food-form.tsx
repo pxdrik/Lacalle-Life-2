@@ -7,6 +7,7 @@ import { parseDecimal } from "@/core/format/decimal";
 import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
+import { useToast } from "@/design-system/components/toast";
 
 import { estimateKcal } from "../services/create-food";
 import type { Food } from "../types/food";
@@ -62,6 +63,7 @@ interface Props {
 
 export function CustomFoodForm({ initial, save, pending, error }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [draft, setDraft] = useState<Draft>(() => draftFrom(initial));
   const [issues, setIssues] = useState<Readonly<Record<string, string>>>({});
 
@@ -119,7 +121,16 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
     }
 
     setIssues({});
-    if (await save(parsed.data)) router.push("/alimentos");
+    if (!(await save(parsed.data))) return;
+
+    // Said out loud, because navigating away is the only other signal and a
+    // navigation looks the same whether it followed a save or a cancel.
+    toast(
+      initial === null
+        ? `${parsed.data.name} foi criado.`
+        : `${parsed.data.name} foi salvo.`,
+    );
+    router.push("/alimentos");
   }
 
   return (

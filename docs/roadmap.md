@@ -36,6 +36,7 @@ depender da memória de nenhuma conversa.
 | Peso decimal digitável | O separador era engolido ao ser digitado: 6·2·vírgula·5 gravava 625 kg |
 | Total à prova de dado corrompido | Um valor ilegível some da soma em vez de virar `NaN` e levar a tela inteira |
 | Aviso de peso desatualizado | O perfil oferece usar a última pesagem quando divergem em 1 kg ou mais — oferece, não sincroniza |
+| Toast de confirmação | Para as escritas que não deixam rastro na tela: salvar perfil, criar e editar alimento |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -117,7 +118,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 
 | O quê | Onde | Por quê |
 | --- | --- | --- |
-| **Toast de confirmação** | Salvar perfil, criar alimento | Não existe nenhum toast no app. Editar gramas se auto-evidencia — o número muda na frente da pessoa — mas salvar perfil e criar alimento só confirmam navegando de volta, que é feedback fraco para escrita |
 | **Aviso antes do timeout** | `useArmed` | O botão armado volta ao normal em 4 s sem contador nem transição. Quem hesita perde a ação em silêncio e precisa clicar de novo — justamente num momento de decisão |
 | **Nome do exercício em duas linhas** | Editor de rotina | "Supino Declinado com Barra" vira "Supi…" numa linha só. Na montagem do treino, que é quando se escolhe |
 | **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |

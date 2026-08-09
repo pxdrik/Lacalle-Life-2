@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { useToast } from "@/design-system/components/toast";
 
 import { useProfile } from "../hooks/use-profile";
 import { PlanSummary } from "./plan-summary";
@@ -13,6 +14,7 @@ import { StaleWeightNotice } from "./stale-weight-notice";
 
 export function ProfileScreen() {
   const { state, writeError, save, clear } = useProfile();
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -53,7 +55,9 @@ export function ProfileScreen() {
             setSaving(true);
             void save(nutrition).then((ok) => {
               setSaving(false);
-              if (ok) setEditing(false);
+              if (!ok) return;
+              setEditing(false);
+              toast("Metas recalculadas.");
             });
           }}
         />
@@ -66,8 +70,9 @@ export function ProfileScreen() {
               pending={saving}
               onApply={(weightKg) => {
                 setSaving(true);
-                void save({ ...state.profile.nutrition, weightKg }).then(() => {
+                void save({ ...state.profile.nutrition, weightKg }).then((ok) => {
                   setSaving(false);
+                  if (ok) toast("Peso atualizado e metas recalculadas.");
                 });
               }}
             />
