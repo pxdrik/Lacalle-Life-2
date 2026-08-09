@@ -180,6 +180,26 @@ describe("statistics", () => {
     expect(sessionVolumeKg(completeSet(bodyweight, exerciseId, setIds[0]!))).toBe(0);
   });
 
+  it("survives a stored weight that is not a number", () => {
+    // `null` means "not recorded" and is already handled. This is the other
+    // case: a value that is present and still unusable, which a row written by
+    // an older version or edited by hand can hold. Without the guard one such
+    // set turned an entire training history's volume into NaN.
+    const { session, exerciseId, setIds } = runningSession();
+    const corrupted: Session = {
+      ...session,
+      exercises: session.exercises.map((exercise) => ({
+        ...exercise,
+        sets: exercise.sets.map((set, index) =>
+          index === 1 ? { ...set, weightKg: Number.NaN, isCompleted: true } : set,
+        ),
+      })),
+    };
+
+    // The readable completed set still counts; the broken one contributes 0.
+    expect(sessionVolumeKg(completeSet(corrupted, exerciseId, setIds[0]!))).toBe(480);
+  });
+
   it("points at the first set not yet done", () => {
     const { session, exerciseId, setIds } = runningSession();
 

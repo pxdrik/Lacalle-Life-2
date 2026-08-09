@@ -34,6 +34,7 @@ depender da memória de nenhuma conversa.
 | PWA e offline | Instalável, e abre sem rede — shell, assets e payloads de rota em cache |
 | Incremento rápido | −1/+1 rep e ∓2,5 kg na série em execução, partindo do planejado quando o campo está vazio |
 | Peso decimal digitável | O separador era engolido ao ser digitado: 6·2·vírgula·5 gravava 625 kg |
+| Total à prova de dado corrompido | Um valor ilegível some da soma em vez de virar `NaN` e levar a tela inteira |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -144,7 +145,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 
 | O quê | Por quê |
 | --- | --- |
-| **Guarda de macro inválido na escrita** | Não há nenhum `isFinite` em `features/foods`, `features/diet` ou `core/domain`. A tela está protegida — `formatDecimal` mostra travessão —, mas o dado não: um macro corrompido entra no `sumMacros` e contamina o total |
 | **Página 404 própria** | Não existe `not-found.tsx`. A página padrão do Next não tem link de volta nem a navegação do app |
 | **`apple-touch-icon`** | O manifesto tem SVG, que o Android usa. iOS quer PNG — sem ele, a tela inicial do iPhone usa uma captura da página |
 

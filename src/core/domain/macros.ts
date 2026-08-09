@@ -53,6 +53,21 @@ export function roundMacros(macros: Macros): Macros {
   };
 }
 
+/**
+ * A total that one unreadable value cannot destroy.
+ *
+ * The type says these are numbers; storage does not obey the type. A row
+ * written by an older version, hand-edited, or corrupted holds whatever it
+ * holds — and `NaN + 100` is `NaN`, so a single bad food used to turn the
+ * whole day's calories into nothing. One item nobody can read is a small
+ * problem; every other number on the screen disappearing with it is not.
+ *
+ * The bad value is skipped rather than repaired, and only here, in the sum.
+ * `scaleMacros` deliberately lets it through, so the offending row still
+ * renders as `—` via `formatDecimal` — the dash is where the truth is told.
+ * Coercing it to zero there would print a confident "0 kcal" for a food whose
+ * calories are unknown, which is the worse lie.
+ */
 export function sumMacros(all: Iterable<Macros>): Macros {
   let kcal = 0;
   let proteinG = 0;
@@ -60,10 +75,10 @@ export function sumMacros(all: Iterable<Macros>): Macros {
   let fatG = 0;
 
   for (const macros of all) {
-    kcal += macros.kcal;
-    proteinG += macros.proteinG;
-    carbsG += macros.carbsG;
-    fatG += macros.fatG;
+    kcal += readable(macros.kcal);
+    proteinG += readable(macros.proteinG);
+    carbsG += readable(macros.carbsG);
+    fatG += readable(macros.fatG);
   }
 
   // Rounded on the way out: repeated addition of one-decimal values still
@@ -78,4 +93,9 @@ export function sumMacros(all: Iterable<Macros>): Macros {
 
 function roundGrams(value: number): number {
   return Math.round(value * 10) / 10;
+}
+
+/** Contributes nothing rather than poisoning the addition. */
+function readable(value: number): number {
+  return Number.isFinite(value) ? value : 0;
 }

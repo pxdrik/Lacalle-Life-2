@@ -93,3 +93,43 @@ describe("sumMacros", () => {
     expect(total.proteinG).toBeCloseTo(byHand, 10);
   });
 });
+
+/**
+ * Storage does not obey the type.
+ *
+ * Every value here is one a real `IndexedDB` row can hold: written by a
+ * version that validated less, hand-edited, or corrupted. The schema rejects
+ * all of them on the way in, which protects the form and nothing else — the
+ * rows that are already stored never pass through it again.
+ */
+describe("a stored value that is not a number", () => {
+  const good = { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 };
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    "does not destroy the total when one item holds %p",
+    (broken) => {
+      const total = sumMacros([good, { ...good, kcal: broken }, good]);
+
+      // The readable items still add up. Without the guard this was NaN, and
+      // every figure on the screen went with it.
+      expect(total.kcal).toBe(200);
+      expect(total.proteinG).toBe(30);
+    },
+  );
+
+  it("skips the unreadable field only, not the whole item", () => {
+    const total = sumMacros([{ ...good, kcal: Number.NaN }]);
+
+    expect(total.kcal).toBe(0);
+    expect(total.proteinG).toBe(10);
+  });
+
+  it("leaves the offending portion alone, so its own row can say so", () => {
+    // `scaleMacros` passes it through on purpose: the item renders as `—`,
+    // which is the truth. Coercing to zero here would print a confident
+    // "0 kcal" for a food whose calories nobody knows.
+    const scaled = scaleMacros({ ...good, kcal: Number.NaN }, 100);
+
+    expect(Number.isNaN(scaled.kcal)).toBe(true);
+  });
+});

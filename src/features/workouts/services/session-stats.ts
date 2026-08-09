@@ -31,7 +31,13 @@ export function sessionVolumeKg(session: Session): number {
     for (const set of exercise.sets) {
       if (!set.isCompleted) continue;
       if (set.reps === null || set.weightKg === null) continue;
-      volume += set.reps * set.weightKg;
+
+      // Same reasoning as `sumMacros`: a stored set holds whatever it holds,
+      // and one unreadable weight must not erase the volume of an entire
+      // training history. `null` already means "not recorded"; this covers the
+      // values that are present and still not numbers.
+      const contribution = set.reps * set.weightKg;
+      if (Number.isFinite(contribution)) volume += contribution;
     }
   }
 
