@@ -42,13 +42,16 @@ Duas mudanças de processo, e o motivo de cada uma está no fim do arquivo.
 > contrário é erro de auditoria, não insight:
 >
 > 1. **Nada de IA.** Sem chat, geração automática, prompts, embeddings, LLM.
-> 2. **O produto faz três coisas:** montar dieta, montar treino, acompanhar
+> 2. **Nada que sugira o que comer.** Sem refeição sugerida, plano gerado,
+>    "trocar esta refeição" ou substituição por equivalente — com ou sem IA.
+>    A dieta se monta à mão, por decisão de produto tomada depois da V1.
+> 3. **O produto faz três coisas:** montar dieta, montar treino, acompanhar
 >    evolução. O que não serve a uma delas é escopo indevido.
-> 3. **Local-first.** IndexedDB é a única fonte de verdade. Sem backend, sem
+> 4. **Local-first.** IndexedDB é a única fonte de verdade. Sem backend, sem
 >    login, sem sincronização nesta versão.
-> 4. **Perfil é opcional.** Montar dieta funciona sem responder nada sobre
+> 5. **Perfil é opcional.** Montar dieta funciona sem responder nada sobre
 >    idade, peso ou sexo.
-> 5. **Menos é mais.** Se não ajuda a montar dieta ou treino, corte.
+> 6. **Menos é mais.** Se não ajuda a montar dieta ou treino, corte.
 >
 > ### O que mudou desde a última auditoria
 >

@@ -118,6 +118,26 @@ muda implementações de adapter, nunca portas nem UI.
 Nada de IA, chat, geração automática de dieta ou treino, prompts, embeddings
 ou integração com LLM. Decisão de produto registrada no `AGENTS.md`.
 
+### Refeição sugerida ou recomendada
+
+Nada que proponha o que comer: refeição sugerida, plano gerado, "trocar esta
+refeição", substituição automática de alimento por equivalente. **Deu dor de
+cabeça na V1** e a decisão é não repetir.
+
+O padrão de falha lá era estrutural, não de execução: a tela dependia da
+sugestão para ter conteúdo, então quando a geração não devolvia itens a
+refeição aparecia vazia — sem plano B visível para quem estava olhando. Uma
+funcionalidade que, ao falhar, deixa a tela sem nada é pior que a ausência
+dela, porque a ausência pelo menos é honesta.
+
+Aqui a dieta se monta à mão, e é isso. O V2 nunca teve nada do tipo; se em
+alguma auditoria futura aparecer "Almoço Renomeado" ou parecido no dado, é
+registro que alguém escreveu testando, não recurso escondido.
+
+A única coisa que o app oferece sem ser pedido é a estimativa de calorias pelos
+macros no cadastro de alimento personalizado — e ela é mostrada como conferência
+do rótulo, nunca aplicada sozinha. É aritmética, não opinião sobre o que comer.
+
 ---
 
 ## Infraestrutura
