@@ -40,11 +40,22 @@ function exercise(images: string[]): Exercise {
 }
 
 describe("ExercisePhotos", () => {
-  it("renders nothing when the exercise has no photo", () => {
+  it("says the photo is absent instead of leaving a gap", () => {
+    // This used to render nothing, which collapsed the detail view's photo
+    // column and left a wide blank beside the metadata. An audit read that
+    // blank as a broken image — reasonably, since nothing on screen said the
+    // catalogue simply has no photograph for 25 of its exercises.
     stubMotionPreference(false);
-    const { container } = render(<ExercisePhotos exercise={exercise([])} />);
+    render(<ExercisePhotos exercise={exercise([])} />);
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByText("Sem foto para este exercício.")).toBeInTheDocument();
+  });
+
+  it("offers no play control with nothing to animate", () => {
+    stubMotionPreference(false);
+    render(<ExercisePhotos exercise={exercise([])} />);
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("offers both positions when the source gives two frames", () => {

@@ -15,7 +15,18 @@ import { BottomNav } from "./bottom-nav";
  * unfinished, which is worse than a short menu.
  */
 const LINKS: readonly { href: Route; label: string }[] = [
-  // The diary sits first because it is the one opened daily; the diet behind
+  /**
+   * "Hoje" is listed even though the wordmark also points at `/`.
+   *
+   * It used to be left out on the grounds that a logo linking home is a
+   * convention everyone knows. Then a design audit spent a session in the app,
+   * tried `/hoje`, got a 404, and reported that the whole dashboard was
+   * missing on desktop. The screen was there the entire time. A convention
+   * that a careful reviewer misses is not discoverable enough for the screen
+   * the product is supposed to open on.
+   */
+  { href: "/", label: "Hoje" },
+  // The diary sits next because it is the one opened daily; the diet behind
   // it is edited once a month.
   { href: "/diario", label: "Diário" },
   { href: "/treinos", label: "Treinos" },
@@ -56,7 +67,12 @@ export function AppNav() {
         >
           <ul className="flex w-max gap-1">
             {LINKS.map((link) => {
-              const active = pathname.startsWith(link.href);
+              // `/` prefixes every route, so it is the one that has to match
+              // exactly — otherwise "Hoje" lights up on every screen.
+              const active =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
 
               return (
                 <li key={link.href}>

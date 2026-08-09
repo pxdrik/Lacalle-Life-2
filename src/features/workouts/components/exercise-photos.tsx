@@ -1,6 +1,6 @@
 "use client";
 
-import { Pause, Play } from "lucide-react";
+import { Dumbbell, Pause, Play } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -60,7 +60,25 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
     };
   }, [playing, frames]);
 
-  if (urls.length === 0) return null;
+  /**
+   * Says so, rather than rendering nothing.
+   *
+   * 25 of the catalogue's exercises have no photograph, and returning `null`
+   * collapsed this column — leaving the detail view with a wide empty area
+   * beside the metadata and no explanation. A design audit read that as a
+   * broken image. An absent photo is a known, permanent state of the data, so
+   * it gets a label instead of a gap.
+   */
+  if (urls.length === 0) {
+    return (
+      <div className="flex aspect-3/2 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-muted text-center">
+        <Dumbbell aria-hidden className="size-7 text-ink-subtle" />
+        <p className="px-4 text-sm text-ink-muted">
+          Sem foto para este exercício.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div>

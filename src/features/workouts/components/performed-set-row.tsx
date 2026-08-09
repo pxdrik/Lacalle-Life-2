@@ -130,7 +130,7 @@ export function PerformedSetRow({
         type="button"
         onClick={onRemove}
         aria-label={`Remover série ${String(number)} de ${exerciseName}`}
-        className="flex size-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+        className="flex size-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:size-7 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
       >
         <X aria-hidden className="size-3.5" />
       </button>

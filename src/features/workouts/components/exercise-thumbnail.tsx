@@ -64,7 +64,7 @@ export function ExerciseThumbnail({ exercise }: Props) {
         />
       ) : (
         <div className="flex size-full items-center justify-center">
-          <Dumbbell aria-hidden className="size-4 text-ink-subtle/40" />
+          <Dumbbell aria-hidden className="size-4 text-ink-subtle" />
         </div>
       )}
     </div>
