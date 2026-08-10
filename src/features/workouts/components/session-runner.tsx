@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { DisarmProgress } from "@/design-system/components/disarm-progress";
 import { useArmed } from "@/design-system/hooks/use-armed";
 
 import { useExerciseLookup } from "../hooks/use-exercise-lookup";
@@ -141,6 +142,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         <Button
           size="sm"
           variant={allDone ? "primary" : finish.armed ? "danger" : "secondary"}
+          className={finish.armed && !allDone ? "relative overflow-hidden" : undefined}
           aria-label={
             finish.armed && !allDone
               ? `Encerrar assim? ${String(pending)} ${pending === 1 ? "série ainda pendente" : "séries ainda pendentes"}.`
@@ -161,7 +163,10 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
           }}
         >
           {finish.armed && !allDone ? (
-            "Encerrar assim?"
+            <>
+              Encerrar assim?
+              <DisarmProgress />
+            </>
           ) : (
             <>
               <Flag aria-hidden className="size-4" />

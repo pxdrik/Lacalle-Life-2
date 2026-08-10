@@ -298,6 +298,15 @@
   /* Loading. Slower and shallower than the usual pulse — a skeleton that
      flashes competes with the content it is standing in for. */
   --animate-pulse-soft: pulse-soft 1.9s var(--ease-in-out) infinite;
+
+  /**
+   * Drains left to right while a two-tap confirmation is armed.
+   *
+   * Linear on purpose: this one is a clock, and easing it would make the time
+   * left read as more or less than it is. The duration is set by the caller
+   * from `DISARM_AFTER_MS`, so the bar and the timer cannot disagree.
+   */
+  --animate-drain: drain linear both;
 }
 
 @keyframes rise {
@@ -308,6 +317,15 @@
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+@keyframes drain {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 0 1;
   }
 }
 

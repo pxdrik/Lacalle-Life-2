@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-/** How long the armed state waits before giving up on its own. */
-const DISARM_AFTER_MS = 4000;
+/**
+ * How long the armed state waits before giving up on its own.
+ *
+ * Exported so the draining bar that shows the time left is driven by this
+ * number rather than a copy of it. A progress indicator that disagrees with
+ * the timer it reports on is worse than none.
+ */
+export const DISARM_AFTER_MS = 4000;
 
 /**
  * "Are you sure?" asked by the control itself.

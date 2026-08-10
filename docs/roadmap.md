@@ -40,6 +40,7 @@ depender da memória de nenhuma conversa.
 | Nome do exercício legível | O cabeçalho da rotina quebra no celular; o nome saiu de 3px para 139px em duas linhas |
 | Página 404 própria | Diz o que aconteceu e oferece dois caminhos de volta, com a navegação do app |
 | Rótulo de confirmação | `confirmLabel` virou obrigatório — o tipo impede cair no genérico |
+| Tempo restante da confirmação | Barra que esvazia no ritmo do desarme, ligada ao mesmo `DISARM_AFTER_MS` |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
@@ -122,7 +123,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 
 | O quê | Onde | Por quê |
 | --- | --- | --- |
-| **Aviso antes do timeout** | `useArmed` | O botão armado volta ao normal em 4 s sem contador nem transição. Quem hesita perde a ação em silêncio e precisa clicar de novo — justamente num momento de decisão |
 | **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |
 
 ### Consistência

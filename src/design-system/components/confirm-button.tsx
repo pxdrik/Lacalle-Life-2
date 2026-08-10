@@ -3,6 +3,8 @@
 import { cn } from "@/design-system/cn";
 import { useArmed } from "@/design-system/hooks/use-armed";
 
+import { DisarmProgress } from "./disarm-progress";
+
 interface Props {
   readonly onConfirm: () => void;
   /** Announced on the idle button, e.g. "Excluir Treino A". */
@@ -52,7 +54,8 @@ export function ConfirmButton({
         confirm(onConfirm);
       }}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md transition-colors duration-150 ease-out",
+        "relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-md",
+        "transition-colors duration-150 ease-out",
         armed
           ? "bg-danger px-2.5 text-xs font-medium text-danger-ink"
           : "text-ink-subtle hover:bg-danger/10 hover:text-danger",
@@ -60,6 +63,7 @@ export function ConfirmButton({
       )}
     >
       {armed ? confirmLabel : children}
+      {armed && <DisarmProgress />}
     </button>
   );
 }
