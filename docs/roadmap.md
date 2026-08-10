@@ -37,6 +37,8 @@ depender da memória de nenhuma conversa.
 | Total à prova de dado corrompido | Um valor ilegível some da soma em vez de virar `NaN` e levar a tela inteira |
 | Aviso de peso desatualizado | O perfil oferece usar a última pesagem quando divergem em 1 kg ou mais — oferece, não sincroniza |
 | Toast de confirmação | Para as escritas que não deixam rastro na tela: salvar perfil, criar e editar alimento |
+| Nome do exercício legível | O cabeçalho da rotina quebra no celular; o nome saiu de 3px para 139px em duas linhas |
+| Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -119,7 +121,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 | O quê | Onde | Por quê |
 | --- | --- | --- |
 | **Aviso antes do timeout** | `useArmed` | O botão armado volta ao normal em 4 s sem contador nem transição. Quem hesita perde a ação em silêncio e precisa clicar de novo — justamente num momento de decisão |
-| **Nome do exercício em duas linhas** | Editor de rotina | "Supino Declinado com Barra" vira "Supi…" numa linha só. Na montagem do treino, que é quando se escolhe |
 | **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |
 | **Placeholder que parece preenchido** | Perfil | `30`, `180`, `80` são valores plausíveis. A cor está certa (`ink-subtle`), o conteúdo é que engana — trocar por texto que não possa ser confundido com dado |
 
@@ -137,7 +138,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 | O quê | Por quê |
 | --- | --- |
 | **Página 404 própria** | Não existe `not-found.tsx`. A página padrão do Next não tem link de volta nem a navegação do app |
-| **`apple-touch-icon`** | O manifesto tem SVG, que o Android usa. iOS quer PNG — sem ele, a tela inicial do iPhone usa uma captura da página |
 
 ### Identidade
 

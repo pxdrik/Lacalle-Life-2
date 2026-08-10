@@ -48,7 +48,12 @@ export function ExerciseIdentity({
     <>
       {catalogue !== undefined && <ExerciseThumbnail exercise={catalogue} />}
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium text-ink">{name}</span>
+        {/* Two lines, not one.
+            "Supino Declinado com Barra" truncated to "Supi…" on a phone, on
+            the screen where you choose which exercise to do — the one place
+            the name is the entire content. Clamped at two rather than left
+            free so a long name still cannot push the row out of shape. */}
+        <span className="line-clamp-2 font-medium text-ink">{name}</span>
         {children !== null && children !== false && (
           <span className="mt-0.5 block truncate text-xs text-ink-subtle">
             {children}

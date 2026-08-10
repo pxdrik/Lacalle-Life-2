@@ -65,7 +65,12 @@ export function RoutineExerciseCard({
         dragHandle?.isDragging === true && "border-accent shadow-md",
       )}
     >
-      <header className="flex items-start gap-2">
+      {/* Wraps on a phone. Grip, thumbnail and four action buttons leave the
+          name about 3px of a 251px row — measured, not estimated — so "Supino
+          Declinado com Barra" arrived as nothing at all on the screen whose
+          entire job is choosing which exercise to do. Below `sm` the actions
+          take a line of their own and the name gets the first one. */}
+      <header className="flex flex-wrap items-start gap-2 sm:flex-nowrap">
         {dragHandle !== undefined && (
           <button
             type="button"
@@ -90,7 +95,7 @@ export function RoutineExerciseCard({
         {/* The arrows stay. Dragging a card with one thumb at the gym is worse
             than tapping an arrow, and a handle alone would make reordering a
             pointer-shaped affordance in a screen used one-handed. */}
-        <div className="flex shrink-0 items-center">
+        <div className="flex w-full shrink-0 items-center justify-end sm:w-auto">
           <IconButton label={`Duplicar ${exercise.name}`} onClick={onDuplicate}>
             <Copy aria-hidden className="size-4" />
           </IconButton>
