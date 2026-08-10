@@ -49,6 +49,37 @@ function mount(value: PerformedSet, isNext = true) {
 const tap = (name: RegExp) =>
   userEvent.click(screen.getByRole("button", { name }));
 
+/**
+ * The confirmation on a finished set belongs to the tap, not to the state.
+ *
+ * Keyed off `isCompleted` it would have fired on mount, so reopening a workout
+ * with twenty-four finished sets would set twenty-four checks bouncing at once
+ * — which is the difference between an app that acknowledges you and one that
+ * congratulates you for scrolling.
+ */
+describe("marking a set as done", () => {
+  // Anchored, because "Remover série 1 de Supino" also contains "série 1".
+  const TOGGLE = /^Desmarcar série 1/;
+  const check = () =>
+    screen.getByRole("button", { name: TOGGLE }).querySelector("svg");
+
+  it("stays still when a set arrives already completed", () => {
+    mount(set({ isCompleted: true }));
+
+    expect(check()).not.toHaveClass("animate-pop");
+  });
+
+  it("confirms the set the moment it is tapped", async () => {
+    // `onToggleComplete` belongs to the parent, so this row never sees
+    // `isCompleted` flip on its own — mounting it completed and tapping puts
+    // the component in the state the real screen puts it in.
+    mount(set({ isCompleted: true }));
+    await tap(TOGGLE);
+
+    expect(check()).toHaveClass("animate-pop");
+  });
+});
+
 describe("stepping the load", () => {
   it("adds a pair of the smallest plates", async () => {
     const onChange = mount(set({ weightKg: 60 }));

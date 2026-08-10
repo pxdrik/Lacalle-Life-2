@@ -175,9 +175,18 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
 
 ### P4 — Polimento
 
-- [ ] **Microinteração onde agrega:** alimento registrado, série concluída,
-      treino concluído, meta atingida, peso registrado. Premium e responsivo —
-      não gamificação infantil.
+- [x] **Série concluída.** O toque mais repetido do app, dado de pé e sem olhar
+      com atenção — ali o retorno é funcional, não enfeite. O check assenta com
+      leve ultrapassagem em 220 ms.
+
+      **Atrelado ao toque, nunca ao estado.** Uma animação ligada a
+      `isCompleted` dispararia também na montagem, e reabrir um treino de 24
+      séries faria 24 checks pularem juntos — a diferença entre um app que
+      reconhece você e um que te parabeniza por rolar a tela. O invariante tem
+      teste próprio.
+- [ ] **Microinteração no resto:** alimento registrado, treino concluído, meta
+      atingida, peso registrado. Os três primeiros já têm toast; o que falta é
+      o momento da meta batida.
 - [ ] Estados vazios no padrão da V1: ícone + mensagem clara + CTA relevante.
 
 ### Dependência e lacunas conhecidas

@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
@@ -36,6 +36,10 @@ export function PerformedSetRow({
 }: Props) {
   const row = useRef<HTMLLIElement>(null);
   const number = index + 1;
+
+  // How many times *this* button has been pressed in this mount. Only used to
+  // key the check so the confirmation replays per tap — never read as data.
+  const [taps, setTaps] = useState(0);
 
   useEffect(() => {
     // Scrolled into view, but never focused. Focusing would open the phone
@@ -110,7 +114,10 @@ export function PerformedSetRow({
           the row — it is the action repeated dozens of times per workout. */}
         <button
           type="button"
-          onClick={onToggleComplete}
+          onClick={() => {
+            setTaps((count) => count + 1);
+            onToggleComplete();
+          }}
           aria-pressed={set.isCompleted}
           aria-label={
             set.isCompleted
@@ -129,7 +136,25 @@ export function PerformedSetRow({
               : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
           )}
         >
-          <Check aria-hidden className="size-5" />
+          {/* Keyed by the tap counter, not by `isCompleted`: remounting is
+              what replays the animation, and keying it off the state would set
+              every check on screen off at once when a finished workout is
+              reopened. `taps > 0` is the same guarantee said twice — nothing
+              animates until this particular button has been pressed.
+
+              `motion-reduce:animate-none` rather than a hook: the global rule
+              collapses animation to 0.01ms, which would land the check at its
+              0.6 starting scale and leave it there. */}
+          <Check
+            key={taps}
+            aria-hidden
+            className={cn(
+              "size-5",
+              taps > 0 &&
+                set.isCompleted &&
+                "animate-pop motion-reduce:animate-none",
+            )}
+          />
         </button>
 
         <button

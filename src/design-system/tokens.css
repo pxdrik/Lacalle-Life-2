@@ -351,6 +351,20 @@
   --animate-pulse-soft: pulse-soft 1.9s var(--ease-in-out) infinite;
 
   /**
+   * A mark landing: the check on a set you just finished.
+   *
+   * It overshoots to 1.15 and settles, which is what separates "the app
+   * noticed" from "something moved". Short — 220ms — because this fires dozens
+   * of times in a workout and anything longer would be in the way of the next
+   * set rather than confirming the last one.
+   *
+   * Driven by the *tap*, never by the completed state: keyed off a counter the
+   * click increments, so opening a finished workout does not set two dozen
+   * checks off at once.
+   */
+  --animate-pop: pop 220ms var(--ease-out) both;
+
+  /**
    * Drains left to right while a two-tap confirmation is armed.
    *
    * Linear on purpose: this one is a clock, and easing it would make the time
@@ -368,6 +382,18 @@
   to {
     opacity: 1;
     translate: 0 0;
+  }
+}
+
+@keyframes pop {
+  from {
+    scale: 0.6;
+  }
+  60% {
+    scale: 1.15;
+  }
+  to {
+    scale: 1;
   }
 }
 
