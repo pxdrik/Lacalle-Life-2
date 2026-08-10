@@ -41,6 +41,7 @@ depender da memória de nenhuma conversa.
 | Página 404 própria | Diz o que aconteceu e oferece dois caminhos de volta, com a navegação do app |
 | Rótulo de confirmação | `confirmLabel` virou obrigatório — o tipo impede cair no genérico |
 | Tempo restante da confirmação | Barra que esvazia no ritmo do desarme, ligada ao mesmo `DISARM_AFTER_MS` |
+| Filtro sobreposto | Sheet no celular, modal no desktop, com a contagem de resultados viva enquanto se escolhe |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
@@ -123,7 +124,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 
 | O quê | Onde | Por quê |
 | --- | --- | --- |
-| **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |
 
 ### Consistência
 

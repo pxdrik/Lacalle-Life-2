@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
+import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
 
 import { useExerciseCatalogue } from "../hooks/use-exercise-catalogue";
@@ -22,7 +23,6 @@ import { ExerciseFilterBar } from "./exercise-filter-bar";
 import { ExerciseRow } from "./exercise-row";
 import { THUMBNAIL_BOX } from "./exercise-thumbnail";
 import { MediaAttribution } from "./media-attribution";
-import { Card } from "@/design-system/components/card";
 
 interface Props {
   /**
@@ -101,16 +101,51 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
         </button>
       </div>
 
-      {showFilters && (
-        <Card>
-          <ExerciseFilterBar
-            filters={query.filters}
-            activeCount={activeFilterCount}
-            onChange={setFilters}
-            onClear={clear}
-          />
-        </Card>
-      )}
+      {/* A sheet, not a panel that grows in place.
+          Expanding inline pushed the whole catalogue down by the height of
+          nineteen muscle chips, so choosing a filter and then reading the
+          result meant scrolling back past the thing you just used. Overlaying
+          costs the list from view, which is why the count below moves as you
+          choose — that number is the result, before you close anything. */}
+      <Dialog
+        open={showFilters}
+        title="Filtros"
+        onClose={() => {
+          setShowFilters(false);
+        }}
+        // Pinned to the bottom edge explicitly rather than pushed there with
+        // `mt-auto`, which left the sheet hanging 8px past the viewport.
+        className="max-sm:inset-x-0 max-sm:top-auto max-sm:bottom-0 max-sm:m-0 max-sm:w-full max-sm:max-w-none max-sm:rounded-b-none"
+      >
+        <ExerciseFilterBar
+          filters={query.filters}
+          activeCount={activeFilterCount}
+          onChange={setFilters}
+          onClear={clear}
+        />
+
+        {/* Sticky, because it is the payoff. Nineteen muscle chips plus
+            equipment, movement and difficulty run past the fold on a phone,
+            and a count that only appears after scrolling to the end is a count
+            nobody reads while choosing. */}
+        <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
+          <p aria-live="polite" className="text-sm text-ink-muted">
+            <span className="font-mono tabular-nums text-ink">
+              {results.length}
+            </span>{" "}
+            {results.length === 1 ? "exercício" : "exercícios"}
+          </p>
+
+          <Button
+            size="sm"
+            onClick={() => {
+              setShowFilters(false);
+            }}
+          >
+            Ver resultados
+          </Button>
+        </div>
+      </Dialog>
 
       {writeError !== null && (
         <p
