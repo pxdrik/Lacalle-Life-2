@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import Link from "next/link";
 
@@ -39,10 +40,7 @@ export function EvolutionScreen() {
 
   if (state.status === "error") {
     return (
-      <div
-        role="alert"
-        className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
-      >
+      <div role="alert" className={noticeClasses("danger", "block")}>
         <p className="text-ink">Não foi possível carregar seu histórico.</p>
         <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
       </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -232,10 +233,7 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
       </fieldset>
 
       {error !== null && (
-        <p
-          role="alert"
-          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={noticeClasses()}>
           {error}
         </p>
       )}

@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/design-system/cn";
+import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Play, Plus } from "lucide-react";
 import Link from "next/link";
@@ -113,10 +115,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
       </div>
 
       {saveError !== null && (
-        <p
-          role="alert"
-          className="mt-4 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={cn("mt-4", noticeClasses())}>
           {saveError}
         </p>
       )}

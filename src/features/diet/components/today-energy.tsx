@@ -156,9 +156,12 @@ function CalorieRing({
           strokeDashoffset={
             CIRCUMFERENCE * (1 - Math.min(Math.max(ratio, 0), 1))
           }
+          // Amber past the target, not red: going over is worth noticing and
+          // is not a fault, and red is what this app says when something
+          // actually broke. See the same reasoning in `MacroProgress`.
           className={cn(
             "transition-[stroke-dashoffset] duration-500 ease-out",
-            over ? "stroke-danger" : "stroke-accent",
+            over ? "stroke-warning" : "stroke-accent",
           )}
         />
       </svg>
@@ -167,7 +170,7 @@ function CalorieRing({
         <p
           className={cn(
             "text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl",
-            over ? "text-danger" : "text-ink",
+            over ? "text-warning" : "text-ink",
           )}
         >
           {formatDecimal(Math.abs(remaining))}

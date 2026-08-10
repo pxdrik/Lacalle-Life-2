@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -61,10 +62,7 @@ export function DietList() {
       </form>
 
       {writeError !== null && (
-        <p
-          role="alert"
-          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={noticeClasses()}>
           {writeError}
         </p>
       )}
@@ -72,10 +70,7 @@ export function DietList() {
       {state.status === "loading" && <ListSkeleton />}
 
       {state.status === "error" && (
-        <div
-          role="alert"
-          className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
-        >
+        <div role="alert" className={noticeClasses("danger", "block")}>
           <p className="text-ink">Não foi possível carregar suas dietas.</p>
           <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
         </div>

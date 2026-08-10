@@ -79,10 +79,18 @@ export function MacroProgress({ totals, targets, figures }: Props) {
                 <div
                   // Capped at 100% so the bar never escapes its track; going
                   // over is signalled by colour instead.
+                  //
+                  // Amber, not red. Red is what this app uses for something
+                  // being wrong — a save that failed, a catalogue that would
+                  // not load — and eating 30 g of carbohydrate past a target
+                  // is not that. It is worth noticing and it is not a fault,
+                  // which is the whole distinction a warning tone exists to
+                  // draw. Colouring it red made a normal Tuesday look like a
+                  // malfunction.
                   style={{ width: `${String(Math.min(ratio, 1) * 100)}%` }}
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300 ease-out",
-                    over ? "bg-danger" : fill,
+                    over ? "bg-warning" : fill,
                   )}
                 />
               </div>

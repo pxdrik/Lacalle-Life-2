@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -59,10 +60,7 @@ export function FoodBrowser() {
       />
 
       {writeError !== null && (
-        <p
-          role="alert"
-          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={noticeClasses()}>
           {writeError}
         </p>
       )}
@@ -144,10 +142,7 @@ function emptyCopy(favoritesOnly: boolean, hasFilters: boolean) {
 
 function ErrorState({ message }: { readonly message: string }) {
   return (
-    <div
-      role="alert"
-      className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
-    >
+    <div role="alert" className={noticeClasses("danger", "block")}>
       <p className="text-ink">Não foi possível carregar os alimentos.</p>
       <p className="mt-1.5 text-sm text-ink-muted">{message}</p>
     </div>

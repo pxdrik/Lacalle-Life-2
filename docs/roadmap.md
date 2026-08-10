@@ -132,9 +132,20 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
 - [ ] **Macros com codificação consistente** — proteína, carboidrato e gordura
       nas mesmas cores em Hoje, Diário, Dietas, Perfil, detalhe nutricional e
       gráficos. Nada de aparecer numa tela e sumir na outra.
-- [ ] **Estados visualmente distinguíveis:** success, warning, error, info,
-      loading, empty, active, completed. Skeleton neutro; alerta que não pareça
-      loading; erro que não pareça informação normal.
+- [x] **Estados visualmente distinguíveis.** Componente `Notice` com quatro
+      tons, substituindo a receita da caixa de alerta escrita à mão em **19
+      lugares, todos vermelhos** — o app só sabia dizer uma coisa. Cada tom
+      leva ícone, porque cor sozinha falha para quem não separa vermelho de
+      âmbar e falha para todo mundo no sol segurando o celular entre séries.
+      O `role` vem do tom e não do call site: `alert` interrompe leitor de tela,
+      `status` espera a vez — nota de rodapé não grita.
+- [x] **Estourar meta virou âmbar, não vermelho.** Era o mesmo `danger` de
+      "não consegui ler seus dados". Comer 30 g de carboidrato além da meta
+      merece ser notado e não é falha; vermelho fazia uma terça-feira normal
+      parecer defeito.
+- [x] **Advisories do perfil saíram do cinza.** A única mensagem que diz "mudei
+      o que você pediu" era renderizada em `bg-muted text-ink-muted`, idêntica
+      a uma legenda inerte.
 - [ ] **Iconografia.** Ícone de menos é parte da sensação de dashboard técnico.
       Alimentação, treino, progresso, dieta, exercício, alimento, perfil,
       configurações — para reconhecer, não para encher.

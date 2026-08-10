@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
@@ -143,10 +144,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
       </Dialog>
 
       {writeError !== null && (
-        <p
-          role="alert"
-          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={noticeClasses()}>
           {writeError}
         </p>
       )}
@@ -179,10 +177,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
       {state.status === "loading" && <ListSkeleton />}
 
       {state.status === "error" && (
-        <div
-          role="alert"
-          className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
-        >
+        <div role="alert" className={noticeClasses("danger", "block")}>
           <p className="text-ink">Não foi possível carregar os exercícios.</p>
           <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
         </div>

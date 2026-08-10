@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/design-system/cn";
+import { noticeClasses } from "@/design-system/components/notice";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -135,7 +137,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
       {state.status === "error" && (
         <div
           role="alert"
-          className="mt-6 rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
+          className={cn("mt-6", noticeClasses("danger", "block"))}
         >
           <p className="text-ink">Não foi possível abrir este dia.</p>
           <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
@@ -155,10 +157,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
           </div>
 
           {saveError !== null && (
-            <p
-              role="alert"
-              className="mt-4 rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-            >
+            <p role="alert" className={cn("mt-4", noticeClasses())}>
               {saveError}
             </p>
           )}

@@ -1,6 +1,7 @@
 import { formatDecimal } from "@/core/format/decimal";
 import type { NutritionPlan, PlanResult } from "@/core/nutrition";
 import { Card } from "@/design-system/components/card";
+import { Notice } from "@/design-system/components/notice";
 
 const FIGURES = [
   { key: "proteinG", label: "Proteína", color: "text-protein" },
@@ -19,19 +20,16 @@ const FIGURES = [
 export function PlanSummary({ result }: { readonly result: PlanResult }) {
   if (!result.ok) {
     return (
-      <div
-        role="alert"
-        className="rounded-xl border border-danger/30 bg-danger/5 p-5"
+      <Notice
+        tone="danger"
+        title="Não é possível montar uma meta segura com esses dados."
       >
-        <p className="font-medium text-ink">
-          Não é possível montar uma meta segura com esses dados.
-        </p>
-        <ul className="mt-3 space-y-1.5 text-sm text-ink-muted">
+        <ul className="mt-2 space-y-1.5 text-sm text-ink-muted">
           {result.violations.map((violation) => (
             <li key={violation.code}>{violation.message}</li>
           ))}
         </ul>
-      </div>
+      </Notice>
     );
   }
 
@@ -78,11 +76,17 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
             the app checks against what you ate; fibre is a recommendation it
             cannot check, because no food in the catalogue carries a fibre
             value. Showing it silently beside tracked targets promises a
-            measurement that never arrives. */}
-        <p className="mt-2 text-xs text-ink-subtle">
-          A fibra é uma referência (14 g por 1000 kcal) para conferir no rótulo
-          — o app ainda não soma a fibra dos alimentos.
-        </p>
+            measurement that never arrives.
+
+            This used to claim "out loud" while rendering in `text-xs
+            text-ink-subtle` — the faintest style the app owns. The comment was
+            right about the intent and the code was doing the opposite. */}
+        <Notice tone="info" className="mt-3">
+          <p className="text-sm text-ink-muted">
+            A fibra é uma referência (14 g por 1000 kcal) para conferir no
+            rótulo — o app ainda não soma a fibra dos alimentos.
+          </p>
+        </Notice>
 
         {plan.energyBalanceKcal !== 0 && (
           <p className="mt-4 border-t border-line pt-4 text-sm text-ink-muted">
@@ -99,14 +103,16 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
         )}
       </Card>
 
+      {/* Amber, not grey. An advisory is the engine saying it did not do what
+          was asked — it clamped a deficit, floored a protein target — and in
+          `bg-muted text-ink-muted` that message looked exactly like a caption.
+          The one line on the screen reporting an override was the quietest
+          thing on it. */}
       {plan.advisories.length > 0 && (
         <ul className="space-y-2">
           {plan.advisories.map((advisory) => (
-            <li
-              key={advisory.code}
-              className="rounded-lg border border-line bg-muted px-4 py-3 text-sm text-ink-muted"
-            >
-              {advisory.message}
+            <li key={advisory.code}>
+              <Notice tone="warning">{advisory.message}</Notice>
             </li>
           ))}
         </ul>

@@ -1,5 +1,6 @@
 "use client";
 
+import { noticeClasses } from "@/design-system/components/notice";
 import { dayKey } from "@/core/format/day";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, Scale } from "lucide-react";
@@ -69,10 +70,7 @@ export function BodyScreen() {
 
   if (state.status === "error") {
     return (
-      <div
-        role="alert"
-        className="rounded-xl border border-danger/30 bg-danger/5 px-6 py-8 text-center"
-      >
+      <div role="alert" className={noticeClasses("danger", "block")}>
         <p className="text-ink">Não foi possível carregar suas medidas.</p>
         <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
       </div>
@@ -119,10 +117,7 @@ export function BodyScreen() {
       </header>
 
       {writeError !== null && (
-        <p
-          role="alert"
-          className="rounded-lg border border-danger/30 bg-danger/5 px-4 py-3 text-sm text-ink"
-        >
+        <p role="alert" className={noticeClasses()}>
           {writeError}
         </p>
       )}
