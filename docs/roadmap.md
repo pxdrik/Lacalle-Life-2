@@ -42,6 +42,7 @@ depender da memória de nenhuma conversa.
 | Rótulo de confirmação | `confirmLabel` virou obrigatório — o tipo impede cair no genérico |
 | Tempo restante da confirmação | Barra que esvazia no ritmo do desarme, ligada ao mesmo `DISARM_AFTER_MS` |
 | Filtro sobreposto | Sheet no celular, modal no desktop, com a contagem de resultados viva enquanto se escolhe |
+| Regra modal vs inline | Escrita no `AGENTS.md` e em `dialog.tsx`, com o caso difícil nomeado |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
@@ -131,7 +132,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 | --- | --- |
 | **Botão de criar entre catálogos** | Treinos, Dietas e Alimentos têm botão fixo; Exercícios só oferece criar depois de busca sem resultado. A solução do Exercícios é melhor — escolher uma e aplicar às quatro |
 | **Tabela vs cartão** | Alimentos usa colunas, Exercícios usa cartão com foto. São a mesma coisa conceitual: catálogo de referência com busca e filtro |
-| **Modal vs painel inline** | A distinção existe e é coerente (modal = consulta, inline = edição), mas não está escrita em lugar nenhum. Sem regra registrada, a próxima tela decide sozinha |
 
 ### Robustez
 

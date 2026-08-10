@@ -52,6 +52,10 @@ Duas mudanças de processo, e o motivo de cada uma está no fim do arquivo.
 > 5. **Perfil é opcional.** Montar dieta funciona sem responder nada sobre
 >    idade, peso ou sexo.
 > 6. **Menos é mais.** Se não ajuda a montar dieta ou treino, corte.
+> 7. **Modal vs painel inline é regra escrita**, não acaso: inline quando o
+>    conteúdo atrás precisa continuar visível reagindo, `Dialog` quando não.
+>    Está no `AGENTS.md` e em `dialog.tsx`. Apontar a mistura como
+>    inconsistência sem ler a regra é erro de auditoria.
 >
 > ### O que mudou desde a última auditoria
 >

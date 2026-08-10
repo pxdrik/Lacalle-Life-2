@@ -21,6 +21,29 @@ interface Props {
  * the top layer, traps focus, restores focus to whatever opened it, handles
  * Escape, and gives us a real `::backdrop`. Every one of those is a bug we
  * would otherwise write ourselves and get subtly wrong.
+ *
+ * ---
+ *
+ * **When this, and when an inline panel.** The app uses both, and a design
+ * audit reasonably called the split undocumented — the distinction was real
+ * and lived nowhere. It is one question:
+ *
+ * > Does the content behind need to stay visible while you work?
+ *
+ * **Inline** when the answer is yes, because the point is watching it react.
+ * Adding a food to a meal must show the food land and the totals move; editing
+ * a set must show the set. Covering that with a modal would hide the feedback
+ * the interaction exists to produce.
+ *
+ * **This** when the answer is no: reading an exercise's detail, choosing where
+ * to navigate, narrowing a list. Nothing behind is changing, so covering it
+ * costs nothing and returning focus where it started is worth having.
+ *
+ * The awkward case is worth naming, because it is the one that will come up
+ * again: **a modal that hides its own result has to report it.** The exercise
+ * filter sits here — it covers the very list it is narrowing — so it carries a
+ * live count of the matches. Without that it would be a control whose effect
+ * you can only see by dismissing it.
  */
 export function Dialog({ open, title, onClose, children, className }: Props) {
   const ref = useRef<HTMLDialogElement>(null);

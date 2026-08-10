@@ -29,8 +29,14 @@ conhecimento de modelos:
    feature. O ESLint bloqueia o contrário.
 5. **`src/composition/migrations.ts` é append-only.** Nunca edite ou renumere
    uma entrada já existente.
-6. **Portão.** `npm run verify` precisa passar. Não avance com ele vermelho.
-7. **Tamanho.** Arquivos até ~250 linhas.
+6. **Modal ou painel inline.** Uma pergunta decide: o conteúdo atrás precisa
+   continuar visível enquanto se trabalha? Se sim, inline — adicionar alimento
+   tem que mostrar o item entrar e os totais se moverem. Se não, `Dialog` —
+   consulta, navegação, filtro. Modal que esconde o próprio resultado precisa
+   reportá-lo; é por isso que o filtro de exercícios mostra a contagem viva. O
+   raciocínio completo está no comentário de `design-system/components/dialog.tsx`.
+7. **Portão.** `npm run verify` precisa passar. Não avance com ele vermelho.
+8. **Tamanho.** Arquivos até ~250 linhas.
 
 O processo de trabalho — como implementar, o que verificar antes de dizer
 "pronto" e os erros que já custaram tempo neste projeto — está em
