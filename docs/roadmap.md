@@ -38,6 +38,8 @@ depender da memória de nenhuma conversa.
 | Aviso de peso desatualizado | O perfil oferece usar a última pesagem quando divergem em 1 kg ou mais — oferece, não sincroniza |
 | Toast de confirmação | Para as escritas que não deixam rastro na tela: salvar perfil, criar e editar alimento |
 | Nome do exercício legível | O cabeçalho da rotina quebra no celular; o nome saiu de 3px para 139px em duas linhas |
+| Página 404 própria | Diz o que aconteceu e oferece dois caminhos de volta, com a navegação do app |
+| Rótulo de confirmação | `confirmLabel` virou obrigatório — o tipo impede cair no genérico |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
@@ -122,13 +124,11 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 | --- | --- | --- |
 | **Aviso antes do timeout** | `useArmed` | O botão armado volta ao normal em 4 s sem contador nem transição. Quem hesita perde a ação em silêncio e precisa clicar de novo — justamente num momento de decisão |
 | **Filtro sobreposto** | `/exercicios` | O painel expande inline e empurra a lista inteira para baixo. Num telefone custa rolagem para voltar aos resultados |
-| **Placeholder que parece preenchido** | Perfil | `30`, `180`, `80` são valores plausíveis. A cor está certa (`ink-subtle`), o conteúdo é que engana — trocar por texto que não possa ser confundido com dado |
 
 ### Consistência
 
 | O quê | Estado medido |
 | --- | --- |
-| **Rótulo de confirmação** | 5× `"Excluir?"`, 1× `"Remover?"`, 1 sem rótulo caindo no `"Confirmar"` genérico (`body-history`) |
 | **Botão de criar entre catálogos** | Treinos, Dietas e Alimentos têm botão fixo; Exercícios só oferece criar depois de busca sem resultado. A solução do Exercícios é melhor — escolher uma e aplicar às quatro |
 | **Tabela vs cartão** | Alimentos usa colunas, Exercícios usa cartão com foto. São a mesma coisa conceitual: catálogo de referência com busca e filtro |
 | **Modal vs painel inline** | A distinção existe e é coerente (modal = consulta, inline = edição), mas não está escrita em lugar nenhum. Sem regra registrada, a próxima tela decide sozinha |
@@ -137,7 +137,6 @@ porque saber quem apontou ajuda a decidir se ainda vale.
 
 | O quê | Por quê |
 | --- | --- |
-| **Página 404 própria** | Não existe `not-found.tsx`. A página padrão do Next não tem link de volta nem a navegação do app |
 
 ### Identidade
 

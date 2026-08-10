@@ -33,6 +33,25 @@ const BASE =
   "font-medium transition-[background-color,border-color,color,opacity] " +
   "duration-150 ease-out disabled:pointer-events-none disabled:opacity-45";
 
+/**
+ * The button's looks, without the button.
+ *
+ * For the handful of places where the thing is genuinely a link — it changes
+ * the address, it should open in a new tab on middle click, it belongs in the
+ * browser's history — but reads as the primary action. Wrapping a `Link` in a
+ * `Button` would nest an anchor in a button, which no assistive technology can
+ * make sense of; giving the `Link` these classes keeps the element honest.
+ *
+ * Same reasoning as `CARD_SURFACE`, and the same trade: one exported recipe
+ * beats a second component that drifts.
+ */
+export function buttonClasses(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "md",
+): string {
+  return cn(BASE, VARIANTS[variant], SIZES[size]);
+}
+
 export interface ButtonProps
   extends Omit<React.ComponentPropsWithRef<"button">, "type"> {
   readonly variant?: ButtonVariant;

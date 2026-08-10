@@ -7,7 +7,11 @@ import { ConfirmButton } from "./confirm-button";
 function setup(onConfirm = vi.fn()) {
   render(
     <>
-      <ConfirmButton onConfirm={onConfirm} label="Excluir Treino A">
+      <ConfirmButton
+        onConfirm={onConfirm}
+        label="Excluir Treino A"
+        confirmLabel="Excluir?"
+      >
         Excluir
       </ConfirmButton>
       <button type="button">outro</button>
@@ -34,7 +38,7 @@ describe("ConfirmButton", () => {
     await userEvent.click(trigger());
 
     expect(
-      screen.getByRole("button", { name: "Confirmar: Excluir Treino A" }),
+      screen.getByRole("button", { name: "Excluir?: Excluir Treino A" }),
     ).toBeInTheDocument();
   });
 
@@ -83,7 +87,11 @@ describe("timeout", () => {
     const onConfirm = vi.fn();
 
     render(
-      <ConfirmButton onConfirm={onConfirm} label="Excluir Treino A">
+      <ConfirmButton
+        onConfirm={onConfirm}
+        label="Excluir Treino A"
+        confirmLabel="Excluir?"
+      >
         Excluir
       </ConfirmButton>,
     );

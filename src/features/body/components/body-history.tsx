@@ -69,7 +69,8 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
             </button>
 
             <ConfirmButton
-              label={`Apagar ${formatDay(entry.day)}`}
+              label={`Excluir a medição de ${formatDay(entry.day)}`}
+              confirmLabel="Excluir?"
               onConfirm={() => {
                 onRemove(entry.day);
               }}

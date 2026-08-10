@@ -111,7 +111,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
               onChange={(event) => {
                 update("ageYears", event.target.value);
               }}
-              placeholder="30"
+              placeholder="—"
             />
           )}
         </Field>
@@ -127,7 +127,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
               onChange={(event) => {
                 update("heightCm", event.target.value);
               }}
-              placeholder="180"
+              placeholder="—"
             />
           )}
         </Field>
@@ -143,7 +143,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
               onChange={(event) => {
                 update("weightKg", event.target.value);
               }}
-              placeholder="80"
+              placeholder="—"
             />
           )}
         </Field>
