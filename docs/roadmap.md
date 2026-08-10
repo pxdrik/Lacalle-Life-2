@@ -26,7 +26,7 @@ depender da memória de nenhuma conversa.
 | Duplicar e copiar | Refeição, alimento entre refeições, exercício, rotina e dieta inteiras |
 | Detalhe do exercício | Duas fases do movimento animadas, curadoria completa, fotos no treino |
 | Evolução corporal | Peso, gordura e 9 medidas por dia, gráfico de tendência com média móvel |
-| Identidade visual | Esmeralda da V1 nas superfícies, escuro por padrão, contraste asserido nos dois temas |
+| Identidade visual | Esmeralda da V1, escuro por padrão, contraste asserido nos dois temas — **as superfícies verdes serão revertidas**, ver a sprint abaixo |
 | Densidade por contexto | Desktop mais denso que o celular, não menor — 1152px de conteúdo, cartão de 24px |
 | Números em pt-BR | `formatDecimal` em toda superfície: 2,7 e 2.220, e travessão no lugar de `NaN` |
 | Tela de hoje | Anel de calorias, macros contra a meta e o treino do dia — funciona sem perfil |
@@ -48,6 +48,144 @@ depender da memória de nenhuma conversa.
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
+
+---
+
+## Sprint atual — redesign visual
+
+Pedido em 10/08/2026, a partir de duas auditorias independentes (uma da V1,
+uma da V2). Escopo **exclusivamente visual**.
+
+### O diagnóstico
+
+A V2 parece um **dashboard técnico / terminal / SaaS de desenvolvedor**. Deveria
+parecer um app de saúde, nutrição, treino e bem-estar: moderno, confiável,
+agradável, acolhedor.
+
+### A regra
+
+**V1 é a referência visual. V2 é a referência funcional e estrutural.**
+
+Não é copiar componente da V1, nem inventar uma terceira linguagem. É entender o
+que fazia a V1 parecer um app de saúde e reproduzir esses **princípios** aqui,
+preservando o que a V2 evoluiu. O teste é olhar para a tela e pensar "é
+claramente o mesmo produto que a V1".
+
+Quando a estrutura da V2 for melhor — a barra inferior é o exemplo — **mantém-se
+a estrutura e troca-se a aparência**.
+
+### Isto reverte uma decisão desta mesma trilha
+
+Registrado porque o `tokens.css` argumenta o contrário, por escrito, e quem ler
+só o comentário vai desfazer o redesign de boa fé.
+
+O verde nas superfícies foi pedido ("deixa o verde mais forte, é pra ser o msm
+verde que está na V1") e implementado de propósito. O raciocínio na época: a V1
+concentra cor numa sidebar de 256px em croma 0.08, a V2 não tem sidebar, então a
+cor que ela carregaria foi **espalhada pelas superfícies**.
+
+A medição feita então continua valendo e agora aponta para o outro lado: **na V1
+os cartões são neutros — croma 0.01**. A cor mora num elemento só. Espalhar foi
+o erro; a saída não é menos verde, é verde concentrado.
+
+### P0 — Identidade
+
+- [ ] **Superfícies neutras de verdade.** O tema escuro hoje é verde em quatro
+      níveis: canvas 0.03, surface 0.055, elevated 0.06, muted 0.065 — todos no
+      matiz 167. Isso não é profundidade, é monocromia. Neutros escuros com
+      degraus perceptíveis entre `canvas → surface → elevated → muted`.
+- [ ] **O verde ganha valor ao recuar.** Continua sendo a marca: CTA primário,
+      estado ativo, progresso, sucesso, destaque. Deixa de ser a cor de toda
+      superfície, borda, ícone e barra.
+- [ ] **Números param de parecer log.** `font-mono` aparece **50 vezes em 29
+      arquivos**, em caloria, peso, macro, série, repetição, carga e progresso.
+      Vão para a família principal — podem manter peso forte, corpo grande e
+      `tabular-nums`, mas não monoespaçado por padrão.
+- [ ] **Escuro é dark fitness app, não green terminal.** Fundo escuro e cartões
+      escuros continuam; o que muda é a hierarquia entre eles.
+- [ ] **Claro não é o escuro invertido.** Fundo neutro claro, superfícies claras,
+      verde de marca, cores de macro, estados consistentes.
+
+### P1 — Hierarquia
+
+- [ ] **Hoje:** caloria como herói, depois macros, treino, refeições, progresso,
+      alertas quando houver. Não é tudo com o mesmo peso.
+- [ ] **Menos vazio no desktop.** Aproveitar a largura sem virar lista vertical
+      de CRUD. É central de acompanhamento pessoal, não página administrativa.
+- [ ] **Cartões com identidade.** Contraste com o fundo, hierarquia interna,
+      radius e padding consistentes, níveis de superfície diferentes. Alimentação,
+      treino, progresso e alerta podem divergir um pouco quando isso comunica
+      função — não podem ser todos a mesma caixa verde.
+- [ ] **CTA primário inconfundível** em toda tela que tenha um.
+
+### P2 — Design system
+
+- [ ] **Macros com codificação consistente** — proteína, carboidrato e gordura
+      nas mesmas cores em Hoje, Diário, Dietas, Perfil, detalhe nutricional e
+      gráficos. Nada de aparecer numa tela e sumir na outra.
+- [ ] **Estados visualmente distinguíveis:** success, warning, error, info,
+      loading, empty, active, completed. Skeleton neutro; alerta que não pareça
+      loading; erro que não pareça informação normal.
+- [ ] **Iconografia.** Ícone de menos é parte da sensação de dashboard técnico.
+      Alimentação, treino, progresso, dieta, exercício, alimento, perfil,
+      configurações — para reconhecer, não para encher.
+- [ ] **Nada de valor solto no componente.** Cor, tipografia, radius, sombra e
+      espaçamento centralizados em token.
+
+### P3 — Consistência
+
+- [ ] **Uma linguagem só entre desktop e mobile.** A barra inferior fica; ganha a
+      identidade da V1. No desktop, navegação reconhecível e com hierarquia.
+- [ ] **Mobile não paga a conta do desktop.** Alvo de toque, legibilidade,
+      pouco esforço visual — o app é usado durante a refeição e durante o treino.
+- [ ] **Alimentos parece planilha.** A lista pode continuar lista; a tela precisa
+      parecer app de alimentação. (Ver a decisão tabela-vs-cartão mais abaixo: a
+      forma foi escolhida por causa do dado, e continua valendo. O que muda aqui
+      é o acabamento — hierarquia, agrupamento, busca, filtro, estado.)
+- [ ] **Exercícios:** o filtro foi apontado como um dos melhores componentes
+      atuais. Preservar a ideia — chips, categorias, modal, badges — e trazer
+      para a mesma linguagem.
+- [ ] **Evolução:** os dados ficam, o tratamento muda. Progresso é conquista, não
+      tabela de métricas.
+- [ ] **Passar em todas as rotas:** Hoje, Diário, Treinos, Sessão, Dietas,
+      detalhe da dieta, Evolução, Exercícios, Alimentos, Perfil, 404.
+- [ ] Preservar o que a V2 já corrigiu da V1: 404 com identidade própria,
+      skeleton neutro, tema persistente, sem navegação redundante, componente
+      reutilizável.
+
+### P4 — Polimento
+
+- [ ] **Microinteração onde agrega:** alimento registrado, série concluída,
+      treino concluído, meta atingida, peso registrado. Premium e responsivo —
+      não gamificação infantil.
+- [ ] Estados vazios no padrão da V1: ícone + mensagem clara + CTA relevante.
+
+### Dependência e lacunas conhecidas
+
+- **A logo não existe.** O pedido cita "o novo símbolo do LaCalle Life quando
+  disponível", para header, mobile, favicon, loading e estado vazio. É o mesmo
+  buraco do item _Identidade_ mais abaixo, e continua sendo o único bloqueio
+  desta sprint.
+- **"Configurações" e "Ajuda" não são rotas da V2.** Aparecem na lista de telas
+  a revisar porque existiam na V1. Criar rota é escopo funcional, não visual —
+  fica fora até haver decisão.
+
+### O que não muda
+
+Funcionalidade, dado, rota, regra de negócio, cálculo nutricional, lógica de
+treino, persistência e modelo de dados. Nada de simplificar recurso para
+facilitar o redesign. **A sprint é visual.**
+
+### Antes de dizer pronto
+
+Além do `npm run verify` e do `npm run build` de sempre: conferir as rotas
+principais nos dois temas, no celular e no desktop, procurando especificamente
+por verde excessivo, contraste insuficiente, número parecendo código, cartão sem
+hierarquia, tela vazia demais e componente que destoa do resto.
+
+A pergunta de controle, antes de cada componente: **"isso pertence a um app
+moderno de saúde, nutrição e treino?"** Se a resposta for "parece SaaS",
+"parece ferramenta de desenvolvedor" ou "parece terminal", refazer.
 
 ---
 
@@ -128,6 +266,10 @@ exclusivo além da cor: tirando o nome do topo, não há uma forma, ícone ou
 ilustração que seja só dele. É oportunidade, não defeito — um gesto visual
 pequeno (marca no anel de progresso, ilustração para estado vazio) transformaria
 "app calmo e técnico" em algo identificável à primeira vista.
+
+**Virou bloqueio.** O redesign visual pede o símbolo em cinco lugares — header,
+celular, favicon, carregamento e estado vazio — e ele não existe. É a única
+peça da sprint que não dá para tirar do código.
 
 ---
 
