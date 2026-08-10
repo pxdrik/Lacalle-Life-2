@@ -54,7 +54,10 @@ describe("mealMacros", () => {
     diet = addItem(diet, mealId, item("Frango", 149, CHICKEN));
 
     const meal = diet.meals[0]!;
-    const byHand = meal.items.reduce((sum, i) => sum + itemMacros(i).proteinG, 0);
+    const byHand = meal.items.reduce(
+      (sum, i) => sum + itemMacros(i).proteinG,
+      0,
+    );
 
     expect(mealMacros(meal).proteinG).toBeCloseTo(byHand, 10);
   });

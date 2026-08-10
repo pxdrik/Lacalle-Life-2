@@ -8,7 +8,8 @@ import {
   type ExerciseQuery,
 } from "./filter-url";
 
-const parse = (search: string) => parseExerciseQuery(new URLSearchParams(search));
+const parse = (search: string) =>
+  parseExerciseQuery(new URLSearchParams(search));
 
 describe("serializeExerciseQuery", () => {
   it("produces an empty string for an unfiltered view", () => {
@@ -60,7 +61,9 @@ describe("parseExerciseQuery", () => {
   });
 
   it("reads every dimension back", () => {
-    const query = parse("q=rosca&m=biceps,triceps&e=dumbbell&p=isolation&d=beginner&fav=1");
+    const query = parse(
+      "q=rosca&m=biceps,triceps&e=dumbbell&p=isolation&d=beginner&fav=1",
+    );
 
     expect(query.text).toBe("rosca");
     expect([...query.filters.muscles]).toEqual(["biceps", "triceps"]);

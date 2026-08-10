@@ -25,7 +25,11 @@ export type IndexKey = string | number;
  */
 export type IndexQuery =
   | { readonly equals: IndexKey; readonly from?: never; readonly to?: never }
-  | { readonly equals?: never; readonly from?: IndexKey; readonly to?: IndexKey };
+  | {
+      readonly equals?: never;
+      readonly from?: IndexKey;
+      readonly to?: IndexKey;
+    };
 
 export interface Store<T extends Entity> {
   get(id: EntityId): Promise<T | undefined>;

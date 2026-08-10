@@ -4,7 +4,9 @@ import { createContext, useContext } from "react";
 
 import type { BodyRepository } from "./body-repository";
 
-const BodyRepositoryContext = createContext<Promise<BodyRepository> | null>(null);
+const BodyRepositoryContext = createContext<Promise<BodyRepository> | null>(
+  null,
+);
 
 export function BodyRepositoryProvider({
   repository,

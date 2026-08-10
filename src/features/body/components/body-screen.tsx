@@ -2,7 +2,7 @@
 
 import { dayKey } from "@/core/format/day";
 import { Skeleton } from "@/design-system/components/skeleton";
-import { Plus } from "lucide-react";
+import { Plus, Scale } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
@@ -99,7 +99,11 @@ export function BodyScreen() {
   return (
     <section className="space-y-4">
       <header className="flex items-end justify-between gap-4">
-        <Headline change={change} unit={unitOf(metric)} label={labelOf(metric)} />
+        <Headline
+          change={change}
+          unit={unitOf(metric)}
+          label={labelOf(metric)}
+        />
 
         {editing === null && (
           <Button
@@ -144,7 +148,11 @@ export function BodyScreen() {
       )}
 
       {entries.length === 0 ? (
-        <EmptyState />
+        <EmptyState
+          onStart={() => {
+            setEditing(dayKey(new Date()));
+          }}
+        />
       ) : (
         <>
           {available.length > 1 && (
@@ -249,14 +257,28 @@ function Headline({
   );
 }
 
-function EmptyState() {
+/**
+ * Icon, sentence, way out — the shape every empty state in the app uses.
+ *
+ * The way out used to be missing here. The "Registrar" button existed, but
+ * above the box and beside a heading reading "Peso —", so the one screen whose
+ * empty state is guaranteed to be the first thing a new person sees explained
+ * what to do without offering to do it. The button being somewhere on the page
+ * is not the same as it being where the sentence leaves you.
+ */
+function EmptyState({ onStart }: { readonly onStart: () => void }) {
   return (
     <div className="rounded-xl border border-dashed border-line px-6 py-12 text-center">
-      <p className="text-ink">Nenhuma medição ainda.</p>
+      <Scale aria-hidden className="mx-auto size-8 text-ink-subtle" />
+      <p className="mt-3 text-ink">Nenhuma medição ainda.</p>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-ink-subtle">
         Um peso por semana já mostra a tendência. As medidas são opcionais e
         podem entrar quando você quiser.
       </p>
+      <Button className="mt-5" onClick={onStart}>
+        <Plus aria-hidden className="size-4" />
+        Registrar peso
+      </Button>
     </div>
   );
 }

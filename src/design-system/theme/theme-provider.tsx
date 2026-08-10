@@ -1,6 +1,11 @@
 "use client";
 
-import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
 
 import { resolveTheme, THEME_ATTRIBUTE, type ThemePreference } from "./theme";
 import {
@@ -60,7 +65,9 @@ export function ThemeProvider({
   }, [resolved]);
 
   return (
-    <ThemeContext value={{ preference, setPreference }}>{children}</ThemeContext>
+    <ThemeContext value={{ preference, setPreference }}>
+      {children}
+    </ThemeContext>
   );
 }
 

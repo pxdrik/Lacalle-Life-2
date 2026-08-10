@@ -140,7 +140,11 @@ describe("independence", () => {
       ...session,
       exercises: session.exercises.map((exercise) => ({
         ...exercise,
-        sets: exercise.sets.map((set) => ({ ...set, reps: 99, isCompleted: true })),
+        sets: exercise.sets.map((set) => ({
+          ...set,
+          reps: 99,
+          isCompleted: true,
+        })),
       })),
     };
 

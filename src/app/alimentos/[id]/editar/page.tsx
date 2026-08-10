@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { Apple, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -37,6 +37,7 @@ export default async function EditFoodPage({
       </Link>
 
       <PageHeader
+        icon={Apple}
         title="Editar alimento"
         subtitle="A correção vale para todas as dietas que usam este alimento daqui para frente."
         className="mt-4"

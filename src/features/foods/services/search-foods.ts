@@ -59,12 +59,14 @@ export function searchFoods(
 
   const firstTerm = terms[0]!;
 
-  return filtered
-    .map((food) => ({ food, name: normalize(food.name) }))
-    .filter(({ name }) => matches(name, terms))
-    .map(({ food, name }) => ({ food, score: rank(name, firstTerm) }))
-    // Sort is stable, so foods with equal score keep the alphabetical order
-    // the repository already put them in.
-    .sort((a, b) => a.score - b.score)
-    .map(({ food }) => food);
+  return (
+    filtered
+      .map((food) => ({ food, name: normalize(food.name) }))
+      .filter(({ name }) => matches(name, terms))
+      .map(({ food, name }) => ({ food, score: rank(name, firstTerm) }))
+      // Sort is stable, so foods with equal score keep the alphabetical order
+      // the repository already put them in.
+      .sort((a, b) => a.score - b.score)
+      .map(({ food }) => food)
+  );
 }

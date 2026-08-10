@@ -87,7 +87,8 @@ function mount(session: Session) {
   return sessions;
 }
 
-const finishButton = () => screen.getByRole("button", { name: /Finalizar|Encerrar/ });
+const finishButton = () =>
+  screen.getByRole("button", { name: /Finalizar|Encerrar/ });
 
 async function waitForRunner() {
   await screen.findByRole("heading", { name: "Treino A" });
@@ -154,7 +155,9 @@ describe("finishing a workout with sets still open", () => {
     await userEvent.click(finishButton());
 
     await waitFor(async () => {
-      expect(await sessions.getById("s1")).not.toMatchObject({ finishedAt: null });
+      expect(await sessions.getById("s1")).not.toMatchObject({
+        finishedAt: null,
+      });
     });
   });
 });
@@ -172,7 +175,9 @@ describe("finishing a completed workout", () => {
     await userEvent.click(screen.getByRole("button", { name: "Finalizar" }));
 
     await waitFor(async () => {
-      expect(await sessions.getById("s1")).not.toMatchObject({ finishedAt: null });
+      expect(await sessions.getById("s1")).not.toMatchObject({
+        finishedAt: null,
+      });
     });
   });
 });

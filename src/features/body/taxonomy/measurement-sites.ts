@@ -22,18 +22,19 @@ export const MEASUREMENT_SITES = [
 
 export type MeasurementSite = (typeof MEASUREMENT_SITES)[number];
 
-export const MEASUREMENT_SITE_LABELS: Readonly<Record<MeasurementSite, string>> =
-  {
-    neck: "Pescoço",
-    chest: "Tórax",
-    arm: "Braço",
-    forearm: "Antebraço",
-    waist: "Cintura",
-    abdomen: "Abdômen",
-    hip: "Quadril",
-    thigh: "Coxa",
-    calf: "Panturrilha",
-  };
+export const MEASUREMENT_SITE_LABELS: Readonly<
+  Record<MeasurementSite, string>
+> = {
+  neck: "Pescoço",
+  chest: "Tórax",
+  arm: "Braço",
+  forearm: "Antebraço",
+  waist: "Cintura",
+  abdomen: "Abdômen",
+  hip: "Quadril",
+  thigh: "Coxa",
+  calf: "Panturrilha",
+};
 
 /**
  * Waist and abdomen are both here on purpose: they are taken at different

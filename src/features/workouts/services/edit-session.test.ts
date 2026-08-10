@@ -44,7 +44,12 @@ function runningSession() {
   const session = startSession(routine, 1_000);
   const exercise = session.exercises[0]!;
 
-  return { routine, session, exerciseId: exercise.id, setIds: exercise.sets.map((s) => s.id) };
+  return {
+    routine,
+    session,
+    exerciseId: exercise.id,
+    setIds: exercise.sets.map((s) => s.id),
+  };
 }
 
 describe("completing sets", () => {
@@ -115,7 +120,11 @@ describe("editing during the workout", () => {
 
   it("records a note against the exercise", () => {
     const { session, exerciseId } = runningSession();
-    const after = setSessionExerciseNotes(session, exerciseId, "Ombro incomodou");
+    const after = setSessionExerciseNotes(
+      session,
+      exerciseId,
+      "Ombro incomodou",
+    );
 
     expect(after.exercises[0]?.notes).toBe("Ombro incomodou");
   });
@@ -139,7 +148,10 @@ describe("finishing", () => {
     // "I planned four and did three" is information. Discarding the fourth
     // would erase it.
     const { session, exerciseId, setIds } = runningSession();
-    const finished = finishSession(completeSet(session, exerciseId, setIds[0]!), 5_000);
+    const finished = finishSession(
+      completeSet(session, exerciseId, setIds[0]!),
+      5_000,
+    );
 
     expect(finished.exercises[0]?.sets).toHaveLength(3);
     expect(sessionProgress(finished)).toEqual({ completed: 1, total: 3 });
@@ -168,7 +180,9 @@ describe("statistics", () => {
     const { session, exerciseId, setIds } = runningSession();
 
     expect(sessionVolumeKg(session)).toBe(0);
-    expect(sessionVolumeKg(completeSet(session, exerciseId, setIds[0]!))).toBe(480);
+    expect(sessionVolumeKg(completeSet(session, exerciseId, setIds[0]!))).toBe(
+      480,
+    );
   });
 
   it("ignores a completed set with no weight, which is unmeasured and not zero", () => {
@@ -177,7 +191,9 @@ describe("statistics", () => {
       weightKg: null,
     });
 
-    expect(sessionVolumeKg(completeSet(bodyweight, exerciseId, setIds[0]!))).toBe(0);
+    expect(
+      sessionVolumeKg(completeSet(bodyweight, exerciseId, setIds[0]!)),
+    ).toBe(0);
   });
 
   it("survives a stored weight that is not a number", () => {
@@ -191,20 +207,29 @@ describe("statistics", () => {
       exercises: session.exercises.map((exercise) => ({
         ...exercise,
         sets: exercise.sets.map((set, index) =>
-          index === 1 ? { ...set, weightKg: Number.NaN, isCompleted: true } : set,
+          index === 1
+            ? { ...set, weightKg: Number.NaN, isCompleted: true }
+            : set,
         ),
       })),
     };
 
     // The readable completed set still counts; the broken one contributes 0.
-    expect(sessionVolumeKg(completeSet(corrupted, exerciseId, setIds[0]!))).toBe(480);
+    expect(
+      sessionVolumeKg(completeSet(corrupted, exerciseId, setIds[0]!)),
+    ).toBe(480);
   });
 
   it("points at the first set not yet done", () => {
     const { session, exerciseId, setIds } = runningSession();
 
-    expect(nextIncompleteSet(session)).toEqual({ exerciseId, setId: setIds[0] });
-    expect(nextIncompleteSet(completeSet(session, exerciseId, setIds[0]!))).toEqual({
+    expect(nextIncompleteSet(session)).toEqual({
+      exerciseId,
+      setId: setIds[0],
+    });
+    expect(
+      nextIncompleteSet(completeSet(session, exerciseId, setIds[0]!)),
+    ).toEqual({
       exerciseId,
       setId: setIds[1],
     });
@@ -270,7 +295,10 @@ describe("independence during the workout", () => {
     const before = structuredClone(routine);
 
     let live = completeSet(session, exerciseId, setIds[0]!);
-    live = updatePerformedSet(live, exerciseId, setIds[1]!, { reps: 20, weightKg: 200 });
+    live = updatePerformedSet(live, exerciseId, setIds[1]!, {
+      reps: 20,
+      weightKg: 200,
+    });
     live = addPerformedSet(live, exerciseId);
     live = setSessionExerciseNotes(live, exerciseId, "mudou tudo");
     live = finishSession(live, 9_999);

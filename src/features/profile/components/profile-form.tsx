@@ -155,7 +155,10 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
             id={id}
             value={draft.activityLevel}
             onChange={(event) => {
-              update("activityLevel", event.target.value as Draft["activityLevel"]);
+              update(
+                "activityLevel",
+                event.target.value as Draft["activityLevel"],
+              );
             }}
             className={SELECT_CLASS}
           >

@@ -171,14 +171,18 @@ export function RoutineExerciseCard({
           <input
             type="text"
             inputMode="numeric"
-            value={exercise.restSeconds === null ? "" : String(exercise.restSeconds)}
+            value={
+              exercise.restSeconds === null ? "" : String(exercise.restSeconds)
+            }
             aria-label={`Descanso de ${exercise.name} em segundos`}
             placeholder="—"
             onChange={(event) => {
               const seconds = parseDecimal(event.target.value);
               onChange({
                 restSeconds:
-                  seconds === null ? null : Math.min(Math.max(seconds, 0), 3600),
+                  seconds === null
+                    ? null
+                    : Math.min(Math.max(seconds, 0), 3600),
               });
             }}
             className="w-16 rounded-md border border-line bg-surface px-2 py-1 text-center text-sm tabular-nums hover:border-line-strong"

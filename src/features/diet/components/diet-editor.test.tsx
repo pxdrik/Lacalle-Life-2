@@ -61,7 +61,9 @@ function mount(dietId: string, seed?: Diet): Harness {
 
 /** Opens the picker and adds the one food the harness knows about. */
 async function addChicken() {
-  await userEvent.click(screen.getByRole("button", { name: "Adicionar alimento" }));
+  await userEvent.click(
+    screen.getByRole("button", { name: "Adicionar alimento" }),
+  );
   await userEvent.type(
     screen.getByLabelText("Buscar alimento para adicionar"),
     "frango",
@@ -79,20 +81,26 @@ describe("DietEditor", () => {
     const diet = createDiet("Cutting");
     mount(diet.id, diet);
 
-    expect(await screen.findByLabelText("Nome da dieta")).toHaveValue("Cutting");
+    expect(await screen.findByLabelText("Nome da dieta")).toHaveValue(
+      "Cutting",
+    );
   });
 
   it("reports a diet that does not exist, rather than showing an empty one", async () => {
     mount("nunca-existiu");
 
-    expect(await screen.findByText("Esta dieta não existe.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Esta dieta não existe."),
+    ).toBeInTheDocument();
   });
 
   it("loads the diet's name and its meal", async () => {
     const diet = createDiet("Cutting");
     mount(diet.id, diet);
 
-    expect(await screen.findByLabelText("Nome da dieta")).toHaveValue("Cutting");
+    expect(await screen.findByLabelText("Nome da dieta")).toHaveValue(
+      "Cutting",
+    );
     expect(screen.getByLabelText("Nome da refeição")).toHaveValue("Refeição 1");
   });
 

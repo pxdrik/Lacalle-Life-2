@@ -94,7 +94,9 @@ describe("TodayWorkout", () => {
       session({ id: "b", name: "Costas", startedAt: at("2026-08-06", 18) }),
     ]);
 
-    expect(await screen.findByText("Nada registrado hoje.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Nada registrado hoje."),
+    ).toBeInTheDocument();
     expect(screen.queryByText("Costas")).not.toBeInTheDocument();
   });
 
@@ -109,6 +111,8 @@ describe("TodayWorkout", () => {
   it("offers a way to start when the day is still empty", async () => {
     mount([]);
 
-    expect(await screen.findByRole("link", { name: "Começar" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Começar" }),
+    ).toBeInTheDocument();
   });
 });

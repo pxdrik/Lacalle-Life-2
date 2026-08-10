@@ -41,7 +41,11 @@ export function useDietEditor(dietId: EntityId): DietEditor {
       try {
         const diet = await (await repository).getById(dietId);
         if (!active) return;
-        setState(diet === undefined ? { status: "missing" } : { status: "ready", diet });
+        setState(
+          diet === undefined
+            ? { status: "missing" }
+            : { status: "ready", diet },
+        );
       } catch (error) {
         if (active) {
           setState({ status: "error", message: describeDataError(error) });

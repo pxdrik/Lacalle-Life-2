@@ -50,7 +50,9 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
   }
 
   if (state.status === "error") {
-    return <Notice title="Não foi possível abrir a dieta.">{state.message}</Notice>;
+    return (
+      <Notice title="Não foi possível abrir a dieta.">{state.message}</Notice>
+    );
   }
 
   const { diet } = state;
@@ -108,59 +110,66 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
           {diet.meals.map((meal, index) => (
             <SortableItem key={meal.id} id={meal.id}>
               {(dragHandle) => (
-          <MealCard
-            meal={meal}
-            position={index}
-            total={diet.meals.length}
-            dragHandle={dragHandle}
-            onChange={(changes) => {
-              apply((current) => updateMeal(current, meal.id, changes));
-            }}
-            onRemove={() => {
-              apply((current) => removeMeal(current, meal.id));
-            }}
-            onDuplicate={() => {
-              apply((current) => duplicateMeal(current, meal.id));
-            }}
-            onMove={(offset) => {
-              apply((current) => moveMeal(current, meal.id, offset));
-            }}
-            otherMeals={diet.meals
-              .filter((other) => other.id !== meal.id)
-              .map((other) => ({ id: other.id, name: other.name }))}
-            onSendItem={(itemId, targetMealId, mode) => {
-              apply((current) =>
-                mode === "copy"
-                  ? copyItemToMeal(current, meal.id, itemId, targetMealId)
-                  : moveItemToMeal(current, meal.id, itemId, targetMealId),
-              );
-            }}
-            onReorderItems={(activeId, overId) => {
-              apply((current) =>
-                reorderMealItems(current, meal.id, activeId, overId),
-              );
-            }}
-            onAddFood={(food: Food) => {
-              apply((current) =>
-                addItem(
-                  current,
-                  meal.id,
-                  createMealItem({
-                    foodId: food.id,
-                    name: food.name,
-                    grams: DEFAULT_GRAMS,
-                    per100g: food.per100g,
-                  }),
-                ),
-              );
-            }}
-            onItemGramsChange={(itemId, grams) => {
-              apply((current) => setItemGrams(current, meal.id, itemId, grams));
-            }}
-            onRemoveItem={(itemId) => {
-              apply((current) => removeItem(current, meal.id, itemId));
-            }}
-          />
+                <MealCard
+                  meal={meal}
+                  position={index}
+                  total={diet.meals.length}
+                  dragHandle={dragHandle}
+                  onChange={(changes) => {
+                    apply((current) => updateMeal(current, meal.id, changes));
+                  }}
+                  onRemove={() => {
+                    apply((current) => removeMeal(current, meal.id));
+                  }}
+                  onDuplicate={() => {
+                    apply((current) => duplicateMeal(current, meal.id));
+                  }}
+                  onMove={(offset) => {
+                    apply((current) => moveMeal(current, meal.id, offset));
+                  }}
+                  otherMeals={diet.meals
+                    .filter((other) => other.id !== meal.id)
+                    .map((other) => ({ id: other.id, name: other.name }))}
+                  onSendItem={(itemId, targetMealId, mode) => {
+                    apply((current) =>
+                      mode === "copy"
+                        ? copyItemToMeal(current, meal.id, itemId, targetMealId)
+                        : moveItemToMeal(
+                            current,
+                            meal.id,
+                            itemId,
+                            targetMealId,
+                          ),
+                    );
+                  }}
+                  onReorderItems={(activeId, overId) => {
+                    apply((current) =>
+                      reorderMealItems(current, meal.id, activeId, overId),
+                    );
+                  }}
+                  onAddFood={(food: Food) => {
+                    apply((current) =>
+                      addItem(
+                        current,
+                        meal.id,
+                        createMealItem({
+                          foodId: food.id,
+                          name: food.name,
+                          grams: DEFAULT_GRAMS,
+                          per100g: food.per100g,
+                        }),
+                      ),
+                    );
+                  }}
+                  onItemGramsChange={(itemId, grams) => {
+                    apply((current) =>
+                      setItemGrams(current, meal.id, itemId, grams),
+                    );
+                  }}
+                  onRemoveItem={(itemId) => {
+                    apply((current) => removeItem(current, meal.id, itemId));
+                  }}
+                />
               )}
             </SortableItem>
           ))}

@@ -16,26 +16,27 @@ import type { PerformedSet, Session, SessionExercise } from "../types/session";
  * up later would read whatever the routine says *then*, which is precisely the
  * thing that must not happen.
  */
-export function startSession(routine: Routine, startedAt = Date.now()): Session {
+export function startSession(
+  routine: Routine,
+  startedAt = Date.now(),
+): Session {
   const exercises: SessionExercise[] = routine.exercises.map((exercise) => ({
     id: createEntityId(),
     exerciseId: exercise.exerciseId,
     name: exercise.name,
     restSeconds: exercise.restSeconds,
     notes: exercise.notes,
-    sets: exercise.sets.map(
-      (set): PerformedSet => ({
-        id: createEntityId(),
-        // Prefilled from the plan so the common case — doing what you planned
-        // — is confirming numbers rather than typing them.
-        reps: set.reps,
-        weightKg: set.weightKg,
-        // RPE is left blank: it is a report on a set that has not happened yet.
-        rpe: null,
-        isCompleted: false,
-        planned: { reps: set.reps, weightKg: set.weightKg, rpe: set.rpe },
-      }),
-    ),
+    sets: exercise.sets.map((set): PerformedSet => ({
+      id: createEntityId(),
+      // Prefilled from the plan so the common case — doing what you planned
+      // — is confirming numbers rather than typing them.
+      reps: set.reps,
+      weightKg: set.weightKg,
+      // RPE is left blank: it is a report on a set that has not happened yet.
+      rpe: null,
+      isCompleted: false,
+      planned: { reps: set.reps, weightKg: set.weightKg, rpe: set.rpe },
+    })),
   }));
 
   return {

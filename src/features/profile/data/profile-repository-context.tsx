@@ -4,9 +4,8 @@ import { createContext, useContext } from "react";
 
 import type { ProfileRepository } from "./profile-repository";
 
-const ProfileRepositoryContext = createContext<Promise<ProfileRepository> | null>(
-  null,
-);
+const ProfileRepositoryContext =
+  createContext<Promise<ProfileRepository> | null>(null);
 
 export function ProfileRepositoryProvider({
   repository,

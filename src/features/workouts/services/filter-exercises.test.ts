@@ -31,7 +31,9 @@ function exercise(overrides: Partial<Exercise> & { id: string }): Exercise {
   };
 }
 
-const filters = (overrides: Partial<ExerciseFilters> = {}): ExerciseFilters => ({
+const filters = (
+  overrides: Partial<ExerciseFilters> = {},
+): ExerciseFilters => ({
   ...EMPTY_FILTERS,
   ...overrides,
 });
@@ -92,9 +94,9 @@ describe("filterExercises", () => {
 
   describe("muscles", () => {
     it("matches a primary muscle", () => {
-      expect(ids(filterExercises(ALL, filters({ muscles: new Set(["quads"]) })))).toEqual(
-        ["agachamento"],
-      );
+      expect(
+        ids(filterExercises(ALL, filters({ muscles: new Set(["quads"]) }))),
+      ).toEqual(["agachamento"]);
     });
 
     it("matches a secondary muscle too", () => {
@@ -108,12 +110,19 @@ describe("filterExercises", () => {
     it("ignores stabilisers", () => {
       // Every heavy lift braces the core. Including stabilisers would make the
       // abs filter return most of the catalogue.
-      expect(filterExercises(ALL, filters({ muscles: new Set(["abs"]) }))).toEqual([]);
+      expect(
+        filterExercises(ALL, filters({ muscles: new Set(["abs"]) })),
+      ).toEqual([]);
     });
 
     it("ORs values within the dimension", () => {
       expect(
-        ids(filterExercises(ALL, filters({ muscles: new Set(["quads", "biceps"]) }))),
+        ids(
+          filterExercises(
+            ALL,
+            filters({ muscles: new Set(["quads", "biceps"]) }),
+          ),
+        ),
       ).toEqual(["rosca", "agachamento"]);
     });
   });
@@ -167,18 +176,23 @@ describe("filterExercises", () => {
     });
 
     it("still appears when no filter constrains it", () => {
-      expect(filterExercises([semClassificacao], EMPTY_FILTERS)).toHaveLength(1);
+      expect(filterExercises([semClassificacao], EMPTY_FILTERS)).toHaveLength(
+        1,
+      );
     });
   });
 
   it("narrows to favourites", () => {
-    expect(ids(filterExercises(ALL, filters({ favoritesOnly: true })))).toEqual([
-      "rosca",
-    ]);
+    expect(ids(filterExercises(ALL, filters({ favoritesOnly: true })))).toEqual(
+      ["rosca"],
+    );
   });
 
   it("preserves the incoming order", () => {
-    const found = filterExercises(ALL, filters({ equipment: new Set(["barbell"]) }));
+    const found = filterExercises(
+      ALL,
+      filters({ equipment: new Set(["barbell"]) }),
+    );
 
     expect(ids(found)).toEqual(["supino", "agachamento"]);
   });

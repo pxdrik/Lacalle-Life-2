@@ -29,7 +29,9 @@ export function Field({ label, id, error, hint, disabled, children }: Props) {
   const messageId = `${id}-message`;
 
   return (
-    <div className={disabled === true ? "space-y-1.5 opacity-45" : "space-y-1.5"}>
+    <div
+      className={disabled === true ? "space-y-1.5 opacity-45" : "space-y-1.5"}
+    >
       <label htmlFor={id} className="block text-sm font-medium text-ink">
         {label}
       </label>
@@ -44,7 +46,9 @@ export function Field({ label, id, error, hint, disabled, children }: Props) {
         <p
           id={messageId}
           className={
-            error === undefined ? "text-xs text-ink-subtle" : "text-xs text-danger"
+            error === undefined
+              ? "text-xs text-ink-subtle"
+              : "text-xs text-danger"
           }
         >
           {message}

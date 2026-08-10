@@ -36,7 +36,8 @@ export function useRoutineList(): RoutineList {
         const routines = await (await repositories).routines.listAll();
         if (active) setState({ status: "ready", routines });
       } catch (cause) {
-        if (active) setState({ status: "error", message: describeDataError(cause) });
+        if (active)
+          setState({ status: "error", message: describeDataError(cause) });
       }
     }
 
@@ -99,7 +100,9 @@ export function useRoutineList(): RoutineList {
           current.status === "ready"
             ? {
                 status: "ready",
-                routines: current.routines.filter((item) => item.id !== routine.id),
+                routines: current.routines.filter(
+                  (item) => item.id !== routine.id,
+                ),
               }
             : current,
         );

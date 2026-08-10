@@ -78,7 +78,9 @@ describe("creating from a search that found something", () => {
     await userEvent.type(search(), "supino");
 
     // Two matches, and still a way out for the one that is missing.
-    expect(screen.getByText("Supino Inclinado com Halteres")).toBeInTheDocument();
+    expect(
+      screen.getByText("Supino Inclinado com Halteres"),
+    ).toBeInTheDocument();
     expect(createRow()).toBeInTheDocument();
   });
 
@@ -89,7 +91,7 @@ describe("creating from a search that found something", () => {
     await userEvent.type(search(), "supino pegada fechada");
 
     expect(
-      screen.getByRole("button", { name: 'Criar “supino pegada fechada”' }),
+      screen.getByRole("button", { name: "Criar “supino pegada fechada”" }),
     ).toBeInTheDocument();
   });
 

@@ -118,7 +118,8 @@ export function useBodyLog(): BodyLog {
 
         setEntries((current) => {
           const rest = (current ?? []).filter(
-            (item) => item.day !== updated.day && (!moved || item.day !== previousDay),
+            (item) =>
+              item.day !== updated.day && (!moved || item.day !== previousDay),
           );
           return [...rest, updated].sort((a, b) => a.day.localeCompare(b.day));
         });
@@ -133,7 +134,8 @@ export function useBodyLog(): BodyLog {
 
   const entryFor = useCallback(
     (day: string): BodyEntry =>
-      (entries ?? []).find((entry) => entry.day === day) ?? createBodyEntry(day),
+      (entries ?? []).find((entry) => entry.day === day) ??
+      createBodyEntry(day),
     [entries],
   );
 

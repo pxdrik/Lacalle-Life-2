@@ -44,7 +44,10 @@ describe("createRoutine", () => {
 
 describe("createRoutineExercise", () => {
   it("arrives with three sets, the usual prescription", () => {
-    const exercise = createRoutineExercise({ exerciseId: "supino", name: "Supino" });
+    const exercise = createRoutineExercise({
+      exerciseId: "supino",
+      name: "Supino",
+    });
 
     expect(exercise.sets).toHaveLength(DEFAULT_SET_COUNT);
   });
@@ -52,7 +55,10 @@ describe("createRoutineExercise", () => {
   it("keeps the link back to the catalogue entry", () => {
     // Load history is per exercise across months, so this reference has to
     // survive — it is what ids.lock.json protects.
-    const exercise = createRoutineExercise({ exerciseId: "supino", name: "Supino" });
+    const exercise = createRoutineExercise({
+      exerciseId: "supino",
+      name: "Supino",
+    });
 
     expect(exercise.exerciseId).toBe("supino");
   });
@@ -133,7 +139,9 @@ describe("sets", () => {
     const { routine, ids } = routineWith("Supino");
     const setId = routine.exercises[0]!.sets[0]!.id;
 
-    expect(removeSet(routine, ids[0]!, setId).exercises[0]?.sets).toHaveLength(2);
+    expect(removeSet(routine, ids[0]!, setId).exercises[0]?.sets).toHaveLength(
+      2,
+    );
   });
 
   it("updates reps, weight and RPE independently", () => {
@@ -153,7 +161,10 @@ describe("sets", () => {
     const { routine, ids } = routineWith("Supino");
     const setId = routine.exercises[0]!.sets[0]!.id;
 
-    const updated = updateSet(routine, ids[0]!, setId, { reps: 8, weightKg: 60 });
+    const updated = updateSet(routine, ids[0]!, setId, {
+      reps: 8,
+      weightKg: 60,
+    });
 
     expect(updated.exercises[0]?.sets[0]?.rpe).toBeNull();
   });

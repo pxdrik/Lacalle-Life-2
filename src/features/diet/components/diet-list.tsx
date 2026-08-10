@@ -36,7 +36,10 @@ export function DietList() {
 
   return (
     <div className="space-y-5">
-      <form onSubmit={(event) => void handleCreate(event)} className="flex gap-2">
+      <form
+        onSubmit={(event) => void handleCreate(event)}
+        className="flex gap-2"
+      >
         <Input
           value={name}
           onChange={(event) => {
@@ -46,7 +49,12 @@ export function DietList() {
           aria-label="Nome da nova dieta"
           autoComplete="off"
         />
-        <Button type="submit" size="lg" pending={creating} disabled={name.trim() === ""}>
+        <Button
+          type="submit"
+          size="lg"
+          pending={creating}
+          disabled={name.trim() === ""}
+        >
           <Plus aria-hidden className="size-4" />
           Criar
         </Button>

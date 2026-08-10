@@ -18,7 +18,10 @@ function entry(day: string, over: Partial<BodyEntry> = {}): BodyEntry {
 
 describe("moveEntryToDay", () => {
   it("changes the identity, because the id is the day", () => {
-    const moved = moveEntryToDay(entry("2026-08-07", { weightKg: 81 }), "2026-08-05");
+    const moved = moveEntryToDay(
+      entry("2026-08-07", { weightKg: 81 }),
+      "2026-08-05",
+    );
 
     expect(moved.id).toBe("2026-08-05");
     expect(moved.day).toBe("2026-08-05");
@@ -114,7 +117,10 @@ describe("seriesOf", () => {
   });
 
   it("keeps a recorded zero", () => {
-    const points = seriesOf([entry("2026-08-01", { bodyFatPercent: 0 })], (i) => i.bodyFatPercent);
+    const points = seriesOf(
+      [entry("2026-08-01", { bodyFatPercent: 0 })],
+      (i) => i.bodyFatPercent,
+    );
 
     expect(points).toHaveLength(1);
   });
@@ -180,4 +186,3 @@ describe("movingAverage", () => {
     expect(movingAverage(raw, 1)).toEqual(raw);
   });
 });
-

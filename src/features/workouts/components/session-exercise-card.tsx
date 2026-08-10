@@ -130,7 +130,10 @@ function formatShortDate(timestamp: number): string {
   return shortDate.format(new Date(timestamp));
 }
 
-function describeSet(set: { reps: number | null; weightKg: number | null }): string {
+function describeSet(set: {
+  reps: number | null;
+  weightKg: number | null;
+}): string {
   const reps = set.reps ?? "—";
   return set.weightKg === null
     ? `${String(reps)}`

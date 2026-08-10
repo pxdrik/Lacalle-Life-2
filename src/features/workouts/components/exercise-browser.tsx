@@ -59,10 +59,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
   // that can fall out of sync with its inputs is a bug waiting to happen.
   const results =
     state.status === "ready"
-      ? filterExercises(
-          searchExercises(state.index, query.text),
-          query.filters,
-        )
+      ? filterExercises(searchExercises(state.index, query.text), query.filters)
       : [];
 
   return (
@@ -130,9 +127,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             nobody reads while choosing. */}
         <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
           <p aria-live="polite" className="text-sm text-ink-muted">
-            <span className="tabular-nums text-ink">
-              {results.length}
-            </span>{" "}
+            <span className="tabular-nums text-ink">{results.length}</span>{" "}
             {results.length === 1 ? "exercício" : "exercícios"}
           </p>
 
@@ -195,7 +190,11 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
 
       {state.status === "ready" && (
         <>
-          <p className="text-sm text-ink-subtle" role="status" aria-live="polite">
+          <p
+            className="text-sm text-ink-subtle"
+            role="status"
+            aria-live="polite"
+          >
             {results.length === 0
               ? "Nenhum exercício encontrado"
               : `${results.length} ${results.length === 1 ? "exercício" : "exercícios"}`}
@@ -322,7 +321,16 @@ function EmptyState({
 }
 
 function ListSkeleton() {
-  const widths = ["w-48", "w-64", "w-40", "w-56", "w-44", "w-52", "w-36", "w-60"];
+  const widths = [
+    "w-48",
+    "w-64",
+    "w-40",
+    "w-56",
+    "w-44",
+    "w-52",
+    "w-36",
+    "w-60",
+  ];
 
   return (
     <div

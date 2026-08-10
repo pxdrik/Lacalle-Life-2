@@ -37,50 +37,58 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
         {/* A description list, because that is what this is: terms and their
             values. `dl > div > dt + dd` is the grouping form. */}
         <dl className="space-y-3.5">
-        <Muscles label="Músculos principais" muscles={exercise.primaryMuscles} />
-        <Muscles label="Também trabalha" muscles={exercise.secondaryMuscles} />
-        <Muscles
-          label="Estabilizadores"
-          muscles={exercise.stabilizerMuscles}
-          hint="Trabalham para segurar a posição, não para mover a carga."
-        />
+          <Muscles
+            label="Músculos principais"
+            muscles={exercise.primaryMuscles}
+          />
+          <Muscles
+            label="Também trabalha"
+            muscles={exercise.secondaryMuscles}
+          />
+          <Muscles
+            label="Estabilizadores"
+            muscles={exercise.stabilizerMuscles}
+            hint="Trabalham para segurar a posição, não para mover a carga."
+          />
 
-        <Row
-          label="Equipamento"
-          values={exercise.equipment.map((item) => EQUIPMENT_LABELS[item])}
-        />
-        <Row
-          label="Padrão"
-          values={
-            exercise.movementPattern === null
-              ? []
-              : [MOVEMENT_PATTERN_LABELS[exercise.movementPattern]]
-          }
-        />
-        <Row
-          label="Plano"
-          values={exercise.movementPlanes.map((plane) => MOVEMENT_PLANE_LABELS[plane])}
-        />
-        <Row
-          label="Dificuldade técnica"
-          values={
-            exercise.technicalDifficulty === null
-              ? []
-              : [TECHNICAL_DIFFICULTY_LABELS[exercise.technicalDifficulty]]
-          }
-          hint="Técnica exigida para carregar com segurança — não é o esforço."
-        />
-        <Row
-          label="Tipo"
-          values={[
-            exercise.isCompound === null
-              ? null
-              : exercise.isCompound
-                ? "Composto"
-                : "Isolado",
-            exercise.isUnilateral === true ? "Unilateral" : null,
-          ].filter((value): value is string => value !== null)}
-        />
+          <Row
+            label="Equipamento"
+            values={exercise.equipment.map((item) => EQUIPMENT_LABELS[item])}
+          />
+          <Row
+            label="Padrão"
+            values={
+              exercise.movementPattern === null
+                ? []
+                : [MOVEMENT_PATTERN_LABELS[exercise.movementPattern]]
+            }
+          />
+          <Row
+            label="Plano"
+            values={exercise.movementPlanes.map(
+              (plane) => MOVEMENT_PLANE_LABELS[plane],
+            )}
+          />
+          <Row
+            label="Dificuldade técnica"
+            values={
+              exercise.technicalDifficulty === null
+                ? []
+                : [TECHNICAL_DIFFICULTY_LABELS[exercise.technicalDifficulty]]
+            }
+            hint="Técnica exigida para carregar com segurança — não é o esforço."
+          />
+          <Row
+            label="Tipo"
+            values={[
+              exercise.isCompound === null
+                ? null
+                : exercise.isCompound
+                  ? "Composto"
+                  : "Isolado",
+              exercise.isUnilateral === true ? "Unilateral" : null,
+            ].filter((value): value is string => value !== null)}
+          />
           <Row label="Outros nomes" values={[...exercise.aliases]} />
         </dl>
       </div>

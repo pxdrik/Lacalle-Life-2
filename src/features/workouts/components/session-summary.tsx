@@ -96,7 +96,10 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                       <span className="text-ink">
                         {set.reps ?? "—"} × {set.weightKg ?? "—"} kg
                         {set.rpe !== null && (
-                          <span className="text-ink-muted"> · RPE {set.rpe}</span>
+                          <span className="text-ink-muted">
+                            {" "}
+                            · RPE {set.rpe}
+                          </span>
                         )}
                       </span>
                     ) : (
@@ -106,7 +109,9 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                     {/* Shown only when it differs — a delta of zero is noise. */}
                     {rpeDelta !== null && rpeDelta !== 0 && (
                       <span
-                        className={rpeDelta > 0 ? "text-danger" : "text-ink-subtle"}
+                        className={
+                          rpeDelta > 0 ? "text-danger" : "text-ink-subtle"
+                        }
                       >
                         {rpeDelta > 0 ? "+" : ""}
                         {rpeDelta} vs plano

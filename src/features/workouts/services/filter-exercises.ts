@@ -1,5 +1,8 @@
 import type { Equipment } from "../taxonomy/equipment";
-import type { MovementPattern, TechnicalDifficulty } from "../taxonomy/movement";
+import type {
+  MovementPattern,
+  TechnicalDifficulty,
+} from "../taxonomy/movement";
 import type { MuscleGroup } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 

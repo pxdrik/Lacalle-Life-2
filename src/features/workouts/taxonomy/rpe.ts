@@ -24,7 +24,9 @@ export const RPE_SCALE = [
 
 export type RpeValue = (typeof RPE_SCALE)[number]["value"];
 
-export const RPE_VALUES: readonly number[] = RPE_SCALE.map((step) => step.value);
+export const RPE_VALUES: readonly number[] = RPE_SCALE.map(
+  (step) => step.value,
+);
 
 export function isRpeValue(value: number): boolean {
   return RPE_VALUES.includes(value);

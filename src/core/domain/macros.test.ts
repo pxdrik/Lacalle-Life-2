@@ -41,7 +41,9 @@ describe("scaleMacros", () => {
 
 describe("roundMacros", () => {
   it("rounds calories to whole numbers and grams to one decimal", () => {
-    expect(roundMacros({ kcal: 82.5, proteinG: 15.55, carbsG: 0.04, fatG: 1.84 })).toEqual({
+    expect(
+      roundMacros({ kcal: 82.5, proteinG: 15.55, carbsG: 0.04, fatG: 1.84 }),
+    ).toEqual({
       kcal: 83,
       proteinG: 15.6,
       carbsG: 0,

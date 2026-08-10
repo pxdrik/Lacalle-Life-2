@@ -59,7 +59,10 @@ describe("startDayFromDiet", () => {
 
     const dietIds = new Set([
       diet.id,
-      ...diet.meals.flatMap((meal) => [meal.id, ...meal.items.map((i) => i.id)]),
+      ...diet.meals.flatMap((meal) => [
+        meal.id,
+        ...meal.items.map((i) => i.id),
+      ]),
     ]);
     const logIds = [
       ...log.meals.flatMap((meal) => [meal.id, ...meal.items.map((i) => i.id)]),

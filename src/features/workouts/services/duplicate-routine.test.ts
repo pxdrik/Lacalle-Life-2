@@ -19,7 +19,11 @@ function plannedRoutine() {
   });
   routine = addExercise(routine, supino);
   for (const set of supino.sets) {
-    routine = updateSet(routine, supino.id, set.id, { reps: 8, weightKg: 60, rpe: 8 });
+    routine = updateSet(routine, supino.id, set.id, {
+      reps: 8,
+      weightKg: 60,
+      rpe: 8,
+    });
   }
 
   const remada = createRoutineExercise({
@@ -93,7 +97,10 @@ describe("duplicateRoutine", () => {
     const before = structuredClone(copy);
 
     const setId = routine.exercises[0]!.sets[0]!.id;
-    const later = updateSet(routine, supinoId, setId, { reps: 20, weightKg: 200 });
+    const later = updateSet(routine, supinoId, setId, {
+      reps: 20,
+      weightKg: 200,
+    });
 
     expect(later.exercises[0]?.sets[0]?.reps).toBe(20);
     expect(copy).toEqual(before);

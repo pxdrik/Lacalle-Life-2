@@ -96,8 +96,16 @@ describe("clearing the field", () => {
 
 describe("the label", () => {
   it("names the field for assistive technology", () => {
-    render(<WeightField value={null} label="Peso da série 1 de Supino" onChange={vi.fn()} />);
+    render(
+      <WeightField
+        value={null}
+        label="Peso da série 1 de Supino"
+        onChange={vi.fn()}
+      />,
+    );
 
-    expect(screen.getByLabelText("Peso da série 1 de Supino")).toBeInTheDocument();
+    expect(
+      screen.getByLabelText("Peso da série 1 de Supino"),
+    ).toBeInTheDocument();
   });
 });

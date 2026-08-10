@@ -42,7 +42,9 @@ describe("MIGRATIONS", () => {
   it("starts at 1 and leaves no gaps", () => {
     // A gap would still work, but it almost always means an entry was dropped
     // instead of being superseded — and a released version must never vanish.
-    const versions = [...MIGRATIONS.map((m) => m.version)].sort((a, b) => a - b);
+    const versions = [...MIGRATIONS.map((m) => m.version)].sort(
+      (a, b) => a - b,
+    );
     expect(versions).toEqual(versions.map((_, index) => index + 1));
   });
 });

@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
-import { buildNutritionPlan, type NutritionProfile, type PlanResult } from "@/core/nutrition";
+import {
+  buildNutritionPlan,
+  type NutritionProfile,
+  type PlanResult,
+} from "@/core/nutrition";
 
 import { useProfileRepository } from "../data/profile-repository-context";
 import { PROFILE_ID, type Profile } from "../types/profile";
@@ -12,7 +16,11 @@ export type ProfileState =
   | { readonly status: "loading" }
   /** No profile yet. Targets are off, and everything else works unchanged. */
   | { readonly status: "empty" }
-  | { readonly status: "ready"; readonly profile: Profile; readonly result: PlanResult }
+  | {
+      readonly status: "ready";
+      readonly profile: Profile;
+      readonly result: PlanResult;
+    }
   | { readonly status: "error"; readonly message: string };
 
 export interface ProfileStore {
@@ -43,7 +51,8 @@ export function useProfile(): ProfileStore {
         if (!active) return;
         setState(profile === undefined ? { status: "empty" } : ready(profile));
       } catch (error) {
-        if (active) setState({ status: "error", message: describeDataError(error) });
+        if (active)
+          setState({ status: "error", message: describeDataError(error) });
       }
     }
 

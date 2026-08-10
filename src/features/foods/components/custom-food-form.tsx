@@ -176,7 +176,8 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
 
       <fieldset className="space-y-3">
         <legend className="mb-1 text-sm font-medium text-ink">
-          Por 100 g <span className="text-ink-subtle">— como está no rótulo</span>
+          Por 100 g{" "}
+          <span className="text-ink-subtle">— como está no rótulo</span>
         </legend>
 
         <div className="grid grid-cols-3 gap-3">

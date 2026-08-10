@@ -42,7 +42,11 @@ export function useExerciseDetail(): ExerciseDetailControl {
   };
 }
 
-export function ExerciseDetailDialog({ control }: { readonly control: ExerciseDetailControl }) {
+export function ExerciseDetailDialog({
+  control,
+}: {
+  readonly control: ExerciseDetailControl;
+}) {
   const { exercise, open, hide } = control;
 
   return (

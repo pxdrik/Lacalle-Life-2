@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-import { BodyDataProvider, WorkoutDataProvider } from "@/composition/data-providers";
+import { TrendingUp } from "lucide-react";
+import {
+  BodyDataProvider,
+  WorkoutDataProvider,
+} from "@/composition/data-providers";
 import { BodyScreen } from "@/features/body/components/body-screen";
 import { EvolutionScreen } from "@/features/workouts/components/evolution-screen";
 import { PageHeader } from "@/design-system/components/page-header";
@@ -24,6 +28,7 @@ export default function EvolutionPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <PageHeader
+        icon={TrendingUp}
         title="Evolução"
         subtitle="Seu corpo e seus treinos, ao longo do tempo."
       />

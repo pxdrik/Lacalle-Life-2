@@ -48,7 +48,10 @@ export function addMeal<T extends MealOwner>(diet: T): T {
 }
 
 export function removeMeal<T extends MealOwner>(diet: T, mealId: EntityId): T {
-  return withMeals(diet, diet.meals.filter((meal) => meal.id !== mealId));
+  return withMeals(
+    diet,
+    diet.meals.filter((meal) => meal.id !== mealId),
+  );
 }
 
 /**
@@ -82,7 +85,11 @@ export function updateMeal<T extends MealOwner>(
   return mapMeal(diet, mealId, (meal) => ({ ...meal, ...changes }));
 }
 
-export function addItem<T extends MealOwner>(diet: T, mealId: EntityId, item: MealItem): T {
+export function addItem<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  item: MealItem,
+): T {
   return mapMeal(diet, mealId, (meal) => ({
     ...meal,
     items: [...meal.items, item],
@@ -101,7 +108,11 @@ export function removeItem<T extends MealOwner>(
 }
 
 /** Moves a meal by `offset`, clamped. What the arrow buttons report. */
-export function moveMeal<T extends MealOwner>(diet: T, mealId: EntityId, offset: number): T {
+export function moveMeal<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  offset: number,
+): T {
   const meals = shiftById(diet.meals, mealId, offset);
   if (meals === diet.meals) return diet;
 
@@ -206,5 +217,8 @@ function mapMeal<T extends MealOwner>(
 ): T {
   if (!diet.meals.some((meal) => meal.id === mealId)) return diet;
 
-  return withMeals(diet, diet.meals.map((meal) => (meal.id === mealId ? change(meal) : meal)));
+  return withMeals(
+    diet,
+    diet.meals.map((meal) => (meal.id === mealId ? change(meal) : meal)),
+  );
 }

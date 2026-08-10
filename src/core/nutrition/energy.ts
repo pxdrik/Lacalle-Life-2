@@ -30,7 +30,10 @@ export function computeBmr(profile: NutritionProfile): number {
   return round(sex === "male" ? base + 5 : base - 161, 1);
 }
 
-export function computeTdee(profile: NutritionProfile, bmrKcal: number): number {
+export function computeTdee(
+  profile: NutritionProfile,
+  bmrKcal: number,
+): number {
   return round(bmrKcal * ACTIVITY_MULTIPLIER[profile.activityLevel], 1);
 }
 

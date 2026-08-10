@@ -40,7 +40,8 @@ export function TodayWorkout({ day }: { readonly day: string }) {
 
   const today = state.sessions.filter(
     (session) =>
-      session.finishedAt !== null && dayKey(new Date(session.startedAt)) === day,
+      session.finishedAt !== null &&
+      dayKey(new Date(session.startedAt)) === day,
   );
 
   return (
@@ -56,9 +57,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
       </div>
 
       {today.length === 0 ? (
-        <p className="mt-3 text-sm text-ink-muted">
-          Nada registrado hoje.
-        </p>
+        <p className="mt-3 text-sm text-ink-muted">Nada registrado hoje.</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {today.map((session) => (

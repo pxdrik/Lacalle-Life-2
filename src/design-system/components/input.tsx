@@ -1,6 +1,9 @@
 import { cn } from "@/design-system/cn";
 
-export function Input({ className, ...props }: React.ComponentPropsWithRef<"input">) {
+export function Input({
+  className,
+  ...props
+}: React.ComponentPropsWithRef<"input">) {
   return (
     <input
       className={cn(

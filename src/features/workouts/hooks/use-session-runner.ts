@@ -43,10 +43,13 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
         const session = await (await repositories).sessions.getById(sessionId);
         if (!active) return;
         setState(
-          session === undefined ? { status: "missing" } : { status: "ready", session },
+          session === undefined
+            ? { status: "missing" }
+            : { status: "ready", session },
         );
       } catch (cause) {
-        if (active) setState({ status: "error", message: describeDataError(cause) });
+        if (active)
+          setState({ status: "error", message: describeDataError(cause) });
       }
     }
 

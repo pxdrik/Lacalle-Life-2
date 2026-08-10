@@ -34,7 +34,9 @@ interface Props {
     readonly listeners: Record<string, unknown> | undefined;
     readonly isDragging: boolean;
   };
-  readonly onChange: (changes: Partial<Pick<Meal, "name" | "time" | "notes">>) => void;
+  readonly onChange: (
+    changes: Partial<Pick<Meal, "name" | "time" | "notes">>,
+  ) => void;
   readonly onRemove: () => void;
   readonly onDuplicate: () => void;
   readonly onMove: (offset: number) => void;
@@ -43,7 +45,10 @@ interface Props {
   readonly onRemoveItem: (itemId: string) => void;
   readonly onReorderItems: (activeId: string, overId: string) => void;
   /** The other meals a food can be sent to. Empty when this is the only one. */
-  readonly otherMeals: readonly { readonly id: string; readonly name: string }[];
+  readonly otherMeals: readonly {
+    readonly id: string;
+    readonly name: string;
+  }[];
   readonly onSendItem: (
     itemId: string,
     targetMealId: string,
@@ -112,7 +117,9 @@ export function MealCard({
               onChange={(event) => {
                 // An empty field means "no fixed time", which is different
                 // from midnight.
-                onChange({ time: event.target.value === "" ? null : event.target.value });
+                onChange({
+                  time: event.target.value === "" ? null : event.target.value,
+                });
               }}
               className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
             />

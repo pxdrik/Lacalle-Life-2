@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import type { Food } from "../types/food";
 import { customFoodSchema } from "../validation/food-schema";
-import { createCustomFood, estimateKcal, updateCustomFood } from "./create-food";
+import {
+  createCustomFood,
+  estimateKcal,
+  updateCustomFood,
+} from "./create-food";
 
 const VALID = {
   name: "Whey protein",
@@ -95,7 +99,9 @@ describe("estimateKcal", () => {
     // Lemon: 29 kcal on the label, 43 by Atwater. The gap is fibre, at ~2 kcal
     // per gram rather than 4. This is the reason the form suggests instead of
     // filling in.
-    expect(estimateKcal({ proteinG: 1.1, carbsG: 9, fatG: 0.3 })).toBeGreaterThan(29);
+    expect(
+      estimateKcal({ proteinG: 1.1, carbsG: 9, fatG: 0.3 }),
+    ).toBeGreaterThan(29);
   });
 });
 

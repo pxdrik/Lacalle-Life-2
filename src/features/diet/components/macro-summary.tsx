@@ -34,10 +34,17 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
       )}
     >
       <div className="flex items-baseline gap-1">
-        <dd className={cn("text-ink", large ? "text-xl font-medium" : "text-sm")}>
+        <dd
+          className={cn("text-ink", large ? "text-xl font-medium" : "text-sm")}
+        >
           {formatDecimal(macros.kcal)}
         </dd>
-        <dt className={cn("text-ink-subtle", large ? "text-xs" : "text-[0.6875rem]")}>
+        <dt
+          className={cn(
+            "text-ink-subtle",
+            large ? "text-xs" : "text-[0.6875rem]",
+          )}
+        >
           kcal
         </dt>
       </div>

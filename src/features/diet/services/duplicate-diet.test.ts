@@ -23,12 +23,22 @@ function fullDiet() {
   diet = addItem(
     diet,
     almoco,
-    createMealItem({ foodId: "frango", name: "Frango", grams: 150, per100g: CHICKEN }),
+    createMealItem({
+      foodId: "frango",
+      name: "Frango",
+      grams: 150,
+      per100g: CHICKEN,
+    }),
   );
   diet = addItem(
     diet,
     almoco,
-    createMealItem({ foodId: "arroz", name: "Arroz", grams: 100, per100g: RICE }),
+    createMealItem({
+      foodId: "arroz",
+      name: "Arroz",
+      grams: 100,
+      per100g: RICE,
+    }),
   );
 
   diet = addMeal(diet);
@@ -52,7 +62,10 @@ describe("duplicateDiet", () => {
     const copy = duplicateDiet(diet);
 
     expect(copy.meals).toHaveLength(2);
-    expect(copy.meals[0]?.items.map((i) => i.name)).toEqual(["Frango", "Arroz"]);
+    expect(copy.meals[0]?.items.map((i) => i.name)).toEqual([
+      "Frango",
+      "Arroz",
+    ]);
   });
 
   it("marks the copy in its name, since it sits beside the original", () => {
@@ -102,7 +115,11 @@ describe("duplicateMeal", () => {
     const { diet, almoco } = fullDiet();
     const after = duplicateMeal(diet, almoco);
 
-    expect(after.meals.map((m) => m.name)).toEqual(["Almoço", "Almoço", "Jantar"]);
+    expect(after.meals.map((m) => m.name)).toEqual([
+      "Almoço",
+      "Almoço",
+      "Jantar",
+    ]);
   });
 
   it("leaves the name alone, unlike a duplicated diet", () => {
@@ -136,7 +153,12 @@ describe("duplicateMeal", () => {
     diet = addItem(
       diet,
       mealId,
-      createMealItem({ foodId: null, name: "Frango", grams: 100, per100g: CHICKEN }),
+      createMealItem({
+        foodId: null,
+        name: "Frango",
+        grams: 100,
+        per100g: CHICKEN,
+      }),
     );
 
     expect(dietMacros(duplicateMeal(diet, mealId)).kcal).toBe(
@@ -209,9 +231,9 @@ describe("moveItemToMeal", () => {
     const { diet, almoco, jantar } = fullDiet();
     const itemId = diet.meals[0]!.items[0]!.id;
 
-    expect(moveItemToMeal(diet, almoco, itemId, jantar).meals[1]?.items[0]?.id).toBe(
-      itemId,
-    );
+    expect(
+      moveItemToMeal(diet, almoco, itemId, jantar).meals[1]?.items[0]?.id,
+    ).toBe(itemId);
   });
 
   it("leaves the diet's totals untouched", () => {

@@ -115,7 +115,9 @@ export function SessionEditor({ session, apply, onDone }: Props) {
               );
             }}
             onRemoveSet={(setId) => {
-              apply((current) => removePerformedSet(current, exercise.id, setId));
+              apply((current) =>
+                removePerformedSet(current, exercise.id, setId),
+              );
             }}
             onAddSet={() => {
               apply((current) => addPerformedSet(current, exercise.id));

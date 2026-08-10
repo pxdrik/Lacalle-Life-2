@@ -93,7 +93,10 @@ export function setSessionExerciseNotes(
   exerciseId: EntityId,
   notes: string,
 ): Session {
-  return mapExercise(session, exerciseId, (exercise) => ({ ...exercise, notes }));
+  return mapExercise(session, exerciseId, (exercise) => ({
+    ...exercise,
+    notes,
+  }));
 }
 
 /**
@@ -131,14 +134,14 @@ export function moveSessionToDay(session: Session, day: string): Session {
   );
 
   const startedAt = moved.getTime();
-  if (Number.isNaN(startedAt) || startedAt === session.startedAt) return session;
+  if (Number.isNaN(startedAt) || startedAt === session.startedAt)
+    return session;
 
   const shift = startedAt - session.startedAt;
 
   return revise(session, {
     startedAt,
-    finishedAt:
-      session.finishedAt === null ? null : session.finishedAt + shift,
+    finishedAt: session.finishedAt === null ? null : session.finishedAt + shift,
   });
 }
 
@@ -151,7 +154,10 @@ export function renameSession(session: Session, name: string): Session {
  * discarded — "I planned four and did three" is information, and deleting the
  * fourth would erase it.
  */
-export function finishSession(session: Session, finishedAt = Date.now()): Session {
+export function finishSession(
+  session: Session,
+  finishedAt = Date.now(),
+): Session {
   if (session.finishedAt !== null) return session;
   return revise(session, { finishedAt });
 }

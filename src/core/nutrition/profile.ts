@@ -20,18 +20,36 @@ export const nutritionProfileSchema = z.object({
   ageYears: z
     .number({ error: "Preencha a idade." })
     .int("Idade deve ser um número inteiro.")
-    .min(INPUT_BOUNDS.ageYears.min, `Idade mínima: ${INPUT_BOUNDS.ageYears.min} anos.`)
-    .max(INPUT_BOUNDS.ageYears.max, `Idade máxima: ${INPUT_BOUNDS.ageYears.max} anos.`),
+    .min(
+      INPUT_BOUNDS.ageYears.min,
+      `Idade mínima: ${INPUT_BOUNDS.ageYears.min} anos.`,
+    )
+    .max(
+      INPUT_BOUNDS.ageYears.max,
+      `Idade máxima: ${INPUT_BOUNDS.ageYears.max} anos.`,
+    ),
 
   heightCm: z
     .number({ error: "Preencha a altura." })
-    .min(INPUT_BOUNDS.heightCm.min, `Altura mínima: ${INPUT_BOUNDS.heightCm.min} cm.`)
-    .max(INPUT_BOUNDS.heightCm.max, `Altura máxima: ${INPUT_BOUNDS.heightCm.max} cm.`),
+    .min(
+      INPUT_BOUNDS.heightCm.min,
+      `Altura mínima: ${INPUT_BOUNDS.heightCm.min} cm.`,
+    )
+    .max(
+      INPUT_BOUNDS.heightCm.max,
+      `Altura máxima: ${INPUT_BOUNDS.heightCm.max} cm.`,
+    ),
 
   weightKg: z
     .number({ error: "Preencha o peso." })
-    .min(INPUT_BOUNDS.weightKg.min, `Peso mínimo: ${INPUT_BOUNDS.weightKg.min} kg.`)
-    .max(INPUT_BOUNDS.weightKg.max, `Peso máximo: ${INPUT_BOUNDS.weightKg.max} kg.`),
+    .min(
+      INPUT_BOUNDS.weightKg.min,
+      `Peso mínimo: ${INPUT_BOUNDS.weightKg.min} kg.`,
+    )
+    .max(
+      INPUT_BOUNDS.weightKg.max,
+      `Peso máximo: ${INPUT_BOUNDS.weightKg.max} kg.`,
+    ),
 
   activityLevel: z.enum(ACTIVITY_LEVELS),
   goal: z.enum(GOALS),

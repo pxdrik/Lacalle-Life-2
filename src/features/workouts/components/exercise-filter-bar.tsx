@@ -83,7 +83,10 @@ export function ExerciseFilterBar({
             key={muscle}
             active={filters.muscles.has(muscle)}
             onClick={() => {
-              onChange({ ...filters, muscles: toggle(filters.muscles, muscle) });
+              onChange({
+                ...filters,
+                muscles: toggle(filters.muscles, muscle),
+              });
             }}
           >
             {MUSCLE_LABELS[muscle]}
@@ -97,7 +100,10 @@ export function ExerciseFilterBar({
             key={item}
             active={filters.equipment.has(item)}
             onClick={() => {
-              onChange({ ...filters, equipment: toggle(filters.equipment, item) });
+              onChange({
+                ...filters,
+                equipment: toggle(filters.equipment, item),
+              });
             }}
           >
             {EQUIPMENT_LABELS[item]}
@@ -111,7 +117,10 @@ export function ExerciseFilterBar({
             key={pattern}
             active={filters.patterns.has(pattern)}
             onClick={() => {
-              onChange({ ...filters, patterns: toggle(filters.patterns, pattern) });
+              onChange({
+                ...filters,
+                patterns: toggle(filters.patterns, pattern),
+              });
             }}
           >
             {MOVEMENT_PATTERN_LABELS[pattern]}

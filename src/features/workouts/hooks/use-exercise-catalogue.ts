@@ -33,7 +33,9 @@ export interface ExerciseCatalogue {
    * Resolves to the exercise so the caller can use it at once — the whole
    * point is that "not in the catalogue" never becomes a dead end mid-routine.
    */
-  readonly createExercise: (input: CustomExerciseInput) => Promise<Exercise | null>;
+  readonly createExercise: (
+    input: CustomExerciseInput,
+  ) => Promise<Exercise | null>;
 }
 
 /**

@@ -38,9 +38,9 @@ export function FoodEditorScreen({ id }: { readonly id: string | null }) {
   if (state.status === "missing") {
     return (
       <Notice title="Este alimento não pode ser editado.">
-        Ou ele foi excluído, ou é um item do banco original — esses são
-        curados e ficam iguais para todo mundo. Crie o seu com os valores que
-        você quiser.
+        Ou ele foi excluído, ou é um item do banco original — esses são curados
+        e ficam iguais para todo mundo. Crie o seu com os valores que você
+        quiser.
       </Notice>
     );
   }

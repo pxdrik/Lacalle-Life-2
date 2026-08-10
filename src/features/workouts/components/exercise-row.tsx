@@ -24,8 +24,12 @@ export function ExerciseRow({
   onSelect,
   onOpenDetail,
 }: Props) {
-  const muscles = exercise.primaryMuscles.map((m) => MUSCLE_LABELS[m]).join(" · ");
-  const equipment = exercise.equipment.map((e) => EQUIPMENT_LABELS[e]).join(" · ");
+  const muscles = exercise.primaryMuscles
+    .map((m) => MUSCLE_LABELS[m])
+    .join(" · ");
+  const equipment = exercise.equipment
+    .map((e) => EQUIPMENT_LABELS[e])
+    .join(" · ");
 
   return (
     <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">

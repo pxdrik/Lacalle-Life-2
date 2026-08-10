@@ -19,21 +19,23 @@ const MIGRATIONS: readonly Migration[] = [
 
 let counter = 0;
 
-const ADAPTERS: readonly { name: string; create: () => Promise<Store<Diet>> }[] =
-  [
-    {
-      name: "memory",
-      create: () => Promise.resolve(new MemoryStore<Diet>(DIETS_STORE)),
+const ADAPTERS: readonly {
+  name: string;
+  create: () => Promise<Store<Diet>>;
+}[] = [
+  {
+    name: "memory",
+    create: () => Promise.resolve(new MemoryStore<Diet>(DIETS_STORE)),
+  },
+  {
+    name: "indexeddb",
+    create: async () => {
+      counter += 1;
+      const db = await openDatabase(`diets-repo-${counter}`, MIGRATIONS);
+      return new IndexedDbStore<Diet>(db, DIETS_STORE.name);
     },
-    {
-      name: "indexeddb",
-      create: async () => {
-        counter += 1;
-        const db = await openDatabase(`diets-repo-${counter}`, MIGRATIONS);
-        return new IndexedDbStore<Diet>(db, DIETS_STORE.name);
-      },
-    },
-  ];
+  },
+];
 
 const at = (diet: Diet, updatedAt: number): Diet => ({ ...diet, updatedAt });
 
@@ -77,7 +79,10 @@ describe.each(ADAPTERS)("LocalDietRepository — $name", ({ create }) => {
 
     // One document in, one document out — the aggregate cannot come back
     // half-assembled.
-    expect(stored?.meals[0]?.items[0]).toMatchObject({ name: "Ovo", grams: 50 });
+    expect(stored?.meals[0]?.items[0]).toMatchObject({
+      name: "Ovo",
+      grams: 50,
+    });
   });
 
   it("lists the most recently edited first", async () => {

@@ -101,7 +101,9 @@ describe("timeout", () => {
       vi.advanceTimersByTime(5000);
     });
 
-    expect(screen.getByRole("button", { name: "Excluir Treino A" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Excluir Treino A" }),
+    ).toBeInTheDocument();
 
     await user.click(trigger());
     expect(onConfirm).not.toHaveBeenCalled();

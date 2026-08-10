@@ -25,7 +25,11 @@ const css = readFileSync(
 type Rgb = readonly [number, number, number];
 
 /** OKLCH → linear sRGB, per the OKLab specification. */
-function oklchToLinearSrgb(lightness: number, chroma: number, hue: number): Rgb {
+function oklchToLinearSrgb(
+  lightness: number,
+  chroma: number,
+  hue: number,
+): Rgb {
   const radians = (hue * Math.PI) / 180;
   const a = chroma * Math.cos(radians);
   const b = chroma * Math.sin(radians);
@@ -92,6 +96,8 @@ const PAIRS = [
   ["accent-ink", "accent", 4.5, "primary button label"],
   ["accent-text", "canvas", 4.5, "the emerald used as text on the page"],
   ["accent-text", "surface", 4.5, "the emerald used as text on a card"],
+  // The page header's icon chip: a saturated glyph on the recessed surface.
+  ["accent-text", "muted", 4.5, "the emerald on a chip"],
   ["accent", "canvas", 3, "the emerald as a chart line or filled control"],
   ["danger-ink", "danger", 4.5, "destructive button label"],
   // Both are used as text beside their icon, not only as a tint behind one,

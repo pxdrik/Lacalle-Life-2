@@ -156,7 +156,9 @@ export function personalRecords(
     }
   }
 
-  return [...records.values()].sort((a, b) => b.bestOneRepMax - a.bestOneRepMax);
+  return [...records.values()].sort(
+    (a, b) => b.bestOneRepMax - a.bestOneRepMax,
+  );
 }
 
 export interface VolumePoint {
@@ -209,7 +211,10 @@ export function volumeByPeriod(
   bucketOf: (timestamp: number) => number,
   now = Date.now(),
 ): readonly VolumePoint[] {
-  const buckets = new Map<number, { volumeKg: number; sets: number; sessions: number }>();
+  const buckets = new Map<
+    number,
+    { volumeKg: number; sets: number; sessions: number }
+  >();
 
   // Seed every period so gaps survive into the output.
   let cursor = bucketOf(now);

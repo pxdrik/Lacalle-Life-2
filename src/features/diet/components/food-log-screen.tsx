@@ -42,7 +42,8 @@ import { MealCard } from "./meal-card";
 /** Shifts a `YYYY-MM-DD` day by whole days, without dragging a clock along. */
 function shiftDay(day: string, offset: number): string {
   const [year, month, date] = day.split("-").map(Number);
-  if (year === undefined || month === undefined || date === undefined) return day;
+  if (year === undefined || month === undefined || date === undefined)
+    return day;
 
   return dayKey(new Date(year, month - 1, date + offset));
 }
@@ -182,7 +183,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             <SortableList
               ids={state.log.meals.map((meal) => meal.id)}
               describe={(id) =>
-                state.log.meals.find((meal) => meal.id === id)?.name ?? "refeição"
+                state.log.meals.find((meal) => meal.id === id)?.name ??
+                "refeição"
               }
               onReorder={(activeId, overId) => {
                 apply((current) => reorderMeals(current, activeId, overId));
@@ -198,7 +200,9 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         total={state.log.meals.length}
                         dragHandle={dragHandle}
                         onChange={(changes) => {
-                          apply((current) => updateMeal(current, meal.id, changes));
+                          apply((current) =>
+                            updateMeal(current, meal.id, changes),
+                          );
                         }}
                         onRemove={() => {
                           apply((current) => removeMeal(current, meal.id));
@@ -207,7 +211,9 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                           apply((current) => duplicateMeal(current, meal.id));
                         }}
                         onMove={(offset) => {
-                          apply((current) => moveMeal(current, meal.id, offset));
+                          apply((current) =>
+                            moveMeal(current, meal.id, offset),
+                          );
                         }}
                         otherMeals={state.log.meals
                           .filter((other) => other.id !== meal.id)
@@ -215,13 +221,28 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         onSendItem={(itemId, targetMealId, mode) => {
                           apply((current) =>
                             mode === "copy"
-                              ? copyItemToMeal(current, meal.id, itemId, targetMealId)
-                              : moveItemToMeal(current, meal.id, itemId, targetMealId),
+                              ? copyItemToMeal(
+                                  current,
+                                  meal.id,
+                                  itemId,
+                                  targetMealId,
+                                )
+                              : moveItemToMeal(
+                                  current,
+                                  meal.id,
+                                  itemId,
+                                  targetMealId,
+                                ),
                           );
                         }}
                         onReorderItems={(activeId, overId) => {
                           apply((current) =>
-                            reorderMealItems(current, meal.id, activeId, overId),
+                            reorderMealItems(
+                              current,
+                              meal.id,
+                              activeId,
+                              overId,
+                            ),
                           );
                         }}
                         onAddFood={(food: Food) => {
@@ -244,7 +265,9 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                           );
                         }}
                         onRemoveItem={(itemId) => {
-                          apply((current) => removeItem(current, meal.id, itemId));
+                          apply((current) =>
+                            removeItem(current, meal.id, itemId),
+                          );
                         }}
                       />
                     )}

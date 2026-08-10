@@ -21,7 +21,9 @@ export class IndexedDbStore<T extends Entity> implements Store<T> {
   }
 
   get(id: EntityId): Promise<T | undefined> {
-    return run(async () => (await this.#db.get(this.#name, id)) as T | undefined);
+    return run(
+      async () => (await this.#db.get(this.#name, id)) as T | undefined,
+    );
   }
 
   getAll(): Promise<T[]> {

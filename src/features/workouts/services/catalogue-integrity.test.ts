@@ -22,7 +22,9 @@ import {
  * makes that silence mean something.
  */
 
-const entry = (overrides: Partial<CatalogueEntry> & { id: string }): CatalogueEntry =>
+const entry = (
+  overrides: Partial<CatalogueEntry> & { id: string },
+): CatalogueEntry =>
   ({
     name: `Exercício ${overrides.id}`,
     primaryMuscles: ["chest"],
@@ -66,7 +68,10 @@ describe("findMisplaced", () => {
 
   it("places by the first primary muscle, since order means dominance", () => {
     // Pullover is lats first, chest second — it belongs with backs.
-    const pullover = entry({ id: "pullover", primaryMuscles: ["lats", "chest"] });
+    const pullover = entry({
+      id: "pullover",
+      primaryMuscles: ["lats", "chest"],
+    });
 
     expect(findMisplaced([pullover], "costas")).toEqual([]);
     expect(findMisplaced([pullover], "peito")).toHaveLength(1);
@@ -98,7 +103,10 @@ describe("findStrayCardio", () => {
 
 describe("aliases", () => {
   it("catches an alias pointing at no exercise", () => {
-    const orphans = findOrphanAliases({ "nao-existe": ["X"] }, new Set(["existe"]));
+    const orphans = findOrphanAliases(
+      { "nao-existe": ["X"] },
+      new Set(["existe"]),
+    );
 
     expect(orphans).toEqual(["nao-existe"]);
   });

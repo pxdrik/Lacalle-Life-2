@@ -31,7 +31,9 @@ const parsed = CATALOGUE.map((entry) => ({
   result: catalogueEntrySchema.safeParse(entry),
 }));
 
-const valid = parsed.flatMap(({ result }) => (result.success ? [result.data] : []));
+const valid = parsed.flatMap(({ result }) =>
+  result.success ? [result.data] : [],
+);
 
 const regionEntries = (region: Region): CatalogueEntry[] =>
   (CATALOGUE_BY_REGION[region] as unknown[]).flatMap((entry) => {
@@ -92,7 +94,9 @@ describe("aliases", () => {
   const table = aliases as AliasTable;
 
   it("only references exercises that exist", () => {
-    expect(findOrphanAliases(table, new Set(valid.map((e) => e.id)))).toEqual([]);
+    expect(findOrphanAliases(table, new Set(valid.map((e) => e.id)))).toEqual(
+      [],
+    );
   });
 
   it("has no alias claimed by two exercises", () => {

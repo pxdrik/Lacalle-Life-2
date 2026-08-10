@@ -119,8 +119,11 @@ function readIndexKey(record: object, keyPath: string): IndexKey | undefined {
 }
 
 function matchesQuery(key: IndexKey, query: IndexQuery): boolean {
-  if (query.equals !== undefined) return compareIndexKeys(key, query.equals) === 0;
-  if (query.from !== undefined && compareIndexKeys(key, query.from) < 0) return false;
-  if (query.to !== undefined && compareIndexKeys(key, query.to) > 0) return false;
+  if (query.equals !== undefined)
+    return compareIndexKeys(key, query.equals) === 0;
+  if (query.from !== undefined && compareIndexKeys(key, query.from) < 0)
+    return false;
+  if (query.to !== undefined && compareIndexKeys(key, query.to) > 0)
+    return false;
   return true;
 }

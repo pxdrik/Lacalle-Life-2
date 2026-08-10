@@ -48,7 +48,9 @@ export function useRestTimer(): RestTimer {
     /** Adds or removes time without restarting — the usual "+15s" mid-rest. */
     adjust: useCallback((seconds: number) => {
       setEndsAt((current) =>
-        current === null ? current : Math.max(Date.now(), current + seconds * 1000),
+        current === null
+          ? current
+          : Math.max(Date.now(), current + seconds * 1000),
       );
       setTotalSeconds((current) =>
         current === null ? current : Math.max(0, current + seconds),

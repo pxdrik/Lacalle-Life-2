@@ -31,7 +31,8 @@ function mount(ui: React.ReactNode = <Trigger />) {
   render(<ToastProvider>{ui}</ToastProvider>);
 }
 
-const act_ = () => userEvent.click(screen.getByRole("button", { name: "agir" }));
+const act_ = () =>
+  userEvent.click(screen.getByRole("button", { name: "agir" }));
 
 describe("showing a confirmation", () => {
   it("says what happened", async () => {

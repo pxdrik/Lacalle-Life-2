@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { ClipboardList } from "lucide-react";
 import { DietDataProvider } from "@/composition/data-providers";
 import { DietList } from "@/features/diet/components/diet-list";
 import { PageHeader } from "@/design-system/components/page-header";
@@ -11,7 +12,11 @@ export const metadata: Metadata = {
 export default function DietsPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
-      <PageHeader title="Dietas" subtitle="Suas refeições e seus totais." />
+      <PageHeader
+        icon={ClipboardList}
+        title="Dietas"
+        subtitle="Suas refeições e seus totais."
+      />
 
       <div className="mt-8">
         <DietDataProvider>

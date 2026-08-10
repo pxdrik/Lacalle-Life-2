@@ -56,7 +56,9 @@ describe("the Mais sheet", () => {
     await userEvent.click(screen.getByRole("button", { name: /Mais/ }));
 
     for (const label of ["Dietas", "Exercícios", "Alimentos", "Perfil"]) {
-      expect(screen.getByRole("link", { name: new RegExp(label) })).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: new RegExp(label) }),
+      ).toBeInTheDocument();
     }
   });
 

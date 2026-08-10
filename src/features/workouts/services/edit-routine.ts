@@ -32,7 +32,10 @@ export function addExercise(
   return revise(routine, { exercises: [...routine.exercises, exercise] });
 }
 
-export function removeExercise(routine: Routine, exerciseId: EntityId): Routine {
+export function removeExercise(
+  routine: Routine,
+  exerciseId: EntityId,
+): Routine {
   return revise(routine, {
     exercises: routine.exercises.filter((item) => item.id !== exerciseId),
   });

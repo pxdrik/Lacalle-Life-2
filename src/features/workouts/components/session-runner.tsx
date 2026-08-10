@@ -77,7 +77,9 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   }
 
   if (state.status === "error") {
-    return <Notice title="Não foi possível abrir o treino.">{state.message}</Notice>;
+    return (
+      <Notice title="Não foi possível abrir o treino.">{state.message}</Notice>
+    );
   }
 
   const { session } = state;
@@ -121,12 +123,20 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         Sair sem finalizar
       </Link>
 
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">{session.name}</h1>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+        {session.name}
+      </h1>
 
       {/* The two numbers worth glancing at mid-set, and nothing else. */}
       <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center gap-6 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
-        <Stat label="Tempo" value={formatDuration(sessionElapsedMs(session, now))} />
-        <Stat label="Séries" value={`${String(progress.completed)}/${String(progress.total)}`} />
+        <Stat
+          label="Tempo"
+          value={formatDuration(sessionElapsedMs(session, now))}
+        />
+        <Stat
+          label="Séries"
+          value={`${String(progress.completed)}/${String(progress.total)}`}
+        />
         <div className="flex-1" />
         {/* Two taps while sets are still open, one when everything is done:
             ending a workout at set 1 of 8 used to be a single accidental tap
@@ -142,7 +152,9 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         <Button
           size="sm"
           variant={allDone ? "primary" : finish.armed ? "danger" : "secondary"}
-          className={finish.armed && !allDone ? "relative overflow-hidden" : undefined}
+          className={
+            finish.armed && !allDone ? "relative overflow-hidden" : undefined
+          }
           aria-label={
             finish.armed && !allDone
               ? `Encerrar assim? ${String(pending)} ${pending === 1 ? "série ainda pendente" : "séries ainda pendentes"}.`
@@ -220,12 +232,17 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
                 // Rest starts on completion and stops on an undo, because an
                 // undo means the set is not over.
                 if (wasCompleted) timer.stop();
-                else if (exercise.restSeconds !== null && exercise.restSeconds > 0) {
+                else if (
+                  exercise.restSeconds !== null &&
+                  exercise.restSeconds > 0
+                ) {
                   timer.start(exercise.restSeconds);
                 }
               }}
               onRemoveSet={(setId) => {
-                apply((current) => removePerformedSet(current, exercise.id, setId));
+                apply((current) =>
+                  removePerformedSet(current, exercise.id, setId),
+                );
               }}
               onAddSet={() => {
                 apply((current) => addPerformedSet(current, exercise.id));
@@ -266,7 +283,13 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   );
 }
 
-function Stat({ label, value }: { readonly label: string; readonly value: string }) {
+function Stat({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: string;
+}) {
   return (
     <div>
       <p className="text-[0.6875rem] tracking-wide text-ink-subtle uppercase">

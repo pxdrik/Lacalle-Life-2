@@ -33,7 +33,8 @@ interface Source {
 export const MEDIA_SOURCES = {
   "free-exercise-db": {
     /** jsDelivr fronts the GitHub repo, so nothing is bundled or re-hosted. */
-    baseUrl: "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises",
+    baseUrl:
+      "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises",
     repository: "free-exercise-db",
     sourceUrl: "https://github.com/yuhonas/free-exercise-db",
     /**
@@ -93,7 +94,11 @@ export function resolveCredit(media: ExerciseMedia): ResolvedCredit | null {
   const credit = media.credit ?? source.credit;
   if (credit === null) return null;
 
-  return { ...credit, repository: source.repository, sourceUrl: source.sourceUrl };
+  return {
+    ...credit,
+    repository: source.repository,
+    sourceUrl: source.sourceUrl,
+  };
 }
 
 /**
@@ -116,5 +121,7 @@ export function creditsFor(
     seen.set(`${credit.author}|${credit.license}|${credit.repository}`, credit);
   }
 
-  return [...seen.values()].sort((a, b) => a.author.localeCompare(b.author, "pt-BR"));
+  return [...seen.values()].sort((a, b) =>
+    a.author.localeCompare(b.author, "pt-BR"),
+  );
 }

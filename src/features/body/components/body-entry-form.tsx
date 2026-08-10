@@ -108,8 +108,8 @@ export function BodyEntryForm({
 
       {replacing && (
         <p className="text-xs text-ink-muted">
-          Já existe um registro em {formatDay(day)}. Salvar substitui o que
-          está lá.
+          Já existe um registro em {formatDay(day)}. Salvar substitui o que está
+          lá.
         </p>
       )}
 

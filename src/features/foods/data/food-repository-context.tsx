@@ -16,7 +16,9 @@ import type { FoodRepository } from "./food-repository";
  * asynchronous and the alternative is a second loading state stacked on top of
  * the one the data hooks already own.
  */
-const FoodRepositoryContext = createContext<Promise<FoodRepository> | null>(null);
+const FoodRepositoryContext = createContext<Promise<FoodRepository> | null>(
+  null,
+);
 
 export function FoodRepositoryProvider({
   repository,

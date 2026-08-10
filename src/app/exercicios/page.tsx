@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Activity } from "lucide-react";
 import { Suspense } from "react";
 
 import { ExerciseDataProvider } from "@/composition/data-providers";
@@ -13,6 +14,7 @@ export default function ExercisesPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
       <PageHeader
+        icon={Activity}
         title="Exercícios"
         subtitle="O catálogo que seus treinos usam."
       />

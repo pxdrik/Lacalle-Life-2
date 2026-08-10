@@ -52,8 +52,10 @@ export function buttonClasses(
   return cn(BASE, VARIANTS[variant], SIZES[size]);
 }
 
-export interface ButtonProps
-  extends Omit<React.ComponentPropsWithRef<"button">, "type"> {
+export interface ButtonProps extends Omit<
+  React.ComponentPropsWithRef<"button">,
+  "type"
+> {
   readonly variant?: ButtonVariant;
   readonly size?: ButtonSize;
   /**

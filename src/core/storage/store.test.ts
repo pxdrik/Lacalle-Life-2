@@ -62,7 +62,10 @@ const ADAPTERS: readonly {
     name: "IndexedDbStore",
     create: async () => {
       databaseCounter += 1;
-      const db = await openDatabase(`conformance-${databaseCounter}`, MIGRATIONS);
+      const db = await openDatabase(
+        `conformance-${databaseCounter}`,
+        MIGRATIONS,
+      );
       return new IndexedDbStore<TestRecord>(db, TEST_STORE.name);
     },
   },

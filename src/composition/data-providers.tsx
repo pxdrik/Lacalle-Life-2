@@ -204,11 +204,15 @@ export function DietDataProvider({
  * The home screen reads across the app and writes nothing.
  *
  * Deliberately narrower than the screens it summarises: it needs today's food
- * log, the profile behind the targets, and the sessions — but not the foods
- * (it adds nothing to a meal), not the diets (it starts no day from one) and
- * not the exercise catalogue (it names sessions, never their exercises).
- * Wiring those in anyway would cost four IndexedDB opens on the first screen
- * of the app for data nothing on it reads.
+ * log, the profile behind the targets, the sessions, and the body log behind
+ * the weight — but not the foods (it adds nothing to a meal), not the diets
+ * (it starts no day from one) and not the exercise catalogue (it names
+ * sessions, never their exercises). Wiring those in anyway would cost three
+ * IndexedDB opens on the first screen of the app for data nothing on it reads.
+ *
+ * The body log joined the list when the screen grew a weight card. It was
+ * excluded here on the grounds that nothing read it, and that stopped being
+ * true — which is the whole point of stating the reason rather than the rule.
  */
 export function HomeDataProvider({
   children,
@@ -219,7 +223,9 @@ export function HomeDataProvider({
     <FoodLogRepositoryProvider repository={foodLogRepository()}>
       <ProfileRepositoryProvider repository={profileRepository()}>
         <WorkoutRepositoryProvider repositories={workoutRepositories()}>
-          {children}
+          <BodyRepositoryProvider repository={bodyRepository()}>
+            {children}
+          </BodyRepositoryProvider>
         </WorkoutRepositoryProvider>
       </ProfileRepositoryProvider>
     </FoodLogRepositoryProvider>

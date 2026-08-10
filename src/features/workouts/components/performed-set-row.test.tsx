@@ -111,12 +111,16 @@ describe("where the steppers appear", () => {
   it("only on the set being done", async () => {
     mount(set(), false);
 
-    expect(screen.queryByRole("button", { name: /^Mais 2,5 kg/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
+    ).not.toBeInTheDocument();
   });
 
   it("not on a set already finished, which nobody is adjusting", async () => {
     mount(set({ isCompleted: true }), true);
 
-    expect(screen.queryByRole("button", { name: /^Mais 2,5 kg/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
+    ).not.toBeInTheDocument();
   });
 });

@@ -31,7 +31,9 @@ export type SessionHistoryState =
  */
 export function useSessionHistory(): SessionHistoryState {
   const repositories = useWorkoutRepositories();
-  const [state, setState] = useState<SessionHistoryState>({ status: "loading" });
+  const [state, setState] = useState<SessionHistoryState>({
+    status: "loading",
+  });
 
   useEffect(() => {
     let active = true;
@@ -47,7 +49,8 @@ export function useSessionHistory(): SessionHistoryState {
           inProgress: sessions.find((session) => session.finishedAt === null),
         });
       } catch (cause) {
-        if (active) setState({ status: "error", message: describeDataError(cause) });
+        if (active)
+          setState({ status: "error", message: describeDataError(cause) });
       }
     }
 

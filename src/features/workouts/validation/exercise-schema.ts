@@ -49,7 +49,9 @@ export const catalogueEntrySchema = z
       !entry.secondaryMuscles?.some((muscle) =>
         entry.primaryMuscles.includes(muscle),
       ),
-    { message: "Um músculo não pode ser primário e secundário ao mesmo tempo." },
+    {
+      message: "Um músculo não pode ser primário e secundário ao mesmo tempo.",
+    },
   )
   .refine(
     (entry) =>

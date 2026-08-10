@@ -69,10 +69,7 @@ export function CustomExerciseForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className={cn(CARD_SURFACE, "space-y-4")}
-    >
+    <form onSubmit={handleSubmit} className={cn(CARD_SURFACE, "space-y-4")}>
       <Field label="Nome do exercício" id="custom-exercise-name" error={error}>
         {({ id, describedBy, invalid }) => (
           <Input
@@ -119,7 +116,11 @@ export function CustomExerciseForm({
       </Optional>
 
       <div className="flex gap-2">
-        <Button type="submit" pending={pending} disabled={name.trim().length < 3}>
+        <Button
+          type="submit"
+          pending={pending}
+          disabled={name.trim().length < 3}
+        >
           Criar e usar
         </Button>
         <Button type="button" variant="ghost" onClick={onCancel}>

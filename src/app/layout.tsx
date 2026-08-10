@@ -38,11 +38,7 @@ export default function RootLayout({
     /* `suppressHydrationWarning` is required, not a workaround: ThemeScript
        intentionally sets `data-theme` on this element before React hydrates,
        so the server markup and the live DOM differ by design. */
-    <html
-      lang="pt-BR"
-      className={GeistSans.variable}
-      suppressHydrationWarning
-    >
+    <html lang="pt-BR" className={GeistSans.variable} suppressHydrationWarning>
       <body>
         <ThemeScript />
         <ThemeProvider>

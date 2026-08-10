@@ -46,10 +46,13 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
         const routine = await (await repositories).routines.getById(routineId);
         if (!active) return;
         setState(
-          routine === undefined ? { status: "missing" } : { status: "ready", routine },
+          routine === undefined
+            ? { status: "missing" }
+            : { status: "ready", routine },
         );
       } catch (cause) {
-        if (active) setState({ status: "error", message: describeDataError(cause) });
+        if (active)
+          setState({ status: "error", message: describeDataError(cause) });
       }
     }
 

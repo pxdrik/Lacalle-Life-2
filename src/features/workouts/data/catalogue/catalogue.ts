@@ -20,14 +20,17 @@ import pernas from "./pernas.json";
  * source of truth for shape, and TypeScript's inference over a JSON import
  * would otherwise widen every enum to `string` anyway.
  */
-export const CATALOGUE_BY_REGION: Readonly<Record<Region, readonly unknown[]>> = {
-  peito,
-  costas,
-  ombros,
-  bracos,
-  pernas,
-  core,
-  cardio,
-};
+export const CATALOGUE_BY_REGION: Readonly<Record<Region, readonly unknown[]>> =
+  {
+    peito,
+    costas,
+    ombros,
+    bracos,
+    pernas,
+    core,
+    cardio,
+  };
 
-export const CATALOGUE = Object.values(CATALOGUE_BY_REGION).flat() as readonly CatalogueEntry[];
+export const CATALOGUE = Object.values(
+  CATALOGUE_BY_REGION,
+).flat() as readonly CatalogueEntry[];

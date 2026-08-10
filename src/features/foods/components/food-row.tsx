@@ -110,5 +110,7 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
 
 /** Whole numbers stay whole; only fractional values spend a decimal place. */
 function format(value: number): string {
-  return Number.isInteger(value) ? formatDecimal(value) : formatDecimal(value, 1);
+  return Number.isInteger(value)
+    ? formatDecimal(value)
+    : formatDecimal(value, 1);
 }

@@ -22,21 +22,23 @@ const MIGRATIONS: readonly Migration[] = [
 
 let counter = 0;
 
-const ADAPTERS: readonly { name: string; create: () => Promise<Store<Food>> }[] =
-  [
-    {
-      name: "memory",
-      create: () => Promise.resolve(new MemoryStore<Food>(FOODS_STORE)),
+const ADAPTERS: readonly {
+  name: string;
+  create: () => Promise<Store<Food>>;
+}[] = [
+  {
+    name: "memory",
+    create: () => Promise.resolve(new MemoryStore<Food>(FOODS_STORE)),
+  },
+  {
+    name: "indexeddb",
+    create: async () => {
+      counter += 1;
+      const db = await openDatabase(`foods-repo-${counter}`, MIGRATIONS);
+      return new IndexedDbStore<Food>(db, FOODS_STORE.name);
     },
-    {
-      name: "indexeddb",
-      create: async () => {
-        counter += 1;
-        const db = await openDatabase(`foods-repo-${counter}`, MIGRATIONS);
-        return new IndexedDbStore<Food>(db, FOODS_STORE.name);
-      },
-    },
-  ];
+  },
+];
 
 function food(name: string, isCustom = false): Food {
   return {

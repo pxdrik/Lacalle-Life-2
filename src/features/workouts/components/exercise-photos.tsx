@@ -89,7 +89,11 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
             src={url}
             // Only the visible frame carries a description; the other is
             // stacked underneath and would otherwise be announced twice.
-            alt={index === phase ? `${exercise.name}: posição ${PHASE_LABELS[index] ?? ""}` : ""}
+            alt={
+              index === phase
+                ? `${exercise.name}: posição ${PHASE_LABELS[index] ?? ""}`
+                : ""
+            }
             aria-hidden={index === phase ? undefined : true}
             fill
             sizes="(min-width: 48rem) 44rem, 100vw"
@@ -104,7 +108,11 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
 
       {urls.length > 1 && (
         <div className="mt-3 flex items-center gap-2">
-          <div className="flex rounded-lg border border-line p-0.5" role="group" aria-label="Fase do movimento">
+          <div
+            className="flex rounded-lg border border-line p-0.5"
+            role="group"
+            aria-label="Fase do movimento"
+          >
             {urls.map((url, index) => (
               <button
                 key={url}

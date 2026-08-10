@@ -15,7 +15,10 @@ interface Props {
     readonly listeners: Record<string, unknown> | undefined;
     readonly isDragging: boolean;
   };
-  readonly otherMeals: readonly { readonly id: string; readonly name: string }[];
+  readonly otherMeals: readonly {
+    readonly id: string;
+    readonly name: string;
+  }[];
   readonly onGramsChange: (grams: number) => void;
   readonly onRemove: () => void;
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;

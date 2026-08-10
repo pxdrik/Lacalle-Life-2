@@ -8,7 +8,9 @@ import type { DietRepository } from "./diet-repository";
  * How this feature receives its repository. The composition root fills it;
  * nothing here imports the composition root back.
  */
-const DietRepositoryContext = createContext<Promise<DietRepository> | null>(null);
+const DietRepositoryContext = createContext<Promise<DietRepository> | null>(
+  null,
+);
 
 export function DietRepositoryProvider({
   repository,

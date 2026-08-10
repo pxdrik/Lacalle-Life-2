@@ -34,7 +34,11 @@ const TABS: readonly { href: Route; label: string; icon: LucideIcon }[] = [
 
 const REST: readonly { href: Route; label: string; hint: string }[] = [
   { href: "/dietas", label: "Dietas", hint: "Seus planos alimentares" },
-  { href: "/exercicios", label: "Exercícios", hint: "Catálogo e personalizados" },
+  {
+    href: "/exercicios",
+    label: "Exercícios",
+    hint: "Catálogo e personalizados",
+  },
   { href: "/alimentos", label: "Alimentos", hint: "Banco de alimentos" },
   { href: "/perfil", label: "Perfil", hint: "Metas e dados" },
 ];
@@ -67,7 +71,8 @@ export function BottomNav() {
         {TABS.map(({ href, label, icon: Icon }) => {
           // The home route is a prefix of every other one, so it is the single
           // case that has to match exactly.
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          const active =
+            href === "/" ? pathname === "/" : pathname.startsWith(href);
 
           return (
             <Link

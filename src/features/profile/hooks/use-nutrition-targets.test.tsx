@@ -12,7 +12,11 @@ import { useNutritionTargets } from "./use-nutrition-targets";
 function Probe() {
   const targets = useNutritionTargets();
 
-  return <span data-testid="targets">{targets === null ? "none" : targets.kcal}</span>;
+  return (
+    <span data-testid="targets">
+      {targets === null ? "none" : targets.kcal}
+    </span>
+  );
 }
 
 const profile = (nutrition: Profile["nutrition"]): Profile => ({

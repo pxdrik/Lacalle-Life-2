@@ -76,7 +76,9 @@ function mount(log: FoodLog | null, profile: Profile | null) {
   const logs = new LocalFoodLogRepository(
     new MemoryStore<FoodLog>(FOOD_LOGS_STORE),
   );
-  const profiles = new LocalProfileRepository(new MemoryStore<Profile>(PROFILE_STORE));
+  const profiles = new LocalProfileRepository(
+    new MemoryStore<Profile>(PROFILE_STORE),
+  );
 
   const ready = Promise.all([
     log === null ? Promise.resolve() : logs.save(log),
@@ -98,7 +100,9 @@ describe("without a profile", () => {
 
     expect(await screen.findByText("600")).toBeInTheDocument();
     expect(screen.getByText(/Sem meta para comparar/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Preencha o perfil" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Preencha o perfil" }),
+    ).toBeInTheDocument();
   });
 
   it("shows no calorie ring, because there is nothing to be a fraction of", async () => {
@@ -129,6 +133,8 @@ describe("with nothing recorded yet", () => {
   it("invites a first entry instead of showing an empty card", async () => {
     mount(null, null);
 
-    expect(await screen.findByRole("link", { name: "Registrar" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("link", { name: "Registrar" }),
+    ).toBeInTheDocument();
   });
 });

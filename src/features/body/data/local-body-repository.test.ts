@@ -42,7 +42,12 @@ describe("LocalBodyRepository", () => {
   });
 
   it("reads a range inclusively at both ends", async () => {
-    for (const day of ["2026-07-30", "2026-08-01", "2026-08-15", "2026-09-01"]) {
+    for (const day of [
+      "2026-07-30",
+      "2026-08-01",
+      "2026-08-15",
+      "2026-09-01",
+    ]) {
       await repository.save(entry(day));
     }
 

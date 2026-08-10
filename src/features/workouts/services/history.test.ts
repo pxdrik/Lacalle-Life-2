@@ -67,16 +67,17 @@ const AGACHAMENTO = "agachamento-livre-barra";
 describe("finishedSessions", () => {
   it("excludes a workout still in progress", () => {
     // One in progress is not a fact yet.
-    const sessions = [
-      session(1_000, [], true),
-      session(2_000, [], false),
-    ];
+    const sessions = [session(1_000, [], true), session(2_000, [], false)];
 
     expect(finishedSessions(sessions).map((s) => s.startedAt)).toEqual([1_000]);
   });
 
   it("orders most recent first", () => {
-    const sessions = [session(1_000, []), session(3_000, []), session(2_000, [])];
+    const sessions = [
+      session(1_000, []),
+      session(3_000, []),
+      session(2_000, []),
+    ];
 
     expect(finishedSessions(sessions).map((s) => s.startedAt)).toEqual([
       3_000, 2_000, 1_000,
@@ -106,18 +107,28 @@ describe("lastPerformance", () => {
       session(30 * DAY, [exercise(SUPINO, "Supino", [set(8, 80, false)])]),
     ];
 
-    expect(lastPerformance(withAbandoned, SUPINO)?.sets[0]?.weightKg).toBe(57.5);
+    expect(lastPerformance(withAbandoned, SUPINO)?.sets[0]?.weightKg).toBe(
+      57.5,
+    );
   });
 
   it("ignores the workout in progress, so it cannot answer about itself", () => {
-    const current = session(40 * DAY, [exercise(SUPINO, "Supino", [set(8, 65)])]);
+    const current = session(40 * DAY, [
+      exercise(SUPINO, "Supino", [set(8, 65)]),
+    ]);
 
-    expect(lastPerformance([...history, current], SUPINO, current.id)?.sets[0]?.weightKg)
-      .toBe(57.5);
+    expect(
+      lastPerformance([...history, current], SUPINO, current.id)?.sets[0]
+        ?.weightKg,
+    ).toBe(57.5);
   });
 
   it("looks up a whole workout in one pass", () => {
-    const found = lastPerformanceByExercise(history, [SUPINO, AGACHAMENTO, "outro"]);
+    const found = lastPerformanceByExercise(history, [
+      SUPINO,
+      AGACHAMENTO,
+      "outro",
+    ]);
 
     expect(found.size).toBe(2);
     expect(found.get(AGACHAMENTO)?.sets[0]?.weightKg).toBe(100);
@@ -175,7 +186,9 @@ describe("personalRecords", () => {
 
   it("ignores sets that were not completed", () => {
     const history = [
-      session(1 * DAY, [exercise(SUPINO, "Supino", [set(8, 60), set(1, 200, false)])]),
+      session(1 * DAY, [
+        exercise(SUPINO, "Supino", [set(8, 60), set(1, 200, false)]),
+      ]),
     ];
 
     expect(personalRecords(history)[0]?.heaviestKg).toBe(60);

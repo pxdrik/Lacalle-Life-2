@@ -153,7 +153,9 @@ function CalorieRing({
           strokeWidth="10"
           strokeLinecap="round"
           strokeDasharray={CIRCUMFERENCE}
-          strokeDashoffset={CIRCUMFERENCE * (1 - Math.min(Math.max(ratio, 0), 1))}
+          strokeDashoffset={
+            CIRCUMFERENCE * (1 - Math.min(Math.max(ratio, 0), 1))
+          }
           className={cn(
             "transition-[stroke-dashoffset] duration-500 ease-out",
             over ? "stroke-danger" : "stroke-accent",

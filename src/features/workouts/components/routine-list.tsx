@@ -39,7 +39,10 @@ export function RoutineList() {
           this screen, and until now it was unreachable. */}
       <InProgressBanner />
 
-      <form onSubmit={(event) => void handleCreate(event)} className="flex gap-2">
+      <form
+        onSubmit={(event) => void handleCreate(event)}
+        className="flex gap-2"
+      >
         <Input
           value={name}
           onChange={(event) => {
@@ -49,7 +52,12 @@ export function RoutineList() {
           aria-label="Nome do novo treino"
           autoComplete="off"
         />
-        <Button type="submit" size="lg" pending={creating} disabled={name.trim() === ""}>
+        <Button
+          type="submit"
+          size="lg"
+          pending={creating}
+          disabled={name.trim() === ""}
+        >
           <Plus aria-hidden className="size-4" />
           Criar
         </Button>
@@ -114,7 +122,10 @@ function RoutineRow({
 
   return (
     <li className="group relative rounded-xl border border-line bg-surface transition-colors duration-150 ease-out hover:border-line-strong">
-      <Link href={`/treinos/${routine.id}`} className="flex items-center gap-4 p-4">
+      <Link
+        href={`/treinos/${routine.id}`}
+        className="flex items-center gap-4 p-4"
+      >
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">
             {routine.name === "" ? "Treino sem nome" : routine.name}

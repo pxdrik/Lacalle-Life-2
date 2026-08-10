@@ -84,7 +84,8 @@ export function findAmbiguousAliases(table: AliasTable): string[] {
       const key = normalizeName(alias);
       const existing = owner.get(key);
 
-      if (existing !== undefined) clashes.push(`"${alias}": ${existing} e ${id}`);
+      if (existing !== undefined)
+        clashes.push(`"${alias}": ${existing} e ${id}`);
       else owner.set(key, id);
     }
   }

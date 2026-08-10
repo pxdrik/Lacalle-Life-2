@@ -67,7 +67,8 @@ export function useFoodEditor(id: EntityId | null): FoodEditor {
             : { status: "ready", food },
         );
       } catch (cause) {
-        if (active) setState({ status: "error", message: describeDataError(cause) });
+        if (active)
+          setState({ status: "error", message: describeDataError(cause) });
       }
     }
 
@@ -86,7 +87,9 @@ export function useFoodEditor(id: EntityId | null): FoodEditor {
       try {
         const existing = state.status === "ready" ? state.food : null;
 
-        await (await repository).save(
+        await (
+          await repository
+        ).save(
           existing === null
             ? createCustomFood(input)
             : updateCustomFood(existing, input),

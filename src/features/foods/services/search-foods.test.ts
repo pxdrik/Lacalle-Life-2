@@ -98,13 +98,19 @@ describe("searchFoods", () => {
     });
 
     it("combines with the text query", () => {
-      const found = searchFoods(CATALOGUE, query({ text: "a", category: "fruit" }));
+      const found = searchFoods(
+        CATALOGUE,
+        query({ text: "a", category: "fruit" }),
+      );
 
       expect(names(found)).toEqual(["Abacate"]);
     });
 
     it("returns nothing when the category has no match for the text", () => {
-      const found = searchFoods(CATALOGUE, query({ text: "frango", category: "carb" }));
+      const found = searchFoods(
+        CATALOGUE,
+        query({ text: "frango", category: "carb" }),
+      );
 
       expect(found).toEqual([]);
     });

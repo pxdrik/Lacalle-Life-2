@@ -125,7 +125,9 @@ describe("stale references", () => {
     const { diet, mealId } = dietWithFood();
 
     expect(removeItem(diet, mealId, "gone").meals[0]?.items).toHaveLength(1);
-    expect(setItemGrams(diet, mealId, "gone", 500).meals[0]?.items[0]?.grams).toBe(150);
+    expect(
+      setItemGrams(diet, mealId, "gone", 500).meals[0]?.items[0]?.grams,
+    ).toBe(150);
   });
 });
 

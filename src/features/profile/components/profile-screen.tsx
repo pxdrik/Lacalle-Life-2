@@ -70,10 +70,12 @@ export function ProfileScreen() {
               pending={saving}
               onApply={(weightKg) => {
                 setSaving(true);
-                void save({ ...state.profile.nutrition, weightKg }).then((ok) => {
-                  setSaving(false);
-                  if (ok) toast("Peso atualizado e metas recalculadas.");
-                });
+                void save({ ...state.profile.nutrition, weightKg }).then(
+                  (ok) => {
+                    setSaving(false);
+                    if (ok) toast("Peso atualizado e metas recalculadas.");
+                  },
+                );
               }}
             />
           )}

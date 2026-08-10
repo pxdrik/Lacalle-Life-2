@@ -120,9 +120,9 @@ describe("refreshExerciseMedia", () => {
 
     await refreshExerciseMedia(repository);
 
-    expect(repository.rows.get(MAPPED_ID)?.media?.images.length).toBeGreaterThan(
-      0,
-    );
+    expect(
+      repository.rows.get(MAPPED_ID)?.media?.images.length,
+    ).toBeGreaterThan(0);
   });
 
   it("writes an explicit null onto old rows that get no illustration", async () => {

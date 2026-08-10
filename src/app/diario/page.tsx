@@ -1,5 +1,6 @@
 "use client";
 
+import { NotebookPen } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -20,6 +21,7 @@ export default function DiaryPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
       <PageHeader
+        icon={NotebookPen}
         title="Diário"
         subtitle="O que você comeu, dia a dia. A dieta é o plano; isto é o que aconteceu."
       />

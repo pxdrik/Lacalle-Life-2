@@ -6,7 +6,11 @@
  */
 
 /** Moves the item at `from` to `to`, without mutating the input. */
-export function moveItem<T>(items: readonly T[], from: number, to: number): T[] {
+export function moveItem<T>(
+  items: readonly T[],
+  from: number,
+  to: number,
+): T[] {
   const next = [...items];
   const [moved] = next.splice(from, 1);
 

@@ -31,7 +31,8 @@ export function dayKey(date: Date): string {
 /** `2026-08-07` → `07/08/2026`. Returns anything unparseable unchanged. */
 export function formatDay(day: string): string {
   const [year, month, date] = day.split("-");
-  if (year === undefined || month === undefined || date === undefined) return day;
+  if (year === undefined || month === undefined || date === undefined)
+    return day;
 
   return `${date}/${month}/${year}`;
 }
@@ -46,7 +47,8 @@ export function formatDay(day: string): string {
  */
 export function formatLongDay(day: string): string {
   const [year, month, date] = day.split("-").map(Number);
-  if (year === undefined || month === undefined || date === undefined) return day;
+  if (year === undefined || month === undefined || date === undefined)
+    return day;
 
   const parsed = new Date(year, month - 1, date);
 

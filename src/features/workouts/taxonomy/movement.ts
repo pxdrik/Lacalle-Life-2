@@ -20,7 +20,9 @@ export const MOVEMENT_PATTERNS = [
 
 export type MovementPattern = (typeof MOVEMENT_PATTERNS)[number];
 
-export const MOVEMENT_PATTERN_LABELS: Readonly<Record<MovementPattern, string>> = {
+export const MOVEMENT_PATTERN_LABELS: Readonly<
+  Record<MovementPattern, string>
+> = {
   "horizontal-push": "Empurrar horizontal",
   "vertical-push": "Empurrar vertical",
   "horizontal-pull": "Puxar horizontal",

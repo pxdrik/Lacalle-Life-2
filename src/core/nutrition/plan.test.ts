@@ -72,10 +72,9 @@ describe("computeTdee", () => {
   it("applies the activity multiplier", () => {
     const bmr = computeBmr(BASE);
 
-    expect(computeTdee(profile({ activityLevel: "sedentary" }), bmr)).toBeCloseTo(
-      bmr * 1.2,
-      1,
-    );
+    expect(
+      computeTdee(profile({ activityLevel: "sedentary" }), bmr),
+    ).toBeCloseTo(bmr * 1.2, 1);
     expect(computeTdee(profile({ activityLevel: "athlete" }), bmr)).toBeCloseTo(
       bmr * 1.9,
       1,
@@ -108,7 +107,9 @@ describe("energy target", () => {
     // Targets are whole kilocalories, so the realised ratio can sit up to
     // 1 kcal past the exact cap. Allow for that, nothing more.
     const slack = 1 / p.tdeeKcal;
-    expect(Math.abs(p.energyBalanceKcal) / p.tdeeKcal).toBeLessThanOrEqual(0.25 + slack);
+    expect(Math.abs(p.energyBalanceKcal) / p.tdeeKcal).toBeLessThanOrEqual(
+      0.25 + slack,
+    );
     expect(p.energyBalanceKcal).toBeLessThan(0);
   });
 
@@ -169,15 +170,17 @@ describe("safety floors", () => {
     ];
 
     for (const input of cases) {
-      expect(plan(input).targets.carbsG).toBeGreaterThanOrEqual(CARB_G_ABSOLUTE_MIN);
+      expect(plan(input).targets.carbsG).toBeGreaterThanOrEqual(
+        CARB_G_ABSOLUTE_MIN,
+      );
     }
   });
 
   it("holds protein under the absolute safe ceiling at every weight", () => {
     for (const weightKg of [45, 60, 80, 120, 150, 180]) {
-      expect(plan(profile({ weightKg, goal: "cut" })).targets.proteinG).toBeLessThanOrEqual(
-        weightKg * PROTEIN_G_PER_KG.absoluteMax,
-      );
+      expect(
+        plan(profile({ weightKg, goal: "cut" })).targets.proteinG,
+      ).toBeLessThanOrEqual(weightKg * PROTEIN_G_PER_KG.absoluteMax);
     }
   });
 
@@ -241,9 +244,9 @@ describe("input validation", () => {
     ["peso implausível", { weightKg: 500 }],
     ["percentual de gordura impossível", { bodyFatPercent: 90 }],
   ])("rejects %s", (_label, override) => {
-    expect(nutritionProfileSchema.safeParse({ ...BASE, ...override }).success).toBe(
-      false,
-    );
+    expect(
+      nutritionProfileSchema.safeParse({ ...BASE, ...override }).success,
+    ).toBe(false);
   });
 
   it.each([
@@ -251,9 +254,9 @@ describe("input validation", () => {
     ["nível de atividade", { activityLevel: "extreme" }],
     ["sexo", { sex: "other" }],
   ])("rejects an unknown %s", (_label, override) => {
-    expect(nutritionProfileSchema.safeParse({ ...BASE, ...override }).success).toBe(
-      false,
-    );
+    expect(
+      nutritionProfileSchema.safeParse({ ...BASE, ...override }).success,
+    ).toBe(false);
   });
 
   it("accepts a valid profile", () => {

@@ -84,7 +84,9 @@ describe("when the profile has drifted", () => {
     // one bad morning on the scale move somebody's calories unasked.
     const onApply = mount([entry("2026-08-07", 80.4)]);
 
-    await userEvent.click(await screen.findByRole("button", { name: "Usar 80,4 kg" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Usar 80,4 kg" }),
+    );
 
     expect(onApply).toHaveBeenCalledWith(80.4);
   });
@@ -92,7 +94,9 @@ describe("when the profile has drifted", () => {
   it("reads the most recent weigh-in, not the last one stored", async () => {
     mount([entry("2026-08-07", 80.4), entry("2026-07-01", 90)]);
 
-    expect(await screen.findByRole("button", { name: "Usar 80,4 kg" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Usar 80,4 kg" }),
+    ).toBeInTheDocument();
   });
 
   it("works upwards too", async () => {

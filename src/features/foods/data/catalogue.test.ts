@@ -31,9 +31,14 @@ describe("catalogue.json", () => {
 
   it("matches the schema on every entry", () => {
     const failures = catalogue
-      .map((entry) => ({ entry, result: catalogueEntrySchema.safeParse(entry) }))
+      .map((entry) => ({
+        entry,
+        result: catalogueEntrySchema.safeParse(entry),
+      }))
       .filter(({ result }) => !result.success)
-      .map(({ entry, result }) => `${entry.name}: ${result.error?.message ?? ""}`);
+      .map(
+        ({ entry, result }) => `${entry.name}: ${result.error?.message ?? ""}`,
+      );
 
     expect(failures).toEqual([]);
   });

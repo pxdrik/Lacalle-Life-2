@@ -48,7 +48,9 @@ describe("ExercisePhotos", () => {
     stubMotionPreference(false);
     render(<ExercisePhotos exercise={exercise([])} />);
 
-    expect(screen.getByText("Sem foto para este exercício.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Sem foto para este exercício."),
+    ).toBeInTheDocument();
   });
 
   it("offers no play control with nothing to animate", () => {
@@ -70,7 +72,9 @@ describe("ExercisePhotos", () => {
     stubMotionPreference(false);
     render(<ExercisePhotos exercise={exercise(["a/0.jpg"])} />);
 
-    expect(screen.queryByRole("button", { name: "Início" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Início" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /animar/i }),
     ).not.toBeInTheDocument();
@@ -82,11 +86,15 @@ describe("ExercisePhotos", () => {
     render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
 
     // Starts playing, so the control offers to pause.
-    expect(screen.getByRole("button", { name: "Pausar animação" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Pausar animação" }),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Fim" }));
 
-    expect(screen.getByRole("button", { name: "Animar movimento" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Animar movimento" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Fim" })).toHaveAttribute(
       "aria-pressed",
       "true",

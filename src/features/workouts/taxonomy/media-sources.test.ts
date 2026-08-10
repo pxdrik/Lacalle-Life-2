@@ -22,7 +22,9 @@ const anyMedia = (over: Partial<ExerciseMedia> = {}): ExerciseMedia => ({
 describe("mediaUrl", () => {
   it("joins the source's base url to the stored path", () => {
     expect(
-      mediaUrl(anyMedia({ images: ["Barbell_Bench_Press_-_Medium_Grip/0.jpg"] })),
+      mediaUrl(
+        anyMedia({ images: ["Barbell_Bench_Press_-_Medium_Grip/0.jpg"] }),
+      ),
     ).toBe(
       "https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/Barbell_Bench_Press_-_Medium_Grip/0.jpg",
     );
@@ -30,7 +32,11 @@ describe("mediaUrl", () => {
 
   it("uses each source's own base url", () => {
     expect(
-      mediaUrl({ source: "wger", images: ["exercise-images/1/a.png"], credit: null }),
+      mediaUrl({
+        source: "wger",
+        images: ["exercise-images/1/a.png"],
+        credit: null,
+      }),
     ).toBe("https://wger.de/media/exercise-images/1/a.png");
   });
 
@@ -64,7 +70,11 @@ describe("resolveCredit", () => {
     // wger has no source-level credit, so a photo without its own would be
     // unattributable — the build script refuses to emit one.
     expect(
-      resolveCredit({ source: "wger", images: ["exercise-images/1/a.png"], credit: null }),
+      resolveCredit({
+        source: "wger",
+        images: ["exercise-images/1/a.png"],
+        credit: null,
+      }),
     ).toBeNull();
   });
 });

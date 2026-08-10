@@ -55,11 +55,16 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   }
 
   if (state.status === "error") {
-    return <Notice title="Não foi possível abrir o treino.">{state.message}</Notice>;
+    return (
+      <Notice title="Não foi possível abrir o treino.">{state.message}</Notice>
+    );
   }
 
   const { routine } = state;
-  const totalSets = routine.exercises.reduce((sum, e) => sum + e.sets.length, 0);
+  const totalSets = routine.exercises.reduce(
+    (sum, e) => sum + e.sets.length,
+    0,
+  );
 
   return (
     <div>
@@ -130,35 +135,43 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           {routine.exercises.map((exercise, index) => (
             <SortableItem key={exercise.id} id={exercise.id}>
               {(dragHandle) => (
-          <RoutineExerciseCard
-            exercise={exercise}
-            catalogue={catalogue.get(exercise.exerciseId)}
-            onOpenDetail={detail.show}
-            position={index}
-            total={routine.exercises.length}
-            dragHandle={dragHandle}
-            onChange={(changes) => {
-              apply((current) => updateExercise(current, exercise.id, changes));
-            }}
-            onRemove={() => {
-              apply((current) => removeExercise(current, exercise.id));
-            }}
-            onDuplicate={() => {
-              apply((current) => duplicateRoutineExercise(current, exercise.id));
-            }}
-            onMove={(offset) => {
-              apply((current) => moveExercise(current, exercise.id, offset));
-            }}
-            onAddSet={() => {
-              apply((current) => addSet(current, exercise.id));
-            }}
-            onRemoveSet={(setId) => {
-              apply((current) => removeSet(current, exercise.id, setId));
-            }}
-            onSetChange={(setId, changes) => {
-              apply((current) => updateSet(current, exercise.id, setId, changes));
-            }}
-          />
+                <RoutineExerciseCard
+                  exercise={exercise}
+                  catalogue={catalogue.get(exercise.exerciseId)}
+                  onOpenDetail={detail.show}
+                  position={index}
+                  total={routine.exercises.length}
+                  dragHandle={dragHandle}
+                  onChange={(changes) => {
+                    apply((current) =>
+                      updateExercise(current, exercise.id, changes),
+                    );
+                  }}
+                  onRemove={() => {
+                    apply((current) => removeExercise(current, exercise.id));
+                  }}
+                  onDuplicate={() => {
+                    apply((current) =>
+                      duplicateRoutineExercise(current, exercise.id),
+                    );
+                  }}
+                  onMove={(offset) => {
+                    apply((current) =>
+                      moveExercise(current, exercise.id, offset),
+                    );
+                  }}
+                  onAddSet={() => {
+                    apply((current) => addSet(current, exercise.id));
+                  }}
+                  onRemoveSet={(setId) => {
+                    apply((current) => removeSet(current, exercise.id, setId));
+                  }}
+                  onSetChange={(setId, changes) => {
+                    apply((current) =>
+                      updateSet(current, exercise.id, setId, changes),
+                    );
+                  }}
+                />
               )}
             </SortableItem>
           ))}
@@ -169,7 +182,9 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         {picking ? (
           <div className="rounded-xl border border-line bg-canvas p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink">Adicionar exercício</h2>
+              <h2 className="text-sm font-medium text-ink">
+                Adicionar exercício
+              </h2>
               <button
                 type="button"
                 onClick={() => {

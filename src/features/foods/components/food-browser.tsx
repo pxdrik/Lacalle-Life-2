@@ -75,7 +75,11 @@ export function FoodBrowser() {
         <>
           {/* Announced rather than only shown, so a screen-reader user knows
               the list changed as they type. */}
-          <p className="text-sm text-ink-subtle" role="status" aria-live="polite">
+          <p
+            className="text-sm text-ink-subtle"
+            role="status"
+            aria-live="polite"
+          >
             {results.length === 0
               ? "Nenhum alimento encontrado"
               : `${results.length} ${results.length === 1 ? "alimento" : "alimentos"}`}

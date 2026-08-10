@@ -34,7 +34,9 @@ function parseSet<T extends string>(
   if (raw === null || raw === "") return new Set();
 
   const valid = new Set<string>(allowed);
-  return new Set(raw.split(",").filter((value): value is T => valid.has(value)));
+  return new Set(
+    raw.split(",").filter((value): value is T => valid.has(value)),
+  );
 }
 
 export interface ExerciseQuery {
@@ -46,8 +48,14 @@ export function parseExerciseQuery(params: URLSearchParams): ExerciseQuery {
   return {
     text: params.get(FILTER_PARAMS.text) ?? "",
     filters: {
-      muscles: parseSet<MuscleGroup>(params.get(FILTER_PARAMS.muscles), MUSCLE_GROUPS),
-      equipment: parseSet<Equipment>(params.get(FILTER_PARAMS.equipment), EQUIPMENT),
+      muscles: parseSet<MuscleGroup>(
+        params.get(FILTER_PARAMS.muscles),
+        MUSCLE_GROUPS,
+      ),
+      equipment: parseSet<Equipment>(
+        params.get(FILTER_PARAMS.equipment),
+        EQUIPMENT,
+      ),
       patterns: parseSet<MovementPattern>(
         params.get(FILTER_PARAMS.patterns),
         MOVEMENT_PATTERNS,

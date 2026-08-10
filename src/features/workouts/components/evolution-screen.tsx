@@ -110,7 +110,8 @@ export function EvolutionScreen() {
                   {record.name}
                 </span>
                 <span className="shrink-0 text-sm tabular-nums text-ink">
-                  {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)} kg
+                  {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)}{" "}
+                  kg
                 </span>
                 <span className="w-20 shrink-0 text-right text-xs tabular-nums text-ink-muted">
                   1RM {formatDecimal(record.bestOneRepMax)}

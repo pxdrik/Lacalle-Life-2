@@ -125,7 +125,9 @@ describe("openDatabase", () => {
       {
         version: 2,
         description: "index meals by day",
-        addIndexes: [{ store: "meals", index: { name: "byDay", keyPath: "day" } }],
+        addIndexes: [
+          { store: "meals", index: { name: "byDay", keyPath: "day" } },
+        ],
       },
     ]);
 

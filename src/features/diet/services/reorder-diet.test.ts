@@ -15,7 +15,9 @@ const CHICKEN = { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 };
 function dietWithMeals(...names: string[]) {
   let diet = createDiet("Cutting");
   // createDiet already ships one meal; rename it and append the rest.
-  diet = updateMeal(diet, diet.meals[0]!.id, { name: names[0] ?? "Refeição 1" });
+  diet = updateMeal(diet, diet.meals[0]!.id, {
+    name: names[0] ?? "Refeição 1",
+  });
 
   for (const name of names.slice(1)) {
     diet = addMeal(diet);
@@ -123,14 +125,18 @@ describe("reorderMealItems", () => {
     const { diet } = dietWithFoods("Arroz", "Frango");
     const items = diet.meals[0]!.items;
 
-    expect(reorderMealItems(diet, "gone", items[0]!.id, items[1]!.id)).toBe(diet);
+    expect(reorderMealItems(diet, "gone", items[0]!.id, items[1]!.id)).toBe(
+      diet,
+    );
   });
 
   it("returns the same diet when nothing moves", () => {
     const { diet, mealId } = dietWithFoods("Arroz", "Frango");
     const items = diet.meals[0]!.items;
 
-    expect(reorderMealItems(diet, mealId, items[0]!.id, items[0]!.id)).toBe(diet);
+    expect(reorderMealItems(diet, mealId, items[0]!.id, items[0]!.id)).toBe(
+      diet,
+    );
   });
 
   it("leaves the other meals untouched", () => {
