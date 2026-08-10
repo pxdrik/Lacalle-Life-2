@@ -222,6 +222,36 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                     onOpenDetail={detail.show}
                   />
                 ))}
+
+                {/* Creating used to be reachable only from the empty state,
+                    which made it unreachable in the case that actually happens:
+                    searching "supino", getting eight results, and wanting the
+                    variation your gym has that none of them is. You had to
+                    type nonsense to get the option back.
+
+                    Offered while searching and never while browsing — a
+                    standing button over 183 curated exercises invites
+                    duplicates of entries already there. */}
+                {query.text.trim() !== "" && (
+                  <li>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCreating(true);
+                      }}
+                      className={cn(
+                        "flex w-full items-center gap-2 px-4 py-3 text-left text-sm",
+                        "text-ink-muted transition-colors duration-150 ease-out",
+                        "hover:bg-muted hover:text-ink",
+                      )}
+                    >
+                      <Plus aria-hidden className="size-4 shrink-0" />
+                      <span className="min-w-0 truncate">
+                        Criar “{query.text.trim()}”
+                      </span>
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
           )}

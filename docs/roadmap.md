@@ -43,6 +43,7 @@ depender da memória de nenhuma conversa.
 | Tempo restante da confirmação | Barra que esvazia no ritmo do desarme, ligada ao mesmo `DISARM_AFTER_MS` |
 | Filtro sobreposto | Sheet no celular, modal no desktop, com a contagem de resultados viva enquanto se escolhe |
 | Regra modal vs inline | Escrita no `AGENTS.md` e em `dialog.tsx`, com o caso difícil nomeado |
+| Criar exercício ao buscar | Antes só existia no estado vazio: com 8 resultados e nenhum sendo o seu, não havia saída |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
@@ -117,26 +118,8 @@ muda implementações de adapter, nunca portas nem UI.
 
 ## Ajustes pendentes
 
-Achados verificados que não entraram em nenhum item acima. Cada um é pequeno o
-bastante para caber numa sessão; nenhum exige redesenho. Marcados com a origem,
-porque saber quem apontou ajuda a decidir se ainda vale.
-
-### Comportamento
-
-| O quê | Onde | Por quê |
-| --- | --- | --- |
-
-### Consistência
-
-| O quê | Estado medido |
-| --- | --- |
-| **Botão de criar entre catálogos** | Treinos, Dietas e Alimentos têm botão fixo; Exercícios só oferece criar depois de busca sem resultado. A solução do Exercícios é melhor — escolher uma e aplicar às quatro |
-| **Tabela vs cartão** | Alimentos usa colunas, Exercícios usa cartão com foto. São a mesma coisa conceitual: catálogo de referência com busca e filtro |
-
-### Robustez
-
-| O quê | Por quê |
-| --- | --- |
+Os treze achados verificados das auditorias foram fechados. Sobra um, que é
+oportunidade e não defeito.
 
 ### Identidade
 
@@ -145,6 +128,19 @@ exclusivo além da cor: tirando o nome do topo, não há uma forma, ícone ou
 ilustração que seja só dele. É oportunidade, não defeito — um gesto visual
 pequeno (marca no anel de progresso, ilustração para estado vazio) transformaria
 "app calmo e técnico" em algo identificável à primeira vista.
+
+---
+
+### Tabela em Alimentos, cartão em Exercícios — decidido, não pendente
+
+Uma auditoria de design leu isso como inconsistência. É a forma seguindo o
+dado: alimento se **compara** — kcal, proteína, carboidrato e gordura alinhados
+em coluna dão para varrer de cima a baixo — e exercício se **reconhece**, por
+foto e tag. Unificar em cartão tiraria o alinhamento dos macros; unificar em
+tabela tiraria a foto, que é justamente o que identifica um exercício de
+relance.
+
+Fica registrado porque a próxima auditoria vai apontar de novo.
 
 ---
 
