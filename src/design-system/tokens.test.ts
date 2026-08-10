@@ -94,6 +94,12 @@ const PAIRS = [
   ["accent-text", "surface", 4.5, "the emerald used as text on a card"],
   ["accent", "canvas", 3, "the emerald as a chart line or filled control"],
   ["danger-ink", "danger", 4.5, "destructive button label"],
+  // Both are used as text beside their icon, not only as a tint behind one,
+  // so they answer to 4.5:1 rather than the 3:1 a graphic would need.
+  ["warning", "canvas", 4.5, "a warning's text and icon"],
+  ["warning", "surface", 4.5, "a warning inside a card"],
+  ["info", "canvas", 4.5, "an informational note"],
+  ["info", "surface", 4.5, "an informational note inside a card"],
   ["focus", "canvas", 3, "focus ring"],
   ["protein", "canvas", 3, "protein in charts"],
   ["carbs", "canvas", 3, "carbohydrate in charts"],

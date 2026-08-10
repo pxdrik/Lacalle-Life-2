@@ -96,7 +96,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           <SlidersHorizontal aria-hidden className="size-4" />
           Filtros
           {activeFilterCount > 0 && (
-            <span className="font-mono tabular-nums">{activeFilterCount}</span>
+            <span className="tabular-nums">{activeFilterCount}</span>
           )}
         </button>
       </div>
@@ -130,7 +130,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             nobody reads while choosing. */}
         <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
           <p aria-live="polite" className="text-sm text-ink-muted">
-            <span className="font-mono tabular-nums text-ink">
+            <span className="tabular-nums text-ink">
               {results.length}
             </span>{" "}
             {results.length === 1 ? "exercício" : "exercícios"}

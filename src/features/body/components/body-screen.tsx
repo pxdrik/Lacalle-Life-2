@@ -224,7 +224,7 @@ function Headline({
     return (
       <div>
         <p className="text-xs text-ink-subtle">{label}</p>
-        <p className="font-mono text-2xl tabular-nums text-ink-subtle">—</p>
+        <p className="text-2xl tabular-nums text-ink-subtle">—</p>
       </div>
     );
   }
@@ -232,12 +232,12 @@ function Headline({
   return (
     <div>
       <p className="text-xs text-ink-subtle">{label}</p>
-      <p className="font-mono text-2xl tabular-nums text-ink">
+      <p className="text-2xl tabular-nums text-ink">
         {change.latest.value.toLocaleString("pt-BR")}
         <span className="ml-1 text-sm text-ink-subtle">{unit}</span>
       </p>
       {change.delta !== null && (
-        <p className="mt-0.5 font-mono text-xs tabular-nums text-ink-muted">
+        <p className="mt-0.5 text-xs tabular-nums text-ink-muted">
           {change.delta > 0 ? "+" : ""}
           {change.delta.toLocaleString("pt-BR", {
             maximumFractionDigits: 2,

@@ -60,7 +60,7 @@ export function MacroProgress({ totals, targets, figures }: Props) {
           <div key={key}>
             <dt className="sr-only">{label}</dt>
             <dd>
-              <div className="flex items-baseline gap-1 font-mono text-sm tabular-nums">
+              <div className="flex items-baseline gap-1 text-sm tabular-nums">
                 <span className="text-ink">{formatDecimal(value)}</span>
                 <span className="text-ink-subtle">
                   /{formatDecimal(target)}
@@ -87,7 +87,20 @@ export function MacroProgress({ totals, targets, figures }: Props) {
                 />
               </div>
 
-              <p className="mt-1 text-[0.6875rem] text-ink-subtle">{label}</p>
+              {/* The dot carries the colour when the bar cannot.
+                  Protein, carbohydrate and fat each own a hue across the whole
+                  app, but the bar only shows it once something has been eaten
+                  — so on a fresh morning the card was three grey tracks under
+                  three grey words, and the coding that the rest of the app
+                  relies on simply was not there. It marks identity, not state:
+                  it keeps its hue when the bar turns red for going over. */}
+              <p className="mt-1 flex items-center gap-1.5 text-[0.6875rem] text-ink-subtle">
+                <span
+                  aria-hidden
+                  className={cn("size-1.5 shrink-0 rounded-full", fill)}
+                />
+                {label}
+              </p>
             </dd>
           </div>
         );

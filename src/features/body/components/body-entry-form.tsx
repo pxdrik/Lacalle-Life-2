@@ -96,7 +96,7 @@ export function BodyEntryForm({
             setDay(event.target.value);
           }}
           aria-invalid={future || undefined}
-          className="mt-1 h-(--control-h) rounded-lg border border-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          className="mt-1 h-(--control-h) rounded-lg border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
       </label>
 
@@ -210,7 +210,7 @@ function Number({
           onChange(event.target.value);
         }}
         placeholder="—"
-        className="mt-1 h-11 w-full rounded-lg border border-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line-strong focus:border-line-strong"
+        className="mt-1 h-11 w-full rounded-lg border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line-strong focus:border-line-strong"
       />
       {hint !== undefined && (
         <span className="mt-0.5 block text-[0.625rem] text-ink-subtle">

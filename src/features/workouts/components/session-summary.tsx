@@ -88,7 +88,7 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                 return (
                   <li
                     key={set.id}
-                    className="flex items-baseline gap-3 font-mono text-sm tabular-nums"
+                    className="flex items-baseline gap-3 text-sm tabular-nums"
                   >
                     <span className="w-5 text-ink-subtle">{index + 1}</span>
 
@@ -151,7 +151,7 @@ function Figure({
 }) {
   return (
     <div>
-      <dd className="font-mono text-xl tabular-nums text-ink">{value}</dd>
+      <dd className="text-xl tabular-nums text-ink">{value}</dd>
       <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
     </div>
   );

@@ -43,7 +43,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
     <div className="space-y-4">
       <Card>
         <div className="flex items-baseline gap-2">
-          <span className="font-mono text-3xl font-medium tabular-nums text-ink">
+          <span className="text-3xl font-medium tabular-nums text-ink">
             {formatDecimal(plan.targets.kcal)}
           </span>
           <span className="text-sm text-ink-subtle">kcal por dia</span>
@@ -52,7 +52,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
         <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line pt-4">
           {FIGURES.map(({ key, label, color }) => (
             <div key={key}>
-              <dd className={`font-mono text-xl tabular-nums ${color}`}>
+              <dd className={`text-xl tabular-nums ${color}`}>
                 {formatDecimal(plan.targets[key])}
                 <span className="ml-0.5 text-xs text-ink-subtle">g</span>
               </dd>
@@ -87,11 +87,11 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
         {plan.energyBalanceKcal !== 0 && (
           <p className="mt-4 border-t border-line pt-4 text-sm text-ink-muted">
             {plan.energyBalanceKcal < 0 ? "Déficit" : "Superávit"} de{" "}
-            <span className="font-mono tabular-nums">
+            <span className="tabular-nums">
               {formatDecimal(Math.abs(plan.energyBalanceKcal))}
             </span>{" "}
             kcal por dia — cerca de{" "}
-            <span className="font-mono tabular-nums">
+            <span className="tabular-nums">
               {formatDecimal(Math.abs(plan.projectedWeeklyChangeKg), 2)}
             </span>{" "}
             kg por semana.
@@ -129,7 +129,7 @@ function Derivation({
 }) {
   return (
     <div>
-      <dd className="font-mono tabular-nums text-ink-muted">{value}</dd>
+      <dd className="tabular-nums text-ink-muted">{value}</dd>
       <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
     </div>
   );

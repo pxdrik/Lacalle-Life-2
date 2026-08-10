@@ -88,30 +88,39 @@ A medição feita então continua valendo e agora aponta para o outro lado: **na
 os cartões são neutros — croma 0.01**. A cor mora num elemento só. Espalhar foi
 o erro; a saída não é menos verde, é verde concentrado.
 
-### P0 — Identidade
+### P0 — Identidade ✅ entregue
 
-- [ ] **Superfícies neutras de verdade.** O tema escuro hoje é verde em quatro
-      níveis: canvas 0.03, surface 0.055, elevated 0.06, muted 0.065 — todos no
-      matiz 167. Isso não é profundidade, é monocromia. Neutros escuros com
-      degraus perceptíveis entre `canvas → surface → elevated → muted`.
-- [ ] **O verde ganha valor ao recuar.** Continua sendo a marca: CTA primário,
-      estado ativo, progresso, sucesso, destaque. Deixa de ser a cor de toda
-      superfície, borda, ícone e barra.
-- [ ] **Números param de parecer log.** `font-mono` aparece **50 vezes em 29
-      arquivos**, em caloria, peso, macro, série, repetição, carga e progresso.
-      Vão para a família principal — podem manter peso forte, corpo grande e
-      `tabular-nums`, mas não monoespaçado por padrão.
-- [ ] **Escuro é dark fitness app, não green terminal.** Fundo escuro e cartões
-      escuros continuam; o que muda é a hierarquia entre eles.
-- [ ] **Claro não é o escuro invertido.** Fundo neutro claro, superfícies claras,
-      verde de marca, cores de macro, estados consistentes.
+- [x] **Superfícies neutras de verdade.** Croma caiu de 0.03–0.065 para
+      0.005–0.008 no escuro; a profundidade passou a vir de claridade, em
+      degraus de ~5 L\* medidos no navegador (2,8 → 7,8 → 13,1 → 18,3).
+- [x] **O verde ganha valor ao recuar.** Medido na tela: a superfície tem a\*
+      −1,9 e o accent −72,8. O esmeralda é, por larga margem, a coisa mais
+      saturada em vista — e agora só aparece na aba ativa, no CTA e no progresso.
+- [x] **Números param de parecer log.** As 50 ocorrências saíram; `tabular-nums`
+      ficou onde a monoespaçada estava, então o alinhamento sobreviveu à troca.
+      A Geist Mono não é mais carregada.
+- [x] **Escuro é dark fitness app, não green terminal.**
+- [x] **Claro não é o escuro invertido.** Página neutra clara, cartão branco
+      destacando por claridade antes da sombra.
+
+Tokens de estado (`warning`, `info`) criados junto — não existiam, e é por isso
+que tudo caía em verde ou vermelho. Sucesso é o accent e erro é `danger` de
+propósito: um segundo verde ao lado de uma marca verde não é um estado, é ruído.
 
 ### P1 — Hierarquia
 
-- [ ] **Hoje:** caloria como herói, depois macros, treino, refeições, progresso,
-      alertas quando houver. Não é tudo com o mesmo peso.
-- [ ] **Menos vazio no desktop.** Aproveitar a largura sem virar lista vertical
-      de CRUD. É central de acompanhamento pessoal, não página administrativa.
+- [x] **Caloria como herói.** O anel foi de 128px para 144/176px e o número de
+      `text-2xl` para `text-3xl sm:text-4xl`.
+- [x] **Desktop usa a largura.** Alimentação e treino lado a lado a partir de
+      `lg`, dois terços contra um — a proporção diz qual é o principal.
+- [x] **Cor de macro sobrevive ao dia zerado.** As barras já usavam
+      `protein/carbs/fat`, mas com 0 g a largura é 0% e só o trilho cinza
+      aparecia; um ponto colorido ao lado do rótulo carrega a identidade quando
+      a barra não pode. Marca identidade, não estado: mantém o tom quando a
+      barra fica vermelha por estouro.
+- [ ] **Refeições e progresso no Hoje.** Pedido no §8 do brief, mas é conteúdo
+      novo e não reestilização — a tela hoje responde a duas perguntas e para.
+      Fica fora até haver decisão, porque o §25 diz que a sprint é visual.
 - [ ] **Cartões com identidade.** Contraste com o fundo, hierarquia interna,
       radius e padding consistentes, níveis de superfície diferentes. Alimentação,
       treino, progresso e alerta podem divergir um pouco quando isso comunica

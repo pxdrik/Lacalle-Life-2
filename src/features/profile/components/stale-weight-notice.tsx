@@ -50,11 +50,11 @@ export function StaleWeightNotice({ profile, onApply, pending }: Props) {
         <div className="min-w-0">
           <p className="text-sm text-ink">
             Sua meta usa{" "}
-            <strong className="font-mono tabular-nums">
+            <strong className="tabular-nums">
               {formatDecimal(profile.weightKg)} kg
             </strong>
             , mas sua última pesagem, de {formatDay(latest.day)}, diz{" "}
-            <strong className="font-mono tabular-nums">
+            <strong className="tabular-nums">
               {formatDecimal(latest.weightKg)} kg
             </strong>
             .

@@ -97,7 +97,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             const next = event.target.value;
             if (next !== "" && !isFutureDay(next)) goToDay(next);
           }}
-          className="h-(--control-h) rounded-lg border border-line bg-surface px-3 font-mono tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          className="h-(--control-h) rounded-lg border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
 
         <DayStep

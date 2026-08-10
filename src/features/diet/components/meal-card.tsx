@@ -114,7 +114,7 @@ export function MealCard({
                 // from midnight.
                 onChange({ time: event.target.value === "" ? null : event.target.value });
               }}
-              className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-mono text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+              className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
             />
           </div>
         </div>

@@ -181,7 +181,7 @@ export function RoutineExerciseCard({
                   seconds === null ? null : Math.min(Math.max(seconds, 0), 3600),
               });
             }}
-            className="w-16 rounded-md border border-line bg-surface px-2 py-1 text-center font-mono text-sm tabular-nums hover:border-line-strong"
+            className="w-16 rounded-md border border-line bg-surface px-2 py-1 text-center text-sm tabular-nums hover:border-line-strong"
           />
           <span className="text-xs text-ink-subtle">seg</span>
         </label>

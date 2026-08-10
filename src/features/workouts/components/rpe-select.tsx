@@ -32,7 +32,7 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
         onChange(event.target.value === "" ? null : Number(event.target.value));
       }}
       className={cn(
-        "rounded-md border border-line bg-surface px-1.5 py-1 text-center font-mono text-sm tabular-nums",
+        "rounded-md border border-line bg-surface px-1.5 py-1 text-center text-sm tabular-nums",
         "transition-colors duration-150 ease-out hover:border-line-strong",
         value === null && "text-ink-subtle",
         className,

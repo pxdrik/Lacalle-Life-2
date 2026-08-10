@@ -21,6 +21,15 @@ import { TodayWorkout } from "@/features/workouts/components/today-workout";
  * navigation is three centimetres above it, and a second copy of the menu
  * dressed as buttons is not a feature.
  *
+ * **The two questions are not equally big, and the layout says so.** Stacked
+ * full-width they read as a list of two equal rows, which on a 1440px screen
+ * left the page more than half empty below them. Side by side from `lg`, food
+ * takes two thirds and training one: the width gets used, the vertical run
+ * shortens, and the ranking between them becomes visible instead of implied.
+ *
+ * `items-start` because they are independent answers — stretching the shorter
+ * card to match the taller one would invent a relationship between them.
+ *
  * A client route for the same reason as `/diario` — only the browser knows
  * what today is where the reader is standing.
  */
@@ -31,9 +40,11 @@ export default function HomePage() {
     <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
       <PageHeader title="Hoje" subtitle={capitalise(formatLongDay(today))} />
 
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 grid gap-3 lg:grid-cols-3 lg:items-start">
         <HomeDataProvider>
-          <TodayEnergy day={today} />
+          <div className="lg:col-span-2">
+            <TodayEnergy day={today} />
+          </div>
           <TodayWorkout day={today} />
         </HomeDataProvider>
       </div>

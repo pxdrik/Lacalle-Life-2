@@ -1,4 +1,3 @@
-import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 
@@ -41,7 +40,7 @@ export default function RootLayout({
        so the server markup and the live DOM differ by design. */
     <html
       lang="pt-BR"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={GeistSans.variable}
       suppressHydrationWarning
     >
       <body>

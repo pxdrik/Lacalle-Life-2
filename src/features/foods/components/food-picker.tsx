@@ -108,7 +108,7 @@ export function FoodPicker({ onPick, onCancel }: Props) {
                 <span className="shrink-0 text-xs text-ink-subtle">
                   {FOOD_CATEGORY_LABELS[food.category]}
                 </span>
-                <span className="w-16 shrink-0 text-right font-mono text-xs tabular-nums text-ink-muted">
+                <span className="w-16 shrink-0 text-right text-xs tabular-nums text-ink-muted">
                   {food.per100g.kcal} kcal
                 </span>
               </button>

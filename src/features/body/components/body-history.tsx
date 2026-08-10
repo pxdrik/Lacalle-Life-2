@@ -34,7 +34,7 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
         {newestFirst.map((entry) => (
           <li key={entry.id} className="flex items-start gap-3 px-4 py-3">
             <div className="min-w-0 flex-1">
-              <p className="font-mono text-sm tabular-nums text-ink">
+              <p className="text-sm tabular-nums text-ink">
                 {formatDay(entry.day)}
                 {entry.weightKg !== null && (
                   <span className="ml-3 text-ink-muted">
@@ -92,7 +92,7 @@ function Sites({ entry }: { readonly entry: BodyEntry }) {
   if (taken.length === 0) return null;
 
   return (
-    <p className="mt-0.5 font-mono text-xs tabular-nums text-ink-subtle">
+    <p className="mt-0.5 text-xs tabular-nums text-ink-subtle">
       {taken
         .map((site) => {
           // `toLocaleString`, not `String`: the rest of the app writes 84,2

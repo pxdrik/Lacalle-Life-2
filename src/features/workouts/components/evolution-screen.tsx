@@ -109,10 +109,10 @@ export function EvolutionScreen() {
                 <span className="min-w-0 flex-1 truncate text-sm text-ink">
                   {record.name}
                 </span>
-                <span className="shrink-0 font-mono text-sm tabular-nums text-ink">
+                <span className="shrink-0 text-sm tabular-nums text-ink">
                   {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)} kg
                 </span>
-                <span className="w-20 shrink-0 text-right font-mono text-xs tabular-nums text-ink-muted">
+                <span className="w-20 shrink-0 text-right text-xs tabular-nums text-ink-muted">
                   1RM {formatDecimal(record.bestOneRepMax)}
                 </span>
               </li>
@@ -161,7 +161,7 @@ function SessionRow({ session }: { readonly session: Session }) {
           </p>
         </div>
 
-        <span className="shrink-0 font-mono text-sm tabular-nums text-ink-muted">
+        <span className="shrink-0 text-sm tabular-nums text-ink-muted">
           {sessionVolumeKg(session).toLocaleString("pt-BR")} kg
         </span>
       </Link>

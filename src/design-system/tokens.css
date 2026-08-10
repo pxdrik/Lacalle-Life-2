@@ -10,20 +10,26 @@
  * state, and data. A screen that is mostly numbers stays calm only if the
  * numbers are the loudest thing on it.
  *
- * **The surfaces are emerald, not grey.** They used to carry a few thousandths
- * of chroma — technically tinted, indistinguishable from grey in use. The
- * owner compared the two versions and said it plainly: V1's colours are more
- * alive.
+ * **The surfaces are neutral, and that is a reversal.** They were emerald for
+ * a while — 0.03 chroma on the canvas, 0.055 on a dark card — after the owner
+ * compared the two versions and said V1's colours were more alive. He was
+ * right about the impression. The fix was wrong.
  *
- * He was right about the impression, and measuring V1 showed where it actually
- * comes from: not the cards, which are neutral there (chroma 0.01), but a
- * 256px emerald sidebar at 0.08 and an accent at 0.20. This version has no
- * sidebar, so the colour it would have carried is spread across the surfaces
- * instead — 0.03 on the canvas, 0.055 on a card in the dark theme.
+ * The measurement that produced it is the same one that now overturns it. V1's
+ * cards are **neutral, chroma 0.01**; its colour comes from a 256px emerald
+ * sidebar at 0.08 and an accent at 0.20. Reading that, this version — which
+ * has no sidebar — spread the sidebar's colour across every surface. Four
+ * greens stacked (canvas, surface, elevated, muted) do not read as depth. They
+ * read as a terminal.
  *
- * The text tokens stay near-neutral on purpose: tinting a surface reads as a
- * material, while tinting body copy just reads as a display that needs
- * calibrating.
+ * So the rule is the one V1 actually follows: **the brand is concentrated, not
+ * diluted.** Depth comes from lightness between neutral surfaces; the emerald
+ * is spent on the primary action, the active state and progress, where it is
+ * the only saturated thing in view and therefore unmissable.
+ *
+ * The text tokens are near-neutral for the same reason they always were:
+ * tinting a surface reads as a material, while tinting body copy just reads as
+ * a display that needs calibrating.
  *
  * Values are OKLCH because it is perceptually uniform: a lightness step reads
  * as the same step at any hue, which is what makes the light and dark scales
@@ -37,22 +43,23 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces, from furthest back to closest. The canvas is faintly tinted and
-     cards are pure white, so a card lifts off the page without a shadow. */
-  --canvas: oklch(0.986 0.014 167);
-  --surface: oklch(0.999 0.004 167);
-  --elevated: oklch(0.999 0.004 167);
-  --muted: oklch(0.957 0.026 167);
+  /* Surfaces, from furthest back to closest. Cards are pure white on a soft
+     grey page, so a card lifts off it before a shadow is drawn. `muted` sits
+     *below* the canvas — a recessed row rather than a raised one. */
+  --canvas: oklch(0.98 0.003 190);
+  --surface: oklch(1 0 0);
+  --elevated: oklch(1 0 0);
+  --muted: oklch(0.955 0.004 190);
 
   /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder. */
-  --ink: oklch(0.17 0.014 180);
-  --ink-muted: oklch(0.45 0.014 180);
+  --ink: oklch(0.17 0.008 190);
+  --ink-muted: oklch(0.45 0.008 190);
   /* 0.55, not the 0.58 that looked right by eye: below this the ratio against
      the canvas drops under 4.5:1. Placeholder text is still text. */
-  --ink-subtle: oklch(0.55 0.012 180);
+  --ink-subtle: oklch(0.55 0.007 190);
 
-  --line: oklch(0.9 0.035 167);
-  --line-strong: oklch(0.79 0.055 167);
+  --line: oklch(0.905 0.004 190);
+  --line-strong: oklch(0.8 0.006 190);
 
   /**
    * The brand, and the same value in both themes: `oklch(0.58 0.2 167)`,
@@ -72,6 +79,21 @@
 
   --danger: oklch(0.51 0.21 27);
   --danger-ink: oklch(1 0 0);
+
+  /**
+   * The other two states.
+   *
+   * There are four — success, warning, error, info — and only two are new.
+   * **Success is the accent**, and error is `danger`. Minting a second green
+   * for "it worked" next to a green brand would produce two greens nobody can
+   * tell apart, which is the opposite of a state being legible.
+   *
+   * Both are pulled a little off the macro hues they sit near — warning at 55
+   * against carbohydrate's 62, info at 265 against protein's 250 — because a
+   * banner and a chart legend will eventually share a screen.
+   */
+  --warning: oklch(0.55 0.15 55);
+  --info: oklch(0.5 0.14 265);
 
   /* Deliberately not the brand hue: a focus ring drawn in emerald disappears
      the moment it lands on the emerald button. */
@@ -102,19 +124,28 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  /* Dark surfaces lift by getting lighter. Shadows do not read on near-black,
-     so depth is carried by surface value and the top hairline instead. */
-  --canvas: oklch(0.185 0.03 167);
-  --surface: oklch(0.245 0.055 167);
-  --elevated: oklch(0.275 0.06 167);
-  --muted: oklch(0.3 0.065 167);
+  /**
+   * Dark surfaces lift by getting lighter. Shadows do not read on near-black,
+   * so depth is carried by surface value and the top hairline instead.
+   *
+   * The four steps are 0.145 → 0.205 → 0.25 → 0.295, and the gaps are the
+   * point: 0.06, 0.045, 0.045 of OKLCH lightness are each comfortably above
+   * the threshold where a surface change is visible. The previous scale had
+   * gaps of the same size but carried 0.03–0.065 of chroma at hue 167, so what
+   * you actually saw was four greens rather than four depths — the eye reads
+   * the hue first and stops there.
+   */
+  --canvas: oklch(0.145 0.005 190);
+  --surface: oklch(0.205 0.006 190);
+  --elevated: oklch(0.25 0.007 190);
+  --muted: oklch(0.295 0.008 190);
 
-  --ink: oklch(0.97 0.004 180);
-  --ink-muted: oklch(0.73 0.011 180);
-  --ink-subtle: oklch(0.61 0.013 180);
+  --ink: oklch(0.97 0.003 190);
+  --ink-muted: oklch(0.73 0.008 190);
+  --ink-subtle: oklch(0.61 0.009 190);
 
-  --line: oklch(0.36 0.07 167);
-  --line-strong: oklch(0.46 0.085 167);
+  --line: oklch(0.32 0.008 190);
+  --line-strong: oklch(0.43 0.01 190);
 
   /**
    * V1's green, sampled from the running app: `oklch(0.58 0.2 167)`.
@@ -138,6 +169,11 @@
 
   --danger: oklch(0.7 0.18 25);
   --danger-ink: oklch(0.165 0.008 180);
+
+  /* Same two states as the light theme, lifted to read on a dark ground.
+     Success is still the accent; error is still `danger`. */
+  --warning: oklch(0.79 0.13 62);
+  --info: oklch(0.72 0.13 265);
 
   --focus: oklch(0.72 0.16 258);
 
@@ -260,6 +296,9 @@
   --color-danger: var(--danger);
   --color-danger-ink: var(--danger-ink);
 
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
   --color-focus: var(--focus);
 
   --color-protein: var(--protein);
@@ -271,8 +310,20 @@
   --shadow-sm: var(--elevation-sm);
   --shadow-md: var(--elevation-md);
 
+  /**
+   * One family, for prose and for numbers alike.
+   *
+   * A monospace face used to carry every calorie, weight, set and load — 50
+   * places across 29 files. Monospace is a signal, and the signal it sends is
+   * *code*: a log, a terminal, a diff. On a screen that is mostly numbers it
+   * was the loudest thing about the product, and it said "developer tool".
+   *
+   * What that face was actually needed for is digits of equal width, so a
+   * total does not jitter as it counts. That is `tabular-nums`, a feature of
+   * this face too — kept everywhere the monospace was, which is why the
+   * alignment survived the swap. Geist Mono is no longer loaded at all.
+   */
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 
   /* Corners come from the density layer above, so every `rounded-*` already
      written across the app follows the breakpoint without being touched. */

@@ -1,5 +1,6 @@
 "use client";
 
+import { UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
@@ -51,7 +52,13 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   return (
     <Card as="section">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-medium text-ink">Alimentação</h2>
+        {/* The icon is recognition, not decoration: on a screen where every
+            card is a titled box, the glyph is what tells food from training
+            before the words are read. */}
+        <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
+          <UtensilsCrossed aria-hidden className="size-4 text-ink-subtle" />
+          Alimentação
+        </h2>
         <Link
           href="/diario"
           className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
@@ -121,10 +128,13 @@ function CalorieRing({
 
   return (
     <div className="relative shrink-0">
+      {/* Sized up from 128px flat. This is the figure the screen exists to
+          show — the one people open the app to read and then close it — and at
+          the old size it was merely one of several things in the card. */}
       <svg
         aria-hidden
         viewBox="0 0 128 128"
-        className="size-32 -rotate-90"
+        className="size-36 -rotate-90 sm:size-44"
         role="presentation"
       >
         <circle
@@ -154,13 +164,13 @@ function CalorieRing({
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <p
           className={cn(
-            "font-mono text-2xl font-medium tabular-nums",
+            "text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl",
             over ? "text-danger" : "text-ink",
           )}
         >
           {formatDecimal(Math.abs(remaining))}
         </p>
-        <p className="mt-0.5 max-w-24 text-[0.6875rem] leading-tight text-ink-subtle">
+        <p className="mt-1 max-w-24 text-xs leading-tight text-ink-subtle">
           {over ? "kcal acima da meta" : "kcal restantes"}
         </p>
       </div>

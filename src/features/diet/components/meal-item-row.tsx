@@ -76,7 +76,7 @@ export function MealItemRow({
           onChange={(event) => {
             onGramsChange(toGrams(event.target.value));
           }}
-          className="w-14 rounded-md border border-line bg-surface px-2 py-1 text-right font-mono text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
+          className="w-14 rounded-md border border-line bg-surface px-2 py-1 text-right text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
         />
         <span className="text-xs text-ink-subtle">g</span>
       </div>
@@ -90,7 +90,7 @@ export function MealItemRow({
       {/* `ms-auto` pins the numbers to the right edge of the wrapped line, so
           they stay in a column across items instead of drifting with the
           width of each name. */}
-      <div className="ms-auto flex w-40 shrink-0 items-baseline justify-end gap-3 font-mono text-xs tabular-nums sm:w-48 sm:gap-4">
+      <div className="ms-auto flex w-40 shrink-0 items-baseline justify-end gap-3 text-xs tabular-nums sm:w-48 sm:gap-4">
         <span className="text-ink-muted">{formatDecimal(macros.kcal)}</span>
         <span className="text-protein">{formatDecimal(macros.proteinG)}</span>
         <span className="text-carbs">{formatDecimal(macros.carbsG)}</span>

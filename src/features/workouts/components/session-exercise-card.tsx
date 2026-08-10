@@ -57,7 +57,7 @@ export function SessionExerciseCard({
             ? null
             : `Descanso de ${String(exercise.restSeconds)}s`}
         </ExerciseIdentity>
-        <span className="shrink-0 font-mono text-xs tabular-nums text-ink-subtle">
+        <span className="shrink-0 text-xs tabular-nums text-ink-subtle">
           {done}/{exercise.sets.length}
           {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}
         </span>
@@ -67,7 +67,7 @@ export function SessionExerciseCard({
           One compact line, above the sets, so it is read before the first rep
           and not hunted for afterwards. */}
       {lastTime !== undefined && (
-        <p className="mt-1 truncate font-mono text-xs tabular-nums text-ink-muted">
+        <p className="mt-1 truncate text-xs tabular-nums text-ink-muted">
           <span className="font-sans text-ink-subtle">
             Última vez, {formatShortDate(lastTime.performedAt)}:{" "}
           </span>

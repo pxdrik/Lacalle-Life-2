@@ -272,7 +272,7 @@ function Stat({ label, value }: { readonly label: string; readonly value: string
       <p className="text-[0.6875rem] tracking-wide text-ink-subtle uppercase">
         {label}
       </p>
-      <p className="font-mono text-lg tabular-nums text-ink">{value}</p>
+      <p className="text-lg tabular-nums text-ink">{value}</p>
     </div>
   );
 }

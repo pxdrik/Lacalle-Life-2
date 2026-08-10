@@ -57,7 +57,7 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
           </p>
           <p
             className={cn(
-              "font-mono text-2xl tabular-nums",
+              "text-2xl tabular-nums",
               isFinished ? "text-accent-text" : "text-ink",
             )}
           >
@@ -70,7 +70,7 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
           onClick={() => {
             timer.adjust(-15);
           }}
-          className="h-11 rounded-lg border border-line px-3 font-mono text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+          className="h-11 rounded-lg border border-line px-3 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
         >
           −15s
         </button>
@@ -79,7 +79,7 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
           onClick={() => {
             timer.adjust(15);
           }}
-          className="h-11 rounded-lg border border-line px-3 font-mono text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+          className="h-11 rounded-lg border border-line px-3 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
         >
           +15s
         </button>

@@ -16,7 +16,7 @@ interface Props {
 }
 
 const CELL =
-  "w-full rounded-md border border-line bg-surface px-2 py-1 text-center font-mono text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
+  "w-full rounded-md border border-line bg-surface px-2 py-1 text-center text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
 
 export function PlannedSetRow({
   set,
@@ -29,7 +29,7 @@ export function PlannedSetRow({
 
   return (
     <li className="group flex items-center gap-2 py-1">
-      <span className="w-6 shrink-0 text-center font-mono text-xs tabular-nums text-ink-subtle">
+      <span className="w-6 shrink-0 text-center text-xs tabular-nums text-ink-subtle">
         {number}
       </span>
 

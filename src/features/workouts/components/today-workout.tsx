@@ -84,7 +84,7 @@ function FinishedSession({ session }: { readonly session: Session }) {
       <span className="min-w-0 flex-1 truncate text-sm text-ink">
         {session.name}
       </span>
-      <span className="shrink-0 font-mono text-xs tabular-nums text-ink-muted">
+      <span className="shrink-0 text-xs tabular-nums text-ink-muted">
         {duration === null ? "—" : formatDuration(duration)}
         <span className="mx-1.5 text-line-strong">·</span>
         {formatDecimal(volume)} kg

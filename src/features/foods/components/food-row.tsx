@@ -61,7 +61,7 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
         </p>
       </div>
 
-      <div className="flex shrink-0 items-baseline gap-3 font-mono text-sm tabular-nums sm:gap-4">
+      <div className="flex shrink-0 items-baseline gap-3 text-sm tabular-nums sm:gap-4">
         <span className="w-11 text-right text-ink">{format(kcal)}</span>
         <span className="w-9 text-right text-protein">{format(proteinG)}</span>
         <span className="w-9 text-right text-carbs">{format(carbsG)}</span>

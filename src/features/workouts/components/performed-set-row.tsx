@@ -23,7 +23,7 @@ interface Props {
 }
 
 const FIELD =
-  "h-11 w-full rounded-lg border bg-surface px-2 text-center font-mono text-base tabular-nums transition-colors duration-150 ease-out";
+  "h-11 w-full rounded-lg border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -55,7 +55,7 @@ export function PerformedSetRow({
       )}
     >
       <div className="flex items-center gap-2">
-        <span className="w-6 shrink-0 text-center font-mono text-sm tabular-nums text-ink-subtle">
+        <span className="w-6 shrink-0 text-center text-sm tabular-nums text-ink-subtle">
           {number}
         </span>
 
@@ -249,7 +249,7 @@ function Step({
       aria-label={label}
       className={cn(
         "h-9 min-w-11 rounded-lg border border-line-strong px-2",
-        "font-mono text-xs tabular-nums text-ink-muted",
+        "text-xs tabular-nums text-ink-muted",
         "transition-[background-color,border-color,color,scale] duration-150 ease-out",
         "active:scale-90 hover:border-accent hover:text-ink",
         "sm:h-7 sm:min-w-9",
@@ -268,7 +268,7 @@ function Planned({
   readonly suffix: string;
 }) {
   return (
-    <p className="mt-0.5 h-3 text-center font-mono text-[0.625rem] tabular-nums text-ink-subtle">
+    <p className="mt-0.5 h-3 text-center text-[0.625rem] tabular-nums text-ink-subtle">
       {value === null ? "" : `${formatDecimal(value)} ${suffix}`}
     </p>
   );

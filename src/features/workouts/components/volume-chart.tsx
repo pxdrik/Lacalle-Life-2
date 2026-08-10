@@ -58,7 +58,7 @@ export function VolumeChart({ points, format }: Props) {
         {chronological.map((point) => (
           <li
             key={point.startsAt}
-            className="flex-1 truncate text-center font-mono text-[0.625rem] tabular-nums text-ink-subtle"
+            className="flex-1 truncate text-center text-[0.625rem] tabular-nums text-ink-subtle"
           >
             {format(point)}
           </li>
