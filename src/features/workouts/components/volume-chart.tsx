@@ -1,6 +1,7 @@
 import { Card } from "@/design-system/components/card";
 
 import type { VolumePoint } from "../services/history";
+import { formatDecimal } from "@/core/format/decimal";
 
 interface Props {
   /** Most recent first, as the service returns them. */
@@ -35,13 +36,13 @@ export function VolumeChart({ points, format }: Props) {
               className="flex h-full flex-1 flex-col justify-end"
             >
               <span className="sr-only">
-                {format(point)}: {point.volumeKg.toLocaleString("pt-BR")} kg em{" "}
+                {format(point)}: {formatDecimal(point.volumeKg)} kg em{" "}
                 {point.sets} séries
               </span>
 
               <span
                 aria-hidden
-                title={`${point.volumeKg.toLocaleString("pt-BR")} kg · ${String(point.sets)} séries`}
+                title={`${formatDecimal(point.volumeKg)} kg · ${String(point.sets)} séries`}
                 className={
                   point.volumeKg === 0
                     ? "min-h-0.5 rounded-sm bg-line"

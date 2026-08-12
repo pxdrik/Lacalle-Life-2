@@ -165,7 +165,7 @@ function SessionRow({ session }: { readonly session: Session }) {
         </div>
 
         <span className="shrink-0 text-sm tabular-nums text-ink-muted">
-          {sessionVolumeKg(session).toLocaleString("pt-BR")} kg
+          {formatDecimal(sessionVolumeKg(session))} kg
         </span>
       </Link>
     </li>

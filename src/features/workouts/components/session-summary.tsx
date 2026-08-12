@@ -3,6 +3,7 @@
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
@@ -76,7 +77,7 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
           label="Séries"
           value={`${String(progress.completed)}/${String(progress.total)}`}
         />
-        <Figure label="Volume" value={`${volume.toLocaleString("pt-BR")} kg`} />
+        <Figure label="Volume" value={`${formatDecimal(volume)} kg`} />
       </Card>
 
       <div className="mt-4 space-y-3">
@@ -97,7 +98,11 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
 
                     {set.isCompleted ? (
                       <span className="text-ink">
-                        {set.reps ?? "—"} × {set.weightKg ?? "—"} kg
+                        {set.reps ?? "—"} ×{" "}
+                        {set.weightKg === null
+                          ? "—"
+                          : formatDecimal(set.weightKg)}{" "}
+                        kg
                         {set.rpe !== null && (
                           <span className="text-ink-muted">
                             {" "}

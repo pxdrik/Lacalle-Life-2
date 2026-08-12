@@ -2,6 +2,7 @@
 
 import { noticeClasses } from "@/design-system/components/notice";
 import { dayKey } from "@/core/format/day";
+import { formatDecimal } from "@/core/format/decimal";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, Scale } from "lucide-react";
 import { useState } from "react";
@@ -236,15 +237,18 @@ function Headline({
     <div>
       <p className="text-xs text-ink-subtle">{label}</p>
       <p className="text-2xl tabular-nums text-ink">
-        {change.latest.value.toLocaleString("pt-BR")}
+        {formatDecimal(change.latest.value)}
         <span className="ml-1 text-sm text-ink-subtle">{unit}</span>
       </p>
       {change.delta !== null && (
         <p className="mt-0.5 text-xs tabular-nums text-ink-muted">
           {change.delta > 0 ? "+" : ""}
-          {change.delta.toLocaleString("pt-BR", {
-            maximumFractionDigits: 2,
-          })}{" "}
+          {/* Rounded before formatting rather than capped by `Intl`: the delta
+              is a subtraction of two stored weights, so it arrives carrying
+              float noise like 0.8000000000000007. `formatDecimal`'s own
+              `fractionDigits` pads as well as caps, which would turn 0,8 into
+              0,80 — a precision the scale never claimed. */}
+          {formatDecimal(Math.round(change.delta * 100) / 100)}{" "}
           {unit} desde a medição anterior
         </p>
       )}

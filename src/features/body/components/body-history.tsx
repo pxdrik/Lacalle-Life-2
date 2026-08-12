@@ -5,6 +5,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { formatDay } from "@/core/format/day";
 
 import {
@@ -39,12 +40,12 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
                 {formatDay(entry.day)}
                 {entry.weightKg !== null && (
                   <span className="ml-3 text-ink-muted">
-                    {entry.weightKg.toLocaleString("pt-BR")} kg
+                    {formatDecimal(entry.weightKg)} kg
                   </span>
                 )}
                 {entry.bodyFatPercent !== null && (
                   <span className="ml-3 text-ink-muted">
-                    {entry.bodyFatPercent.toLocaleString("pt-BR")}%
+                    {formatDecimal(entry.bodyFatPercent)}%
                   </span>
                 )}
               </p>
@@ -98,6 +99,12 @@ function Sites({ entry }: { readonly entry: BodyEntry }) {
         .map((site) => {
           // `toLocaleString`, not `String`: the rest of the app writes 84,2
           // and a stray 84.2 here reads as a different app.
+          //
+          // And not `formatDecimal`, which is what every *display* surface
+          // uses — this string is fed back into a text field for editing, and
+          // `formatDecimal` answers unreadable input with an em dash. A dash
+          // is the right thing to show and the wrong thing to hand someone to
+          // edit. The guard in `number-format.test.ts` exempts this line.
           const value = entry.measurements[site]?.toLocaleString("pt-BR") ?? "";
           return `${MEASUREMENT_SITE_LABELS[site]} ${value}`;
         })

@@ -3,6 +3,7 @@ import { Card } from "@/design-system/components/card";
 import { formatShortDay } from "@/core/format/day";
 
 import type { TrendPoint } from "../services/body-log";
+import { formatDecimal } from "@/core/format/decimal";
 
 interface Props {
   readonly points: readonly TrendPoint[];
@@ -101,7 +102,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
       >
         <span>{formatShortDay(points[0]?.day ?? "")}</span>
         <span>
-          {min.toLocaleString("pt-BR")}–{max.toLocaleString("pt-BR")} {unit}
+          {formatDecimal(min)}–{formatDecimal(max)} {unit}
         </span>
         <span>{formatShortDay(points.at(-1)?.day ?? "")}</span>
       </div>
@@ -120,7 +121,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
               <tr key={point.day}>
                 <th scope="row">{formatShortDay(point.day)}</th>
                 <td>
-                  {point.value.toLocaleString("pt-BR")} {unit}
+                  {formatDecimal(point.value)} {unit}
                 </td>
               </tr>
             ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
@@ -263,7 +264,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         <Card tone="hero" className="mt-6 text-center">
           <p className="text-ink">Todas as séries concluídas.</p>
           <p className="mt-1 text-sm text-ink-subtle">
-            {sessionVolumeKg(session).toLocaleString("pt-BR")} kg movidos.
+            {formatDecimal(sessionVolumeKg(session))} kg movidos.
           </p>
           <Button
             size="lg"

@@ -50,12 +50,22 @@ export default function HomePage() {
 
       <div className="mt-6 grid gap-3 lg:grid-cols-3 lg:items-start">
         <HomeDataProvider>
-          <div className="lg:col-span-2 lg:row-span-2 lg:space-y-3">
+          {/* `space-y-3` at every width, not `lg:` only: below `lg` these two
+              are inside one grid cell, so the grid's own `gap-3` never lands
+              between them and the cards met edge to edge on a phone. */}
+          <div className="space-y-3 lg:col-span-2">
             <TodayEnergy day={today} />
             <TodayMeals day={today} />
           </div>
-          <TodayWorkout day={today} />
-          <TodayProgress />
+          {/* One cell holding two cards, not two cells in a two-row grid.
+              As separate grid children their heights came from the rows the
+              left column defined, so training ended 135px above weight while
+              every other gap on the screen was 12 — a hole the layout never
+              intended and that only appears once there is data in both. */}
+          <div className="space-y-3">
+            <TodayWorkout day={today} />
+            <TodayProgress />
+          </div>
         </HomeDataProvider>
       </div>
     </main>

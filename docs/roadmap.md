@@ -221,8 +221,30 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       para a mesma linguagem.
 - [ ] **Evolução:** os dados ficam, o tratamento muda. Progresso é conquista, não
       tabela de métricas.
-- [ ] **Passar em todas as rotas:** Hoje, Diário, Treinos, Sessão, Dietas,
-      detalhe da dieta, Evolução, Exercícios, Alimentos, Perfil, 404.
+- [x] **Passar em todas as rotas** com dado de verdade no banco — perfil, cinco
+      pesagens, dieta de três refeições, diário do dia, treino de três
+      exercícios e uma sessão concluída, tudo semeado pelos formulários do
+      próprio app. Três defeitos que só existem com dado dentro:
+
+      1. **`72.5 kg` com ponto** no resumo da sessão, e mais nove superfícies
+         chamando `toLocaleString("pt-BR")` direto — separador certo, mas
+         pulando o travessão que `formatDecimal` põe no lugar de `NaN`. As duas
+         coisas estão listadas como entregues aqui em cima e nenhuma tinha
+         teste. Agora `core/format/number-format.test.ts` varre o código e
+         falha apontando arquivo e linha.
+      2. **135px de buraco no Hoje** entre Treino e Progresso. Os dois eram
+         filhos diretos do grid, então a altura vinha das linhas que a coluna
+         da esquerda definia — enquanto todo o resto da tela usa 12px.
+      3. **Os dois cartões do Hoje se tocavam no celular.** O espaçamento era
+         `lg:space-y-3`, e conferido na folha compilada essa regra vive dentro
+         de `@media (min-width:64rem)`: abaixo disso não havia regra nenhuma.
+         Num app cuja premissa é o celular, na tela que ele abre primeiro.
+
+      Conferido e **não** é defeito: campo de data e hora saem em `MM/DD` e
+      `AM/PM` neste navegador porque controle nativo segue o locale do
+      navegador (`en-US` aqui), não o `lang` da página — o valor gravado é
+      `2026-08-12`. E as miniaturas de exercício carregam (`falhas: 0`); elas
+      parecem vazias no tema claro porque são fotos sobre fundo branco.
 - [ ] Preservar o que a V2 já corrigiu da V1: 404 com identidade própria,
       skeleton neutro, tema persistente, sem navegação redundante, componente
       reutilizável.
