@@ -1,12 +1,12 @@
 "use client";
 
-import { UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { ICONS } from "@/design-system/icons";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
@@ -59,7 +59,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
             card is a titled box, the glyph is what tells food from training
             before the words are read. */}
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-          <UtensilsCrossed aria-hidden className="size-4 text-ink-subtle" />
+          <ICONS.diary aria-hidden className="size-4 text-ink-subtle" />
           Alimentação
         </h2>
         <Link

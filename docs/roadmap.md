@@ -176,9 +176,23 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
 - [x] **Advisories do perfil saíram do cinza.** A única mensagem que diz "mudei
       o que você pediu" era renderizada em `bg-muted text-ink-muted`, idêntica
       a uma legenda inerte.
-- [ ] **Iconografia.** Ícone de menos é parte da sensação de dashboard técnico.
-      Alimentação, treino, progresso, dieta, exercício, alimento, perfil,
-      configurações — para reconhecer, não para encher.
+- [x] **Iconografia.** Cada rota já tinha um glifo no cabeçalho; o que faltava
+      era eles concordarem. **Dois dos quatro tabs abriam numa tela com outro
+      ícone** — Hoje era casa na barra e calendário na página, Diário era talher
+      na barra e caderno na página. Ícone que muda entre o toque e a chegada é
+      pior que ícone nenhum: gasta a atenção do leitor e depois se contradiz.
+
+      Agora vem tudo de `design-system/icons.ts`. Dois empates desfeitos, com o
+      raciocínio registrado lá: **Hoje é calendário** (a tela se chama Hoje e a
+      marca no topo já leva ao início) e **Diário é talher** (as duas coisas são
+      verdade, e o desempate foi para o glifo que o app já usava três vezes).
+
+      A folha "Mais" ganhou os quatro ícones que não tinha — era o único lugar
+      onde alguém está *procurando* uma tela, e o único sem os glifos. O cartão
+      de Treino no Hoje era o único dos quatro sem um.
+
+      Fora de escopo: **a navegação do desktop segue só texto.** Oito links num
+      cabeçalho lêem bem, e o item pede ícone para reconhecer, não para encher.
 - [ ] **Nada de valor solto no componente.** Cor, tipografia, radius, sombra e
       espaçamento centralizados em token. As doze superfícies e os dois botões
       primários escritos à mão saíram; o que resta são os controles — input,

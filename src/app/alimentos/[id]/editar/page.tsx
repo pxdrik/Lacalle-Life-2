@@ -1,9 +1,10 @@
-import { Apple, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
 import { FoodDataProvider } from "@/composition/data-providers";
 import { FoodEditorScreen } from "@/features/foods/components/food-editor-screen";
+import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
@@ -37,7 +38,7 @@ export default async function EditFoodPage({
       </Link>
 
       <PageHeader
-        icon={Apple}
+        icon={ICONS.foods}
         title="Editar alimento"
         subtitle="A correção vale para todas as dietas que usam este alimento daqui para frente."
         className="mt-4"

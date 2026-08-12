@@ -6,6 +6,7 @@ import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
 import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { ICONS } from "@/design-system/icons";
 
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
@@ -47,7 +48,13 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   return (
     <Card as="section">
       <div className="flex items-center justify-between gap-4">
-        <h2 className="text-sm font-medium text-ink">Treino</h2>
+        {/* The one card of the four on this screen that had no glyph, next to
+            three that did — which reads as an oversight rather than as
+            restraint. Same dumbbell as `/treinos`, from the same table. */}
+        <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
+          <ICONS.workouts aria-hidden className="size-4 text-ink-subtle" />
+          Treino
+        </h2>
         <Link
           href="/treinos"
           className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"

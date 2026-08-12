@@ -1,20 +1,14 @@
 "use client";
 
 import type { Route } from "next";
-import {
-  Dumbbell,
-  Home,
-  Menu,
-  TrendingUp,
-  UtensilsCrossed,
-  type LucideIcon,
-} from "lucide-react";
+import { Menu, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { Dialog } from "@/design-system/components/dialog";
+import { ICONS } from "@/design-system/icons";
 
 /**
  * The four screens a phone opens during the day, in the order the day uses
@@ -26,21 +20,49 @@ import { Dialog } from "@/design-system/components/dialog";
  * bar 360px wide would give each of them 51px.
  */
 const TABS: readonly { href: Route; label: string; icon: LucideIcon }[] = [
-  { href: "/", label: "Hoje", icon: Home },
-  { href: "/diario", label: "Diário", icon: UtensilsCrossed },
-  { href: "/treinos", label: "Treinos", icon: Dumbbell },
-  { href: "/evolucao", label: "Evolução", icon: TrendingUp },
+  { href: "/", label: "Hoje", icon: ICONS.today },
+  { href: "/diario", label: "Diário", icon: ICONS.diary },
+  { href: "/treinos", label: "Treinos", icon: ICONS.workouts },
+  { href: "/evolucao", label: "Evolução", icon: ICONS.progress },
 ];
 
-const REST: readonly { href: Route; label: string; hint: string }[] = [
-  { href: "/dietas", label: "Dietas", hint: "Seus planos alimentares" },
+/**
+ * The icons are the same ones the tabs use, from the same table — and until
+ * now this list had none at all. Four destinations that carry a glyph on their
+ * own header, in the tab bar, and on the home screen arrived here as two lines
+ * of text, so the one place where somebody is *hunting* for a screen was the
+ * one place the glyphs were missing.
+ */
+const REST: readonly {
+  href: Route;
+  label: string;
+  hint: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    href: "/dietas",
+    label: "Dietas",
+    hint: "Seus planos alimentares",
+    icon: ICONS.diets,
+  },
   {
     href: "/exercicios",
     label: "Exercícios",
     hint: "Catálogo e personalizados",
+    icon: ICONS.exercises,
   },
-  { href: "/alimentos", label: "Alimentos", hint: "Banco de alimentos" },
-  { href: "/perfil", label: "Perfil", hint: "Metas e dados" },
+  {
+    href: "/alimentos",
+    label: "Alimentos",
+    hint: "Banco de alimentos",
+    icon: ICONS.foods,
+  },
+  {
+    href: "/perfil",
+    label: "Perfil",
+    hint: "Metas e dados",
+    icon: ICONS.profile,
+  },
 ];
 
 /**
@@ -121,7 +143,7 @@ export function BottomNav() {
         className="m-0 mt-auto w-full max-w-none rounded-t-2xl rounded-b-none border-x-0 border-b-0"
       >
         <ul className="space-y-1">
-          {REST.map(({ href, label, hint }) => (
+          {REST.map(({ href, label, hint, icon: Icon }) => (
             <li key={href}>
               <Link
                 href={href}
@@ -129,10 +151,15 @@ export function BottomNav() {
                   setMore(false);
                 }}
                 aria-current={pathname.startsWith(href) ? "page" : undefined}
-                className="flex flex-col rounded-lg px-3 py-3 transition-colors duration-150 ease-out hover:bg-muted aria-[current=page]:bg-muted"
+                className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors duration-150 ease-out hover:bg-muted aria-[current=page]:bg-muted"
               >
-                <span className="text-ink">{label}</span>
-                <span className="mt-0.5 text-xs text-ink-subtle">{hint}</span>
+                <Icon aria-hidden className="size-5 shrink-0 text-ink-subtle" />
+                <span className="min-w-0">
+                  <span className="block text-ink">{label}</span>
+                  <span className="mt-0.5 block text-xs text-ink-subtle">
+                    {hint}
+                  </span>
+                </span>
               </Link>
             </li>
           ))}

@@ -1,8 +1,8 @@
 "use client";
 
-import { CalendarDays } from "lucide-react";
 import { HomeDataProvider } from "@/composition/data-providers";
 import { dayKey, formatLongDay } from "@/core/format/day";
+import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { TodayProgress } from "@/features/body";
 import { TodayEnergy } from "@/features/diet/components/today-energy";
@@ -43,7 +43,7 @@ export default function HomePage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
       <PageHeader
-        icon={CalendarDays}
+        icon={ICONS.today}
         title="Hoje"
         subtitle={capitalise(formatLongDay(today))}
       />

@@ -1,12 +1,13 @@
 "use client";
 
-import { Plus, UtensilsCrossed } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { ICONS } from "@/design-system/icons";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { mealMacros } from "../services/diet-macros";
@@ -45,7 +46,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
     <Card as="section">
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-          <UtensilsCrossed aria-hidden className="size-4 text-ink-subtle" />
+          <ICONS.diary aria-hidden className="size-4 text-ink-subtle" />
           Refeições de hoje
         </h2>
         {eaten.length > 0 && (
@@ -98,7 +99,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
 function Empty() {
   return (
     <div className="mt-4 flex flex-col items-center gap-3 py-6 text-center">
-      <UtensilsCrossed aria-hidden className="size-8 text-ink-subtle" />
+      <ICONS.diary aria-hidden className="size-8 text-ink-subtle" />
       <p className="text-sm text-ink-muted">Nada registrado hoje ainda.</p>
       <Link href="/diario" className={buttonClasses("secondary", "sm")}>
         <Plus aria-hidden className="size-4" />

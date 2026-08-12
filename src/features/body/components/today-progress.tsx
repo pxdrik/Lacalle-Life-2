@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Minus, TrendingUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { Card } from "@/design-system/components/card";
+import { ICONS } from "@/design-system/icons";
 
 import {
   PROGRESS_WINDOW_DAYS,
@@ -36,7 +37,7 @@ export function TodayProgress() {
     <Card as="section">
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-          <TrendingUp aria-hidden className="size-4 text-ink-subtle" />
+          <ICONS.progress aria-hidden className="size-4 text-ink-subtle" />
           Progresso
         </h2>
         <Link
