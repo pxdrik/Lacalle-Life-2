@@ -7,6 +7,7 @@ import { ThemeScript } from "@/design-system/theme/theme-script";
 
 import { AppNav } from "./_components/app-nav";
 import { ServiceWorker } from "./_components/service-worker";
+import { Sidebar } from "./_components/sidebar";
 
 import "./globals.css";
 
@@ -43,8 +44,16 @@ export default function RootLayout({
         <ThemeScript />
         <ThemeProvider>
           <ToastProvider>
-            <AppNav />
-            {children}
+            {/* Two navigations, one at a time. `Sidebar` owns `lg` and up;
+                below that it is not rendered and `AppNav` carries the header
+                and the phone's tab bar. The padding is what keeps content
+                clear of the fixed column, and it lives here rather than on
+                each of eleven pages. */}
+            <Sidebar />
+            <div className="lg:pl-64">
+              <AppNav />
+              {children}
+            </div>
             <ServiceWorker />
           </ToastProvider>
         </ThemeProvider>

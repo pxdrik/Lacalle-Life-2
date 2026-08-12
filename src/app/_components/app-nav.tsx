@@ -41,7 +41,10 @@ export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <header className="border-b border-line">
+    /* Hidden from `lg`, where `Sidebar` is the navigation. `BottomNav` renders
+       from inside here and carries its own `sm:hidden`, so the phone keeps its
+       tab bar either way. */
+    <header className="border-b border-line lg:hidden">
       {/* `justify-between` on a phone, where the links are gone and the
           wordmark would otherwise sit next to the theme toggle with a gap the
           size of the screen between them and the edge. */}

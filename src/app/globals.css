@@ -19,12 +19,6 @@
 
   body {
     background-color: var(--canvas);
-    /* The brand's glow, defined per theme in `tokens.css`. On the background
-       itself rather than a pseudo-element: a `::before` overlay would need a
-       stacking context and a `z-index` on every page wrapper to sit under the
-       content, and that is three fragile rules where this is none. */
-    background-image: var(--page-atmosphere);
-    background-repeat: no-repeat;
     color: var(--ink);
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
