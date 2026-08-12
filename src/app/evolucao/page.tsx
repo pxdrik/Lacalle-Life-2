@@ -8,6 +8,7 @@ import { BodyScreen } from "@/features/body/components/body-screen";
 import { EvolutionScreen } from "@/features/workouts/components/evolution-screen";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Evolução · LaCalle Life",
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
  */
 export default function EvolutionPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       <PageHeader
         icon={ICONS.progress}
         title="Evolução"
@@ -51,6 +52,6 @@ export default function EvolutionPage() {
           </WorkoutDataProvider>
         </div>
       </div>
-    </main>
+    </PageShell>
   );
 }

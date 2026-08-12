@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { buttonClasses } from "@/design-system/components/button";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Página não encontrada · LaCalle Life",
@@ -22,7 +23,7 @@ export const metadata: Metadata = {
  */
 export default function NotFound() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-20 text-center sm:py-28">
+    <PageShell className="py-20 text-center sm:py-28">
       <p className="text-sm tracking-wide text-ink-subtle uppercase">404</p>
 
       <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance">
@@ -45,6 +46,6 @@ export default function NotFound() {
           Ver treinos
         </Link>
       </div>
-    </main>
+    </PageShell>
   );
 }

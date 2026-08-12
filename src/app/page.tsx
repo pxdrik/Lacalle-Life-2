@@ -8,6 +8,7 @@ import { TodayProgress } from "@/features/body";
 import { TodayEnergy } from "@/features/diet/components/today-energy";
 import { TodayMeals } from "@/features/diet/components/today-meals";
 import { TodayWorkout } from "@/features/workouts/components/today-workout";
+import { PageShell } from "@/design-system/components/page-shell";
 
 /**
  * How today is going.
@@ -41,7 +42,7 @@ export default function HomePage() {
   const today = dayKey(new Date());
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
+    <PageShell padding="tight">
       <PageHeader
         icon={ICONS.today}
         title="Hoje"
@@ -68,7 +69,7 @@ export default function HomePage() {
           </div>
         </HomeDataProvider>
       </div>
-    </main>
+    </PageShell>
   );
 }
 

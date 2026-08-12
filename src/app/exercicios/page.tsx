@@ -5,6 +5,7 @@ import { ExerciseDataProvider } from "@/composition/data-providers";
 import { ExerciseBrowser } from "@/features/workouts";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Exercícios · LaCalle Life",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function ExercisesPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       <PageHeader
         icon={ICONS.exercises}
         title="Exercícios"
@@ -28,6 +29,6 @@ export default function ExercisesPage() {
           </ExerciseDataProvider>
         </Suspense>
       </div>
-    </main>
+    </PageShell>
   );
 }

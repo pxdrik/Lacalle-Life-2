@@ -4,6 +4,7 @@ import { DietDataProvider } from "@/composition/data-providers";
 import { DietList } from "@/features/diet/components/diet-list";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Dietas · LaCalle Life",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function DietsPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       <PageHeader
         icon={ICONS.diets}
         title="Dietas"
@@ -23,6 +24,6 @@ export default function DietsPage() {
           <DietList />
         </DietDataProvider>
       </div>
-    </main>
+    </PageShell>
   );
 }

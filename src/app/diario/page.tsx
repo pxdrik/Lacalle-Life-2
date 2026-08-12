@@ -8,6 +8,7 @@ import { dayKey, isFutureDay } from "@/core/format/day";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
+import { PageShell } from "@/design-system/components/page-shell";
 
 /**
  * The food diary — what was eaten, on a date.
@@ -19,7 +20,7 @@ import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
  */
 export default function DiaryPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
+    <PageShell padding="tight">
       <PageHeader
         icon={ICONS.diary}
         title="Diário"
@@ -33,7 +34,7 @@ export default function DiaryPage() {
           </FoodLogDataProvider>
         </Suspense>
       </div>
-    </main>
+    </PageShell>
   );
 }
 

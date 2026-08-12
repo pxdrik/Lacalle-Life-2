@@ -48,7 +48,7 @@ export function AppNav() {
       {/* `justify-between` on a phone, where the links are gone and the
           wordmark would otherwise sit next to the theme toggle with a gap the
           size of the screen between them and the edge. */}
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3.5 sm:justify-start">
+      <div className="mx-auto flex w-full max-w-[120rem] items-center justify-between gap-4 px-6 py-3.5 sm:justify-start">
         {/* `shrink-0` and no wrapping: the wordmark broke onto two lines the
             moment a seventh link was added, which shoved the whole header
             taller on a screen that was merely narrow. */}

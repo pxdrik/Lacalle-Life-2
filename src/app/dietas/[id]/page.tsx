@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { DietEditorDataProvider } from "@/composition/data-providers";
 import { DietEditor } from "@/features/diet/components/diet-editor";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Dieta · LaCalle Life",
@@ -20,10 +21,10 @@ export default async function DietPage({
   const { id } = await params;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       <DietEditorDataProvider>
         <DietEditor dietId={id} />
       </DietEditorDataProvider>
-    </main>
+    </PageShell>
   );
 }

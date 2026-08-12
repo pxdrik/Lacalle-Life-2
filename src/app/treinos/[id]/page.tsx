@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { WorkoutDataProvider } from "@/composition/data-providers";
 import { RoutineEditor } from "@/features/workouts/components/routine-editor";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Treino · LaCalle Life",
@@ -21,7 +22,7 @@ export default async function RoutinePage({
   const { id } = await params;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       {/* The exercise picker reads search params, so it needs a boundary for
           the shell to stay prerenderable. */}
       <Suspense fallback={null}>
@@ -29,6 +30,6 @@ export default async function RoutinePage({
           <RoutineEditor routineId={id} />
         </WorkoutDataProvider>
       </Suspense>
-    </main>
+    </PageShell>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { WorkoutDataProvider } from "@/composition/data-providers";
 import { SessionRunner } from "@/features/workouts/components/session-runner";
+import { PageShell } from "@/design-system/components/page-shell";
 
 /**
  * Deliberately neutral.
@@ -24,10 +25,10 @@ export default async function SessionPage({
   const { id } = await params;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-6 sm:py-10">
+    <PageShell padding="tight">
       <WorkoutDataProvider>
         <SessionRunner sessionId={id} />
       </WorkoutDataProvider>
-    </main>
+    </PageShell>
   );
 }

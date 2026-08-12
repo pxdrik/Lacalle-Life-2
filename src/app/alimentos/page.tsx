@@ -4,6 +4,7 @@ import { FoodDataProvider } from "@/composition/data-providers";
 import { FoodBrowser } from "@/features/foods/components/food-browser";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
   title: "Alimentos · LaCalle Life",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function FoodsPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10 sm:py-14">
+    <PageShell>
       <PageHeader
         icon={ICONS.foods}
         title="Alimentos"
@@ -23,6 +24,6 @@ export default function FoodsPage() {
           <FoodBrowser />
         </FoodDataProvider>
       </div>
-    </main>
+    </PageShell>
   );
 }
