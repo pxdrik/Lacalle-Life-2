@@ -385,9 +385,22 @@ ilustração que seja só dele. É oportunidade, não defeito — um gesto visua
 pequeno (marca no anel de progresso, ilustração para estado vazio) transformaria
 "app calmo e técnico" em algo identificável à primeira vista.
 
-**Virou bloqueio.** O redesign visual pede o símbolo em cinco lugares — header,
-celular, favicon, carregamento e estado vazio — e ele não existe. É a única
-peça da sprint que não dá para tirar do código.
+**A marca chegou em 12/08/2026** e o bloqueio caiu pela metade. Ver
+`docs/logo-brief.md`.
+
+- [x] **A paleta do app é a da logo**, nos dois temas: emerald 500/600/800 e a
+      família slate, com as 67 duplas de contraste aferidas. O nome virou
+      `LaCalle`, com C maiúsculo, e o wordmark do cabeçalho ficou em duas cores.
+- [x] **O brilho da apresentação entrou, o verde nas superfícies não.** Foram
+      comparadas quatro variantes na mesma tela e com o mesmo dado — slate puro,
+      verde sutil, verde forte, e slate com brilho. As quatro passam em AA, então
+      a escolha foi de olho. Verde forte é o modo de falha que originou a sprint,
+      e tem custo: com o fundo verde o esmeralda deixa de ser a única coisa
+      saturada em vista. O brilho põe o verde **no ar e não no material**.
+- [ ] **O símbolo ainda não está no app** — continua o "L" placeholder.
+      **Falta o arquivo vetorial**: traçar a fita a partir do PNG seria adivinhar
+      curva por curva. Com o SVG, são os cinco lugares — header, celular,
+      favicon, carregamento e estado vazio.
 
 ---
 

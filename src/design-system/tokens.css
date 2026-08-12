@@ -184,6 +184,27 @@
      casting a shadow instead — there is nothing above white to raise it to. */
   --card-top-light: transparent;
   --card-top-hero: transparent;
+
+  /**
+   * The glow behind the page. See the dark theme's copy for why it exists.
+   *
+   * **Much weaker here, and deliberately near the threshold of noticing.** The
+   * dark theme's alpha on a white canvas does not read as light in the air; it
+   * reads as a stain on paper. Tested at 0.10 and 0.20 in the browser: at 0.10
+   * it is not there at all, and past 0.20 the top-left corner starts looking
+   * soiled rather than lit. This is the top of that range.
+   */
+  --page-atmosphere:
+    radial-gradient(
+      90rem 50rem at 15% -10%,
+      oklch(0.596 0.127 163.2 / 0.2),
+      transparent 60%
+    ),
+    radial-gradient(
+      70rem 40rem at 95% 8%,
+      oklch(0.596 0.127 163.2 / 0.14),
+      transparent 55%
+    );
 }
 
 [data-theme="dark"] {
@@ -290,6 +311,39 @@
      rather than as a slightly paler one. */
   --card-top-light: oklch(1 0 0 / 0.06);
   --card-top-hero: oklch(1 0 0 / 0.12);
+
+  /**
+   * The glow behind the page — the one piece of the brand artwork's atmosphere
+   * that made it into the product.
+   *
+   * The presentation renders the mark inside a green haze, and the obvious way
+   * to chase that is to tint the surfaces. That was tried, twice, and it is
+   * what made the app read as a terminal: four greens stacked do not say
+   * depth. Compared side by side against a tinted build, the difference is
+   * that **this puts the green in the air and not in the material** — the
+   * cards stay slate, so the emerald ring and the active tab remain the only
+   * saturated things you can point at.
+   *
+   * Two lobes rather than one, off-centre and off-balance, because a single
+   * centred glow reads as a vignette — a lens effect — instead of as light
+   * coming from somewhere.
+   *
+   * It scrolls with the document rather than being pinned. `background-
+   * attachment: fixed` is the pinned version and it is a known performance and
+   * rendering trap on iOS Safari, which is exactly where this app is installed
+   * to a home screen and used one-handed.
+   */
+  --page-atmosphere:
+    radial-gradient(
+      90rem 50rem at 15% -10%,
+      oklch(0.696 0.149 162.5 / 0.16),
+      transparent 60%
+    ),
+    radial-gradient(
+      70rem 40rem at 95% 8%,
+      oklch(0.696 0.149 162.5 / 0.1),
+      transparent 55%
+    );
 }
 
 /**
