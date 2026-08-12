@@ -9,10 +9,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lacalle Life",
+    name: "LaCalle Life",
     // Under the icon on a home screen, where a long name is truncated by the
     // launcher rather than wrapped.
-    short_name: "Lacalle",
+    short_name: "LaCalle",
     description: "Monte dietas, monte treinos, acompanhe sua evolução.",
     lang: "pt-BR",
 

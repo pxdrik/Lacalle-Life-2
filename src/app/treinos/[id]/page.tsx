@@ -5,7 +5,7 @@ import { WorkoutDataProvider } from "@/composition/data-providers";
 import { RoutineEditor } from "@/features/workouts/components/routine-editor";
 
 export const metadata: Metadata = {
-  title: "Treino · Lacalle Life",
+  title: "Treino · LaCalle Life",
 };
 
 /**

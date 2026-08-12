@@ -11,7 +11,7 @@ import { ServiceWorker } from "./_components/service-worker";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Lacalle Life",
+  title: "LaCalle Life",
   description: "Monte dietas, monte treinos, acompanhe sua evolução.",
 };
 

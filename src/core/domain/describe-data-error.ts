@@ -18,7 +18,7 @@ export function describeDataError(error: unknown): string {
       case "QUOTA_EXCEEDED":
         return "O armazenamento do navegador está cheio. Libere espaço para continuar.";
       case "BLOCKED":
-        return "Outra aba do Lacalle Life está aberta com uma versão anterior. Feche-a e recarregue esta página.";
+        return "Outra aba do LaCalle Life está aberta com uma versão anterior. Feche-a e recarregue esta página.";
       case "FAILED":
         return "A operação não pôde ser concluída. Tente novamente.";
     }

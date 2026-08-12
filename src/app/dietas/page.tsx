@@ -6,7 +6,7 @@ import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
-  title: "Dietas · Lacalle Life",
+  title: "Dietas · LaCalle Life",
 };
 
 export default function DietsPage() {

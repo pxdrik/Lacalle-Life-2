@@ -6,7 +6,7 @@ import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
-  title: "Perfil · Lacalle Life",
+  title: "Perfil · LaCalle Life",
 };
 
 export default function ProfilePage() {

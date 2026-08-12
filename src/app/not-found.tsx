@@ -4,7 +4,7 @@ import Link from "next/link";
 import { buttonClasses } from "@/design-system/components/button";
 
 export const metadata: Metadata = {
-  title: "Página não encontrada · Lacalle Life",
+  title: "Página não encontrada · LaCalle Life",
 };
 
 /**

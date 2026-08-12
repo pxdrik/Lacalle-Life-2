@@ -49,11 +49,17 @@ export function AppNav() {
         {/* `shrink-0` and no wrapping: the wordmark broke onto two lines the
             moment a seventh link was added, which shoved the whole header
             taller on a screen that was merely narrow. */}
+        {/* Two-tone, as the logo sets it: "LaCalle" in ink and "Life" in the
+            emerald, with `Life` a step lighter. The mark does the same thing —
+            the name is the weight and the green is what makes it the brand's
+            name rather than a title. `accent-text`, not `accent`: this is type,
+            and the fill green does not clear 4.5:1 at this size. */}
         <Link
           href="/"
-          className="shrink-0 text-sm font-semibold tracking-tight whitespace-nowrap"
+          className="shrink-0 text-sm tracking-tight whitespace-nowrap"
         >
-          Lacalle Life
+          <span className="font-semibold text-ink">LaCalle</span>{" "}
+          <span className="font-medium text-accent-text">Life</span>
         </Link>
 
         {/* Home is reached through the wordmark, so it is not repeated here.

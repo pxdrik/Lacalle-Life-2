@@ -8,7 +8,7 @@ import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 
 export const metadata: Metadata = {
-  title: "Editar alimento · Lacalle Life",
+  title: "Editar alimento · LaCalle Life",
 };
 
 /**

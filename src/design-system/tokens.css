@@ -1,31 +1,54 @@
 /**
  * Design tokens.
  *
- * **Identity: the emerald carries over from V1, and nothing else does.** The
- * brand hue is 167 — the same `oklch(58% 0.2 167)` the first version shipped —
- * because a product's colour is its identity, not its layout. Everything
- * around it is new.
+ * **Identity: the palette is the logo's, and the logo came first.** Every
+ * colour below is either one of the eight swatches that shipped with the mark
+ * — emerald 500/600/800, slate 900/800/700/200, white — or a step interpolated
+ * inside one of those two families. Nothing here is chosen by eye.
+ *
+ * This replaces the V1 emerald at hue 167. That colour was inherited from the
+ * first version on the reasoning that a product's colour is its identity; the
+ * reasoning still holds and the identity simply moved, because the app now has
+ * a mark and the mark has its own green. Hue went 167 → 162.5 and the surfaces
+ * went from a near-neutral cyan (hue 190) to slate, which is a real blue-grey
+ * and the family the logo's own panels use.
+ *
+ * **The brand is a gradient, so each theme takes the stop that works on its
+ * ground.** The mark is not a flat fill: it runs from emerald-500 to
+ * emerald-600 across the ribbon. Measured, emerald-500 does not clear 3:1 as a
+ * graphic on a white page (2.31) and emerald-600 does (3.44), while on the
+ * dark ground 500 reads at 7.04 against 600's 4.73. One flat value would mean
+ * picking a theme to disappoint. Both stops belong to the mark, so neither
+ * choice invents a colour.
+ *
+ * **Near-black stays on the emerald in both themes**, which is the one rule
+ * carried over unchanged. White on emerald-600 measures 3.77 and on
+ * emerald-500 measures 2.54 — neither clears AA. Slate-900 on them measures
+ * 4.74 and 7.04. V1 put white on its green and its own primary button failed;
+ * repeating that with a nicer green would still be a button nobody can read.
  *
  * Colour is spent only where it carries meaning: the primary action, the live
  * state, and data. A screen that is mostly numbers stays calm only if the
  * numbers are the loudest thing on it.
  *
- * **The surfaces are neutral, and that is a reversal.** They were emerald for
- * a while — 0.03 chroma on the canvas, 0.055 on a dark card — after the owner
- * compared the two versions and said V1's colours were more alive. He was
- * right about the impression. The fix was wrong.
+ * **The surfaces are slate, not green, and the logo agrees.** This survived
+ * the rebrand unchanged, which is worth saying out loud because the brand
+ * artwork is full of green: the mark sits in a green glow, and the phone in
+ * the presentation has a green-tinted screen. Those are atmosphere in a
+ * mockup. The eight swatches that came with it name **four slates and no green
+ * surface at all**, and that is the part a UI is built from.
  *
- * The measurement that produced it is the same one that now overturns it. V1's
- * cards are **neutral, chroma 0.01**; its colour comes from a 256px emerald
- * sidebar at 0.08 and an accent at 0.20. Reading that, this version — which
- * has no sidebar — spread the sidebar's colour across every surface. Four
- * greens stacked (canvas, surface, elevated, muted) do not read as depth. They
- * read as a terminal.
+ * The history is the reason to be careful here. Surfaces were emerald once —
+ * 0.03 chroma on the canvas, 0.055 on a dark card — and four greens stacked
+ * (canvas, surface, elevated, muted) did not read as depth. They read as a
+ * terminal, which is the diagnosis that started the redesign. Slate is a
+ * *blue*-grey, so the surfaces now lean away from the brand hue rather than
+ * toward it, and the emerald has the screen to itself.
  *
- * So the rule is the one V1 actually follows: **the brand is concentrated, not
- * diluted.** Depth comes from lightness between neutral surfaces; the emerald
- * is spent on the primary action, the active state and progress, where it is
- * the only saturated thing in view and therefore unmissable.
+ * So the rule is unchanged: **the brand is concentrated, not diluted.** Depth
+ * comes from lightness between neutral surfaces; the emerald is spent on the
+ * primary action, the active state and progress, where it is the only
+ * saturated thing in view and therefore unmissable.
  *
  * The text tokens are near-neutral for the same reason they always were:
  * tinting a surface reads as a material, while tinting body copy just reads as
@@ -43,39 +66,47 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces, from furthest back to closest. Cards are pure white on a soft
-     grey page, so a card lifts off it before a shadow is drawn. `muted` sits
-     *below* the canvas — a recessed row rather than a raised one. */
-  --canvas: oklch(0.98 0.003 190);
+  /* Surfaces, from furthest back to closest. Cards are the palette's white on
+     a slate-tinted page, so a card lifts off it before a shadow is drawn.
+     `muted` sits *below* the canvas — a recessed row rather than a raised one.
+     The tint is the slate hue at a trace of chroma: the same family as the
+     dark theme, so the two are one palette seen under different light. */
+  --canvas: oklch(0.968 0.006 256);
   --surface: oklch(1 0 0);
   --elevated: oklch(1 0 0);
-  --muted: oklch(0.955 0.004 190);
+  --muted: oklch(0.938 0.01 256);
 
-  /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder. */
-  --ink: oklch(0.17 0.008 190);
-  --ink-muted: oklch(0.45 0.008 190);
-  /* 0.55, not the 0.58 that looked right by eye: below this the ratio against
+  /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder.
+     `ink` is slate-900 exactly — the palette's darkest swatch, doing here what
+     it does as the canvas in the dark theme. */
+  --ink: oklch(0.2077 0.0398 265.8);
+  --ink-muted: oklch(0.44 0.035 258);
+  /* 0.545, not the 0.58 that looked right by eye: above this the ratio against
      the canvas drops under 4.5:1. Placeholder text is still text. */
-  --ink-subtle: oklch(0.55 0.007 190);
+  --ink-subtle: oklch(0.545 0.032 257);
 
-  --line: oklch(0.905 0.004 190);
-  --line-strong: oklch(0.8 0.006 190);
+  --line: oklch(0.9 0.008 256);
+  --line-strong: oklch(0.79 0.012 256);
 
   /**
-   * The brand, and the same value in both themes: `oklch(0.58 0.2 167)`,
-   * sampled from V1.
+   * The brand on a light ground: **emerald-600, `#059669`**, the middle stop
+   * of the mark's own gradient.
    *
-   * Earlier this was deeper here than in the dark theme, derived so that white
-   * would sit on it. That reasoning produced two greens for one brand. Taking
-   * V1's measured colour and putting near-black on it satisfies both themes at
-   * once, so the identity is now a colour rather than a pair of compromises.
+   * Not emerald-500, which is the stop the dark theme uses: on a white page it
+   * measures 2.31 against the canvas and misses the 3:1 a filled control and a
+   * chart line owe. 600 measures 3.44. Both are the logo's, so this picks a
+   * stop rather than inventing a green.
    */
-  --accent: oklch(0.58 0.2 167);
-  --accent-ink: oklch(0.165 0.008 180);
+  --accent: oklch(0.596 0.127 163.2);
+  /* Slate-900, the palette's own darkest, at 4.74:1 on the emerald. White
+     measures 3.77 here and does not clear AA. */
+  --accent-ink: oklch(0.2077 0.0398 265.8);
 
   /* The emerald as *text*, which needs 4.5:1 rather than the 3:1 a graphic
-     needs. Used for the completed mark and the finished timer. */
-  --accent-text: oklch(0.47 0.14 167);
+     needs — so it drops to **emerald-800, `#065F46`**, the palette's darkest
+     green, at 7.01 on the canvas. Used for the completed mark and the
+     finished timer. */
+  --accent-text: oklch(0.4318 0.0865 166.9);
 
   --danger: oklch(0.51 0.21 27);
   --danger-ink: oklch(1 0 0);
@@ -124,14 +155,14 @@
   --carbs-text: oklch(0.55 0.14 62);
   --fat-text: oklch(0.52 0.19 305);
 
-  --overlay: oklch(0.17 0.014 180 / 0.45);
+  --overlay: oklch(0.2077 0.0398 265.8 / 0.45);
 
   /* Named `elevation`, not `shadow`: `--shadow-*` is Tailwind's own theme
      namespace, and reusing it here would make the mapping below a circular
      reference to itself. */
-  --elevation-sm: 0 1px 2px oklch(0.17 0.03 180 / 0.06);
+  --elevation-sm: 0 1px 2px oklch(0.2077 0.04 265.8 / 0.06);
   --elevation-md:
-    0 4px 12px oklch(0.17 0.03 180 / 0.08), 0 1px 3px oklch(0.17 0.03 180 / 0.04);
+    0 4px 12px oklch(0.2077 0.04 265.8 / 0.08), 0 1px 3px oklch(0.2077 0.04 265.8 / 0.04);
 
   /**
    * The hero card's lift, and the whole of it in this theme.
@@ -145,7 +176,7 @@
    * same size just reads as a heavier outline.
    */
   --elevation-hero:
-    0 10px 28px oklch(0.17 0.03 180 / 0.1), 0 2px 6px oklch(0.17 0.03 180 / 0.05);
+    0 10px 28px oklch(0.2077 0.04 265.8 / 0.1), 0 2px 6px oklch(0.2077 0.04 265.8 / 0.05);
 
   /* A hairline along a card's top edge, drawn by the `Card` primitive.
      Transparent here: in light mode the border already separates the card from
@@ -162,52 +193,61 @@
    * Dark surfaces lift by getting lighter. Shadows do not read on near-black,
    * so depth is carried by surface value and the top hairline instead.
    *
-   * The four steps are 0.145 → 0.205 → 0.25 → 0.295, and the gaps are the
-   * point: 0.06, 0.045, 0.045 of OKLCH lightness are each comfortably above
-   * the threshold where a surface change is visible. The previous scale had
-   * gaps of the same size but carried 0.03–0.065 of chroma at hue 167, so what
-   * you actually saw was four greens rather than four depths — the eye reads
-   * the hue first and stops there.
+   * **This is the slate ramp from the palette**: slate-900 is the canvas,
+   * slate-800 the card, slate-700 the recessed row, and `elevated` is the one
+   * step interpolated between 800 and 700 — the palette gave three darks and a
+   * raised card needs a fourth.
+   *
+   * The steps are 0.208 → 0.280 → 0.325 → 0.372, each gap comfortably above
+   * the threshold where a surface change is visible. They carry ~0.038 of
+   * chroma, which is five times the old scale's, and that is safe here in a
+   * way it was not before: the hue is 258, a blue-grey pointing *away* from
+   * the brand's 162. The failure this avoids was four greens stacked reading
+   * as a terminal — slate cannot make that mistake, because it is not green.
+   *
+   * The whole ramp is lighter than the one it replaces. Slate-900 sits at
+   * 0.208 where the old canvas was 0.145, so the app reads less like a void
+   * and more like the deep blue-black of the logo's own panels.
    */
-  --canvas: oklch(0.145 0.005 190);
-  --surface: oklch(0.205 0.006 190);
-  --elevated: oklch(0.25 0.007 190);
-  --muted: oklch(0.295 0.008 190);
+  --canvas: oklch(0.208 0.04 266);
+  --surface: oklch(0.2795 0.037 260);
+  --elevated: oklch(0.325 0.038 258);
+  --muted: oklch(0.372 0.039 257);
 
-  --ink: oklch(0.97 0.003 190);
-  --ink-muted: oklch(0.73 0.008 190);
-  /* 0.63, up from 0.61, because the hero card made `elevated` a surface that
-     carries text: against it the old value measured 4.23:1 and missed AA,
-     while against the canvas it had always been comfortable. A token that only
-     passes on the darkest surface is a token that fails the moment something
-     is raised — the caption under the calorie ring is exactly that case. */
-  --ink-subtle: oklch(0.63 0.009 190);
+  --ink: oklch(0.985 0.004 256);
+  --ink-muted: oklch(0.78 0.022 256);
+  /* 0.70, and the reason is unchanged from the last time this moved: the hero
+     card makes `elevated` a surface that carries text, and a token that only
+     passes on the darkest surface fails the moment something is raised. The
+     whole ramp got lighter, so this had to follow it up. */
+  --ink-subtle: oklch(0.7 0.026 256);
 
-  --line: oklch(0.32 0.008 190);
-  --line-strong: oklch(0.43 0.01 190);
+  --line: oklch(0.36 0.038 258);
+  --line-strong: oklch(0.46 0.04 256);
 
   /**
-   * V1's green, sampled from the running app: `oklch(0.58 0.2 167)`.
+   * The brand on a dark ground: **emerald-500, `#10B981`** — the brightest
+   * stop of the mark's gradient and the first swatch of the palette.
    *
-   * The previous value sat at 0.78 lightness — the same hue and nearly the
-   * same chroma, but a pale mint. That is what "the green looks weaker" meant:
-   * not less saturated, lighter. A brand colour is a specific colour, so this
-   * is now the measured one rather than one derived to be convenient.
+   * It reads 7.04:1 against the canvas here, where the light theme's
+   * emerald-600 would read 4.73. Both clear what a graphic owes; this one is
+   * the colour the mark actually leads with, and the dark theme is the one the
+   * brand artwork is drawn on.
    *
-   * The ink stays near-black, and here we part from V1 on purpose. V1 puts
-   * white on this green, which measures 3.54:1 — its own primary button does
-   * not clear AA. Near-black on the same green measures about 5.9:1. Same
-   * colour, legible label.
+   * The ink stays near-black — slate-900, the palette's own — at 7.04:1. White
+   * on this green measures 2.54 and is not an option, which is worth writing
+   * down because the presentation shows white type beside the mark and not on
+   * it.
    */
-  --accent: oklch(0.58 0.2 167);
-  --accent-ink: oklch(0.165 0.008 180);
+  --accent: oklch(0.696 0.149 162.5);
+  --accent-ink: oklch(0.208 0.04 266);
 
   /* On a dark ground the emerald clears 4.5:1 as text while bright, so this
      goes brighter than its light-theme counterpart rather than darker. */
-  --accent-text: oklch(0.84 0.16 167);
+  --accent-text: oklch(0.84 0.15 162.5);
 
   --danger: oklch(0.7 0.18 25);
-  --danger-ink: oklch(0.165 0.008 180);
+  --danger-ink: oklch(0.208 0.04 266);
 
   /* Same two states as the light theme, lifted to read on a dark ground.
      Success is still the accent; error is still `danger`. */

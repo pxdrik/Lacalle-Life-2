@@ -4,7 +4,7 @@ import { DietEditorDataProvider } from "@/composition/data-providers";
 import { DietEditor } from "@/features/diet/components/diet-editor";
 
 export const metadata: Metadata = {
-  title: "Dieta · Lacalle Life",
+  title: "Dieta · LaCalle Life",
 };
 
 /**

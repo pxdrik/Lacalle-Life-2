@@ -13,7 +13,7 @@ import { SessionRunner } from "@/features/workouts/components/session-runner";
  * person keeps many tabs.
  */
 export const metadata: Metadata = {
-  title: "Treino · Lacalle Life",
+  title: "Treino · LaCalle Life",
 };
 
 export default async function SessionPage({

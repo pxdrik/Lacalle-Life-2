@@ -1,8 +1,19 @@
 # Brief da marca
 
-A logo é o **único bloqueio** da sprint de redesign: o pedido cita o símbolo em
-cinco lugares — cabeçalho, celular, favicon, carregamento e estado vazio — e ele
-não existe. Este arquivo é o prompt para gerá-la e o que fazer com o resultado.
+**A marca existe** desde 12/08/2026. O prompt abaixo fica registrado porque foi
+o que a produziu; o que importa agora é o estado e o que falta.
+
+## Estado
+
+- ✅ **A paleta é a da logo**, nos dois temas, com todas as duplas de contraste
+  aferidas em `tokens.test.ts`. Ver a seção _A paleta_ mais abaixo.
+- ✅ **O nome virou `LaCalle Life`**, com C maiúsculo, como a marca escreve — e
+  o wordmark do cabeçalho ficou em duas cores: `LaCalle` em tinta, `Life` em
+  esmeralda.
+- ⏳ **O símbolo ainda não está no app.** Continua o "L" placeholder em
+  `src/app/icon.svg`. **Falta o arquivo vetorial** — traçar a fita a partir do
+  PNG seria adivinhar curva por curva e o resultado ficaria pior que o
+  original. Com o SVG em mãos, são os cinco lugares da lista no fim.
 
 ---
 
@@ -43,15 +54,36 @@ Elas vêm do código, não de gosto:
 
 ## A paleta
 
-| Papel | Hex | Token |
-| --- | --- | --- |
-| A marca | `#009c60` | `oklch(0.58 0.2 167)` — o esmeralda da V1 |
-| Fundo escuro | `#080b0b` | `--canvas` escuro |
-| Fundo claro | `#f6f9f9` | `--canvas` claro |
-| Sobre o esmeralda | `#0b0f0e` | `--accent-ink`, quase-preto |
+As oito cores que vieram com a marca, e onde cada uma foi parar:
 
-O esmeralda é hue 167 e **não muda entre os temas** — é a identidade, medida da
-V1. Ver o cabeçalho de `src/design-system/tokens.css`.
+| Swatch | Hex | Papel no app |
+| --- | --- | --- |
+| emerald-500 | `#10B981` | `--accent` no **escuro** |
+| emerald-600 | `#059669` | `--accent` no **claro** |
+| emerald-800 | `#065F46` | `--accent-text` no claro |
+| slate-900 | `#0F172A` | `--canvas` escuro, `--ink` claro, e a tinta sobre o verde |
+| slate-800 | `#1E293B` | `--surface` escuro |
+| slate-700 | `#334155` | `--muted` escuro |
+| slate-200 | `#E2E8F0` | base dos cinzas claros |
+| branco | `#FFFFFF` | `--surface` claro |
+
+Três coisas medidas que decidiram o resto:
+
+1. **Branco sobre o esmeralda reprova** — 2,54:1 no emerald-500 e 3,77:1 no
+   600. A tinta sobre o verde é slate-900, que mede 7,04 e 4,74. É a mesma
+   armadilha em que a V1 caiu com o próprio botão primário.
+2. **A marca é um degradê, então cada tema pega o passo que funciona no seu
+   fundo.** O emerald-500 não chega aos 3:1 que um gráfico deve numa página
+   branca (2,31); o 600 chega (3,44). No escuro, 500 lê 7,04 contra 4,73 do
+   600. Os dois passos são da marca — nenhum foi inventado.
+3. **As superfícies são slate, não verdes.** A apresentação tem brilho verde em
+   volta de tudo, mas as oito cores nomeiam **quatro slates e nenhuma
+   superfície verde**. Isso é atmosfera de mockup; a paleta é a especificação —
+   e é o que impede o app de voltar a parecer terminal, que foi o diagnóstico
+   que abriu a sprint.
+
+Tudo aferido em `src/design-system/tokens.test.ts`: 67 asserções, e editar um
+valor sem cumprir AA quebra o build.
 
 ---
 
