@@ -1,3 +1,5 @@
+import { Card } from "@/design-system/components/card";
+
 import type { Food } from "../types/food";
 import { FoodRow } from "./food-row";
 
@@ -33,7 +35,7 @@ function ColumnHeader() {
 
 export function FoodList({ foods, onToggleFavorite, onRemove }: Props) {
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-surface">
+    <Card padded={false} className="overflow-hidden">
       <div className="pt-3">
         <ColumnHeader />
       </div>
@@ -48,6 +50,6 @@ export function FoodList({ foods, onToggleFavorite, onRemove }: Props) {
           />
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

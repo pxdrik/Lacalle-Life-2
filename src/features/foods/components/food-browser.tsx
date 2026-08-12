@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
@@ -111,10 +112,10 @@ function EmptyState({
   const { title, hint } = emptyCopy(favoritesOnly, hasFilters);
 
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <Card tone="quiet" className="text-center">
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{hint}</p>
-    </div>
+    </Card>
   );
 }
 

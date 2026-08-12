@@ -256,8 +256,11 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         </div>
       )}
 
+      {/* The end of the workout, and the one moment on this screen that is not
+          a set: raised so that "finalizar" is not one more box in a column of
+          exercise cards. */}
       {allDone && (
-        <Card className="mt-6 text-center">
+        <Card tone="hero" className="mt-6 text-center">
           <p className="text-ink">Todas as séries concluídas.</p>
           <p className="mt-1 text-sm text-ink-subtle">
             {sessionVolumeKg(session).toLocaleString("pt-BR")} kg movidos.

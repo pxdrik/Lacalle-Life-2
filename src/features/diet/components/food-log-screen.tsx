@@ -341,7 +341,10 @@ function EmptyDay({
   readonly onAddMeal: () => void;
 }) {
   return (
-    <Card className="mt-6 text-center">
+    // Quiet: an empty day is an invitation, not a result. Raising a card that
+    // reports nothing gives the most presence on the screen to the absence of
+    // content.
+    <Card tone="quiet" className="mt-6 text-center">
       <p className="text-ink">Nada registrado em {formatDay(day)}.</p>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-ink-subtle">
         Comece de uma dieta que você já montou e ajuste o que mudou, ou monte o

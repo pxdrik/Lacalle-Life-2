@@ -39,7 +39,9 @@ export function PlanSummary({ result }: { readonly result: PlanResult }) {
 function Plan({ plan }: { readonly plan: NutritionPlan }) {
   return (
     <div className="space-y-4">
-      <Card>
+      {/* The whole point of filling in the profile: the number the rest of the
+          screen is inputs for. */}
+      <Card tone="hero">
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-medium tabular-nums text-ink">
             {formatDecimal(plan.targets.kcal)}

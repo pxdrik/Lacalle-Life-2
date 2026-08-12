@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
-import { CARD_SURFACE } from "@/design-system/components/card";
+import { Card, cardSurface } from "@/design-system/components/card";
 
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
@@ -51,7 +51,7 @@ export function EvolutionScreen() {
 
   if (history.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+      <Card tone="quiet" className="text-center">
         <p className="text-ink">Nenhum treino concluído ainda.</p>
         <p className="mt-1.5 text-sm text-ink-subtle">
           Assim que você finalizar um treino, ele aparece aqui com volume,
@@ -63,7 +63,7 @@ export function EvolutionScreen() {
         >
           Ir para os treinos
         </Link>
-      </div>
+      </Card>
     );
   }
 
@@ -98,7 +98,11 @@ export function EvolutionScreen() {
             diferentes
           </p>
 
-          <ul className="mt-3 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <Card
+            as="ul"
+            padded={false}
+            className="mt-3 divide-y divide-line overflow-hidden"
+          >
             {records.slice(0, 12).map((record) => (
               <li
                 key={record.exerciseId}
@@ -116,7 +120,7 @@ export function EvolutionScreen() {
                 </span>
               </li>
             ))}
-          </ul>
+          </Card>
         </section>
       )}
 
@@ -141,7 +145,7 @@ function SessionRow({ session }: { readonly session: Session }) {
       <Link
         href={`/sessao/${session.id}`}
         className={cn(
-          CARD_SURFACE,
+          cardSurface(),
           "flex items-center gap-4 transition-colors duration-150 ease-out hover:border-line-strong",
         )}
       >

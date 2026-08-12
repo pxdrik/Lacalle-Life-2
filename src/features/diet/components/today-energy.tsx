@@ -49,8 +49,11 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const totals = dietMacros(state.log);
   const nothingYet = totals.kcal === 0;
 
+  // The hero of the home screen, and the only one: this is the figure the page
+  // exists to show, and a second raised card beside it would flatten both back
+  // into a list of boxes.
   return (
-    <Card as="section">
+    <Card as="section" tone="hero">
       <div className="flex items-center justify-between gap-4">
         {/* The icon is recognition, not decoration: on a screen where every
             card is a titled box, the glyph is what tells food from training

@@ -1,3 +1,4 @@
+import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
 
 /**
@@ -9,10 +10,7 @@ const WIDTHS = ["w-40", "w-56", "w-32", "w-48", "w-36", "w-52", "w-44", "w-28"];
 
 export function FoodListSkeleton() {
   return (
-    <div
-      aria-hidden
-      className="overflow-hidden rounded-xl border border-line bg-surface"
-    >
+    <Card aria-hidden padded={false} className="overflow-hidden">
       <ul className="divide-y divide-line">
         {WIDTHS.map((width, index) => (
           <li key={index} className="flex items-center gap-4 px-4 py-3">
@@ -29,6 +27,6 @@ export function FoodListSkeleton() {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

@@ -2,6 +2,7 @@
 
 import { Pencil, Trash2 } from "lucide-react";
 
+import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import { formatDay } from "@/core/format/day";
@@ -29,7 +30,7 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
   const newestFirst = [...entries].reverse();
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-surface">
+    <Card padded={false} className="overflow-hidden">
       <ul className="divide-y divide-line">
         {newestFirst.map((entry) => (
           <li key={entry.id} className="flex items-start gap-3 px-4 py-3">
@@ -80,7 +81,7 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }
 

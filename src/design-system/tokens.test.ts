@@ -93,6 +93,15 @@ const PAIRS = [
   ["ink", "muted", 4.5, "body text on a hovered row"],
   ["ink-muted", "canvas", 4.5, "secondary text"],
   ["ink-subtle", "canvas", 4.5, "placeholder text"],
+  // `elevated` stopped being the toast's private background when the hero card
+  // was given it, so every kind of text that lands on a card now has to clear
+  // it too. This is the pair that caught the miss: the ring's caption is
+  // `ink-subtle`, and on the raised surface the old value measured 4.23:1.
+  ["ink", "elevated", 7, "body text on the hero card"],
+  ["ink-muted", "elevated", 4.5, "secondary text on the hero card"],
+  ["ink-subtle", "elevated", 4.5, "the caption under the calorie ring"],
+  ["warning", "elevated", 4.5, "calories past the target, on the hero card"],
+  ["accent-text", "elevated", 4.5, "the emerald as text on the hero card"],
   ["accent-ink", "accent", 4.5, "primary button label"],
   ["accent-text", "canvas", 4.5, "the emerald used as text on the page"],
   ["accent-text", "surface", 4.5, "the emerald used as text on a card"],

@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
 
@@ -205,7 +206,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
               }}
             />
           ) : (
-            <div className="overflow-hidden rounded-xl border border-line bg-surface">
+            <Card padded={false} className="overflow-hidden">
               <ul className="divide-y divide-line">
                 {results.map((exercise) => (
                   <ExerciseRow
@@ -247,7 +248,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                   </li>
                 )}
               </ul>
-            </div>
+            </Card>
           )}
 
           {/* Credit is owed where the work is shown, and only there — so it
@@ -278,7 +279,7 @@ function EmptyState({
   readonly onCreate: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-12 text-center">
+    <Card tone="quiet" className="text-center">
       <p className="text-ink">
         {hasQuery
           ? "Nenhum exercício corresponde à busca."
@@ -311,7 +312,7 @@ function EmptyState({
           Recarregue a página para preencher o banco automaticamente.
         </p>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -328,10 +329,7 @@ function ListSkeleton() {
   ];
 
   return (
-    <div
-      aria-hidden
-      className="overflow-hidden rounded-xl border border-line bg-surface"
-    >
+    <Card aria-hidden padded={false} className="overflow-hidden">
       <ul className="divide-y divide-line">
         {widths.map((width, index) => (
           <li key={index} className="flex items-center gap-3 px-3 py-2.5">
@@ -343,6 +341,6 @@ function ListSkeleton() {
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }

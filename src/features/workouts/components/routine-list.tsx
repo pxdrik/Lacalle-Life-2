@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
 
@@ -116,7 +117,11 @@ function RoutineRow({
   const sets = routine.exercises.reduce((sum, e) => sum + e.sets.length, 0);
 
   return (
-    <li className="group relative rounded-xl border border-line bg-surface transition-colors duration-150 ease-out hover:border-line-strong">
+    <Card
+      as="li"
+      padded={false}
+      className="group transition-colors duration-150 ease-out hover:border-line-strong"
+    >
       <Link
         href={`/treinos/${routine.id}`}
         className="flex items-center gap-4 p-4"
@@ -155,7 +160,7 @@ function RoutineRow({
           <Trash2 aria-hidden className="size-4" />
         </ConfirmButton>
       </div>
-    </li>
+    </Card>
   );
 }
 

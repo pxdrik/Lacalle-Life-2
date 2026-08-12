@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
 
@@ -78,12 +79,12 @@ export function DietList() {
 
       {state.status === "ready" &&
         (state.diets.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+          <Card tone="quiet" className="text-center">
             <p className="text-ink">Nenhuma dieta ainda.</p>
             <p className="mt-1.5 text-sm text-ink-subtle">
               Dê um nome acima e comece a montar.
             </p>
-          </div>
+          </Card>
         ) : (
           <ul className="space-y-2">
             {state.diets.map((diet) => (
@@ -113,7 +114,11 @@ function DietRow({
   const meals = diet.meals.length;
 
   return (
-    <li className="group relative rounded-xl border border-line bg-surface transition-colors duration-150 ease-out hover:border-line-strong">
+    <Card
+      as="li"
+      padded={false}
+      className="group transition-colors duration-150 ease-out hover:border-line-strong"
+    >
       <Link href={`/dietas/${diet.id}`} className="flex items-center gap-4 p-4">
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">
@@ -150,7 +155,7 @@ function DietRow({
           <Trash2 aria-hidden className="size-4" />
         </ConfirmButton>
       </div>
-    </li>
+    </Card>
   );
 }
 

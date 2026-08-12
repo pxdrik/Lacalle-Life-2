@@ -117,8 +117,10 @@
 
   /* A hairline along a card's top edge, drawn by the `Card` primitive.
      Transparent here: in light mode the border already separates the card from
-     the page, and a second line would only muddy it. */
+     the page, and a second line would only muddy it. The hero card lifts by
+     casting a shadow instead — there is nothing above white to raise it to. */
   --card-top-light: transparent;
+  --card-top-hero: transparent;
 }
 
 [data-theme="dark"] {
@@ -142,7 +144,12 @@
 
   --ink: oklch(0.97 0.003 190);
   --ink-muted: oklch(0.73 0.008 190);
-  --ink-subtle: oklch(0.61 0.009 190);
+  /* 0.63, up from 0.61, because the hero card made `elevated` a surface that
+     carries text: against it the old value measured 4.23:1 and missed AA,
+     while against the canvas it had always been comfortable. A token that only
+     passes on the darkest surface is a token that fails the moment something
+     is raised — the caption under the calorie ring is exactly that case. */
+  --ink-subtle: oklch(0.63 0.009 190);
 
   --line: oklch(0.32 0.008 190);
   --line-strong: oklch(0.43 0.01 190);
@@ -188,8 +195,16 @@
 
   /* Here it does the work shadows cannot: on a near-black page a shadow is
      invisible, and this single lit edge is what reads as "raised" instead of
-     "cut out". */
+     "cut out".
+
+     The hero card gets a brighter one, and the pair has to be read together
+     with the surfaces underneath: `elevated` is only 0.045 of lightness above
+     `surface`, which separates the two but does not by itself say which is in
+     front. The lit edge is what does — the brighter the edge, the closer the
+     light, so a doubled hairline reads as one card standing above another
+     rather than as a slightly paler one. */
   --card-top-light: oklch(1 0 0 / 0.06);
+  --card-top-hero: oklch(1 0 0 / 0.12);
 }
 
 /**

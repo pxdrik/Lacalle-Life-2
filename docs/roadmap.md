@@ -118,13 +118,21 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       aparecia; um ponto colorido ao lado do rótulo carrega a identidade quando
       a barra não pode. Marca identidade, não estado: mantém o tom quando a
       barra fica vermelha por estouro.
-- [ ] **Refeições e progresso no Hoje.** Pedido no §8 do brief, mas é conteúdo
-      novo e não reestilização — a tela hoje responde a duas perguntas e para.
-      Fica fora até haver decisão, porque o §25 diz que a sprint é visual.
-- [ ] **Cartões com identidade.** Contraste com o fundo, hierarquia interna,
-      radius e padding consistentes, níveis de superfície diferentes. Alimentação,
-      treino, progresso e alerta podem divergir um pouco quando isso comunica
-      função — não podem ser todos a mesma caixa verde.
+- [x] **Refeições e progresso no Hoje.** Saiu junto com o preenchimento da tela:
+      `TodayMeals` e `TodayProgress` respondem o que foi comido e para onde o
+      peso está indo. A tela passou de duas perguntas para quatro.
+- [x] **Cartões com identidade.** O `Card` ganhou três tons — `hero`, `default`
+      e `quiet` — que diferem por **superfície e luz, nunca por geometria**:
+      mesmo raio e mesmo padding, porque cartão que também muda de forma deixa
+      de parecer da mesma família. `hero` é a única coisa que a tela existe para
+      mostrar, no máximo um por tela; `quiet` é o cartão sem conteúdo ainda.
+
+      Junto foram embora **onze superfícies escritas à mão** — seis contêineres
+      de lista e cinco estados vazios. Não era só duplicação: por serem escritos
+      à mão nunca receberam a hairline do topo, então no escuro a lista de
+      alimentos parecia um buraco recortado na página enquanto os cartões ao
+      lado pareciam elevados. Os cinco estados vazios também discordavam entre
+      si sobre o padding (`py-12` contra `py-14`).
 - [ ] **CTA primário inconfundível** em toda tela que tenha um.
 
 ### P2 — Design system
@@ -150,7 +158,9 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       Alimentação, treino, progresso, dieta, exercício, alimento, perfil,
       configurações — para reconhecer, não para encher.
 - [ ] **Nada de valor solto no componente.** Cor, tipografia, radius, sombra e
-      espaçamento centralizados em token.
+      espaçamento centralizados em token. As onze superfícies do item acima
+      saíram; o que resta são os controles — input, chip e botão de ícone
+      repetem a mesma receita de borda em cerca de quinze arquivos.
 
 ### P3 — Consistência
 
@@ -285,8 +295,21 @@ muda implementações de adapter, nunca portas nem UI.
 
 ## Ajustes pendentes
 
-Os treze achados verificados das auditorias foram fechados. Sobra um, que é
-oportunidade e não defeito.
+Os treze achados verificados das auditorias foram fechados. Sobram dois: uma
+oportunidade e um achado de contraste.
+
+### `ink-subtle` sobre linha em hover, no escuro
+
+Medido ao dar superfície ao cartão herói. No tema escuro `ink-subtle` sobre
+`muted` mede **3,97:1** — abaixo dos 4,5:1 que texto exige. Só acontece no
+hover de uma linha de lista, e em quase todo lugar é inofensivo porque o mesmo
+elemento troca para `text-ink` ao passar o mouse. **A exceção é a porção de
+`food-row`**, que fica em `ink-subtle` durante o hover.
+
+Não foi corrigido junto porque a saída óbvia — clarear `ink-subtle` até 0.665 —
+o encosta em `ink-muted` (0.73) e apaga a diferença entre "secundário" e
+"terciário" no app inteiro, para resolver um estado de hover. A saída provável
+é a linha trocar de cor no hover, como as outras já fazem.
 
 ### Identidade
 

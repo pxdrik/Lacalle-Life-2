@@ -263,7 +263,7 @@ function Headline({
  */
 function EmptyState({ onStart }: { readonly onStart: () => void }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-12 text-center">
+    <Card tone="quiet" className="text-center">
       <Scale aria-hidden className="mx-auto size-8 text-ink-subtle" />
       <p className="mt-3 text-ink">Nenhuma medição ainda.</p>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-ink-subtle">
@@ -274,7 +274,7 @@ function EmptyState({ onStart }: { readonly onStart: () => void }) {
         <Plus aria-hidden className="size-4" />
         Registrar peso
       </Button>
-    </div>
+    </Card>
   );
 }
 

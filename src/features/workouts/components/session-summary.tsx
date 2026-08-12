@@ -64,7 +64,10 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
         </div>
       </div>
 
-      <Card as="dl" className="mt-6 grid grid-cols-3 gap-4">
+      {/* What the session was, in three numbers — the reason this screen is
+          opened, with the per-exercise breakdown below for when it is not
+          enough. */}
+      <Card as="dl" tone="hero" className="mt-6 grid grid-cols-3 gap-4">
         <Figure
           label="Duração"
           value={formatDuration(sessionDurationMs(session) ?? 0)}
