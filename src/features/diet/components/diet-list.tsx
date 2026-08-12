@@ -51,12 +51,12 @@ export function DietList() {
           aria-label="Nome da nova dieta"
           autoComplete="off"
         />
-        <Button
-          type="submit"
-          size="lg"
-          pending={creating}
-          disabled={name.trim() === ""}
-        >
+        {/* Default size, not `lg`: this button is half of a pair with the
+            field beside it, and `lg` made it 46px against the field's 40px —
+            six pixels hanging below the thing it belongs to. The CTA is
+            unmistakable because it is the only filled control on the screen,
+            not because it is taller than its own input. */}
+        <Button type="submit" pending={creating} disabled={name.trim() === ""}>
           <Plus aria-hidden className="size-4" />
           Criar
         </Button>

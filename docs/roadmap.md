@@ -133,7 +133,18 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       alimentos parecia um buraco recortado na página enquanto os cartões ao
       lado pareciam elevados. Os cinco estados vazios também discordavam entre
       si sobre o padding (`py-12` contra `py-14`).
-- [ ] **CTA primário inconfundível** em toda tela que tenha um.
+- [x] **CTA primário inconfundível** em toda tela que tenha um. O achado não foi
+      falta de destaque — foi o CTA principal **desalinhado do campo ao lado
+      dele** nas três telas de lista. Em Dietas e Treinos o "Criar" era `lg`
+      (46px) contra um campo de 40px; em Alimentos o "Novo" nem vinha do
+      primitivo: `h-11` escrito à mão, 44px, quatro pixels pendurados abaixo da
+      busca. O botão passou a ler a altura dos mesmos tokens de densidade que o
+      campo, e os dois `Link` estilizados à mão como botão primário — Alimentos
+      e o fim da sessão — passaram a usar `buttonClasses()`.
+
+      **Hoje continua sem CTA, de propósito.** A tela responde perguntas e a
+      navegação está três centímetros acima; o item pede CTA em toda tela *que
+      tenha um*.
 
 ### P2 — Design system
 
@@ -158,9 +169,17 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       Alimentação, treino, progresso, dieta, exercício, alimento, perfil,
       configurações — para reconhecer, não para encher.
 - [ ] **Nada de valor solto no componente.** Cor, tipografia, radius, sombra e
-      espaçamento centralizados em token. As onze superfícies do item acima
-      saíram; o que resta são os controles — input, chip e botão de ícone
-      repetem a mesma receita de borda em cerca de quinze arquivos.
+      espaçamento centralizados em token. As doze superfícies e os dois botões
+      primários escritos à mão saíram; o que resta são os controles — input,
+      chip e botão de ícone repetem a mesma receita de borda em cerca de quinze
+      arquivos.
+
+      **Decisão em aberto: o raio do botão contra o do campo.** Lado a lado e
+      da mesma altura, o botão fecha em `--corner-md` (10px no desktop) e o
+      campo em `--corner-lg` (14px). Não mexi porque uniformizar muda o
+      acabamento de todos os botões ou de todos os campos do app, e a direção
+      que combina com a sprint — arredondar mais, que lê mais acolhedor que
+      utilitário — é escolha de dono, não de implementação.
 
 ### P3 — Consistência
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/design-system/cn";
+import { Card } from "@/design-system/components/card";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
@@ -197,7 +198,7 @@ function Notice({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <Card tone="quiet" className="text-center">
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{children}</p>
       <Link
@@ -206,7 +207,7 @@ function Notice({
       >
         Voltar para as dietas
       </Link>
-    </div>
+    </Card>
   );
 }
 

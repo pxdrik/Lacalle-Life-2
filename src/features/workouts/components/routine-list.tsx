@@ -54,12 +54,9 @@ export function RoutineList() {
           aria-label="Nome do novo treino"
           autoComplete="off"
         />
-        <Button
-          type="submit"
-          size="lg"
-          pending={creating}
-          disabled={name.trim() === ""}
-        >
+        {/* Same pairing as `/dietas`: the field sets the height, not the
+            button. See the note there. */}
+        <Button type="submit" pending={creating} disabled={name.trim() === ""}>
           <Plus aria-hidden className="size-4" />
           Criar
         </Button>

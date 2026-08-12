@@ -3,7 +3,7 @@
 import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "@/design-system/components/button";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 
 import {
@@ -133,16 +133,10 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
       </div>
 
       <div className="mt-6 flex gap-3">
-        <Link
-          href="/evolucao"
-          className="inline-flex h-11 items-center rounded-lg bg-accent px-5 text-sm font-medium text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
-        >
+        <Link href="/evolucao" className={buttonClasses()}>
           Ver histórico
         </Link>
-        <Link
-          href="/treinos"
-          className="inline-flex h-11 items-center rounded-lg border border-line px-5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
-        >
+        <Link href="/treinos" className={buttonClasses("secondary")}>
           Treinos
         </Link>
       </div>

@@ -5,6 +5,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 
@@ -43,10 +44,11 @@ export function FoodBrowser() {
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
-        <Link
-          href="/alimentos/novo"
-          className="inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg bg-accent px-4 text-sm font-medium text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
-        >
+        {/* The recipe, not a copy of it. Written out by hand this button stood
+            44px tall next to a 40px search field and hung four pixels below
+            it — the screen's primary action, and the one control in the app
+            that did not read its height from the density tokens. */}
+        <Link href="/alimentos/novo" className={buttonClasses()}>
           <Plus aria-hidden className="size-4" />
           <span className="hidden sm:inline">Novo</span>
           <span className="sr-only sm:hidden">Novo alimento</span>
