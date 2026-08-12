@@ -4,6 +4,7 @@ import { GripVertical, X } from "lucide-react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
+import { MACRO_CODING } from "@/design-system/macros";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
@@ -95,9 +96,11 @@ export function MealItemRow({
           width of each name. */}
       <div className="ms-auto flex w-40 shrink-0 items-baseline justify-end gap-3 text-xs tabular-nums sm:w-48 sm:gap-4">
         <span className="text-ink-muted">{formatDecimal(macros.kcal)}</span>
-        <span className="text-protein">{formatDecimal(macros.proteinG)}</span>
-        <span className="text-carbs">{formatDecimal(macros.carbsG)}</span>
-        <span className="text-fat">{formatDecimal(macros.fatG)}</span>
+        {MACRO_CODING.map(({ key, text }) => (
+          <span key={key} className={text}>
+            {formatDecimal(macros[key])}
+          </span>
+        ))}
       </div>
 
       {/* A native select rather than a custom menu: it is keyboard operable,

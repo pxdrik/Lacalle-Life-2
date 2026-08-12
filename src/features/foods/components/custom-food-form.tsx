@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { parseDecimal } from "@/core/format/decimal";
+import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 import { useToast } from "@/design-system/components/toast";
+import { MACRO_CODING } from "@/design-system/macros";
 
 import { estimateKcal } from "../services/create-food";
 import type { Food } from "../types/food";
@@ -18,11 +20,10 @@ import {
   type CustomFoodInput,
 } from "../validation/food-schema";
 
-const MACROS = [
-  { key: "proteinG", label: "Proteína" },
-  { key: "carbsG", label: "Carboidrato" },
-  { key: "fatG", label: "Gordura" },
-] as const;
+// The labels and the colours both come from `MACRO_CODING` now. They used to
+// be spelled out here without any colour at all, which made this — the one
+// screen where somebody *types* protein, carbohydrate and fat — the single
+// place in the app where the three were not colour-coded.
 
 type NumericKey = "kcal" | "proteinG" | "carbsG" | "fatG";
 type Draft = Record<"name" | NumericKey, string> & {
@@ -182,10 +183,18 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
         </legend>
 
         <div className="grid grid-cols-3 gap-3">
-          {MACROS.map((macro) => (
+          {MACRO_CODING.map((macro) => (
             <Field
               key={macro.key}
-              label={macro.label}
+              label={
+                <>
+                  <span
+                    aria-hidden
+                    className={cn("size-1.5 shrink-0 rounded-full", macro.fill)}
+                  />
+                  {macro.long}
+                </>
+              }
               id={macro.key}
               error={issues[`per100g.${macro.key}`]}
             >

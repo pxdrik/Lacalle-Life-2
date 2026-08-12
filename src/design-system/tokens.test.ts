@@ -119,6 +119,19 @@ const PAIRS = [
   ["protein", "canvas", 3, "protein in charts"],
   ["carbs", "canvas", 3, "carbohydrate in charts"],
   ["fat", "canvas", 3, "fat in charts"],
+  // The gap these were written to close: the three above are asserted at the
+  // 3:1 a *graphic* owes, and that assertion is right — but five screens print
+  // the same numbers as small text, where carbohydrate measured 3.58:1. The
+  // pairs below are why `--carbs-text` exists.
+  ["protein-text", "canvas", 4.5, "protein as a figure on the page"],
+  ["carbs-text", "canvas", 4.5, "carbohydrate as a figure on the page"],
+  ["fat-text", "canvas", 4.5, "fat as a figure on the page"],
+  ["protein-text", "surface", 4.5, "protein as a figure on a card"],
+  ["carbs-text", "surface", 4.5, "carbohydrate as a figure on a card"],
+  ["fat-text", "surface", 4.5, "fat as a figure on a card"],
+  ["protein-text", "elevated", 4.5, "protein as a figure on the hero card"],
+  ["carbs-text", "elevated", 4.5, "carbohydrate on the hero card"],
+  ["fat-text", "elevated", 4.5, "fat as a figure on the hero card"],
 ] as const;
 
 describe.each(THEMES)("$name theme contrast", ({ tokens }) => {

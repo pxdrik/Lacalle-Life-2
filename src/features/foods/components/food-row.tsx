@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { MACRO_CODING } from "@/design-system/macros";
 
 import type { Food } from "../types/food";
 import { FOOD_CATEGORY_LABELS } from "../types/food";
@@ -25,7 +26,7 @@ interface Props {
  * legend.
  */
 export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
-  const { kcal, proteinG, carbsG, fatG } = food.per100g;
+  const { kcal } = food.per100g;
 
   return (
     <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
@@ -63,9 +64,11 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
 
       <div className="flex shrink-0 items-baseline gap-3 text-sm tabular-nums sm:gap-4">
         <span className="w-11 text-right text-ink">{format(kcal)}</span>
-        <span className="w-9 text-right text-protein">{format(proteinG)}</span>
-        <span className="w-9 text-right text-carbs">{format(carbsG)}</span>
-        <span className="w-9 text-right text-fat">{format(fatG)}</span>
+        {MACRO_CODING.map(({ key, text }) => (
+          <span key={key} className={`w-9 text-right ${text}`}>
+            {format(food.per100g[key])}
+          </span>
+        ))}
       </div>
 
       {/* Only the user's own foods can be edited or deleted. The catalogue is

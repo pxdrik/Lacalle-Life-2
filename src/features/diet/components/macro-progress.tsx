@@ -1,12 +1,24 @@
 import type { Macros } from "@/core/domain/macros";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
+import { MACRO_CODING } from "@/design-system/macros";
 
+/**
+ * Calories lead, then the three macros in the app's coding.
+ *
+ * The calorie bar is written here rather than taken from `MACRO_CODING`
+ * because it is not one of them: it is drawn in ink, it is the only figure
+ * without a unit, and it is the one the home screen leaves out because the
+ * ring beside these bars already is it.
+ */
 const BARS = [
   { key: "kcal", label: "kcal", fill: "bg-ink", unit: "" },
-  { key: "proteinG", label: "Prot", fill: "bg-protein", unit: "g" },
-  { key: "carbsG", label: "Carb", fill: "bg-carbs", unit: "g" },
-  { key: "fatG", label: "Gord", fill: "bg-fat", unit: "g" },
+  ...MACRO_CODING.map(({ key, short, fill }) => ({
+    key,
+    label: short,
+    fill,
+    unit: "g",
+  })),
 ] as const;
 
 interface Props {

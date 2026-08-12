@@ -106,6 +106,24 @@
   --carbs: oklch(0.62 0.14 62);
   --fat: oklch(0.52 0.19 305);
 
+  /**
+   * The same three as *text*, which needs 4.5:1 where a bar needs 3:1.
+   *
+   * The split `--accent-text` already made, for the same reason and found the
+   * same way — by measuring. The triad above was tuned for area: bars, dots,
+   * chart fills, and it is asserted at 3:1 because that is what a graphic
+   * owes. But five screens print these numbers as small text, and there
+   * **carbohydrate measured 3.58:1 against the page** — the amber that reads
+   * perfectly as a filled bar is the hardest of the three to read as a digit.
+   *
+   * So the fill keeps its value and the text gets its own. Only the lightness
+   * moves; the hue and the chroma are identical, or the two would stop looking
+   * like the same colour used twice.
+   */
+  --protein-text: oklch(0.54 0.16 250);
+  --carbs-text: oklch(0.55 0.14 62);
+  --fat-text: oklch(0.52 0.19 305);
+
   --overlay: oklch(0.17 0.014 180 / 0.45);
 
   /* Named `elevation`, not `shadow`: `--shadow-*` is Tailwind's own theme
@@ -201,6 +219,14 @@
   --protein: oklch(0.72 0.14 250);
   --carbs: oklch(0.79 0.13 68);
   --fat: oklch(0.71 0.16 305);
+
+  /* On a dark ground all three already clear 4.5:1 as text, even on the hero
+     card — the lightest surface the app has. They are declared anyway rather
+     than left to fall back: a token that exists in one theme and not the other
+     is the shape of a bug waiting for someone to darken this scale. */
+  --protein-text: oklch(0.72 0.14 250);
+  --carbs-text: oklch(0.79 0.13 68);
+  --fat-text: oklch(0.71 0.16 305);
 
   --overlay: oklch(0 0 0 / 0.65);
 
@@ -338,6 +364,10 @@
   --color-protein: var(--protein);
   --color-carbs: var(--carbs);
   --color-fat: var(--fat);
+
+  --color-protein-text: var(--protein-text);
+  --color-carbs-text: var(--carbs-text);
+  --color-fat-text: var(--fat-text);
 
   --color-overlay: var(--overlay);
 

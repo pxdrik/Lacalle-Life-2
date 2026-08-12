@@ -2,12 +2,7 @@ import { formatDecimal } from "@/core/format/decimal";
 import type { NutritionPlan, PlanResult } from "@/core/nutrition";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
-
-const FIGURES = [
-  { key: "proteinG", label: "Proteína", color: "text-protein" },
-  { key: "carbsG", label: "Carboidrato", color: "text-carbs" },
-  { key: "fatG", label: "Gordura", color: "text-fat" },
-] as const;
+import { MACRO_CODING } from "@/design-system/macros";
 
 /**
  * What the engine decided, and why.
@@ -50,13 +45,13 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
         </div>
 
         <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line pt-4">
-          {FIGURES.map(({ key, label, color }) => (
+          {MACRO_CODING.map(({ key, long, text }) => (
             <div key={key}>
-              <dd className={`text-xl tabular-nums ${color}`}>
+              <dd className={`text-xl tabular-nums ${text}`}>
                 {formatDecimal(plan.targets[key])}
                 <span className="ml-0.5 text-xs text-ink-subtle">g</span>
               </dd>
-              <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
+              <dt className="mt-0.5 text-xs text-ink-subtle">{long}</dt>
             </div>
           ))}
         </dl>

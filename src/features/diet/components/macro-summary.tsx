@@ -1,17 +1,12 @@
 import type { Macros } from "@/core/domain/macros";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
+import { MACRO_CODING } from "@/design-system/macros";
 
 interface Props {
   readonly macros: Macros;
   readonly size?: "sm" | "lg";
 }
-
-const MACROS = [
-  { key: "proteinG", label: "Prot", color: "text-protein" },
-  { key: "carbsG", label: "Carb", color: "text-carbs" },
-  { key: "fatG", label: "Gord", color: "text-fat" },
-] as const;
 
 /**
  * Calories, then the three macros.
@@ -49,9 +44,9 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
         </dt>
       </div>
 
-      {MACROS.map(({ key, label, color }) => (
+      {MACRO_CODING.map(({ key, short, text }) => (
         <div key={key} className="flex items-baseline gap-1">
-          <dd className={cn(color, large ? "text-xl font-medium" : "text-sm")}>
+          <dd className={cn(text, large ? "text-xl font-medium" : "text-sm")}>
             {formatDecimal(macros[key])}
           </dd>
           <dt
@@ -60,7 +55,7 @@ export function MacroSummary({ macros, size = "sm" }: Props) {
               large ? "text-xs" : "text-[0.6875rem]",
             )}
           >
-            {label}
+            {short}
           </dt>
         </div>
       ))}

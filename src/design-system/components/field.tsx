@@ -1,5 +1,11 @@
 interface Props {
-  readonly label: string;
+  /**
+   * Node rather than string so a label can carry a mark beside its words —
+   * the macro fields put the nutrient's colour dot here, which is the only way
+   * the app's macro coding reaches the one screen where those three numbers
+   * are typed rather than read.
+   */
+  readonly label: React.ReactNode;
   readonly id: string;
   readonly error?: string | undefined;
   readonly hint?: string | undefined;
@@ -32,7 +38,10 @@ export function Field({ label, id, error, hint, disabled, children }: Props) {
     <div
       className={disabled === true ? "space-y-1.5 opacity-45" : "space-y-1.5"}
     >
-      <label htmlFor={id} className="block text-sm font-medium text-ink">
+      <label
+        htmlFor={id}
+        className="flex items-center gap-1.5 text-sm font-medium text-ink"
+      >
         {label}
       </label>
 

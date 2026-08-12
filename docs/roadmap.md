@@ -148,9 +148,20 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
 
 ### P2 — Design system
 
-- [ ] **Macros com codificação consistente** — proteína, carboidrato e gordura
-      nas mesmas cores em Hoje, Diário, Dietas, Perfil, detalhe nutricional e
-      gráficos. Nada de aparecer numa tela e sumir na outra.
+- [x] **Macros com codificação consistente.** A tripla estava definida em **seis
+      lugares** com rótulo e cor próprios, e o "sumir na outra" era literal: no
+      formulário de alimento personalizado — a única tela onde alguém *digita*
+      proteína, carboidrato e gordura — não havia cor nenhuma. Agora há uma
+      tabela só, `design-system/macros.ts`, com rótulo curto e longo (um cabe
+      num cabeçalho de refeição, o outro num resumo de perfil).
+
+      **Achado medido: `carbs` como texto reprovava em AA no tema claro** —
+      3,58:1 contra o mínimo de 4,5. Os três tokens foram afinados para área
+      (barra, ponto, gráfico) e são asseridos a 3:1, que é o que um gráfico
+      deve; mas cinco telas imprimem esses números como texto pequeno. Daí
+      `--protein-text`, `--carbs-text` e `--fat-text`, a mesma separação que
+      `--accent-text` já fazia — só a claridade muda, hue e croma continuam
+      idênticos. Nove duplas novas no `tokens.test.ts` fecham a lacuna.
 - [x] **Estados visualmente distinguíveis.** Componente `Notice` com quatro
       tons, substituindo a receita da caixa de alerta escrita à mão em **19
       lugares, todos vermelhos** — o app só sabia dizer uma coisa. Cada tom
