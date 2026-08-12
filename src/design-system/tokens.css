@@ -115,6 +115,20 @@
   --elevation-md:
     0 4px 12px oklch(0.17 0.03 180 / 0.08), 0 1px 3px oklch(0.17 0.03 180 / 0.04);
 
+  /**
+   * The hero card's lift, and the whole of it in this theme.
+   *
+   * Measured in the browser: on a dark page the hero separates on its own,
+   * 7.8 → 13.1 of L\*. Here both cards are pure white on a 97.7 canvas, so
+   * there is no lightness left to spend — **the shadow is the only thing
+   * saying which card is in front**, and `--elevation-md`, tuned for a hovered
+   * control, was not enough to say it. Deeper and wider rather than darker: a
+   * larger blur reads as distance from the page, where more opacity at the
+   * same size just reads as a heavier outline.
+   */
+  --elevation-hero:
+    0 10px 28px oklch(0.17 0.03 180 / 0.1), 0 2px 6px oklch(0.17 0.03 180 / 0.05);
+
   /* A hairline along a card's top edge, drawn by the `Card` primitive.
      Transparent here: in light mode the border already separates the card from
      the page, and a second line would only muddy it. The hero card lifts by
@@ -192,6 +206,11 @@
 
   --elevation-sm: 0 1px 2px oklch(0 0 0 / 0.4);
   --elevation-md: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
+
+  /* Here the hero already rises by lightness and by a brighter top edge, so
+     this stays at `md`: a bigger black blur under a card on a near-black page
+     is work nobody can see. */
+  --elevation-hero: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
 
   /* Here it does the work shadows cannot: on a near-black page a shadow is
      invisible, and this single lit edge is what reads as "raised" instead of

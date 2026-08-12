@@ -51,9 +51,10 @@ type CardTone = "hero" | "default" | "quiet";
  *
  * `hero` reaches for `--elevated`, which in the light theme is the same white
  * as `--surface` — there is nothing above white — so there the lift is carried
- * by the shadow instead. That asymmetry is the theme being honest rather than
- * mirrored: dark surfaces rise by getting lighter because shadows do not read
- * on near-black, and light ones rise by casting one.
+ * entirely by `--elevation-hero`, which is deeper than any other shadow in the
+ * app for exactly that reason. That asymmetry is the theme being honest rather
+ * than mirrored: dark surfaces rise by getting lighter because shadows do not
+ * read on near-black, and light ones rise by casting one.
  *
  * `quiet` sets no fill and no hairline: the pseudo-element is still positioned
  * by the base recipe, and with nothing painted into it there is nothing to see.
@@ -61,7 +62,7 @@ type CardTone = "hero" | "default" | "quiet";
  * the one place where the content is genuinely absent rather than quiet.
  */
 const TONES: Record<CardTone, string> = {
-  hero: "border-line bg-elevated shadow-md before:bg-(--card-top-hero)",
+  hero: "border-line bg-elevated shadow-(--elevation-hero) before:bg-(--card-top-hero)",
   default: "border-line bg-surface before:bg-(--card-top-light)",
   quiet: "border-dashed border-line",
 };
