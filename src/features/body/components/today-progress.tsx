@@ -4,7 +4,6 @@ import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
-import { Card } from "@/design-system/components/card";
 import { ICONS } from "@/design-system/icons";
 
 import {
@@ -34,7 +33,7 @@ export function TodayProgress() {
   const { latestKg, changeKg } = progress;
 
   return (
-    <Card as="section">
+    <section>
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
           <ICONS.progress aria-hidden className="size-4 text-ink-subtle" />
@@ -70,7 +69,7 @@ export function TodayProgress() {
           </span>
         </p>
       )}
-    </Card>
+    </section>
   );
 }
 

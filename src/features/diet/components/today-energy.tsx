@@ -6,7 +6,6 @@ import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
-import { ICONS } from "@/design-system/icons";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
@@ -49,29 +48,33 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const totals = dietMacros(state.log);
   const nothingYet = totals.kcal === 0;
 
-  // The hero of the home screen, and the only one: this is the figure the page
-  // exists to show, and a second raised card beside it would flatten both back
-  // into a list of boxes.
+  /**
+   * **No card, and that is the whole change.**
+   *
+   * The ring was the app's most proprietary element sitting inside the same
+   * bordered box, at the same radius, with the same title-plus-link header as
+   * the three cards below it — which is how a signature reads as a widget. It
+   * kept the frame and lost the rank.
+   *
+   * So the frame goes and the space stays. The ring is centred with room
+   * around it, and the macros — which used to sit beside it, competing for the
+   * same glance — move below, as the secondary reading they are.
+   *
+   * The heading survives as `sr-only`. A screen reader still gets the landmark
+   * it needs to skip the section; the eye does not get a label competing with
+   * the figure it labels. The ring already says `kcal restantes`.
+   */
   return (
-    <Card as="section" tone="hero">
-      <div className="flex items-center justify-between gap-4">
-        {/* The icon is recognition, not decoration: on a screen where every
-            card is a titled box, the glyph is what tells food from training
-            before the words are read. */}
-        <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-          <ICONS.diary aria-hidden className="size-4 text-ink-subtle" />
-          Alimentação
-        </h2>
-        <Link
-          href="/diario"
-          className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
-        >
-          {nothingYet ? "Registrar" : "Abrir diário"}
-        </Link>
-      </div>
+    <section className="pt-2 pb-1">
+      <h2 className="sr-only">Alimentação</h2>
 
       {targets === null ? (
-        <div className="mt-4">
+        // No profile means no ring, so this branch is the whole section. The
+        // way into the diary has to live here too: without a target *and*
+        // without a way to record, the screen would state a problem and offer
+        // nothing. A test holds this — it caught the link going missing when
+        // the shared header was removed.
+        <div className="mx-auto max-w-lg text-center">
           <MacroSummary macros={totals} size="lg" />
           <p className="mt-3 text-xs text-ink-subtle">
             Sem meta para comparar.{" "}
@@ -83,21 +86,44 @@ export function TodayEnergy({ day }: { readonly day: string }) {
             </Link>{" "}
             se quiser ver quanto ainda cabe no dia.
           </p>
+          <Link
+            href="/diario"
+            className="mt-4 inline-block text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+          >
+            {nothingYet ? "Registrar" : "Abrir diário"}
+          </Link>
         </div>
       ) : (
-        <div className="mt-4 flex flex-col items-center gap-5 sm:flex-row sm:gap-6">
-          <CalorieRing consumed={totals.kcal} target={targets.kcal} />
+        <>
+          <div className="flex justify-center">
+            <CalorieRing consumed={totals.kcal} target={targets.kcal} />
+          </div>
 
-          <div className="w-full min-w-0 flex-1">
+          {/* Below, not beside. The macros keep every number and every bar
+              they had; what they lose is the right to the same glance as the
+              ring. The link rides with them because the diary is where a
+              macro question is answered, and because a second link beside the
+              ring would be the widget header coming back. */}
+          <div className="mx-auto mt-8 max-w-lg">
+            <div className="mb-2 flex items-baseline justify-between gap-4">
+              <p className="text-xs text-ink-subtle">Macros de hoje</p>
+              <Link
+                href="/diario"
+                className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+              >
+                {nothingYet ? "Registrar" : "Abrir diário"}
+              </Link>
+            </div>
+
             <MacroProgress
               totals={totals}
               targets={targets}
               figures={MACRO_FIGURES}
             />
           </div>
-        </div>
+        </>
       )}
-    </Card>
+    </section>
   );
 }
 

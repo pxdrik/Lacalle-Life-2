@@ -5,7 +5,6 @@ import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
-import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
@@ -43,7 +42,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
   const eaten = state.log.meals.filter((meal) => meal.items.length > 0);
 
   return (
-    <Card as="section">
+    <section>
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
           <ICONS.diary aria-hidden className="size-4 text-ink-subtle" />
@@ -87,7 +86,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
           ))}
         </ul>
       )}
-    </Card>
+    </section>
   );
 }
 

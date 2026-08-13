@@ -49,26 +49,40 @@ export default function HomePage() {
         subtitle={capitalise(formatLongDay(today))}
       />
 
-      <div className="mt-6 grid gap-3 lg:grid-cols-3 lg:items-start">
-        <HomeDataProvider>
-          {/* `space-y-3` at every width, not `lg:` only: below `lg` these two
-              are inside one grid cell, so the grid's own `gap-3` never lands
-              between them and the cards met edge to edge on a phone. */}
-          <div className="space-y-3 lg:col-span-2">
-            <TodayEnergy day={today} />
+      <HomeDataProvider>
+        {/* The ring leads, alone, at the width of the page. It used to be one
+            of four cards in a 2/3–1/3 grid, which is a layout that says "these
+            four things are peers" — and they are not. Nothing sits beside it
+            now, which is the entire point: a signature that shares a row is a
+            widget. */}
+        <div className="mx-auto max-w-2xl">
+          <TodayEnergy day={today} />
+        </div>
+
+        {/* Grouped by space, not by border. `gap-10` between sections against
+            `gap-4` inside one is what does the work a card outline used to do
+            — the eye reads the larger gap as a boundary without a line being
+            drawn. Two columns from `lg` because these three *are* peers. */}
+        {/* `min-w-0` on the tracks, not decoration: a grid item defaults to
+            `min-width: auto`, so it refuses to shrink below its own
+            min-content. These sections used to be wrapped in a block inside
+            the cell and were shielded from that; as direct children a long
+            meal name pushed the track to 331px inside a 318px viewport and the
+            whole page scrolled sideways. Caught at 320px. */}
+        <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:items-start">
+          <div className="min-w-0">
             <TodayMeals day={today} />
           </div>
-          {/* One cell holding two cards, not two cells in a two-row grid.
-              As separate grid children their heights came from the rows the
-              left column defined, so training ended 135px above weight while
-              every other gap on the screen was 12 — a hole the layout never
-              intended and that only appears once there is data in both. */}
-          <div className="space-y-3">
+          {/* `space-y`, not a nested grid: the inner grid recreated the same
+              `min-width: auto` one level down, and the resume banner — which
+              only renders while a workout is running — pushed the page
+              sideways again. Block flow shrinks without an exception. */}
+          <div className="min-w-0 space-y-10">
             <TodayWorkout day={today} />
             <TodayProgress />
           </div>
-        </HomeDataProvider>
-      </div>
+        </div>
+      </HomeDataProvider>
     </PageShell>
   );
 }

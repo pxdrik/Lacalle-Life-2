@@ -4,7 +4,6 @@ import Link from "next/link";
 
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
-import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
@@ -46,7 +45,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   );
 
   return (
-    <Card as="section">
+    <section>
       <div className="flex items-center justify-between gap-4">
         {/* The one card of the four on this screen that had no glyph, next to
             three that did — which reads as an oversight rather than as
@@ -74,7 +73,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
           ))}
         </ul>
       )}
-    </Card>
+    </section>
   );
 }
 
