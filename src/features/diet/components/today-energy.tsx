@@ -96,7 +96,11 @@ export function TodayEnergy({ day }: { readonly day: string }) {
       ) : (
         <>
           <div className="flex justify-center">
-            <CalorieRing consumed={totals.kcal} target={targets.kcal} />
+            <CalorieRing
+              consumed={totals.kcal}
+              target={targets.kcal}
+              nothingYet={nothingYet}
+            />
           </div>
 
           {/* Below, not beside. The macros keep every number and every bar
@@ -147,9 +151,11 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 function CalorieRing({
   consumed,
   target,
+  nothingYet,
 }: {
   readonly consumed: number;
   readonly target: number;
+  readonly nothingYet: boolean;
 }) {
   const ratio = target === 0 ? 0 : consumed / target;
   const over = consumed > target;
@@ -197,13 +203,24 @@ function CalorieRing({
           </linearGradient>
         </defs>
 
+        {/* **Dashed while the day is empty**, and that is the app's own word
+            for absence rather than a new one: every empty state in the product
+            is a dashed outline with no fill. Before this the ring on a fresh
+            morning was a solid grey circle — the most proprietary element in
+            the product reading as a disabled widget at the exact moment
+            somebody opens the app for the first time.
+
+            The track, never the progress. No gradient, no arc, no invented
+            percentage: there is nothing to draw, and the dash says so. */}
         <circle
           cx="64"
           cy="64"
           r={RADIUS}
           fill="none"
           strokeWidth="10"
-          className="stroke-muted"
+          strokeDasharray={nothingYet ? "2 10" : undefined}
+          strokeLinecap={nothingYet ? "round" : undefined}
+          className={nothingYet ? "stroke-line-strong" : "stroke-muted"}
         />
         <circle
           cx="64"
@@ -240,8 +257,15 @@ function CalorieRing({
         >
           {formatDecimal(Math.abs(remaining))}
         </p>
+        {/* "Restantes" implies something was eaten. On an empty day nothing
+            was, and the same 2.067 is the budget rather than a remainder —
+            the honest caption for the same true number. */}
         <p className="mt-1 max-w-24 text-xs leading-tight text-ink-subtle">
-          {over ? "kcal acima da meta" : "kcal restantes"}
+          {over
+            ? "kcal acima da meta"
+            : nothingYet
+              ? "kcal para hoje"
+              : "kcal restantes"}
         </p>
       </div>
     </div>

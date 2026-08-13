@@ -1,11 +1,13 @@
 "use client";
 
 import { noticeClasses } from "@/design-system/components/notice";
-import { Plus } from "lucide-react";
+import { Plus, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { buttonClasses } from "@/design-system/components/button";
+import { cn } from "@/design-system/cn";
+import { Button, buttonClasses } from "@/design-system/components/button";
+import { Dialog } from "@/design-system/components/dialog";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 
@@ -21,6 +23,10 @@ export function FoodBrowser() {
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+
+  // What the button has to report while the sheet is closed.
+  const activeFilterCount = (category === null ? 0 : 1) + (favoritesOnly ? 1 : 0);
 
   // Filtering runs on every render rather than living in state. The catalogue
   // is a few hundred rows, so it costs microseconds — and derived state that
@@ -44,10 +50,34 @@ export function FoodBrowser() {
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
-        {/* The recipe, not a copy of it. Written out by hand this button stood
-            44px tall next to a 40px search field and hung four pixels below
-            it — the screen's primary action, and the one control in the app
-            that did not read its height from the density tokens. */}
+        {/* Collapsed behind a control, as `/exercicios` already does. Left
+            open, the chips wrapped to three rows and cost ~200px on every
+            visit — measured — pushing the table to 444px on a phone. Filtering
+            is the secondary action here; searching 216 foods is the primary
+            one, so the field stays and the chips fold away.
+
+            The count rides on the button so a filter left on from last time is
+            visible without opening anything. */}
+        <button
+          type="button"
+          onClick={() => {
+            setShowFilters(true);
+          }}
+          aria-haspopup="dialog"
+          aria-expanded={showFilters}
+          className={cn(
+            buttonClasses("secondary"),
+            activeFilterCount > 0 && "border-accent text-ink",
+          )}
+        >
+          <SlidersHorizontal aria-hidden className="size-4" />
+          <span className="hidden sm:inline">Filtros</span>
+          <span className="sr-only sm:hidden">Filtros</span>
+          {activeFilterCount > 0 && (
+            <span className="tabular-nums">{activeFilterCount}</span>
+          )}
+        </button>
+
         <Link href="/alimentos/novo" className={buttonClasses()}>
           <Plus aria-hidden className="size-4" />
           <span className="hidden sm:inline">Novo</span>
@@ -55,12 +85,40 @@ export function FoodBrowser() {
         </Link>
       </div>
 
-      <FoodFilters
-        category={category}
-        favoritesOnly={favoritesOnly}
-        onCategoryChange={setCategory}
-        onFavoritesOnlyChange={setFavoritesOnly}
-      />
+      {/* A sheet rather than a panel that grows in place: expanding inline is
+          the 200px this change exists to remove. The live count is the payoff,
+          so it sits at the bottom and moves as chips are chosen. */}
+      <Dialog
+        open={showFilters}
+        title="Filtros"
+        onClose={() => {
+          setShowFilters(false);
+        }}
+        className="max-sm:inset-x-0 max-sm:top-auto max-sm:bottom-0 max-sm:m-0 max-sm:w-full max-sm:max-w-none max-sm:rounded-b-none"
+      >
+        <FoodFilters
+          category={category}
+          favoritesOnly={favoritesOnly}
+          onCategoryChange={setCategory}
+          onFavoritesOnlyChange={setFavoritesOnly}
+        />
+
+        <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
+          <p aria-live="polite" className="text-sm text-ink-muted">
+            <span className="tabular-nums text-ink">{results.length}</span>{" "}
+            {results.length === 1 ? "alimento" : "alimentos"}
+          </p>
+
+          <Button
+            size="sm"
+            onClick={() => {
+              setShowFilters(false);
+            }}
+          >
+            Ver resultados
+          </Button>
+        </div>
+      </Dialog>
 
       {writeError !== null && (
         <p role="alert" className={noticeClasses()}>
