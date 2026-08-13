@@ -45,8 +45,8 @@ export function VolumeChart({ points, format }: Props) {
                 title={`${formatDecimal(point.volumeKg)} kg · ${String(point.sets)} séries`}
                 className={
                   point.volumeKg === 0
-                    ? "min-h-0.5 rounded-sm bg-line"
-                    : "min-h-1 rounded-sm bg-accent transition-[height] duration-300 ease-out"
+                    ? "min-h-0.5 rounded-t-full bg-line"
+                    : "min-h-1 rounded-t-full bg-accent transition-[height] duration-300 ease-out"
                 }
                 style={{ height: `${String(Math.max(height, 1))}%` }}
               />

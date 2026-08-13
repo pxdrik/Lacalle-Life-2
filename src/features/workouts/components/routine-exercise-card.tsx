@@ -77,7 +77,7 @@ export function RoutineExerciseCard({
             aria-label={`Reordenar ${exercise.name}`}
             {...dragHandle.attributes}
             {...dragHandle.listeners}
-            className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
+            className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
           >
             <GripVertical aria-hidden className="size-4" />
           </button>
@@ -225,7 +225,7 @@ function IconButton({
       disabled={disabled}
       aria-label={label}
       className={
-        "flex size-8 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out disabled:opacity-30 " +
+        "flex size-8 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out disabled:opacity-30 " +
         (danger === true
           ? "hover:bg-danger/10 hover:text-danger"
           : "hover:bg-muted hover:text-ink")

@@ -31,9 +31,9 @@ export function InProgressBanner() {
       href={`/sessao/${session.id}`}
       // It appears only after the session data loads, so without this it snaps
       // in and shoves the list down. Rising in makes the arrival legible.
-      className="animate-rise flex items-center gap-4 rounded-xl border border-accent bg-accent/5 p-(--card-p) transition-colors duration-150 ease-out hover:bg-accent/10"
+      className="animate-rise flex items-center gap-4 rounded-lg border border-accent bg-accent/5 p-(--card-p) transition-colors duration-150 ease-out hover:bg-accent/10"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent text-accent-ink">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-accent text-accent-ink">
         <Play aria-hidden className="size-5" />
       </span>
 

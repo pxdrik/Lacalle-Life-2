@@ -20,7 +20,7 @@ export function ProfileScreen() {
   const [saving, setSaving] = useState(false);
 
   if (state.status === "loading") {
-    return <Skeleton className="h-72 rounded-xl" />;
+    return <Skeleton className="h-72 rounded-lg" />;
   }
 
   if (state.status === "error") {

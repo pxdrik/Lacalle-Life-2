@@ -32,8 +32,8 @@ export function EvolutionScreen() {
   if (state.status === "loading") {
     return (
       <div aria-hidden className="space-y-4">
-        <Skeleton className="h-40 w-full rounded-xl" />
-        <Skeleton className="h-64 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
       </div>
     );
   }

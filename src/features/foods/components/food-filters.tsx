@@ -18,7 +18,7 @@ interface Props {
 }
 
 const CHIP =
-  "h-8 rounded-full border px-3.5 text-sm transition-colors duration-150 ease-out";
+  "h-8 touch-44 rounded-full border px-3.5 text-sm transition-colors duration-150 ease-out";
 const CHIP_ON = "border-accent bg-accent text-accent-ink";
 const CHIP_OFF =
   "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink";

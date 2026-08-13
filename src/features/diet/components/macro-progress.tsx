@@ -99,7 +99,15 @@ export function MacroProgress({ totals, targets, figures }: Props) {
                   // which is the whole distinction a warning tone exists to
                   // draw. Colouring it red made a normal Tuesday look like a
                   // malfunction.
-                  style={{ width: `${String(Math.min(ratio, 1) * 100)}%` }}
+                  // `min-width` of one track height: the fill is already
+                  // `rounded-full`, but below its own height the round cap has
+                  // no room and the bar ends in a hard edge — the one shape
+                  // the brand does not make. Only when there is something to
+                  // show; zero stays zero.
+                  style={{
+                    width: `${String(Math.min(ratio, 1) * 100)}%`,
+                    minWidth: value > 0 ? "0.25rem" : undefined,
+                  }}
                   className={cn(
                     "h-full rounded-full transition-[width] duration-300 ease-out",
                     over ? "bg-warning" : fill,

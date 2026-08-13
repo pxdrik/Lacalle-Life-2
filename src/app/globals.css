@@ -9,6 +9,40 @@
  */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/**
+ * A 44px touch target on a control that draws smaller than 44px.
+ *
+ * **Visual size is not touch size.** Measured at 388px on `/exercicios`, 183
+ * icon buttons sat at 32px — and they are all the same control, the favourite
+ * star, once per catalogue row. Growing the star to 44px would grow the row,
+ * and the catalogue's density is the reason it is browsable at all.
+ *
+ * So the button keeps its 32px and the *hit area* grows around it. A
+ * pseudo-element is the right tool because it is outside layout entirely:
+ * padding would push neighbours apart and a wrapper would change the flex
+ * arithmetic of rows that were tuned at 360px.
+ *
+ * `max()` rather than a fixed size, so a control already larger than 44px is
+ * left alone instead of having its target shrunk.
+ *
+ * Not applied to text links inside a paragraph. Inflating those would break
+ * the line box, and the standard they answer to is spacing between targets,
+ * not target size.
+ */
+@utility touch-44 {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 2.75rem);
+    height: max(100%, 2.75rem);
+  }
+}
+
 @layer base {
   html {
     /* Tabular figures everywhere by default: this app is a column of numbers,

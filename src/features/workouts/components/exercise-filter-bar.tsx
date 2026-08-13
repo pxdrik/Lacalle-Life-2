@@ -29,7 +29,7 @@ function toggle<T>(set: ReadonlySet<T>, value: T): Set<T> {
 }
 
 const CHIP =
-  "h-7 rounded-full border px-2.5 text-xs transition-colors duration-150 ease-out";
+  "h-7 touch-44 rounded-full border px-2.5 text-xs transition-colors duration-150 ease-out";
 const ON = "border-accent bg-accent text-accent-ink";
 const OFF =
   "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink";

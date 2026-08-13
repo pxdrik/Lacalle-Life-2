@@ -65,7 +65,7 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
                 onEdit(entry.day);
               }}
               aria-label={`Editar ${formatDay(entry.day)}`}
-              className="flex size-8 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
             >
               <Pencil aria-hidden className="size-4" />
             </button>

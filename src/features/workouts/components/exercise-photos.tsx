@@ -71,7 +71,7 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
    */
   if (urls.length === 0) {
     return (
-      <div className="flex aspect-3/2 w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-muted text-center">
+      <div className="flex aspect-3/2 w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-line bg-muted text-center">
         <Dumbbell aria-hidden className="size-7 text-ink-subtle" />
         <p className="px-4 text-sm text-ink-muted">
           Sem foto para este exercício.
@@ -82,7 +82,7 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
 
   return (
     <div>
-      <div className="relative aspect-3/2 w-full overflow-hidden rounded-xl border border-line bg-muted">
+      <div className="relative aspect-3/2 w-full overflow-hidden rounded-lg border border-line bg-muted">
         {urls.map((url, index) => (
           <Image
             key={url}

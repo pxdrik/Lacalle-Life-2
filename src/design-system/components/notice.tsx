@@ -68,7 +68,7 @@ export function noticeClasses(
     TONES[tone].box,
     layout === "inline"
       ? "rounded-lg px-4 py-3 text-sm text-ink"
-      : "rounded-xl px-6 py-8 text-center",
+      : "rounded-lg px-6 py-8 text-center",
   );
 }
 

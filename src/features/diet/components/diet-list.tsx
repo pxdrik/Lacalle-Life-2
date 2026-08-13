@@ -141,7 +141,7 @@ function DietRow({
           type="button"
           onClick={onDuplicate}
           aria-label={`Duplicar ${diet.name}`}
-          className="flex size-8 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          className="flex size-8 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
         >
           <Copy aria-hidden className="size-4" />
         </button>
@@ -164,7 +164,7 @@ function ListSkeleton() {
     <ul aria-hidden className="space-y-2">
       {[0, 1, 2].map((index) => (
         <li key={index}>
-          <Skeleton className="h-[4.5rem] rounded-xl" />
+          <Skeleton className="h-[4.5rem] rounded-lg" />
         </li>
       ))}
     </ul>

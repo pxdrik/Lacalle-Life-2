@@ -80,7 +80,7 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
             href={`/alimentos/${food.id}/editar`}
             aria-label={`Editar ${food.name}`}
             className={cn(
-              "flex size-8 items-center justify-center rounded-md text-ink-subtle",
+              "flex size-8 items-center justify-center touch-44 rounded-full text-ink-subtle",
               "transition-colors duration-150 ease-out hover:bg-muted hover:text-ink",
               "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
             )}

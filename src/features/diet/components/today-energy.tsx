@@ -34,7 +34,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const targets = useNutritionTargets();
 
   if (state.status === "loading") {
-    return <Skeleton className="h-44 w-full rounded-xl" />;
+    return <Skeleton className="h-44 w-full rounded-lg" />;
   }
 
   if (state.status === "error") {

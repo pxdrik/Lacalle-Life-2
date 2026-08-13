@@ -198,7 +198,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       )}
 
       {session.exercises.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-dashed border-line px-6 py-14 text-center">
+        <div className="mt-6 rounded-lg border border-dashed border-line px-6 py-14 text-center">
           <p className="text-ink">Este treino não tem exercícios.</p>
           <p className="mt-1.5 text-sm text-ink-subtle">
             Finalize e adicione exercícios ao treino antes de começar.
@@ -311,7 +311,7 @@ function Notice({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="rounded-lg border border-dashed border-line px-6 py-14 text-center">
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{children}</p>
       <Link
@@ -330,8 +330,8 @@ function RunnerSkeleton() {
       <Skeleton className="h-4 w-32" />
       <Skeleton className="h-8 w-48" />
       <Skeleton className="h-14 w-full" />
-      <Skeleton className="h-56 w-full rounded-xl" />
-      <Skeleton className="h-56 w-full rounded-xl" />
+      <Skeleton className="h-56 w-full rounded-lg" />
+      <Skeleton className="h-56 w-full rounded-lg" />
     </div>
   );
 }

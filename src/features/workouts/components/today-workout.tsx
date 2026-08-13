@@ -29,7 +29,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
 
   if (state.status === "loading") {
-    return <Skeleton className="h-24 w-full rounded-xl" />;
+    return <Skeleton className="h-24 w-full rounded-lg" />;
   }
 
   // Silent on failure. The workout half of the day is worth showing when it
@@ -85,7 +85,7 @@ function FinishedSession({ session }: { readonly session: Session }) {
   return (
     <Link
       href={`/sessao/${session.id}`}
-      className="flex items-baseline gap-3 rounded-lg px-2 py-1.5 -mx-2 transition-colors duration-150 ease-out hover:bg-muted"
+      className="flex items-baseline gap-3 rounded-sm px-2 py-1.5 -mx-2 transition-colors duration-150 ease-out hover:bg-muted"
     >
       <span className="min-w-0 flex-1 truncate text-sm text-ink">
         {session.name}

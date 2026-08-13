@@ -74,7 +74,7 @@ export function Sidebar() {
                   href={href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm",
+                    "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm",
                     "transition-colors duration-150 ease-out",
                     // Solid emerald for the current screen, as in V1, where the
                     // active item is one of the few large blocks of brand

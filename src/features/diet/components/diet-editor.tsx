@@ -181,7 +181,7 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
         onClick={() => {
           apply(addMeal);
         }}
-        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
       >
         <Plus aria-hidden className="size-4" />
         Adicionar refeição
@@ -217,8 +217,8 @@ function EditorSkeleton() {
       <Skeleton className="h-4 w-16" />
       <Skeleton className="h-8 w-64" />
       <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-40 w-full rounded-xl" />
-      <Skeleton className="h-40 w-full rounded-xl" />
+      <Skeleton className="h-40 w-full rounded-lg" />
+      <Skeleton className="h-40 w-full rounded-lg" />
     </div>
   );
 }

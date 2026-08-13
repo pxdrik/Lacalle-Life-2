@@ -100,7 +100,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             const next = event.target.value;
             if (next !== "" && !isFutureDay(next)) goToDay(next);
           }}
-          className="h-(--control-h) rounded-lg border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          className="h-(--control-h) rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
 
         <DayStep
@@ -129,8 +129,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
       {state.status === "loading" && (
         <div aria-hidden className="mt-6 space-y-3">
           <Skeleton className="h-14 w-full" />
-          <Skeleton className="h-40 w-full rounded-xl" />
-          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-40 w-full rounded-lg" />
+          <Skeleton className="h-40 w-full rounded-lg" />
         </div>
       )}
 
@@ -282,7 +282,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
               onClick={() => {
                 apply(addMeal);
               }}
-              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+              className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
             >
               <Plus aria-hidden className="size-4" />
               Adicionar refeição
@@ -370,7 +370,7 @@ function EmptyDay({
                 onClick={() => {
                   onPick(diet);
                 }}
-                className="w-full rounded-lg border border-line px-4 py-2.5 text-sm text-ink transition-colors duration-150 ease-out hover:border-line-strong hover:bg-muted"
+                className="w-full rounded-md border border-line px-4 py-2.5 text-sm text-ink transition-colors duration-150 ease-out hover:border-line-strong hover:bg-muted"
               >
                 {diet.name === "" ? "Dieta sem nome" : diet.name}
               </button>

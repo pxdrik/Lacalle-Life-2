@@ -32,7 +32,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
   const { state } = useFoodLogDay(day);
 
   if (state.status === "loading") {
-    return <Skeleton className="h-40 w-full rounded-xl" />;
+    return <Skeleton className="h-40 w-full rounded-lg" />;
   }
 
   // Silent on error, deliberately. `TodayEnergy` reads the same day from the

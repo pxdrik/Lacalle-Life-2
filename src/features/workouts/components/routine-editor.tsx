@@ -179,7 +179,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
 
       <div className="mt-4">
         {picking ? (
-          <div className="rounded-xl border border-line bg-canvas p-4">
+          <div className="rounded-lg border border-line bg-canvas p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-medium text-ink">
                 Adicionar exercício
@@ -219,7 +219,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
             onClick={() => {
               setPicking(true);
             }}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
           >
             <Plus aria-hidden className="size-4" />
             Adicionar exercício
@@ -240,7 +240,7 @@ function Notice({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="rounded-lg border border-dashed border-line px-6 py-14 text-center">
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{children}</p>
       <Link
@@ -259,8 +259,8 @@ function EditorSkeleton() {
       <Skeleton className="h-4 w-16" />
       <Skeleton className="h-8 w-64" />
       <Skeleton className="h-10 w-full" />
-      <Skeleton className="h-48 w-full rounded-xl" />
-      <Skeleton className="h-48 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-lg" />
+      <Skeleton className="h-48 w-full rounded-lg" />
     </div>
   );
 }

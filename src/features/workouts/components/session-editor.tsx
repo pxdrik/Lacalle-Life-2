@@ -78,7 +78,7 @@ export function SessionEditor({ session, apply, onDone }: Props) {
 
             apply((current) => moveSessionToDay(current, day));
           }}
-          className="h-(--control-h) rounded-lg border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          className="h-(--control-h) rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
         <span className="text-xs text-ink-subtle">
           A duração não muda — só o dia.

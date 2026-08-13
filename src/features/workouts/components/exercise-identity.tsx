@@ -78,7 +78,7 @@ export function ExerciseIdentity({
       aria-label={`Ver detalhes de ${name}`}
       className={cn(
         shared,
-        "rounded-lg transition-opacity duration-150 ease-out hover:opacity-80",
+        "rounded-sm transition-opacity duration-150 ease-out hover:opacity-80",
       )}
     >
       {content}

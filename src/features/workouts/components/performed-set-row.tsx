@@ -23,7 +23,7 @@ interface Props {
 }
 
 const FIELD =
-  "h-11 w-full rounded-lg border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
+  "h-11 w-full rounded-md border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -53,7 +53,7 @@ export function PerformedSetRow({
     <li
       ref={row}
       className={cn(
-        "group rounded-lg px-1 py-1.5 transition-colors duration-200 ease-out",
+        "group rounded-sm px-1 py-1.5 transition-colors duration-200 ease-out",
         isNext && "bg-muted",
         set.isCompleted && "opacity-60",
       )}
@@ -273,7 +273,7 @@ function Step({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        "h-9 min-w-11 rounded-lg border border-line-strong px-2",
+        "h-9 min-w-11 rounded-md border border-line-strong px-2",
         "text-xs tabular-nums text-ink-muted",
         "transition-[background-color,border-color,color,scale] duration-150 ease-out",
         "active:scale-90 hover:border-accent hover:text-ink",

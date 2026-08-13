@@ -55,6 +55,9 @@ export function ConfirmButton({
       }}
       className={cn(
         "relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-md",
+        // Icon-only at rest in five places, and 32px there. The target grows
+        // without the button growing; `max()` leaves the text sizes alone.
+        "touch-44",
         "transition-colors duration-150 ease-out",
         armed
           ? "bg-danger px-2.5 text-xs font-medium text-danger-ink"

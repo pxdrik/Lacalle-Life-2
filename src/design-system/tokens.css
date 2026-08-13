@@ -313,10 +313,42 @@
  */
 :root {
   /* Cartão: the phone, one-handed, at the gym. */
+  /**
+   * Three corners, and each one names a **role** rather than a size.
+   *
+   * `sm` is inline — a thumbnail, a swatch, something sitting inside something
+   * else. `md` is a control — a button, a field, a select; anything you
+   * operate. `lg` is a container — a card, a sheet, a modal; anything that
+   * holds other things. The fourth radius in the system is `full`, which needs
+   * no token because it is not a measurement.
+   *
+   * **The rule this replaces had no rule.** Six values were in use across the
+   * app — 38 `md`, 34 `lg`, 33 `xl`, 10 `full`, 2 `sm`, 1 `2xl` — and a
+   * developer choosing between them could only guess. Measured in the browser
+   * at 388px, five of them appeared on one screen: a 12px button touching an
+   * 18px field inside a 24px card.
+   *
+   * Naming the role removes the guess. An element no longer asks "am I big or
+   * small?", it asks "what am I?", which is a question with an answer.
+   *
+   * **What actually moved:** the button adopted the field's radius. Values
+   * shifted down one step — what was `lg` is now `md`, what was `xl` is now
+   * `lg`, and `xl` is gone. Every card and every field keeps the exact pixels
+   * it had; only buttons changed, from 12px to 18px.
+   *
+   * That direction was chosen over pulling the field down to 12px for two
+   * reasons. Proportion: on a 46px control, 18px of radius is 0.39 of the
+   * height, which reads generous without becoming a pill — and the brand mark
+   * is a generous curve. And risk: fields outnumber buttons in this app, so
+   * moving the button touches less surface.
+   *
+   * The hierarchy survives — container 24 against control 18 is a ratio of
+   * 1.33, visible at a glance. This is a three-step ladder with a rule, not
+   * one radius for everything.
+   */
   --corner-sm: 0.5rem;
-  --corner-md: 0.75rem;
-  --corner-lg: 1.125rem;
-  --corner-xl: 1.5rem;
+  --corner-md: 1.125rem;
+  --corner-lg: 1.5rem;
 
   --control-h: 2.875rem;
   --control-h-sm: 2.375rem;
@@ -361,9 +393,8 @@
      * modelled on.
      */
     --corner-sm: 0.5rem;
-    --corner-md: 0.625rem;
-    --corner-lg: 0.875rem;
-    --corner-xl: 1rem;
+    --corner-md: 0.875rem;
+    --corner-lg: 1rem;
 
     --control-h: 2.5rem;
     --control-h-sm: 2.125rem;
@@ -433,10 +464,13 @@
 
   /* Corners come from the density layer above, so every `rounded-*` already
      written across the app follows the breakpoint without being touched. */
+  /* Three tokens, three roles. `rounded-xl` and `rounded-2xl` are deliberately
+     not mapped: leaving them unmapped means any stray use falls back to
+     Tailwind's own default and looks wrong immediately, instead of quietly
+     working and reintroducing a fourth vocabulary. */
   --radius-sm: var(--corner-sm);
   --radius-md: var(--corner-md);
   --radius-lg: var(--corner-lg);
-  --radius-xl: var(--corner-xl);
 
   /* Motion. The expo-out curve leaves fast and settles slowly, which is what
      makes an interface feel responsive rather than merely animated.

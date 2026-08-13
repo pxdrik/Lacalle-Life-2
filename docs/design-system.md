@@ -49,6 +49,21 @@ botões no app, então mexer no botão altera menos superfície.
 O cartão em 24px e o campo em 18px mantêm hierarquia visível (razão 1,33). **Isto
 não é uniformização** — é uma escada de três degraus com regra.
 
+### Implementado — Sprint 1 (12/08/2026)
+
+Tokens: `--corner-xl` removido, `md` foi a 1.125rem/0.875rem e `lg` a
+1.5rem/1rem. `--radius-xl` deixou de ser mapeado de propósito — assim qualquer
+`rounded-xl` perdido cai no default do Tailwind e fica visivelmente errado, em
+vez de funcionar quieto e reintroduzir um quinto vocabulário.
+
+Duas decisões que a especificação não previa e foram tomadas na implementação:
+
+- **Botão só de ícone virou `rounded-full`.** No tamanho deles (28–32px) o raio
+  de controle já clampa em círculo; deixar implícito seria ambiguidade. Não é um
+  quinto token — é o quarto, aplicado.
+- **A base reta ficou nas barras de volume.** Elas nascem do eixo; arredondar
+  embaixo faria a barra flutuar. Só o topo é curvo, que é a ponta do anel.
+
 ### O que se mantém
 
 - **8px para inline.** Já está certo, dois usos, ambos corretos.

@@ -79,7 +79,7 @@ export function RoutineList() {
 
       {state.status === "ready" &&
         (state.routines.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+          <div className="rounded-lg border border-dashed border-line px-6 py-14 text-center">
             <p className="text-ink">Nenhum treino ainda.</p>
             <p className="mt-1.5 text-sm text-ink-subtle">
               Dê um nome acima e comece a montar.
@@ -143,7 +143,7 @@ function RoutineRow({
           type="button"
           onClick={onDuplicate}
           aria-label={`Duplicar ${routine.name}`}
-          className="flex size-8 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          className="flex size-8 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
         >
           <Copy aria-hidden className="size-4" />
         </button>
@@ -166,7 +166,7 @@ function ListSkeleton() {
     <ul aria-hidden className="space-y-2">
       {[0, 1, 2].map((index) => (
         <li key={index}>
-          <Skeleton className="h-[4.5rem] rounded-xl" />
+          <Skeleton className="h-[4.5rem] rounded-lg" />
         </li>
       ))}
     </ul>

@@ -165,7 +165,7 @@ export function BodyScreen() {
                       setMetric(candidate);
                     }}
                     className={cn(
-                      "shrink-0 rounded-full border px-3 py-1 text-xs transition-colors duration-150 ease-out",
+                      "shrink-0 touch-44 rounded-full border px-3 py-1 text-xs transition-colors duration-150 ease-out",
                       active
                         ? "border-accent bg-accent text-accent-ink"
                         : "border-line text-ink-muted hover:border-line-strong hover:text-ink",
@@ -179,7 +179,7 @@ export function BodyScreen() {
           )}
 
           {points.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-line px-6 py-10 text-center text-sm text-ink-subtle">
+            <p className="rounded-lg border border-dashed border-line px-6 py-10 text-center text-sm text-ink-subtle">
               Nenhum registro de {labelOf(metric).toLowerCase()} ainda.
             </p>
           ) : (
@@ -286,8 +286,8 @@ function BodySkeleton() {
   return (
     <div aria-hidden className="space-y-4">
       <Skeleton className="h-12 w-40" />
-      <Skeleton className="h-48 w-full rounded-xl" />
-      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-lg" />
+      <Skeleton className="h-32 w-full rounded-lg" />
     </div>
   );
 }

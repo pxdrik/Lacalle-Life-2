@@ -54,7 +54,7 @@ export function PageHeader({
         {Icon !== undefined && (
           <span
             aria-hidden
-            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-accent-text md:size-8"
+            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-sm bg-muted text-accent-text md:size-8"
           >
             <Icon className="size-[1.125rem]" />
           </span>

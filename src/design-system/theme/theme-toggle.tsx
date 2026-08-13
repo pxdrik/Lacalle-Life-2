@@ -29,7 +29,7 @@ export function ThemeToggle() {
   const { preference, setPreference } = useTheme();
 
   return (
-    <fieldset className="inline-flex rounded-lg border border-line bg-surface p-0.5">
+    <fieldset className="inline-flex rounded-md border border-line bg-surface p-0.5">
       <legend className="sr-only">Tema</legend>
 
       {OPTIONS.map(({ value, label, Icon }) => (

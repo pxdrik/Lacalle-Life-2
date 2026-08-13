@@ -35,7 +35,7 @@ type Draft = {
 };
 
 const SELECT_CLASS =
-  "h-11 w-full rounded-lg border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong";
+  "h-11 w-full rounded-md border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong";
 
 export function ProfileForm({ initial, pending, onSubmit }: Props) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(initial));

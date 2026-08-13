@@ -63,7 +63,7 @@ function Notice({
   readonly children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-line px-6 py-14 text-center">
+    <div className="rounded-lg border border-dashed border-line px-6 py-14 text-center">
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{children}</p>
       <Link

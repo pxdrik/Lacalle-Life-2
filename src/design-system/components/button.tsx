@@ -25,7 +25,7 @@ const VARIANTS = {
 const SIZES = {
   sm: "h-(--control-h-sm) gap-1.5 rounded-md px-3 text-sm",
   md: "h-(--control-h) gap-2 rounded-md px-(--control-px) text-sm",
-  lg: "h-(--control-h-lg) gap-2 rounded-lg px-5 text-base md:text-sm",
+  lg: "h-(--control-h-lg) gap-2 rounded-md px-5 text-base md:text-sm",
 } satisfies Record<ButtonSize, string>;
 
 const BASE =

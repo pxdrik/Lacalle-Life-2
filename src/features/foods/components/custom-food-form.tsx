@@ -165,7 +165,7 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
             onChange={(event) => {
               update("category", event.target.value);
             }}
-            className="h-11 w-full rounded-lg border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong"
+            className="h-11 w-full rounded-md border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong"
           >
             {FOOD_CATEGORIES.map((category) => (
               <option key={category} value={category}>

@@ -7,7 +7,7 @@ export function Input({
   return (
     <input
       className={cn(
-        "h-(--control-h) w-full rounded-lg border border-line bg-surface",
+        "h-(--control-h) w-full rounded-md border border-line bg-surface",
         "px-(--control-px) text-ink",
         // 16px minimum on the field itself: anything smaller makes iOS Safari
         // zoom the viewport on focus, which throws away the layout mid-typing.

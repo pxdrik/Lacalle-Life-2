@@ -124,7 +124,7 @@ export function Card({
  */
 export function cardSurface(tone: CardTone = "default", padded = true): string {
   return cn(
-    "relative rounded-xl border",
+    "relative rounded-lg border",
     "before:pointer-events-none before:absolute before:inset-x-px before:top-0",
     "before:h-px",
     TONES[tone],

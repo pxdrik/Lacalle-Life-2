@@ -140,7 +140,7 @@ export function BottomNav() {
         onClose={() => {
           setMore(false);
         }}
-        className="m-0 mt-auto w-full max-w-none rounded-t-2xl rounded-b-none border-x-0 border-b-0"
+        className="m-0 mt-auto w-full max-w-none rounded-t-lg rounded-b-none border-x-0 border-b-0"
       >
         <ul className="space-y-1">
           {REST.map(({ href, label, hint, icon: Icon }) => (
@@ -151,7 +151,7 @@ export function BottomNav() {
                   setMore(false);
                 }}
                 aria-current={pathname.startsWith(href) ? "page" : undefined}
-                className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors duration-150 ease-out hover:bg-muted aria-[current=page]:bg-muted"
+                className="flex items-center gap-3 rounded-md px-3 py-3 transition-colors duration-150 ease-out hover:bg-muted aria-[current=page]:bg-muted"
               >
                 <Icon aria-hidden className="size-5 shrink-0 text-ink-subtle" />
                 <span className="min-w-0">
