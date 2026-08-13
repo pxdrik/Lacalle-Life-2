@@ -78,8 +78,13 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
+        {/* Same rule as `/alimentos`: the label folds away on a phone and the
+            glyph carries it. `aria-label` rather than an `sr-only` span, so
+            one attribute names the control at every width instead of two
+            spans taking turns. */}
         <button
           type="button"
+          aria-label="Filtros"
           aria-expanded={showFilters}
           onClick={() => {
             setShowFilters((open) => !open);
@@ -93,7 +98,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />
-          Filtros
+          <span className="hidden sm:inline">Filtros</span>
           {activeFilterCount > 0 && (
             <span className="tabular-nums">{activeFilterCount}</span>
           )}

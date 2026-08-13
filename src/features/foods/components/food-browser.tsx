@@ -63,6 +63,7 @@ export function FoodBrowser() {
           onClick={() => {
             setShowFilters(true);
           }}
+          aria-label="Filtros"
           aria-haspopup="dialog"
           aria-expanded={showFilters}
           className={cn(
@@ -72,7 +73,6 @@ export function FoodBrowser() {
         >
           <SlidersHorizontal aria-hidden className="size-4" />
           <span className="hidden sm:inline">Filtros</span>
-          <span className="sr-only sm:hidden">Filtros</span>
           {activeFilterCount > 0 && (
             <span className="tabular-nums">{activeFilterCount}</span>
           )}
