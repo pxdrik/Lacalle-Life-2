@@ -61,7 +61,7 @@ export function MealItemRow({
         aria-label={`Reordenar ${item.name}`}
         {...dragHandle.attributes}
         {...dragHandle.listeners}
-        className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-full text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+        className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
       >
         <GripVertical aria-hidden className="size-3.5" />
       </button>
@@ -140,7 +140,7 @@ export function MealItemRow({
         type="button"
         onClick={onRemove}
         aria-label={`Remover ${item.name}`}
-        className="flex size-7 shrink-0 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+        className="flex size-7 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
       >
         <X aria-hidden className="size-3.5" />
       </button>

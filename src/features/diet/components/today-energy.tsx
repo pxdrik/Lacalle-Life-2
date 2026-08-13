@@ -140,6 +140,37 @@ function CalorieRing({
         className="size-36 -rotate-90 sm:size-44"
         role="presentation"
       >
+        {/* The brand's gradient, and the only place it exists.
+
+            **It runs along the direction the arc travels, not across the box.**
+            The svg is rotated −90°, so the stroke starts at twelve o'clock and
+            sweeps clockwise: the first half of any day's progress descends the
+            right-hand side. `y1`→`y2` therefore maps the ramp onto the arc's
+            own path for that half — it opens at the brightest stop where
+            progress begins and deepens as it advances.
+
+            Honest about the limit: a gradient that follows a circle exactly is
+            a *conic* gradient, which SVG has no native element for. Drawing one
+            would mean replacing the stroke with a masked `conic-gradient` div,
+            and that would cost the round cap and the `stroke-dashoffset`
+            transition — the two things that make this ring feel like the app
+            noticing rather than a chart redrawing. Past 50% the ramp mirrors
+            back up rather than continuing to deepen. That is the trade, taken
+            deliberately. */}
+        <defs>
+          <linearGradient
+            id="ring-progress"
+            gradientUnits="userSpaceOnUse"
+            x1="64"
+            y1="12"
+            x2="64"
+            y2="116"
+          >
+            <stop offset="0%" stopColor="var(--ring-from)" />
+            <stop offset="100%" stopColor="var(--ring-to)" />
+          </linearGradient>
+        </defs>
+
         <circle
           cx="64"
           cy="64"
@@ -162,9 +193,14 @@ function CalorieRing({
           // Amber past the target, not red: going over is worth noticing and
           // is not a fault, and red is what this app says when something
           // actually broke. See the same reasoning in `MacroProgress`.
+          //
+          // Flat amber, not a gradient: overshoot is a *state*, and the
+          // gradient is the brand saying "this is progressing". Keeping the
+          // ramp here would dress a warning in the signature.
+          stroke={over ? undefined : "url(#ring-progress)"}
           className={cn(
             "transition-[stroke-dashoffset] duration-500 ease-out",
-            over ? "stroke-warning" : "stroke-accent",
+            over && "stroke-warning",
           )}
         />
       </svg>

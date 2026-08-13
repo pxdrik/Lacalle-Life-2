@@ -44,7 +44,7 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
             <span className="mx-1.5 text-line-strong">·</span>
             {formatDate(session.startedAt)}
           </p>
-          <h1 className="mt-1 truncate text-2xl font-semibold tracking-tight">
+          <h1 className="mt-1 truncate text-2xl font-medium tracking-normal">
             {session.name}
           </h1>
         </div>

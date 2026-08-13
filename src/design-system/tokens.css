@@ -108,6 +108,22 @@
      finished timer. */
   --accent-text: oklch(0.4318 0.0865 166.9);
 
+  /**
+   * The calorie ring's two stops, and **the only gradient in the product.**
+   *
+   * The mark is not a flat fill — it runs across the emerald ramp as the ribbon
+   * turns — and the ring is the one place in the app that draws a trajectory,
+   * so it is the one place that stop belongs. Anywhere else it would stop being
+   * the signature and start being a theme.
+   *
+   * One step of the brand's own ramp, never an invented pair. Here that is
+   * emerald-600 into emerald-700: 600 is the accent and clears the 3:1 a
+   * graphic owes on white (3.44), and 700 measures 4.86, so the deeper end of
+   * the arc is if anything easier to see than the start.
+   */
+  --ring-from: oklch(0.596 0.127 163.2);
+  --ring-to: oklch(0.515 0.105 165);
+
   --danger: oklch(0.51 0.21 27);
   --danger-ink: oklch(1 0 0);
 
@@ -246,6 +262,12 @@
   /* On a dark ground the emerald clears 4.5:1 as text while bright, so this
      goes brighter than its light-theme counterpart rather than darker. */
   --accent-text: oklch(0.84 0.15 162.5);
+
+  /* Emerald-500 into emerald-600 — the same one step of the ramp the light
+     theme takes, moved up to the pair that reads on a dark ground: 7.04 and
+     4.73 against the canvas. */
+  --ring-from: oklch(0.696 0.149 162.5);
+  --ring-to: oklch(0.596 0.127 163.2);
 
   --danger: oklch(0.7 0.18 25);
   --danger-ink: oklch(0.208 0.04 266);

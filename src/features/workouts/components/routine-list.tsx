@@ -143,7 +143,7 @@ function RoutineRow({
           type="button"
           onClick={onDuplicate}
           aria-label={`Duplicar ${routine.name}`}
-          className="flex size-8 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
         >
           <Copy aria-hidden className="size-4" />
         </button>

@@ -26,7 +26,7 @@ export default function NotFound() {
     <PageShell className="py-20 text-center sm:py-28">
       <p className="text-sm tracking-wide text-ink-subtle uppercase">404</p>
 
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-balance">
+      <h1 className="mt-3 text-3xl font-medium tracking-normal text-balance">
         Esta página não existe.
       </h1>
 

@@ -86,7 +86,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         onChange={(event) => {
           apply((current) => renameRoutine(current, event.target.value));
         }}
-        className="-mx-1.5 mt-3 w-full rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-2xl font-semibold tracking-tight transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
+        className="-mx-1.5 mt-3 w-full rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-2xl font-medium tracking-normal transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
       />
 
       <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center justify-between gap-4 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">

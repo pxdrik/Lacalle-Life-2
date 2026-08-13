@@ -126,12 +126,12 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         Sair sem finalizar
       </Link>
 
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">
+      <h1 className="mt-3 text-2xl font-medium tracking-normal">
         {session.name}
       </h1>
 
       {/* The two numbers worth glancing at mid-set, and nothing else. */}
-      <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center gap-6 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
+      <div className="relative sticky top-0 z-10 -mx-6 mt-4 flex items-center gap-6 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
         <Stat
           label="Tempo"
           value={formatDuration(sessionElapsedMs(session, now))}
@@ -189,6 +189,34 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
             </>
           )}
         </Button>
+
+        {/* The same `9/9` that is already two centimetres to the left, drawn.
+            No new data and no new calculation — `sessionProgress` was already
+            computed for the stat beside it.
+
+            **Two pixels, on the bar's own bottom edge, and no track behind
+            it.** It is a line of travel across the session, not a component:
+            the ring is the signature and this must not compete with it. A
+            track would make it a widget; without one it reads as the border
+            filling in as the workout proceeds. `rounded-full` on the fill so
+            the leading edge carries the same round cap the ring does. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden"
+        >
+          <div
+            // `scaleX` from the left rather than a percentage width. The width
+            // version measured 0px in the browser — a percentage inside an
+            // absolutely positioned, `overflow-hidden` strip did not resolve —
+            // and the transform is the better tool anyway: it composites
+            // instead of laying out, and it is what `--animate-drain` already
+            // uses for the confirmation bar.
+            style={{
+              scale: `${String(progress.total === 0 ? 0 : progress.completed / progress.total)} 1`,
+            }}
+            className="h-full origin-left rounded-full bg-accent transition-[scale] duration-300 ease-out"
+          />
+        </div>
       </div>
 
       {saveError !== null && (

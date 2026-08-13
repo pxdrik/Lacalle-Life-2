@@ -27,9 +27,16 @@ interface Props {
  * turned out to be the weakest thing in the design.
  *
  * **The type is the point.** A title one step up from body copy is not a
- * hierarchy, it is a slightly larger paragraph. This sets a real jump and
- * pulls the tracking in as the size grows, which is what stops large text
- * from reading as loose.
+ * hierarchy, it is a slightly larger paragraph. This sets a real jump, and the
+ * jump alone carries it.
+ *
+ * **The tracking used to be negative and is now normal**, which is the smallest
+ * typographic move that answers the brand. Tight tracking is the convention of
+ * a neo-grotesque like Geist, and it is the opposite of the wordmark, whose
+ * letterforms are wide and nearly circular. Measured before the change, the
+ * `Hoje` heading sat at −0.84px: the most technical-looking thing on a screen
+ * whose shapes had just been made generous. Weight came down with it, 600 to
+ * 500, because the mark is light for its size.
  *
  * It gets *smaller* on the desk, not larger: the phone shows one screen at a
  * time and the title orients you, while a desktop window already shows the
@@ -61,7 +68,7 @@ export function PageHeader({
         )}
 
         <div className="min-w-0">
-          <h1 className="text-[1.75rem] leading-[1.15] font-semibold tracking-[-0.03em] text-balance md:text-2xl md:tracking-[-0.025em]">
+          <h1 className="text-[1.75rem] leading-[1.15] font-medium tracking-normal text-balance md:text-2xl">
             {title}
           </h1>
           {subtitle !== undefined && (

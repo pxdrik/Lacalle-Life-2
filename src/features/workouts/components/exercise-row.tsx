@@ -84,7 +84,7 @@ export function ExerciseRow({
             : `Favoritar ${exercise.name}`
         }
         className={cn(
-          "flex size-8 shrink-0 items-center justify-center touch-44 rounded-full",
+          "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md",
           "transition-colors duration-150 ease-out hover:bg-line",
           exercise.isFavorite
             ? "text-ink"
@@ -105,7 +105,7 @@ export function ExerciseRow({
             onSelect(exercise);
           }}
           aria-label={`Adicionar ${exercise.name}`}
-          className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-full bg-accent text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
+          className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md bg-accent text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
         >
           <Plus aria-hidden className="size-4" />
         </button>

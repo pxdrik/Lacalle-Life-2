@@ -78,7 +78,7 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
         }}
         label="Nome da dieta"
         placeholder="Dieta sem nome"
-        className="mt-3 w-full text-2xl font-semibold tracking-tight"
+        className="mt-3 w-full text-2xl font-medium tracking-normal"
       />
 
       {/* Sticky, because the totals are the reason the screen exists: every

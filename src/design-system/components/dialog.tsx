@@ -133,7 +133,7 @@ export function Dialog({ open, title, onClose, children, className }: Props) {
           type="button"
           onClick={onClose}
           aria-label="Fechar"
-          className="-m-1 flex size-8 shrink-0 items-center justify-center touch-44 rounded-full text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          className="-m-1 flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
         >
           <X aria-hidden className="size-4" />
         </button>
