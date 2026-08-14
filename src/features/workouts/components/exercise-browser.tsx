@@ -6,7 +6,7 @@ import { Plus, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
-import { Button } from "@/design-system/components/button";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
@@ -90,11 +90,12 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             setShowFilters((open) => !open);
           }}
           className={cn(
-            "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-lg border px-3.5 text-sm",
-            "transition-colors duration-150 ease-out",
-            activeFilterCount > 0
-              ? "border-accent bg-accent text-accent-ink"
-              : "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink",
+            // Same control, same recipe, on both screens. Active is the
+            // system's `primary` rather than `secondary` patched with an
+            // accent border: the filled variant already carries the right
+            // hover and active opacity, where overriding `secondary` would
+            // leave `hover:bg-muted` behind and wash the state out on hover.
+            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />

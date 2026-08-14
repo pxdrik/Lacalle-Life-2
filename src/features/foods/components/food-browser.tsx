@@ -67,8 +67,12 @@ export function FoodBrowser() {
           aria-haspopup="dialog"
           aria-expanded={showFilters}
           className={cn(
-            buttonClasses("secondary"),
-            activeFilterCount > 0 && "border-accent text-ink",
+            // Same control, same recipe, on both screens. Active is the
+            // system's `primary` rather than `secondary` patched with an
+            // accent border: the filled variant already carries the right
+            // hover and active opacity, where overriding `secondary` would
+            // leave `hover:bg-muted` behind and wash the state out on hover.
+            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />
