@@ -14,10 +14,27 @@ import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
 
 import { useRoutineList } from "../hooks/use-routine-list";
+import { useSessionHistory } from "../hooks/use-session-history";
+import { useTicker } from "../hooks/use-ticker";
+import {
+  executionTrail,
+  TRAIL_WEEKS,
+  type ExecutionTrail,
+} from "../services/history";
 import type { Routine } from "../types/routine";
 import { InProgressBanner } from "./in-progress-banner";
 
 export function RoutineList() {
+  // The same provider the resume banner already reads from, so the history
+  // arrives without a new hook, a new query or a new shape of data.
+  const history = useSessionHistory();
+  const sessions = history.status === "ready" ? history.sessions : [];
+  // Through the ticker rather than `Date.now()` in the body: reading the clock
+  // during render is impure and the lint rule that says so is right. One read
+  // per render, not one per row, or each routine would anchor its marks to a
+  // slightly different "now". An hour is far finer than a trail measured in
+  // weeks needs, and it costs one timer on a screen that already runs one.
+  const now = useTicker(true, 60 * 60 * 1000);
   const router = useRouter();
   const { state, writeError, create, duplicate, remove } = useRoutineList();
   const [name, setName] = useState("");
@@ -103,6 +120,7 @@ export function RoutineList() {
               <RoutineRow
                 key={routine.id}
                 routine={routine}
+                trail={executionTrail(sessions, routine.id, now)}
                 onDuplicate={() => void duplicate(routine)}
                 onRemove={() => void remove(routine)}
               />
@@ -114,12 +132,72 @@ export function RoutineList() {
   );
 }
 
+/**
+ * When this routine was actually trained, drawn in real time.
+ *
+ * **Every mark is a session that happened.** Nothing is drawn for a routine
+ * never executed — the line stays empty and the words say so, the same
+ * discipline that kept the calorie ring from faking an arc on a fresh morning.
+ * A routine done three times in ten days and one abandoned two months ago carry
+ * the same name and the same structure; the spacing is the only thing that
+ * tells them apart, which is why the positions are real and not distributed.
+ *
+ * The line is 1px and the marks are 6px on purpose. With a single execution
+ * this has to read as one quiet fact, not as a chart with one bar — the failure
+ * the volume graph already demonstrated.
+ *
+ * `role="img"` with the full sentence, because the marks are a picture of
+ * something the sighted reader gets from position alone. The visible text
+ * beside it carries the fact that matters most either way.
+ */
+function ExecutionTrail({ trail }: { readonly trail: ExecutionTrail }) {
+  const label =
+    trail.countInWindow === 0
+      ? `Nenhuma execução nas últimas ${String(TRAIL_WEEKS)} semanas.`
+      : `${String(trail.countInWindow)} ${trail.countInWindow === 1 ? "execução" : "execuções"} nas últimas ${String(TRAIL_WEEKS)} semanas.`;
+
+  return (
+    <div className="mt-2 flex items-center gap-3">
+      <div role="img" aria-label={label} className="relative h-1.5 flex-1">
+        <span
+          aria-hidden
+          className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-line"
+        />
+        {trail.marks.map((ratio, index) => (
+          <span
+            key={index}
+            aria-hidden
+            style={{ left: `${String(ratio * 100)}%` }}
+            className={cn(
+              "absolute top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full",
+              // Only the newest carries the brand. One emerald point per
+              // routine marks "the latest" and keeps the colour concentrated;
+              // every mark in accent would scatter it down the whole list.
+              index === trail.marks.length - 1 ? "bg-accent" : "bg-ink-subtle",
+            )}
+          />
+        ))}
+      </div>
+
+      {/* The date rides with the track rather than on the structure line
+          above. Joined to "3 exercícios · 9 séries" it pushed that line to two
+          and sometimes three wraps at 320px — "ainda não / executado" broke
+          mid-phrase — and it belongs next to the marks it explains anyway. */}
+      <span className="shrink-0 text-[0.6875rem] whitespace-nowrap text-ink-subtle">
+        {trail.lastAt === null ? "nunca executado" : formatWhen(trail.lastAt)}
+      </span>
+    </div>
+  );
+}
+
 function RoutineRow({
   routine,
+  trail,
   onDuplicate,
   onRemove,
 }: {
   readonly routine: Routine;
+  readonly trail: ExecutionTrail;
   readonly onDuplicate: () => void;
   readonly onRemove: () => void;
 }) {
@@ -145,6 +223,8 @@ function RoutineRow({
               ? "Nenhum exercício ainda"
               : `${exercises} ${exercises === 1 ? "exercício" : "exercícios"} · ${sets} ${sets === 1 ? "série" : "séries"}`}
           </p>
+
+          <ExecutionTrail trail={trail} />
         </div>
         <span className="w-16 shrink-0" />
       </Link>
@@ -184,4 +264,14 @@ function ListSkeleton() {
       ))}
     </ul>
   );
+}
+
+const whenFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "short",
+});
+
+/** `12 de ago.` — short, because it rides on an already dense meta line. */
+function formatWhen(timestamp: number): string {
+  return whenFormatter.format(new Date(timestamp));
 }

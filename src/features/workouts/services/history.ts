@@ -247,3 +247,60 @@ export function volumeByPeriod(
     }))
     .sort((a, b) => b.startsAt - a.startsAt);
 }
+
+/** How far back the execution trail looks. Eight weeks of real calendar. */
+export const TRAIL_WEEKS = 8;
+const TRAIL_MS = TRAIL_WEEKS * 7 * 24 * 60 * 60 * 1000;
+
+export interface ExecutionTrail {
+  /**
+   * One entry per finished session inside the window, oldest first, as a
+   * fraction of the window: `0` is eight weeks ago, `1` is now.
+   */
+  readonly marks: readonly number[];
+  /** The most recent finish, window or not — `null` if never executed. */
+  readonly lastAt: number | null;
+  /** How many finished sessions fall inside the window. */
+  readonly countInWindow: number;
+}
+
+/**
+ * When a routine was actually trained, positioned in real time.
+ *
+ * **The position is the point.** A routine done three times in ten days and one
+ * abandoned two months ago have the same count and the same card; only spacing
+ * tells them apart. Distributing the marks evenly would throw away the single
+ * fact this exists to show — the gaps — and turn a record into an ornament.
+ *
+ * Reads `routineId`, which sessions have carried since they were introduced, so
+ * this invents no data and stores nothing. A session with a `null` routine —
+ * started before the link existed, or from a routine since deleted — belongs to
+ * no trail rather than to every trail.
+ *
+ * Unfinished sessions are excluded by `finishedSessions`: a workout in progress
+ * is not a fact yet, which is the same rule the history has always used.
+ */
+export function executionTrail(
+  sessions: readonly Session[],
+  routineId: EntityId,
+  now: number,
+): ExecutionTrail {
+  const mine = finishedSessions(sessions).filter(
+    (session) => session.routineId === routineId,
+  );
+
+  const start = now - TRAIL_MS;
+  const inWindow = mine.filter(
+    (session) => (session.finishedAt ?? 0) >= start,
+  );
+
+  return {
+    // Oldest first so the marks read left to right, like the time they show.
+    marks: inWindow
+      .map((session) => ((session.finishedAt ?? 0) - start) / TRAIL_MS)
+      .map((ratio) => Math.min(Math.max(ratio, 0), 1))
+      .sort((a, b) => a - b),
+    lastAt: mine[0]?.finishedAt ?? null,
+    countInWindow: inWindow.length,
+  };
+}
