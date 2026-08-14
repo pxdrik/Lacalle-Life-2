@@ -32,13 +32,20 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const { state } = useFoodLogDay(day);
   const targets = useNutritionTargets();
 
+  // Two skeletons, because this renders two blocks. One would hold a single
+  // cell and let the rest of the grid shift sideways as the day loads.
   if (state.status === "loading") {
-    return <Skeleton className="h-44 w-full rounded-lg" />;
+    return (
+      <>
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-lg" />
+      </>
+    );
   }
 
   if (state.status === "error") {
     return (
-      <Card role="alert">
+      <Card role="alert" className="min-w-0">
         <p className="text-ink">Não foi possível ler o dia de hoje.</p>
         <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
       </Card>
@@ -48,86 +55,97 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const totals = dietMacros(state.log);
   const nothingYet = totals.kcal === 0;
 
+  if (targets === null) {
+    // No profile means no ring, so this branch is the whole block. The way
+    // into the diary has to live here too: without a target *and* without a
+    // way to record, the screen would state a problem and offer nothing. A
+    // test holds this — it caught the link going missing when the shared
+    // header was removed.
+    return (
+      <Card as="section" className="min-w-0 text-center">
+        <MacroSummary macros={totals} size="lg" />
+        <p className="mt-3 text-xs text-ink-subtle">
+          Sem meta para comparar.{" "}
+          <Link
+            href="/perfil"
+            className="underline underline-offset-4 hover:text-ink"
+          >
+            Preencha o perfil
+          </Link>{" "}
+          se quiser ver quanto ainda cabe no dia.
+        </p>
+        <Link
+          href="/diario"
+          className="mt-4 inline-block text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+        >
+          {nothingYet ? "Registrar" : "Abrir diário"}
+        </Link>
+      </Card>
+    );
+  }
+
   /**
-   * **No card, and that is the whole change.**
+   * **Two blocks, not one section.**
    *
-   * The ring was the app's most proprietary element sitting inside the same
-   * bordered box, at the same radius, with the same title-plus-link header as
-   * the three cards below it — which is how a signature reads as a widget. It
-   * kept the frame and lost the rank.
+   * They were one borderless section with the ring floating above the macros.
+   * Read as blocks they are two different questions — *how much is left* and
+   * *what it is made of* — and the second was reading as a footnote of the
+   * first rather than as an answer of its own.
    *
-   * So the frame goes and the space stays. The ring is centred with room
-   * around it, and the macros — which used to sit beside it, competing for the
-   * same glance — move below, as the secondary reading they are.
+   * A fragment rather than a wrapper, so both land as siblings in the page's
+   * grid. Wrapping them would put a container around two cards, which is the
+   * card-inside-a-card the composition exists to avoid.
    *
-   * The heading survives as `sr-only`. A screen reader still gets the landmark
-   * it needs to skip the section; the eye does not get a label competing with
-   * the figure it labels. The ring already says `kcal restantes`.
+   * **Neither title takes a glyph, and that is a rule rather than an
+   * omission.** A block gets an icon when nothing in it carries a mark of its
+   * own; the ring *is* the mark, and the macros have the colour coding. An
+   * icon over the ring would be a second identity element arguing with the
+   * first.
    */
   return (
-    <section className="pt-2 pb-1">
-      <h2 className="sr-only">Alimentação</h2>
+    <>
+      <Card as="section" className="flex min-w-0 flex-col">
+        <h2 className="text-sm font-medium text-ink">Calorias de hoje</h2>
 
-      {targets === null ? (
-        // No profile means no ring, so this branch is the whole section. The
-        // way into the diary has to live here too: without a target *and*
-        // without a way to record, the screen would state a problem and offer
-        // nothing. A test holds this — it caught the link going missing when
-        // the shared header was removed.
-        <div className="mx-auto max-w-lg text-center">
-          <MacroSummary macros={totals} size="lg" />
-          <p className="mt-3 text-xs text-ink-subtle">
-            Sem meta para comparar.{" "}
-            <Link
-              href="/perfil"
-              className="underline underline-offset-4 hover:text-ink"
-            >
-              Preencha o perfil
-            </Link>{" "}
-            se quiser ver quanto ainda cabe no dia.
-          </p>
+        {/* `flex-1` and centred: when the grid stretches this card to match
+            its neighbour, the extra height becomes room around the ring
+            instead of a gap under it. The negative space is the point — the
+            block organises, the circle identifies. */}
+        <div className="flex flex-1 items-center justify-center py-6">
+          <CalorieRing
+            consumed={totals.kcal}
+            target={targets.kcal}
+            nothingYet={nothingYet}
+          />
+        </div>
+      </Card>
+
+      <Card as="section" className="flex min-w-0 flex-col">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-sm font-medium text-ink">Macros de hoje</h2>
           <Link
             href="/diario"
-            className="mt-4 inline-block text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+            className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
           >
             {nothingYet ? "Registrar" : "Abrir diário"}
           </Link>
         </div>
-      ) : (
-        <>
-          <div className="flex justify-center">
-            <CalorieRing
-              consumed={totals.kcal}
-              target={targets.kcal}
-              nothingYet={nothingYet}
-            />
-          </div>
 
-          {/* Below, not beside. The macros keep every number and every bar
-              they had; what they lose is the right to the same glance as the
-              ring. The link rides with them because the diary is where a
-              macro question is answered, and because a second link beside the
-              ring would be the widget header coming back. */}
-          <div className="mx-auto mt-8 max-w-lg">
-            <div className="mb-2 flex items-baseline justify-between gap-4">
-              <p className="text-xs text-ink-subtle">Macros de hoje</p>
-              <Link
-                href="/diario"
-                className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
-              >
-                {nothingYet ? "Registrar" : "Abrir diário"}
-              </Link>
-            </div>
-
-            <MacroProgress
-              totals={totals}
-              targets={targets}
-              figures={MACRO_FIGURES}
-            />
-          </div>
-        </>
-      )}
-    </section>
+        {/* Stacked rows rather than three columns, and it is the height that
+            decides: as columns this block measured 112px against the ring's
+            240 and the grid stretched the difference into dead space — the
+            "floating in the void" the composition is meant to remove. Same
+            numbers, same bars, same order. */}
+        <div className="mt-5 flex flex-1 flex-col justify-center">
+          <MacroProgress
+            totals={totals}
+            targets={targets}
+            figures={MACRO_FIGURES}
+            layout="rows"
+          />
+        </div>
+      </Card>
+    </>
   );
 }
 
@@ -203,24 +221,25 @@ function CalorieRing({
           </linearGradient>
         </defs>
 
-        {/* **Dashed while the day is empty**, and that is the app's own word
-            for absence rather than a new one: every empty state in the product
-            is a dashed outline with no fill. Before this the ring on a fresh
-            morning was a solid grey circle — the most proprietary element in
-            the product reading as a disabled widget at the exact moment
-            somebody opens the app for the first time.
+        {/* **One continuous track, in every state.**
+            It used to go dashed on an empty day — the app's own word for
+            absence, applied to the track and never to the progress. The
+            mechanism was right and the reading was not: three independent
+            readers described the result as broken rather than as empty, which
+            is what a dashed ring says when it is the only dashed ring in
+            sight. A solid neutral track still invents no progress — the arc
+            below simply has nothing to draw — and it says "not yet" without
+            saying "faulty".
 
-            The track, never the progress. No gradient, no arc, no invented
-            percentage: there is nothing to draw, and the dash says so. */}
+            `nothingYet` survives in the caption, which is where the empty day
+            is now stated in words. */}
         <circle
           cx="64"
           cy="64"
           r={RADIUS}
           fill="none"
           strokeWidth="10"
-          strokeDasharray={nothingYet ? "2 10" : undefined}
-          strokeLinecap={nothingYet ? "round" : undefined}
-          className={nothingYet ? "stroke-line-strong" : "stroke-muted"}
+          className="stroke-muted"
         />
         <circle
           cx="64"

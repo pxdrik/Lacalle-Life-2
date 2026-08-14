@@ -26,14 +26,16 @@ import { PageShell } from "@/design-system/components/page-shell";
  * is three centimetres above it, and a second copy of the menu dressed as
  * buttons is not a feature.
  *
- * **The four are not equally big, and the layout says so.** Food owns the left
- * two thirds — the calorie figure and then the meals behind it — while
- * training and weight stack down the right. Stacked full-width instead, they
- * read as four equal rows, which is both untrue and, on a 1440px screen, a
- * page you have to scroll to finish reading.
+ * **Rank comes from what a block holds, not from how it is drawn.** The five
+ * cards share a radius, a padding and a border; the ring is the largest thing
+ * on the screen and the only shape the app draws nowhere else, and that is
+ * what makes it the signature. Dressing it differently from its neighbours
+ * would rank it by decoration instead.
  *
- * `items-start` because these are independent answers: stretching a short card
- * to match a tall one would invent a relationship between them.
+ * `min-w-0` lives on each card rather than here: a grid item defaults to
+ * `min-width: auto` and refuses to shrink below its own min-content, and a
+ * long meal name once pushed the track to 331px inside a 318px viewport and
+ * scrolled the whole page sideways. Caught at 320px, and still checked there.
  *
  * A client route for the same reason as `/diario` — only the browser knows
  * what today is where the reader is standing.
@@ -50,37 +52,32 @@ export default function HomePage() {
       />
 
       <HomeDataProvider>
-        {/* The ring leads, alone, at the width of the page. It used to be one
-            of four cards in a 2/3–1/3 grid, which is a layout that says "these
-            four things are peers" — and they are not. Nothing sits beside it
-            now, which is the entire point: a signature that shares a row is a
-            widget. */}
-        <div className="mx-auto max-w-2xl">
-          <TodayEnergy day={today} />
-        </div>
+        {/* **One grid, and every answer is a block in it.**
+            The screen used to group by space alone: a ring floating above two
+            columns of borderless sections. It read as elements scattered on a
+            page rather than as a screen with places in it, and the ring — the
+            thing with no frame at all — was the loosest of them.
 
-        {/* Grouped by space, not by border. `gap-10` between sections against
-            `gap-4` inside one is what does the work a card outline used to do
-            — the eye reads the larger gap as a boundary without a line being
-            drawn. Two columns from `lg` because these three *are* peers. */}
-        {/* `min-w-0` on the tracks, not decoration: a grid item defaults to
-            `min-width: auto`, so it refuses to shrink below its own
-            min-content. These sections used to be wrapped in a block inside
-            the cell and were shielded from that; as direct children a long
-            meal name pushed the track to 331px inside a 318px viewport and the
-            whole page scrolled sideways. Caught at 320px. */}
-        <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:items-start">
-          <div className="min-w-0">
-            <TodayMeals day={today} />
-          </div>
-          {/* `space-y`, not a nested grid: the inner grid recreated the same
-              `min-width: auto` one level down, and the resume banner — which
-              only renders while a workout is running — pushed the page
-              sideways again. Block flow shrinks without an exception. */}
-          <div className="min-w-0 space-y-10">
-            <TodayWorkout day={today} />
-            <TodayProgress />
-          </div>
+            So the blocks come back, and the ranking moves off geometry: every
+            card is the same radius, the same padding and the same border, and
+            what differs is what each one holds. `TodayEnergy` renders two of
+            them, so the row reads as *how much is left* beside *what it is
+            made of*.
+
+            Order is the mobile order, and it is the priority order: calories,
+            macros, meals, training, weight. No `order-*` anywhere — a grid
+            that reads differently from the DOM reads differently to a screen
+            reader too.
+
+            Cards stretch to their row rather than sitting at its top. With
+            meals and training side by side as peers, matching bottom edges is
+            what makes them look like a pair instead of two things that happen
+            to be adjacent. */}
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          <TodayEnergy day={today} />
+          <TodayMeals day={today} />
+          <TodayWorkout day={today} />
+          <TodayProgress />
         </div>
       </HomeDataProvider>
     </PageShell>

@@ -320,6 +320,33 @@ esquecimento.
   liga sessão a rotina desde que sessões existem. Só a marca mais recente leva o
   esmeralda.
 
+#### Composição do Hoje em blocos — 14/08/2026
+
+Pedida diretamente, e **não é a Sprint 6**: a trilha de execuções continua
+intocada e continua não validada. Escopo fechado no Hoje.
+
+As quatro seções sem contorno viraram **cinco blocos num grid** — calorias,
+macros, refeições, treino, progresso — todos com o mesmo raio, o mesmo padding
+e a mesma borda. O ranking sai da geometria: o anel é a maior coisa da tela e a
+única forma que o app não desenha em nenhum outro lugar, e é isso que o mantém
+como assinatura. Vesti-lo diferente dos vizinhos seria hierarquia por
+decoração.
+
+**Isto reverte parte da Sprint 3A**, que tirou as bordas de propósito. O
+argumento de lá continua verdadeiro — o anel dentro da mesma caixa dos outros
+lê como widget — e a resposta agora é outra: todos ganham caixa, e o que
+distingue é o conteúdo. Medido no antes: com as seções soltas, Treino tinha
+**52px contra 194 de Refeições**, lado a lado na mesma linha. Duas metades do
+dia com essa diferença de peso não estavam dizendo nada verdadeiro. Agora medem
+244 e 244.
+
+Custo registrado: a página cresceu de **849px para 1209px de altura no
+celular** — cinco blocos com padding próprio ocupam mais que quatro seções sem
+contorno. Foi contido em 139px ao manter as macros em três colunas no celular e
+empilhá-las só a partir de `lg`, que é onde elas precisam de altura para ficar
+ao lado do anel. Abaixo disso não há nada para equilibrar, e empilhar custava
+altura em troca de nada.
+
 #### A trilha está em validação, não em refinamento
 
 Ela custou **25 a 41px por cartão** (76 → 101–117) numa tela cujas Sprints 3 e 4
@@ -497,18 +524,25 @@ causa não mudar, e sem isto escrito eles voltam parecendo cinco problemas.
 
 ### Novo — e é sobre a solução, não sobre o produto
 
-- [ ] **O estado vazio do anel é lido como defeito.** **Dois observadores
+- [x] **O estado vazio do anel era lido como defeito.** **Três observadores
       independentes** descreveram o anel do Hoje como "o único elemento que
-      esqueceu a marca — cinza em vez de verde". Ele está correto: sem nada
-      registrado não há arco, o trilho fica tracejado e a legenda vira "kcal
-      para hoje" — a mesma regra de não desenhar progresso inexistente que vale
-      para as barras de macro.
+      esqueceu a marca — cinza em vez de verde", ou como um círculo feito de
+      bolinhas. A mecânica estava correta: sem nada registrado não há arco, o
+      trilho ficava tracejado e a legenda virava "kcal para hoje" — a mesma
+      regra de não desenhar progresso inexistente que vale para as barras de
+      macro.
 
-      **Mas a mecânica estar certa não salva a comunicação.** Se dois leitores
-      atentos chegam à mesma conclusão errada, o tracejado não está dizendo
-      "ainda não" — está dizendo "quebrado". Foi introduzido na Sprint 3B
-      justamente para evitar isso, e é a própria solução que precisa ser
-      revista, não o comportamento.
+      **Mas a mecânica estar certa não salvou a comunicação.** Três leitores
+      atentos chegando à mesma conclusão errada é o veredito: o tracejado não
+      dizia "ainda não", dizia "quebrado".
+
+      Resolvido em 14/08 — o trilho é sólido e contínuo em todo estado, e a
+      ausência é dita pela legenda. **O efeito colateral está aceito de olhos
+      abertos**: o anel vazio volta a ser o círculo cinza sólido que a Sprint
+      3B existiu para evitar. O tracejado era a tentativa de resolver isso e
+      falhou por ler pior, então o cinza sólido é o estado conhecido e não uma
+      descoberta. Se ele incomodar, a próxima tentativa precisa ser outra
+      coisa — traço interrompido já foi testado e reprovado por três leitores.
 
 ### Os outros quatro já estão documentados
 

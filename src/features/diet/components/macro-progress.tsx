@@ -12,14 +12,35 @@ import { MACRO_CODING } from "@/design-system/macros";
  * ring beside these bars already is it.
  */
 const BARS = [
-  { key: "kcal", label: "kcal", fill: "bg-ink", unit: "" },
-  ...MACRO_CODING.map(({ key, short, fill }) => ({
+  { key: "kcal", label: "kcal", long: "kcal", fill: "bg-ink", unit: "" },
+  ...MACRO_CODING.map(({ key, short, long, fill }) => ({
     key,
     label: short,
+    long,
     fill,
     unit: "g",
   })),
 ] as const;
+
+/**
+ * How the figures are arranged, not what they say.
+ *
+ * `grid` is the dense line the diary and the diet editor need, where these
+ * bars sit under a total and must not take a screen of their own.
+ *
+ * `rows` is one figure per line, with room for the long name — **and only from
+ * `lg`, which is where it earns its height.** It exists so the macro block can
+ * stand beside the calorie ring without the grid stretching the difference
+ * into dead space, and the two are only side by side on a wide screen. Applied
+ * on a phone, where the blocks stack and there is nothing to balance, the same
+ * arrangement measured 272px against 130 and pushed the weight block 140px
+ * further down a screen the app is meant to be read on one-handed.
+ *
+ * A prop rather than a second component: the numbers, the cap, the amber and
+ * the announcement are the parts that must never diverge between screens, and
+ * a copy is how they would.
+ */
+type MacroLayout = "grid" | "rows";
 
 interface Props {
   readonly totals: Macros;
@@ -32,6 +53,7 @@ interface Props {
    * would make the same number look like two measurements.
    */
   readonly figures?: readonly (typeof BARS)[number]["key"][];
+  readonly layout?: MacroLayout;
 }
 
 /**
@@ -44,11 +66,18 @@ interface Props {
  * Values are announced as text as well as drawn, because a bar alone tells a
  * screen reader nothing.
  */
-export function MacroProgress({ totals, targets, figures }: Props) {
+export function MacroProgress({
+  totals,
+  targets,
+  figures,
+  layout = "grid",
+}: Props) {
   const bars =
     figures === undefined
       ? BARS
       : figures.map((key) => BARS.find((bar) => bar.key === key)!);
+
+  const rows = layout === "rows";
 
   return (
     // Two columns on a phone. Four of these never fit a 360px screen — a
@@ -60,9 +89,10 @@ export function MacroProgress({ totals, targets, figures }: Props) {
       className={cn(
         "grid gap-x-5 gap-y-3 sm:gap-3",
         bars.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4",
+        rows && "lg:grid-cols-1 lg:gap-y-5",
       )}
     >
-      {bars.map(({ key, label, fill, unit }) => {
+      {bars.map(({ key, label, long, fill, unit }) => {
         const value = totals[key];
         const target = targets[key];
         const ratio = target === 0 ? 0 : value / target;
@@ -70,8 +100,38 @@ export function MacroProgress({ totals, targets, figures }: Props) {
 
         return (
           <div key={key}>
-            <dt className="sr-only">{label}</dt>
-            <dd>
+            {/* From `lg` in `rows` the name leads the line and carries the
+                dot, which is the same coding the grid puts underneath —
+                moved, not invented. Below that it goes back to `sr-only` and
+                the dot returns to the foot of the column, so the two
+                arrangements are the same three parts in a different order.
+                The long name only appears where there is room to read it. */}
+            <dt
+              className={cn(
+                "sr-only",
+                rows &&
+                  "lg:not-sr-only lg:flex lg:items-center lg:gap-1.5 lg:text-xs lg:text-ink-muted",
+              )}
+            >
+              {rows && (
+                <span
+                  aria-hidden
+                  className={cn(
+                    "hidden size-1.5 shrink-0 rounded-full lg:block",
+                    fill,
+                  )}
+                />
+              )}
+              {rows ? (
+                <>
+                  <span className="hidden lg:inline">{long}</span>
+                  <span className="lg:hidden">{label}</span>
+                </>
+              ) : (
+                label
+              )}
+            </dt>
+            <dd className={cn(rows && "lg:mt-1")}>
               <div className="flex items-baseline gap-1 text-sm tabular-nums">
                 <span className="text-ink">{formatDecimal(value)}</span>
                 <span className="text-ink-subtle">
@@ -121,8 +181,17 @@ export function MacroProgress({ totals, targets, figures }: Props) {
                   — so on a fresh morning the card was three grey tracks under
                   three grey words, and the coding that the rest of the app
                   relies on simply was not there. It marks identity, not state:
-                  it keeps its hue when the bar turns red for going over. */}
-              <p className="mt-1 flex items-center gap-1.5 text-[0.6875rem] text-ink-subtle">
+                  it keeps its hue when the bar turns red for going over.
+
+                  From `lg` in `rows` the same dot is already up on the name,
+                  so drawing it again here would state the code twice on one
+                  line. */}
+              <p
+                className={cn(
+                  "mt-1 flex items-center gap-1.5 text-[0.6875rem] text-ink-subtle",
+                  rows && "lg:hidden",
+                )}
+              >
                 <span
                   aria-hidden
                   className={cn("size-1.5 shrink-0 rounded-full", fill)}

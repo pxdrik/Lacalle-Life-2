@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
+import { Card } from "@/design-system/components/card";
 import { ICONS } from "@/design-system/icons";
 
 import {
@@ -32,8 +33,17 @@ export function TodayProgress() {
 
   const { latestKg, changeKg } = progress;
 
+  /**
+   * **The full width of the grid, and short.**
+   *
+   * It is the one block whose answer is a single number, so a column of its
+   * own would have left it floating in a cell sized for a list. Across the
+   * bottom it closes the composition instead, and the weight and its trend
+   * share one baseline rather than stacking — two lines of ink in a card that
+   * is deliberately the shortest on the screen.
+   */
   return (
-    <section>
+    <Card as="section" className="min-w-0 lg:col-span-2">
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
           <ICONS.progress aria-hidden className="size-4 text-ink-subtle" />
@@ -47,29 +57,33 @@ export function TodayProgress() {
         </Link>
       </div>
 
-      <p className="mt-4 text-3xl font-semibold tracking-tight tabular-nums text-ink">
-        {formatDecimal(latestKg, 1)}
-        <span className="ml-1 text-base font-normal text-ink-subtle">kg</span>
-      </p>
+      {/* `flex-wrap`: on a narrow phone the trend drops to its own line rather
+          than squeezing the figure it belongs to. */}
+      <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-1.5">
+        <p className="text-3xl font-semibold tracking-tight tabular-nums text-ink">
+          {formatDecimal(latestKg, 1)}
+          <span className="ml-1 text-base font-normal text-ink-subtle">kg</span>
+        </p>
 
-      {changeKg === null ? (
-        <p className="mt-1.5 text-xs text-ink-subtle">
-          Registre de novo em alguns dias para ver a tendência.
-        </p>
-      ) : (
-        <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-muted">
-          <Direction changeKg={changeKg} />
-          <span className="tabular-nums">
-            {changeKg === 0
-              ? "sem mudança"
-              : `${formatDecimal(Math.abs(changeKg), 1)} kg`}
-          </span>
-          <span className="text-ink-subtle">
-            nos últimos {PROGRESS_WINDOW_DAYS} dias
-          </span>
-        </p>
-      )}
-    </section>
+        {changeKg === null ? (
+          <p className="text-xs text-ink-subtle">
+            Registre de novo em alguns dias para ver a tendência.
+          </p>
+        ) : (
+          <p className="flex items-center gap-1.5 text-xs text-ink-muted">
+            <Direction changeKg={changeKg} />
+            <span className="tabular-nums">
+              {changeKg === 0
+                ? "sem mudança"
+                : `${formatDecimal(Math.abs(changeKg), 1)} kg`}
+            </span>
+            <span className="text-ink-subtle">
+              nos últimos {PROGRESS_WINDOW_DAYS} dias
+            </span>
+          </p>
+        )}
+      </div>
+    </Card>
   );
 }
 

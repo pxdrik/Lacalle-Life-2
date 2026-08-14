@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
+import { buttonClasses } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
@@ -28,7 +30,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
 
   if (state.status === "loading") {
-    return <Skeleton className="h-24 w-full rounded-lg" />;
+    return <Skeleton className="h-48 w-full rounded-lg" />;
   }
 
   // Silent on failure. The workout half of the day is worth showing when it
@@ -44,8 +46,10 @@ export function TodayWorkout({ day }: { readonly day: string }) {
       dayKey(new Date(session.startedAt)) === day,
   );
 
+  const nothingYet = today.length === 0;
+
   return (
-    <section>
+    <Card as="section" className="min-w-0">
       <div className="flex items-center justify-between gap-4">
         {/* The one card of the four on this screen that had no glyph, next to
             three that did — which reads as an oversight rather than as
@@ -54,18 +58,20 @@ export function TodayWorkout({ day }: { readonly day: string }) {
           <ICONS.workouts aria-hidden className="size-4 text-ink-subtle" />
           Treino
         </h2>
-        <Link
-          href="/treinos"
-          className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
-        >
-          {today.length === 0 ? "Começar" : "Ver treinos"}
-        </Link>
+        {!nothingYet && (
+          <Link
+            href="/treinos"
+            className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+          >
+            Ver treinos
+          </Link>
+        )}
       </div>
 
-      {today.length === 0 ? (
-        <p className="mt-3 text-sm text-ink-muted">Nada registrado hoje.</p>
+      {nothingYet ? (
+        <Empty />
       ) : (
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-4 space-y-2">
           {today.map((session) => (
             <li key={session.id}>
               <FinishedSession session={session} />
@@ -73,7 +79,28 @@ export function TodayWorkout({ day }: { readonly day: string }) {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
+  );
+}
+
+/**
+ * The same shape as the meals block's empty state, and that is the point.
+ *
+ * These two answer the two halves of a day and sit side by side, so a
+ * sentence here against an icon-and-button there made training read as the
+ * lesser of the pair — a difference in treatment that says nothing true.
+ * `Começar` is the same link to the same route it has always been; it moved
+ * out of the header and put on the button the other block already wore.
+ */
+function Empty() {
+  return (
+    <div className="mt-4 flex flex-col items-center gap-3 py-6 text-center">
+      <ICONS.workouts aria-hidden className="size-8 text-ink-subtle" />
+      <p className="text-sm text-ink-muted">Nada registrado hoje.</p>
+      <Link href="/treinos" className={buttonClasses("secondary", "sm")}>
+        Começar
+      </Link>
+    </div>
   );
 }
 

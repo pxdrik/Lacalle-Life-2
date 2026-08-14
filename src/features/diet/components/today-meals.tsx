@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
@@ -31,7 +32,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
   const { state } = useFoodLogDay(day);
 
   if (state.status === "loading") {
-    return <Skeleton className="h-40 w-full rounded-lg" />;
+    return <Skeleton className="h-48 w-full rounded-lg" />;
   }
 
   // Silent on error, deliberately. `TodayEnergy` reads the same day from the
@@ -42,7 +43,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
   const eaten = state.log.meals.filter((meal) => meal.items.length > 0);
 
   return (
-    <section>
+    <Card as="section" className="min-w-0">
       <div className="flex items-center justify-between gap-4">
         <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
           <ICONS.diary aria-hidden className="size-4 text-ink-subtle" />
@@ -86,7 +87,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
 
