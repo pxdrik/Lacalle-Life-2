@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Copy, Plus, Trash2 } from "lucide-react";
@@ -35,15 +36,25 @@ export function RoutineList() {
     if (id !== null) router.push(`/treinos/${id}`);
   }
 
+  /**
+   * **Space does the grouping, and the gaps are uneven on purpose.**
+   *
+   * The create form sits close to the title above it — they are one moment,
+   * the screen's action — and the list sits further away, because it is the
+   * answer rather than part of the question. Even spacing said "these are
+   * three peers"; uneven spacing says which two belong together, without a
+   * single border being drawn.
+   */
   return (
-    <div className="space-y-5">
-      {/* Above everything: a workout left open is the most urgent thing on
-          this screen, and until now it was unreachable. */}
+    <div>
+      {/* Still above everything: a workout left open is the most urgent thing
+          on this screen. What changed is what it costs — see the note in
+          `InProgressBanner`. */}
       <InProgressBanner />
 
       <form
         onSubmit={(event) => void handleCreate(event)}
-        className="flex gap-2"
+        className="mt-3 flex gap-2"
       >
         <Input
           value={name}
@@ -63,12 +74,13 @@ export function RoutineList() {
       </form>
 
       {writeError !== null && (
-        <p role="alert" className={noticeClasses()}>
+        <p role="alert" className={cn("mt-4", noticeClasses())}>
           {writeError}
         </p>
       )}
 
-      {state.status === "loading" && <ListSkeleton />}
+      <div className="mt-7">
+        {state.status === "loading" && <ListSkeleton />}
 
       {state.status === "error" && (
         <div role="alert" className={noticeClasses("danger", "block")}>
@@ -97,6 +109,7 @@ export function RoutineList() {
             ))}
           </ul>
         ))}
+      </div>
     </div>
   );
 }
