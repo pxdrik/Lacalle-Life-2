@@ -411,6 +411,47 @@ em `localStorage`.
 
 ---
 
+## Auditoria visual — 14/08/2026
+
+Cinco achados, e **um só é novo**. Registrar o saldo importa mais que a lista:
+auditorias externas vão continuar reencontrando os outros quatro enquanto a
+causa não mudar, e sem isto escrito eles voltam parecendo cinco problemas.
+
+### Novo — e é sobre a solução, não sobre o produto
+
+- [ ] **O estado vazio do anel é lido como defeito.** **Dois observadores
+      independentes** descreveram o anel do Hoje como "o único elemento que
+      esqueceu a marca — cinza em vez de verde". Ele está correto: sem nada
+      registrado não há arco, o trilho fica tracejado e a legenda vira "kcal
+      para hoje" — a mesma regra de não desenhar progresso inexistente que vale
+      para as barras de macro.
+
+      **Mas a mecânica estar certa não salva a comunicação.** Se dois leitores
+      atentos chegam à mesma conclusão errada, o tracejado não está dizendo
+      "ainda não" — está dizendo "quebrado". Foi introduzido na Sprint 3B
+      justamente para evitar isso, e é a própria solução que precisa ser
+      revista, não o comportamento.
+
+### Os outros quatro já estão documentados
+
+- **Ícone do app é um "L" placeholder** e **a sidebar não tem símbolo**: são o
+  mesmo bloqueio, não dois achados — falta o vetor da marca. Ver
+  `docs/logo-brief.md` e _Identidade_ mais abaixo. É a pendência mais antiga em
+  aberto, e nenhuma auditoria vai deixar de encontrá-la enquanto o arquivo não
+  existir.
+- **Ícones flat contra logo com gradiente**: decidido em `docs/auditoria-marca.md`
+  — Lucide é correto e neutro, e a marca **não vira ícone**. A alternativa é
+  desenhar um conjunto proprietário, que é escopo grande e não priorizado.
+- **Qualidade desigual das fotos de exercício**: item 2 deste roadmap. É da
+  origem — bases livres, 105 pares verificados à mão, 25 sem foto — e as três
+  saídas possíveis já estão escritas lá.
+
+O `<script>alert(1)</script>` encontrado em Dietas era dado de teste da própria
+auditoria anterior, no IndexedDB local. React escapa corretamente; não houve
+risco.
+
+---
+
 ## Ajustes pendentes
 
 Os treze achados verificados das auditorias foram fechados. Sobram dois: uma
