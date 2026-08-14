@@ -199,12 +199,14 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       chip e botão de ícone repetem a mesma receita de borda em cerca de quinze
       arquivos.
 
-      **Decisão em aberto: o raio do botão contra o do campo.** Lado a lado e
-      da mesma altura, o botão fecha em `--corner-md` (10px no desktop) e o
-      campo em `--corner-lg` (14px). Não mexi porque uniformizar muda o
-      acabamento de todos os botões ou de todos os campos do app, e a direção
-      que combina com a sprint — arredondar mais, que lê mais acolhedor que
-      utilitário — é escolha de dono, não de implementação.
+      Dois saíram desde então: o **controle de Filtros**, que Alimentos e
+      Exercícios implementavam em separado, e o botão de ícone, que ganhou
+      regra única na Sprint 2.
+
+      **O raio do botão contra o do campo estava listado aqui como decisão em
+      aberto — foi resolvido na Sprint 1.** Os dois leem `--corner-md`. A
+      direção escolhida foi a que a sprint pedia: arredondar mais, com o botão
+      indo de 12 para 18px no celular.
 
 ### P3 — Consistência
 
@@ -216,9 +218,14 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       parecer app de alimentação. (Ver a decisão tabela-vs-cartão mais abaixo: a
       forma foi escolhida por causa do dado, e continua valendo. O que muda aqui
       é o acabamento — hierarquia, agrupamento, busca, filtro, estado.)
+
+      **Busca e filtro saíram na Sprint 3B** — chips recolhidos, contagem viva
+      na folha, contador no botão. Faltam hierarquia, agrupamento e estado.
 - [ ] **Exercícios:** o filtro foi apontado como um dos melhores componentes
       atuais. Preservar a ideia — chips, categorias, modal, badges — e trazer
-      para a mesma linguagem.
+      para a mesma linguagem. O controle que **abre** o filtro já veio para a
+      receita compartilhada na Sprint 2; os chips e o modal continuam como
+      estavam, de propósito.
 - [ ] **Evolução:** os dados ficam, o tratamento muda. Progresso é conquista, não
       tabela de métricas.
 - [x] **Passar em todas as rotas** com dado de verdade no banco — perfil, cinco
@@ -264,6 +271,77 @@ propósito: um segundo verde ao lado de uma marca verde não é um estado, é ru
       atingida, peso registrado. Os três primeiros já têm toast; o que falta é
       o momento da meta batida.
 - [ ] Estados vazios no padrão da V1: ícone + mensagem clara + CTA relevante.
+
+### As cinco sprints implementadas
+
+12 a 14/08/2026, depois que a marca chegou. Sprints 1 e 2 estão no GitHub; **3 a
+5 ficam em commits locais até a trilha ser validada** — decisão tomada, não
+esquecimento.
+
+- **Sprint 1 — raio e área de toque.** O raio passou a expressar **papel** e não
+  tamanho: inline, controle, contêiner, marcador. Eram seis valores sem regra
+  nenhuma, e cinco apareciam na mesma tela a 388px. Na prática mudou uma coisa —
+  **o botão adotou o raio do campo**, 12 → 18. `--radius-xl` deixou de ser
+  mapeado de propósito, para que um `rounded-xl` esquecido fique errado na hora
+  em vez de funcionar quieto e reintroduzir um quinto vocabulário. Os 183 alvos
+  pequenos da auditoria eram um controle só repetido, a estrela de favoritar: o
+  desenho fica em 32px e a área cresce por pseudo-elemento, fora do layout —
+  crescer a estrela cresceria a linha, e a densidade é o que torna 183
+  exercícios navegáveis.
+- **Sprint 2 — a assinatura.** O anel ganhou o degradê da marca e é o único
+  lugar do produto que tem um; **estouro segue âmbar chapado**, porque vestir um
+  aviso com a assinatura seria mentir. O botão de ícone voltou a ser controle: a
+  Sprint 1 o tinha feito círculo, e círculo é fechado e estático onde a marca é
+  fita aberta e direcional. Tipografia: só título de tela, só tracking e peso —
+  o H1 media −0,84px, que é convenção de neo-grotesca e o oposto do wordmark. E
+  o `9/9` virou dois pixels na borda da barra fixa, sem trilho atrás: não é
+  componente, é linha de percurso, e não pode competir com o anel.
+- **Sprint 3 — composição do Hoje.** O anel saiu da moldura compartilhada. Era o
+  elemento mais proprietário do produto dentro da mesma caixa, no mesmo raio,
+  com o mesmo cabeçalho dos três cartões abaixo — que é exatamente como uma
+  assinatura lê como widget. As macros desceram, Refeições, Treino e Progresso
+  viraram seções abertas, e o agrupamento passou a vir do espaço: as bordas
+  estruturais da Home caíram de 6 para 3. Na **3B**, o anel ganhou estado vazio
+  — tracejado no trilho, nunca no progresso — e os filtros de Alimentos foram
+  recolhidos: abertos custavam ~200px em toda visita e empurravam a tabela para
+  444px no celular; medido depois, 240px.
+- **Sprint 4 — Treinos abre na ação.** A tela levava 336px até o primeiro
+  treino, 80% da viewport, com um subtítulo reafirmando o título para quem tinha
+  acabado de tocar numa aba escrita Treinos. Ficou em 160px sem sessão aberta,
+  272px com uma. O espaçamento é desigual de propósito: 12px antes do formulário
+  e 28px depois dizem quais dois blocos formam um momento, sem desenhar borda.
+  **A composição da Home não virou template** — o que atravessou foi a gramática,
+  não o layout.
+- **Sprint 5 — trilha de execuções. Entregue e não aprovada.** Cada rotina passou
+  a carregar as últimas oito semanas com uma marca por sessão concluída, **na
+  posição do tempo real**: com marcas equidistantes, três sessões em dez dias e
+  três espalhadas em dois meses desenhariam a mesma coisa, e a tela voltaria a
+  mostrar contagem em vez de cadência. Nenhum dado novo — `Session.routineId`
+  liga sessão a rotina desde que sessões existem. Só a marca mais recente leva o
+  esmeralda.
+
+#### A trilha está em validação, não em refinamento
+
+Ela custou **25 a 41px por cartão** (76 → 101–117) numa tela cujas Sprints 3 e 4
+existiram justamente para reduzir a distância até a ação. E o caso que
+justificaria esse preço — várias execuções espaçadas ao longo de semanas —
+**nunca foi visto com dado real**: o banco de teste tem uma rotina com uma
+execução. Sete testes cobrem a semântica das marcas e **nenhum deles responde se
+alguém decide melhor por causa delas**. Teste verde prova correção técnica, não
+valor de produto.
+
+**Não propagar para Dietas, Alimentos, Diário ou Perfil. Não compactar, não criar
+prop de densidade, não abrir sprint de refinamento em cima dela.** Com histórico
+real acumulado, três perguntas:
+
+1. Com 3–5 execuções **próximas**, a frequência é percebida na hora?
+2. Com 3–5 execuções **espaçadas**, a diferença de cadência fica óbvia?
+3. Rotina nunca executada ao lado de uma com histórico — a trilha **muda a
+   decisão**, ou é informação decorativa?
+
+Três sins → trajetória temporal vira linguagem do produto e vale generalizar,
+com cada tela mostrando a dimensão temporal do *seu* dado — não todas ganhando
+trilha. Menos que isso → cortar ou simplificar sem apego.
 
 ### Dependência e lacunas conhecidas
 
@@ -454,8 +532,9 @@ risco.
 
 ## Ajustes pendentes
 
-Os treze achados verificados das auditorias foram fechados. Sobram dois: uma
-oportunidade e um achado de contraste.
+Os treze achados verificados das **auditorias de design** foram fechados. Sobram
+dois: uma oportunidade e um achado de contraste. Os achados de robustez e os
+visuais têm seção própria mais acima e não estão contados aqui.
 
 ### `ink-subtle` sobre linha em hover, no escuro
 
@@ -539,7 +618,11 @@ do rótulo, nunca aplicada sozinha. É aritmética, não opinião sobre o que co
 
 ## Infraestrutura
 
-Repositório em `github.com/pxdrik/Lacalle-Life-2`, `main` sincronizada.
+Repositório em `github.com/pxdrik/Lacalle-Life-2`. **`main` está sincronizada até
+a Sprint 2**; as Sprints 3 a 5 e os registros de auditoria seguem em commits
+locais, segurados de propósito enquanto a trilha não for validada. A regra normal
+do projeto é o contrário — toda entrega termina no GitHub — e esta é a exceção,
+que vale só enquanto durar a validação.
 
 **`next dev` quebrado nesta máquina.** Falha com `0xc0000142` — erro do Windows
 ao inicializar processo — centenas de vezes: os workers do Turbopack não sobem.
