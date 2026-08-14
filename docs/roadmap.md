@@ -359,6 +359,58 @@ muda implementações de adapter, nunca portas nem UI.
 
 ---
 
+## Auditoria de robustez — 13/08/2026
+
+Feita numa sessão **sem acesso ao código**, só com o app rodando no navegador.
+Os achados abaixo foram depois **conferidos na fonte**, e a conferência mudou o
+veredito de dois deles — que é a razão de registrar a verificação junto e não só
+o relato.
+
+### Confirmados
+
+- [ ] **Peso e medidas entram sem validação nenhuma.** `features/body` é a
+      **única feature sem pasta `validation/`**: o formulário chama
+      `parseDecimal` e grava o que vier. A auditoria pegou peso negativo (−15 kg
+      aceito, virando "peso atual" e distorcendo gráfico e delta); lendo o
+      código, gordura corporal e as nove medidas têm o mesmo buraco. O padrão a
+      replicar já existe e a própria auditoria o chamou de exemplar:
+      `foods/validation/food-schema.ts`.
+- [ ] **Sessão de treino não tem teto de duração.** Uma esquecida "em andamento"
+      acumulou 25h de cronômetro e, ao finalizar, gravou isso como duração real
+      no histórico. **O gatilho foi uma sessão de teste deixada aberta em
+      12/08** — mas a ausência de limite é do produto, e quem dorme com o treino
+      aberto produz o mesmo lixo. Decisão de produto pendente: encerrar
+      automaticamente, marcar como suspeita, ou só limitar o que é gravado.
+- [ ] **Quantidade de alimento aceita até 100 kg.** `Math.min(Number(digits),
+      100_000)` em `meal-item-row`. O teto existe para conter número colado, não
+      para sanidade nutricional.
+
+### Verificados e **não** são defeito
+
+- **Botão de finalizar "não responde a cliques únicos".** É a confirmação de
+  dois toques: `DISARM_AFTER_MS = 4000`, então cinco toques espaçados armam e
+  desarmam cinco vezes sem confirmar. Existe para impedir que encerrar um treino
+  na série 1 de 8 seja um toque acidental. **Não mexer no `useArmed`** — mas o
+  fato de um auditor ter tentado cinco vezes e concluído "quebrado", mesmo com o
+  rótulo mudando para "Encerrar assim?" e a barra de tempo esvaziando, é achado
+  de **comunicação**, e esse é legítimo.
+- **"Falha silenciosa" ao criar dieta ou treino com nome vazio.** O botão fica
+  `disabled` com o campo vazio. Não há erro porque não há submissão.
+
+### O que a auditoria não pôde ver, e o que disso é vazio de verdade
+
+Banco, backend, autenticação server-side, build, lint, testes e responsividade
+ficaram marcados como BLOCKED por falta de acesso — **não como aprovados**. Com
+o repositório, build/lint/testes e modelo de dados são verificáveis. Mas
+**backend e autenticação vão continuar vazios**, e não por falta de acesso: o
+app é local-first, sem servidor e sem contas. Não há o que auditar ali.
+
+Do lado positivo e verificado: React escapa corretamente (não foi possível
+produzir XSS), rota com id inválido não vaza detalhe interno, e não há segredo
+em `localStorage`.
+
+---
+
 ## Ajustes pendentes
 
 Os treze achados verificados das auditorias foram fechados. Sobram dois: uma
