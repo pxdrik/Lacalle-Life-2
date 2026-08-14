@@ -652,11 +652,12 @@ do rótulo, nunca aplicada sozinha. É aritmética, não opinião sobre o que co
 
 ## Infraestrutura
 
-Repositório em `github.com/pxdrik/Lacalle-Life-2`. **`main` está sincronizada até
-a Sprint 2**; as Sprints 3 a 5 e os registros de auditoria seguem em commits
-locais, segurados de propósito enquanto a trilha não for validada. A regra normal
-do projeto é o contrário — toda entrega termina no GitHub — e esta é a exceção,
-que vale só enquanto durar a validação.
+Repositório em `github.com/pxdrik/Lacalle-Life-2`, `main` sincronizada.
+
+As Sprints 3 a 5 ficaram deliberadamente em commits locais entre 13 e 14/08,
+enquanto a trilha de execuções estava sob decisão. **Estar no GitHub não é
+aprovação**: a trilha continua entregue e não validada, e o que a segura é o
+registro acima, não a ausência de push.
 
 **`next dev` quebrado nesta máquina.** Falha com `0xc0000142` — erro do Windows
 ao inicializar processo — centenas de vezes: os workers do Turbopack não sobem.
