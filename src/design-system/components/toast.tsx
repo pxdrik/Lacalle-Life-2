@@ -82,7 +82,7 @@ export function ToastProvider({
             key={toast.id}
             className={cn(
               "animate-rise pointer-events-auto max-w-md rounded-lg border border-line",
-              "bg-elevated px-4 py-2.5 text-sm text-ink shadow-(--elevation-md)",
+              "bg-elevated px-4 py-3 text-sm text-ink shadow-modal",
             )}
           >
             {toast.message}

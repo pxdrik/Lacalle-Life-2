@@ -26,14 +26,17 @@ type CardElement =
  * bordered box is a screen with no ranking on it. The reader has to read
  * everything to find out what matters.
  *
- * `hero` and `default` differ by **surface and light, never by geometry**:
- * same radius, same padding, because a card that is also a different shape
- * stops reading as the same family. Depth is the same tool the tokens already
- * use — a step of lightness in the dark theme, a shadow in the light one, and
- * the top hairline that makes a surface look raised rather than cut out.
+ * **`hero` changed mechanism, not meaning.** It used to rise by light: a deeper
+ * shadow in the light theme, a lighter surface and a brighter top hairline in
+ * the dark one. Page 24 of the brand system forbids both halves of that — "não
+ * fazer: sombras difusas ou coloridas" and "dois estilos de card diferentes na
+ * mesma tela" — and names the replacement in the same breath: `CARD DESTACADO`
+ * is the standard card with a **3 px indicator down its leading edge** and its
+ * left padding opened from 20 to 24. Everything else is identical to `default`,
+ * which is the point the old version was trying to make with light.
  *
- * `hero` is the one thing a screen exists to show — at most one per screen, or
- * it means nothing. It sits on `elevated`, one step above every other card.
+ * It stays the one thing a screen exists to show — at most one per screen, or
+ * it means nothing.
  *
  * `quiet` is the surface for a card with nothing in it yet: a dashed outline
  * and no fill. **The app already spoke this dialect** — five screens had the
@@ -47,29 +50,28 @@ type CardElement =
 type CardTone = "hero" | "default" | "quiet";
 
 /**
- * The recipe per tone. Only the fill, the shadow and the hairline vary.
+ * The recipe per tone, and it is deliberately thin now.
  *
- * `hero` reaches for `--elevated`, which in the light theme is the same white
- * as `--surface` — there is nothing above white — so there the lift is carried
- * entirely by `--elevation-hero`, which is deeper than any other shadow in the
- * app for exactly that reason. That asymmetry is the theme being honest rather
- * than mirrored: dark surfaces rise by getting lighter because shadows do not
- * read on near-black, and light ones rise by casting one.
- *
- * `quiet` sets no fill and no hairline: the pseudo-element is still positioned
- * by the base recipe, and with nothing painted into it there is nothing to see.
- * Its border is dashed — the one place the app draws an incomplete edge, for
- * the one place where the content is genuinely absent rather than quiet.
+ * All three share one radius, one border and one fill, because the brand system
+ * asks for exactly one card. What varies is a 3 px indicator and a dashed edge —
+ * and note that the indicator is drawn with a border rather than a
+ * pseudo-element, so it participates in the corner radius instead of squaring
+ * off the leading edge.
  */
 const TONES: Record<CardTone, string> = {
-  hero: "border-line bg-elevated shadow-(--elevation-hero) before:bg-(--card-top-hero)",
-  default: "border-line bg-surface before:bg-(--card-top-light)",
+  hero: "border-line bg-surface border-l-[3px] border-l-accent",
+  default: "border-line bg-surface",
   quiet: "border-dashed border-line",
 };
 
-/** See `CardTone`: only the empty state departs from the density token. */
+/**
+ * See `CardTone`. `hero` opens its leading padding to 24 px, as page 24
+ * specifies — the indicator would otherwise sit on top of the content instead
+ * of beside it. The empty state is the only tone that departs from the density
+ * token entirely.
+ */
 const PADDING: Record<CardTone, string> = {
-  hero: "p-(--card-p)",
+  hero: "p-(--card-p) pl-6",
   default: "p-(--card-p)",
   quiet: "px-6 py-12",
 };
@@ -95,16 +97,14 @@ interface Props extends React.HTMLAttributes<HTMLElement> {
  * they never got the top hairline, so in the dark theme the food list read as a
  * hole cut in the page while the cards beside it read as raised.
  *
- * **The padding comes from the density layer**, so a card is roomy in the hand
- * and tight at the desk without either number appearing here. The execution
- * screen's card gets *more* padding on a phone than it used to, which is the
- * point: that is the card someone reads standing up between sets.
+ * **The padding comes from the density layer**, so a card is 16 px in the hand
+ * and 20 px from the tablet up — the one component measurement page 32 varies
+ * by breakpoint, and the only one this file reads.
  *
- * The hairline along the top edge is invisible in light mode, where the border
- * already reads, and does the real work in dark mode — it is what keeps a card
- * from looking like a hole cut in the page. It lives here rather than in a
- * global rule because a global `.bg-surface::before` would also hit inputs and
- * buttons, and `::before` does not exist on replaced elements.
+ * The top hairline that used to be drawn here is gone with the shadow it
+ * partnered: page 33 communicates elevation "por superfície mais clara, nunca
+ * por sombra", and with a single card style there is no second surface to
+ * separate from.
  */
 export function Card({
   as: Tag = "div",
@@ -123,11 +123,5 @@ export function Card({
  * rather than re-typing it and drifting.
  */
 export function cardSurface(tone: CardTone = "default", padded = true): string {
-  return cn(
-    "relative rounded-lg border",
-    "before:pointer-events-none before:absolute before:inset-x-px before:top-0",
-    "before:h-px",
-    TONES[tone],
-    padded && PADDING[tone],
-  );
+  return cn("relative rounded-lg border", TONES[tone], padded && PADDING[tone]);
 }

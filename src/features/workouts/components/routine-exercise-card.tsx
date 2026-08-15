@@ -62,7 +62,7 @@ export function RoutineExerciseCard({
       as="section"
       className={cn(
         "transition-shadow duration-150 ease-out",
-        dragHandle?.isDragging === true && "border-accent shadow-md",
+        dragHandle?.isDragging === true && "border-accent shadow-modal",
       )}
     >
       {/* Wraps on a phone. Grip, thumbnail and four action buttons leave the

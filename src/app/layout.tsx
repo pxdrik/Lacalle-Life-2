@@ -1,5 +1,5 @@
-import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 
 import { ToastProvider } from "@/design-system/components/toast";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
@@ -10,6 +10,25 @@ import { ServiceWorker } from "./_components/service-worker";
 import { Sidebar } from "./_components/sidebar";
 
 import "./globals.css";
+
+/**
+ * Inter, and it is not a preference — page 16 of the brand system makes it the
+ * single institutional typeface of LaCalle, "em marca, produto, apresentação e
+ * documento". It replaces Geist, which was this app's own choice.
+ *
+ * Variable rather than a fixed set of weights: the type scale on page 17 uses
+ * 400, 500, 600, 700 and 900, and shipping five static files to honour a rule
+ * that also says "máximo de três pesos por tela" would be paying for the whole
+ * range at every request.
+ *
+ * `latin` alone is enough for pt-BR — accented characters live there, not in
+ * `latin-ext`.
+ */
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "LaCalle Life",
@@ -23,10 +42,12 @@ export const viewport: Viewport = {
   // screen wants every pixel.
   viewportFit: "cover",
   // Matches `--canvas` in each theme, so the mobile browser chrome blends
-  // into the page instead of framing it.
+  // into the page instead of framing it. Both are brand system values — the
+  // Background of page 18 and the dark canvas of page 33 — and the light one
+  // was white here, which framed every card against a paler chrome.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0d0f" },
   ],
 };
 
@@ -39,7 +60,7 @@ export default function RootLayout({
     /* `suppressHydrationWarning` is required, not a workaround: ThemeScript
        intentionally sets `data-theme` on this element before React hydrates,
        so the server markup and the live DOM differ by design. */
-    <html lang="pt-BR" className={GeistSans.variable} suppressHydrationWarning>
+    <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <body>
         <ThemeScript />
         <ThemeProvider>

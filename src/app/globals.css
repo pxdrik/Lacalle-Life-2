@@ -67,6 +67,11 @@
   /* One focus treatment for the whole app, visible on every surface, and
      only for keyboard users — pointer users never see a ring.
 
+     2 px of accent at 2 px of offset, which is page 25 of the brand system
+     exactly. The offset is not decoration: it is what puts a band of the page
+     between the ring and the element, so an accent ring around an accent
+     button still reads. See the note on `--focus` in `tokens.css`.
+
      No `border-radius` here: an outline already follows the element's own
      corners, and setting it would reshape the element the moment it is
      focused. */
@@ -80,40 +85,46 @@
     color: var(--accent-ink);
   }
 
-  /* Modal entry and exit.
+  /* Modal entry and exit — page 36: "scale 0,98 → 1 + overlay fade, 200 ms,
+     Ease Out". It used to rise 8 px instead, which is the gesture page 36
+     assigns to a toast; a modal takes the centre of the screen and does not
+     travel to get there.
 
      `allow-discrete` is what lets `display` and `overlay` take part in the
      transition. Without it a dialog snaps from `display: none` to visible and
      the fade never runs on the way in, and gets cut off on the way out. */
   dialog {
     opacity: 0;
-    translate: 0 0.5rem;
+    scale: 0.98;
     transition:
-      opacity 150ms ease-out,
-      translate 150ms ease-out,
-      overlay 150ms ease-out allow-discrete,
-      display 150ms ease-out allow-discrete;
+      opacity 200ms var(--ease-out),
+      scale 200ms var(--ease-out),
+      overlay 200ms var(--ease-out) allow-discrete,
+      display 200ms var(--ease-out) allow-discrete;
   }
 
   dialog[open] {
     opacity: 1;
-    translate: 0 0;
+    scale: 1;
   }
 
   @starting-style {
     dialog[open] {
       opacity: 0;
-      translate: 0 0.5rem;
+      scale: 0.98;
     }
   }
 
   dialog::backdrop {
-    background-color: oklch(0% 0 0 / 55%);
+    /* The token, not a hand-written black: page 31 sets the overlay at Ink 40%
+       and the dark theme darkens it. A literal here is how the drawer and the
+       modal would come to disagree about what "behind" looks like. */
+    background-color: var(--overlay);
     opacity: 0;
     transition:
-      opacity 150ms ease-out,
-      overlay 150ms ease-out allow-discrete,
-      display 150ms ease-out allow-discrete;
+      opacity 200ms var(--ease-out),
+      overlay 200ms var(--ease-out) allow-discrete,
+      display 200ms var(--ease-out) allow-discrete;
   }
 
   dialog[open]::backdrop {
@@ -126,15 +137,35 @@
     }
   }
 
-  /* Honour the OS setting rather than overriding it. Animation is a nicety;
-     for some people it is a symptom trigger. */
+  /**
+   * Reduced motion — page 40, and it is **not a degradation of the experience,
+   * it is a legitimate version of it**.
+   *
+   * 120 ms, not the 0.01 ms that used to be here. That number did not reduce
+   * motion, it deleted it: every transition became instantaneous, including
+   * hover, focus and the confirmation of a destructive action. Page 40 lists
+   * those explicitly under "o que sempre é mantido" — they are feedback, not
+   * decoration, and a state change with no transition at all reads as a
+   * flicker rather than as a response.
+   *
+   * What still goes away entirely is anything whose content *is* the movement:
+   * the stagger of a list, the drawing of a chart line, the growth of a
+   * progress arc. Those are handled where they are written, from
+   * `useReducedMotion`, because each one has a correct final frame to jump to
+   * and CSS here cannot know what it is.
+   *
+   * `animation-iteration-count` stays capped, and the only loop in the app is
+   * the skeleton's pulse — which is precisely what page 40 means by "mantido,
+   * **sem pulsação decorativa**". Capped, it settles at full opacity: the
+   * skeleton is still there saying "loading", it just stops breathing.
+   */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-      animation-duration: 0.01ms !important;
+      animation-duration: 120ms !important;
       animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+      transition-duration: 120ms !important;
       scroll-behavior: auto !important;
     }
   }

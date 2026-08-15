@@ -80,7 +80,7 @@ export function MealCard({
       as="section"
       className={cn(
         "transition-shadow duration-150 ease-out",
-        dragHandle.isDragging && "border-accent shadow-md",
+        dragHandle.isDragging && "border-accent shadow-modal",
       )}
     >
       {/* Wraps on a phone. The macro summary and four buttons are `shrink-0`

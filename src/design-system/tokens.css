@@ -1,435 +1,483 @@
 /**
  * Design tokens.
  *
- * **Identity: the palette is the logo's, and the logo came first.** Every
- * colour below is either one of the eight swatches that shipped with the mark
- * — emerald 500/600/800, slate 900/800/700/200, white — or a step interpolated
- * inside one of those two families. Nothing here is chosen by eye.
+ * **A fonte é o LaCalle Brand System V1.1**, e a página 49 dele é literalmente
+ * o contrato entre design e desenvolvimento: "todo valor deste brandbook existe
+ * aqui como token — nenhum valor solto deve entrar no código". Este arquivo é o
+ * lado do código desse contrato. Quando ele e uma tela existente discordarem, o
+ * brandbook prevalece; é o que a própria página 2 determina.
  *
- * This replaces the V1 emerald at hue 167. That colour was inherited from the
- * first version on the reasoning that a product's colour is its identity; the
- * reasoning still holds and the identity simply moved, because the app now has
- * a mark and the mark has its own green. Hue went 167 → 162.5 and the surfaces
- * went from a near-neutral cyan (hue 190) to slate, which is a real blue-grey
- * and the family the logo's own panels use.
+ * **Os valores são hexadecimais, e isso mudou.** Eram OKLCH, e a razão de serem
+ * era boa: a paleta vinha de oito swatches e os passos intermediários precisavam
+ * ser interpolados por matemática perceptual em vez de a olho. Essa razão
+ * acabou. O brandbook nomeia **cada** passo — os cinco do acento, os oito
+ * neutros, os seis do escuro — então não há nada a derivar, e o hexadecimal tem
+ * a propriedade que importa agora: um revisor confere este arquivo contra o PDF
+ * linha a linha, sem converter nada.
  *
- * **The brand is a gradient, so each theme takes the stop that works on its
- * ground.** The mark is not a flat fill: it runs from emerald-500 to
- * emerald-600 across the ribbon. Measured, emerald-500 does not clear 3:1 as a
- * graphic on a white page (2.31) and emerald-600 does (3.44), while on the
- * dark ground 500 reads at 7.04 against 600's 4.73. One flat value would mean
- * picking a theme to disappoint. Both stops belong to the mark, so neither
- * choice invents a colour.
+ * **O que veio do brandbook sem alteração:** a paleta neutra da pág. 18 (Ink
+ * #111111 e a escala Gray, que substitui o slate da versão anterior), os cinco
+ * tokens do LaCalle Life da pág. 19, as cores semânticas e de dado da pág. 27,
+ * a escala dark própria da pág. 33, os raios da pág. 23, o espaçamento base 4
+ * da pág. 22 e as duas curvas e quatro tiers da pág. 38.
  *
- * **Near-black stays on the emerald in both themes**, which is the one rule
- * carried over unchanged. White on emerald-600 measures 3.77 and on
- * emerald-500 measures 2.54 — neither clears AA. Slate-900 on them measures
- * 4.74 and 7.04. V1 put white on its green and its own primary button failed;
- * repeating that with a nicer green would still be a button nobody can read.
+ * ## As quatro divergências, e por que cada uma existe
  *
- * Colour is spent only where it carries meaning: the primary action, the live
- * state, and data. A screen that is mostly numbers stays calm only if the
- * numbers are the loudest thing on it.
+ * Estão registradas aqui e em `docs/brandbook.md` como emenda proposta para a
+ * V1.2. A pág. 53 é explícita sobre isto: "divergências não viram exceção
+ * informal: ou o Brand System é atualizado e versionado, ou a peça é
+ * corrigida". Nenhuma delas é preferência.
  *
- * **The surfaces are slate, not green, and the logo agrees.** This survived
- * the rebrand unchanged, which is worth saying out loud because the brand
- * artwork is full of green: the mark sits in a green glow, and the phone in
- * the presentation has a green-tinted screen. Those are atmosphere in a
- * mockup. The eight swatches that came with it name **four slates and no green
- * surface at all**, and that is the part a UI is built from.
+ * **1. A tinta sobre o acento é Ink, não branco.** A pág. 25 especifica
+ * "Primary texto #FFFFFF". Medido, branco sobre o emerald-600 dá **3,77:1** e
+ * sobre o 500 dá 2,54 — os dois reprovam os 4,5:1 que a própria pág. 48 exige
+ * de texto abaixo de 18 px. Ink sobre os mesmos dois mede 5,01 e 7,44. O
+ * brandbook contradiz a si mesmo aqui, e das duas regras a de acessibilidade é
+ * a que não admite exceção. A V1 deste app caiu nessa armadilha com o próprio
+ * botão primário.
  *
- * The history is the reason to be careful here. Surfaces were emerald once —
- * 0.03 chroma on the canvas, 0.055 on a dark card — and four greens stacked
- * (canvas, surface, elevated, muted) did not read as depth. They read as a
- * terminal, which is the diagnosis that started the redesign. Slate is a
- * *blue*-grey, so the surfaces now lean away from the brand hue rather than
- * toward it, and the emerald has the screen to itself.
+ * **2. Estados e dados ganham um par de texto.** `--warning` (#D97706) mede
+ * 3,04:1 na página, `--danger` (#DC2626) mede 4,41 sobre a própria superfície
+ * de erro, e as duas cores de dado medem 3,60. Como *ícone, borda e
+ * preenchimento* todas cumprem os 3:1 de um elemento gráfico e ficam exatamente
+ * como o brandbook as define; como **texto** entram os pares `-text`, um passo
+ * mais escuros na mesma família. Isto não inventa uma regra: é a mesma
+ * instrução da pág. 48 para o acento — "para texto no acento, use a variação
+ * 600 ou 800 da escala" — aplicada às famílias que o brandbook não escalou. E
+ * não é hipotético: o stat card da pág. 24 imprime o delta em 12 px.
  *
- * So the rule is unchanged: **the brand is concentrated, not diluted.** Depth
- * comes from lightness between neutral surfaces; the emerald is spent on the
- * primary action, the active state and progress, where it is the only
- * saturated thing in view and therefore unmissable.
+ * **3. `--data-positive` é o 600, não o 500 que a pág. 27 nomeia.** #10B981
+ * mede 2,42:1 sobre a página e não chega aos 3:1 de um gráfico. A pág. 48 já
+ * registra esse teto para o acento; a pág. 27 não o herda. É a mesma
+ * substituição, pelo mesmo motivo, que `--accent` faz.
  *
- * The text tokens are near-neutral for the same reason they always were:
- * tinting a surface reads as a material, while tinting body copy just reads as
- * a display that needs calibrating.
+ * **4. O tema escuro precisa de três valores que o brandbook não dá.** Ele
+ * nomeia seis; o app tem mais papéis que isso. Os três interpolados estão
+ * marcados um a um mais abaixo, e nenhum deles é uma cor nova: são passos
+ * dentro da rampa que já está lá.
  *
- * Values are OKLCH because it is perceptually uniform: a lightness step reads
- * as the same step at any hue, which is what makes the light and dark scales
- * mirror each other honestly instead of by eye.
+ * ## O que a pág. 20 pede, e este arquivo sozinho não garante
  *
- * Contrast ratios of every foreground/background pair are asserted in
- * `tokens.test.ts`, parsed from this file. Editing a value here without
- * meeting WCAG AA fails the build.
+ * A proporção 70/20/10 é de composição, não de token. O que os tokens fazem é
+ * tornar o acento **escasso por construção**: existe um `--accent`, uma
+ * `--accent-surface` e um `--accent-text`, e nenhum token de fundo é verde. Uma
+ * tela que estoure os 10% terá feito isso escrevendo utilitários, não lendo
+ * tokens daqui.
+ *
+ * Todo par frente/fundo é aferido em `tokens.test.ts`, que lê deste arquivo.
+ * Editar um valor sem cumprir os mínimos da pág. 48 quebra o build.
  */
 
 :root {
   color-scheme: light;
 
-  /* Surfaces, from furthest back to closest. Cards are the palette's white on
-     a slate-tinted page, so a card lifts off it before a shadow is drawn.
-     `muted` sits *below* the canvas — a recessed row rather than a raised one.
-     The tint is the slate hue at a trace of chroma: the same family as the
-     dark theme, so the two are one palette seen under different light. */
-  --canvas: oklch(0.968 0.006 256);
-  --surface: oklch(1 0 0);
-  --elevated: oklch(1 0 0);
-  --muted: oklch(0.938 0.01 256);
-
-  /* Text. `ink` is body copy, `ink-muted` secondary, `ink-subtle` placeholder.
-     `ink` is slate-900 exactly — the palette's darkest swatch, doing here what
-     it does as the canvas in the dark theme. */
-  --ink: oklch(0.2077 0.0398 265.8);
-  --ink-muted: oklch(0.44 0.035 258);
-  /* 0.545, not the 0.58 that looked right by eye: above this the ratio against
-     the canvas drops under 4.5:1. Placeholder text is still text. */
-  --ink-subtle: oklch(0.545 0.032 257);
-
-  --line: oklch(0.9 0.008 256);
-  --line-strong: oklch(0.79 0.012 256);
+  /**
+   * Superfícies, do fundo para a frente — pág. 18.
+   *
+   * `canvas` é o Background #F8FAFC, `surface` é o White dos cards, e a regra
+   * do brandbook é literal: "fundo da aplicação sempre Background; card sempre
+   * White. Nunca card branco sobre branco."
+   *
+   * `elevated` é branco também, e continua existindo por simetria com o tema
+   * escuro, onde é uma superfície de verdade. No claro não há nada acima do
+   * branco — e é por isso que a hierarquia entre cards **deixou de ser
+   * sombra**: a pág. 24 proíbe "sombras difusas" e "dois estilos de card
+   * diferentes na mesma tela", então o card em destaque agora se distingue pela
+   * linha lateral de 3 px, que é o recurso que o brandbook prevê para isso.
+   *
+   * `muted` é o Surface 100, a superfície secundária e o hover neutro.
+   */
+  --canvas: #f8fafc;
+  --surface: #ffffff;
+  --elevated: #ffffff;
+  --muted: #f3f4f6;
 
   /**
-   * The brand on a light ground: **emerald-600, `#059669`**, the middle stop
-   * of the mark's own gradient.
+   * Texto — pág. 18.
    *
-   * Not emerald-500, which is the stop the dark theme uses: on a white page it
-   * measures 2.31 against the canvas and misses the 3:1 a filled control and a
-   * chart line owe. 600 measures 3.44. Both are the logo's, so this picks a
-   * stop rather than inventing a green.
+   * Ink para corpo, Gray 700 para o secundário de leitura, Gray 500 para
+   * labels, captions e placeholders.
+   *
+   * **`ink-subtle` sobre `muted` mede 4,39:1 e não é um par válido.** É o único
+   * buraco da paleta neutra do brandbook, e não tem saída em token: os dois
+   * valores são normativos. A saída é de componente — uma linha que troca de
+   * fundo no hover troca o texto para `ink-muted` junto, que mede 9,44 ali. O
+   * teste garante o destino dessa troca.
    */
-  --accent: oklch(0.596 0.127 163.2);
-  /* Slate-900, the palette's own darkest, at 4.74:1 on the emerald. White
-     measures 3.77 here and does not clear AA. */
-  --accent-ink: oklch(0.2077 0.0398 265.8);
-
-  /* The emerald as *text*, which needs 4.5:1 rather than the 3:1 a graphic
-     needs — so it drops to **emerald-800, `#065F46`**, the palette's darkest
-     green, at 7.01 on the canvas. Used for the completed mark and the
-     finished timer. */
-  --accent-text: oklch(0.4318 0.0865 166.9);
+  --ink: #111111;
+  --ink-muted: #374151;
+  --ink-subtle: #6b7280;
 
   /**
-   * The calorie ring's two stops, and **the only gradient in the product.**
+   * Bordas — pág. 18 e 24.
    *
-   * The mark is not a flat fill — it runs across the emerald ramp as the ribbon
-   * turns — and the ring is the one place in the app that draws a trajectory,
-   * so it is the one place that stop belongs. Anywhere else it would stop being
-   * the signature and start being a theme.
+   * `line` é o Gray 200, a borda padrão de card e os separadores. `line-strong`
+   * é o Gray 300, que a pág. 24 nomeia como o estado de hover do card e a pág.
+   * 26 como a borda de input.
    *
-   * One step of the brand's own ramp, never an invented pair. Here that is
-   * emerald-600 into emerald-700: 600 is the accent and clears the 3:1 a
-   * graphic owes on white (3.44), and 700 measures 4.86, so the deeper end of
-   * the arc is if anything easier to see than the start.
+   * Divisores a 1 px, nunca 2, e nunca cinza escuro — pág. 18.
    */
-  --ring-from: oklch(0.596 0.127 163.2);
-  --ring-to: oklch(0.515 0.105 165);
-
-  --danger: oklch(0.51 0.21 27);
-  --danger-ink: oklch(1 0 0);
+  --line: #e5e7eb;
+  --line-strong: #d1d5db;
 
   /**
-   * The other two states.
+   * O acento do LaCalle Life — pág. 19. Cinco tokens, e o 500 é a cor oficial.
    *
-   * There are four — success, warning, error, info — and only two are new.
-   * **Success is the accent**, and error is `danger`. Minting a second green
-   * for "it worked" next to a green brand would produce two greens nobody can
-   * tell apart, which is the opposite of a state being legible.
-   *
-   * Both are pulled a little off the macro hues they sit near — warning at 55
-   * against carbohydrate's 62, info at 265 against protein's 250 — because a
-   * banner and a chart legend will eventually share a screen.
+   * `--accent` é o **600 (#059669)** e não o 500 no tema claro. A pág. 19
+   * atribui os papéis: 500 é a cor oficial, 600 é hover, 800 é texto sobre
+   * claro. Mas a pág. 48 avisa que o 500 não sustenta contraste sobre branco, e
+   * medido ele dá 2,31:1 como elemento gráfico, abaixo dos 3:1 obrigatórios. O
+   * 600 dá 3,60 sobre a página. Escolher o passo que cumpre a pág. 48 é o que a
+   * pág. 48 manda fazer; nenhum verde foi inventado.
    */
-  --warning: oklch(0.55 0.15 55);
-  --info: oklch(0.5 0.14 265);
+  --accent-50: #ecfdf5;
+  --accent-300: #6ee7b7;
+  --accent-500: #10b981;
+  --accent-600: #059669;
+  --accent-800: #065f46;
 
-  /* Deliberately not the brand hue: a focus ring drawn in emerald disappears
-     the moment it lands on the emerald button. */
-  --focus: oklch(0.55 0.2 258);
-
-  /* Data. A blue/amber/violet triad stays separable under deuteranopia and
-     protanopia, where a green/red pair collapses — and none of the three
-     collides with the emerald. */
-  --protein: oklch(0.55 0.16 250);
-  --carbs: oklch(0.62 0.14 62);
-  --fat: oklch(0.52 0.19 305);
+  --accent: var(--accent-600);
+  /* Ver a divergência 1 no topo. Ink mede 5,01:1 aqui; branco mede 3,77. */
+  --accent-ink: #111111;
+  /* O acento como texto pede 4,5:1 onde um gráfico pede 3:1, então cai para o
+     800 — 7,68 sobre branco. É a instrução literal da pág. 48. */
+  --accent-text: var(--accent-800);
+  /* O fundo do item de navegação ativo e dos chips do acento — pág. 31. */
+  --accent-surface: var(--accent-50);
 
   /**
-   * The same three as *text*, which needs 4.5:1 where a bar needs 3:1.
+   * Cores semânticas de UI — pág. 27. Iguais em todos os produtos LaCalle.
    *
-   * The split `--accent-text` already made, for the same reason and found the
-   * same way — by measuring. The triad above was tuned for area: bars, dots,
-   * chart fills, and it is asserted at 3:1 because that is what a graphic
-   * owes. But five screens print these numbers as small text, and there
-   * **carbohydrate measured 3.58:1 against the page** — the amber that reads
-   * perfectly as a filled bar is the hardest of the three to read as a digit.
+   * **Atenção do brandbook, e vale repetir aqui:** no Life o acento (#10B981)
+   * coincide com o Positive e é vizinho do Success (#059669). Por isso, **no
+   * Life o acento não confirma ações** — confirmação usa sempre ícone + texto
+   * além da cor.
    *
-   * So the fill keeps its value and the text gets its own. Only the lightness
-   * moves; the hue and the chroma are identical, or the two would stop looking
-   * like the same colour used twice.
+   * Os pares `-text` são a divergência 2. Base para ícone, borda e
+   * preenchimento; `-text` para o que é lido como letra.
    */
-  --protein-text: oklch(0.54 0.16 250);
-  --carbs-text: oklch(0.55 0.14 62);
-  --fat-text: oklch(0.52 0.19 305);
-
-  --overlay: oklch(0.2077 0.0398 265.8 / 0.45);
-
-  /* Named `elevation`, not `shadow`: `--shadow-*` is Tailwind's own theme
-     namespace, and reusing it here would make the mapping below a circular
-     reference to itself. */
-  --elevation-sm: 0 1px 2px oklch(0.2077 0.04 265.8 / 0.06);
-  --elevation-md:
-    0 4px 12px oklch(0.2077 0.04 265.8 / 0.08), 0 1px 3px oklch(0.2077 0.04 265.8 / 0.04);
+  --success: #059669;
+  --success-surface: #ecfdf5;
+  --warning: #d97706;
+  --warning-text: #b45309;
+  --warning-surface: #fffbeb;
+  --danger: #dc2626;
+  --danger-text: #b91c1c;
+  --danger-surface: #fef2f2;
+  /* Branco sobre #DC2626 mede 4,83:1 — este é o um caso em que o rótulo branco
+     do brandbook cumpre a pág. 48, então ele fica. */
+  --danger-ink: #ffffff;
+  --info: #6b7280;
+  --info-surface: #f3f4f6;
 
   /**
-   * The hero card's lift, and the whole of it in this theme.
+   * O anel de foco é o acento — pág. 25, "anel 2 px do acento, offset 2 px".
    *
-   * Measured in the browser: on a dark page the hero separates on its own,
-   * 7.8 → 13.1 of L\*. Here both cards are pure white on a 97.7 canvas, so
-   * there is no lightness left to spend — **the shadow is the only thing
-   * saying which card is in front**, and `--elevation-md`, tuned for a hovered
-   * control, was not enough to say it. Deeper and wider rather than darker: a
-   * larger blur reads as distance from the page, where more opacity at the
-   * same size just reads as a heavier outline.
+   * **Isto reverte a decisão anterior**, que usava um azul deliberadamente fora
+   * da marca com a justificativa de que "um anel esmeralda some no instante em
+   * que cai sobre o botão esmeralda". A justificativa não sobrevive à medição.
+   * O `outline-offset` de 2 px faz o anel encostar na *página*, não no botão —
+   * o que se lê é botão, vão da página, anel — e nessa configuração o acento
+   * mede 3,60:1 contra a página e o vão mede 3,77 contra o botão. Os dois lados
+   * da pág. 48 ("3:1 contra fundo **e** elemento") passam.
+   *
+   * O azul que estava aqui media 1,32:1 contra o botão verde: pior no exato
+   * caso que ele existia para resolver.
    */
-  --elevation-hero:
-    0 10px 28px oklch(0.2077 0.04 265.8 / 0.1), 0 2px 6px oklch(0.2077 0.04 265.8 / 0.05);
+  --focus: var(--accent-600);
 
-  /* A hairline along a card's top edge, drawn by the `Card` primitive.
-     Transparent here: in light mode the border already separates the card from
-     the page, and a second line would only muddy it. The hero card lifts by
-     casting a shadow instead — there is nothing above white to raise it to. */
-  --card-top-light: transparent;
-  --card-top-hero: transparent;
+  /**
+   * Product data colors — pág. 27.
+   *
+   * Comunicam o **valor de um dado**, não o resultado de uma ação: um saldo
+   * negativo em vermelho não é um erro do sistema, e uma meta batida em verde
+   * não é uma confirmação. Os tokens são separados dos semânticos mesmo quando
+   * o valor coincide, porque é o significado que precisa continuar separado.
+   *
+   * **`--data-positive` é o 600, não o #10B981 que a pág. 27 nomeia** — a mesma
+   * substituição, pela mesma medição, que `--accent` faz. O 500 mede 2,42:1
+   * sobre a página, abaixo dos 3:1 que a pág. 48 exige de um elemento gráfico
+   * portador de significado. A pág. 48 registra esse limite do #10B981; a pág.
+   * 27 não o herda, e é a pág. 48 que manda.
+   *
+   * O par `-text` é a divergência 2 outra vez, e aqui ela não é hipotética: o
+   * stat card da pág. 24 imprime o delta em **12 px**, que é a faixa de 4,5:1.
+   * O verde de gráfico mede 3,60 e o vermelho 3,60 — os dois corretos como
+   * seta ou barra, os dois insuficientes como dígito.
+   */
+  --data-positive: var(--accent-600);
+  --data-positive-text: var(--accent-800);
+  --data-negative: #ef4444;
+  --data-negative-text: #b91c1c;
+  --data-neutral: #6b7280;
+  /* Gray 300, e a pág. 18 diz o que ele é: "só decorativo". Vale para histórico
+     e projeção, que são a faixa de referência atrás do dado — nunca o dado. Não
+     é aferido a 3:1 de propósito: exigir isso dele seria promovê-lo a dado. */
+  --data-comparison: #d1d5db;
 
+  /**
+   * Os três macronutrientes — e a única família de cor que **não** vem do
+   * brandbook, porque ele não cobre este caso.
+   *
+   * A pág. 29 manda "uma cor de acento por gráfico, nunca uma paleta de seis
+   * cores", e ela está certa para a série de um gráfico: ali o acento desenha o
+   * dado principal e os cinzas desenham o resto. Proteína, carboidrato e
+   * gordura não são séries de um gráfico — são **três categorias que aparecem
+   * lado a lado em cada refeição**, e um dado categórico não tem "principal".
+   * Reduzi-las a acento + cinza apagaria a distinção que é a informação.
+   *
+   * Azul/âmbar/violeta continuam separáveis sob deuteranopia e protanopia, onde
+   * um par verde/vermelho colapsa, e nenhum dos três colide com o emerald. A
+   * pág. 48 é atendida do jeito que ela pede: as três se distinguem também por
+   * rótulo direto, não só por cor.
+   *
+   * O par `-text` existe pela mesma razão que `--accent-text`: o âmbar que lê
+   * perfeitamente como barra preenchida é o mais difícil dos três de ler como
+   * dígito.
+   */
+  --protein: #0074ca;
+  --carbs: #c06f0a;
+  --fat: #8341be;
+
+  --protein-text: #0071c7;
+  --carbs-text: #a95a00;
+  --fat-text: #8341be;
+
+  /* Overlay do drawer e dos modais: Ink a 40% — pág. 31. */
+  --overlay: rgb(17 17 17 / 0.4);
+
+  /**
+   * Sombra — pág. 24 e 49, e o sistema inteiro cabe em duas.
+   *
+   * O card recebe "nenhuma ou 0 1px 2px rgba(17,17,17,.04)", e o modal recebe a
+   * sua. Não há terceira: a sombra funda que levantava o card herói era
+   * exatamente o que a pág. 24 chama de "sombras difusas" e proíbe, e a
+   * hierarquia que ela carregava passou para a linha lateral de 3 px.
+   *
+   * Nomeado `elevation` e não `shadow` porque `--shadow-*` é o namespace de
+   * tema do próprio Tailwind, e reusar o nome aqui faria o mapeamento lá
+   * embaixo referenciar a si mesmo.
+   */
+  --elevation-sm: 0 1px 2px rgb(17 17 17 / 0.04);
+  --elevation-modal: 0 8px 32px rgb(17 17 17 / 0.1);
 }
 
 [data-theme="dark"] {
   color-scheme: dark;
 
   /**
-   * Dark surfaces lift by getting lighter. Shadows do not read on near-black,
-   * so depth is carried by surface value and the top hairline instead.
+   * A escala escura da pág. 33 — e ela **não é a inversão da clara**, é uma
+   * escala própria, construída para reduzir brilho sem perder hierarquia.
    *
-   * **This is the slate ramp from the palette**: slate-900 is the canvas,
-   * slate-800 the card, slate-700 the recessed row, and `elevated` is the one
-   * step interpolated between 800 and 700 — the palette gave three darks and a
-   * raised card needs a fourth.
+   * Quatro dos seis valores são do brandbook sem alteração. `muted` é o
+   * primeiro dos três interpolados (ver divergência 4 no topo): o brandbook dá
+   * `border` a #262B31 e nada entre ele e `elevated`, e o app precisa de uma
+   * superfície de hover distinta da borda que a atravessa. #22272C fica entre
+   * os dois.
    *
-   * The steps are 0.208 → 0.280 → 0.325 → 0.372, each gap comfortably above
-   * the threshold where a surface change is visible. They carry ~0.038 of
-   * chroma, which is five times the old scale's, and that is safe here in a
-   * way it was not before: the hue is 258, a blue-grey pointing *away* from
-   * the brand's 162. The failure this avoids was four greens stacked reading
-   * as a terminal — slate cannot make that mistake, because it is not green.
-   *
-   * The whole ramp is lighter than the one it replaces. Slate-900 sits at
-   * 0.208 where the old canvas was 0.145, so the app reads less like a void
-   * and more like the deep blue-black of the logo's own panels.
+   * Elevação é comunicada por superfície mais clara, **nunca por sombra** —
+   * pág. 33. É por isso que não há tokens de sombra neste bloco.
    */
-  --canvas: oklch(0.208 0.04 266);
-  --surface: oklch(0.2795 0.037 260);
-  --elevated: oklch(0.325 0.038 258);
-  --muted: oklch(0.372 0.039 257);
-
-  --ink: oklch(0.985 0.004 256);
-  --ink-muted: oklch(0.78 0.022 256);
-  /* 0.70, and the reason is unchanged from the last time this moved: the hero
-     card makes `elevated` a surface that carries text, and a token that only
-     passes on the darkest surface fails the moment something is raised. The
-     whole ramp got lighter, so this had to follow it up. */
-  --ink-subtle: oklch(0.7 0.026 256);
-
-  --line: oklch(0.36 0.038 258);
-  --line-strong: oklch(0.46 0.04 256);
+  --canvas: #0b0d0f;
+  --surface: #16191d;
+  --elevated: #1d2126;
+  /* Interpolado — ver acima. */
+  --muted: #22272c;
 
   /**
-   * The brand on a dark ground: **emerald-500, `#10B981`** — the brightest
-   * stop of the mark's gradient and the first swatch of the palette.
+   * Texto — pág. 33 dá dois, o app usa três.
    *
-   * It reads 7.04:1 against the canvas here, where the light theme's
-   * emerald-600 would read 4.73. Both clear what a graphic owes; this one is
-   * the colour the mark actually leads with, and the dark theme is the one the
-   * brand artwork is drawn on.
+   * `ink-subtle` (#8A929C) é o segundo interpolado: um passo abaixo do Text
+   * secondary, medido para ainda cumprir 4,5:1 sobre `elevated`, que é a
+   * superfície mais clara que carrega texto (5,14). Um token que só passasse
+   * sobre o fundo mais escuro falharia no instante em que algo fosse elevado.
    *
-   * The ink stays near-black — slate-900, the palette's own — at 7.04:1. White
-   * on this green measures 2.54 and is not an option, which is worth writing
-   * down because the presentation shows white type beside the mark and not on
-   * it.
+   * Nunca branco puro em texto corrido — pág. 33.
    */
-  --accent: oklch(0.696 0.149 162.5);
-  --accent-ink: oklch(0.208 0.04 266);
+  --ink: #f3f4f6;
+  --ink-muted: #9aa3ae;
+  /* Interpolado — ver acima. */
+  --ink-subtle: #8a929c;
 
-  /* On a dark ground the emerald clears 4.5:1 as text while bright, so this
-     goes brighter than its light-theme counterpart rather than darker. */
-  --accent-text: oklch(0.84 0.15 162.5);
+  /* `line` é o Border da pág. 33, sem alteração. `line-strong` é o terceiro
+     interpolado: a pág. 33 não dá borda de ênfase, e o hover de card da pág. 24
+     precisa de um passo acima da borda padrão. */
+  --line: #262b31;
+  --line-strong: #363c44;
 
-  /* Emerald-500 into emerald-600 — the same one step of the ramp the light
-     theme takes, moved up to the pair that reads on a dark ground: 7.04 and
-     4.73 against the canvas. */
-  --ring-from: oklch(0.696 0.149 162.5);
-  --ring-to: oklch(0.596 0.127 163.2);
+  /**
+   * O acento sobe um passo de luminosidade no escuro — pág. 33, "os acentos
+   * sobem um passo para manter contraste ≥ 4,5:1". Life claro #10B981 → escuro
+   * **#34D399**, que mede 10,13:1 contra o fundo.
+   *
+   * A escala 50–800 continua a mesma: ela é a identidade do produto e não muda
+   * de tema. O que muda é qual passo `--accent` aponta.
+   */
+  --accent-50: #ecfdf5;
+  --accent-300: #6ee7b7;
+  --accent-500: #10b981;
+  --accent-600: #059669;
+  --accent-800: #065f46;
 
-  --danger: oklch(0.7 0.18 25);
-  --danger-ink: oklch(0.208 0.04 266);
+  --accent: #34d399;
+  --accent-ink: #0b0d0f;
+  /* No escuro o acento já cumpre 4,5:1 como texto sobre todas as superfícies
+     (8,42 no pior caso, sobre `elevated`), então aqui ele **sobe** em vez de
+     descer — o oposto do que o tema claro faz, e pela mesma razão. */
+  --accent-text: #34d399;
+  /* Superfícies coloridas usam o acento a 12–16% de opacidade — pág. 33. Este é
+     o acento a 14% já composto sobre `surface`, que é o fundo em que ele
+     aparece (item de navegação ativo, chips). Composto e não `color-mix` para
+     que o valor seja aferível pelo teste como qualquer outro. */
+  --accent-surface: #1a332e;
 
-  /* Same two states as the light theme, lifted to read on a dark ground.
-     Success is still the accent; error is still `danger`. */
-  --warning: oklch(0.79 0.13 62);
-  --info: oklch(0.72 0.13 265);
+  /**
+   * Os estados, lidos na tabela de ajuste da pág. 33. Success continua sendo o
+   * acento, e a mesma ressalva do tema claro vale: no Life, confirmação nunca é
+   * comunicada só pela cor.
+   *
+   * No escuro os três já cumprem 4,5:1 como texto, então `-text` aponta para a
+   * própria base. Os tokens existem em ambos os temas mesmo assim: um token que
+   * existe num tema e não no outro é o formato de um bug esperando alguém
+   * escurecer esta escala.
+   */
+  --success: #34d399;
+  --success-surface: #1a332e;
+  --warning: #fbbf24;
+  --warning-text: #fbbf24;
+  --warning-surface: #36301e;
+  --danger: #f87171;
+  --danger-text: #f87171;
+  --danger-surface: #362529;
+  --danger-ink: #0b0d0f;
+  --info: #9aa3ae;
+  --info-surface: #282c31;
 
-  --focus: oklch(0.72 0.16 258);
+  --focus: #34d399;
 
-  --protein: oklch(0.72 0.14 250);
-  --carbs: oklch(0.79 0.13 68);
-  --fat: oklch(0.71 0.16 305);
+  /* Data colors, subidas junto com os acentos. No escuro as três já cumprem
+     4,5:1 como texto, então `-text` aponta para a própria base — o oposto do
+     tema claro, e pela mesma razão de sempre.
 
-  /* On a dark ground all three already clear 4.5:1 as text, even on the hero
-     card — the lightest surface the app has. They are declared anyway rather
-     than left to fall back: a token that exists in one theme and not the other
-     is the shape of a bug waiting for someone to darken this scale. */
-  --protein-text: oklch(0.72 0.14 250);
-  --carbs-text: oklch(0.79 0.13 68);
-  --fat-text: oklch(0.71 0.16 305);
+     `comparison` é o Gray 500 da paleta clara, o cinza mais claro que ainda
+     cumpre os 3:1 sobre este fundo (4,03) — nenhum valor novo. */
+  --data-positive: #34d399;
+  --data-positive-text: #34d399;
+  --data-negative: #f87171;
+  --data-negative-text: #f87171;
+  --data-neutral: #9aa3ae;
+  --data-comparison: #6b7280;
 
-  --overlay: oklch(0 0 0 / 0.65);
+  --protein: #59aaf8;
+  --carbs: #f1aa57;
+  --fat: #b985f1;
 
-  --elevation-sm: 0 1px 2px oklch(0 0 0 / 0.4);
-  --elevation-md: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
+  --protein-text: #59aaf8;
+  --carbs-text: #f1aa57;
+  --fat-text: #b985f1;
 
-  /* Here the hero already rises by lightness and by a brighter top edge, so
-     this stays at `md`: a bigger black blur under a card on a near-black page
-     is work nobody can see. */
-  --elevation-hero: 0 4px 12px oklch(0 0 0 / 0.5), 0 1px 3px oklch(0 0 0 / 0.3);
+  --overlay: rgb(11 13 15 / 0.65);
 
-  /* Here it does the work shadows cannot: on a near-black page a shadow is
-     invisible, and this single lit edge is what reads as "raised" instead of
-     "cut out".
-
-     The hero card gets a brighter one, and the pair has to be read together
-     with the surfaces underneath: `elevated` is only 0.045 of lightness above
-     `surface`, which separates the two but does not by itself say which is in
-     front. The lit edge is what does — the brighter the edge, the closer the
-     light, so a doubled hairline reads as one card standing above another
-     rather than as a slightly paler one. */
-  --card-top-light: oklch(1 0 0 / 0.06);
-  --card-top-hero: oklch(1 0 0 / 0.12);
-
+  /* Sombra não lê sobre quase-preto, e a pág. 33 diz para não tentar. O card
+     não recebe nenhuma; o modal mantém a sua só para separar do overlay. */
+  --elevation-sm: none;
+  --elevation-modal: 0 8px 32px rgb(0 0 0 / 0.5);
 }
 
 /**
- * Density — the one place the two experiences differ.
+ * Raio — pág. 23. Cinco valores, cada um ligado a uma escala de superfície, e
+ * "nenhum projeto escolhe raio por conta própria".
  *
- * You decided early that desktop and mobile would be intentionally different:
- * **desktop to build a workout, mobile to execute one.** These tokens are that
- * decision, expressed as measurements rather than as two sets of screens.
- * Nothing is duplicated; the same components read different numbers.
+ * **Estes valores deixaram de variar por breakpoint.** A densidade responsiva
+ * de antes usava 18 px no celular e 14 px no desktop para controles, e os dois
+ * estão na lista que a pág. 23 proíbe **pelo nome**: "raios intermediários como
+ * 10, 14 ou 18". A regra de aninhamento é o que substitui a graduação por tela
+ * — card 16 → botão 12 → chip 8, sempre o raio imediatamente inferior, nunca o
+ * contrário.
  *
- * Mobile is the base because that is where the constraint is real: a 46px
- * control is what a sweaty thumb can hit between sets, standing up, without
- * looking carefully. The desk has a mouse and no such excuse, so it trades the
- * generosity for seeing a whole workout without scrolling.
- *
- * **Named `corner`, not `radius`.** `--radius-*` is Tailwind's own theme
- * namespace, and declaring the raw values under that name would make the
- * mapping below a circular reference — the same trap `--elevation-*` avoids.
+ * Nomeado `corner` e não `radius` porque `--radius-*` é o namespace de tema do
+ * Tailwind, e declarar os valores crus com esse nome faria o mapeamento lá
+ * embaixo referenciar a si mesmo.
  */
 :root {
-  /* Cartão: the phone, one-handed, at the gym. */
+  --corner-sm: 8px;
+  --corner-md: 12px;
+  --corner-lg: 16px;
+  --corner-xl: 20px;
+  --corner-2xl: 24px;
+
   /**
-   * Three corners, and each one names a **role** rather than a size.
+   * Alturas de controle — pág. 25 e 26.
    *
-   * `sm` is inline — a thumbnail, a swatch, something sitting inside something
-   * else. `md` is a control — a button, a field, a select; anything you
-   * operate. `lg` is a container — a card, a sheet, a modal; anything that
-   * holds other things. The fourth radius in the system is `full`, which needs
-   * no token because it is not a measurement.
+   * Botão: 48 grande, 40 padrão, 32 pequeno. Input: **44 px em celular e
+   * desktop**, que a pág. 26 fixa sem variação.
    *
-   * **The rule this replaces had no rule.** Six values were in use across the
-   * app — 38 `md`, 34 `lg`, 33 `xl`, 10 `full`, 2 `sm`, 1 `2xl` — and a
-   * developer choosing between them could only guess. Measured in the browser
-   * at 388px, five of them appeared on one screen: a 12px button touching an
-   * 18px field inside a 24px card.
+   * A decisão antiga de densidade — controles maiores no celular porque "é o
+   * que um polegar suado acerta entre séries" — não morre aqui, muda de
+   * mecanismo: a ação do meio do treino usa o tamanho **grande**, que agora tem
+   * 48 px em todo lugar, contra os 46 de antes no celular. O argumento
+   * sobrevive escolhendo o token certo em vez de mudando o token com a tela.
    *
-   * Naming the role removes the guess. An element no longer asks "am I big or
-   * small?", it asks "what am I?", which is a question with an answer.
-   *
-   * **What actually moved:** the button adopted the field's radius. Values
-   * shifted down one step — what was `lg` is now `md`, what was `xl` is now
-   * `lg`, and `xl` is gone. Every card and every field keeps the exact pixels
-   * it had; only buttons changed, from 12px to 18px.
-   *
-   * That direction was chosen over pulling the field down to 12px for two
-   * reasons. Proportion: on a 46px control, 18px of radius is 0.39 of the
-   * height, which reads generous without becoming a pill — and the brand mark
-   * is a generous curve. And risk: fields outnumber buttons in this app, so
-   * moving the button touches less surface.
-   *
-   * The hierarchy survives — container 24 against control 18 is a ratio of
-   * 1.33, visible at a glance. This is a three-step ladder with a rule, not
-   * one radius for everything.
+   * A área de toque de 44 × 44 da pág. 48 continua vindo do utilitário
+   * `touch-44`, que cresce o alvo sem crescer o desenho.
    */
-  --corner-sm: 0.5rem;
-  --corner-md: 1.125rem;
-  --corner-lg: 1.5rem;
+  --control-h: 40px;
+  --control-h-sm: 32px;
+  --control-h-lg: 48px;
+  --control-px: 16px;
+  --input-h: 44px;
 
-  --control-h: 2.875rem;
-  --control-h-sm: 2.375rem;
-  /* The mid-set tap: finishing a workout, marking a set. Biggest in both
-     worlds, and never below 44px even at a desk. */
-  --control-h-lg: 3.25rem;
-  --control-px: 1rem;
-  --card-p: 1.25rem;
+  /* Padding de card por breakpoint — a tabela da pág. 32: 16 no celular, 20 do
+     tablet para cima. É a única medida de componente que o brandbook varia. */
+  --card-p: 16px;
+
+  /* Altura do header — pág. 30 e 32: 56 no celular, 60 no tablet, 64 no
+     desktop. */
+  --header-h: 56px;
+
+  /* Largura da sidebar — pág. 31, expandida e colapsada. */
+  --sidebar-w: 264px;
+  --sidebar-w-collapsed: 72px;
+
+  /* Largura máxima de conteúdo — pág. 21. */
+  --content-max: 1280px;
 
   /**
-   * How much of the bottom of the screen the tab bar owns.
+   * Quanto do rodapé a tab bar ocupa.
    *
-   * A token rather than a number in one component, because three things have
-   * to agree on it: the bar's own height, the padding that stops the last card
-   * hiding underneath it, and the rest timer, which is pinned to the bottom
-   * during a workout and would otherwise sit on top of the navigation.
+   * Um token e não um número dentro de um componente porque três coisas
+   * precisam concordar: a altura da própria barra, o padding que impede o
+   * último card de sumir sob ela, e o cronômetro de descanso, que fica preso ao
+   * rodapé durante o treino.
    *
-   * The safe-area inset is inside the value so that the iPhone home indicator
-   * is accounted for once, here, instead of at each of those three places.
+   * O inset da safe area está dentro do valor para que o home indicator do
+   * iPhone seja contado uma vez, aqui, e não em cada um dos três lugares. A
+   * pág. 32 pede 8 px de folga além da barra.
    */
   --bottom-nav-h: calc(3.5rem + env(safe-area-inset-bottom));
 }
 
-@media (width >= 40rem) {
+@media (width >= 48rem) {
   :root {
-    /* The tab bar is a phone affordance. From `sm` up the links are in the
-       header, where there is room for all seven. */
+    /* A tab bar é uma affordance de celular. Da pág. 32: tablet usa drawer,
+       desktop usa sidebar fixa — em nenhum dos dois a barra existe. */
     --bottom-nav-h: 0rem;
+
+    --card-p: 20px;
+    --header-h: 60px;
   }
 }
 
-@media (width >= 48rem) {
+@media (width >= 64rem) {
   :root {
-    /**
-     * Desktop is denser than a phone, not smaller.
-     *
-     * The first version of this shrank everything — 15px card padding, 36px
-     * controls — and the result read as a phone screen stretched across a
-     * monitor rather than an application. Pulling back: still tighter than
-     * the phone, because a mouse is precise and a desk shows more at once,
-     * but close to the 24px padding and 16px corners of the app this one is
-     * modelled on.
-     */
-    --corner-sm: 0.5rem;
-    --corner-md: 0.875rem;
-    --corner-lg: 1rem;
-
-    --control-h: 2.5rem;
-    --control-h-sm: 2.125rem;
-    --control-h-lg: 2.875rem;
-    --control-px: 0.9375rem;
-    --card-p: 1.5rem;
+    --header-h: 64px;
   }
 }
 
 /**
- * `inline` because every value above is a `var()` that changes per theme:
- * it makes utilities resolve to the variable itself rather than baking in
- * whichever value happened to be current at build time.
+ * `inline` porque todo valor acima é um `var()` que muda por tema: faz os
+ * utilitários resolverem para a variável em si em vez de gravarem o valor que
+ * estava corrente no momento do build.
  */
 @theme inline {
   --color-canvas: var(--canvas);
@@ -447,14 +495,33 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-text: var(--accent-text);
+  --color-accent-surface: var(--accent-surface);
+  --color-accent-50: var(--accent-50);
+  --color-accent-300: var(--accent-300);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-800: var(--accent-800);
 
-  --color-danger: var(--danger);
-  --color-danger-ink: var(--danger-ink);
-
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
   --color-warning: var(--warning);
+  --color-warning-text: var(--warning-text);
+  --color-warning-surface: var(--warning-surface);
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+  --color-danger-surface: var(--danger-surface);
+  --color-danger-ink: var(--danger-ink);
   --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
 
   --color-focus: var(--focus);
+
+  --color-data-positive: var(--data-positive);
+  --color-data-positive-text: var(--data-positive-text);
+  --color-data-negative: var(--data-negative);
+  --color-data-negative-text: var(--data-negative-text);
+  --color-data-neutral: var(--data-neutral);
+  --color-data-comparison: var(--data-comparison);
 
   --color-protein: var(--protein);
   --color-carbs: var(--carbs);
@@ -467,71 +534,100 @@
   --color-overlay: var(--overlay);
 
   --shadow-sm: var(--elevation-sm);
-  --shadow-md: var(--elevation-md);
+  --shadow-modal: var(--elevation-modal);
 
   /**
-   * One family, for prose and for numbers alike.
+   * **Inter é a única tipografia institucional da LaCalle** — pág. 16, "em
+   * marca, produto, apresentação e documento". Substitui a Geist, que era uma
+   * escolha do app e não da marca.
    *
-   * A monospace face used to carry every calorie, weight, set and load — 50
-   * places across 29 files. Monospace is a signal, and the signal it sends is
-   * *code*: a log, a terminal, a diff. On a screen that is mostly numbers it
-   * was the loudest thing about the product, and it said "developer tool".
-   *
-   * What that face was actually needed for is digits of equal width, so a
-   * total does not jitter as it counts. That is `tabular-nums`, a feature of
-   * this face too — kept everywhere the monospace was, which is why the
-   * alignment survived the swap. Geist Mono is no longer loaded at all.
+   * O fallback é o técnico que a pág. 16 especifica. `tabular-nums` continua
+   * ligado globalmente em `globals.css`: este app é uma coluna de números, e a
+   * pág. 16 pede a mesma coisa para números em finanças.
    */
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
 
-  /* Corners come from the density layer above, so every `rounded-*` already
-     written across the app follows the breakpoint without being touched. */
-  /* Three tokens, three roles. `rounded-xl` and `rounded-2xl` are deliberately
-     not mapped: leaving them unmapped means any stray use falls back to
-     Tailwind's own default and looks wrong immediately, instead of quietly
-     working and reintroducing a fourth vocabulary. */
+  /* Os cinco raios da pág. 23, todos mapeados. `xl` e `2xl` eram deixados de
+     fora de propósito, para que um uso solto caísse no default do Tailwind e
+     parecesse errado na hora — agora o brandbook os define e usa: modal e
+     painel em 20, bottom sheet e hero em 24. */
   --radius-sm: var(--corner-sm);
   --radius-md: var(--corner-md);
   --radius-lg: var(--corner-lg);
+  --radius-xl: var(--corner-xl);
+  --radius-2xl: var(--corner-2xl);
 
-  /* Motion. The expo-out curve leaves fast and settles slowly, which is what
-     makes an interface feel responsive rather than merely animated.
+  /**
+   * As duas curvas oficiais — pág. 38. Não existe terceira.
+   *
+   * `ease-out` é a entrada de qualquer elemento: sai rápido e desacelera com
+   * suavidade. `ease-in` é a saída e a navegação de retorno. Linear é proibido,
+   * exceto em spinners e loops infinitos.
+   *
+   * **Isto substitui a curva expo-out** `(0.16, 1, 0.3, 1)` que estava aqui. Ela
+   * é da mesma família e o efeito é parecido, mas "usar os tokens de duração e
+   * as duas curvas oficiais em 100% dos casos" é a primeira linha do "fazer" da
+   * pág. 39, e uma curva parecida é uma curva diferente.
+   *
+   * Mapeadas sobre o namespace `--ease-*` do próprio Tailwind de propósito:
+   * cada `ease-out` já escrito pelo app passa a usar a curva da marca sem nada
+   * a migrar.
+   */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-in-out: cubic-bezier(0.22, 1, 0.36, 1);
 
-     Mapping these onto Tailwind's own `--ease-*` namespace is deliberate: it
-     means every `ease-out` already written across the app uses this curve
-     instead of the framework default, with nothing to migrate. */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /**
+   * Os quatro tiers de duração da pág. 38.
+   *
+   * micro: hover, feedback, mudança de estado, toggle, foco.
+   * standard: cards, menus, modais, transições entre páginas comuns.
+   * signature: LaCalle Reveal, troca de módulo, transições de identidade.
+   * hero: splash, onboarding, campanhas.
+   *
+   * O critério final da pág. 38 é o que resolve empate: "se a animação atrasa o
+   * usuário, ela está errada — na dúvida entre dois tempos, escolha o mais
+   * curto". A saída é sempre 60% da entrada.
+   */
+  --duration-micro: 150ms;
+  --duration-standard: 250ms;
+  --duration-signature: 450ms;
+  --duration-hero: 800ms;
+  --duration-stagger: 40ms;
 
-  /* Something arriving: a rest timer, a banner, a panel. It rises a short
-     distance because motion from below reads as "this came to you", where a
-     drop reads as "this fell on you". */
-  --animate-rise: rise 240ms var(--ease-out) both;
+  /* Algo chegando: um cronômetro, um aviso, um painel. Sobe uma distância curta
+     porque movimento vindo de baixo lê como "isto veio até você", enquanto uma
+     queda lê como "isto caiu em você". 6 px, que é o deslocamento da entrada de
+     conteúdo da pág. 35 — a pág. 36 limita a faixa a 4–12 px. */
+  --animate-rise: rise var(--duration-standard) var(--ease-out) both;
 
-  /* Loading. Slower and shallower than the usual pulse — a skeleton that
-     flashes competes with the content it is standing in for. */
+  /* Carregamento. Mais lento e mais raso que o pulse comum — um esqueleto que
+     pisca compete com o conteúdo que ele está substituindo. */
   --animate-pulse-soft: pulse-soft 1.9s var(--ease-in-out) infinite;
 
   /**
-   * A mark landing: the check on a set you just finished.
+   * Uma marca aterrissando: o check da série que você acabou de terminar.
    *
-   * It overshoots to 1.15 and settles, which is what separates "the app
-   * noticed" from "something moved". Short — 220ms — because this fires dozens
-   * of times in a workout and anything longer would be in the way of the next
-   * set rather than confirming the last one.
+   * **Sem overshoot.** A versão anterior ia a 1,15 e voltava, e a pág. 36 é
+   * explícita: "sem bounce, sem overshoot, sem elástico". A microinteração que
+   * o brandbook prevê no lugar é outra e melhor — o traço do check sendo
+   * *desenhado* em vez de aparecer pronto, seguindo a mesma curvatura do
+   * símbolo. Aqui fica a escala, que é o que o elemento pode fazer sozinho.
    *
-   * Driven by the *tap*, never by the completed state: keyed off a counter the
-   * click increments, so opening a finished workout does not set two dozen
-   * checks off at once.
+   * Disparada pelo *toque*, nunca pelo estado concluído: presa a um contador
+   * que o clique incrementa, para que abrir um treino terminado não dispare
+   * duas dezenas de checks de uma vez.
    */
-  --animate-pop: pop 220ms var(--ease-out) both;
+  --animate-pop: pop var(--duration-micro) var(--ease-out) both;
 
   /**
-   * Drains left to right while a two-tap confirmation is armed.
+   * Esvazia da esquerda para a direita enquanto uma confirmação de dois toques
+   * está armada.
    *
-   * Linear on purpose: this one is a clock, and easing it would make the time
-   * left read as more or less than it is. The duration is set by the caller
-   * from `DISARM_AFTER_MS`, so the bar and the timer cannot disagree.
+   * Linear de propósito, e é a exceção que a pág. 38 permite: isto é um
+   * relógio, e suavizá-lo faria o tempo restante parecer mais ou menos do que
+   * é. A duração vem de quem chama, a partir de `DISARM_AFTER_MS`, para que a
+   * barra e o cronômetro não possam discordar.
    */
   --animate-drain: drain linear both;
 }
@@ -539,7 +635,7 @@
 @keyframes rise {
   from {
     opacity: 0;
-    translate: 0 0.5rem;
+    translate: 0 0.375rem;
   }
   to {
     opacity: 1;
@@ -549,10 +645,7 @@
 
 @keyframes pop {
   from {
-    scale: 0.6;
-  }
-  60% {
-    scale: 1.15;
+    scale: 0.9;
   }
   to {
     scale: 1;
