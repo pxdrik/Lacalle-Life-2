@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { Route } from "next";
 
+import { Signature } from "@/design-system/brand/signature";
 import { cn } from "@/design-system/cn";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
@@ -49,20 +50,16 @@ export function AppNav() {
           wordmark would otherwise sit next to the theme toggle with a gap the
           size of the screen between them and the edge. */}
       <div className="mx-auto flex w-full max-w-[120rem] items-center justify-between gap-4 px-6 py-3.5 sm:justify-start">
-        {/* `shrink-0` and no wrapping: the wordmark broke onto two lines the
-            moment a seventh link was added, which shoved the whole header
-            taller on a screen that was merely narrow. */}
-        {/* Two-tone, as the logo sets it: "LaCalle" in ink and "Life" in the
-            emerald, with `Life` a step lighter. The mark does the same thing —
-            the name is the weight and the green is what makes it the brand's
-            name rather than a title. `accent-text`, not `accent`: this is type,
-            and the fill green does not clear 4.5:1 at this size. */}
-        <Link
-          href="/"
-          className="shrink-0 text-sm tracking-tight whitespace-nowrap"
-        >
-          <span className="font-semibold text-ink">LaCalle</span>{" "}
-          <span className="font-medium text-accent-text">Life</span>
+        {/* A assinatura completa — símbolo + "LaCalle" + qualificador — que é a
+            forma obrigatória dentro de um produto (pág. 14). O que estava aqui
+            era só o wordmark, porque o símbolo não existia; ele existe agora.
+
+            `Signature` lê `--signature-h`, que vale 18 px neste cabeçalho e 22
+            do tablet para cima, exatamente como a tabela da pág. 14 pede.
+
+            A logo é sempre o link para a home (pág. 30). */}
+        <Link href="/" className="shrink-0">
+          <Signature />
         </Link>
 
         {/* Home is reached through the wordmark, so it is not repeated here.

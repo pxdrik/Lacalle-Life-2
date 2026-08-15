@@ -435,6 +435,17 @@
      desktop. */
   --header-h: 56px;
 
+  /**
+   * A unidade `x` da assinatura: a altura do símbolo, da qual a pág. 10 deriva
+   * todo o resto da construção.
+   *
+   * 18 px no cabeçalho do celular e 22 no do desktop e na sidebar — a tabela da
+   * pág. 14. É um token e não uma prop porque muda com a tela, e um componente
+   * que recebesse o número precisaria ser renderizado duas vezes para
+   * conseguir a mesma coisa.
+   */
+  --signature-h: 18px;
+
   /* Largura da sidebar — pág. 31, expandida e colapsada. */
   --sidebar-w: 264px;
   --sidebar-w-collapsed: 72px;
@@ -465,6 +476,7 @@
 
     --card-p: 20px;
     --header-h: 60px;
+    --signature-h: 22px;
   }
 }
 

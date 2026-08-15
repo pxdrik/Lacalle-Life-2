@@ -681,19 +681,39 @@ pequeno (marca no anel de progresso, ilustração para estado vazio) transformar
 **A marca chegou em 12/08/2026** e o bloqueio caiu pela metade. Ver
 `docs/logo-brief.md`.
 
-- [x] **A paleta do app é a da logo**, nos dois temas: emerald 500/600/800 e a
-      família slate, com as 67 duplas de contraste aferidas. O nome virou
-      `LaCalle`, com C maiúsculo, e o wordmark do cabeçalho ficou em duas cores.
+- [x] **A paleta do app é a da marca**, nos dois temas, com todas as duplas de
+      contraste aferidas. O nome virou `LaCalle`, com C maiúsculo. **Em 15/08 a
+      paleta foi substituída pela do Brand System V1.1** — os neutros deixaram
+      de ser slate e passaram a ser a escala Gray da pág. 18; o acento
+      emerald 500/600/800 sobreviveu intacto, porque era o mesmo.
 - [x] **O brilho da apresentação entrou, o verde nas superfícies não.** Foram
       comparadas quatro variantes na mesma tela e com o mesmo dado — slate puro,
       verde sutil, verde forte, e slate com brilho. As quatro passam em AA, então
       a escolha foi de olho. Verde forte é o modo de falha que originou a sprint,
       e tem custo: com o fundo verde o esmeralda deixa de ser a única coisa
       saturada em vista. O brilho põe o verde **no ar e não no material**.
-- [ ] **O símbolo ainda não está no app** — continua o "L" placeholder.
-      **Falta o arquivo vetorial**: traçar a fita a partir do PNG seria adivinhar
-      curva por curva. Com o SVG, são os cinco lugares — header, celular,
-      favicon, carregamento e estado vazio.
+- [x] **O símbolo entrou em 15/08/2026**, e a pendência mais antiga do
+      repositório fechou. O "L" placeholder saiu do favicon, do ícone do iOS e
+      do maskable, e a assinatura completa — símbolo + "LaCalle" + qualificador,
+      como a pág. 14 obriga dentro de um produto — entrou no cabeçalho e na
+      sidebar.
+
+      **O bloqueio era o vetor, e a saída foi reler o que faltava.** A nota
+      antiga dizia que traçar a fita a partir do PNG "seria adivinhar curva por
+      curva", e ela estava certa sobre a arte que tinha em vista: uma fita
+      renderizada em 3D, cuja leitura vem inteira do sombreado. Mas a versão que
+      o brandbook pede na pág. 8 é outra — "em monocromia, usar a versão de
+      contorno preenchido" — e essa é a silhueta do canal alfa, que é um
+      contorno fechado, sem buracos e sem quinas. Traçada em resolução 6× e
+      ajustada em bézier, ela diverge do original em 6,6% de área, quase toda a
+      franja de antialias de 1 px.
+
+      O maior render disponível em qualquer um dos dois brandbooks mede
+      **139 × 137 px** — é o teto, e uma curva ajustada em cima dele fica melhor
+      que ele, não pior. Quando o vetor oficial da pág. 51 existir, ele
+      substitui duas constantes em `design-system/brand/mark.ts` e nada mais
+      muda: `mark.test.ts` garante que os SVGs de disco não possam divergir do
+      módulo.
 
 ---
 

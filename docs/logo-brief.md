@@ -1,89 +1,43 @@
 # Brief da marca
 
-**A marca existe** desde 12/08/2026. O prompt abaixo fica registrado porque foi
-o que a produziu; o que importa agora é o estado e o que falta.
+**Este documento está encerrado.** A marca existe desde 12/08/2026, o símbolo
+entrou no app em 15/08/2026, e desde então a fonte de verdade da identidade é
+outra: o **LaCalle Brand System V1.1**, com o resumo das decisões de aplicação
+em `docs/brandbook.md` e o contrato técnico em `src/design-system/tokens.css`.
 
-## Estado
+O que sobra aqui é histórico — o prompt que produziu a marca, e o registro de
+como o bloqueio do vetor foi resolvido. Nada abaixo é normativo.
 
-- ✅ **A paleta é a da logo**, nos dois temas, com todas as duplas de contraste
-  aferidas em `tokens.test.ts`. Ver a seção _A paleta_ mais abaixo.
-- ✅ **O nome virou `LaCalle Life`**, com C maiúsculo, como a marca escreve — e
-  o wordmark do cabeçalho ficou em duas cores: `LaCalle` em tinta, `Life` em
-  esmeralda.
-- ⏳ **O símbolo ainda não está no app.** Continua o "L" placeholder em
-  `src/app/icon.svg`. **Falta o arquivo vetorial** — traçar a fita a partir do
-  PNG seria adivinhar curva por curva e o resultado ficaria pior que o
-  original. Com o SVG em mãos, são os cinco lugares da lista no fim.
+## Como o bloqueio do vetor caiu
 
----
+A versão anterior desta página dizia:
 
-## O que existe hoje
+> Falta o arquivo vetorial — traçar a fita a partir do PNG seria adivinhar curva
+> por curva e o resultado ficaria pior que o original.
 
-Um **"L" branco sobre quase-preto**, em `src/app/icon.svg`:
+**Estava certa sobre a arte que tinha em vista, e errada sobre o que era
+preciso.** A fita do brandbook é um render 3D em degradê, cuja leitura vem
+inteira do sombreado; adivinhar aquilo de fato produziria algo pior. Mas a
+versão que a pág. 8 do Brand System pede é outra — "em monocromia, usar a versão
+de contorno preenchido" — e essa é a **silhueta do canal alfa**, que é um
+contorno fechado, sem buracos e sem quinas.
 
-```svg
-<path d="M11 7h4.6v13.4H22V25H11z" fill="#ffffff" />
-```
+Foi essa que foi traçada, em 15/08: canal alfa da arte, contorno seguido em
+resolução 6×, reamostrado por comprimento de arco, ajustado em bézier cúbicas
+com âncoras distribuídas por curvatura. **Divergência de 6,6% de área contra o
+original, quase toda a franja de antialias de 1 px.**
 
-Nove caracteres de path. É placeholder honesto — diz a inicial e nada mais. Não
-carrega o esmeralda, não diz saúde, treino ou nutrição, e é por isso que a
-auditoria registrou que "tirando o nome do topo, não há forma, ícone ou
-ilustração que seja só dele".
+O maior render do símbolo em qualquer um dos dois brandbooks mede **139 × 137
+px** — é o teto disponível, e uma curva ajustada em cima dele fica melhor que
+ele. Quando o vetor oficial da pág. 51 existir, ele substitui duas constantes em
+`src/design-system/brand/mark.ts` e nada mais muda.
 
-`apple-icon.tsx` **gera** o PNG do iOS a partir desse mesmo traço, de propósito:
-uma imagem binária no repositório é uma segunda cópia da arte que sai do lugar
-na primeira vez que uma das duas muda.
-
----
-
-## As restrições que não são negociáveis
-
-Elas vêm do código, não de gosto:
-
-1. **Tem que virar path de SVG.** O ícone é path data commitada e o ícone do iOS
-   é gerado a partir dela. Nada de gradiente, sombra, textura, 3D ou degradê —
-   forma chapada, fechada, uma cor.
-2. **Tem que sobreviver a 16px.** Favicon é o menor uso e o mais implacável.
-   Se a ideia precisa de detalhe para ser lida, ela não serve.
-3. **Tem que funcionar em duas cores de fundo**: `#080b0b` (escuro, o padrão do
-   app) e `#f6f9f9` (claro). E tem que funcionar **em uma cor só**, porque no
-   cabeçalho ela entra num chip monocromático.
-4. **Não pode parecer SaaS, terminal ou ferramenta de desenvolvedor.** É o
-   diagnóstico que abriu a sprint inteira. Tem que parecer app de saúde,
-   nutrição e treino: moderno, confiável, agradável, acolhedor.
-
-## A paleta
-
-As oito cores que vieram com a marca, e onde cada uma foi parar:
-
-| Swatch | Hex | Papel no app |
-| --- | --- | --- |
-| emerald-500 | `#10B981` | `--accent` no **escuro** |
-| emerald-600 | `#059669` | `--accent` no **claro** |
-| emerald-800 | `#065F46` | `--accent-text` no claro |
-| slate-900 | `#0F172A` | `--canvas` escuro, `--ink` claro, e a tinta sobre o verde |
-| slate-800 | `#1E293B` | `--surface` escuro |
-| slate-700 | `#334155` | `--muted` escuro |
-| slate-200 | `#E2E8F0` | base dos cinzas claros |
-| branco | `#FFFFFF` | `--surface` claro |
-
-Três coisas medidas que decidiram o resto:
-
-1. **Branco sobre o esmeralda reprova** — 2,54:1 no emerald-500 e 3,77:1 no
-   600. A tinta sobre o verde é slate-900, que mede 7,04 e 4,74. É a mesma
-   armadilha em que a V1 caiu com o próprio botão primário.
-2. **A marca é um degradê, então cada tema pega o passo que funciona no seu
-   fundo.** O emerald-500 não chega aos 3:1 que um gráfico deve numa página
-   branca (2,31); o 600 chega (3,44). No escuro, 500 lê 7,04 contra 4,73 do
-   600. Os dois passos são da marca — nenhum foi inventado.
-3. **As superfícies são slate, não verdes.** A apresentação tem brilho verde em
-   volta de tudo, mas as oito cores nomeiam **quatro slates e nenhuma
-   superfície verde**. Isso é atmosfera de mockup; a paleta é a especificação —
-   e é o que impede o app de voltar a parecer terminal, que foi o diagnóstico
-   que abriu a sprint.
-
-Tudo aferido em `src/design-system/tokens.test.ts`: 67 asserções, e editar um
-valor sem cumprir AA quebra o build.
+As quatro restrições que a versão anterior listou como não negociáveis foram
+todas atendidas, e continuam valendo para qualquer arte futura: **um path
+fechado e chapado**, **legível a 16 px** (com a variante de ajuste óptico que a
+pág. 15 exige para isso), **funcional em uma cor só** via `currentColor`, e
+**sem cara de ferramenta de desenvolvedor**, que foi o diagnóstico que abriu a
+sprint do redesign.
 
 ---
 
@@ -138,14 +92,20 @@ Gere as quatro e compare lado a lado a 16px, não a 512px:
 
 ---
 
-## O que fazer com o resultado
+## Onde a marca vive hoje
 
-1. Vetorizar e reduzir a **um path**, ou poucos. Se não couber em path simples,
-   a ideia não passou na restrição 1.
-2. Substituir o `<path>` em `src/app/icon.svg`, mantendo o `viewBox="0 0 32 32"`
-   e o `rect` de fundo.
-3. **Não commitar PNG.** `apple-icon.tsx` regenera o do iOS a partir do traço;
-   basta trocar o path lá também.
-4. Conferir nos cinco lugares que o pedido cita: cabeçalho, celular, favicon,
-   carregamento e estado vazio — e nos dois temas.
-5. Riscar o bloqueio em `docs/roadmap.md`, seção _Identidade_.
+Nenhum destes é escolha deste documento — os três primeiros vêm da pág. 50 do
+Brand System, e o último é a tradução dela para um app sem repositório de marca
+separado.
+
+| Arquivo | Papel |
+| --- | --- |
+| `src/design-system/brand/mark.ts` | **A única fonte da forma.** Os dois paths e a construção do ícone. |
+| `src/design-system/brand/signature.tsx` | `Mark` e `Signature`, com a construção da pág. 10 como `calc()`. |
+| `src/app/icon.svg` | Favicon: gradiente 150°, símbolo a 46%, raio a 22,5%. |
+| `src/app/apple-icon.tsx` | Ícone do iOS, gerado — sangria total, sem raio. |
+| `public/icon-maskable.svg` | Android, sangria total, símbolo dentro da zona segura. |
+| `src/design-system/brand/mark.test.ts` | Prova que os SVGs de disco não divergiram do módulo. |
+
+**Não commitar PNG.** O do iOS é gerado; um binário no repositório é uma segunda
+cópia da arte que sai do lugar na primeira vez que uma das duas muda.

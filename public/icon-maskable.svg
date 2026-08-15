@@ -1,9 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!-- Full bleed, unlike icon.svg: Android applies its own mask (circle,
-       squircle, teardrop depending on the launcher), and rounded corners baked
-       into the artwork would appear as a rounded square floating inside that
-       mask. The mark stays inside the 80% safe zone (3.2–28.8) so no launcher
-       shape can clip it. -->
-  <rect width="32" height="32" fill="#0a0a0a" />
-  <path d="M11 7h4.6v13.4H22V25H11z" fill="#ffffff" />
+  <!-- Sangria total, ao contrário de `icon.svg`: o Android aplica a própria
+       máscara (círculo, squircle ou gota, conforme o launcher), e cantos
+       arredondados embutidos na arte apareceriam como um quadrado arredondado
+       flutuando dentro dessa máscara.
+
+       O símbolo ocupa os 46% da largura que a pág. 15 fixa, o que o mantém
+       folgadamente dentro da zona segura de 80% (3,2–28,8) — nenhum formato de
+       launcher chega a tocá-lo. É a mesma construção do favicon sem o raio:
+       "manter o mesmo enquadramento do símbolo em todas as submarcas — só o
+       fundo muda". -->
+  <defs>
+    <linearGradient id="g" x1="0.317" y1="0.183" x2="0.683" y2="0.817">
+      <stop offset="0" stop-color="#10B981" />
+      <stop offset="1" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" fill="url(#g)" />
+  <g transform="translate(8.64 8.408) scale(0.1472)">
+    <path d="M36.93 0C41.37 0.09 48.13 6.72 49.23 13.1C50.32 19.49 45.97 31.76 43.5 38.31C41.02 44.86 37.74 47.9 34.38 52.41C31.02 56.92 27.11 60.99 23.33 65.38C19.55 69.77 14.15 74.48 11.69 78.75C9.24 83.03 5.58 89.86 8.59 91.04C11.61 92.22 24.11 88.5 29.79 85.85C35.48 83.19 38.35 78.74 42.71 75.11C47.06 71.47 50.97 67.13 55.9 64.05C60.83 60.97 65.24 57.67 72.28 56.63C79.32 55.6 94.07 56.66 98.13 57.83C102.19 59 98.67 60.29 96.64 63.67C94.62 67.05 89.48 73.44 85.99 78.13C82.49 82.82 79.91 87.95 75.68 91.83C71.44 95.71 70.11 99.66 60.58 101.43C51.05 103.2 28.27 103.73 18.49 102.43C8.7 101.13 4.76 99.52 1.85 93.64C-1.06 87.76 0.11 75.01 1.02 67.14C1.94 59.26 5.03 52.87 7.35 46.39C9.66 39.91 12.36 33.86 14.91 28.23C17.45 22.6 18.96 17.3 22.63 12.59C26.3 7.89 32.5 -0.09 36.93 0Z" fill="#FFFFFF" />
+  </g>
 </svg>

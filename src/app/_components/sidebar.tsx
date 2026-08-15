@@ -5,6 +5,7 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { Signature } from "@/design-system/brand/signature";
 import { cn } from "@/design-system/cn";
 import { ICONS } from "@/design-system/icons";
 import { ThemeToggle } from "@/design-system/theme/theme-toggle";
@@ -53,10 +54,12 @@ export function Sidebar() {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-surface lg:flex">
-      <div className="border-b border-line px-5 py-5">
-        <Link href="/" className="text-base tracking-tight whitespace-nowrap">
-          <span className="font-semibold text-ink">LaCalle</span>{" "}
-          <span className="font-medium text-accent-text">Life</span>
+      {/* A logo ocupa o topo da sidebar, com a mesma altura do header — pág.
+          31. `--signature-h` já vale 22 px nesta faixa, então a altura vem do
+          token e não de um número escrito aqui. */}
+      <div className="flex h-(--header-h) shrink-0 items-center border-b border-line px-4">
+        <Link href="/">
+          <Signature />
         </Link>
       </div>
 
