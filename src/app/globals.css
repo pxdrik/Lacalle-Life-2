@@ -44,6 +44,38 @@
 }
 
 @layer base {
+  /**
+   * O traço do ícone afina conforme ele cresce — pág. 28.
+   *
+   * 2,0 em 16 px, 1,9 em 20, 1,75 em 24, 1,5 em 32. A página explica o porquê
+   * numa frase: é o que mantém **o mesmo peso óptico** em todos os tamanhos. Um
+   * traço fixo de 2, que é o padrão do Lucide, faz o ícone de 32 parecer mais
+   * pesado que o de 16 ao lado dele.
+   *
+   * Escrito como regra em vez de prop em cada chamada porque são mais de duas
+   * centenas de usos, e um `strokeWidth` digitado a cada um é uma centena de
+   * chances de digitar o número errado. O seletor casa a classe que o Lucide já
+   * põe em todo ícone com o utilitário de tamanho que o app já escreve, então
+   * nenhum arquivo de componente muda — e um tamanho fora desta lista cai no
+   * 2,0 do primeiro seletor, que é o padrão correto.
+   */
+  .lucide {
+    stroke-width: 2;
+  }
+
+  .lucide.size-5 {
+    stroke-width: 1.9;
+  }
+
+  .lucide.size-6 {
+    stroke-width: 1.75;
+  }
+
+  .lucide.size-7,
+  .lucide.size-8 {
+    stroke-width: 1.5;
+  }
+
   html {
     /* Tabular figures everywhere by default: this app is a column of numbers,
        and digits that change width make totals jitter as they update. */

@@ -9,6 +9,12 @@ import { cn } from "@/design-system/cn";
  * and error is `danger`**, for the reason recorded in `tokens.css`: a second
  * green beside a green brand is not a state, it is noise.
  *
+ * **As superfícies são as da pág. 27**, nomeadas lá uma a uma — `#FEF2F2`,
+ * `#FFFBEB`, `#F3F4F6`, `#ECFDF5`. Eram o próprio tom a 5% de opacidade, que
+ * chegava perto no tema claro e errado no escuro: 5% de vermelho sobre
+ * quase-preto é quase-preto, e o aviso perdia a superfície que o distingue do
+ * fundo. Os tokens `-surface` já resolvem os dois temas.
+ *
  * `role` is part of the tone rather than a prop, because it is not a styling
  * choice. An `alert` interrupts a screen reader mid-sentence; a `status` waits
  * its turn. Something went wrong earns the interruption — "here is a note
@@ -17,25 +23,25 @@ import { cn } from "@/design-system/cn";
  */
 const TONES = {
   danger: {
-    box: "border-danger/30 bg-danger/5",
+    box: "border-danger/30 bg-danger-surface",
     mark: "text-danger",
     Icon: CircleAlert,
     role: "alert",
   },
   warning: {
-    box: "border-warning/30 bg-warning/5",
+    box: "border-warning/30 bg-warning-surface",
     mark: "text-warning",
     Icon: TriangleAlert,
     role: "alert",
   },
   info: {
-    box: "border-info/30 bg-info/5",
+    box: "border-info/30 bg-info-surface",
     mark: "text-info",
     Icon: Info,
     role: "status",
   },
   success: {
-    box: "border-accent/30 bg-accent/5",
+    box: "border-accent/30 bg-success-surface",
     mark: "text-accent-text",
     Icon: CircleCheck,
     role: "status",

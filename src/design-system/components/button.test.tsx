@@ -80,8 +80,18 @@ describe("Button", () => {
       </Button>,
     );
 
-    const button = screen.getByRole("button");
-    expect(button.className).toContain("bg-danger");
-    expect(button.className).not.toContain("bg-accent");
+    /**
+     * Por classe e não por substring.
+     *
+     * `toContain` numa string de classes pergunta a coisa errada, e a pergunta
+     * errada passou a dar a resposta errada: com o hover do primário em
+     * `hover:bg-accent-hover`, a string contém "bg-accent" mesmo depois de o
+     * `bg-accent` de verdade ter sido corretamente removido pelo merge. A
+     * afirmação é sobre a classe aplicada, então é a lista de classes que tem
+     * de ser consultada.
+     */
+    const classes = [...screen.getByRole("button").classList];
+    expect(classes).toContain("bg-danger");
+    expect(classes).not.toContain("bg-accent");
   });
 });

@@ -66,14 +66,51 @@ const REST: readonly {
 ];
 
 /**
- * Tab bar for phones.
+ * A barra de abas do celular — quatro destinos e "Mais", que é o teto de cinco
+ * itens da pág. 32.
  *
- * The header's link list scrolls sideways below `sm` — seven items do not fit
- * 360px — which hides destinations behind a gesture nobody performs, at the
- * top of the screen, where a thumb holding a phone at the gym cannot reach.
+ * Vai até 768 px, não até 640. É a tabela da pág. 32: abaixo de 768 a navegação
+ * é tab bar, entre 768 e 1023 é drawer sobreposto, e de 1024 em diante é a
+ * sidebar fixa. A faixa do meio mostrava uma fileira de links que rolava de
+ * lado, escondendo destinos atrás de um gesto que ninguém executa.
  *
- * Hidden from `sm` up, where the header shows every link at once.
+ * ## O ícone preenchido do item ativo, e por que ele não está aqui
+ *
+ * A pág. 32 pede que "o ativo use ícone preenchido + acento", e a pág. 28 abre
+ * para isso a **única** exceção do sistema à regra de ícones lineares. Não dá
+ * para cumprir: o app usa Lucide, que é uma biblioteca linear sem família
+ * preenchida, e `fill="currentColor"` só funciona nos glifos fechados —
+ * `TrendingUp` é uma polilinha aberta e `UtensilsCrossed` são dois traços
+ * cruzados, e preencher os dois produz borrão, não ícone. A saída de buscar os
+ * preenchidos em outra biblioteca é justamente o que a pág. 28 proíbe: "usar
+ * biblioteca diferente por produto".
+ *
+ * O que o item ativo faz no lugar é o tratamento que a **pág. 31** dá ao item
+ * ativo da sidebar — acento sobre a superfície do acento — o que entrega o que
+ * a regra do preenchimento existe para entregar: distinção por **forma** além
+ * de cor, que é o que a pág. 48 exige de todo estado. Registrado em
+ * `docs/brandbook.md`.
  */
+/**
+ * O rótulo é 11 px SemiBold, que é o estilo Label da pág. 17.
+ *
+ * Era 10 px. A pág. 48 fixa 12 px como piso de texto e a pág. 17 define o Label
+ * em 11 — as duas páginas discordam, e entre elas 10 px não está em nenhuma
+ * leitura. Um rótulo de aba é um label, então vale o estilo do label; o piso de
+ * 12 px é sobre conteúdo, que é a coisa que a pág. 32 proíbe encolher "para
+ * caber".
+ */
+const TAB = cn(
+  "flex flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold leading-none",
+  "transition-colors duration-(--duration-micro) ease-out",
+);
+
+const IDLE = "text-ink-subtle hover:text-ink";
+
+/** A pílula do item ativo: raio full, que a pág. 23 reserva a pills e toggles. */
+const GLYPH =
+  "flex h-6 w-11 items-center justify-center rounded-full transition-colors duration-(--duration-micro) ease-out";
+
 export function BottomNav() {
   const pathname = usePathname();
   const [more, setMore] = useState(false);
@@ -86,7 +123,7 @@ export function BottomNav() {
         aria-label="Principal"
         className={cn(
           "fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line",
-          "bg-canvas/95 backdrop-blur sm:hidden",
+          "bg-canvas/95 backdrop-blur md:hidden",
           "h-(--bottom-nav-h) pb-[env(safe-area-inset-bottom)]",
         )}
       >
@@ -101,14 +138,12 @@ export function BottomNav() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex flex-col items-center justify-center gap-0.5",
-                "transition-colors duration-150 ease-out",
-                active ? "text-accent-text" : "text-ink-subtle hover:text-ink",
-              )}
+              className={cn(TAB, active ? "text-accent-text" : IDLE)}
             >
-              <Icon aria-hidden className="size-5" />
-              <span className="text-[0.625rem] leading-none">{label}</span>
+              <span className={cn(GLYPH, active && "bg-accent-surface")}>
+                <Icon aria-hidden className="size-5" />
+              </span>
+              {label}
             </Link>
           );
         })}
@@ -120,14 +155,12 @@ export function BottomNav() {
           }}
           aria-haspopup="dialog"
           aria-expanded={more}
-          className={cn(
-            "flex flex-col items-center justify-center gap-0.5",
-            "transition-colors duration-150 ease-out",
-            inRest ? "text-accent-text" : "text-ink-subtle hover:text-ink",
-          )}
+          className={cn(TAB, inRest ? "text-accent-text" : IDLE)}
         >
-          <Menu aria-hidden className="size-5" />
-          <span className="text-[0.625rem] leading-none">Mais</span>
+          <span className={cn(GLYPH, inRest && "bg-accent-surface")}>
+            <Menu aria-hidden className="size-5" />
+          </span>
+          Mais
         </button>
       </nav>
 
@@ -137,10 +170,10 @@ export function BottomNav() {
       <Dialog
         open={more}
         title="Mais"
+        placement="sheet-bottom"
         onClose={() => {
           setMore(false);
         }}
-        className="m-0 mt-auto w-full max-w-none rounded-t-lg rounded-b-none border-x-0 border-b-0"
       >
         <ul className="space-y-1">
           {REST.map(({ href, label, hint, icon: Icon }) => (
@@ -151,12 +184,15 @@ export function BottomNav() {
                   setMore(false);
                 }}
                 aria-current={pathname.startsWith(href) ? "page" : undefined}
-                className="flex items-center gap-3 rounded-md px-3 py-3 transition-colors duration-150 ease-out hover:bg-muted aria-[current=page]:bg-muted"
+                className="group flex items-center gap-3 rounded-md px-3 py-3 transition-colors duration-(--duration-micro) ease-out hover:bg-muted aria-[current=page]:bg-accent-surface aria-[current=page]:text-accent-text"
               >
                 <Icon aria-hidden className="size-5 shrink-0 text-ink-subtle" />
                 <span className="min-w-0">
-                  <span className="block text-ink">{label}</span>
-                  <span className="mt-0.5 block text-xs text-ink-subtle">
+                  <span className="block">{label}</span>
+                  {/* `ink-muted` e não `ink-subtle`: sobre `muted` no hover o
+                      terciário mede 4,39:1, e a troca é a saída que a paleta do
+                      brandbook deixa — ver a nota em `tokens.css`. */}
+                  <span className="mt-1 block text-xs text-ink-subtle group-hover:text-ink-muted">
                     {hint}
                   </span>
                 </span>

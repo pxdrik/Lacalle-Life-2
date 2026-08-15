@@ -137,6 +137,20 @@
   --accent-800: #065f46;
 
   --accent: var(--accent-600);
+  /**
+   * O hover do controle primário, e ele sobe a escala em vez de descer.
+   *
+   * A pág. 19 atribui ao 600 o papel de hover do 500. Aqui o 600 já é a base,
+   * porque a pág. 48 não deixa o 500 preencher um controle sobre branco — então
+   * o passo de hover teria de ser o 800, e **o 800 quebra a tinta**: Ink sobre
+   * #065F46 mede 2,46:1. Subir para o 500 é o mesmo tipo de passo, na mesma
+   * escala oficial, e move o contraste da tinta de 5,01 para 7,44 em vez de
+   * derrubá-lo.
+   *
+   * Isto substitui um `hover:opacity-90`, que clareava o verde contra a página
+   * e reduzia o contraste do rótulo por um caminho que nenhum teste vê.
+   */
+  --accent-hover: var(--accent-500);
   /* Ver a divergência 1 no topo. Ink mede 5,01:1 aqui; branco mede 3,77. */
   --accent-ink: #111111;
   /* O acento como texto pede 4,5:1 onde um gráfico pede 3:1, então cai para o
@@ -320,6 +334,9 @@
   --accent-800: #065f46;
 
   --accent: #34d399;
+  /* Mesma lógica do tema claro, um passo acima: o 300 é mais claro que a base,
+     que é a direção em que o contraste cresce sobre fundo escuro. */
+  --accent-hover: var(--accent-300);
   --accent-ink: #0b0d0f;
   /* No escuro o acento já cumpre 4,5:1 como texto sobre todas as superfícies
      (8,42 no pior caso, sobre `elevated`), então aqui ele **sobe** em vez de
@@ -424,8 +441,22 @@
   --control-h: 40px;
   --control-h-sm: 32px;
   --control-h-lg: 48px;
-  --control-px: 16px;
+  /**
+   * O padding horizontal do botão, pela fórmula da pág. 25: "1,5 × a altura ÷
+   * 3, arredondado para a escala: 24 / 18 / 12".
+   *
+   * 18 não está na escala base 4 da pág. 22, e as duas páginas se contradizem.
+   * Vale a pág. 25, que é a específica e dá o número escrito por extenso; a
+   * pág. 22 governa layout, não o interior de um controle.
+   */
+  --control-px: 18px;
+  --control-px-sm: 12px;
+  --control-px-lg: 24px;
+
   --input-h: 44px;
+  /* Pág. 26. Diferente do botão de propósito: o texto de um campo alinha com o
+     rótulo acima dele, e 18 px empurraria os dois para longe. */
+  --input-px: 14px;
 
   /* Padding de card por breakpoint — a tabela da pág. 32: 16 no celular, 20 do
      tablet para cima. É a única medida de componente que o brandbook varia. */
@@ -505,6 +536,7 @@
   --color-line-strong: var(--line-strong);
 
   --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
   --color-accent-text: var(--accent-text);
   --color-accent-surface: var(--accent-surface);

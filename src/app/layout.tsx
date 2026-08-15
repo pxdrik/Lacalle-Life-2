@@ -71,7 +71,7 @@ export default function RootLayout({
                 clear of the fixed column, and it lives here rather than on
                 each of eleven pages. */}
             <Sidebar />
-            <div className="lg:pl-64">
+            <div className="lg:pl-(--sidebar-w)">
               <AppNav />
               {children}
             </div>

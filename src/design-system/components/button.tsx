@@ -4,34 +4,70 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 /**
- * Variants are a plain lookup rather than a variants library. The set is
- * small and closed, `satisfies` makes exhaustiveness a compile error, and it
- * costs nothing at runtime.
+ * As quatro variantes da pág. 25, e nenhuma quinta.
+ *
+ * `danger` é só para ação destrutiva e irreversível — nunca como acento
+ * decorativo. `secondary` tem borda de 1 px em Gray 300, e não a borda de card;
+ * um controle de linha pede a borda mais forte.
+ *
+ * **Os hovers deixaram de ser opacidade.** `hover:opacity-90` clareava o verde
+ * contra a página e, junto, reduzia o contraste do rótulo por um caminho que
+ * nenhuma asserção de contraste enxerga — os tokens continuam medindo certo
+ * enquanto o pixel na tela não. Agora cada um troca para uma cor que existe,
+ * e `--accent-hover` explica a direção escolhida.
+ *
+ * Um bloco de lookup em vez de uma biblioteca de variantes: o conjunto é
+ * pequeno e fechado, `satisfies` torna a exaustividade um erro de compilação, e
+ * não custa nada em tempo de execução.
  */
 const VARIANTS = {
-  primary: "bg-accent text-accent-ink hover:opacity-90 active:opacity-80",
+  primary: "bg-accent text-accent-ink hover:bg-accent-hover",
   secondary:
-    "bg-surface text-ink border border-line hover:bg-muted hover:border-line-strong",
+    "bg-surface text-ink border border-line-strong hover:bg-muted",
   ghost: "text-ink-muted hover:bg-muted hover:text-ink",
-  danger: "bg-danger text-danger-ink hover:opacity-90 active:opacity-80",
+  danger: "bg-danger text-danger-ink hover:bg-danger-text",
 } satisfies Record<ButtonVariant, string>;
 
 /**
- * Heights come from the density tokens, so a button is a comfortable thumb
- * target on a phone and a compact control at a desk without either size being
- * spelled out here. `lg` is the mid-set tap — finishing a workout, marking a
- * set — and stays the largest in both worlds.
+ * Alturas 48 / 40 / 32 e padding 24 / 18 / 12 — pág. 25, onde o padding sai de
+ * "1,5 × a altura ÷ 3".
+ *
+ * **Deixaram de variar por breakpoint**, e a decisão que os fazia variar
+ * sobreviveu por outro caminho: um controle maior para o polegar suado entre
+ * séries agora é o tamanho `lg`, que tem 48 px em todo lugar contra os 46 que o
+ * celular tinha. É escolher o token certo em vez de mudar o token com a tela.
+ *
+ * O ícone é 16 px com gap de 8 nos três tamanhos, também da pág. 25 — o gap não
+ * encolhe junto com o botão, porque o que ele separa não encolheu.
  */
 const SIZES = {
-  sm: "h-(--control-h-sm) gap-1.5 rounded-md px-3 text-sm",
+  sm: "h-(--control-h-sm) gap-2 rounded-md px-(--control-px-sm) text-[0.8125rem]",
   md: "h-(--control-h) gap-2 rounded-md px-(--control-px) text-sm",
-  lg: "h-(--control-h-lg) gap-2 rounded-md px-5 text-base md:text-sm",
+  lg: "h-(--control-h-lg) gap-2 rounded-md px-(--control-px-lg) text-sm",
 } satisfies Record<ButtonSize, string>;
 
-const BASE =
-  "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap " +
-  "font-medium transition-[background-color,border-color,color,opacity] " +
-  "duration-150 ease-out disabled:pointer-events-none disabled:opacity-45";
+/**
+ * SemiBold 600, que é o peso que a pág. 16 atribui a botões e a pág. 25 repete.
+ * Era Medium 500.
+ *
+ * `active:scale-[0.98]` vem da mesma página: "o active reduz a escala para
+ * 0,98 — sem deslocamento vertical". Substitui um `active:opacity-80`, que
+ * dizia a mesma coisa apagando o botão em vez de afundá-lo.
+ *
+ * **O desabilitado deixou de ser opacidade.** A pág. 27 é explícita: "opacidade
+ * não é suficiente: reduzir contraste e remover interação". Um primário a 45%
+ * de opacidade continua sendo um bloco verde, só que lavado — parece quebrado,
+ * não desligado. Agora ele vira superfície neutra com texto terciário, que é
+ * como um controle desligado se parece, e `pointer-events-none` garante o
+ * resto da regra: "não muda de cor no hover e mantém o cursor padrão".
+ */
+const BASE = cn(
+  "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap",
+  "font-semibold transition-[background-color,border-color,color,scale]",
+  "duration-(--duration-micro) ease-out active:scale-[0.98]",
+  "disabled:pointer-events-none disabled:border-transparent",
+  "disabled:bg-muted disabled:text-ink-subtle disabled:active:scale-100",
+);
 
 /**
  * The button's looks, without the button.
