@@ -1,8 +1,9 @@
 "use client";
 
 import { GripVertical, X } from "lucide-react";
+import { useState } from "react";
 
-import { formatDecimal } from "@/core/format/decimal";
+import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 
@@ -71,16 +72,10 @@ export function MealItemRow({
       </span>
 
       <div className="flex shrink-0 items-center gap-1">
-        <input
-          type="text"
-          inputMode="numeric"
-          value={item.grams === 0 ? "" : String(item.grams)}
-          aria-label={`Gramas de ${item.name}`}
-          placeholder="0"
-          onChange={(event) => {
-            onGramsChange(toGrams(event.target.value));
-          }}
-          className="w-14 rounded-md border border-line bg-surface px-2 py-1 text-right text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
+        <GramsField
+          grams={item.grams}
+          label={`Gramas de ${item.name}`}
+          onChange={onGramsChange}
         />
         <span className="text-xs text-ink-subtle">g</span>
       </div>
@@ -148,14 +143,108 @@ export function MealItemRow({
   );
 }
 
-/**
- * Digits only, and never negative. A portion is a physical quantity, so the
- * field refuses nonsense at entry instead of validating it afterwards.
- */
-function toGrams(input: string): number {
-  const digits = input.replace(/\D/g, "");
-  if (digits === "") return 0;
+/** Guards against a pasted number so long it stops being a number. */
+const MAX_GRAMS = 100_000;
 
-  // Guards against a pasted number so long it stops being a number.
-  return Math.min(Number(digits), 100_000);
+/**
+ * A portion you can actually type.
+ *
+ * The field used to strip every non-digit — `input.replace(/\D/g, "")` — which
+ * kept it non-negative and, in the same stroke, deleted the decimal separator.
+ * **"12,5" was stored as 125**: ten times the portion, on the most repeated
+ * action the app has, propagated to the meal total, the day total, the ring
+ * and the comparison against the target. Nothing looked wrong, because 125 is
+ * a perfectly ordinary number of grams.
+ *
+ * Parsing alone does not fix it. With the value coming straight back from the
+ * stored number, typing "12," parses to 12, re-renders as "12", and the
+ * separator is gone before the next digit lands — which is the same failure
+ * again by a different route. So the text being typed is held apart from the
+ * number it means.
+ *
+ * **This is the second copy of that technique.** `WeightField` in the workout
+ * feature exists for the identical bug — tapping 6·2·,·5 recorded 625 kg — and
+ * sharing the two means lifting a workouts component into the design system,
+ * which is a refactor this change is not allowed to make. Recorded here rather
+ * than left to be discovered.
+ */
+function GramsField({
+  grams,
+  label,
+  onChange,
+}: {
+  readonly grams: number;
+  readonly label: string;
+  readonly onChange: (grams: number) => void;
+}) {
+  const [draft, setDraft] = useState(() => text(grams));
+  const [seen, setSeen] = useState(grams);
+
+  // Adjusting state during render — React's documented alternative to an
+  // effect. The guard is what lets a comma survive: after typing "12,5" the
+  // value comes back as 12.5, which the draft already means, so the text is
+  // left exactly as typed. A change from elsewhere replaces it.
+  if (seen !== grams) {
+    setSeen(grams);
+    if (parseDecimal(draft) !== grams) setDraft(text(grams));
+  }
+
+  return (
+    <input
+      type="text"
+      // `decimal` and not `numeric`: on a phone this is the difference between
+      // a keypad that offers a comma and one that does not.
+      inputMode="decimal"
+      value={draft}
+      aria-label={label}
+      placeholder="0"
+      onChange={(event) => {
+        const next = readGrams(event.target.value);
+        setDraft(next.text);
+        onChange(next.grams);
+      }}
+      className="w-14 rounded-md border border-line bg-surface px-2 py-1 text-right text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
+    />
+  );
+}
+
+/**
+ * What may be typed into a portion: digits and one separator, nothing else.
+ *
+ * **Refusing at entry is the old behaviour and it was right** — a portion is a
+ * physical quantity and a minus sign has no meaning in it. What was wrong was
+ * the separator being thrown out with the sign.
+ *
+ * Returns the text as well as the number, because the two must not disagree:
+ * clamping the value while leaving the field showing what was typed is the
+ * screen saying one thing and the store holding another.
+ */
+function readGrams(input: string): {
+  readonly text: string;
+  readonly grams: number;
+} {
+  const kept = input.replace(/[^\d,.]/g, "");
+  const [whole = "", ...rest] = kept.split(/[.,]/);
+  const text = rest.length === 0 ? whole : `${whole},${rest.join("")}`;
+
+  const value = parseDecimal(text);
+  // A lone separator, or nothing: no number yet, and the draft keeps what was
+  // typed so the next keystroke has something to land on.
+  if (value === null) return { text, grams: 0 };
+
+  if (value > MAX_GRAMS) return { text: String(MAX_GRAMS), grams: MAX_GRAMS };
+
+  return { text, grams: value };
+}
+
+/**
+ * A comma, like everywhere else in the app — and written by hand rather than
+ * with `formatDecimal`, which also groups thousands: "1.000" would come back
+ * through `parseDecimal` as 1.
+ *
+ * Zero shows the placeholder instead of a digit, which is what the field did
+ * before and is right: a portion nobody has set yet is blank, not `0 g`.
+ */
+function text(grams: number): string {
+  return grams === 0 ? "" : String(grams).replace(".", ",");
 }

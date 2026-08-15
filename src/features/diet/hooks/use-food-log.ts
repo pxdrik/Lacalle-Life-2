@@ -31,9 +31,13 @@ export interface FoodLogDay {
 /**
  * One day of the food log, loaded and written back.
  *
- * A day that ends up with no food in it is deleted rather than stored: an
- * empty Tuesday is not a Tuesday you logged, and keeping it would put a zero
- * on a chart where the truth is "no record".
+ * A day that ends up with nothing in it is deleted rather than stored: an
+ * untouched Tuesday is not a Tuesday you logged, and keeping it would put a
+ * zero on a chart where the truth is "no record".
+ *
+ * **Nothing means no meals**, not "no food". See `isEmptyLog`: a day holding a
+ * meal somebody named and has not filled yet is a day in progress, and this
+ * used to throw it away on the way to storage.
  *
  * Writes optimistically — the edit is on screen before the write resolves,
  * because typing grams and waiting for IndexedDB would make every keystroke

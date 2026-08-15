@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { dayKey, formatDay, isFutureDay } from "@/core/format/day";
 import { parseDecimal } from "@/core/format/decimal";
 import { Button } from "@/design-system/components/button";
 
 import { moveEntryToDay } from "../services/body-log";
+import { bodyEntrySchema } from "../validation/body-schema";
 
 import {
   MEASUREMENT_SITE_HINTS,
@@ -54,11 +55,31 @@ export function BodyEntryForm({
   const [showSites, setShowSites] = useState(() =>
     MEASUREMENT_SITES.some((site) => entry.measurements[site] !== null),
   );
+  // Keyed by the schema's own path — `weightKg`, `measurements.waist` — so the
+  // field that reports a problem is the field the schema named.
+  const [issues, setIssues] = useState<Readonly<Record<string, string>>>({});
 
   const future = isFutureDay(day);
   // Only a warning, never a block: replacing a day is a legitimate correction,
   // and the person is better placed than the app to know that.
   const replacing = day !== entry.day && takenDays.includes(day);
+
+  /**
+   * Drops the stale message for one field.
+   *
+   * Without it the form goes on saying "O peso fica entre 30 e 300 kg" beside
+   * a weight the person already corrected — the app contradicting what is on
+   * screen, at the exact moment it asked for the correction.
+   */
+  function clearIssue(field: string) {
+    setIssues((current) => {
+      if (current[field] === undefined) return current;
+
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  }
 
   return (
     <form
@@ -66,22 +87,46 @@ export function BodyEntryForm({
         event.preventDefault();
         if (future) return;
 
+        const parsed = bodyEntrySchema.safeParse({
+          weightKg: parseDecimal(weight),
+          bodyFatPercent: parseDecimal(fat),
+          measurements: Object.fromEntries(
+            MEASUREMENT_SITES.map((site) => [
+              site,
+              parseDecimal(sites[site] ?? ""),
+            ]),
+          ),
+        });
+
+        if (!parsed.success) {
+          const found: Record<string, string> = {};
+          for (const issue of parsed.error.issues) {
+            found[issue.path.join(".")] ??= issue.message;
+          }
+          setIssues(found);
+
+          // A folded panel with the offending number inside it would refuse
+          // to submit and show nothing — the form silently disagreeing with
+          // itself. If the problem is down there, open it.
+          if (Object.keys(found).some((key) => key.startsWith("measurements"))) {
+            setShowSites(true);
+          }
+          return;
+        }
+
+        setIssues({});
         onSubmit(
           {
             ...moveEntryToDay(entry, day),
-            weightKg: parseDecimal(weight),
-            bodyFatPercent: parseDecimal(fat),
+            weightKg: parsed.data.weightKg,
+            bodyFatPercent: parsed.data.bodyFatPercent,
             notes: notes.trim(),
-            measurements: Object.fromEntries(
-              MEASUREMENT_SITES.map((site) => [
-                site,
-                parseDecimal(sites[site] ?? ""),
-              ]),
-            ) as BodyEntry["measurements"],
+            measurements: parsed.data.measurements as BodyEntry["measurements"],
           },
           entry.day,
         );
       }}
+      noValidate
       className="space-y-5"
     >
       {/* The date leads, because the reason this field exists is somebody
@@ -118,10 +163,23 @@ export function BodyEntryForm({
           label="Peso"
           unit="kg"
           value={weight}
-          onChange={setWeight}
+          error={issues["weightKg"]}
+          onChange={(value) => {
+            setWeight(value);
+            clearIssue("weightKg");
+          }}
           autoFocus
         />
-        <Number label="Gordura" unit="%" value={fat} onChange={setFat} />
+        <Number
+          label="Gordura"
+          unit="%"
+          value={fat}
+          error={issues["bodyFatPercent"]}
+          onChange={(value) => {
+            setFat(value);
+            clearIssue("bodyFatPercent");
+          }}
+        />
       </div>
 
       <div>
@@ -145,8 +203,10 @@ export function BodyEntryForm({
                 hint={MEASUREMENT_SITE_HINTS[site]}
                 unit="cm"
                 value={sites[site] ?? ""}
+                error={issues[`measurements.${site}`]}
                 onChange={(value) => {
                   setSites((current) => ({ ...current, [site]: value }));
+                  clearIssue(`measurements.${site}`);
                 }}
               />
             ))}
@@ -179,11 +239,22 @@ export function BodyEntryForm({
   );
 }
 
+/**
+ * The message replaces the hint rather than stacking under it, which is the
+ * rule `Field` already sets in the design system: two lines of guidance, one a
+ * correction and one advice, read as noise exactly when somebody is stuck.
+ *
+ * It is wired through `aria-describedby` and not merely printed. A message
+ * that is visible and unannounced makes the field *look* accessible while a
+ * screen reader reads the label, hits the invalid value and says nothing about
+ * why.
+ */
 function Number({
   label,
   unit,
   hint,
   value,
+  error,
   onChange,
   autoFocus,
 }: {
@@ -191,9 +262,13 @@ function Number({
   readonly unit: string;
   readonly hint?: string | undefined;
   readonly value: string;
+  readonly error?: string | undefined;
   readonly onChange: (value: string) => void;
   readonly autoFocus?: boolean;
 }) {
+  const messageId = useId();
+  const message = error ?? hint;
+
   return (
     <label className="block">
       <span className="text-xs text-ink-subtle">
@@ -206,15 +281,24 @@ function Number({
         // The form only opens because someone asked to log a weight, and this
         // is the field they came to fill in.
         autoFocus={autoFocus === true}
+        aria-invalid={error !== undefined || undefined}
+        aria-describedby={message === undefined ? undefined : messageId}
         onChange={(event) => {
           onChange(event.target.value);
         }}
         placeholder="—"
         className="mt-1 h-11 w-full rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line-strong focus:border-line-strong"
       />
-      {hint !== undefined && (
-        <span className="mt-0.5 block text-[0.625rem] text-ink-subtle">
-          {hint}
+      {message !== undefined && (
+        <span
+          id={messageId}
+          className={
+            error === undefined
+              ? "mt-0.5 block text-[0.625rem] text-ink-subtle"
+              : "mt-0.5 block text-[0.625rem] text-danger"
+          }
+        >
+          {message}
         </span>
       )}
     </label>

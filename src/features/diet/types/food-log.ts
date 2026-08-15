@@ -37,7 +37,20 @@ export interface FoodLog extends Entity {
   readonly dietId: EntityId | null;
 }
 
-/** Whether the day records anything at all. */
+/**
+ * Whether the day records anything at all.
+ *
+ * **A day with named meals and no food in them is not empty.** It used to
+ * count as empty — every meal having no items was enough — and `useFoodLogDay`
+ * deletes what it considers empty rather than storing it. So a meal created in
+ * the diary was never written: the name, the time and the notes were on screen
+ * and nowhere else, and the next reload said "Nada registrado". It also caught
+ * starting a day from a diet whose meals had no items yet.
+ *
+ * The old rule was right about a day with no structure and wrong about a day
+ * being built. Declaring a meal is a record of intent, and the app asked for
+ * it.
+ */
 export function isEmptyLog(log: FoodLog): boolean {
-  return log.meals.every((meal) => meal.items.length === 0);
+  return log.meals.length === 0;
 }

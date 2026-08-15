@@ -473,22 +473,26 @@ o relato.
 
 ### Confirmados
 
-- [ ] **Peso e medidas entram sem validação nenhuma.** `features/body` é a
-      **única feature sem pasta `validation/`**: o formulário chama
-      `parseDecimal` e grava o que vier. A auditoria pegou peso negativo (−15 kg
-      aceito, virando "peso atual" e distorcendo gráfico e delta); lendo o
-      código, gordura corporal e as nove medidas têm o mesmo buraco. O padrão a
-      replicar já existe e a própria auditoria o chamou de exemplar:
-      `foods/validation/food-schema.ts`.
+- [x] **Peso e medidas entram sem validação nenhuma.** `features/body` era a
+      **única feature sem pasta `validation/`**: o formulário chamava
+      `parseDecimal` e gravava o que viesse. A auditoria pegou peso negativo
+      (−15 kg aceito, virando "peso atual" e distorcendo gráfico e delta); lendo
+      o código, gordura corporal e as nove medidas tinham o mesmo buraco. O
+      padrão a replicar já existia e a própria auditoria o chamou de exemplar:
+      `foods/validation/food-schema.ts`. **Fechado em 15/08 como BUG-009** da
+      auditoria externa.
 - [ ] **Sessão de treino não tem teto de duração.** Uma esquecida "em andamento"
       acumulou 25h de cronômetro e, ao finalizar, gravou isso como duração real
       no histórico. **O gatilho foi uma sessão de teste deixada aberta em
       12/08** — mas a ausência de limite é do produto, e quem dorme com o treino
       aberto produz o mesmo lixo. Decisão de produto pendente: encerrar
       automaticamente, marcar como suspeita, ou só limitar o que é gravado.
-- [ ] **Quantidade de alimento aceita até 100 kg.** `Math.min(Number(digits),
+- [x] **Quantidade de alimento aceita até 100 kg.** `Math.min(Number(digits),
       100_000)` em `meal-item-row`. O teto existe para conter número colado, não
-      para sanidade nutricional.
+      para sanidade nutricional — e agora diz isso, como `MAX_GRAMS`. Continua
+      sendo 100 kg de propósito: apertar para uma faixa "plausível" transformaria
+      um guarda contra colagem numa opinião sobre o que se pode comer, e o app
+      não tem essa. Revisado junto do **BUG-002** em 15/08.
 
 ### Verificados e **não** são defeito
 
@@ -561,6 +565,89 @@ causa não mudar, e sem isto escrito eles voltam parecendo cinco problemas.
 O `<script>alert(1)</script>` encontrado em Dietas era dado de teste da própria
 auditoria anterior, no IndexedDB local. React escapa corretamente; não houve
 risco.
+
+---
+
+## Auditoria externa — 14/08/2026
+
+Sobre o commit `d84d5c9`, com o código em mãos e o app em build de produção.
+Veredito **NÃO PRONTO**, nota 6,5, **nenhum P0**, 22 achados.
+
+O padrão vale mais que a lista: **a arquitetura é boa; o risco mora na
+orquestração UI → hook → repositório → storage.** 22 hooks, 1 testado. Os quatro
+P1 estão todos nessa camada, e é por isso que o plano abaixo é por camada e não
+por severidade.
+
+### O plano, em cinco frentes
+
+Não é a ordem da auditoria. Ela misturava integridade de dado com qualidade
+arquitetural; aqui os dois estão separados, e **entre uma frente e a seguinte
+entra uma auditoria focada**.
+
+1. **Integridade** — BUG-002, 003, 009 · ✅ entregue, ver abaixo
+2. **Durabilidade** — BUG-004: sem `navigator.storage.persist()` e **sem
+   exportação**. Medido: `persisted: false`, 5,8 MB de 10.246 disponíveis.
+3. **Concorrência** — BUG-001, 008: duas abas na mesma dieta se sobrescrevem em
+   silêncio. `updatedAt` existe e ninguém lê.
+4. **Infraestrutura** — BUG-005, 007, 010, 014
+5. **UX e performance** — BUG-006, 011, 013, 016, 017
+
+**Duas ressalvas que valem mais que os achados:**
+
+- **`persist()` é hardening, não backup.** Não cobre limpar o navegador,
+  desinstalar o PWA, trocar de aparelho ou perder o celular. **Exportação é
+  obrigatória**; `persist()` é recomendado. Não tratar um como o outro.
+- **Não mudar a arquitetura de agregado** por causa do BUG-001. A decisão está
+  certa para o tamanho do dado; falta o mecanismo que a protege — concorrência
+  otimista por `updatedAt` **no repositório**, não `BroadcastChannel` na UI.
+
+### O que a auditoria **não** validou
+
+A distinção importa: _não encontrei defeito_ não é _foi validado_. Ficaram de
+fora iOS e Safari, qualquer aparelho físico, leitores de tela reais, drag and
+drop, cronômetro de descanso, upgrade de schema com aba antiga aberta, cota
+cheia, curadoria par a par das 105 fotos, e **a trilha de execuções —
+deliberadamente**, porque ela mesma ainda está em validação.
+
+### Frente 1 — Integridade ✅ entregue em 15/08/2026
+
+Os três achados foram conferidos na fonte antes de qualquer correção, e cada
+correção foi **provada revertendo-a e vendo o teste falhar** — teste de
+regressão verde não prova nada por si.
+
+- [x] **BUG-002 · o campo de gramas gravava `12,5` como `125`.** `toGrams` fazia
+      `replace(/\D/g, "")`, e a defesa contra o sinal negativo comia o
+      separador junto. Dez vezes a porção, na ação mais repetida do app,
+      propagando para o total da refeição, o do dia, o anel e a comparação com a
+      meta — e nada parecia errado, porque 125 é um número de gramas
+      perfeitamente comum.
+
+      **Parsear não bastava**, que era a correção proposta pela auditoria: com o
+      valor voltando do número gravado, digitar `12,` parseia para 12,
+      re-renderiza como `"12"` e a vírgula some antes do próximo dígito.
+      Precisou da técnica de rascunho que `WeightField` já usava. **É a segunda
+      cópia dela, de propósito** — compartilhar exigiria subir um componente de
+      treinos para o design system, e esta frente não podia refatorar. Está
+      escrito no próprio arquivo. Consolidar as duas é candidato a follow-up.
+
+- [x] **BUG-003 · refeição criada no Diário nunca era gravada.** `isEmptyLog`
+      chamava de vazio um dia cujas refeições não tinham itens, e o hook apaga o
+      que julga vazio em vez de gravar. O nome, o horário e as notas ficavam na
+      tela e em lugar nenhum. Passou a ser `meals.length === 0`: declarar uma
+      refeição é registro de intenção, e o app pediu por ela.
+
+- [x] **BUG-009 · `features/body` era a única feature sem `validation/`.** O
+      formulário chamava `parseDecimal` e gravava o que viesse: −15 kg entrava e
+      virava "peso atual", distorcendo a linha de tendência e o delta de 30 dias.
+      Agora tem `body-schema.ts`, com piso e teto para peso, gordura e as nove
+      medidas, mensagem por campo e `aria-invalid` ligado ao erro. Peso e gordura
+      reusam `INPUT_BOUNDS`, que o motor nutricional já aplica às mesmas duas
+      grandezas — duas faixas para uma medida é como o app viria a discordar de
+      si mesmo.
+
+Isto também fecha dois itens da _Auditoria de robustez_ mais acima: a validação
+ausente em `features/body` e o teto de gramas, que agora existe como
+`MAX_GRAMS` com o motivo escrito.
 
 ---
 
