@@ -169,7 +169,7 @@ export function MacroProgress({
                     minWidth: value > 0 ? "0.25rem" : undefined,
                   }}
                   className={cn(
-                    "h-full rounded-full transition-[width] duration-300 ease-out",
+                    "h-full rounded-full transition-[width] duration-(--duration-standard) ease-out",
                     over ? "bg-warning" : fill,
                   )}
                 />

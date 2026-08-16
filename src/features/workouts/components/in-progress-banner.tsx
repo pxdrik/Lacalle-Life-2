@@ -31,7 +31,13 @@ export function InProgressBanner() {
       href={`/sessao/${session.id}`}
       // It appears only after the session data loads, so without this it snaps
       // in and shoves the list down. Rising in makes the arrival legible.
-      className="animate-rise flex items-center gap-4 rounded-lg border border-accent bg-accent/5 p-(--card-p) transition-colors duration-150 ease-out hover:bg-accent/10"
+      //
+      // O destaque virou a linha lateral de 3 px do cartão destacado (pág. 24).
+      // Era borda de acento em volta do cartão inteiro sobre fundo de acento a
+      // 5%, e a mesma página proíbe as duas coisas por nome: "borda colorida no
+      // card inteiro" e "card com fundo no acento inteiro". A hierarquia não
+      // muda — este continua sendo o único cartão destacado da tela.
+      className="animate-rise flex items-center gap-4 rounded-lg border border-l-[3px] border-line border-l-accent bg-surface p-(--card-p) pl-6 transition-colors duration-(--duration-micro) ease-out hover:border-line-strong"
     >
       <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-accent text-accent-ink">
         <Play aria-hidden className="size-5" />

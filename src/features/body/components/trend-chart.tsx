@@ -98,7 +98,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
 
       <div
         aria-hidden
-        className="mt-2 flex justify-between text-[0.625rem] tabular-nums text-ink-subtle"
+        className="mt-2 flex justify-between text-xs tabular-nums text-ink-subtle"
       >
         <span>{formatShortDay(points[0]?.day ?? "")}</span>
         <span>

@@ -190,36 +190,26 @@ function CalorieRing({
         className="size-36 -rotate-90 sm:size-44"
         role="presentation"
       >
-        {/* The brand's gradient, and the only place it exists.
+        {/* **O degradê do anel saiu, e a decisão é do brandbook.**
 
-            **It runs along the direction the arc travels, not across the box.**
-            The svg is rotated −90°, so the stroke starts at twelve o'clock and
-            sweeps clockwise: the first half of any day's progress descends the
-            right-hand side. `y1`→`y2` therefore maps the ramp onto the arc's
-            own path for that half — it opens at the brightest stop where
-            progress begins and deepens as it advances.
+            Ele era a assinatura desta tela: a rampa da marca correndo ao longo
+            do arco, do stop mais claro onde o progresso começa até o mais fundo
+            conforme avança. A pág. 46 desfaz isso em uma linha — gradiente é
+            "recurso de superfície, nunca de identidade", e a lista de onde ele
+            é proibido nomeia **barras de progresso** junto com botões, inputs e
+            séries de gráfico. Um anel é uma barra de progresso curvada.
 
-            Honest about the limit: a gradient that follows a circle exactly is
-            a *conic* gradient, which SVG has no native element for. Drawing one
-            would mean replacing the stroke with a masked `conic-gradient` div,
-            and that would cost the round cap and the `stroke-dashoffset`
-            transition — the two things that make this ring feel like the app
-            noticing rather than a chart redrawing. Past 50% the ramp mirrors
-            back up rather than continuing to deepen. That is the trade, taken
-            deliberately. */}
-        <defs>
-          <linearGradient
-            id="ring-progress"
-            gradientUnits="userSpaceOnUse"
-            x1="64"
-            y1="12"
-            x2="64"
-            y2="116"
-          >
-            <stop offset="0%" stopColor="var(--ring-from)" />
-            <stop offset="100%" stopColor="var(--ring-to)" />
-          </linearGradient>
-        </defs>
+            O teste que a mesma página propõe é o que decide: "remova todos os
+            gradientes da peça — se ela deixar de funcionar, o problema não era
+            a falta de gradiente". O anel continua sendo a coisa mais visível da
+            tela pelo tamanho, pela posição e por ser a única forma saturada em
+            vista. Ele não dependia da rampa.
+
+            O que se perde é uma sutileza que quase ninguém via: a rampa
+            espelhava de volta depois dos 50%, porque SVG não tem gradiente
+            cônico e a aproximação linear só acompanha o arco na primeira
+            metade. Era uma limitação assumida; agora é uma limitação que não
+            existe mais. */}
 
         {/* **One continuous track, in every state.**
             It used to go dashed on an empty day — the app's own word for
@@ -256,13 +246,13 @@ function CalorieRing({
           // is not a fault, and red is what this app says when something
           // actually broke. See the same reasoning in `MacroProgress`.
           //
-          // Flat amber, not a gradient: overshoot is a *state*, and the
-          // gradient is the brand saying "this is progressing". Keeping the
-          // ramp here would dress a warning in the signature.
-          stroke={over ? undefined : "url(#ring-progress)"}
+          // 250 ms porque isto é **atualização de valor**, que é o tempo que a
+          // pág. 37 dá a ela. Os 900 ms da mesma tabela são do anel *crescendo
+          // do zero* na chegada à tela, que é outro momento — e um dia inteiro
+          // de registro faz esta transição disparar dezenas de vezes.
           className={cn(
-            "transition-[stroke-dashoffset] duration-500 ease-out",
-            over && "stroke-warning",
+            "transition-[stroke-dashoffset] duration-(--duration-standard) ease-out",
+            over ? "stroke-warning" : "stroke-accent",
           )}
         />
       </svg>

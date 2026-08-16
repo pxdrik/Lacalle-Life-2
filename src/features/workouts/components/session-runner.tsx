@@ -214,7 +214,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
             style={{
               scale: `${String(progress.total === 0 ? 0 : progress.completed / progress.total)} 1`,
             }}
-            className="h-full origin-left rounded-full bg-accent transition-[scale] duration-300 ease-out"
+            className="h-full origin-left rounded-full bg-accent transition-[scale] duration-(--duration-standard) ease-out"
           />
         </div>
       </div>

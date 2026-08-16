@@ -45,7 +45,10 @@ export function StaleWeightNotice({ profile, onApply, pending }: Props) {
   if (Math.abs(difference) < WORTH_MENTIONING_KG) return null;
 
   return (
-    <Card as="section" className="border-accent/40">
+    // `hero` em vez de uma borda de acento em volta do cartão inteiro, que a
+    // pág. 24 lista entre os "nunca". O destaque é a linha lateral de 3 px, e
+    // esta é a única coisa nesta tela que pede destaque.
+    <Card as="section" tone="hero">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm text-ink">

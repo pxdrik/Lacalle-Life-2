@@ -53,7 +53,7 @@ export function PerformedSetRow({
     <li
       ref={row}
       className={cn(
-        "group rounded-sm px-1 py-1.5 transition-colors duration-200 ease-out",
+        "group rounded-sm px-1 py-1.5 transition-colors duration-(--duration-micro) ease-out",
         isNext && "bg-muted",
         set.isCompleted && "opacity-60",
       )}
@@ -293,7 +293,7 @@ function Planned({
   readonly suffix: string;
 }) {
   return (
-    <p className="mt-0.5 h-3 text-center text-[0.625rem] tabular-nums text-ink-subtle">
+    <p className="mt-1 h-4 text-center text-xs tabular-nums text-ink-subtle">
       {value === null ? "" : `${formatDecimal(value)} ${suffix}`}
     </p>
   );

@@ -99,7 +99,7 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
             sizes="(min-width: 48rem) 44rem, 100vw"
             priority={index === 0}
             className={cn(
-              "object-cover transition-opacity duration-300 ease-out",
+              "object-cover transition-opacity duration-(--duration-standard) ease-out",
               index === phase ? "opacity-100" : "opacity-0",
             )}
           />

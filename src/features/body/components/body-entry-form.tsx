@@ -287,15 +287,21 @@ function Number({
           onChange(event.target.value);
         }}
         placeholder="—"
-        className="mt-1 h-11 w-full rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line-strong focus:border-line-strong"
+        // Mesma anatomia do `Input` do design system — pág. 26: 44 px, raio 12,
+        // borda Gray 300, padding 14, e o foco levando a borda para o acento.
+        // Continua sendo um input próprio porque este campo é um rascunho
+        // numérico com estado seu; o que ele não pode é *parecer* outro campo.
+        className="mt-1 h-(--input-h) w-full rounded-md border border-line-strong bg-surface px-(--input-px) tabular-nums text-ink transition-colors duration-(--duration-micro) ease-out placeholder:text-ink-subtle hover:border-ink-subtle focus:border-accent aria-[invalid=true]:border-danger"
       />
       {message !== undefined && (
         <span
           id={messageId}
           className={
             error === undefined
-              ? "mt-0.5 block text-[0.625rem] text-ink-subtle"
-              : "mt-0.5 block text-[0.625rem] text-danger"
+              ? "mt-1 block text-xs text-ink-subtle"
+              : // `danger-text` e não `danger`: o vermelho de borda mede
+                // 4,41:1 sobre a superfície de erro, abaixo do que texto pede.
+                "mt-1 block text-xs text-danger-text"
           }
         >
           {message}
