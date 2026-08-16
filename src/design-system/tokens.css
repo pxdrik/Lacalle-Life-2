@@ -518,6 +518,58 @@
 }
 
 /**
+ * A escala tipográfica da pág. 17, inteira, com line-height e tracking **presos
+ * ao tamanho**.
+ *
+ * É esse acoplamento que faz a escala valer alguma coisa. Os números estão na
+ * página numa tabela de três colunas — 32 / 115% / −2,5% — e escrever só o
+ * tamanho no componente é como as três colunas se separam: um título ganha o
+ * tamanho certo e o entrelinhamento do parágrafo, e ninguém percebe, porque
+ * cada peça isolada parece correta. Aqui `text-h1` traz as três.
+ *
+ * **Bloco próprio, sem `inline`.** O modificador serve a valores que são `var()`
+ * de outra coisa — o caso das cores, que mudam por tema — e aqui não há nada a
+ * resolver: 32 px é 32 px nos dois temas. Sem `inline`, as variáveis também
+ * saem no `:root`, o que deixa a escala inspecionável no navegador.
+ *
+ * O peso fica de fora de propósito. A pág. 16 limita a **três pesos por tela**,
+ * e um peso embutido no tamanho é um peso que ninguém conta.
+ */
+@theme {
+  --text-display: 48px;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.035em;
+
+  --text-h1: 32px;
+  --text-h1--line-height: 1.15;
+  --text-h1--letter-spacing: -0.025em;
+
+  --text-h2: 24px;
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: -0.02em;
+
+  --text-h3: 20px;
+  --text-h3--line-height: 1.3;
+  --text-h3--letter-spacing: -0.015em;
+
+  --text-h4: 18px;
+  --text-h4--line-height: 1.35;
+  --text-h4--letter-spacing: -0.01em;
+
+  /* Caixa alta faz parte deste estilo, e a pág. 16 permite caixa alta
+     exatamente aqui: "apenas em labels e eyebrows". */
+  --text-label: 11px;
+  --text-label--line-height: 1.3;
+  --text-label--letter-spacing: 0.1em;
+
+  /* O número de destaque: 28 / 110% / −2%, tabular. A pág. 24 o usa no valor do
+     stat card, que é a linha que o cartão existe para mostrar. */
+  --text-metric: 28px;
+  --text-metric--line-height: 1.1;
+  --text-metric--letter-spacing: -0.02em;
+}
+
+/**
  * `inline` porque todo valor acima é um `var()` que muda por tema: faz os
  * utilitários resolverem para a variável em si em vez de gravarem o valor que
  * estava corrente no momento do build.

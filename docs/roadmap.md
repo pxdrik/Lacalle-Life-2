@@ -651,6 +651,53 @@ ausente em `features/body` e o teto de gramas, que agora existe como
 
 ---
 
+## Brand System V1.1 — aplicado em 15/08/2026
+
+O brandbook chegou como PDF e virou a fonte de verdade da identidade. A
+aplicação inteira está registrada em **`docs/brandbook.md`**: as seis
+divergências com a emenda proposta para cada uma, os quatro conflitos internos do
+documento com a leitura adotada, o checklist da pág. 53 item a item e os três
+testes de identidade da pág. 52.
+
+Leia de lá. O que fica aqui é só o saldo:
+
+- [x] **Tokens** — a paleta neutra deixou de ser slate e virou a escala Gray;
+      tipografia de Geist para Inter, com a escala de LH e tracking acoplada ao
+      tamanho; raios 8/12/16/20/24 fixos, sem os proibidos 14 e 18; as duas
+      curvas oficiais e os quatro tiers de duração.
+- [x] **A marca** — a pendência mais antiga do repositório, fechada. Ver
+      _Identidade_ mais acima.
+- [x] **A casca** — sidebar de 264 px com grupos e bloco de conta na base,
+      drawer na faixa de 768–1023, tab bar abaixo de 768, conteúdo em 1280.
+- [x] **Componentes** — card, botão, input, estados e ícones na anatomia das
+      pág. 24 a 28.
+- [x] **Motion e dados** — `prefers-reduced-motion` virou fade de 120 ms em vez
+      de 0,01 ms, que apagava também hover, foco e confirmação de ação.
+
+**Três coisas que este trabalho reverteu**, e valem registro porque cada uma
+tinha razão escrita:
+
+1. **O degradê do anel saiu.** Era a assinatura da tela Hoje, entregue na Sprint
+   2. A pág. 46 proíbe gradiente em barras de progresso, e um anel é uma barra
+   curvada. O teste da própria página decide: remova o gradiente e veja se a peça
+   deixa de funcionar — não deixa.
+2. **O anel de foco voltou a ser o acento.** O comentário que defendia o azul
+   dizia que verde "some sobre o botão verde"; medido, com `outline-offset` de
+   2 px o anel encosta na página e o acento mede 3,60 contra ela, enquanto o azul
+   media 1,32 contra o verde.
+3. **O título da página voltou a crescer no desktop.** Encolher era defensável,
+   mas a tabela da pág. 32 é explícita na direção contrária.
+
+### O que ficou de fora, e por quê
+
+Está detalhado em `docs/brandbook.md`, seção _Lacunas conhecidas_. Em resumo: o
+grid de 12 colunas não está aplicado literalmente (margens, gutter e largura
+máxima estão; a contagem de colunas não), sobram usos de 6 e 2 px fora da escala
+base 4, e o **BUG-006** da auditoria externa — a área de toque de 15 × 15 px do
+`ConfirmButton` — continua aberto na frente 5, que é onde ele já estava.
+
+---
+
 ## Ajustes pendentes
 
 Os treze achados verificados das **auditorias de design** foram fechados. Sobram

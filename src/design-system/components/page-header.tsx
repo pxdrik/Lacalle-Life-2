@@ -30,17 +30,21 @@ interface Props {
  * hierarchy, it is a slightly larger paragraph. This sets a real jump, and the
  * jump alone carries it.
  *
- * **The tracking used to be negative and is now normal**, which is the smallest
- * typographic move that answers the brand. Tight tracking is the convention of
- * a neo-grotesque like Geist, and it is the opposite of the wordmark, whose
- * letterforms are wide and nearly circular. Measured before the change, the
- * `Hoje` heading sat at −0.84px: the most technical-looking thing on a screen
- * whose shapes had just been made generous. Weight came down with it, 600 to
- * 500, because the mark is light for its size.
+ * **O estilo agora é o H1 da pág. 17, e isso reverte duas decisões daqui.**
  *
- * It gets *smaller* on the desk, not larger: the phone shows one screen at a
- * time and the title orients you, while a desktop window already shows the
- * navigation, the content and its context at once.
+ * O tracking era normal, e o comentário que o defendia dizia que tracking
+ * apertado "é a convenção de uma neo-grotesca como a Geist, e o oposto do
+ * wordmark, cujas letras são largas e quase circulares". As duas premissas
+ * caíram: a tipografia não é mais Geist, é Inter, e o wordmark da pág. 10 é
+ * Inter Bold com tracking de **−3%**. Apertar o título aproxima os dois em vez
+ * de afastá-los. O peso volta a 700 pelo mesmo motivo.
+ *
+ * E ele voltou a **crescer** na mesa em vez de encolher. Encolher era uma
+ * decisão defensável — o celular mostra uma tela por vez e o título orienta —
+ * mas a tabela da pág. 32 é explícita na direção contrária: H1 em 24 no
+ * celular, 28 no tablet, 32 no desktop. No celular ele fica no estilo H2, que é
+ * o próprio passo de 24 da escala com o entrelinhamento que aquele tamanho
+ * pede.
  *
  * **The icon chip is where the brand is spent on an ordinary screen.** One
  * small saturated glyph on a neutral chip, once per page — the same logic that
@@ -68,11 +72,11 @@ export function PageHeader({
         )}
 
         <div className="min-w-0">
-          <h1 className="text-[1.75rem] leading-[1.15] font-medium tracking-normal text-balance md:text-2xl">
+          <h1 className="text-h2 font-bold text-balance md:text-h1">
             {title}
           </h1>
           {subtitle !== undefined && (
-            <p className="mt-1.5 text-ink-muted md:text-sm">{subtitle}</p>
+            <p className="mt-2 text-sm text-ink-muted">{subtitle}</p>
           )}
         </div>
       </div>
