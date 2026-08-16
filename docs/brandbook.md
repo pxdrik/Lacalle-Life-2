@@ -212,18 +212,18 @@ própria, com conferência no navegador tela a tela.
 
 ### Alvos de toque abaixo de 44 px
 
-Três casos, e nenhum é novo:
+Dois casos aceitos, e um terceiro que era defeito e já fechou:
 
 1. **Itens de sidebar em 40 px** — conflito interno do brandbook, resolvido na
    tabela acima.
 2. **Links de texto em linha** — inflá-los quebraria a caixa de linha, e o
    padrão que eles atendem é espaçamento entre alvos, não tamanho. Decisão já
    documentada em `globals.css`.
-3. **`ConfirmButton` com área efetiva de 15 × 15 px** — este é defeito de
-   verdade, e é o **BUG-006** da auditoria externa: o `overflow-hidden` que
-   contém a barra de desarme recorta o `::after` do utilitário `touch-44`.
-   Atinge as 8 ações destrutivas do app. Está na frente 5 do plano em
-   `docs/roadmap.md`, não nesta.
+3. ~~`ConfirmButton` com área efetiva de 15 × 15 px~~ — era o **BUG-006** da
+   auditoria externa: o `overflow-hidden` que contém a barra de desarme
+   recortava o `::after` do utilitário `touch-44`. **Fechado em 15/08**, na
+   Frente 5 do plano em `docs/roadmap.md` — não nesta entrega de marca, mas já
+   corrigido. Medido depois: 41–43 px nos dois eixos.
 
 ### O que o brandbook prevê e o app não tem
 

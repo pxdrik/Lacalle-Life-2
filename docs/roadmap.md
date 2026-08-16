@@ -649,6 +649,54 @@ Isto também fecha dois itens da _Auditoria de robustez_ mais acima: a validaç�
 ausente em `features/body` e o teto de gramas, que agora existe como
 `MAX_GRAMS` com o motivo escrito.
 
+### Frente 5 — UX e Acessibilidade · parcial, 15/08/2026
+
+Adiantada fora de ordem, por decisão direta: em vez de seguir 2 → 3 → 4 → 5,
+esta sprint atacou só o **BUG-006** e os dois achados de comunicação que andam
+junto dele — **BUG-016** e **BUG-017** — deixando **BUG-011** (listas sem
+virtualização) e **BUG-013** (service worker sem checar `response.ok`) para
+quando a frente for retomada por completo. Nenhuma das outras quatro frentes
+foi tocada.
+
+Cada correção foi **provada revertendo-a e vendo o teste cair** antes de ser
+aceita, e o BUG-006 também foi medido no navegador, antes e depois, em build
+de produção — não só em `jsdom`.
+
+- [x] **BUG-006 · o `ConfirmButton` tinha área de toque efetiva de 15 × 15 px.**
+      `overflow-hidden` vivia no mesmo elemento que carrega `touch-44`, e
+      recortava o pseudo-elemento que a *utility* usa para expandir o alvo para
+      44 × 44 sem crescer o desenho — um ícone de 16 ou 32 px continuava
+      parecendo o mesmo ícone, mas o toque ao redor dele desaparecia junto com o
+      corte. Medido antes: 16×16 visual, 15×15 efetivo — os números exatos do
+      laudo. Medido depois, em três instâncias reais e nas seis larguras
+      pedidas (320 a 430 px): 41 a 43 px nos dois eixos, variando com o quanto
+      os controles vizinhos na mesma linha também disputam área de toque. A
+      barra de confirmação, que precisava do corte para não escapar dos cantos
+      arredondados, passou a viver num `<span>` próprio que cobre só a caixa
+      visual — a área de toque continua sendo o `<button>` inteiro.
+- [x] **BUG-016 · o valor de cada barra do gráfico de volume só existia em
+      `title`.** Tooltip nativo não abre no celular, e o `sr-only` que cobria o
+      resto existe só para leitor de tela — não para quem enxerga a barra e não
+      usa um. Uma
+      linha de resumo — sempre visível, sem hover — mostra o período mais
+      recente por padrão e troca ao tocar em qualquer barra, que virou um
+      `<button>` de verdade. Nenhum número por barra: 12 períodos imprimindo
+      cada um o seu valor é a "tela cheia de números" que a correção evita.
+- [x] **BUG-017 · série concluída com peso e sem repetições saía do volume
+      calada.** A fórmula estava certa — não há o que multiplicar sem a
+      repetição —, o silêncio é que era o defeito. `sessionVolumeKg` agora
+      também conta quantas séries concluídas caíram nesse caso específico, e
+      dois lugares avisam: o cartão de término do treino ("kg movidos", a
+      frase que o laudo citou ao pé da letra) e o relatório permanente da
+      sessão. **A exclusão de peso corporal continua muda, de propósito** — é
+      o caso comum e documentado há mais tempo neste arquivo, e avisar sobre
+      ele alarmaria toda série sem peso do produto.
+
+Testes: 868 → 887 (19 novos, em 5 arquivos — 2 deles novos:
+`volume-chart.test.tsx` e `session-summary.test.tsx`). `verify` e `build`
+verdes; conferido em build de produção no navegador com um treino real de três
+séries, uma delas sem repetições.
+
 ---
 
 ## Brand System V1.1 — aplicado em 15/08/2026
@@ -692,9 +740,9 @@ tinha razão escrita:
 
 Está detalhado em `docs/brandbook.md`, seção _Lacunas conhecidas_. Em resumo: o
 grid de 12 colunas não está aplicado literalmente (margens, gutter e largura
-máxima estão; a contagem de colunas não), sobram usos de 6 e 2 px fora da escala
-base 4, e o **BUG-006** da auditoria externa — a área de toque de 15 × 15 px do
-`ConfirmButton` — continua aberto na frente 5, que é onde ele já estava.
+máxima estão; a contagem de colunas não), e sobram usos de 6 e 2 px fora da
+escala base 4. **O BUG-006** — a área de toque de 15 × 15 px do
+`ConfirmButton` — foi **fechado em 15/08**, na Frente 5 (ver acima).
 
 ---
 
