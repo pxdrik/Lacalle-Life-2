@@ -39,11 +39,16 @@ describe("revise", () => {
   });
 
   it("bumps updatedAt even when nothing else changes", () => {
-    vi.spyOn(Date, "now").mockReturnValue(5_000);
+    // A different mocked instant than the previous test's, deliberately: two
+    // `revise()` calls that land on the same millisecond are exactly what the
+    // internal monotonic clamp exists to handle (see BUG-008 in
+    // `entityTimestamp`), and that clamp would otherwise advance past
+    // this test's mocked value instead of returning it verbatim.
+    vi.spyOn(Date, "now").mockReturnValue(6_000);
 
     // A no-op revision is still a write, and the sync layer's ordering
     // depends on the timestamp reflecting that.
-    expect(revise(note(), {}).updatedAt).toBe(5_000);
+    expect(revise(note(), {}).updatedAt).toBe(6_000);
 
     vi.restoreAllMocks();
   });

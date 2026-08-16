@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
 
@@ -61,6 +61,27 @@ export function useFoodLogDay(day: string): FoodLogDay {
     readonly state: FoodLogState;
   } | null>(null);
 
+  /**
+   * The version this hook believes storage currently holds for `day` — `null`
+   * meaning no record exists yet. Tracked separately from the log itself
+   * because the log always has *some* `updatedAt` (the blank fallback's own
+   * synthetic one when nothing is stored), and that value must never be
+   * mistaken for a version storage actually has.
+   */
+  const expectedVersionRef = useRef<number | null>(null);
+
+  /**
+   * Mirrors `state.log`, kept current everywhere the log changes — the load
+   * effect below and `apply`/`replace` further down — rather than derived
+   * during render. Refs cannot be written during render (React may render
+   * without committing), and `apply` needs the most recent log even when
+   * several calls land before React re-renders — elsewhere that is solved
+   * with `setState`'s functional form, but this hook's own history already
+   * ruled out a side effect inside a `setState` updater (see the file
+   * comment).
+   */
+  const logRef = useRef<FoodLog | null>(null);
+
   // Memoised so `apply` below keeps a stable identity between renders. The
   // alternative — reading the log inside a `setState` updater — is the impure
   // updater this codebase has been bitten by twice, and it stays out.
@@ -80,10 +101,15 @@ export function useFoodLogDay(day: string): FoodLogDay {
         const stored = await (await repository).getByDay(day);
         if (!active) return;
 
-        setLoaded({
-          day,
-          state: { status: "ready", log: stored ?? createFoodLog(day) },
-        });
+        // `stored` absent means this day has no record at all — the version
+        // to expect on the next write is `null` (a create), not the blank
+        // fallback log's own synthetic `updatedAt`. Losing that distinction
+        // is exactly what made the first save of a fresh day look like a
+        // conflict against nothing.
+        expectedVersionRef.current = stored?.updatedAt ?? null;
+        const log = stored ?? createFoodLog(day);
+        logRef.current = log;
+        setLoaded({ day, state: { status: "ready", log } });
       } catch (cause) {
         if (active) {
           setLoaded({
@@ -109,14 +135,14 @@ export function useFoodLogDay(day: string): FoodLogDay {
   );
 
   const persist = useCallback(
-    (log: FoodLog) => {
+    (log: FoodLog, expectedUpdatedAt: number | null) => {
       setSaveError(null);
 
       void (async () => {
         try {
           const store = await repository;
           if (isEmptyLog(log)) await store.remove(log.id);
-          else await store.save(log);
+          else await store.save(log, expectedUpdatedAt);
         } catch (cause) {
           setSaveError(describeDataError(cause));
         }
@@ -127,23 +153,36 @@ export function useFoodLogDay(day: string): FoodLogDay {
 
   const apply = useCallback(
     (change: (log: FoodLog) => FoodLog) => {
-      if (state.status !== "ready") return;
+      const current = logRef.current;
+      if (current === null) return;
 
-      const next = change(state.log);
+      const next = change(current);
       // Same reference means the operation was a no-op — a stale click on a
       // meal already gone. Writing it would stamp `updatedAt` for nothing.
-      if (next === state.log) return;
+      if (next === current) return;
 
+      const expectedUpdatedAt = expectedVersionRef.current;
+      logRef.current = next;
+      // Optimistic, matching the log itself: if the write is rejected, both
+      // this and the on-screen value are equally stale until the banner
+      // prompts a reload — the same trade-off this hook already makes for
+      // the log, not a new one. An empty log takes the `remove` branch in
+      // `persist` below, so the version it leaves storage in is "absent",
+      // not `next.updatedAt`.
+      expectedVersionRef.current = isEmptyLog(next) ? null : next.updatedAt;
       setState({ status: "ready", log: next });
-      persist(next);
+      persist(next, expectedUpdatedAt);
     },
-    [state, persist, setState],
+    [persist, setState],
   );
 
   const replace = useCallback(
     (log: FoodLog) => {
+      const expectedUpdatedAt = expectedVersionRef.current;
+      logRef.current = log;
+      expectedVersionRef.current = isEmptyLog(log) ? null : log.updatedAt;
       setState({ status: "ready", log });
-      persist(log);
+      persist(log, expectedUpdatedAt);
     },
     [persist, setState],
   );

@@ -9,6 +9,7 @@ import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { useToast } from "@/design-system/components/toast";
 
 import { useProfile } from "../hooks/use-profile";
+import { BackupPanel } from "./backup-panel";
 import { PlanSummary } from "./plan-summary";
 import { ProfileForm } from "./profile-form";
 import { StaleWeightNotice } from "./stale-weight-notice";
@@ -41,6 +42,11 @@ export function ProfileScreen() {
           {writeError}
         </p>
       )}
+
+      {/* Independent of the nutrition form and of `state`: a backup exists
+          whether or not a profile does, and covers every domain, not just
+          this one. */}
+      <BackupPanel />
 
       {showForm ? (
         <ProfileForm

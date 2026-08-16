@@ -140,5 +140,26 @@ async function build(): Promise<Repositories> {
     ),
   ]);
 
+  // Hardening, not backup: a granted `persist()` makes the browser less
+  // likely to evict this origin's storage under disk pressure. It covers
+  // none of the ways data actually disappears — clearing the browser,
+  // uninstalling the PWA, losing the phone — which is why the export in
+  // `composition/backup.ts` exists and this does not replace it. Fire and
+  // forget: a refusal is not an error, and nothing here blocks startup on
+  // the answer.
+  void requestPersistentStorage();
+
   return repositories;
+}
+
+async function requestPersistentStorage(): Promise<void> {
+  if (typeof navigator === "undefined" || !("storage" in navigator)) return;
+
+  try {
+    await navigator.storage.persist();
+  } catch {
+    // Some browsers throw rather than resolve `false` when the API exists
+    // but the permission model refuses outright (notably older Safari).
+    // Indistinguishable from "no" for this purpose, so treated the same.
+  }
 }

@@ -1,3 +1,5 @@
+import { entityTimestamp } from "@/core/domain/entity";
+
 import type { BodyEntry, Measurements } from "../types/body-entry";
 import { MEASUREMENT_SITES } from "../taxonomy/measurement-sites";
 
@@ -7,7 +9,7 @@ export const EMPTY_MEASUREMENTS: Measurements = Object.fromEntries(
 ) as Measurements;
 
 export function createBodyEntry(day: string): BodyEntry {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: day,

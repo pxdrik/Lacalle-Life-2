@@ -2,6 +2,7 @@
 
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
+import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Play, Plus } from "lucide-react";
 import Link from "next/link";
@@ -89,7 +90,12 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         className="-mx-1.5 mt-3 w-full rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-2xl font-medium tracking-normal transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
       />
 
-      <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center justify-between gap-4 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
+      <div
+        className={cn(
+          PAGE_SHELL_BLEED,
+          "sticky top-0 z-10 mt-4 flex items-center justify-between gap-4 border-b border-line bg-canvas/90 py-3 backdrop-blur",
+        )}
+      >
         <p className="text-sm text-ink-muted">
           {routine.exercises.length}{" "}
           {routine.exercises.length === 1 ? "exercício" : "exercícios"}

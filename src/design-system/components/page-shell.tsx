@@ -38,12 +38,26 @@ const PADDING: Record<Padding, string> = {
  * eleven had already drifted into two different vertical paddings with no rule
  * saying which screen gets which.
  */
+const SHELL_PX = "px-4 md:px-6 lg:px-12";
+
 export function pageShell(padding: Padding = "roomy"): string {
-  return cn(
-    "mx-auto w-full max-w-(--content-max) px-4 md:px-6 lg:px-12",
-    PADDING[padding],
-  );
+  return cn("mx-auto w-full max-w-(--content-max)", SHELL_PX, PADDING[padding]);
 }
+
+/**
+ * For an element that bleeds to the shell's own edge — a sticky header, a
+ * full-bleed image — and then repads to line back up with the content below
+ * it.
+ *
+ * A negative margin only cancels padding of the exact same value, at the exact
+ * same breakpoint. Writing `-mx-6` by hand next to `pageShell()`'s `px-4
+ * md:px-6 lg:px-12` cancels correctly at `md` and up and overshoots by 8px
+ * below it — that mismatch is what caused the mobile overflow regression this
+ * constant exists to prevent from happening a second time. Pairing bleed and
+ * pad from the same source is the fix; a second one-off `-mx-6` elsewhere is
+ * the same bug again.
+ */
+export const PAGE_SHELL_BLEED = "-mx-4 md:-mx-6 lg:-mx-12 " + SHELL_PX;
 
 interface Props extends React.HTMLAttributes<HTMLElement> {
   readonly padding?: Padding;

@@ -19,6 +19,8 @@ export function describeDataError(error: unknown): string {
         return "O armazenamento do navegador está cheio. Libere espaço para continuar.";
       case "BLOCKED":
         return "Outra aba do LaCalle Life está aberta com uma versão anterior. Feche-a e recarregue esta página.";
+      case "CONFLICT":
+        return "Isso foi alterado em outro lugar depois que esta tela carregou. Recarregue para ver a versão mais recente antes de continuar editando.";
       case "FAILED":
         return "A operação não pôde ser concluída. Tente novamente.";
     }

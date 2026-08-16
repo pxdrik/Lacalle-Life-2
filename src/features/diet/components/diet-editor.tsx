@@ -3,6 +3,7 @@
 import { cn } from "@/design-system/cn";
 import { Card } from "@/design-system/components/card";
 import { noticeClasses } from "@/design-system/components/notice";
+import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
@@ -83,7 +84,12 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
 
       {/* Sticky, because the totals are the reason the screen exists: every
           portion change is a question about them. */}
-      <div className="sticky top-0 z-10 -mx-6 mt-4 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
+      <div
+        className={cn(
+          PAGE_SHELL_BLEED,
+          "sticky top-0 z-10 mt-4 border-b border-line bg-canvas/90 py-3 backdrop-blur",
+        )}
+      >
         {targets === null ? (
           <MacroSummary macros={totals} size="lg" />
         ) : (

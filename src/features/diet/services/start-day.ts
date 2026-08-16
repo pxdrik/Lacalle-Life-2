@@ -1,11 +1,11 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, entityTimestamp } from "@/core/domain/entity";
 
 import type { Diet, Meal } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 
 /** A day with nothing in it yet. */
 export function createFoodLog(day: string): FoodLog {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: day,
@@ -34,7 +34,7 @@ export function createFoodLog(day: string): FoodLog {
  * the day from nothing.
  */
 export function startDayFromDiet(diet: Diet, day: string): FoodLog {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   const meals: Meal[] = diet.meals.map((meal) => ({
     id: createEntityId(),

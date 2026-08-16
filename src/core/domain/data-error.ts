@@ -17,6 +17,12 @@ export type DataErrorCode =
   | "BLOCKED"
   /** No room left. Only writes produce this. */
   | "QUOTA_EXCEEDED"
+  /**
+   * A versioned write's expected version no longer matches what is stored —
+   * someone else wrote this record since it was read. The write did not
+   * happen; nothing was overwritten.
+   */
+  | "CONFLICT"
   /** Anything else that went wrong mid-operation. */
   | "FAILED";
 

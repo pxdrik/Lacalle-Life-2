@@ -29,8 +29,11 @@ export interface BodyRepository {
 
   getByDay(day: string): Promise<BodyEntry | undefined>;
 
-  /** Insert or replace. The id is the day, so logging twice corrects. */
-  save(entry: BodyEntry): Promise<void>;
+  /**
+   * Insert or replace. The id is the day, so logging twice corrects.
+   * `expectedUpdatedAt` is `null` for a day with no entry yet.
+   */
+  save(entry: BodyEntry, expectedUpdatedAt: number | null): Promise<void>;
 
   remove(id: EntityId): Promise<void>;
 }

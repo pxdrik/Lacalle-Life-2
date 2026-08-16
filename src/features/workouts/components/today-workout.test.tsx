@@ -71,7 +71,7 @@ function mount(sessions: readonly Session[]) {
     new MemoryStore<Routine>(ROUTINES_STORE),
   );
 
-  const ready = Promise.all(sessions.map((s) => store.save(s)));
+  const ready = Promise.all(sessions.map((s) => store.save(s, null)));
 
   render(
     <WorkoutRepositoryProvider

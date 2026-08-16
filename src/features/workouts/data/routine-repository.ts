@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { StoreDefinition } from "@/core/storage/schema";
 import type { Store } from "@/core/storage/store";
@@ -18,7 +19,12 @@ export interface RoutineRepository {
   /** Most recently edited first — the one you want is the one you just left. */
   listAll(): Promise<readonly Routine[]>;
   getById(id: EntityId): Promise<Routine | undefined>;
-  save(routine: Routine): Promise<void>;
+  /**
+   * `expectedUpdatedAt` is the version this caller last read — `null` for a
+   * routine that has never been saved. Throws `DataError("CONFLICT")` instead
+   * of overwriting when the stored version has moved since.
+   */
+  save(routine: Routine, expectedUpdatedAt: number | null): Promise<void>;
   remove(id: EntityId): Promise<void>;
 }
 
@@ -38,8 +44,17 @@ export class LocalRoutineRepository implements RoutineRepository {
     return this.#store.get(id);
   }
 
-  save(routine: Routine): Promise<void> {
-    return this.#store.put(routine);
+  async save(routine: Routine, expectedUpdatedAt: number | null): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      routine,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Esta rotina foi alterada em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   remove(id: EntityId): Promise<void> {

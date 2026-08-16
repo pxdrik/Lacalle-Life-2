@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
 
@@ -28,8 +29,20 @@ export class LocalBodyRepository implements BodyRepository {
     return entry === undefined ? undefined : normalize(entry);
   }
 
-  save(entry: BodyEntry): Promise<void> {
-    return this.#store.put(entry);
+  async save(
+    entry: BodyEntry,
+    expectedUpdatedAt: number | null,
+  ): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      entry,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Este registro foi alterado em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   remove(id: EntityId): Promise<void> {

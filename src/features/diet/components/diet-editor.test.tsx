@@ -44,7 +44,7 @@ function mount(dietId: string, seed?: Diet): Harness {
   const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
 
   const ready = Promise.all([
-    seed === undefined ? Promise.resolve() : diets.save(seed),
+    seed === undefined ? Promise.resolve() : diets.save(seed, null),
     foods.save(CHICKEN),
   ]);
 

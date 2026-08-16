@@ -7,6 +7,7 @@ import {
   type IndexKey,
   type IndexQuery,
   type Store,
+  type VersionedWriteResult,
 } from "./store";
 
 /**
@@ -78,6 +79,28 @@ export class MemoryStore<T extends Entity> implements Store<T> {
   put(record: T): Promise<void> {
     this.#records.set(record.id, clone(record));
     return Promise.resolve();
+  }
+
+  // No `await` before the write: JS is single-threaded, so nothing can run
+  // between the read and the `set` below. That is the entire atomicity
+  // guarantee this adapter needs — `IndexedDbStore` earns the same guarantee
+  // with a transaction instead, because it has no such luxury.
+  putIfVersionMatches(
+    record: T,
+    expectedUpdatedAt: number | null,
+  ): Promise<VersionedWriteResult<T>> {
+    const current = this.#records.get(record.id);
+    const currentVersion = current === undefined ? null : current.updatedAt;
+
+    if (currentVersion !== expectedUpdatedAt) {
+      return Promise.resolve({
+        ok: false,
+        current: current === undefined ? undefined : clone(current),
+      });
+    }
+
+    this.#records.set(record.id, clone(record));
+    return Promise.resolve({ ok: true });
   }
 
   putMany(records: readonly T[]): Promise<void> {

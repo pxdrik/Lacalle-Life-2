@@ -74,7 +74,7 @@ function mount(seed: FoodLog) {
   const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
   const profile = new LocalProfileRepository(new MemoryStore(PROFILE_STORE));
 
-  const ready = logs.save(seed);
+  const ready = logs.save(seed, null);
 
   render(
     <FoodLogRepositoryProvider repository={ready.then(() => logs)}>

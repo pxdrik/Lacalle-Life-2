@@ -31,6 +31,19 @@ export type IndexQuery =
       readonly to?: IndexKey;
     };
 
+/**
+ * The result of a version-checked write.
+ *
+ * `current` on rejection is the record actually in storage right now — the
+ * caller already paid for reading it as part of the check, so handing it back
+ * saves a second round trip for whoever wants to show what changed.
+ * `undefined` there means the expected version was `null` (a create) and
+ * someone else's create beat this one to the id.
+ */
+export type VersionedWriteResult<T extends Entity> =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly current: T | undefined };
+
 export interface Store<T extends Entity> {
   get(id: EntityId): Promise<T | undefined>;
 
@@ -50,6 +63,21 @@ export interface Store<T extends Entity> {
 
   /** Insert or replace many, atomically. */
   putMany(records: readonly T[]): Promise<void>;
+
+  /**
+   * Writes `record` only if the stored `updatedAt` for its id still equals
+   * `expectedUpdatedAt` — or the record is absent, when `expectedUpdatedAt` is
+   * `null` (a create). Read, compare and write happen as one unit per
+   * adapter, so nothing can write in between the check and the put.
+   *
+   * This is the whole mechanism behind optimistic concurrency: a caller reads
+   * a record, remembers its `updatedAt`, and this rejects the write instead of
+   * silently overwriting when that version has moved.
+   */
+  putIfVersionMatches(
+    record: T,
+    expectedUpdatedAt: number | null,
+  ): Promise<VersionedWriteResult<T>>;
 
   /** Removing an absent id is a no-op, not an error. */
   remove(id: EntityId): Promise<void>;

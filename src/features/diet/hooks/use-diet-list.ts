@@ -55,7 +55,7 @@ export function useDietList(): DietList {
       const diet = createDiet(name);
 
       try {
-        await (await repository).save(diet);
+        await (await repository).save(diet, null);
         setState((current) =>
           current.status === "ready"
             ? { status: "ready", diets: [diet, ...current.diets] }
@@ -76,7 +76,7 @@ export function useDietList(): DietList {
       const copy = duplicateDiet(diet);
 
       try {
-        await (await repository).save(copy);
+        await (await repository).save(copy, null);
         setState((current) =>
           current.status === "ready"
             ? { status: "ready", diets: [copy, ...current.diets] }

@@ -68,30 +68,38 @@ export function useDietEditor(dietId: EntityId): DietEditor {
    * transaction — and an editor that stutters while you type is a broken
    * editor. A failed save surfaces as a banner without discarding the edit.
    */
+  /**
+   * The functional form of `setState` matters beyond convention here: when
+   * several `apply()` calls land in the same batch, each updater sees the
+   * previous updater's result as `prevState`, not the stale value this
+   * closure closed over — that is what makes same-tick edits compose instead
+   * of the last one silently winning. The version passed to `save` is exactly
+   * the version the updater it grew out of actually read.
+   */
   const apply = useCallback(
     (change: (diet: Diet) => Diet) => {
-      if (state.status !== "ready") return;
+      setState((prevState) => {
+        if (prevState.status !== "ready") return prevState;
 
-      const next = change(state.diet);
-      // Edits addressing a meal or item that is no longer there return the same
-      // diet. Nothing to store, nothing to re-render.
-      if (next === state.diet) return;
+        const next = change(prevState.diet);
+        // Edits addressing a meal or item that is no longer there return the
+        // same diet. Nothing to store, nothing to re-render.
+        if (next === prevState.diet) return prevState;
 
-      setState({ status: "ready", diet: next });
-      void persist(next);
+        void persist(next, prevState.diet.updatedAt);
+        return { status: "ready", diet: next };
+      });
 
-      async function persist(diet: Diet) {
+      async function persist(diet: Diet, expectedUpdatedAt: number) {
         setSaveError(null);
         try {
-          await (await repository).save(diet);
+          await (await repository).save(diet, expectedUpdatedAt);
         } catch (error) {
           setSaveError(describeDataError(error));
         }
       }
     },
-    // Reads `state`, so it changes identity per edit. That is what keeps the
-    // side effect out of the state updater, which React is free to run twice.
-    [state, repository],
+    [repository],
   );
 
   return { state, saveError, apply };

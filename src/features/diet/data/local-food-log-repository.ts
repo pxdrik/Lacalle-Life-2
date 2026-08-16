@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
 
@@ -26,8 +27,20 @@ export class LocalFoodLogRepository implements FoodLogRepository {
     return log === undefined ? undefined : normalize(log);
   }
 
-  save(log: FoodLog): Promise<void> {
-    return this.#store.put(log);
+  async save(
+    log: FoodLog,
+    expectedUpdatedAt: number | null,
+  ): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      log,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Este dia do diário foi alterado em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   remove(id: EntityId): Promise<void> {

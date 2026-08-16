@@ -99,16 +99,19 @@ describe("useFoodLogDay", () => {
     const store = new MemoryStore<FoodLog>(FOOD_LOGS_STORE);
     const repository = new LocalFoodLogRepository(store);
 
-    await repository.save({
-      id: DAY,
-      day: DAY,
-      dietId: null,
-      createdAt: 1,
-      updatedAt: 1,
-      meals: [
-        { id: "m1", name: "Almoço", time: null, notes: "", items: [] },
-      ],
-    });
+    await repository.save(
+      {
+        id: DAY,
+        day: DAY,
+        dietId: null,
+        createdAt: 1,
+        updatedAt: 1,
+        meals: [
+          { id: "m1", name: "Almoço", time: null, notes: "", items: [] },
+        ],
+      },
+      null,
+    );
 
     render(
       <FoodLogRepositoryProvider repository={Promise.resolve(repository)}>

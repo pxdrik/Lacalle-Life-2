@@ -2,7 +2,9 @@
 
 import { Check } from "lucide-react";
 
+import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
+import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 
 import { dayKey, isFutureDay } from "@/core/format/day";
 
@@ -85,7 +87,12 @@ export function SessionEditor({ session, apply, onDone }: Props) {
         </span>
       </label>
 
-      <div className="sticky top-0 z-10 -mx-6 mt-4 flex items-center justify-end border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
+      <div
+        className={cn(
+          PAGE_SHELL_BLEED,
+          "sticky top-0 z-10 mt-4 flex items-center justify-end border-b border-line bg-canvas/90 py-3 backdrop-blur",
+        )}
+      >
         <Button size="sm" onClick={onDone}>
           <Check aria-hidden className="size-4" />
           Concluir edição

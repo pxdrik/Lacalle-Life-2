@@ -29,8 +29,11 @@ export interface FoodLogRepository {
 
   getByDay(day: string): Promise<FoodLog | undefined>;
 
-  /** Insert or replace. The id is the day, so writing twice corrects. */
-  save(log: FoodLog): Promise<void>;
+  /**
+   * Insert or replace. The id is the day, so writing twice corrects.
+   * `expectedUpdatedAt` is `null` for a day that has no log yet.
+   */
+  save(log: FoodLog, expectedUpdatedAt: number | null): Promise<void>;
 
   remove(id: EntityId): Promise<void>;
 }

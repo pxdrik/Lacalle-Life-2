@@ -1,0 +1,168 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { Download, Upload } from "lucide-react";
+
+import { Button } from "@/design-system/components/button";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { noticeClasses } from "@/design-system/components/notice";
+import { useToast } from "@/design-system/components/toast";
+
+import { useBackupRepository } from "../data/backup-repository-context";
+
+/**
+ * The only durability mechanism this app has that survives clearing the
+ * browser, uninstalling the PWA, or losing the phone.
+ * `navigator.storage.persist()`, requested silently at startup, is hardening
+ * against eviction under disk pressure — it does not cover any of those, so
+ * this exists regardless of whether that request was granted.
+ */
+export function BackupPanel() {
+  const repository = useBackupRepository();
+  const toast = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [persisted, setPersisted] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("storage" in navigator)) return;
+    void navigator.storage.persisted().then(setPersisted);
+  }, []);
+
+  async function handleExport() {
+    setError(null);
+    setExporting(true);
+    try {
+      const backup = await (await repository).exportAll();
+      const blob = new Blob([JSON.stringify(backup, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+      const day = new Date().toISOString().slice(0, 10);
+
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `lacalle-life-backup-${day}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+
+      toast("Backup exportado.");
+    } catch {
+      setError("Não foi possível gerar o backup. Tente novamente.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  function handleFileChosen(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setError(null);
+    setPendingFile(file);
+    // Clears the input's own memory of the file, so choosing the exact same
+    // file a second time still fires `onChange` instead of being a no-op.
+    event.target.value = "";
+  }
+
+  async function handleImportConfirmed() {
+    if (pendingFile === null) return;
+
+    setImporting(true);
+    setError(null);
+    try {
+      const text = await pendingFile.text();
+      const result = await (await repository).importAll(text);
+
+      if (result.ok) {
+        toast(`Backup restaurado — ${String(result.recordCount)} registros.`);
+        setPendingFile(null);
+        return;
+      }
+
+      setError(
+        result.reason === "incompatible"
+          ? "Este arquivo é de uma versão do backup que este app não sabe ler. Verifique se há uma atualização do app."
+          : "Este arquivo não é um backup válido do LaCalle Life, ou está corrompido.",
+      );
+    } catch {
+      setError("Não foi possível ler o arquivo selecionado.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3 rounded-lg border border-line bg-surface p-4">
+      <h2 className="text-sm font-semibold text-ink">Backup</h2>
+      <p className="text-xs text-ink-subtle">
+        Exporta dietas, treinos, diário, evolução e perfil num arquivo que
+        você guarda. Importar substitui completamente os dados atuais pelo
+        conteúdo do arquivo — não soma, não mescla.
+      </p>
+
+      {persisted !== null && (
+        <p className="text-xs text-ink-subtle">
+          {persisted
+            ? "O navegador protegeu este armazenamento contra despejo automático."
+            : "O navegador pode apagar este armazenamento sob pouco espaço em disco. O backup é a proteção que realmente importa."}
+        </p>
+      )}
+
+      {error !== null && (
+        <p role="alert" className={noticeClasses()}>
+          {error}
+        </p>
+      )}
+
+      <div className="flex flex-wrap gap-3">
+        <Button
+          variant="secondary"
+          size="sm"
+          pending={exporting}
+          onClick={() => {
+            void handleExport();
+          }}
+        >
+          <Download aria-hidden className="size-4" />
+          Exportar dados
+        </Button>
+
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            fileInputRef.current?.click();
+          }}
+        >
+          <Upload aria-hidden className="size-4" />
+          Escolher arquivo de backup
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json"
+          className="sr-only"
+          onChange={handleFileChosen}
+        />
+      </div>
+
+      {pendingFile !== null && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-line-strong bg-muted px-3 py-2">
+          <p className="text-sm text-ink">{pendingFile.name}</p>
+          <ConfirmButton
+            onConfirm={() => {
+              void handleImportConfirmed();
+            }}
+            label={`Importar ${pendingFile.name} e substituir todos os dados`}
+            confirmLabel="Substituir tudo?"
+            className="h-(--control-h-sm) px-3 text-xs"
+          >
+            {importing ? "Importando…" : "Importar e substituir tudo"}
+          </ConfirmButton>
+        </div>
+      )}
+    </div>
+  );
+}

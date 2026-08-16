@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -72,7 +72,7 @@ function mount(session: Session) {
     new MemoryStore<Exercise>(EXERCISES_STORE),
   );
 
-  const ready = sessions.save(session);
+  const ready = sessions.save(session, null);
 
   render(
     <WorkoutRepositoryProvider
@@ -218,5 +218,56 @@ describe("finishing a completed workout", () => {
     expect(
       screen.queryByText(/não entrou no total|não entraram no total/),
     ).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * BUG-008 (auditoria externa, 14/08 e fechamento, 15/08): três toques no
+ * mesmo quadro do React se anulavam — `apply` lia `state` do closure, então
+ * duas chamadas síncronas computavam `next` a partir do mesmo estado antigo,
+ * e a segunda `setState` apagava o efeito da primeira antes de qualquer uma
+ * chegar ao IndexedDB.
+ *
+ * `fireEvent`, não `userEvent`: `userEvent.click` insere `await`s internos
+ * que já dão ao React uma chance de re-renderizar entre os dois toques —
+ * exatamente a janela de tempo que faz o bug desaparecer. O toque humano real
+ * também costuma ser lento o bastante para não disparar isto; é por isso que
+ * o teste tem de forçar os dois toques no mesmo lote, não confiar em cliques
+ * devagar.
+ */
+describe("marking two different sets done in the same React batch", () => {
+  it("keeps both edits — neither the UI nor storage drops one", async () => {
+    const sessions = mount(sessionWith(0, 8));
+    await waitForRunner();
+
+    const setTwo = screen.getByRole("button", {
+      name: "Concluir série 2 de Supino reto",
+    });
+    const setThree = screen.getByRole("button", {
+      name: "Concluir série 3 de Supino reto",
+    });
+
+    // Both dispatched synchronously, before React has a chance to
+    // re-render between them — the same-tick race BUG-008 needs.
+    fireEvent.click(setTwo);
+    fireEvent.click(setThree);
+
+    // The UI: both toggles must read as completed, not just the second one.
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Desmarcar série 2 de Supino reto" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Desmarcar série 3 de Supino reto" }),
+      ).toBeInTheDocument();
+    });
+
+    // Storage: both writes actually landed, not just whichever raced last.
+    await waitFor(async () => {
+      const stored = await sessions.getById("s1");
+      const sets = stored?.exercises[0]?.sets ?? [];
+      expect(sets[1]?.isCompleted).toBe(true);
+      expect(sets[2]?.isCompleted).toBe(true);
+    });
   });
 });

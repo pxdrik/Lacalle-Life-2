@@ -67,30 +67,39 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
    * The screen updates first, then storage. Waiting on a transaction per
    * keystroke would make the editor stutter; a failed save surfaces as a
    * banner without discarding the edit.
+   *
+   * The functional form of `setState` matters here beyond React convention:
+   * when several `apply()` calls land in the same batch — two fields edited
+   * fast enough to land in one tick — each updater sees the *previous
+   * updater's* result as `prevState`, not the stale value this closure was
+   * created with. That is what makes the edits compose instead of the last
+   * one silently winning, and it is also where the version passed to `save`
+   * comes from: each write's expected version is exactly the version the
+   * updater it grew out of actually read.
    */
   const apply = useCallback(
     (change: (routine: Routine) => Routine) => {
-      if (state.status !== "ready") return;
+      setState((prevState) => {
+        if (prevState.status !== "ready") return prevState;
 
-      const next = change(state.routine);
-      // Edits addressing something already gone return the same routine.
-      if (next === state.routine) return;
+        const next = change(prevState.routine);
+        // Edits addressing something already gone return the same routine.
+        if (next === prevState.routine) return prevState;
 
-      setState({ status: "ready", routine: next });
-      void persist(next);
+        void persist(next, prevState.routine.updatedAt);
+        return { status: "ready", routine: next };
+      });
 
-      async function persist(routine: Routine) {
+      async function persist(routine: Routine, expectedUpdatedAt: number) {
         setSaveError(null);
         try {
-          await (await repositories).routines.save(routine);
+          await (await repositories).routines.save(routine, expectedUpdatedAt);
         } catch (cause) {
           setSaveError(describeDataError(cause));
         }
       }
     },
-    // Reads `state`, so it changes identity per edit. That is what keeps the
-    // side effect out of the state updater, which React may run twice.
-    [state, repositories],
+    [repositories],
   );
 
   const start = useCallback(async (): Promise<string | null> => {
@@ -100,7 +109,7 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
     const session = startSession(state.routine);
 
     try {
-      await (await repositories).sessions.save(session);
+      await (await repositories).sessions.save(session, null);
       return session.id;
     } catch (cause) {
       setSaveError(describeDataError(cause));

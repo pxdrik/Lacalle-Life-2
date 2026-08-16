@@ -104,6 +104,13 @@ export function useBodyLog(): BodyLog {
         return cleared;
       }
 
+      // `entry` itself may be a blank `createBodyEntry(day)` that was never
+      // stored — its own `updatedAt` is a fresh in-memory timestamp, not a
+      // version anything in storage holds. The expected version has to come
+      // from the in-memory mirror of storage, not from the entry being saved.
+      const existing = (entries ?? []).find((item) => item.day === entry.day);
+      const expectedUpdatedAt = existing?.updatedAt ?? null;
+
       const updated = revise(entry, {});
       const moved = previousDay !== undefined && previousDay !== updated.day;
 
@@ -113,7 +120,7 @@ export function useBodyLog(): BodyLog {
         // Write first, delete second. If the delete fails the worst case is a
         // duplicate the user can see and remove; the other order risks losing
         // the record entirely.
-        await store.save(updated);
+        await store.save(updated, expectedUpdatedAt);
         if (moved) await store.remove(previousDay);
 
         setEntries((current) => {
@@ -129,7 +136,7 @@ export function useBodyLog(): BodyLog {
         return false;
       }
     },
-    [repository, removeEntry],
+    [repository, removeEntry, entries],
   );
 
   const entryFor = useCallback(

@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
 
@@ -20,8 +21,17 @@ export class LocalDietRepository implements DietRepository {
     return this.#store.get(id);
   }
 
-  save(diet: Diet): Promise<void> {
-    return this.#store.put(diet);
+  async save(diet: Diet, expectedUpdatedAt: number | null): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      diet,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Esta dieta foi alterada em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   remove(id: EntityId): Promise<void> {

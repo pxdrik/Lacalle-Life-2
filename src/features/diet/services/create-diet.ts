@@ -1,4 +1,4 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, entityTimestamp } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
@@ -12,7 +12,7 @@ import type { Diet, Meal, MealItem } from "../types/diet";
  * be "add a food" rather than "add a meal, then add a food".
  */
 export function createDiet(name: string): Diet {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: createEntityId(),
@@ -58,7 +58,7 @@ export function createMeal(position: number): Meal {
  * list, where two identical names are a coin toss.
  */
 export function duplicateDiet(diet: Diet): Diet {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: createEntityId(),

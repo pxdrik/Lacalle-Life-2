@@ -99,6 +99,118 @@ describe.each(ADAPTERS)("Store contract — $name", ({ create }) => {
     });
   });
 
+  describe("putIfVersionMatches", () => {
+    it("accepts a create when the id is absent and expected is null", async () => {
+      const result = await store.putIfVersionMatches(
+        record({ id: "a" }),
+        null,
+      );
+
+      expect(result).toEqual({ ok: true });
+      await expect(store.get("a")).resolves.toBeDefined();
+    });
+
+    it("rejects a create when the id already exists", async () => {
+      await store.put(record({ id: "a", updatedAt: 1_000 }));
+
+      const result = await store.putIfVersionMatches(
+        record({ id: "a", name: "second writer" }),
+        null,
+      );
+
+      expect(result.ok).toBe(false);
+      expect(result.ok === false && result.current?.updatedAt).toBe(1_000);
+      // The rejected write never happened.
+      await expect(store.get("a")).resolves.toMatchObject({
+        name: "record a",
+      });
+    });
+
+    it("accepts an update when the expected version matches what is stored", async () => {
+      await store.put(record({ id: "a", updatedAt: 1_000 }));
+
+      const result = await store.putIfVersionMatches(
+        record({ id: "a", name: "second write", updatedAt: 2_000 }),
+        1_000,
+      );
+
+      expect(result).toEqual({ ok: true });
+      await expect(store.get("a")).resolves.toMatchObject({
+        name: "second write",
+        updatedAt: 2_000,
+      });
+    });
+
+    it("rejects an update when the stored version has moved — the core of BUG-001", async () => {
+      // Tab A and Tab B both read version 1_000.
+      await store.put(record({ id: "a", name: "original", updatedAt: 1_000 }));
+
+      // Tab A writes first, moving the record to 2_000.
+      const tabA = await store.putIfVersionMatches(
+        record({ id: "a", name: "from tab A", updatedAt: 2_000 }),
+        1_000,
+      );
+      expect(tabA).toEqual({ ok: true });
+
+      // Tab B still thinks the version is 1_000 — its write must be rejected,
+      // not silently overwrite what Tab A just saved.
+      const tabB = await store.putIfVersionMatches(
+        record({ id: "a", name: "from tab B", updatedAt: 3_000 }),
+        1_000,
+      );
+
+      expect(tabB.ok).toBe(false);
+      expect(tabB.ok === false && tabB.current?.name).toBe("from tab A");
+
+      // Tab A's write is the one that survived.
+      await expect(store.get("a")).resolves.toMatchObject({
+        name: "from tab A",
+      });
+    });
+
+    it("rejects a stale write against a different record without disturbing it", async () => {
+      await store.put(record({ id: "a", updatedAt: 1_000 }));
+      await store.put(record({ id: "b", updatedAt: 5_000 }));
+
+      const result = await store.putIfVersionMatches(
+        record({ id: "b", name: "stale write" }),
+        1_000, // wrong version for "b"
+      );
+
+      expect(result.ok).toBe(false);
+      // "a" is untouched by a conflicting write aimed at "b".
+      await expect(store.get("a")).resolves.toMatchObject({ updatedAt: 1_000 });
+    });
+
+    it("allows a valid sequence of successive updates", async () => {
+      await store.put(record({ id: "a", updatedAt: 1_000 }));
+
+      await store.putIfVersionMatches(
+        record({ id: "a", name: "v2", updatedAt: 2_000 }),
+        1_000,
+      );
+      const third = await store.putIfVersionMatches(
+        record({ id: "a", name: "v3", updatedAt: 3_000 }),
+        2_000,
+      );
+
+      expect(third).toEqual({ ok: true });
+      await expect(store.get("a")).resolves.toMatchObject({ name: "v3" });
+    });
+
+    it("supports deletion after a version-checked read via remove", async () => {
+      await store.put(record({ id: "a", updatedAt: 1_000 }));
+      await store.remove("a");
+
+      // The id is free again — a create with expected `null` succeeds.
+      const result = await store.putIfVersionMatches(
+        record({ id: "a", name: "recreated" }),
+        null,
+      );
+      expect(result).toEqual({ ok: true });
+    });
+  });
+
   describe("structured clone semantics", () => {
     it("does not keep a reference to the object it was given", async () => {
       const written = record({ id: "a", name: "original" });

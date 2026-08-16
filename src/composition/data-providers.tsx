@@ -8,6 +8,8 @@ import { FoodLogRepositoryProvider } from "@/features/diet/data/food-log-reposit
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
+import { BackupRepositoryProvider } from "@/features/profile/data/backup-repository-context";
+import type { BackupRepository } from "@/features/profile/data/backup-repository";
 import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repository-context";
 import type { ProfileRepository } from "@/features/profile/data/profile-repository";
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
@@ -17,6 +19,7 @@ import {
   type WorkoutRepositories,
 } from "@/features/workouts/data/workout-repository-context";
 
+import { exportAll, importAll } from "./backup";
 import { getRepositories } from "./repositories";
 
 /**
@@ -108,6 +111,10 @@ const profileRepository = once<ProfileRepository>(async () => {
   return (await getRepositories()).profile;
 });
 
+const backupRepository = once<BackupRepository>(() =>
+  Promise.resolve({ exportAll, importAll }),
+);
+
 const exerciseRepository = once<ExerciseRepository>(async () => {
   return (await getRepositories()).exercises;
 });
@@ -125,8 +132,22 @@ export function ProfileScreenDataProvider({
 }) {
   return (
     <ProfileDataProvider>
-      <BodyDataProvider>{children}</BodyDataProvider>
+      <BodyDataProvider>
+        <BackupDataProvider>{children}</BackupDataProvider>
+      </BodyDataProvider>
     </ProfileDataProvider>
+  );
+}
+
+function BackupDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <BackupRepositoryProvider repository={backupRepository()}>
+      {children}
+    </BackupRepositoryProvider>
   );
 }
 

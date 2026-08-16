@@ -1,4 +1,4 @@
-import { createEntityId, revise } from "@/core/domain/entity";
+import { createEntityId, entityTimestamp, revise } from "@/core/domain/entity";
 
 import type { PlannedSet, Routine, RoutineExercise } from "../types/routine";
 
@@ -13,7 +13,7 @@ export const DEFAULT_SET_COUNT = 3;
  * exercise slot is not a thing.
  */
 export function createRoutine(name: string): Routine {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: createEntityId(),
@@ -46,7 +46,7 @@ export function createPlannedSet(previous?: PlannedSet): PlannedSet {
  * The name gains a suffix because the copy sits beside the original in a list.
  */
 export function duplicateRoutine(routine: Routine): Routine {
-  const now = Date.now();
+  const now = entityTimestamp();
 
   return {
     id: createEntityId(),

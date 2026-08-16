@@ -3,6 +3,7 @@
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
+import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Flag, TriangleAlert } from "lucide-react";
 import Link from "next/link";
@@ -134,7 +135,12 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       </h1>
 
       {/* The two numbers worth glancing at mid-set, and nothing else. */}
-      <div className="relative sticky top-0 z-10 -mx-6 mt-4 flex items-center gap-6 border-b border-line bg-canvas/90 px-6 py-3 backdrop-blur">
+      <div
+        className={cn(
+          PAGE_SHELL_BLEED,
+          "relative sticky top-0 z-10 mt-4 flex items-center gap-6 border-b border-line bg-canvas/90 py-3 backdrop-blur",
+        )}
+      >
         <Stat
           label="Tempo"
           value={formatDuration(sessionElapsedMs(session, now))}

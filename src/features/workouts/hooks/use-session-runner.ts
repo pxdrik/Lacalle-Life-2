@@ -60,28 +60,36 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
     };
   }, [repositories, sessionId]);
 
+  /**
+   * The functional form of `setState` is what makes several `apply()` calls
+   * landing in the same tick — marking two sets done in a row, faster than a
+   * render — compose instead of the last one silently winning: each updater
+   * sees the previous updater's result as `prevState`, not the stale value
+   * this closure was created with. The version passed to `save` falls out of
+   * that same read.
+   */
   const apply = useCallback(
     (change: (session: Session) => Session) => {
-      if (state.status !== "ready") return;
+      setState((prevState) => {
+        if (prevState.status !== "ready") return prevState;
 
-      const next = change(state.session);
-      if (next === state.session) return;
+        const next = change(prevState.session);
+        if (next === prevState.session) return prevState;
 
-      setState({ status: "ready", session: next });
-      void persist(next);
+        void persist(next, prevState.session.updatedAt);
+        return { status: "ready", session: next };
+      });
 
-      async function persist(session: Session) {
+      async function persist(session: Session, expectedUpdatedAt: number) {
         setSaveError(null);
         try {
-          await (await repositories).sessions.save(session);
+          await (await repositories).sessions.save(session, expectedUpdatedAt);
         } catch (cause) {
           setSaveError(describeDataError(cause));
         }
       }
     },
-    // Reads `state`, so it changes identity per edit. That is what keeps the
-    // side effect out of the state updater, which React may run twice.
-    [state, repositories],
+    [repositories],
   );
 
   const remove = useCallback(async (): Promise<boolean> => {

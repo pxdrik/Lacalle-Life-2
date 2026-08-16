@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { StoreDefinition } from "@/core/storage/schema";
 import type { Store } from "@/core/storage/store";
@@ -26,7 +27,8 @@ export interface SessionRepository {
   findInProgress(): Promise<Session | undefined>;
 
   getById(id: EntityId): Promise<Session | undefined>;
-  save(session: Session): Promise<void>;
+  /** `expectedUpdatedAt` is `null` for a session that has never been saved. */
+  save(session: Session, expectedUpdatedAt: number | null): Promise<void>;
   remove(id: EntityId): Promise<void>;
 }
 
@@ -51,8 +53,20 @@ export class LocalSessionRepository implements SessionRepository {
     return this.#store.get(id);
   }
 
-  save(session: Session): Promise<void> {
-    return this.#store.put(session);
+  async save(
+    session: Session,
+    expectedUpdatedAt: number | null,
+  ): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      session,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Esta sessão foi alterada em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   remove(id: EntityId): Promise<void> {

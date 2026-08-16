@@ -40,7 +40,7 @@ function mount(entries: readonly BodyEntry[], onApply = vi.fn()) {
   const repository = new LocalBodyRepository(
     new MemoryStore<BodyEntry>(BODY_ENTRIES_STORE),
   );
-  const ready = Promise.all(entries.map((e) => repository.save(e)));
+  const ready = Promise.all(entries.map((e) => repository.save(e, null)));
 
   render(
     <BodyRepositoryProvider repository={ready.then(() => repository)}>

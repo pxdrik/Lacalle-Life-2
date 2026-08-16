@@ -825,6 +825,158 @@ Fica registrado porque a próxima auditoria vai apontar de novo.
 
 ---
 
+## Sprint 3 — Release Reliability ✅ entregue em 16/08/2026
+
+A partir da auditoria de fechamento pós-sprints (15/08), que manteve o veredito
+**NÃO PRONTO** com três P1: dois herdados (BUG-001, BUG-004) e um novo,
+introduzido pelo Brand System (overflow horizontal mobile). Esta sprint **não é
+de design** — nada de tokens, cor, tipografia, raio ou motion mudou.
+
+Critério de conclusão, todos atendidos: zero overflow horizontal nas seis
+larguras testadas, BUG-001 fechado com teste de conflito real (não `save()`
+retorna sucesso), BUG-008 verificado, export/import funcionando com validação
+antes de escrever, `persist()` como hardening depois disso, suíte e build
+verdes, Brand System intacto — mais os quatro fluxos centrais, reload e
+fechar/reabrir confirmados juntos na Fase 4.
+
+Os três P1 que travavam o release na auditoria de 15/08 estão fechados. Não
+significa "pronto para produção" sem ressalvas — os P2/P3 do laudo original
+seguem abertos, de propósito: esta sprint tinha um escopo, e não era esse.
+
+### Fase 1 — REGR-MOBILE ✅ entregue em 16/08/2026
+
+- [x] `PAGE_SHELL_BLEED` em `page-shell.tsx`, ao lado de `pageShell()`, para que
+      sangria e padding só possam descasar se alguém editar um sem olhar o outro.
+- [x] Substituir `-mx-6 … px-6` em `food-log-screen.tsx`, `diet-editor.tsx`,
+      `session-runner.tsx`, `routine-editor.tsx`, `session-editor.tsx`.
+- [x] Validar 320/360/375/390/414/430 px em `/diario`, `/sessao/[id]`,
+      `/treinos/[id]`, `/dietas/[id]` — `scrollWidth === clientWidth` nos quatro,
+      nas seis larguras. Medido com dado real criado na hora (rotina com um
+      exercício, sessão iniciada, dieta), não com o banco vazio, porque o
+      cabeçalho fixo só existe depois que há conteúdo para rolar.
+      `typecheck`/`lint`/`test` (887) e `build` verdes antes da medição.
+
+### Fase 2 — BUG-001 e BUG-008 ✅ entregue em 16/08/2026
+
+Concorrência otimista no repositório, como a auditoria de 14/08 já havia
+decidido — nunca `BroadcastChannel` na UI.
+
+- [x] `putIfVersionMatches` em `Store<T>`, implementado nos dois adapters —
+      uma transação `readwrite` única no `IndexedDbStore`, para que nada
+      escreva entre a leitura e a comparação; `MemoryStore` é atômico por
+      construção (JS de thread única, sem `await` entre ler e escrever).
+- [x] `revise()`, e todo `create*` de agregado, passam a emitir `updatedAt` de
+      `entityTimestamp()` — um relógio monotônico por processo, não
+      `Date.now()` cru. Precisou cobrir as fábricas de criação também, não só
+      `revise()`: um teste real pegou uma criação e a primeira edição caindo no
+      mesmo milissegundo, o que zerava a checagem de versão silenciosamente.
+      **Risco residual documentado, não escondido:** duas abas com relógios de
+      sistema distintos podem, em teoria, colidir no mesmo milissegundo; um
+      campo `version` inteiro fecharia isso por completo, a um custo de
+      migração que esta sprint decidiu não pagar agora.
+- [x] `DataError("CONFLICT")` novo, com mensagem própria em
+      `describe-data-error.ts`; os cinco repositórios de agregado (rotina,
+      sessão, dieta, diário, corpo) exigem a versão esperada em `save()`;
+      conflito nunca sobrescreve em silêncio.
+- [x] `apply()` de `use-routine-editor`, `use-session-runner` e
+      `use-diet-editor` passou para a forma funcional de `setState` — não só
+      por causa da versão esperada. Achado durante a implementação: sem isso,
+      múltiplos `apply()` no mesmo lote do React perdiam edição **no próprio
+      estado da UI**, antes mesmo de qualquer escrita — o mecanismo real por
+      trás do "1 de 3 é gravado" do laudo original. `use-food-log` resolve o
+      mesmo problema com uma ref em vez de updater com efeito colateral, que
+      este arquivo já havia banido antes por um motivo próprio.
+- [x] Teste determinístico por domínio (rotina, sessão, dieta, diário, corpo):
+      A lê v, B lê v, A salva, B rejeitada — contra `IndexedDbStore` real, não
+      só `MemoryStore`. Mais criação duplicada rejeitada, sequência válida de
+      atualizações, e conflito contra uma entidade removida.
+- [x] BUG-008 com teste de componente real: dois toques síncronos (`fireEvent`,
+      não `userEvent` — que já insere esperas entre toques) marcando duas
+      séries diferentes no mesmo lote do React. As duas sobrevivem, na tela e
+      no IndexedDB.
+- [x] Reproduzido ao vivo, duas abas reais, build de produção: aba A renomeia
+      a rotina, aba B — que carregou antes da edição de A — tenta renomear
+      diferente. B é rejeitada com o aviso na tela; o banco guarda a versão de
+      A. Confirmado por leitura direta do IndexedDB, não só pela tela.
+- [x] 936 testes (887 → 936, 49 novos), `typecheck`, `lint` e `build` verdes.
+
+### Fase 3 — BUG-004 ✅ entregue em 16/08/2026
+
+Exportação e importação vêm antes de `persist()` — é o backup real, `persist()`
+é hardening.
+
+- [x] `exportAll()`/`importAll()` em `composition/backup.ts`, cobrindo os oito
+      stores (rotina, sessão, dieta, diário, corpo, perfil, alimentos,
+      exercícios) — `schemaVersion` próprio, independente da versão de
+      migração do banco.
+- [x] Import valida o envelope inteiro (zod) e a forma mínima de cada registro
+      antes de escrever qualquer coisa; nunca abre uma transação com o arquivo
+      não validado. Toda a escrita acontece numa única transação IndexedDB
+      abrangendo os oito stores — uma falha no meio reverte todos, não deixa o
+      banco pela metade.
+- [x] `navigator.storage.persist()` disparado no startup da composição,
+      silencioso e tolerante a recusa — nunca bloqueia a inicialização.
+- [x] Fronteira arquitetural respeitada, não contornada: o lint pegou a
+      própria auditoria tentando importar `composition/backup` direto de um
+      componente. Resolvido com o padrão já usado em todo o resto do app —
+      `BackupRepository` em `features/profile/data/`, provider ligado por
+      `composition/`. A interface exposta à feature nem conhece a forma real
+      do arquivo (`Diet[]`, `Routine[]`...) — só `unknown` e um resultado
+      genérico, exatamente para não vazar tipo de outras features para dentro
+      de uma.
+- [x] Painel em `/perfil`: exportar baixa um `.json`; importar exige escolher
+      o arquivo e depois confirmar em dois toques (`ConfirmButton`) — trocar
+      tudo por engano custa uma segunda intenção clara. Mostra se o navegador
+      concedeu armazenamento persistente.
+- [x] 20 testes novos: round-trip por domínio, round-trip via
+      `JSON.stringify`/`parse` (não só o objeto em memória), arquivo inválido,
+      envelope corrompido, registro sem a forma mínima de entidade, versão
+      incompatível, importação vazia substituindo o banco — todos confirmando
+      que uma falha **não toca no banco existente**. Mais a UI isolada com um
+      `BackupRepository` falso.
+- [x] Reproduzido ao vivo, ponta a ponta, build de produção: criada uma rotina
+      real, exportado um arquivo de 245&nbsp;KB (216 alimentos + 183
+      exercícios + a rotina), banco inteiro apagado via
+      `indexedDB.deleteDatabase` — o mesmo efeito de "limpar o navegador" —,
+      arquivo reimportado, rotina de volta com o **mesmo id**, confirmado no
+      IndexedDB e na tela de Treinos.
+- [x] 949 testes, `typecheck`, `lint` e `build` verdes.
+
+### Fase 4 — Release verification ✅ entregue em 16/08/2026
+
+Passagem final, com tudo junto, depois de cada blocker já ter sido verificado
+ao vivo isoladamente na própria fase que o resolveu.
+
+- [x] 949 testes, `typecheck`, `lint` e `build` de produção verdes numa
+      última rodada limpa.
+- [x] `git diff` revisado — 56 arquivos (47 modificados, 9 novos), zero
+      `console.log`/`debugger`/comentário de depuração esquecido, zero arquivo
+      de Brand System ou token tocado, `package.json` intacto.
+- [x] Os quatro fluxos centrais, numa sessão contínua no build de produção:
+      criar rotina → adicionar exercício → iniciar treino → concluir uma série
+      (Monte treinos); criar dieta (Monte dietas); registrar um alimento no
+      diário de hoje (Registre alimentação); registrar peso (Acompanhe
+      evolução).
+- [x] Reload da página — os quatro domínios sobreviveram, decimal com vírgula
+      correto (78,5, não 785).
+- [x] Fechar a aba e abrir uma nova no mesmo endereço — mesmo resultado.
+      **Um achado do próprio processo, não do produto:** a primeira tentativa
+      de registrar o alimento reportou sucesso mas não persistiu — o clique
+      caiu na lista de busca do seletor, não no item; o texto "Abacate"
+      continuava na tela de qualquer forma, o que bastava para a checagem
+      ingênua passar. Corrigido repetindo a ação e **confirmando pelo
+      resultado observável (fechar e reabrir), não pela resposta imediata do
+      clique** — o mesmo cuidado que a rodada de BUG-001 já exigia.
+- [x] Overflow horizontal mobile reconferido nas quatro rotas centrais com
+      dado real (não formulário vazio), 320–430&nbsp;px: zero.
+- [x] BUG-001, BUG-008 e BUG-004 não foram reexecutados ao vivo nesta fase —
+      cada um já tem prova ao vivo própria, na fase que o resolveu, e nenhum
+      arquivo relevante mudou desde então. A suíte automatizada que os cobre
+      (conflito de duas abas em cinco domínios, toques síncronos no mesmo
+      lote, round-trip de backup) continua verde nesta rodada.
+
+---
+
 ## Fora de escopo, permanentemente
 
 Nada de IA, chat, geração automática de dieta ou treino, prompts, embeddings

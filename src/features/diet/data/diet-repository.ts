@@ -14,7 +14,8 @@ export interface DietRepository {
 
   getById(id: EntityId): Promise<Diet | undefined>;
 
-  save(diet: Diet): Promise<void>;
+  /** `expectedUpdatedAt` is `null` for a diet that has never been saved. */
+  save(diet: Diet, expectedUpdatedAt: number | null): Promise<void>;
 
   remove(id: EntityId): Promise<void>;
 }

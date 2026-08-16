@@ -1,4 +1,4 @@
-import { createEntityId } from "@/core/domain/entity";
+import { createEntityId, entityTimestamp } from "@/core/domain/entity";
 
 import type { Routine } from "../types/routine";
 import type { PerformedSet, Session, SessionExercise } from "../types/session";
@@ -18,7 +18,7 @@ import type { PerformedSet, Session, SessionExercise } from "../types/session";
  */
 export function startSession(
   routine: Routine,
-  startedAt = Date.now(),
+  startedAt = entityTimestamp(),
 ): Session {
   const exercises: SessionExercise[] = routine.exercises.map((exercise) => ({
     id: createEntityId(),

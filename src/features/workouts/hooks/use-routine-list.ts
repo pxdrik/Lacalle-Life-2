@@ -54,7 +54,7 @@ export function useRoutineList(): RoutineList {
       const routine = createRoutine(name);
 
       try {
-        await (await repositories).routines.save(routine);
+        await (await repositories).routines.save(routine, null);
         setState((current) =>
           current.status === "ready"
             ? { status: "ready", routines: [routine, ...current.routines] }
@@ -75,7 +75,7 @@ export function useRoutineList(): RoutineList {
       const copy = duplicateRoutine(routine);
 
       try {
-        await (await repositories).routines.save(copy);
+        await (await repositories).routines.save(copy, null);
         setState((current) =>
           current.status === "ready"
             ? { status: "ready", routines: [copy, ...current.routines] }

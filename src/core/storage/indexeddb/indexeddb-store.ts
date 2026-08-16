@@ -3,7 +3,7 @@ import type { IDBPDatabase } from "idb";
 import type { Entity, EntityId } from "@/core/domain/entity";
 
 import { toDataError } from "../errors";
-import type { IndexQuery, Store } from "../store";
+import type { IndexQuery, Store, VersionedWriteResult } from "../store";
 
 /**
  * `Store` backed by an IndexedDB object store.
@@ -45,6 +45,29 @@ export class IndexedDbStore<T extends Entity> implements Store<T> {
   put(record: T): Promise<void> {
     return run(async () => {
       await this.#db.put(this.#name, record);
+    });
+  }
+
+  // One `readwrite` transaction for the get and the put: IndexedDB serializes
+  // transactions on the same store, so nothing else can write `record.id`
+  // between the check below and the put. Two separate calls — a `get` then a
+  // later `put` — would leave exactly that gap open.
+  putIfVersionMatches(
+    record: T,
+    expectedUpdatedAt: number | null,
+  ): Promise<VersionedWriteResult<T>> {
+    return run(async () => {
+      const tx = this.#db.transaction(this.#name, "readwrite");
+      const current = (await tx.store.get(record.id)) as T | undefined;
+      const currentVersion = current === undefined ? null : current.updatedAt;
+
+      if (currentVersion !== expectedUpdatedAt) {
+        await tx.done;
+        return { ok: false, current };
+      }
+
+      await Promise.all([tx.store.put(record), tx.done]);
+      return { ok: true };
     });
   }
 
