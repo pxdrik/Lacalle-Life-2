@@ -17,6 +17,26 @@ export function sessionProgress(session: Session): SessionProgress {
   return { completed, total };
 }
 
+export interface SessionVolume {
+  readonly kg: number;
+  /**
+   * Completed sets that carry a weight but no rep count, and so contribute
+   * nothing to `kg` above.
+   *
+   * **BUG-017 (auditoria externa, 14/08): esta é a exclusão que precisa de
+   * aviso, e só ela.** Uma série concluída com peso registrado e repetições
+   * em branco tem um número real, deliberado, que some do total sem dizer
+   * nada — "500 kg movidos" com uma série de 52,5 kg fora da conta, do jeito
+   * que a auditoria encontrou. É diferente de uma série de peso corporal
+   * (peso em branco, repetições preenchidas), que este arquivo já tratava
+   * como exclusão honesta e documentada — "não é esforço zero, é carga não
+   * medida" — e continua sendo, em silêncio: avisar sobre ela alarmaria toda
+   * série de peso corporal do app, que é o caso comum e correto, não uma
+   * regra nova inventada para sumir com o aviso.
+   */
+  readonly excludedSets: number;
+}
+
 /**
  * Load moved, in kilograms.
  *
@@ -24,12 +44,23 @@ export function sessionProgress(session: Session): SessionProgress {
  * count. A set logged at bodyweight contributes nothing to a kilogram total,
  * which is honest — it is not zero effort, it is unmeasured load.
  */
-export function sessionVolumeKg(session: Session): number {
+export function sessionVolumeKg(session: Session): SessionVolume {
   let volume = 0;
+  let excludedSets = 0;
 
   for (const exercise of session.exercises) {
     for (const set of exercise.sets) {
       if (!set.isCompleted) continue;
+
+      // Peso presente, repetições ausentes — ver o comentário em
+      // `SessionVolume.excludedSets`. Contado antes da checagem geral de
+      // `null` porque é o único dos três casos (bodyweight / vazia / esta)
+      // que precisa ser contado, e não só pulado.
+      if (set.weightKg !== null && set.reps === null) {
+        excludedSets += 1;
+        continue;
+      }
+
       if (set.reps === null || set.weightKg === null) continue;
 
       // Same reasoning as `sumMacros`: a stored set holds whatever it holds,
@@ -41,7 +72,7 @@ export function sessionVolumeKg(session: Session): number {
     }
   }
 
-  return Math.round(volume);
+  return { kg: Math.round(volume), excludedSets };
 }
 
 /** Milliseconds the workout has been running. Needs a clock, so it takes one. */

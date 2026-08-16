@@ -61,9 +61,9 @@ describe("the draining bar", () => {
   it("carries the variant that hides it under reduced motion", async () => {
     // Asserted as a class because jsdom does not evaluate media queries, so
     // the rendered outcome cannot be observed here. What this pins down is
-    // the mechanism: without it the global "collapse every animation to
-    // 0.01ms" rule would paint the bar already empty, reading as expired the
-    // instant it appeared.
+    // the mechanism: without it the global rule that caps every animation at
+    // 120ms would compress the several-second countdown into a flash, reading
+    // as expired the instant it appeared.
     mount();
 
     await arm();

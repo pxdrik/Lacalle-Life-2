@@ -165,7 +165,7 @@ function SessionRow({ session }: { readonly session: Session }) {
         </div>
 
         <span className="shrink-0 text-sm tabular-nums text-ink-muted">
-          {formatDecimal(sessionVolumeKg(session))} kg
+          {formatDecimal(sessionVolumeKg(session).kg)} kg
         </span>
       </Link>
     </li>

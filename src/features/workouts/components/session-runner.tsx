@@ -4,7 +4,7 @@ import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
-import { ArrowLeft, Flag } from "lucide-react";
+import { ArrowLeft, Flag, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -115,6 +115,9 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const progress = sessionProgress(session);
   const allDone = progress.completed === progress.total && progress.total > 0;
   const pending = progress.total - progress.completed;
+  // Só computado quando precisa aparecer — a mesma preguiça que a chamada
+  // embutida no JSX tinha antes de virar uma constante.
+  const volume = allDone ? sessionVolumeKg(session) : null;
 
   return (
     <div className="pb-32">
@@ -288,12 +291,26 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       {/* The end of the workout, and the one moment on this screen that is not
           a set: raised so that "finalizar" is not one more box in a column of
           exercise cards. */}
-      {allDone && (
+      {allDone && volume !== null && (
         <Card tone="hero" className="mt-6 text-center">
           <p className="text-ink">Todas as séries concluídas.</p>
           <p className="mt-1 text-sm text-ink-subtle">
-            {formatDecimal(sessionVolumeKg(session))} kg movidos.
+            {formatDecimal(volume.kg)} kg movidos.
           </p>
+          {/* BUG-017 (auditoria externa, 14/08): esta linha é a resposta a
+              "'500 kg movidos' com uma série de 52,5 kg fora da conta" — o
+              texto exato que a auditoria citou é a frase logo acima. O
+              problema nunca foi a fórmula, era o silêncio; isto é o aviso,
+              não uma regra de treino nova. Cor + ícone + texto, como todo
+              estado do app — nunca só a cor. */}
+          {volume.excludedSets > 0 && (
+            <p className="mt-2 flex items-center justify-center gap-1.5 text-xs text-warning-text">
+              <TriangleAlert aria-hidden className="size-3.5 shrink-0" />
+              {volume.excludedSets === 1
+                ? "1 série concluída sem repetições registradas não entrou no total."
+                : `${String(volume.excludedSets)} séries concluídas sem repetições registradas não entraram no total.`}
+            </p>
+          )}
           <Button
             size="lg"
             className="mt-4"

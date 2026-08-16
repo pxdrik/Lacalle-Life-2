@@ -13,13 +13,16 @@ import { DISARM_AFTER_MS } from "@/design-system/hooks/use-armed";
  * than the timer allows.
  *
  * **Hidden under `prefers-reduced-motion`, in CSS rather than JavaScript.** The
- * global rule in `globals.css` collapses every animation to 0.01ms, which would
- * leave an already-drained bar reading as "expired" the instant it appeared.
- * The first version asked `useReducedMotion` and returned `null`, which made
- * every confirmation button in the app depend on `matchMedia` — and took
- * thirteen tests down with it. A variant does the same job with no hook, no
- * extra render and nothing to stub. The armed state still announces itself
- * through the colour and the changed label; this only adds the clock.
+ * global rule in `globals.css` caps every animation at 120ms and runs it once
+ * — nowhere near the several seconds `DISARM_AFTER_MS` gives someone to change
+ * their mind, so a clock compressed into 120ms would read as a flash rather
+ * than a countdown, and would still be readable as "already expired" the
+ * instant it appeared. The first version asked `useReducedMotion` and returned
+ * `null`, which made every confirmation button in the app depend on
+ * `matchMedia` — and took thirteen tests down with it. A variant does the same
+ * job with no hook, no extra render and nothing to stub. The armed state still
+ * announces itself through the colour and the changed label; this only adds
+ * the clock.
  */
 export function DisarmProgress({ className }: { readonly className?: string }) {
   return (

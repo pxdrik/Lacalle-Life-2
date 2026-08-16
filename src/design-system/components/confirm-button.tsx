@@ -54,9 +54,19 @@ export function ConfirmButton({
         confirm(onConfirm);
       }}
       className={cn(
-        "relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-md",
-        // Icon-only at rest in five places, and 32px there. The target grows
+        "relative inline-flex items-center justify-center gap-1.5 rounded-md",
+        // Icon-only at rest in most places, and 32px there. The target grows
         // without the button growing; `max()` leaves the text sizes alone.
+        //
+        // BUG-006 (auditoria externa, 14/08): `overflow-hidden` costumava
+        // viver neste mesmo elemento, e recortava o pseudo-elemento de
+        // `touch-44` junto com o resto — medido no navegador, a área efetiva
+        // de toque caía para 15×15px num botão que desenha 16×16, um terço do
+        // mínimo de 44×44 que a pág. 48 do brandbook exige. O corte que a
+        // barra de confirmação precisa para não escapar dos cantos
+        // arredondados agora vive só no `<span>` logo abaixo, que cobre a
+        // caixa visual do botão e não a área de toque — a área de toque é o
+        // próprio `<button>`, sem overflow, e o pseudo-elemento sai livre.
         "touch-44",
         "transition-colors duration-150 ease-out",
         armed
@@ -66,7 +76,14 @@ export function ConfirmButton({
       )}
     >
       {armed ? confirmLabel : children}
-      {armed && <DisarmProgress />}
+      {armed && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
+        >
+          <DisarmProgress />
+        </span>
+      )}
     </button>
   );
 }

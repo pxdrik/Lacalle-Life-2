@@ -179,10 +179,10 @@ describe("statistics", () => {
   it("counts volume only from completed sets", () => {
     const { session, exerciseId, setIds } = runningSession();
 
-    expect(sessionVolumeKg(session)).toBe(0);
-    expect(sessionVolumeKg(completeSet(session, exerciseId, setIds[0]!))).toBe(
-      480,
-    );
+    expect(sessionVolumeKg(session).kg).toBe(0);
+    expect(
+      sessionVolumeKg(completeSet(session, exerciseId, setIds[0]!)).kg,
+    ).toBe(480);
   });
 
   it("ignores a completed set with no weight, which is unmeasured and not zero", () => {
@@ -191,9 +191,15 @@ describe("statistics", () => {
       weightKg: null,
     });
 
-    expect(
-      sessionVolumeKg(completeSet(bodyweight, exerciseId, setIds[0]!)),
-    ).toBe(0);
+    const result = sessionVolumeKg(completeSet(bodyweight, exerciseId, setIds[0]!));
+
+    expect(result.kg).toBe(0);
+    // BUG-017 (auditoria externa): esta é a distinção que o aviso não pode
+    // borrar. Peso corporal é uma exclusão honesta e documentada há muito
+    // tempo neste arquivo — se ela também disparasse `excludedSets`, o app
+    // avisaria em toda série de peso corporal do produto, que é o caso comum
+    // e correto, não uma exceção.
+    expect(result.excludedSets).toBe(0);
   });
 
   it("survives a stored weight that is not a number", () => {
@@ -216,8 +222,39 @@ describe("statistics", () => {
 
     // The readable completed set still counts; the broken one contributes 0.
     expect(
-      sessionVolumeKg(completeSet(corrupted, exerciseId, setIds[0]!)),
+      sessionVolumeKg(completeSet(corrupted, exerciseId, setIds[0]!)).kg,
     ).toBe(480);
+  });
+
+  /**
+   * BUG-017 (auditoria externa, 14/08): "série concluída + carga preenchida +
+   * repetições ausentes = não entra no volume" — e ninguém avisava. A fórmula
+   * já estava certa em não somar um peso sem repetições contáveis; o que
+   * faltava era dizer isso. `excludedSets` é essa comunicação, contada à parte
+   * de `kg` para que a UI decida como avisar sem ter de recalcular nada.
+   */
+  it("counts a completed set with a weight but no reps as excluded, not silently as zero", () => {
+    const { session, exerciseId, setIds } = runningSession();
+    // `runningSession` já parte de reps/peso planejados preenchidos — isto
+    // reproduz alguém apagando as repetições e concluindo a série mesmo
+    // assim, com o peso ainda lá.
+    const noReps = updatePerformedSet(session, exerciseId, setIds[0]!, {
+      reps: null,
+    });
+
+    const result = sessionVolumeKg(completeSet(noReps, exerciseId, setIds[0]!));
+
+    expect(result.kg).toBe(0);
+    expect(result.excludedSets).toBe(1);
+  });
+
+  it("does not count an untouched, uncompleted set as excluded", () => {
+    // Uma série ainda não feita não é uma série que "devia ter contado e não
+    // contou" — ela simplesmente não aconteceu ainda. `excludedSets` é sobre
+    // séries concluídas, não sobre o treino inteiro.
+    const { session } = runningSession();
+
+    expect(sessionVolumeKg(session).excludedSets).toBe(0);
   });
 
   it("points at the first set not yet done", () => {

@@ -73,6 +73,72 @@ describe("ConfirmButton", () => {
   });
 });
 
+/**
+ * BUG-006 (auditoria externa, 14/08): `overflow-hidden` vivia no mesmo
+ * elemento que carrega `touch-44`, e recortava o pseudo-elemento que a
+ * utility usa para expandir a área de toque. Medido no navegador antes da
+ * correção: um botão que desenha 16×16px tinha área de toque efetiva de
+ * 15×15 — abaixo até da própria caixa visual, porque o recorte também comia
+ * a borda do `::after`. Depois da correção, a mesma medição no navegador deu
+ * 44×44. Estes testes travam a estrutura que torna isso possível; a medição
+ * geométrica real, que o jsdom não faz, está registrada em
+ * `docs/roadmap.md`.
+ */
+describe("touch target (BUG-006)", () => {
+  it("keeps the interactive button free of overflow-hidden", () => {
+    render(
+      <ConfirmButton onConfirm={vi.fn()} label="Excluir Treino A" confirmLabel="Excluir?">
+        Excluir
+      </ConfirmButton>,
+    );
+
+    // `touch-44`'s `::after` extends past the button's own 16–32px box up to
+    // 44×44 — `overflow-hidden` on the same element clips that pseudo-element
+    // right back down to the box it was meant to grow past. This is the
+    // element BUG-006 measured at 15×15px.
+    const classes = [...trigger().classList];
+    expect(classes).toContain("touch-44");
+    expect(classes).not.toContain("overflow-hidden");
+  });
+
+  it("clips the confirmation bar in a layer separate from the touch target", async () => {
+    render(
+      <ConfirmButton onConfirm={vi.fn()} label="Excluir Treino A" confirmLabel="Excluir?">
+        Excluir
+      </ConfirmButton>,
+    );
+
+    await userEvent.click(trigger());
+
+    const bar = document.querySelector(".animate-drain");
+    expect(bar).not.toBeNull();
+
+    // The drain bar's rounded-corner clipping has to live *somewhere* — the
+    // regression this guards against is it moving back onto the button.
+    const clipped = bar!.closest(".overflow-hidden");
+    expect(clipped).not.toBeNull();
+    expect(clipped).not.toBe(trigger());
+    expect(trigger().contains(clipped)).toBe(true);
+  });
+
+  it("still fires on the second tap with the bar in its own layer", async () => {
+    // The two-tap flow does not read anything from the wrapper span; this
+    // guards against the refactor accidentally breaking the click handler by
+    // catching a click that lands on the wrapper instead of the button.
+    const onConfirm = vi.fn();
+    render(
+      <ConfirmButton onConfirm={onConfirm} label="Excluir Treino A" confirmLabel="Excluir?">
+        Excluir
+      </ConfirmButton>,
+    );
+
+    await userEvent.click(trigger());
+    await userEvent.click(trigger());
+
+    expect(onConfirm).toHaveBeenCalledOnce();
+  });
+});
+
 describe("timeout", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });

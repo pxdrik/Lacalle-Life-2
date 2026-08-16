@@ -180,4 +180,43 @@ describe("finishing a completed workout", () => {
       });
     });
   });
+
+  /**
+   * BUG-017 (auditoria externa, 14/08): "'500 kg movidos' com uma série de
+   * 52,5 kg fora da conta" — a frase literal que a auditoria citou, e o texto
+   * exato que este cartão mostra. Não basta o número estar certo; alguém
+   * completando o treino precisa ver que uma série ficou de fora.
+   */
+  it("warns when a completed set has a weight but no reps on record", async () => {
+    const session = sessionWith(8, 8);
+    const withMissingReps: Session = {
+      ...session,
+      exercises: [
+        {
+          ...session.exercises[0]!,
+          sets: session.exercises[0]!.sets.map((set, index) =>
+            index === 0 ? { ...set, reps: null } : set,
+          ),
+        },
+      ],
+    };
+
+    mount(withMissingReps);
+    await waitForRunner();
+
+    expect(
+      screen.getByText(
+        "1 série concluída sem repetições registradas não entrou no total.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("says nothing about excluded sets when every completed set counted", async () => {
+    mount(sessionWith(8, 8));
+    await waitForRunner();
+
+    expect(
+      screen.queryByText(/não entrou no total|não entraram no total/),
+    ).not.toBeInTheDocument();
+  });
 });

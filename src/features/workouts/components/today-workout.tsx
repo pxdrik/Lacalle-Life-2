@@ -119,7 +119,7 @@ function FinishedSession({ session }: { readonly session: Session }) {
       <span className="shrink-0 text-xs tabular-nums text-ink-muted">
         {duration === null ? "—" : formatDuration(duration)}
         <span className="mx-1.5 text-line-strong">·</span>
-        {formatDecimal(volume)} kg
+        {formatDecimal(volume.kg)} kg
       </span>
     </Link>
   );

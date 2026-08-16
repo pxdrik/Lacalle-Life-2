@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatDecimal } from "@/core/format/decimal";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { Notice } from "@/design-system/components/notice";
 
 import {
   comparePlanned,
@@ -77,8 +78,21 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
           label="Séries"
           value={`${String(progress.completed)}/${String(progress.total)}`}
         />
-        <Figure label="Volume" value={`${formatDecimal(volume)} kg`} />
+        <Figure label="Volume" value={`${formatDecimal(volume.kg)} kg`} />
       </Card>
+
+      {/* BUG-017 (auditoria externa, 14/08): esta é a versão permanente do
+          mesmo aviso que aparece na hora de finalizar, em `session-runner.tsx`
+          — este relatório é o que fica, e é revisitado depois, então o motivo
+          do número não bater com "somar tudo que a lista abaixo mostra" tem
+          que estar aqui também, não só no instante do término. */}
+      {volume.excludedSets > 0 && (
+        <Notice tone="warning" className="mt-4">
+          {volume.excludedSets === 1
+            ? "1 série concluída ficou de fora do volume: tem peso registrado, mas sem repetições."
+            : `${String(volume.excludedSets)} séries concluídas ficaram de fora do volume: têm peso registrado, mas sem repetições.`}
+        </Notice>
+      )}
 
       <div className="mt-4 space-y-3">
         {session.exercises.map((exercise) => (
