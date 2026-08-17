@@ -14,7 +14,12 @@ import type { Exercise } from "@/features/workouts/types/exercise";
 import type { Routine } from "@/features/workouts/types/routine";
 import type { Session } from "@/features/workouts/types/session";
 
-import { BACKUP_FORMAT_VERSION, exportAll, importAll } from "./backup";
+import {
+  BACKUP_FORMAT_VERSION,
+  exportAll,
+  importAll,
+  previewImport,
+} from "./backup";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 import { getRepositories } from "./repositories";
@@ -228,6 +233,52 @@ describe("exportAll / importAll", () => {
     await expect(repositories.diets.listAll()).resolves.toMatchObject([
       { name: "Keep me" },
     ]);
+  });
+
+  describe("previewImport", () => {
+    it("counts records without writing anything — the H.2 confirmation step", async () => {
+      const repositories = await getRepositories();
+      await repositories.diets.save(createDiet("Untouched"), null);
+
+      const backup = await exportAll(); // one diet, nothing else
+      const preview = previewImport(backup);
+
+      expect(preview).toEqual({ ok: true, recordCount: 1 });
+      // Not a second copy of "Untouched" — the database was never touched.
+      await expect(repositories.diets.listAll()).resolves.toMatchObject([
+        { name: "Untouched" },
+      ]);
+    });
+
+    it("names a technically valid but empty backup as 0 records, rather than blocking it", async () => {
+      const emptyBackup = {
+        schemaVersion: BACKUP_FORMAT_VERSION,
+        exportedAt: Date.now(),
+        stores: {
+          body: [],
+          foodLogs: [],
+          foods: [],
+          diets: [],
+          profile: [],
+          exercises: [],
+          routines: [],
+          sessions: [],
+        },
+      };
+
+      expect(previewImport(emptyBackup)).toEqual({ ok: true, recordCount: 0 });
+    });
+
+    it("reports the same validation failures importAll would, on the same inputs", () => {
+      expect(previewImport("{ not json at all")).toEqual({
+        ok: false,
+        reason: "invalid",
+      });
+      expect(previewImport({ schemaVersion: 999 })).toEqual({
+        ok: false,
+        reason: "invalid", // no `stores` at all — fails shape before version
+      });
+    });
   });
 
   it("a full import replaces rather than merges — an empty backup clears the database", async () => {

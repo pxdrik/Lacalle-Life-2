@@ -139,18 +139,28 @@ export type ImportResult =
   | { readonly ok: true; readonly recordCount: number }
   | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
 
+type ParsedBackupFile = z.infer<typeof backupFileSchema>;
+
+type ParsedBackup =
+  | {
+      readonly ok: true;
+      readonly file: ParsedBackupFile;
+      readonly recordCount: number;
+    }
+  | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
+
 /**
- * Validates the whole file before writing anything, and writes every store in
- * one IndexedDB transaction spanning all of them.
+ * Validation and record-counting, with no store touched — the read half of
+ * `importAll`, split out so a caller can show what a file contains **before**
+ * asking for the confirmation that replaces every domain with it.
  *
- * The ordering is the point: a file that fails validation never opens a
- * transaction, so a bad import cannot leave the database half-replaced. And
- * because every store clears and refills inside one transaction rather than
- * one each, a failure partway through — a quota hit on the sixth store, say —
- * rolls back every store already written in this call, not just that one.
- * The person either gets their new data or keeps exactly what they had.
+ * A technically valid backup with zero records used to reach that same
+ * confirmation dialog as any other file, because `recordCount` was only ever
+ * computed after the write. Someone who confirms out of habit — even past the
+ * `ConfirmButton` double tap — could replace real data with an empty or
+ * corrupted file without a chance to notice first.
  */
-export async function importAll(raw: unknown): Promise<ImportResult> {
+function parseBackupFile(raw: unknown): ParsedBackup {
   let parsedJson: unknown;
 
   if (typeof raw === "string") {
@@ -171,6 +181,46 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
   }
 
   const { stores } = parsed.data;
+  const recordCount =
+    stores.body.length +
+    stores.foodLogs.length +
+    stores.foods.length +
+    stores.diets.length +
+    stores.profile.length +
+    stores.exercises.length +
+    stores.routines.length +
+    stores.sessions.length;
+
+  return { ok: true, file: parsed.data, recordCount };
+}
+
+/**
+ * Read-only preview of what a file would do, for the confirmation step —
+ * never opens a database transaction.
+ */
+export function previewImport(raw: unknown): ImportResult {
+  const parsed = parseBackupFile(raw);
+  return parsed.ok
+    ? { ok: true, recordCount: parsed.recordCount }
+    : { ok: false, reason: parsed.reason };
+}
+
+/**
+ * Validates the whole file before writing anything, and writes every store in
+ * one IndexedDB transaction spanning all of them.
+ *
+ * The ordering is the point: a file that fails validation never opens a
+ * transaction, so a bad import cannot leave the database half-replaced. And
+ * because every store clears and refills inside one transaction rather than
+ * one each, a failure partway through — a quota hit on the sixth store, say —
+ * rolls back every store already written in this call, not just that one.
+ * The person either gets their new data or keeps exactly what they had.
+ */
+export async function importAll(raw: unknown): Promise<ImportResult> {
+  const parsed = parseBackupFile(raw);
+  if (!parsed.ok) return parsed;
+
+  const { stores } = parsed.file;
   const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
 
   try {

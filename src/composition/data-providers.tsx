@@ -19,7 +19,7 @@ import {
   type WorkoutRepositories,
 } from "@/features/workouts/data/workout-repository-context";
 
-import { exportAll, importAll } from "./backup";
+import { exportAll, importAll, previewImport } from "./backup";
 import { getRepositories } from "./repositories";
 
 /**
@@ -112,7 +112,11 @@ const profileRepository = once<ProfileRepository>(async () => {
 });
 
 const backupRepository = once<BackupRepository>(() =>
-  Promise.resolve({ exportAll, importAll }),
+  Promise.resolve({
+    exportAll,
+    importAll,
+    previewImport: (raw: string) => Promise.resolve(previewImport(raw)),
+  }),
 );
 
 const exerciseRepository = once<ExerciseRepository>(async () => {

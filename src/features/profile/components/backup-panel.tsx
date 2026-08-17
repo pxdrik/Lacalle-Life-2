@@ -22,6 +22,10 @@ export function BackupPanel() {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  /** `null` while the chosen file is still being read and validated. */
+  const [preview, setPreview] = useState<
+    { readonly recordCount: number } | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -60,10 +64,40 @@ export function BackupPanel() {
   function handleFileChosen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     setError(null);
+    setPreview(null);
     setPendingFile(file);
     // Clears the input's own memory of the file, so choosing the exact same
     // file a second time still fires `onChange` instead of being a no-op.
     event.target.value = "";
+
+    if (file === null) return;
+    void previewFile(file);
+  }
+
+  /**
+   * Reads and validates the file the moment it's chosen, so the confirmation
+   * step below can say what it actually contains — including "0 registros"
+   * for a file that is technically valid but empty — instead of only finding
+   * out after the data it replaces is already gone.
+   */
+  async function previewFile(file: File) {
+    try {
+      const text = await file.text();
+      const result = await (await repository).previewImport(text);
+
+      if (result.ok) {
+        setPreview({ recordCount: result.recordCount });
+        return;
+      }
+
+      setError(
+        result.reason === "incompatible"
+          ? "Este arquivo é de uma versão do backup que este app não sabe ler. Verifique se há uma atualização do app."
+          : "Este arquivo não é um backup válido do LaCalle Life, ou está corrompido.",
+      );
+    } catch {
+      setError("Não foi possível ler o arquivo selecionado.");
+    }
   }
 
   async function handleImportConfirmed() {
@@ -78,6 +112,7 @@ export function BackupPanel() {
       if (result.ok) {
         toast(`Backup restaurado — ${String(result.recordCount)} registros.`);
         setPendingFile(null);
+        setPreview(null);
         return;
       }
 
@@ -150,17 +185,32 @@ export function BackupPanel() {
 
       {pendingFile !== null && (
         <div className="flex flex-wrap items-center gap-3 rounded-md border border-line-strong bg-muted px-3 py-2">
-          <p className="text-sm text-ink">{pendingFile.name}</p>
-          <ConfirmButton
-            onConfirm={() => {
-              void handleImportConfirmed();
-            }}
-            label={`Importar ${pendingFile.name} e substituir todos os dados`}
-            confirmLabel="Substituir tudo?"
-            className="h-(--control-h-sm) px-3 text-xs"
-          >
-            {importing ? "Importando…" : "Importar e substituir tudo"}
-          </ConfirmButton>
+          <div className="min-w-0">
+            <p className="text-sm text-ink">{pendingFile.name}</p>
+            {/* The number that has to be seen before the confirming tap, not
+                after — a file with 0 registros is technically valid and
+                would otherwise sail through the same confirmation as any
+                other. */}
+            <p className="text-xs text-ink-subtle">
+              {preview === null
+                ? "Lendo arquivo…"
+                : `Este arquivo contém ${String(preview.recordCount)} ${
+                    preview.recordCount === 1 ? "registro" : "registros"
+                  }.`}
+            </p>
+          </div>
+          {preview !== null && (
+            <ConfirmButton
+              onConfirm={() => {
+                void handleImportConfirmed();
+              }}
+              label={`Importar ${pendingFile.name} e substituir todos os dados`}
+              confirmLabel="Substituir tudo?"
+              className="h-(--control-h-sm) px-3 text-xs"
+            >
+              {importing ? "Importando…" : "Importar e substituir tudo"}
+            </ConfirmButton>
+          )}
         </div>
       )}
     </div>

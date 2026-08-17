@@ -7,6 +7,7 @@ import { PageHeader } from "@/design-system/components/page-header";
 import { TodayProgress } from "@/features/body";
 import { TodayEnergy } from "@/features/diet/components/today-energy";
 import { TodayMeals } from "@/features/diet/components/today-meals";
+import { ProfileIncompleteNotice } from "@/features/profile/components/profile-incomplete-notice";
 import { TodayWorkout } from "@/features/workouts/components/today-workout";
 import { PageShell } from "@/design-system/components/page-shell";
 
@@ -52,6 +53,8 @@ export default function HomePage() {
       />
 
       <HomeDataProvider>
+        <ProfileIncompleteNotice />
+
         {/* **One grid, and every answer is a block in it.**
             The screen used to group by space alone: a ring floating above two
             columns of borderless sections. It read as elements scattered on a

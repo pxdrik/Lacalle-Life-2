@@ -15,6 +15,11 @@ export type ImportResult =
 export interface BackupRepository {
   /** Everything needed to reconstruct the app's state, ready to serialise. */
   exportAll(): Promise<unknown>;
+  /**
+   * Validates and counts records without writing anything — what the
+   * confirmation step shows before the second, destructive tap.
+   */
+  previewImport(raw: string): Promise<ImportResult>;
   /** Validates before writing anything; never partially replaces the database. */
   importAll(raw: string): Promise<ImportResult>;
 }

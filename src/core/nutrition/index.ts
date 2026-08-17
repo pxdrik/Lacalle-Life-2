@@ -30,6 +30,8 @@ export {
 
 export { buildNutritionPlan } from "./plan";
 
+export { weeklyRatePresets, type RatePreset } from "./rate-presets";
+
 export {
   type Advisory,
   type AdvisoryCode,

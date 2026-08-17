@@ -1,5 +1,5 @@
 import { formatDecimal } from "@/core/format/decimal";
-import type { NutritionPlan, PlanResult } from "@/core/nutrition";
+import type { NutritionPlan, NutritionProfile, PlanResult } from "@/core/nutrition";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
 import { MACRO_CODING } from "@/design-system/macros";
@@ -12,7 +12,13 @@ import { MACRO_CODING } from "@/design-system/macros";
  * the same reason: the engine changed what was asked for, and hiding that
  * would make it feel arbitrary.
  */
-export function PlanSummary({ result }: { readonly result: PlanResult }) {
+export function PlanSummary({
+  result,
+  goal,
+}: {
+  readonly result: PlanResult;
+  readonly goal: NutritionProfile["goal"];
+}) {
   if (!result.ok) {
     return (
       <Notice
@@ -28,10 +34,23 @@ export function PlanSummary({ result }: { readonly result: PlanResult }) {
     );
   }
 
-  return <Plan plan={result.plan} />;
+  return <Plan plan={result.plan} goal={goal} />;
 }
 
-function Plan({ plan }: { readonly plan: NutritionPlan }) {
+function Plan({
+  plan,
+  goal,
+}: {
+  readonly plan: NutritionPlan;
+  readonly goal: NutritionProfile["goal"];
+}) {
+  const balance = plan.energyBalanceKcal;
+  // The engine applies a safety floor before it applies what was asked for —
+  // correctly. Someone who requested a cut and got a surplus, or a bulk and
+  // got a deficit, needs to be told that in those words, not left to notice
+  // it from a signed number two sections down.
+  const mismatch =
+    (goal === "cut" && balance >= 0) || (goal === "bulk" && balance <= 0);
   return (
     <div className="space-y-4">
       {/* The whole point of filling in the profile: the number the rest of the
@@ -62,7 +81,7 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
             value={`${formatDecimal(Math.round(plan.bmrKcal))} kcal`}
           />
           <Derivation
-            label="TDEE"
+            label="Gasto diário (TDEE)"
             value={`${formatDecimal(Math.round(plan.tdeeKcal))} kcal`}
           />
           <Derivation label="Fibra" value={`${formatDecimal(plan.fiberG)} g`} />
@@ -85,18 +104,42 @@ function Plan({ plan }: { readonly plan: NutritionPlan }) {
           </p>
         </Notice>
 
-        {plan.energyBalanceKcal !== 0 && (
-          <p className="mt-4 border-t border-line pt-4 text-sm text-ink-muted">
-            {plan.energyBalanceKcal < 0 ? "Déficit" : "Superávit"} de{" "}
-            <span className="tabular-nums">
-              {formatDecimal(Math.abs(plan.energyBalanceKcal))}
-            </span>{" "}
-            kcal por dia — cerca de{" "}
-            <span className="tabular-nums">
-              {formatDecimal(Math.abs(plan.projectedWeeklyChangeKg), 2)}
-            </span>{" "}
-            kg por semana.
-          </p>
+        {/* The result the whole screen exists to answer, next to the goal it
+            answers for. A signed number on its own reads fine to someone who
+            already knows the safety floor won — everyone else just sees
+            "Superávit de 88 kcal" under a profile that asked to cut, and has
+            no reason to connect the two. */}
+        {(balance !== 0 || mismatch) && (
+          <Notice tone={mismatch ? "warning" : "info"} className="mt-4">
+            <p className="text-sm text-ink-muted">
+              {mismatch && (
+                <>
+                  Seu objetivo era {goal === "cut" ? "perder peso" : "ganhar massa"}
+                  ; com seus dados atuais, o limite seguro de ritmo não permite
+                  esse resultado — a meta ficou{" "}
+                  {balance === 0
+                    ? "em manutenção"
+                    : balance > 0
+                      ? "em superávit"
+                      : "em déficit"}
+                  .{" "}
+                </>
+              )}
+              {balance !== 0 && (
+                <>
+                  {balance < 0 ? "Déficit" : "Superávit"} de{" "}
+                  <span className="tabular-nums">
+                    {formatDecimal(Math.abs(balance))}
+                  </span>{" "}
+                  kcal por dia — cerca de{" "}
+                  <span className="tabular-nums">
+                    {formatDecimal(Math.abs(plan.projectedWeeklyChangeKg), 2)}
+                  </span>{" "}
+                  kg por semana.
+                </>
+              )}
+            </p>
+          </Notice>
         )}
       </Card>
 

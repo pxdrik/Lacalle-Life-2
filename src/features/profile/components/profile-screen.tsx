@@ -81,7 +81,10 @@ export function ProfileScreen() {
             />
           )}
 
-          <PlanSummary result={state.result} />
+          <PlanSummary
+            result={state.result}
+            goal={state.profile.nutrition.goal}
+          />
 
           <div className="flex gap-3">
             <Button

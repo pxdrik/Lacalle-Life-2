@@ -75,7 +75,22 @@ export function SessionExerciseCard({
         </p>
       )}
 
-      <ul className="mt-2">
+      {/* Same header the routine editor already shows — the column labels
+          shouldn't only exist where a set is being planned, not where it's
+          being done. */}
+      <div
+        aria-hidden
+        className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
+      >
+        <span className="w-6 text-center">#</span>
+        <span className="flex-1 text-center">Reps</span>
+        <span className="flex-1 text-center">Peso</span>
+        <span className="w-16 text-center">RPE</span>
+        <span className="w-11 shrink-0" />
+        <span className="w-11 shrink-0 sm:w-7" />
+      </div>
+
+      <ul className="mt-1">
         {exercise.sets.map((set, index) => (
           <PerformedSetRow
             key={set.id}

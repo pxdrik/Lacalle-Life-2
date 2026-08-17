@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { parseDecimal } from "@/core/format/decimal";
+import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import {
   ACTIVITY_LABELS,
   ACTIVITY_LEVELS,
@@ -11,9 +11,11 @@ import {
   GOALS,
   nutritionProfileSchema,
   SEX_LABELS,
+  weeklyRatePresets,
   type NutritionProfile,
 } from "@/core/nutrition";
 import { Button } from "@/design-system/components/button";
+import { cn } from "@/design-system/cn";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 
@@ -236,10 +238,71 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
         </Field>
       </div>
 
+      {/* Presets derived from the same percentage-of-bodyweight limits the
+          engine enforces (`weeklyRatePresets`), not fixed kilograms — a fixed
+          "1 kg/semana" preset is unsafe for a 60 kg person and pointless for a
+          120 kg one. The free field above still takes any value in between or
+          outside these two; this only offers a starting point for someone who
+          has no idea what "sustainable" means in kilograms. */}
+      {draft.goal !== "maintain" && (
+        <RatePresetChips
+          goal={draft.goal}
+          weightKg={parseDecimal(draft.weightKg)}
+          value={draft.weeklyChangeKg}
+          onChange={(value) => {
+            update("weeklyChangeKg", value);
+          }}
+        />
+      )}
+
       <Button type="submit" size="lg" pending={pending}>
         Calcular metas
       </Button>
     </form>
+  );
+}
+
+function RatePresetChips({
+  goal,
+  weightKg,
+  value,
+  onChange,
+}: {
+  readonly goal: Exclude<NutritionProfile["goal"], "maintain">;
+  readonly weightKg: number | null;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+}) {
+  if (weightKg === null || weightKg <= 0) return null;
+
+  const presets = weeklyRatePresets(weightKg, goal);
+  const selected = parseDecimal(value);
+
+  return (
+    <div className="-mt-2 flex flex-wrap gap-2">
+      {presets.map((preset) => {
+        const active = selected !== null && selected === preset.weeklyChangeKg;
+
+        return (
+          <button
+            key={preset.id}
+            type="button"
+            onClick={() => {
+              onChange(String(preset.weeklyChangeKg));
+            }}
+            aria-pressed={active}
+            className={cn(
+              "rounded-full border px-3 py-1.5 text-xs tabular-nums transition-colors duration-150 ease-out",
+              active
+                ? "border-accent bg-accent/10 text-accent-text"
+                : "border-line-strong text-ink-muted hover:border-accent hover:text-ink",
+            )}
+          >
+            {preset.label} — {formatDecimal(preset.weeklyChangeKg, 2)} kg
+          </button>
+        );
+      })}
+    </div>
   );
 }
 

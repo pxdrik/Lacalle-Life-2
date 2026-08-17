@@ -1507,7 +1507,7 @@ instalada) antes de propor qualquer coisa.
 
 ### PRÓXIMAS SPRINTS — sequência validada contra dependências reais
 
-**Sprint 5 — Confiança essencial**
+**Sprint 5 — Confiança essencial ✅ entregue em 16/08/2026**
 
 - objetivo: fechar os itens de maior impacto de compreensão e de risco de
   dado, todos de baixo risco técnico.
@@ -1528,6 +1528,47 @@ instalada) antes de propor qualquer coisa.
 - risco de regressão: baixo. O item de maior risco relativo é A.1, por
   reusar constantes do motor nutricional — testar contra os limites
   existentes evita regressão silenciosa.
+
+**O que foi entregue, por item:**
+
+- [x] **A — TDEE.** O rótulo em `plan-summary.tsx` virou "Gasto diário
+      (TDEE)" — o termo continua ali para quem o reconhece, só deixou de ser
+      a primeira palavra.
+- [x] **A — aviso de perfil incompleto.** `ProfileIncompleteNotice`, novo,
+      lido pelo mesmo `useProfile` da tela de perfil: aparece em Hoje só com
+      `status === "empty"`, com CTA para `/perfil`, e some sozinho assim que
+      o perfil existe — sem botão de dispensar, porque não há o que dispensar
+      depois que o motivo desaparece.
+- [x] **A — cabeçalho PESO/REPS na execução.** `SessionExerciseCard` ganhou o
+      mesmo cabeçalho `# Reps Peso RPE` que o editor de rotina já tinha, com
+      as mesmas larguras de coluna — os dois botões de 44px da linha (concluir
+      e remover) viraram spaçadores no cabeçalho para as colunas continuarem
+      alinhadas.
+- [x] **A.1 — presets de ritmo.** Decisão tomada pela rota recomendada:
+      `weeklyRatePresets(weightKg, goal)`, novo em `core/nutrition`, deriva
+      "Leve" (50% do teto) e "Moderado" (100% do teto) dos mesmos
+      `MAX_WEEKLY_LOSS_RATIO`/`MAX_WEEKLY_GAIN_RATIO` que o motor já aplica —
+      nunca um valor fixo, que a auditoria já tinha mostrado que quebraria
+      para pesos diferentes. `ProfileForm` mostra os dois como chips acima do
+      campo livre, que continua aceitando qualquer valor.
+- [x] **G — objetivo↔resultado.** `PlanSummary` agora recebe o `goal` do
+      perfil e compara com o sinal de `energyBalanceKcal`: quando alguém pede
+      corte e a meta calculada não fica em déficit (ou pede ganho e não fica
+      em superávit), a frase nomeia os dois — "Seu objetivo era perder peso;
+      com seus dados atuais, o limite seguro de ritmo não permite esse
+      resultado — a meta ficou em superávit" — e o `Notice` vira `warning` em
+      vez de `info`. Testado com o cenário adversarial exato da Sprint 4
+      (mulher, 60 anos, 150 cm, 45 kg, corte, 1 kg/semana pedido).
+- [x] **H.2 — aviso de backup vazio.** `composition/backup.ts` ganhou
+      `previewImport`, que reaproveita a mesma validação de `importAll` sem
+      abrir transação nenhuma — nenhum store é tocado. `BackupPanel` chama a
+      prévia assim que o arquivo é escolhido e só mostra o botão de
+      confirmação depois que "Este arquivo contém N registros" aparece; um
+      backup de fato vazio não é bloqueado, só nomeado antes do toque que
+      substitui tudo.
+
+967 testes (949 → 967, 18 novos, 6 arquivos), `typecheck`, `lint` e `build`
+de produção verdes.
 
 **Sprint 6 — Saneamento de armazenamento e descoberta**
 
@@ -1677,9 +1718,9 @@ saturada, gordura trans, colesterol)
 
 ### DECISÕES PENDENTES — antes de qualquer código
 
-1. **Ritmo de mudança de peso (A.1):** presets em percentual do peso
-   (recomendado, fonte da verdade já existe no motor) ou presets fixos
-   filtrados/desabilitados por pessoa?
+1. ~~**Ritmo de mudança de peso (A.1)**~~ — **decidido e entregue na Sprint 5**:
+   presets em percentual do peso, via `weeklyRatePresets` em
+   `core/nutrition`. Ver o relato na Sprint 5, acima.
 2. **Modelo de unidade de alimento (B):** confirmar a rota aditiva
    (unidades nomeadas em `Food`, `MealItem.grams` intocado); decidir fonte
    de dado nutricional para porções por unidade; decidir quem cura os 216
