@@ -977,6 +977,728 @@ ao vivo isoladamente na própria fase que o resolveu.
 
 ---
 
+## Feedback de uso real e validação adversarial — 16/08/2026
+
+Duas rodadas de evidência consolidadas aqui: a validação de uso real por
+telas (Perfil, Hoje, Diário, Treinos, Dietas, Alimentos, Evolução) e o
+resultado da Sprint 4 — validação adversarial independente, veredito
+**READY WITH KNOWN RISKS**, zero blocker de release, seis riscos residuais
+registrados. Cada item de UX abaixo foi conferido no código antes de virar
+proposta; o enquadramento é o mesmo de sempre — o produto precisa ser
+entendido, usado e confiado por uma pessoa comum, sem o Pedro explicando o
+funcionamento por trás.
+
+Formato por iniciativa: objetivo, problema, impacto no usuário,
+dependências, escopo, fora de escopo, prioridade, critérios de aceite,
+evidência necessária e — quando aplicável — riscos. Prioridade em cinco
+níveis: **P0** bloqueador, **P1** alta prioridade antes de escala, **P2**
+importante, **P3** melhoria, **P4** polish/futuro.
+
+---
+
+### RESOLVIDO — não reabrir sem evidência nova
+
+- **BUG-001/BUG-008 (concorrência otimista), BUG-004 (export/import +
+  persist), REGR-MOBILE (overflow responsivo).** Sprint 3, commit
+  `8ddb76c`, cada um provado ao vivo com duas abas reais e build de
+  produção. Não é hipótese — tem reprodução documentada na seção da Sprint 3
+  acima.
+- **Cálculo automático de calorias a partir dos macros.** Já existe:
+  `estimateKcal` em `foods/services/create-food.ts` (`proteína×4 +
+  carboidrato×4 + gordura×9`), já ligado ao formulário de alimento
+  personalizado (`custom-food-form.tsx:99-102`) como sugestão que nunca
+  sobrescreve o valor digitado, já coberto por teste
+  (`create-food.test.ts`), e já é a **única exceção documentada** à regra de
+  "nada de sugestão automática" (seção _Fora de escopo_ deste arquivo: "é
+  aritmética, não opinião sobre o que comer"). A ressalva sobre fibra
+  também já está no comentário da própria função. **Não criar de novo.**
+- **Criação de exercício personalizado.** Existe e está visível:
+  `createCustomExercise` → `useExerciseCatalogue` → botão "Criar exercício"
+  em `exercise-browser.tsx:302-305`, presente no estado vazio **e** dentro
+  dos resultados de busca (item já entregue: "Criar exercício ao buscar").
+  A única ação cabível é conferir se algum ponto de entrada ficou de fora —
+  não reimplementar.
+- **Horário do Diário em AM/PM não é bug de armazenamento.** Investigado em
+  14/08 e de novo nesta rodada: `<input type="time">` nativo em
+  `meal-card.tsx:114`, o formato de exibição segue o locale do navegador,
+  o valor gravado já é ISO 24h (`"14:30"`). O pedido de mostrar sempre 24h é
+  legítimo, mas é item de UX/produto novo (ver Iniciativa A), não correção
+  de um defeito de dado.
+
+### RISCOS ACEITOS — Sprint 4, não bloqueiam usuário real, mas seguem registrados
+
+- **NOVO-3.** Peso de série aceita magnitudes absurdas, sem crash nem perda
+  de dado. Aceito por ora; se algum item futuro mexer em `WeightField`, vale
+  revisar limites junto.
+- **BUG-007.** Erros de IndexedDB observados durante `next build`, não
+  reproduzidos em requisição real de produção. Aceito, monitorar.
+- **Offline real, instalação PWA e atualização de service worker em
+  dispositivo físico** — não testados ainda. Aceito como risco residual,
+  não como item de código; entra como critério de aceite da Iniciativa F
+  abaixo, que já mexe na mesma camada.
+
+---
+
+### A — Linguagem, onboarding e confiança
+
+- **objetivo:** reduzir a maior fonte de confusão para quem nunca usou o
+  produto, sem tocar em dado nem estrutura.
+- **problema:** três pontos concretos de jargão/orientação ausente.
+  1. TDEE aparece sem tradução — ocorrência única confirmada em
+     `profile/components/plan-summary.tsx:65`, `label="TDEE"`, não se repete
+     em nenhum outro componente.
+  2. A tela Hoje funciona sem perfil (já é requisito entregue), mas não
+     convida ninguém a completá-lo.
+  3. A execução de treino não tem cabeçalho de coluna —
+     `session-exercise-card.tsx` não imprime nenhum rótulo, enquanto o
+     editor de rotina já tem `# REPS PESO RPE`.
+- **impacto no usuário:** três pequenas barreiras de compreensão no
+  primeiro contato com o produto — exatamente onde "pessoa comum sem o
+  Pedro explicando" mais aparece.
+- **dependências:** nenhuma entre os três itens; nenhuma com outra
+  iniciativa.
+- **escopo:** (1) trocar o rótulo por algo como "Gasto calórico diário
+  estimado", com TDEE como detalhe secundário se algum usuário avançado
+  precisar — não remover o termo tecnicamente, só deixar de ser a primeira
+  coisa que aparece; (2) cartão não-bloqueante em Hoje, com CTA direto para
+  `/perfil`, que some sozinho quando o perfil fica completo, no padrão
+  `Notice` já usado no resto do app; (3) replicar em
+  `session-exercise-card.tsx` o mesmo cabeçalho que o editor de rotina já
+  tem.
+- **fora do escopo:** revisão geral de microcopy — é iniciativa própria,
+  ver abaixo; qualquer mudança no motor nutricional.
+- **prioridade:** **P1** — os três itens são baratos e o ganho é direto.
+- **critérios de aceite:** rótulo novo em todas as telas onde TDEE aparecia
+  (uma só, confirmado); aviso de Hoje aparece com perfil incompleto e some
+  ao completar; cabeçalho de execução idêntico em rótulo ao do editor.
+- **evidência necessária:** teste de render por item; nenhum precisa de
+  suíte de integração nova.
+
+#### A.1 — Ritmo de mudança de peso: presets, não valor livre
+
+- **objetivo:** tirar do usuário a obrigação de saber "quanto é seguro"
+  perder ou ganhar por semana.
+- **problema:** hoje `weeklyChangeKg` é texto livre
+  (`profile/components/profile-form.tsx`), com a única orientação sendo a
+  dica "Opcional. É limitado ao que for sustentável." — sem dizer o que é
+  sustentável.
+- **impacto no usuário:** a pessoa digita um número sem saber se é seguro,
+  e só descobre no envio se foi rejeitado ou silenciosamente ajustado.
+- **contraponto técnico à proposta original:** presets fixos em kg/semana
+  (0,25 / 0,5 / 0,75 / 1) não podem ser implementados como pedido.
+  `core/nutrition/constants.ts` define `MAX_WEEKLY_LOSS_RATIO = 0.01`
+  (1%/semana) e `MAX_WEEKLY_GAIN_RATIO = 0.005` (0,5%/semana) —
+  **percentuais do peso corporal, assimétricos entre perder e ganhar, não
+  valores fixos.** Exemplo real: para 60 kg, o teto de corte é 0,6 kg/semana
+  — o preset de "1 kg/semana" já seria inválido; o teto de ganho é 0,3
+  kg/semana — **até "0,5 kg/semana" already estouraria o limite seguro de
+  ganho.** Presets fixos funcionariam para uns pesos e quebrariam
+  silenciosamente para outros.
+- **dependências:** nenhuma de outro item; precisa de uma decisão de rota
+  antes de codar.
+- **escopo:** presets derivados do percentual já existente no motor, não de
+  números fixos — apresentados por objetivo (perda/ganho/manutenção), com
+  rótulo qualitativo ("ritmo leve/moderado") e o kg/semana resultante
+  calculado e arredondado por pessoa. "Personalizado" continua aceitando o
+  valor livre já validado hoje.
+- **fora do escopo:** qualquer alteração dos limites do motor nutricional
+  em si — reuso, não mudança de regra.
+- **prioridade:** **P1** — é o item mais citado como confuso, mas só entra
+  em sprint depois da decisão de rota (ver Decisões Pendentes).
+- **critérios de aceite:** presets corretos e distintos para peso
+  baixo/médio/alto; nenhum preset oferecido estoura o teto da pessoa;
+  "Personalizado" inalterado.
+- **evidência necessária:** testes contra `MAX_WEEKLY_LOSS_RATIO`/
+  `GAIN_RATIO` para múltiplos pesos, incluindo casos de borda.
+
+#### A.2 — Revisão de microcopy
+
+- **objetivo:** tirar a "cara de IA" do texto do produto sem virar
+  prescrição de estilo.
+- **problema:** uso excessivo de travessão e explicação longa em vários
+  pontos do app, sem levantamento por arquivo nesta rodada — é auditoria de
+  tom, não um achado pontual.
+- **impacto no usuário:** soa artificial, contradiz o objetivo de "escrito
+  por equipe de produto, não por chatbot".
+- **dependências:** nenhuma técnica.
+- **escopo:** passada de revisão tela por tela contra o tom já definido em
+  `docs/brandbook.md` — frases mais naturais, menos explicação redundante,
+  consistência de tom. Não é proibir travessão, é reler cada string com
+  essa vara de medir.
+- **fora do escopo:** reescrita completa de qualquer fluxo; mudança de
+  informação, só de tom.
+- **prioridade:** **P3** — real, mas sem risco e sem urgência; é trabalho
+  contínuo, não uma sprint fechada.
+- **critérios de aceite:** não há métrica automática — critério é revisão
+  humana contra o brandbook.
+
+### B — Modelo de unidade e porção de alimento (estrutural)
+
+- **objetivo:** permitir registrar comida do jeito que as pessoas comem —
+  "1 ovo", "1 fatia", "100 ml de leite" — não só em grama.
+- **problema:** `MealItem.grams: number` é o único campo de quantidade em
+  todo o domínio de dieta (`diet/types/diet.ts`) — `Meal`, `MealOwner` e
+  `Diet` não carregam nenhum conceito de unidade alternativa.
+  `itemMacros` calcula direto `scaleMacros(item.per100g, item.grams)`
+  (`diet/services/diet-macros.ts:16-17`). O seletor de quantidade
+  (`meal-item-row.tsx`) é um stepper numérico de grama, com teto de 100 kg
+  já documentado como guarda contra colagem, não opinião nutricional.
+- **impacto no usuário:** quem não pesa comida — a maioria — converte de
+  cabeça toda vez, ou desiste de registrar.
+- **dependências:** compartilha schema de `Food` com o item de nutrientes
+  opcionais (ver Alimentos, abaixo) — fazer as duas mudanças na mesma
+  decisão evita duas migrações separadas do mesmo tipo. **É pré-requisito
+  de sequenciamento (não técnico) para a Iniciativa E** — evitar duas
+  mudanças estruturais grandes em paralelo no mesmo domínio de dieta.
+- **escopo da fase de decisão** (não é ainda escopo de implementação):
+  - quais unidades são universais (g, kg, ml, l) vs. específicas por
+    alimento (unidade, fatia, colher, xícara, porção);
+  - como cada unidade converte para grama/mililitro por alimento;
+  - como representar líquidos (densidade varia — leite ≠ água ≠ óleo, "100
+    ml" não é sempre "100 g");
+  - como tratar alimento vendido por unidade, onde "1 ovo" pode ter um
+    valor nutricional diferente de "100 g de ovo" dependendo da fonte;
+  - pesquisar/avaliar fonte de dado nutricional que já traga porção por
+    unidade (mesma pesquisa já cogitada para fibra — TACO ou equivalente);
+  - como preservar compatibilidade com os 216 alimentos já curados e com
+    todo `MealItem` já gravado.
+- **proposta técnica preliminar** (a confirmar na fase de decisão): **não
+  generalizar `MealItem.grams`** — é a base de cálculo confiável hoje, e
+  mexer nele arrisca quebrar silenciosamente cinco lugares (total da
+  refeição, do dia, anel, meta, histórico). Rota aditiva: `Food` ganha uma
+  lista opcional de unidades nomeadas (`{ label, grams }[]`), a UI de
+  adicionar/editar item oferece "unidade + quantidade" e converte para
+  grama **na entrada** — `MealItem.grams` continua sendo o dado gravado,
+  zero migração do que já existe.
+- **fora do escopo (agora):** qualquer código de produção. Isto é desenho
+  de dado.
+- **prioridade:** **P1 estrutural** — é a mudança mais citada como
+  importante ("SUPER IMPORTANTE" no seu próprio texto), mas é também a
+  maior mudança estrutural desta rodada inteira. Fase de decisão antes de
+  qualquer sprint de implementação.
+- **critérios de aceite (da fase de decisão):** documento de schema final,
+  plano de conversão por unidade, decisão sobre os 216 alimentos existentes
+  e sobre a fonte de dado nutricional, revisado antes de qualquer PR.
+- **evidência necessária:** nenhuma de código ainda — a evidência que falta
+  é de produto (fonte de dado, escopo de curadoria).
+- **riscos:** subestimar o tamanho é o risco real aqui — toca cadastro de
+  alimento, catálogo curado, seletor de quantidade, picker, editor de dieta,
+  diário e o cálculo nutricional em si. Por isso a fase de decisão vem
+  antes, não depois.
+
+### C — Descoberta e catálogo de exercícios
+
+- **objetivo:** que "bíceps" encontre rosca direta, e que o catálogo seja
+  confiável, não só grande.
+- **problema:** `search-exercises.ts` indexa só `name` e `aliases`,
+  confirmado por leitura completa — `MUSCLE_LABELS` (mapa de rótulo em
+  português, ex. `biceps: "Bíceps"`) já existe em `taxonomy/muscles.ts` e
+  não é usado na busca. Separadamente, "duplicatas" suspeitas no catálogo
+  — ex. puxada alta na máquina vs. puxada frontal pronada — foram
+  conferidas em `workouts/data/catalogue/costas.json`: têm taxonomia de
+  músculo e padrão **idênticas**, diferindo só no campo `equipment` (cabo
+  vs. máquina). É distinção real mal comunicada, não duplicação de dado.
+- **impacto no usuário:** busca por intenção falha (item 3 do seu
+  feedback); catálogo parece inflado quando na verdade está mal explicado.
+- **dependências:** busca por músculo é independente de tudo; a auditoria
+  de catálogo é trabalho de conteúdo, roda em paralelo a qualquer sprint de
+  código, sem bloquear nem ser bloqueada.
+- **escopo:**
+  1. estender `buildExerciseIndex` para indexar também rótulos de músculo
+     (e equipamento, se fizer sentido), num tier abaixo de nome/alias — a
+     ordem de relevância atual não muda, músculo entra como camada extra;
+  2. badge de equipamento mais visível na lista/seletor de exercícios, para
+     que pares como o da Puxada parem de parecer duplicata por má
+     comunicação;
+  3. auditoria manual completa do catálogo — candidatos a duplicata real
+     (mesmo músculo, padrão **e** equipamento) viram candidatos a mesclar;
+     preferência por catálogo menor e confiável é registrada como critério
+     de julgamento da auditoria, não como meta numérica;
+  4. exercício sem imagem (25 dos 183, número já registrado na seção
+     "Cobertura de fotos"): a proposta de ocultar (não apagar) vira uma
+     quarta opção **naquela seção já existente**, decidida junto da
+     auditoria de catálogo — inclui confirmar quantos exercícios seriam
+     afetados e se imagem de fato muda a decisão do usuário antes de agir.
+- **fora do escopo:** apagar qualquer exercício sem a auditoria manual
+  completa primeiro; recriar criação de exercício personalizado — já
+  existe (ver Resolvido).
+- **prioridade:** busca por músculo **P1** (barato, resolve lacuna real);
+  badge de equipamento **P2**; auditoria de catálogo e exercício-sem-foto
+  **P3, trabalho paralelo**, não item de sprint fechada.
+- **critérios de aceite:** busca por "bíceps"/"peito"/"costas" retorna
+  exercícios corretos, ranqueados abaixo de nome/alias; badge de
+  equipamento visível na lista.
+- **evidência necessária:** casos de teste de busca por músculo isolado e
+  combinado com termo de nome.
+
+### D — UX de execução de treino: série concluída
+
+- **objetivo:** que marcar uma série seja imediatamente reconhecível sem
+  quebrar a regra de verde escasso que a sprint de redesign já estabeleceu.
+- **problema:** hoje o único efeito de `set.isCompleted` na linha é
+  `opacity-60` (`performed-set-row.tsx:55-59`) — sem tom de cor, sem
+  destaque de fundo equivalente ao que `isNext` recebe (`bg-muted`).
+- **impacto no usuário:** no meio de um treino, sem prestar atenção, é
+  fácil perder qual série já foi marcada.
+- **contraponto técnico à proposta original:** tonalizar toda a linha de
+  verde colide direto com a regra que a própria Sprint de redesign fechou —
+  "verde concentrado, não espalhado" (P0 da sprint de identidade). Numa
+  sessão de 20-30 séries, tonalizar cada linha concluída reintroduz
+  exatamente o padrão que aquela sprint existiu para reverter.
+- **dependências:** decisão de design antes de qualquer código — não é
+  implementação direta do pedido original.
+- **escopo:** manter o verde reservado ao ícone de check; resolver
+  "mais perceptível" com uma combinação de contraste de superfície (um
+  `bg-muted` mais assertivo, no espírito do que `isNext` já faz) e/ou borda
+  — sem introduzir uma segunda cor saturada na lista. Julgamento de design
+  na hora da implementação, não um mockup fechado agora.
+- **fora do escopo:** qualquer mudança em outra tela de treino.
+- **prioridade:** **P2** — real, mas com decisão de design pendente antes
+  de qualquer código.
+- **critérios de aceite:** série concluída reconhecível à distância;
+  nenhuma segunda cor saturada introduzida na lista.
+- **evidência necessária:** o teste já existente de "animação atrelada ao
+  toque, nunca ao estado" (P4 da sprint de redesign) precisa continuar
+  passando — qualquer novo estilo de linha não pode disparar na montagem.
+
+### E — Planejamento semanal de dieta (estrutural)
+
+- **objetivo:** abrir o Diário num dia e já ver a dieta planejada, sem
+  reconstruir a escolha manualmente todo dia.
+- **problema:** `Diet` (`diet/types/diet.ts`) é só `{ name, meals }` — zero
+  campo de calendário. O mecanismo existente,
+  `startDayFromDiet(diet, day)` (`diet/services/start-day.ts:36`), semeia
+  um dia manualmente, sob demanda — não é vínculo recorrente.
+- **impacto no usuário:** quem segue um plano semanal (dieta de treino vs.
+  dieta de descanso, por exemplo) repete "Começar de uma dieta" todo dia.
+- **dependências:** nenhuma técnica direta, mas **sequenciada depois da
+  Iniciativa B** — mesmo domínio de dieta, e empilhar duas mudanças
+  estruturais grandes ao mesmo tempo ali é o tipo de risco que este
+  documento existe para evitar.
+- **escopo da fase de decisão:** associação dieta ↔ dia da semana; se a
+  mesma dieta pode repetir em vários dias; o que significa "sem dieta"
+  nesse dia; o que acontece quando a dieta vinculada é editada ou apagada;
+  como isso aparece no Diário; se `startDayFromDiet` continua tendo
+  prioridade sobre o vínculo automático quando alguém sobrepõe manualmente
+  um dia específico (resposta preliminar: sim — o vínculo é o padrão, a
+  sobreposição manual sempre vence).
+- **fora do escopo (agora):** qualquer código de produção.
+- **prioridade:** **P2 estrutural** — real, mas sem o mesmo custo diário de
+  fricção que a Iniciativa B; entra depois dela.
+- **critérios de aceite (da fase de decisão):** modelo de vínculo definido,
+  comportamento de edição/exclusão de dieta vinculada definido,
+  compatibilidade com `startDayFromDiet` confirmada.
+- **evidência necessária:** nenhuma de código ainda.
+
+### F — Saneamento de cache do service worker (BUG-013 + NOVO-1)
+
+- **objetivo:** parar de servir erro do cache e parar de crescer sem
+  limite — os dois problemas que a Sprint 4 encontrou na mesma camada.
+- **problema, confirmado por leitura de `public/sw.js`:**
+  1. `networkFirst()` (linhas 130-145, usada para toda navegação e para os
+     payloads RSC) faz `cache.put(request, response.clone())`
+     **incondicionalmente** — sem checar `response.ok`. `cacheFirst()`, no
+     mesmo arquivo, já faz essa checagem (linha 155) — o padrão de correção
+     já existe no próprio arquivo, só não foi aplicado nas duas funções.
+  2. `isPayload(url)` (linha 101-103) reconhece qualquer URL com
+     `_rsc=<hash>` como cacheável via `networkFirst` — e cada navegação
+     client-side gera um payload com um hash potencialmente novo. Sem
+     limite de entradas nem expiração, isso é crescimento não-limitado por
+     construção, não só por falta de rotina de limpeza. Bate com o número
+     observado na Sprint 4: 144 das 160 entradas eram variantes de
+     `_rsc=`.
+- **impacto no usuário:** uma rota que respondeu erro uma vez pode
+  continuar respondendo esse erro do cache; o cache do app cresce
+  indefinidamente na mesma origem que a Iniciativa de backup (Sprint 3)
+  existe para proteger contra estouro de cota.
+- **dependências:** nenhuma com os outros itens desta rodada — é
+  autocontido em `public/sw.js` — mas compartilha tema de "confiança de
+  armazenamento" com o item de backup vazio (H, abaixo).
+- **escopo:** checar `response.ok` em `networkFirst` antes de `cache.put`
+  (mesmo padrão de `cacheFirst`, mesmo arquivo); separar o cache de
+  payloads `_rsc=` do cache do shell, com um limite de entradas e
+  descarte das mais antigas quando o limite é atingido; testes reais de
+  rota inexistente, online, offline, recuperação online, atualização de
+  service worker e nova versão publicada — os mesmos cenários que a Sprint
+  4 já cobrou e que ainda não têm teste automatizado.
+- **fora do escopo:** qualquer mudança na lista `ROUTES` pré-cacheada ou na
+  estratégia `cacheFirst` dos assets imutáveis — já corretos.
+- **prioridade:** **P1** — não é só débito técnico; é um bug de correção
+  real (serve erro do cache) mais um risco de armazenamento sem teto, na
+  mesma camada que a Sprint 3 tratou como crítica para a confiabilidade do
+  release.
+- **critérios de aceite:** resposta de erro nunca é gravada no cache;
+  contagem de entradas do cache de payloads tem um teto e não cresce
+  indefinidamente numa sessão longa; os seis cenários de teste passam,
+  incluindo em dispositivo real (fecha também o risco aceito de "offline
+  real não testado").
+- **evidência necessária:** teste de unidade do service worker (ou
+  equivalente) para a checagem de `response.ok`; medição real de contagem
+  de entradas antes/depois, como já é praxe neste projeto para mudanças de
+  cache/storage.
+
+### G — Comunicação nutricional
+
+- **objetivo:** que o resultado mais acionável da tela (estou comendo mais
+  ou menos do que preciso) nunca fique menos visível que um aviso
+  secundário — e que quando o motor ajusta a meta por segurança, isso seja
+  dito, não descoberto.
+- **problema, com cenário adversarial concreto da Sprint 4:** mulher, 60
+  anos, 150 cm, 45 kg, sedentária, objetivo corte, ritmo pedido de 1
+  kg/semana. Resultado: meta 1.200 kcal/dia, TDEE 1.112 kcal — **a meta
+  calculada é 88 kcal **acima** do gasto**, ou seja, a pessoa pediu
+  emagrecimento e o sistema, corretamente, aplicou um piso de segurança que
+  vira superávit. Tecnicamente correto — os limites (`MAX_WEEKLY_LOSS_RATIO`
+  etc.) existem exatamente para isto. Mas em `plan-summary.tsx`, esse
+  resultado ("Superávit de 88 kcal por dia") é um `<p>` simples, enquanto os
+  `advisories` logo abaixo usam `Notice tone="warning"` — o aviso
+  secundário tem mais peso visual que o resultado principal.
+- **impacto no usuário:** alguém pode não perceber que pediu perder peso e
+  a meta virou manutenção/ganho — exatamente o cenário que o teste
+  adversarial expôs.
+- **dependências:** nenhuma — **não muda o motor nutricional**, só a
+  comunicação do resultado que ele já produz corretamente.
+- **escopo:** envolver o resultado em `Notice` (tom conforme o sinal —
+  dentro do esperado pode ser `info`, superávit-quando-pediu-corte é
+  `warning`); conectar explicitamente o resultado ao objetivo escolhido
+  ("Seu objetivo era perder peso; com seus dados atuais, o limite seguro
+  não permite esse ritmo — a meta ficou em manutenção" ou equivalente,
+  texto final a definir na implementação, sem alarmismo); revisão mais
+  ampla de linguagem nutricional (TDEE, TMB, déficit, superávit, macros)
+  para não pressupor que o usuário já conhece os termos — parte do mesmo
+  esforço de humanização da Iniciativa A, aplicado à tela de nutrição.
+- **fora do escopo:** qualquer alteração de `MAX_WEEKLY_LOSS_RATIO`,
+  `MAX_WEEKLY_GAIN_RATIO` ou de como a meta é calculada — o motor está
+  certo, é a comunicação que está fraca.
+- **prioridade:** **P1** — cenário real, adversarial, comprovado; risco
+  direto de confiança ("o app disse que eu ia emagrecer e não vou").
+- **critérios de aceite:** o cenário da Sprint 4 (mulher, 45 kg, corte 1
+  kg/semana) mostra claramente que a meta foi ajustada por segurança, com
+  destaque visual igual ou maior que os avisos ao lado.
+- **evidência necessária:** teste de render usando exatamente o cenário
+  adversarial acima como caso de teste — não um cenário genérico.
+
+### H — UX e confiança de backup
+
+- **H.1 — Hierarquia visual do painel de backup.**
+  problema: o painel vive como cartão de topo em `/perfil`, competindo
+  visualmente com os campos principais do perfil logo na primeira visita.
+  impacto: nenhum risco funcional — é hierarquia de informação.
+  escopo: mover para uma área secundária (ex. "Dados e segurança"),
+  dobrada/colapsada por padrão, sem reduzir função nem visibilidade real —
+  continua alcançável, só não é a primeira coisa vista.
+  dependências: nenhuma. `backup-panel.test.tsx` continua válido sem
+  alteração — muda só onde o componente é montado.
+  prioridade: **P3** — estético, zero risco, zero urgência.
+
+- **H.2 — NOVO-2: backup vazio substitui dados reais sem aviso
+  proporcional.**
+  problema: um backup tecnicamente válido, mas com zero registros, hoje
+  passa pela mesma confirmação genérica de qualquer outro backup.
+  evidência: `composition/backup.ts` — `importAll` (linha 153) só calcula
+  `recordCount` **depois** de já ter escrito os dados (linha 197-207); a
+  UI (`backup-panel.tsx`) só mostra esse número no toast de sucesso, depois
+  do fato consumado. Não existe hoje um passo de "espiar" o conteúdo do
+  arquivo antes de confirmar.
+  impacto: quem confirma por hábito (mesmo com o toque duplo do
+  `ConfirmButton`) pode apagar todos os dados reais com um arquivo vazio ou
+  corrompido, sem saber até depois.
+  proposta: **não bloquear a importação de backup vazio** — pode ser
+  legítimo. Mudar quando a contagem é conhecida: separar validação/leitura
+  da contagem de registros da escrita em si, para que o passo de
+  confirmação já mostre "Este arquivo contém 0 registros" (ou o número
+  real) **antes** do segundo toque. Isso muda o contrato de
+  `BackupRepository`/`importAll` — não é só texto na UI, é expor a
+  contagem num passo que hoje não existe separado da escrita.
+  dependências: nenhuma com os outros itens; compartilha tema de
+  "confiança de armazenamento" com a Iniciativa F.
+  prioridade: **P1** — risco de perda de dado real por confirmação
+  apressada, mesmo que raro.
+  critérios de aceite: a tela de confirmação sempre mostra a contagem de
+  registros do arquivo antes do toque final de confirmação; importar um
+  backup de fato vazio continua possível, com a mensagem deixando claro o
+  que vai acontecer.
+  evidência necessária: teste cobrindo arquivo com 0 registros, arquivo
+  com N registros, e o texto de confirmação correspondente a cada caso.
+
+### I — Page Reveal Global (motion) — agendado, mecanismo já decidido por padrão
+
+Analisado o arquivo de referência (`lacalle-motion-prototype.html`) e
+comparado com `design-system/tokens.css` e com a arquitetura de rotas
+(`src/app/layout.tsx`, sem `template.tsx`, sem biblioteca de animação
+instalada) antes de propor qualquer coisa.
+
+- **O que já está implementado, idêntico ao protótipo — nada a criar:**
+  as curvas (`--ease-out: cubic-bezier(0.22, 1, 0.36, 1)`,
+  `--ease-in: cubic-bezier(0.64, 0, 0.78, 0)`) e os quatro tiers de duração
+  (`--duration-micro: 150ms`, `--duration-standard: 250ms`,
+  `--duration-signature: 450ms`, `--duration-hero: 800ms`) batem
+  exatamente com o protótipo, tier a tier. Qualquer Page Reveal deve
+  **reusar esses tokens**, nunca criar novo valor de curva ou duração.
+- **problema/pedido:** aplicar a transição de máscara circular ("LaCalle
+  Reveal" — um círculo colorido que expande e vira o fundo da tela
+  seguinte) como entrada padrão em todas as rotas principais, incluindo a
+  navegação pela barra inferior.
+- **contraponto técnico direto, porque a alternativa é melhor:** o próprio
+  arquivo de referência restringe esse efeito por escrito — "use apenas em
+  splash, onboarding e troca de contexto — nunca em navegação comum" — e
+  essa restrição não é acidental. Quatro razões concretas para não aplicar
+  o mecanismo **literal** (máscara circular colorida cobrindo a tela
+  inteira) à navegação do dia a dia:
+  1. **Repete o erro que a sprint de identidade já corrigiu.** A mesma
+     lição do verde escasso (Iniciativa D) se aplica a movimento: reservar
+     o gesto mais expressivo do sistema para o momento mais raro é o que o
+     torna reconhecível. Uma máscara colorida cobrindo a tela inteira a
+     cada toque na barra de navegação — potencialmente dezenas de vezes
+     por sessão — espalha a assinatura em vez de concentrá-la.
+  2. **Custo de implementação real, não cosmético.** Um reveal circular
+     "que nasce do ponto tocado" exige capturar a coordenada de origem de
+     cada gatilho de navegação (aba da barra inferior, item da sidebar,
+     link interno, botão voltar, voltar do navegador) — é plumbing de
+     estado por todo canto de navegação, não uma transição CSS isolada.
+  3. **Velocidade percebida.** Uma barra de navegação inferior é tocada
+     com alta frequência; cobrir a tela inteira e revelar de novo a cada
+     toque, mesmo em 350-450ms (tier Signature), tende a parecer mais
+     lento que o crossfade/slide que qualquer app de tab bar nativo usa —
+     e isso contraria diretamente o seu próprio princípio ("rápido,
+     discreto... sem delay perceptível").
+  4. **Não há infraestrutura de transição de rota hoje.** `layout.tsx` é
+     único, sem `template.tsx` por segmento, sem biblioteca de animação. O
+     app já tem a peça certa para uma entrada discreta e reaproveitável: a
+     keyframe `--animate-rise` (`tokens.css`), já usada nos cartões que
+     aparecem hoje — fade + leve deslocamento vertical, no tier Standard.
+- **proposta alternativa:** adotar a **linguagem** do Reveal (curva
+  Ease Out, tier Signature reservado a raros momentos de verdade) sem
+  adotar o mecanismo de máscara circular para navegação comum. Para
+  entrada de página padrão, reaproveitar `--animate-rise` via `template.tsx`
+  por segmento de rota — nativo do Next.js App Router, sem biblioteca nova,
+  sem captura de coordenada de toque. Reservar a máscara circular (se algum
+  dia fizer sentido) para um momento genuinamente raro e único — ex. fim de
+  uma sessão de treino concluída — não para navegação repetida.
+- **dependências:** nenhuma técnica. Decisão de **entrar na sequência**
+  já veio (16/08) — falta só confirmar o mecanismo antes da sprint começar:
+  por padrão, esta seção adota a rota recomendada (`--animate-rise`, sem
+  máscara circular na navegação comum); se a intenção for a máscara
+  circular literal mesmo assim, avisar antes da Sprint 8 para trocar o
+  escopo abaixo.
+- **escopo:** `template.tsx` por segmento
+  de rota principal (`/hoje`, `/treinos`, `/treinos/[id]`, `/sessao/[id]`,
+  `/dietas`, `/dietas/[id]`, `/diario`, `/evolucao`, `/alimentos`,
+  `/perfil`); CSS puro (`transform`/`opacity`, tokens existentes), sem
+  JavaScript de animação; `prefers-reduced-motion` herdando a mesma regra
+  global já implementada (fade de 120ms); avaliar separadamente o
+  comportamento em **voltar** — se a mesma entrada piorar a sensação de
+  velocidade no retorno, usar uma estratégia diferente ali (ex. sem
+  animação, ou uma mais curta), registrado explicitamente, não assumido.
+- **fora do escopo:** qualquer animação por componente/card — a unidade é
+  a entrada da página inteira, não cada elemento dela; qualquer biblioteca
+  de animação nova.
+- **prioridade:** **P2** — agendado (Sprint 8), sem risco de dado, mas
+  toca toda rota principal do app; não implementar antes da sprint chegar.
+- **critérios de aceite:** zero overflow/
+  layout shift em 320-430px; navegação pela barra inferior não parece mais
+  lenta que hoje; `prefers-reduced-motion` remove a transição, mantendo
+  navegação instantânea; nenhum token novo de cor/curva/duração criado.
+- **evidência necessária:** medição de percepção de velocidade antes/depois
+  na barra inferior (mesmo padrão de medição real já usado nas sprints
+  anteriores), não só ausência de bug técnico.
+
+---
+
+### PRÓXIMAS SPRINTS — sequência validada contra dependências reais
+
+**Sprint 5 — Confiança essencial**
+
+- objetivo: fechar os itens de maior impacto de compreensão e de risco de
+  dado, todos de baixo risco técnico.
+- escopo: Iniciativa A (TDEE, aviso de perfil incompleto, cabeçalho
+  PESO/REPS) e A.1 (presets de ritmo, após decisão de rota); Iniciativa G
+  (BUG-015 — `Notice` + mensagem conectando objetivo↔resultado, usando o
+  cenário adversarial da Sprint 4 como caso de teste); H.2 (NOVO-2 — aviso
+  de backup vazio, inclui expor `recordCount` antes da escrita).
+- fora do escopo: qualquer item estrutural (B, E); Page Reveal; cache do
+  service worker (Iniciativa F, sprint seguinte); microcopy transversal
+  (A.2, contínuo).
+- dependências: decisão de rota de A.1 precisa estar fechada antes da
+  sprint começar; nenhuma outra.
+- critérios de aceite: todos os itens do escopo entregues e testados;
+  nenhum token de Brand System tocado.
+- testes necessários: um por item, conforme descrito em cada iniciativa —
+  nenhum exige suíte de integração nova.
+- risco de regressão: baixo. O item de maior risco relativo é A.1, por
+  reusar constantes do motor nutricional — testar contra os limites
+  existentes evita regressão silenciosa.
+
+**Sprint 6 — Saneamento de armazenamento e descoberta**
+
+- objetivo: fechar o risco de cache sem limite (Iniciativa F) e destravar
+  descoberta de exercício (Iniciativa C, parte 1), preparando o terreno
+  para a Sprint 7.
+- escopo: Iniciativa F completa (response.ok em `networkFirst`, cache de
+  `_rsc=` separado e com teto, os seis cenários de teste real, incluindo
+  dispositivo físico); busca por músculo/sinônimo (Iniciativa C); BUG-011
+  (virtualização de lista) — fechamento do bloqueador identificado na
+  rodada anterior, pré-requisito da Sprint 7.
+- fora do escopo: catálogo completo do Diário em si (Sprint 7); auditoria
+  manual de duplicatas/exercício-sem-foto (paralelo, não-sprint).
+- dependências: nenhuma entre os três itens do escopo — rodam em paralelo,
+  arquivos completamente distintos; BUG-011 é pré-requisito da Sprint 7.
+- critérios de aceite: os seis cenários de F passam, incluindo em
+  dispositivo real; busca por músculo retorna resultado correto; qualquer
+  lista grande do app renderiza sem degradação perceptível com o catálogo
+  cheio.
+- testes necessários: unidade do service worker; casos de busca por
+  músculo isolado/combinado; medição real de performance de lista antes/
+  depois (dado real, não banco vazio — mesma lição já registrada nas fases
+  anteriores).
+- risco de regressão: médio — mexer em cache e em renderização de lista
+  são as duas superfícies mais fáceis de quebrar sutilmente (scroll,
+  offline, atualização de versão). Medir ao vivo, não só suíte automatizada.
+
+**Sprint 7 — Diário e execução, polimento (agora destravado)**
+
+- objetivo: entregar "catálogo completo pelo Diário" — só possível com
+  segurança depois do BUG-011 fechado na Sprint 6 — e o estado visual de
+  série concluída.
+- escopo: estender `food-picker.tsx` com filtro de categoria/favoritos,
+  removendo o teto artificial de 8 resultados; Iniciativa D (série
+  concluída), com decisão de design resolvida antes da sprint começar;
+  H.1 (backup para área secundária — cabe aqui por ser barato e sem
+  dependência).
+- fora do escopo: qualquer coisa da Iniciativa B ou E; Page Reveal.
+- dependências: **BUG-011 fechado (Sprint 6)** é obrigatório para a parte
+  do Diário; decisão de design de D deve estar fechada antes da sprint
+  começar.
+- critérios de aceite: buscar e navegar por categoria funcionam no
+  `FoodPicker` sem degradação perceptível ao digitar; série concluída
+  reconhecível sem segunda cor saturada.
+- testes necessários: `FoodPicker` com filtro; regressão do teste de
+  "animação atrelada ao toque, nunca ao estado".
+- risco de regressão: médio — mesma superfície de risco da Sprint 6 (lista
+  grande, agora com filtro embutido).
+
+**Fase de decisão (sem código) — Modelo de unidade de alimento + nutrientes
+opcionais**
+
+- objetivo: não é sprint de implementação. É fechar a decisão de schema da
+  Iniciativa B, incluindo se os nutrientes opcionais (Alimentos, item
+  abaixo) entram na mesma migração.
+- escopo: tudo listado no "escopo da fase de decisão" da Iniciativa B, mais
+  a definição de quais nutrientes opcionais entram (ver Alimentos) e a
+  fonte de dado nutricional a usar.
+- dependências: nenhuma — pode rodar em paralelo às Sprints 6-7.
+- critérios de aceite: documento de decisão revisado antes de qualquer PR
+  de implementação.
+
+**Sprint 8 — Page Reveal Global**
+
+- objetivo: entrada de página consistente nas rotas principais, reusando o
+  sistema de motion já existente — sem inventar biblioteca nem curva/
+  duração nova.
+- escopo: `template.tsx` por segmento nas dez rotas listadas na Iniciativa
+  I, usando `--animate-rise` (fade + leve deslocamento vertical, já
+  existente em `tokens.css`, já usado hoje em outros elementos) no tier
+  Standard; comportamento de **voltar** avaliado separadamente — se a
+  mesma entrada piorar a sensação de velocidade no retorno, usar estratégia
+  diferente ali (registrado, não assumido); `prefers-reduced-motion`
+  herdando a regra global já implementada.
+- fora do escopo: máscara circular colorida cobrindo a tela inteira na
+  navegação comum (ver o contraponto técnico na Iniciativa I — continua
+  válido); qualquer animação por componente/card isolado; qualquer token
+  novo de curva, duração ou cor.
+- dependências: nenhuma técnica de outra iniciativa desta rodada. Só
+  precisa que o mecanismo (rota recomendada vs. máscara circular literal)
+  esteja confirmado antes de começar — por padrão, a rota recomendada.
+- critérios de aceite: zero overflow, layout shift ou scroll estranho em
+  320/360/375/390/393/430px nas dez rotas; navegação pela barra inferior
+  não parece mais lenta que hoje, medido, não só ausência de bug técnico;
+  `prefers-reduced-motion` remove a transição e mantém navegação
+  instantânea; nenhum componente interno ganhou animação própria fora da
+  entrada da página.
+- testes necessários: render de cada rota com e sem `prefers-reduced-
+  motion`; medição de percepção de velocidade na barra inferior antes/
+  depois, mesmo padrão de medição real já usado nas sprints anteriores.
+- risco de regressão: baixo — `template.tsx` remonta a árvore do segmento a
+  cada navegação, o que reexecuta efeitos de carregamento inicial a cada
+  troca de rota. **Aceito de propósito (16/08):** não é regressão a
+  corrigir, é o comportamento esperado do mecanismo escolhido — os hooks já
+  leem de IndexedDB local, não de rede, então reexecutar é barato.
+
+**Depois — Iniciativa E (planejamento semanal de dieta)**, sequenciada após
+a Iniciativa B estar decidida e, de preferência, implementada — mesma
+lógica de não empilhar duas mudanças estruturais no mesmo domínio.
+
+---
+
+### FUTURO — não precisa entrar agora
+
+- Auditoria manual de catálogo de exercícios (duplicata real, sem foto) —
+  contínua, roda em paralelo, sem sprint fechada.
+- Revisão de microcopy (A.2) — contínua.
+- Iniciativa E (planejamento semanal) — depois da Iniciativa B.
+- Fibra rastreável — sem mudança de rota; **sua leitura está confirmada:
+  pode ser ignorado por ora**, a menos que a fase de decisão de nutrientes
+  opcionais (abaixo) crie o campo que faltava, e mesmo assim isso não
+  obriga a fechar o item de fibra imediatamente.
+
+### Alimentos — nutrientes opcionais (fibra, sódio, açúcar, gordura
+saturada, gordura trans, colesterol)
+
+- **objetivo:** permitir campos nutricionais além dos quatro principais,
+  sem virar tabela nutricional completa por padrão.
+- **problema:** `Macros` (`core/domain/macros.ts:12-17`) tem exatamente
+  `kcal`, `proteinG`, `carbsG`, `fatG` — nenhum nutriente opcional existe
+  em lugar nenhum do domínio hoje.
+- **impacto no usuário:** sem esses campos, pedidos como fibra rastreável
+  não têm onde guardar o dado, mesmo que uma fonte apareça.
+- **contraponto ao pedido original:** não definir a lista de nutrientes
+  antes de responder três perguntas — quais realmente agregam valor ao
+  usuário comum (provavelmente fibra e sódio, pelo apelo de saúde mais
+  direto), quais são necessários para alguma feature futura já cogitada, e
+  quais a fonte de dado escolhida sequer traz de forma confiável. Adicionar
+  os seis de uma vez, "porque existem", é o oposto do princípio de manter a
+  interface simples que você mesmo pediu.
+- **dependências:** compartilha schema de `Food` com a Iniciativa B — decidir
+  junto, uma migração só, não duas.
+- **escopo (fase de decisão, dentro da fase de decisão da Iniciativa B):**
+  lista final de nutrientes opcionais (provavelmente menor que os seis
+  citados), todos opcionais/nunca obrigatórios, com `scaleMacros`/
+  `roundMacros` estendidos para propagar os campos presentes sem quebrar
+  chamadas que só usam os quatro principais.
+- **fora do escopo:** qualquer nutriente virar obrigatório; qualquer mudança
+  na interface de exibição além de "opcional, se presente".
+- **prioridade:** **P2** — real e bem definido, sem a urgência diária da
+  Iniciativa B; decide-se junto, implementa-se junto.
+- **critérios de aceite:** alimento sem nenhum nutriente opcional continua
+  calculando igual a hoje (regressão coberta); nutriente opcional propaga
+  corretamente ao escalar por grama/unidade.
+
+---
+
+### DECISÕES PENDENTES — antes de qualquer código
+
+1. **Ritmo de mudança de peso (A.1):** presets em percentual do peso
+   (recomendado, fonte da verdade já existe no motor) ou presets fixos
+   filtrados/desabilitados por pessoa?
+2. **Modelo de unidade de alimento (B):** confirmar a rota aditiva
+   (unidades nomeadas em `Food`, `MealItem.grams` intocado); decidir fonte
+   de dado nutricional para porções por unidade; decidir quem cura os 216
+   alimentos existentes e em que ritmo.
+3. **Nutrientes opcionais:** lista final (provavelmente menor que os seis
+   sugeridos), decidida junto com a Iniciativa B.
+4. **Estado visual de série concluída (D):** julgamento de design entre as
+   alternativas descritas — sem verde espalhado.
+5. **Exercício sem foto — ocultar como quarta opção:** decidir junto da
+   auditoria de catálogo (C).
+6. **Page Reveal Global (I):** entrada na sequência confirmada em 16/08 —
+   agendado como Sprint 8. Fica só o mecanismo: por padrão, a Sprint 8 usa
+   `--animate-rise` num `template.tsx` por rota (recomendação técnica), não
+   a máscara circular literal em toda navegação. Se a intenção real for a
+   máscara mesmo assim (ou uma terceira rota, reservando-a para um momento
+   raro específico), avisar antes da sprint começar para trocar o escopo.
+
+---
+
 ## Fora de escopo, permanentemente
 
 Nada de IA, chat, geração automática de dieta ou treino, prompts, embeddings
