@@ -1647,7 +1647,7 @@ incluindo um benchmark de custo de montagem por proporção — mesmo raciocíni
 do benchmark de busca em `search-exercises.test.ts`, não limiar de
 milissegundos). 986 testes, `typecheck`, `lint` e `build` de produção verdes.
 
-**Sprint 7 — Diário e execução, polimento (agora destravado)**
+**Sprint 7 — Diário e execução, polimento ✅ entregue em 17/08/2026**
 
 - objetivo: entregar "catálogo completo pelo Diário" — só possível com
   segurança depois do BUG-011 fechado na Sprint 6 — e o estado visual de
@@ -1668,6 +1668,57 @@ milissegundos). 986 testes, `typecheck`, `lint` e `build` de produção verdes.
   "animação atrelada ao toque, nunca ao estado".
 - risco de regressão: médio — mesma superfície de risco da Sprint 6 (lista
   grande, agora com filtro embutido).
+
+**O que foi entregue, por item:**
+
+- [x] **`food-picker.tsx` sem o teto de 8.** O `LIMIT` saiu; a lista usa o
+      mesmo `useIncrementalReveal` da Sprint 6 (páginas de 20, contra 40 nas
+      duas telas cheias — a superfície é bem menor aqui), dentro de um
+      `max-h-72 overflow-y-auto` próprio, para não empurrar a refeição
+      abaixo dele conforme o resultado cresce. Ganhou o mesmo botão
+      "Filtros" de categoria/favoritos que `/alimentos` já tinha, via o
+      `FoodFilters` compartilhado. Filtro sobrevive à escolha de propósito —
+      adicionar vários alimentos da mesma categoria é o caso comum.
+
+      **Achado no processo, não no código:** os primeiros testes escritos
+      digitavam no campo de busca logo após montar o componente, sem esperar
+      o catálogo sair de "carregando" — nesse estado o campo está
+      `disabled`, então o texto nunca era digitado, e ainda assim os testes
+      passavam, porque com busca vazia todo alimento aparece de qualquer
+      forma. Corrigido esperando o campo ficar habilitado antes de digitar,
+      e reforçando os testes para provar que a busca de fato filtrou (um
+      alimento que não deveria aparecer, ausente do resultado), não só que
+      "algo" apareceu.
+- [x] **Iniciativa D — série concluída.** `opacity-60` saiu por completo — era
+      o único efeito de `isCompleted` na linha, e apagava também o botão de
+      check em si, o único elemento com o acento saturado que a regra do
+      redesign pede para preservar. No lugar, a mesma linguagem que um `Card`
+      já usa em outro lugar do app: superfície (`bg-muted`) e borda
+      (`border-line`) permanentes, não um estado de hover. Continua sem
+      segunda cor saturada — o verde nunca sai do ícone do check, que agora
+      fica mais visível, não menos. Confirmado ao vivo numa sessão real:
+      a série concluída fica visivelmente emoldurada contra a "próxima"
+      (que só tem `bg-muted`, sem borda) e contra as ainda não tocadas (sem
+      superfície nenhuma). O teste de "animação atrelada ao toque, nunca ao
+      estado" continua verde, sem alteração.
+- [x] **H.1 — backup para área secundária.** `BackupPanel` saiu do topo de
+      `/perfil` — onde competia com os campos que alguém veio preencher — e
+      passou a viver dentro de um `<details>` nativo chamado "Dados e
+      segurança", colapsado por padrão. Sem biblioteca nova e sem estado em
+      React: o elemento já dá o comportamento de abrir/fechar, a
+      acessibilidade e a busca de página de graça. `backup-panel.test.tsx`
+      não mudou uma linha, como o item previa — só o local de montagem
+      mudou.
+
+Confirmado ao vivo, build de produção, nas três telas: `/perfil` com o
+painel colapsado e reabrindo; uma sessão real com uma série marcada,
+mostrando a linha emoldurada ao lado da "próxima" só com `bg-muted`; e o
+`FoodPicker` de uma dieta real filtrando por categoria, listando mais de
+oito resultados com rolagem própria, e mantendo o filtro ativo após
+adicionar um alimento. Nenhum erro no console em nenhuma das três.
+
+995 testes (986 → 995, 9 novos), `typecheck`, `lint` e `build` de produção
+verdes.
 
 **Fase de decisão (sem código) — Modelo de unidade de alimento + nutrientes
 opcionais**
@@ -1778,8 +1829,9 @@ saturada, gordura trans, colesterol)
    alimentos existentes e em que ritmo.
 3. **Nutrientes opcionais:** lista final (provavelmente menor que os seis
    sugeridos), decidida junto com a Iniciativa B.
-4. **Estado visual de série concluída (D):** julgamento de design entre as
-   alternativas descritas — sem verde espalhado.
+4. ~~**Estado visual de série concluída (D)**~~ — **decidido e entregue na
+   Sprint 7**: superfície (`bg-muted`) e borda (`border-line`) permanentes,
+   sem opacidade e sem verde espalhado. Ver o relato na Sprint 7, acima.
 5. **Exercício sem foto — ocultar como quarta opção:** decidir junto da
    auditoria de catálogo (C).
 6. **Page Reveal Global (I):** entrada na sequência confirmada em 16/08 —

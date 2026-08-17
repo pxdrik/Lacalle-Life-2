@@ -53,9 +53,18 @@ export function PerformedSetRow({
     <li
       ref={row}
       className={cn(
-        "group rounded-sm px-1 py-1.5 transition-colors duration-(--duration-micro) ease-out",
+        "group rounded-sm border border-transparent px-1 py-1.5",
+        "transition-[background-color,border-color] duration-(--duration-micro) ease-out",
         isNext && "bg-muted",
-        set.isCompleted && "opacity-60",
+        // Surface and border, not colour and not opacity. `opacity-60` used
+        // to be the *only* effect of a finished set — which faded the check
+        // button's own accent fill along with everything else, dimming the
+        // one signal the row exists to give. A done row now gets the same
+        // settled, framed surface a finished `Card` gets elsewhere in the
+        // app: `bg-muted` plus a hairline border, permanent rather than a
+        // hover state — recognisable mid-workout without a second saturated
+        // colour anywhere on the line.
+        set.isCompleted && "border-line bg-muted",
       )}
     >
       <div className="flex items-center gap-2">

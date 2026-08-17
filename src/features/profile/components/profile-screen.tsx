@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { useState } from "react";
@@ -42,11 +43,6 @@ export function ProfileScreen() {
           {writeError}
         </p>
       )}
-
-      {/* Independent of the nutrition form and of `state`: a backup exists
-          whether or not a profile does, and covers every domain, not just
-          this one. */}
-      <BackupPanel />
 
       {showForm ? (
         <ProfileForm
@@ -120,6 +116,27 @@ export function ProfileScreen() {
           </p>
         </>
       )}
+
+      {/* Independent of the nutrition form and of `state`: a backup exists
+          whether or not a profile does, and covers every domain, not just
+          this one. Moved to a secondary, collapsed area (H.1): it used to
+          be the first card on the screen, ahead of the profile fields
+          someone actually came here to fill in. Collapsed, not hidden — the
+          `<details>` element gets this for free, with no JS state and no
+          dependency, and stays reachable to a screen reader and to
+          find-in-page either way. */}
+      <details className="group rounded-lg border border-line">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+          Dados e segurança
+          <ChevronDown
+            aria-hidden
+            className="size-4 text-ink-subtle transition-transform duration-150 ease-out group-open:rotate-180"
+          />
+        </summary>
+        <div className="border-t border-line p-4">
+          <BackupPanel />
+        </div>
+      </details>
     </div>
   );
 }

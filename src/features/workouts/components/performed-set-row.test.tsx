@@ -80,6 +80,34 @@ describe("marking a set as done", () => {
   });
 });
 
+describe("Iniciativa D — a finished set reads at a glance", () => {
+  function row() {
+    // The `<li>` itself carries the surface/border — walk up from a stable
+    // child rather than relying on a container query that could match the
+    // wrong element.
+    return screen.getByText("1").closest("li");
+  }
+
+  it("gives a finished set a filled, bordered surface", () => {
+    mount(set({ isCompleted: true }), false);
+
+    expect(row()).toHaveClass("bg-muted", "border-line");
+  });
+
+  it("never dims the row with opacity — that used to fade the check itself", () => {
+    mount(set({ isCompleted: true }), false);
+
+    expect(row()).not.toHaveClass("opacity-60");
+  });
+
+  it("leaves an unfinished, non-next set with no surface at all", () => {
+    mount(set({ isCompleted: false }), false);
+
+    expect(row()).not.toHaveClass("bg-muted");
+    expect(row()).not.toHaveClass("border-line");
+  });
+});
+
 describe("stepping the load", () => {
   it("adds a pair of the smallest plates", async () => {
     const onChange = mount(set({ weightKg: 60 }));
