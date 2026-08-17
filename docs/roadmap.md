@@ -1733,39 +1733,146 @@ opcionais**
 - critérios de aceite: documento de decisão revisado antes de qualquer PR
   de implementação.
 
-**Sprint 8 — Page Reveal Global**
+**Sprint 8 — Identidade visual e maturidade de produto**
 
-- objetivo: entrada de página consistente nas rotas principais, reusando o
-  sistema de motion já existente — sem inventar biblioteca nem curva/
-  duração nova.
-- escopo: `template.tsx` por segmento nas dez rotas listadas na Iniciativa
-  I, usando `--animate-rise` (fade + leve deslocamento vertical, já
-  existente em `tokens.css`, já usado hoje em outros elementos) no tier
-  Standard; comportamento de **voltar** avaliado separadamente — se a
-  mesma entrada piorar a sensação de velocidade no retorno, usar estratégia
-  diferente ali (registrado, não assumido); `prefers-reduced-motion`
-  herdando a regra global já implementada.
-- fora do escopo: máscara circular colorida cobrindo a tela inteira na
-  navegação comum (ver o contraponto técnico na Iniciativa I — continua
-  válido); qualquer animação por componente/card isolado; qualquer token
-  novo de curva, duração ou cor.
-- dependências: nenhuma técnica de outra iniciativa desta rodada. Só
-  precisa que o mecanismo (rota recomendada vs. máscara circular literal)
-  esteja confirmado antes de começar — por padrão, a rota recomendada.
-- critérios de aceite: zero overflow, layout shift ou scroll estranho em
-  320/360/375/390/393/430px nas dez rotas; navegação pela barra inferior
-  não parece mais lenta que hoje, medido, não só ausência de bug técnico;
-  `prefers-reduced-motion` remove a transição e mantém navegação
-  instantânea; nenhum componente interno ganhou animação própria fora da
-  entrada da página.
-- testes necessários: render de cada rota com e sem `prefers-reduced-
-  motion`; medição de percepção de velocidade na barra inferior antes/
-  depois, mesmo padrão de medição real já usado nas sprints anteriores.
-- risco de regressão: baixo — `template.tsx` remonta a árvore do segmento a
-  cada navegação, o que reexecuta efeitos de carregamento inicial a cada
-  troca de rota. **Aceito de propósito (16/08):** não é regressão a
-  corrigir, é o comportamento esperado do mecanismo escolhido — os hooks já
-  leem de IndexedDB local, não de rede, então reexecutar é barato.
+Pedida em 17/08/2026, com o LaCalle Finance como referência de maturidade
+visual — **referência de princípios, não template a copiar**. Substitui e
+absorve a antiga "Sprint 8 — Page Reveal Global" (agora item 12 abaixo).
+
+- **objetivo:** o Life passa a maioria das auditorias de confiabilidade,
+  mas continua lendo como "um app funcional com um bom design system", não
+  como um produto com identidade própria. O Finance já tem mais variedade
+  de cor funcional, hierarquia mais clara, componentes com personalidade
+  além do card, e mais contraste entre estados. A meta é abrir Hoje →
+  Treinos → Dietas → Diário → Evolução → Perfil e reconhecer "isso é
+  LaCalle Life" sem olhar a logo — não empilhar mais cor, sombra ou
+  animação por si só.
+- **escopo, é só visual/UX/motion/microcopy.** Fora do escopo, sem exceção:
+  arquitetura, persistência, IndexedDB, motor nutricional, qualquer
+  funcionalidade nova. Uma necessidade funcional encontrada no caminho
+  entra no roadmap como item novo, não na sprint.
+- **regra de admissão de cada mudança:** melhora hierarquia, compreensão,
+  diferenciação de estado, identidade do Life, percepção de qualidade, ou
+  torna a experiência mais agradável e memorável? Nenhuma dessas → não
+  entra. Isto vale tanto para cor e sombra quanto para motion.
+- **não mexer:** logo, símbolo, tipografia oficial, tokens fundamentais de
+  marca, proporções já definidas no Brand System (`docs/brandbook.md`). Um
+  token que pareça limitar a evolução visual é documentado aqui como
+  achado — nunca substituído em silêncio.
+- **responsividade:** as seis larguras de sempre (320/360/375/390/393/430
+  mais desktop) continuam sem overflow — a auditoria anterior confirmou
+  54/54 combinações limpas, e esta sprint não pode regredir isso, com
+  atenção a headers fixos, barra inferior, execução de treino, formulários,
+  cards e gráficos.
+
+**Bloqueio de partida:** o pedido cita imagens de referência do LaCalle
+Finance "fornecidas nesta conversa" para a Fase 1 — nenhuma imagem chegou
+de fato à conversa. A Fase 1 (auditoria comparativa) não começa sem elas ou
+sem uma decisão explícita de seguir só com os princípios já registrados na
+memória sobre o Finance (Brand System compartilhado, dark mode realinhado
+em 16/08/2026).
+
+### As quatro fases, na ordem — cada uma termina antes da próxima começar
+
+1. **Auditoria.** Hoje, Treinos, Execução, Dietas, Editor de dieta, Diário,
+   Evolução, Alimentos, Perfil, Exercícios — por tela: hierarquia (o que é
+   primário/secundário/apoio, e onde dois elementos com peso diferente
+   parecem iguais), superfícies (onde há card/container/borda/fundo/seção/
+   divisor hoje, e onde o padrão "fundo → card → card → card" já cansou),
+   e lista de oportunidades de cor, motion e componente. Produz uma lista
+   de problemas, não código.
+2. **Direção visual.** Antes de tocar em código: como o Life deve parecer —
+   paleta funcional, tratamento de superfície, vocabulário de componente,
+   hierarquia, motion, densidade, personalidade. Por escrito, revisável
+   antes da Fase 3 começar.
+3. **Implementação**, nesta ordem: tokens → componentes base → tratamento
+   de superfície → tipografia → cores funcionais → motion → telas
+   principais. Não é "editar 30 arquivos de uma vez" — cada camada se
+   apoia na anterior.
+4. **Revisão crítica.** Comparar as seis telas lado a lado: "isso parece um
+   produto com identidade, ou só um conjunto de telas bonitas?" Se ainda
+   ler genérico, mais uma rodada de refinamento antes de encerrar — a
+   sprint não termina na primeira versão "bonitinha".
+
+### O que cada frente cobre
+
+1. **Cor funcional**, em cima da paleta do Brand System, não ao lado dela:
+   primária (ação/navegação ativa/CTA), verde (progresso/conclusão/meta
+   batida — continua escasso, a regra da sprint de identidade não muda),
+   vermelho (erro/exclusão/negativo real), âmbar (atenção/aviso), azul
+   (informação/dado/contexto neutro), e a cor de marca para identidade e
+   momentos estratégicos. Cor comunica; não decora. Sem app arco-íris.
+2. **Vocabulário de componente além do card**: hero/destaque, metric
+   (número grande + contexto pequeno), progress, insight, notice, section
+   (sem exigir um card em volta), list (mais leve que um card por item),
+   action, empty state e success state com personalidade. Escolher o que
+   cada tela precisa, não aplicar os nove em toda parte.
+3. **Hoje** é o cartão de visita — primeira impressão do produto. Repensar
+   como calorias, progresso, treino, alimentação, evolução e pendências se
+   compõem, para deixar de ler como "seis cards empilhados" e ler como uma
+   central pessoal de saúde.
+4. **Treinos**: linguagem visual própria para exercício, série, peso,
+   reps, RPE, progresso, exercício atual/seguinte. **Série concluída**
+   continua sendo o ponto mais citado — o tratamento (superfície + borda,
+   Sprint 7) é o piso, não necessariamente o teto; qualquer evolução aqui
+   respeita o mesmo verde escasso.
+5. **Dieta**: clareza + precisão + progresso. O anel/círculo nutricional é
+   tratado como peça de identidade, não como mais um número dentro de um
+   card.
+6. **Diário**: registro rápido + clareza — responder "o que comi hoje"
+   rápido, com refeição/alimento/quantidade/horário/total diferenciados
+   sem empilhar container.
+7. **Evolução**: progresso ao longo do tempo — peso, medidas, gráfico,
+   histórico. As observações contextuais que já existem (achados medidos,
+   não adivinhados) são preservadas, não redesenhadas por capricho.
+8. **Perfil** para de parecer tela de configurações genérica: identidade
+   pessoal, objetivos, nutrição, treino, preferências e dados/backup
+   claramente separados — backup já foi para uma área secundária colapsada
+   na Sprint 7 (H.1) e continua lá.
+9. **Tipografia**: hierarquia mais clara entre título de página, título de
+   seção, métrica, label, descrição, texto auxiliar, aviso e CTA — usando
+   peso, espaçamento, contraste, posição, superfície e cor, não só
+   tamanho.
+10. **Microcopy**: mesma frente que a Iniciativa A.2 já registrava como
+    contínua — travessão em excesso, frase explicativa longa, formalidade
+    que soa gerada. "Você ainda não definiu sua meta" em vez de um
+    parágrafo justificando por que perguntar. Revisão ao longo da sprint,
+    não só nas telas que mudaram de layout.
+11. **Motion / Page Reveal**, lendo a implementação/protótipo já citado no
+    roadmap antes de tocar em qualquer curva ou duração: reusar
+    `--ease-out`/`--ease-in` e os quatro tiers já existentes, sem token
+    novo. A máscara circular do Reveal não vai para navegação comum — o
+    contraponto técnico já registrado (verde escasso aplicado a motion,
+    custo real de captura de coordenada, velocidade percebida numa barra
+    tocada dezenas de vezes por sessão, ausência de infraestrutura de
+    transição por rota) continua de pé até que uma auditoria nova o
+    derrube com medição, não com preferência. Rota padrão: `--animate-rise`
+    via `template.tsx` por segmento, tier Standard, exatamente como a
+    antiga Sprint 8 já especificava — ver critérios de aceite abaixo.
+12. **Fora do escopo, explícito:** Iniciativa B, Iniciativa E, qualquer
+    funcionalidade nova, qualquer mudança de arquitetura.
+
+### Critérios de aceite
+
+Os da antiga Sprint 8 continuam valendo integralmente para o Reveal (zero
+overflow/layout shift nas seis larguras, navegação da barra inferior sem
+parecer mais lenta — medido, `prefers-reduced-motion` remove a transição,
+nenhum componente ganha animação própria fora da entrada de página) — mais,
+para o resto da sprint: as seis telas principais lidas em sequência
+comunicam identidade própria sem depender da logo; nenhum token, proporção
+ou regra do Brand System alterado sem registro explícito aqui; `npm run
+verify` e `npm run build` verdes; confirmação visual nas seis larguras e
+desktop, sem regressão de overflow.
+
+### Entrega
+
+Ao encerrar: lista dos problemas visuais encontrados na auditoria, a
+direção visual escolhida e por quê, arquivos alterados, tokens/componentes
+criados ou modificados, quais telas receberam mais intervenção, comparação
+antes/depois, `verify`/`build` verdes, verificação visual mobile+desktop
+sem overflow novo, commit com mensagem explicando o porquê. O roadmap só é
+marcado como entregue depois de tudo isso — não antes, para registrar a
+sprint como concluída.
 
 **Depois — Iniciativa E (planejamento semanal de dieta)**, sequenciada após
 a Iniciativa B estar decidida e, de preferência, implementada — mesma
