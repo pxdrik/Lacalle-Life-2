@@ -1570,7 +1570,7 @@ instalada) antes de propor qualquer coisa.
 967 testes (949 → 967, 18 novos, 6 arquivos), `typecheck`, `lint` e `build`
 de produção verdes.
 
-**Sprint 6 — Saneamento de armazenamento e descoberta**
+**Sprint 6 — Saneamento de armazenamento e descoberta ✅ entregue em 17/08/2026**
 
 - objetivo: fechar o risco de cache sem limite (Iniciativa F) e destravar
   descoberta de exercício (Iniciativa C, parte 1), preparando o terreno
@@ -1595,6 +1595,57 @@ de produção verdes.
 - risco de regressão: médio — mexer em cache e em renderização de lista
   são as duas superfícies mais fáceis de quebrar sutilmente (scroll,
   offline, atualização de versão). Medir ao vivo, não só suíte automatizada.
+
+**O que foi entregue, por item:**
+
+- [x] **F — `response.ok` em `networkFirst`.** O mesmo padrão que
+      `cacheFirst` já usava: uma rota que respondeu erro uma vez não é mais
+      gravada no cache, então uma visita offline seguinte não pode reproduzir
+      esse erro para sempre.
+- [x] **F — cache de payload `_rsc=` separado, com teto.** Saiu do cache do
+      shell para `PAYLOADS`, um cache próprio com `MAX_PAYLOAD_ENTRIES = 40`
+      e descarte do mais antigo (`Cache.keys()` preserva ordem de inserção,
+      que é o que "mais antigo" significa aqui). `activate` passou a
+      preservar as três caches da versão atual, não só duas.
+- [x] **F — testado rodando o `public/sw.js` real**, não uma reimplementação:
+      `src/service-worker/load-sw.ts` executa o arquivo publicado dentro de um
+      escopo global falso (`self`, `caches`, `fetch`), então um teste vermelho
+      aqui significa o arquivo publicado está errado, não que uma cópia dele
+      divergiu. Cobre os dois achados acima e a retenção das caches da versão
+      atual no `activate`. **Não cobertos, e não reivindicados:** offline num
+      aparelho físico e atualização de versão com o app aberto — ficam como
+      risco residual, registrados e não escondidos.
+- [x] **C — busca por músculo.** `buildExerciseIndex` agora indexa também os
+      rótulos de `MUSCLE_LABELS` de `primaryMuscles`/`secondaryMuscles` (nunca
+      `stabilizerMuscles`), num tier abaixo de nome e alias — texto sempre
+      vence intenção. Confirmado ao vivo: buscar "panturrilha" retorna cinco
+      exercícios cujo nome já leva a palavra, seguidos de "Agachamento com
+      Salto", "Bicicleta Ergométrica", "Caminhada", "Corrida" e "Elíptico" —
+      nenhum deles com "panturrilha" no nome ou alias, todos com panturrilhas
+      no músculo primário ou secundário.
+- [x] **BUG-011 — `useIncrementalReveal`.** Não é o virtualizador com janela
+      que desmonta linha rolada — a essa escala (183 exercícios, 216
+      alimentos, centenas e não milhares) o custo real nunca foi manter
+      linhas montadas, foi montar todas de uma vez a cada tecla digitada.
+      O hook revela em páginas de 40, crescendo por `IntersectionObserver`
+      quando a sentinela entra na viewport (com `rootMargin` para carregar
+      antes de faltar), e reseta para a primeira página quando a busca muda
+      — nunca num render não relacionado. Aplicado em `ExerciseBrowser` e
+      `FoodBrowser`/`FoodList`. Fallback explícito para navegador sem
+      `IntersectionObserver`: revela tudo, em vez de travar na primeira
+      página para sempre sem explicação.
+
+      Confirmado ao vivo, build de produção: as duas listas rolam do
+      primeiro ao último item (183 e 216) sem erro no console, com a nova
+      busca por músculo testada na mesma passagem.
+
+      **O `food-picker.tsx` continua com o teto de 8** — remover esse teto é
+      escopo da Sprint 7, que este item apenas destrava.
+
+19 testes novos (6 do service worker, 6 de busca por músculo, 7 do hook,
+incluindo um benchmark de custo de montagem por proporção — mesmo raciocínio
+do benchmark de busca em `search-exercises.test.ts`, não limiar de
+milissegundos). 986 testes, `typecheck`, `lint` e `build` de produção verdes.
 
 **Sprint 7 — Diário e execução, polimento (agora destravado)**
 

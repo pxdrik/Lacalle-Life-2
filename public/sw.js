@@ -21,6 +21,20 @@
 const VERSION = "v1";
 const SHELL = `lacalle-shell-${VERSION}`;
 const ASSETS = `lacalle-assets-${VERSION}`;
+const PAYLOADS = `lacalle-payloads-${VERSION}`;
+
+/**
+ * Cap on RSC payload entries, evicted oldest-first once exceeded.
+ *
+ * Every client-side navigation to a route with a fresh id (`_rsc=<hash>`)
+ * mints a new cacheable URL, so this cache grows by construction, not just
+ * by a missing cleanup routine — measured on a real session at 144 of 160
+ * total cache entries. Ten routes' worth is enough to keep the diets,
+ * routines and sessions someone actually opened recently working offline,
+ * without the cache becoming the largest thing in storage on a phone that
+ * has been left running for a week.
+ */
+const MAX_PAYLOAD_ENTRIES = 40;
 
 /**
  * The routes worth having before they are first visited.
@@ -59,7 +73,7 @@ self.addEventListener("activate", (event) => {
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((key) => key !== SHELL && key !== ASSETS)
+          .filter((key) => key !== SHELL && key !== ASSETS && key !== PAYLOADS)
           .map((key) => caches.delete(key)),
       );
       await self.clients.claim();
@@ -77,8 +91,13 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (request.mode === "navigate" || isPayload(url)) {
-    event.respondWith(networkFirst(request));
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirst(request, SHELL));
+    return;
+  }
+
+  if (isPayload(url)) {
+    event.respondWith(networkFirst(request, PAYLOADS));
     return;
   }
 
@@ -126,12 +145,23 @@ function isImmutable(url) {
  * Falling back to the exact page first and to `/` second: an unvisited route
  * offline is better served by the app's own home screen — which reads real
  * data from IndexedDB — than by a dead-end error page.
+ *
+ * **`response.ok` gates the write.** A route that answered once with a 404 or
+ * a 500 used to get cached anyway, and the next offline visit replayed that
+ * same error forever — the fix a deploy shipped could never reach a cache
+ * that already held the failure. `cacheFirst` below already had this check;
+ * this only had to catch up.
  */
-async function networkFirst(request) {
+async function networkFirst(request, cacheName) {
   try {
     const response = await fetch(request);
-    const cache = await caches.open(SHELL);
-    cache.put(request, response.clone());
+
+    if (response.ok) {
+      const cache = await caches.open(cacheName);
+      await cache.put(request, response.clone());
+      if (cacheName === PAYLOADS) await prunePayloadCache();
+    }
+
     return response;
   } catch {
     const cached = await caches.match(request);
@@ -142,6 +172,24 @@ async function networkFirst(request) {
 
     throw new Error("offline e sem shell em cache");
   }
+}
+
+/**
+ * Evicts the oldest payload entries once the cache exceeds
+ * `MAX_PAYLOAD_ENTRIES`, oldest first.
+ *
+ * `Cache.keys()` returns entries in insertion order in every engine that
+ * implements the Cache API today, which is what makes "oldest" mean anything
+ * here — there is no timestamp stored per entry, and adding one would cost a
+ * second store just to sort a list a `Cache` already hands back sorted.
+ */
+async function prunePayloadCache() {
+  const cache = await caches.open(PAYLOADS);
+  const keys = await cache.keys();
+  const excess = keys.length - MAX_PAYLOAD_ENTRIES;
+  if (excess <= 0) return;
+
+  await Promise.all(keys.slice(0, excess).map((key) => cache.delete(key)));
 }
 
 async function cacheFirst(request) {

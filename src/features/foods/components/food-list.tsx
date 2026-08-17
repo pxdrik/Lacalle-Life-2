@@ -5,6 +5,9 @@ import { FoodRow } from "./food-row";
 
 interface Props {
   readonly foods: readonly Food[];
+  /** More rows exist below `foods` — see `useIncrementalReveal`. */
+  readonly hasMore?: boolean;
+  readonly sentinelRef?: React.RefCallback<Element>;
   readonly onToggleFavorite: (food: Food) => void;
   readonly onRemove: (food: Food) => void;
 }
@@ -33,7 +36,13 @@ function ColumnHeader() {
   );
 }
 
-export function FoodList({ foods, onToggleFavorite, onRemove }: Props) {
+export function FoodList({
+  foods,
+  hasMore = false,
+  sentinelRef,
+  onToggleFavorite,
+  onRemove,
+}: Props) {
   return (
     <Card padded={false} className="overflow-hidden">
       <div className="pt-3">
@@ -49,6 +58,12 @@ export function FoodList({ foods, onToggleFavorite, onRemove }: Props) {
             onRemove={onRemove}
           />
         ))}
+
+        {/* Unrendered rows below this point exist in the catalogue, not in
+            the DOM yet — see `useIncrementalReveal`. */}
+        {hasMore && sentinelRef !== undefined && (
+          <li ref={sentinelRef} aria-hidden className="h-px" />
+        )}
       </ul>
     </Card>
   );

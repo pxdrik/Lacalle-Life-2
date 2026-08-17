@@ -10,6 +10,7 @@ import { Button, buttonClasses } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
+import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
 
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { searchFoods } from "../services/search-foods";
@@ -35,6 +36,16 @@ export function FoodBrowser() {
     state.status === "ready"
       ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
+
+  // Bounds how many rows exist in the DOM at once, so 216 catalogue foods —
+  // already unpaginated on this screen, unlike the picker's old 8-result
+  // cap — cannot make every keystroke re-render the whole table. See
+  // `useIncrementalReveal`.
+  const { count, hasMore, sentinelRef } = useIncrementalReveal(
+    `${text}|${category ?? ""}|${String(favoritesOnly)}`,
+    results.length,
+  );
+  const visible = results.slice(0, count);
 
   return (
     <div className="space-y-5">
@@ -155,7 +166,9 @@ export function FoodBrowser() {
             />
           ) : (
             <FoodList
-              foods={results}
+              foods={visible}
+              hasMore={hasMore}
+              sentinelRef={sentinelRef}
               onToggleFavorite={(food) => void toggleFavorite(food)}
               onRemove={(food) => void removeFood(food)}
             />

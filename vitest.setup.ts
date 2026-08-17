@@ -25,3 +25,30 @@ HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
   this.open = false;
   this.dispatchEvent(new Event("close"));
 };
+
+// jsdom has no IntersectionObserver at all — `useIncrementalReveal` would
+// throw on mount without this. Inert on purpose: it never calls back, so a
+// test never sees a list grow past its first page on its own. A test that
+// needs to assert the growth behaviour installs its own controllable fake
+// via `vi.stubGlobal`, scoped to that file.
+class InertIntersectionObserver implements IntersectionObserver {
+  readonly root = null;
+  readonly rootMargin = "";
+  readonly scrollMargin = "";
+  readonly thresholds: readonly number[] = [];
+  observe() {
+    // Never fires — see the class comment.
+  }
+  unobserve() {
+    // Never fires — see the class comment.
+  }
+  disconnect() {
+    // Never fires — see the class comment.
+  }
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
+}
+
+globalThis.IntersectionObserver ??=
+  InertIntersectionObserver as unknown as typeof IntersectionObserver;

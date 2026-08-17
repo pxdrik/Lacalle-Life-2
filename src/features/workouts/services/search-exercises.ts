@@ -1,3 +1,4 @@
+import { MUSCLE_LABELS } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 
 /**
@@ -27,6 +28,15 @@ interface IndexedExercise {
   readonly aliasWords: readonly string[];
   /** Name and aliases joined — one `includes` answers "matches at all?". */
   readonly haystack: string;
+  /**
+   * Portuguese labels for `primaryMuscles` and `secondaryMuscles` — never
+   * `stabilizerMuscles`, which trains isometrically rather than being what
+   * "bíceps" or "peito" means to someone typing that word. Ranked below name
+   * and alias in `rank()`: intent should never outrank someone who typed the
+   * exercise's actual name.
+   */
+  readonly muscleWords: readonly string[];
+  readonly muscleHaystack: string;
 }
 
 /**
@@ -48,6 +58,11 @@ export function buildExerciseIndex(
     const name = normalizeSearch(exercise.name);
     const aliases = exercise.aliases.map(normalizeSearch);
 
+    const muscleLabels = [
+      ...exercise.primaryMuscles,
+      ...exercise.secondaryMuscles,
+    ].map((muscle) => normalizeSearch(MUSCLE_LABELS[muscle]));
+
     return {
       exercise,
       name,
@@ -55,6 +70,8 @@ export function buildExerciseIndex(
       aliases,
       aliasWords: aliases.flatMap((alias) => alias.split(" ")),
       haystack: [name, ...aliases].join(" | "),
+      muscleWords: muscleLabels.flatMap((label) => label.split(" ")),
+      muscleHaystack: muscleLabels.join(" | "),
     };
   });
 
@@ -71,16 +88,27 @@ const NO_MATCH = Number.POSITIVE_INFINITY;
 
 function rank(entry: IndexedExercise, term: string): number {
   // Cheap gate first. Most entries do not match at all, and answering that
-  // with one `includes` over a prepared string beats six checks that each
+  // with two `includes` over prepared strings beats seven checks that each
   // allocate an iterator only to conclude the same thing.
-  if (!entry.haystack.includes(term)) return NO_MATCH;
+  const matchesText = entry.haystack.includes(term);
+  const matchesMuscle = entry.muscleHaystack.includes(term);
+  if (!matchesText && !matchesMuscle) return NO_MATCH;
 
-  if (entry.name.startsWith(term)) return 0;
-  if (entry.aliases.some((alias) => alias.startsWith(term))) return 1;
-  if (entry.nameWords.some((word) => word.startsWith(term))) return 2;
-  if (entry.aliasWords.some((word) => word.startsWith(term))) return 3;
-  if (entry.name.includes(term)) return 4;
-  return 5;
+  if (matchesText) {
+    if (entry.name.startsWith(term)) return 0;
+    if (entry.aliases.some((alias) => alias.startsWith(term))) return 1;
+    if (entry.nameWords.some((word) => word.startsWith(term))) return 2;
+    if (entry.aliasWords.some((word) => word.startsWith(term))) return 3;
+    if (entry.name.includes(term)) return 4;
+    return 5;
+  }
+
+  // Only the muscle taxonomy matched — "bíceps" finds every biceps exercise,
+  // but ranked below every text tier above: someone who typed a muscle is
+  // browsing by intent, which should never outrank someone who typed the
+  // exercise's actual name.
+  if (entry.muscleWords.some((word) => word.startsWith(term))) return 6;
+  return 7;
 }
 
 /**

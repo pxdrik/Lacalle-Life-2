@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
 
+import type { MuscleGroup } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 import { buildExerciseIndex, searchExercises } from "./search-exercises";
 
-function exercise(name: string, aliases: string[] = []): Exercise {
+function exercise(
+  name: string,
+  aliases: string[] = [],
+  primaryMuscles: MuscleGroup[] = ["chest"],
+): Exercise {
   return {
     id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
     aliases,
-    primaryMuscles: ["chest"],
+    primaryMuscles,
     secondaryMuscles: [],
     stabilizerMuscles: [],
     equipment: ["barbell"],
@@ -129,6 +134,63 @@ describe("searchExercises", () => {
     searchExercises(index, "rosca");
 
     expect(CATALOGUE).toEqual(snapshot);
+  });
+});
+
+describe("muscle search", () => {
+  // None of these three carries the muscle word in its name or alias — the
+  // whole point is that the match can only come from `primaryMuscles`.
+  const MUSCLE_CATALOGUE = [
+    exercise("Rosca 21", [], ["biceps"]),
+    exercise("Supino Reto com Barra", ["Supino", "Bench Press"], ["chest"]),
+    exercise("Elevação Lateral", [], ["side-delts"]),
+  ];
+  const muscleIndex = buildExerciseIndex(MUSCLE_CATALOGUE);
+
+  it("finds an exercise by its primary muscle's Portuguese label", () => {
+    expect(names(searchExercises(muscleIndex, "biceps"))).toContain(
+      "Rosca 21",
+    );
+  });
+
+  it("is accent-insensitive for muscle labels too", () => {
+    // "Deltoide lateral" — reached from the unaccented term the same way an
+    // exercise name is.
+    expect(names(searchExercises(muscleIndex, "deltoide"))).toContain(
+      "Elevação Lateral",
+    );
+  });
+
+  it("finds an exercise by muscle group even though the word never appears in its name", () => {
+    expect(names(searchExercises(muscleIndex, "peito"))).toEqual([
+      "Supino Reto com Barra",
+    ]);
+  });
+
+  it("ranks a name match above a muscle-only match from another exercise", () => {
+    // "biceps" is Rosca 21's muscle and nobody's alias here, so name/alias
+    // tiers never fire for it — the whole result has to come from rank 6/7.
+    const found = searchExercises(muscleIndex, "biceps");
+    expect(found).toHaveLength(1);
+  });
+
+  it("combines a name term and a muscle term, requiring both", () => {
+    expect(names(searchExercises(muscleIndex, "rosca biceps"))).toEqual([
+      "Rosca 21",
+    ]);
+    expect(searchExercises(muscleIndex, "supino biceps")).toEqual([]);
+  });
+
+  it("ranks a name/alias match above a muscle-only match for the same term", () => {
+    const mixed = buildExerciseIndex([
+      exercise("Supino Reto", ["Peito"], ["chest"]),
+      exercise("Cross Over na Polia", [], ["chest"]),
+    ]);
+
+    expect(names(searchExercises(mixed, "peito"))).toEqual([
+      "Supino Reto",
+      "Cross Over na Polia",
+    ]);
   });
 });
 

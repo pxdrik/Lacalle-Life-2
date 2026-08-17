@@ -10,10 +10,12 @@ import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
+import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
 
 import { useExerciseCatalogue } from "../hooks/use-exercise-catalogue";
 import { useExerciseQuery } from "../hooks/use-exercise-query";
 import { filterExercises } from "../services/filter-exercises";
+import { serializeExerciseQuery } from "../services/filter-url";
 import { searchExercises } from "../services/search-exercises";
 import type { Exercise } from "../types/exercise";
 import { CustomExerciseForm } from "./custom-exercise-form";
@@ -63,6 +65,15 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
     state.status === "ready"
       ? filterExercises(searchExercises(state.index, query.text), query.filters)
       : [];
+
+  // Bounds how many rows exist in the DOM at once — see `useIncrementalReveal`.
+  // 183 curated exercises already render uncapped today; this is what keeps
+  // that safe as the catalogue grows past what fits comfortably in one paint.
+  const { count, hasMore, sentinelRef } = useIncrementalReveal(
+    serializeExerciseQuery(query),
+    results.length,
+  );
+  const visible = results.slice(0, count);
 
   return (
     <div className="space-y-4">
@@ -214,7 +225,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           ) : (
             <Card padded={false} className="overflow-hidden">
               <ul className="divide-y divide-line">
-                {results.map((exercise) => (
+                {visible.map((exercise) => (
                   <ExerciseRow
                     key={exercise.id}
                     exercise={exercise}
@@ -223,6 +234,13 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                     onOpenDetail={detail.show}
                   />
                 ))}
+
+                {/* Unrendered rows below this point exist in `results`, not
+                    in the DOM yet — this is what keeps a keystroke's re-render
+                    bounded regardless of how large the catalogue gets. It
+                    grows before it is actually on screen (`rootMargin` in the
+                    hook), so scrolling never outruns it. */}
+                {hasMore && <li ref={sentinelRef} aria-hidden className="h-px" />}
 
                 {/* Creating used to be reachable only from the empty state,
                     which made it unreachable in the case that actually happens:
@@ -259,7 +277,7 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
 
           {/* Credit is owed where the work is shown, and only there — so it
               is derived from the rows on screen, not from a fixed list. */}
-          <MediaAttribution media={results.map((exercise) => exercise.media)} />
+          <MediaAttribution media={visible.map((exercise) => exercise.media)} />
 
           <ExerciseDetailDialog control={detail} />
         </>
