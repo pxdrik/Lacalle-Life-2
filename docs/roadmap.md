@@ -1765,12 +1765,23 @@ absorve a antiga "Sprint 8 — Page Reveal Global" (agora item 12 abaixo).
   atenção a headers fixos, barra inferior, execução de treino, formulários,
   cards e gráficos.
 
-**Bloqueio de partida:** o pedido cita imagens de referência do LaCalle
-Finance "fornecidas nesta conversa" para a Fase 1 — nenhuma imagem chegou
-de fato à conversa. A Fase 1 (auditoria comparativa) não começa sem elas ou
-sem uma decisão explícita de seguir só com os princípios já registrados na
-memória sobre o Finance (Brand System compartilhado, dark mode realinhado
-em 16/08/2026).
+**Bloqueio de partida — resolvido em 17/08/2026:** o pedido citava imagens
+de referência do Finance que não tinham chegado à conversa; o Pedro anexou
+quatro capturas reais do FinFlow/LaCalle Finance (Início, evolução do
+dinheiro, transações, previstos) e a Fase 1 rodou contra elas de verdade,
+mais uma auditoria ao vivo do Life em build de produção (Hoje, Diário,
+Evolução).
+
+**Status — 17/08/2026:** Fase 1 e Fase 2 entregues e aprovadas
+conceitualmente. Fase 2.5 (refinamento, pedida depois da aprovação) também
+entregue: composição das sete telas, princípios finais, proposta de
+identidade própria, decisão técnica sobre o Page Reveal — revista com a
+leitura real de `node_modules/next/dist/docs/01-app/02-guides/
+view-transitions.md`, que mostrou o App Router deste projeto já suporta
+`<ViewTransition>` nativamente — e a lista exata de componentes/tokens a
+alterar. Documento completo, não reproduzido aqui por design (fica no
+histórico da conversa, não no roadmap). **Fase 3 (implementação) não
+começou — aguardando aprovação explícita do Pedro sobre a Fase 2.5.**
 
 ### As quatro fases, na ordem — cada uma termina antes da próxima começar
 
