@@ -2128,8 +2128,11 @@ reproduzido ao vivo antes de qualquer correção — nem todo achado sobreviveu.
 - **BUG-003** (hora em AM/PM) — **real, corrigido**. `TimeField` substitui
   `<input type="time">`/`datetime-local` — o Chrome segue a região do
   Windows, não o `lang="pt-BR"` da página.
-- **BUG-004** (sem unidade além de grama) — real, mas é melhoria de escopo,
-  não bug; não corrigido nesta rodada.
+- **BUG-004** (sem unidade além de grama) — **real, `ml` corrigido em rodada
+  seguinte** (commit `3caaada`). "1 unidade" (1 ovo, 1 fatia) fica de fora:
+  a TACO não carrega peso por unidade nenhum, e inventar um peso médio por
+  alimento contrariaria "na dúvida, omitir". `ml` não tem esse problema —
+  1 ml ≈ 1 g é aproximação padrão, sem depender de dado por alimento.
 - **BUG-005** (quantidade sem limite superior) — **já corrigido antes da
   auditoria** (commit `f25e36d`, 15/08). O build testado provavelmente veio
   do cache do service worker.
