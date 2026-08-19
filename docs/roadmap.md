@@ -48,6 +48,7 @@ depender da memória de nenhuma conversa.
 | Catálogo TACO | 365 alimentos da Tabela Brasileira de Composição de Alimentos somados aos 216 da V1 — só ingrediente simples, pratos compostos ficaram de fora; `seedCatalogue` passou de "só roda se o banco está vazio" para diff por id, senão a expansão não chegava a quem já tinha o app instalado |
 | Fundo consistente em Hoje | Alimentação e Treino sempre com o cinza do `Card` padrão — antes só o treino em andamento tinha superfície, e o verde continua reservado só para esse estado |
 | Corrigir início de treino travado | Campo "Início" na execução: uma sessão esquecida aberta parava de mostrar "começou há 56 horas" só depois de finalizada — agora dá para corrigir o horário sem sair do treino |
+| Corrigir conflito falso em Treinos/Dietas | `use-diet-editor`, `use-routine-editor`, `use-session-runner` chamavam `persist()` de dentro do updater de `setState` — o React (`reactStrictMode: true`) invoca esse updater duas vezes de propósito, então uma única edição disparava duas gravações e a segunda perdia a corrida, aparecendo como "alterado em outro lugar" numa única aba. Corrigido com uma `ref` síncrona em vez do padrão funcional de `setState`. Achado pela auditoria externa de 19/08 (BUG-008) |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
