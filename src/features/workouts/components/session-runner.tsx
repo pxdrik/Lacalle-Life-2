@@ -1,10 +1,12 @@
 "use client";
 
+import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { TimeField } from "@/design-system/components/time-field";
 import { ArrowLeft, Flag, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -36,7 +38,7 @@ import {
   sessionElapsedMs,
   sessionProgress,
   sessionVolumeKg,
-  toDateTimeLocal,
+  timeOfDay,
 } from "../services/session-stats";
 import type { Session } from "../types/session";
 import {
@@ -145,16 +147,41 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       <label className="mt-2 flex items-center gap-2">
         <span className="text-xs text-ink-subtle">Início</span>
         <input
-          type="datetime-local"
-          value={toDateTimeLocal(session.startedAt)}
-          max={toDateTimeLocal(now)}
-          aria-label="Horário de início do treino"
+          type="date"
+          value={dayKey(new Date(session.startedAt))}
+          max={dayKey(new Date(now))}
+          aria-label="Dia de início do treino"
           onChange={(event) => {
-            if (event.target.value === "") return;
-            const startedAt = new Date(event.target.value).getTime();
-            apply((current) => setSessionStartedAt(current, startedAt));
+            const [year, month, date] = event.target.value
+              .split("-")
+              .map(Number);
+            if (year === undefined || month === undefined || date === undefined)
+              return;
+
+            const started = new Date(session.startedAt);
+            started.setFullYear(year, month - 1, date);
+            apply((current) => setSessionStartedAt(current, started.getTime()));
           }}
           className="h-8 rounded-md border border-transparent bg-transparent px-1.5 text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+        />
+        {/* Own field rather than folded into the date one, and text rather
+            than `<input type="time">` — see `TimeField` for why: the native
+            picker renders AM/PM on an English-locale OS regardless of
+            `lang="pt-BR"`, which is what the auditoria externa de 19/08
+            (BUG-003) actually caught. */}
+        <TimeField
+          value={timeOfDay(session.startedAt)}
+          label="Horário de início do treino"
+          onChange={(time) => {
+            if (time === null) return;
+            const [hours, minutes] = time.split(":").map(Number);
+            if (hours === undefined || minutes === undefined) return;
+
+            const started = new Date(session.startedAt);
+            started.setHours(hours, minutes, 0, 0);
+            apply((current) => setSessionStartedAt(current, started.getTime()));
+          }}
+          className="h-8 rounded-md border border-transparent bg-transparent px-1.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
         />
       </label>
 

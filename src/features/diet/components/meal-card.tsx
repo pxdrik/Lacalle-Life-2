@@ -16,6 +16,7 @@ import {
   SortableItem,
   SortableList,
 } from "@/design-system/components/sortable-list";
+import { TimeField } from "@/design-system/components/time-field";
 import { FoodPicker, type Food } from "@/features/foods";
 
 import { mealMacros } from "../services/diet-macros";
@@ -110,18 +111,15 @@ export function MealCard({
           />
 
           <div className="mt-1 flex items-center gap-2">
-            <input
-              type="time"
-              value={meal.time ?? ""}
-              aria-label={`Horário de ${meal.name}`}
-              onChange={(event) => {
-                // An empty field means "no fixed time", which is different
-                // from midnight.
-                onChange({
-                  time: event.target.value === "" ? null : event.target.value,
-                });
+            <TimeField
+              value={meal.time}
+              label={`Horário de ${meal.name}`}
+              onChange={(time) => {
+                // `null` means "no fixed time", which is different from
+                // midnight.
+                onChange({ time });
               }}
-              className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+              className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
             />
           </div>
         </div>
