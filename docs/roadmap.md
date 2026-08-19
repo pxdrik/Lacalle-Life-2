@@ -1772,16 +1772,22 @@ dinheiro, transações, previstos) e a Fase 1 rodou contra elas de verdade,
 mais uma auditoria ao vivo do Life em build de produção (Hoje, Diário,
 Evolução).
 
-**Status — 17/08/2026:** Fase 1 e Fase 2 entregues e aprovadas
-conceitualmente. Fase 2.5 (refinamento, pedida depois da aprovação) também
-entregue: composição das sete telas, princípios finais, proposta de
-identidade própria, decisão técnica sobre o Page Reveal — revista com a
-leitura real de `node_modules/next/dist/docs/01-app/02-guides/
-view-transitions.md`, que mostrou o App Router deste projeto já suporta
-`<ViewTransition>` nativamente — e a lista exata de componentes/tokens a
-alterar. Documento completo, não reproduzido aqui por design (fica no
-histórico da conversa, não no roadmap). **Fase 3 (implementação) não
-começou — aguardando aprovação explícita do Pedro sobre a Fase 2.5.**
+**Status — ✅ entregue em 19/08/2026.** Fase 1, Fase 2 e Fase 2.5 (auditoria,
+direção, refinamento) aprovadas antes da implementação. Fase 3 entregue em
+oito checkpoints — tokens, componentes base, Hoje, Treinos/Execução,
+Evolução/Perfil/Dietas, Alimentos/Exercícios (sem mudança — ver abaixo),
+motion, auditoria final. Relato completo logo depois desta seção.
+
+**Uma conclusão da Fase 2.5 não sobreviveu à Fase 3, e a correção está
+registrada onde ela aconteceu:** a leitura de
+`node_modules/next/dist/docs/01-app/02-guides/view-transitions.md` dizia
+que o App Router "já suporta `<ViewTransition>` nativamente" — mas o
+`react` de fato instalado (`19.2.8`, conferido em
+`node_modules/react/package.json`) não exporta `ViewTransition`; o guia
+pressupõe uma build canary que este projeto não tem. A máscara circular
+foi substituída por `--animate-rise` via `template.tsx`, o fallback que o
+pedido original já previa para este cenário. Detalhe técnico completo
+na Iniciativa I, item 6 das decisões pendentes (agora resolvida).
 
 ### As quatro fases, na ordem — cada uma termina antes da próxima começar
 
@@ -1875,15 +1881,87 @@ ou regra do Brand System alterado sem registro explícito aqui; `npm run
 verify` e `npm run build` verdes; confirmação visual nas seis larguras e
 desktop, sem regressão de overflow.
 
-### Entrega
+### Entrega — 19/08/2026
 
-Ao encerrar: lista dos problemas visuais encontrados na auditoria, a
-direção visual escolhida e por quê, arquivos alterados, tokens/componentes
-criados ou modificados, quais telas receberam mais intervenção, comparação
-antes/depois, `verify`/`build` verdes, verificação visual mobile+desktop
-sem overflow novo, commit com mensagem explicando o porquê. O roadmap só é
-marcado como entregue depois de tudo isso — não antes, para registrar a
-sprint como concluída.
+**Tokens novos/alterados:** `--reveal-x`/`--reveal-y` (origem do Reveal,
+`50% 50%` como padrão — acabaram não sendo consumidos, ver a nota sobre o
+Reveal abaixo). `--info` foi **investigado e não alterado** — a leitura da
+Fase 2.5 achava que era cinza por acidente; `tokens.test.ts` prova que é um
+valor citado literalmente da pág. 27 do brandbook, então mexer seria
+reabrir uma decisão de marca sem registrar. Nenhum outro token tocado.
+
+**Componentes novos:** `Section` (título + subtítulo + conteúdo, sem
+borda — generaliza o que só existia em `/evolucao`), `Metric` (número +
+legenda, com `align="center"`), `Badge` (cinco estados —
+neutro/próximo/atenção/concluído/negativo, texto sempre presente),
+`PageTransition` (o wrapper de `--animate-rise` que todo `template.tsx`
+reexporta).
+
+**Telas com intervenção, da maior para a menor:**
+1. **Hoje** — a maior mudança da sprint. `TodayEnergy` virou um
+   `Card tone="hero"` só (anel + três `Metric` centralizados como tira
+   secundária), `TodayMeals`/`TodayWorkout` viraram `Section`,
+   `TodayProgress` virou uma linha sem superfície nenhuma. Quatro níveis
+   de hierarquia onde havia cinco cards iguais.
+2. **Perfil** — `profile-form.tsx` ganhou três `Section` (Identidade,
+   Objetivo, Nutrição); nenhum campo, validação ou submissão mudou.
+3. **Execução** — o exercício com a próxima série vira `Card tone="hero"`
+   (reusa `nextSetId`, dado que já existia); nunca mais de um por vez.
+4. **Evolução** — o único `Section` escrito à mão virou o componente.
+5. **Nove rotas** ganharam `template.tsx` com `--animate-rise`.
+6. **Treinos, Diário, Dietas, Alimentos, Exercícios** — sem mudança de
+   código, por três razões diferentes e registradas: Treinos já
+   satisfazia a composição (hero condicional via `InProgressBanner`);
+   Diário compartilha `MealCard` com Dietas, e as duas instruções juntas
+   exigiriam bifurcar edição de refeição — risco maior que o ganho;
+   Alimentos/Exercícios já tinham personalidade própria e nenhuma mudança
+   de estado real a comunicar que justificasse um `Badge` novo.
+
+**Arquivos alterados/criados:** `tokens.css`; `section.tsx`, `metric.tsx`,
+`badge.tsx`, `page-transition.tsx` (novos, com teste); `today-energy.tsx`,
+`today-meals.tsx`, `today-workout.tsx`, `today-progress.tsx`,
+`in-progress-banner.tsx`, `app/page.tsx`; `session-exercise-card.tsx`;
+`app/evolucao/page.tsx`; `profile-form.tsx`; nove `template.tsx`.
+
+**Page Reveal:** implementado como `--animate-rise`, não a máscara
+circular — a Fase 2.5 achou viável citando um guia do Next.js que
+pressupõe React canary; o `react` real deste projeto é `19.2.8` estável e
+não exporta `ViewTransition` (conferido por grep no pacote, não por
+documentação). `/sessao/[id]` ficou sem `template.tsx`: `translate` cria
+containing block para descendentes `fixed`, e `RestTimerBar` é `fixed`
+dentro dessa rota — evitado, não corrigido.
+
+**Testes executados:** 986 → 1012 (26 novos). `typecheck`, `lint`,
+`npm run build` verdes em cada um dos oito checkpoints, não só no final.
+Verificação visual ao vivo em build de produção: as seis larguras
+(320/360/375/390/393/430) mais 1440px desktop, em Hoje, Diário, Treinos,
+`/treinos/[id]`, `/sessao/[id]`, Evolução, Perfil e Alimentos — zero
+overflow, zero erro no console em qualquer combinação testada.
+
+**Comparação antes/depois, em uma frase:** Hoje foi de quatro cards do
+mesmo peso para uma resposta (anel), duas perguntas (alimentação/treino) e
+um rodapé quieto (peso); Perfil foi de um formulário corrido para três
+blocos nomeados; Execução e Treinos passaram a falar a mesma língua visual
+(o exercício atual e a rotina em andamento usam o mesmo friso).
+
+**Problemas encontrados, não corrigidos nesta sprint:** nenhum bug
+funcional novo. Um achado de processo, já corrigido na hora: a Fase 2.5
+propôs um "friso superior" para o Hero que contrariava o friso lateral já
+existente e documentado contra a pág. 24 do brandbook — mantido o
+mecanismo existente, o superior nunca foi implementado.
+
+**O que deliberadamente não foi alterado:** logo, símbolo, tipografia
+oficial, qualquer token de cor além dos já listados, a forma de Alimentos
+(tabela) e Exercícios (cartão com foto), `MealCard`/Diário/Dietas, o motor
+nutricional, IndexedDB, qualquer regra de negócio.
+
+**Alguma regra de produto ou dado foi alterada? Não.**
+
+Commit: seguiu em oito commits, um por checkpoint, cada um com a alteração
+mais o motivo — não um commit único "Sprint 8 completa".
+
+O roadmap só foi marcado como entregue depois de todos os itens acima
+verificados, não antes.
 
 **Depois — Iniciativa E (planejamento semanal de dieta)**, sequenciada após
 a Iniciativa B estar decidida e, de preferência, implementada — mesma
