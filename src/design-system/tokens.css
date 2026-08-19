@@ -691,6 +691,20 @@
   --duration-hero: 800ms;
   --duration-stagger: 40ms;
 
+  /**
+   * A origem do LaCalle Reveal — Sprint 8, Fase 3.6.
+   *
+   * `50% 50%` é o padrão declarado aqui, não em cada call site: a máscara
+   * nasce do centro sempre que ninguém definiu o ponto real de toque, que é
+   * exatamente o caso de navegação programática, `router.back()` do
+   * navegador e qualquer entrada sem coordenada. Um item da navegação
+   * primária escreve a própria posição nestas duas propriedades no
+   * `pointerdown`, antes de navegar; tudo o mais herda o centro sem precisar
+   * de um branch condicional em cada chamador.
+   */
+  --reveal-x: 50%;
+  --reveal-y: 50%;
+
   /* Algo chegando: um cronômetro, um aviso, um painel. Sobe uma distância curta
      porque movimento vindo de baixo lê como "isto veio até você", enquanto uma
      queda lê como "isto caiu em você". 6 px, que é o deslocamento da entrada de
