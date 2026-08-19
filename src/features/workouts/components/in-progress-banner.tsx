@@ -3,6 +3,9 @@
 import { Play } from "lucide-react";
 import Link from "next/link";
 
+import { cn } from "@/design-system/cn";
+import { cardSurface } from "@/design-system/components/card";
+
 import { useSessionHistory } from "../hooks/use-session-history";
 import { useTicker } from "../hooks/use-ticker";
 import { formatDuration, sessionProgress } from "../services/session-stats";
@@ -37,7 +40,16 @@ export function InProgressBanner() {
       // 5%, e a mesma página proíbe as duas coisas por nome: "borda colorida no
       // card inteiro" e "card com fundo no acento inteiro". A hierarquia não
       // muda — este continua sendo o único cartão destacado da tela.
-      className="animate-rise flex items-center gap-4 rounded-lg border border-l-[3px] border-line border-l-accent bg-surface p-(--card-p) pl-6 transition-colors duration-(--duration-micro) ease-out hover:border-line-strong"
+      //
+      // `cardSurface("hero")` em vez da receita escrita à mão que vivia aqui
+      // — Sprint 8: era uma cópia exata das mesmas classes que `Card
+      // tone="hero"` já centraliza, só porque este elemento precisa continuar
+      // sendo um `<Link>`, não um `Card`. `cardSurface` existe desde a
+      // extração do `Card` exatamente para este caso.
+      className={cn(
+        cardSurface("hero"),
+        "animate-rise flex items-center gap-4 transition-colors duration-(--duration-micro) ease-out hover:border-line-strong",
+      )}
     >
       <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-accent text-accent-ink">
         <Play aria-hidden className="size-5" />

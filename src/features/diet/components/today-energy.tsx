@@ -5,23 +5,31 @@ import Link from "next/link";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Card } from "@/design-system/components/card";
+import { Metric } from "@/design-system/components/metric";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { MACRO_CODING } from "@/design-system/macros";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { dietMacros } from "../services/diet-macros";
-import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 
-const MACRO_FIGURES = ["proteinG", "carbsG", "fatG"] as const;
-
 /**
- * How much of the day is left, in calories.
+ * How much of the day is left, in calories — the hero of `/`.
  *
  * The first question anyone opens a diet app to ask, and the reason the home
  * screen exists at all. It reads the diary rather than keeping a second copy
  * of the day: the numbers here and the numbers in `/diario` are the same
  * numbers, computed the same way, or they would drift apart within a week.
+ *
+ * **One hero, not two cards of equal weight.** They used to be siblings — a
+ * ring in one card, macros in another, competing for the same rank on the
+ * screen. Sprint 8 puts them in the one piece the page exists to show: the
+ * ring stays the only shape the app draws nowhere else, and the three macros
+ * sit underneath it, smaller, past a rule — read *after* the ring, not beside
+ * it. The `Abrir diário` / `Registrar` link that used to live on the macro
+ * card's own header is gone from here: `TodayMeals` right below already
+ * carries it, and printing it twice was the split card's own symptom.
  *
  * The whole card works without a profile — the ring needs a target and simply
  * does not appear without one, leaving the totals, which are true either way.
@@ -32,20 +40,13 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const { state } = useFoodLogDay(day);
   const targets = useNutritionTargets();
 
-  // Two skeletons, because this renders two blocks. One would hold a single
-  // cell and let the rest of the grid shift sideways as the day loads.
   if (state.status === "loading") {
-    return (
-      <>
-        <Skeleton className="h-64 w-full rounded-lg" />
-        <Skeleton className="h-64 w-full rounded-lg" />
-      </>
-    );
+    return <Skeleton className="h-72 w-full rounded-lg lg:col-span-2" />;
   }
 
   if (state.status === "error") {
     return (
-      <Card role="alert" className="min-w-0">
+      <Card role="alert" tone="hero" className="min-w-0 lg:col-span-2">
         <p className="text-ink">Não foi possível ler o dia de hoje.</p>
         <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
       </Card>
@@ -56,13 +57,13 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const nothingYet = totals.kcal === 0;
 
   if (targets === null) {
-    // No profile means no ring, so this branch is the whole block. The way
+    // No profile means no ring, so this branch is the whole hero. The way
     // into the diary has to live here too: without a target *and* without a
     // way to record, the screen would state a problem and offer nothing. A
     // test holds this — it caught the link going missing when the shared
     // header was removed.
     return (
-      <Card as="section" className="min-w-0 text-center">
+      <Card as="section" tone="hero" className="min-w-0 text-center lg:col-span-2">
         <MacroSummary macros={totals} size="lg" />
         <p className="mt-3 text-xs text-ink-subtle">
           Sem meta para comparar.{" "}
@@ -84,68 +85,38 @@ export function TodayEnergy({ day }: { readonly day: string }) {
     );
   }
 
-  /**
-   * **Two blocks, not one section.**
-   *
-   * They were one borderless section with the ring floating above the macros.
-   * Read as blocks they are two different questions — *how much is left* and
-   * *what it is made of* — and the second was reading as a footnote of the
-   * first rather than as an answer of its own.
-   *
-   * A fragment rather than a wrapper, so both land as siblings in the page's
-   * grid. Wrapping them would put a container around two cards, which is the
-   * card-inside-a-card the composition exists to avoid.
-   *
-   * **Neither title takes a glyph, and that is a rule rather than an
-   * omission.** A block gets an icon when nothing in it carries a mark of its
-   * own; the ring *is* the mark, and the macros have the colour coding. An
-   * icon over the ring would be a second identity element arguing with the
-   * first.
-   */
   return (
-    <>
-      <Card as="section" className="flex min-w-0 flex-col">
-        <h2 className="text-sm font-medium text-ink">Calorias de hoje</h2>
+    <Card
+      as="section"
+      tone="hero"
+      className="flex min-w-0 flex-col items-center lg:col-span-2"
+    >
+      <div className="flex w-full flex-1 items-center justify-center py-4">
+        <CalorieRing
+          consumed={totals.kcal}
+          target={targets.kcal}
+          nothingYet={nothingYet}
+        />
+      </div>
 
-        {/* `flex-1` and centred: when the grid stretches this card to match
-            its neighbour, the extra height becomes room around the ring
-            instead of a gap under it. The negative space is the point — the
-            block organises, the circle identifies. */}
-        <div className="flex flex-1 items-center justify-center py-6">
-          <CalorieRing
-            consumed={totals.kcal}
-            target={targets.kcal}
-            nothingYet={nothingYet}
+      {/* Secondary by construction, not just by convention: smaller size,
+          past a rule, read only after the ring resolves. Three columns —
+          never `MacroProgress`'s bars — because a bar argues for attention
+          the same way the ring does, and this block exists to not do that. */}
+      <div className="mt-2 grid w-full max-w-xs grid-cols-3 gap-2 border-t border-line pt-4">
+        {MACRO_CODING.map(({ key, short, text }) => (
+          <Metric
+            key={key}
+            value={formatDecimal(totals[key])}
+            unit="g"
+            label={short}
+            size="sm"
+            tone={text}
+            align="center"
           />
-        </div>
-      </Card>
-
-      <Card as="section" className="flex min-w-0 flex-col">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="text-sm font-medium text-ink">Macros de hoje</h2>
-          <Link
-            href="/diario"
-            className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
-          >
-            {nothingYet ? "Registrar" : "Abrir diário"}
-          </Link>
-        </div>
-
-        {/* Stacked rows rather than three columns, and it is the height that
-            decides: as columns this block measured 112px against the ring's
-            240 and the grid stretched the difference into dead space — the
-            "floating in the void" the composition is meant to remove. Same
-            numbers, same bars, same order. */}
-        <div className="mt-5 flex flex-1 flex-col justify-center">
-          <MacroProgress
-            totals={totals}
-            targets={targets}
-            figures={MACRO_FIGURES}
-            layout="rows"
-          />
-        </div>
-      </Card>
-    </>
+        ))}
+      </div>
+    </Card>
   );
 }
 

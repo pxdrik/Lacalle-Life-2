@@ -27,13 +27,22 @@ import { PageShell } from "@/design-system/components/page-shell";
  * is three centimetres above it, and a second copy of the menu dressed as
  * buttons is not a feature.
  *
- * **Rank comes from what a block holds, not from how it is drawn.** The five
- * cards share a radius, a padding and a border; the ring is the largest thing
- * on the screen and the only shape the app draws nowhere else, and that is
- * what makes it the signature. Dressing it differently from its neighbours
- * would rank it by decoration instead.
+ * **Sprint 8 — four ranks, not five equal cards.** The screen used to be five
+ * bordered boxes of identical weight; the auditory finding behind this sprint
+ * named it directly: nothing on the page read as *the* answer, everything
+ * argued for the same amount of attention. The new order is the mobile order
+ * and it is now also the visual order:
  *
- * `min-w-0` lives on each card rather than here: a grid item defaults to
+ * 1. **Hero** — `TodayEnergy`, the calorie ring with macros folded into the
+ *    same card as a secondary metric strip, not a sibling card of equal rank.
+ * 2. **Alimentação** — `TodayMeals`, a borderless `Section`.
+ * 3. **Treino** — `TodayWorkout`, the same `Section` weight as Alimentação,
+ *    except when a session is genuinely running right now, which keeps the
+ *    hero-adjacent treatment `InProgressBanner` already had.
+ * 4. **Apoio** — `TodayProgress`, a single row with no surface at all, the
+ *    quietest thing on the page.
+ *
+ * `min-w-0` lives on each block rather than here: a grid item defaults to
  * `min-width: auto` and refuses to shrink below its own min-content, and a
  * long meal name once pushed the track to 331px inside a 318px viewport and
  * scrolled the whole page sideways. Caught at 320px, and still checked there.
@@ -55,31 +64,16 @@ export default function HomePage() {
       <HomeDataProvider>
         <ProfileIncompleteNotice />
 
-        {/* **One grid, and every answer is a block in it.**
-            The screen used to group by space alone: a ring floating above two
-            columns of borderless sections. It read as elements scattered on a
-            page rather than as a screen with places in it, and the ring — the
-            thing with no frame at all — was the loosest of them.
-
-            So the blocks come back, and the ranking moves off geometry: every
-            card is the same radius, the same padding and the same border, and
-            what differs is what each one holds. `TodayEnergy` renders two of
-            them, so the row reads as *how much is left* beside *what it is
-            made of*.
-
-            Order is the mobile order, and it is the priority order: calories,
-            macros, meals, training, weight. No `order-*` anywhere — a grid
-            that reads differently from the DOM reads differently to a screen
-            reader too.
-
-            Cards stretch to their row rather than sitting at its top. With
-            meals and training side by side as peers, matching bottom edges is
-            what makes them look like a pair instead of two things that happen
-            to be adjacent. */}
         <div className="mt-8 grid gap-4 lg:grid-cols-2">
           <TodayEnergy day={today} />
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <TodayMeals day={today} />
           <TodayWorkout day={today} />
+        </div>
+
+        <div className="mt-6 border-t border-line pt-3">
           <TodayProgress />
         </div>
       </HomeDataProvider>

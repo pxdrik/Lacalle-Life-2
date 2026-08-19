@@ -5,7 +5,7 @@ import Link from "next/link";
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
-import { Card } from "@/design-system/components/card";
+import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
@@ -25,12 +25,20 @@ import { InProgressBanner } from "./in-progress-banner";
  * workout slot rather than sitting beside the "resume" banner: showing
  * "nenhum treino hoje" underneath a workout that is running right now would be
  * the screen contradicting itself.
+ *
+ * **Two different registers for two different facts.** A session in progress
+ * keeps the hero-adjacent treatment `InProgressBanner` already had — the one
+ * thing on the screen that is happening *right now* earns it. Everything else
+ * (finished today, or nothing yet) reads as `Section`, the same weight
+ * `TodayMeals` uses for the other half of the day, so the two questions the
+ * screen answers stay peers instead of one out-ranking the other by
+ * accident.
  */
 export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
 
   if (state.status === "loading") {
-    return <Skeleton className="h-48 w-full rounded-lg" />;
+    return <Skeleton className="h-40 w-full rounded-lg" />;
   }
 
   // Silent on failure. The workout half of the day is worth showing when it
@@ -49,29 +57,25 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   const nothingYet = today.length === 0;
 
   return (
-    <Card as="section" className="min-w-0">
-      <div className="flex items-center justify-between gap-4">
-        {/* The one card of the four on this screen that had no glyph, next to
-            three that did — which reads as an oversight rather than as
-            restraint. Same dumbbell as `/treinos`, from the same table. */}
-        <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
-          <ICONS.workouts aria-hidden className="size-4 text-ink-subtle" />
-          Treino
-        </h2>
-        {!nothingYet && (
+    <Section
+      title="Treino"
+      size="compact"
+      className="min-w-0"
+      action={
+        !nothingYet ? (
           <Link
             href="/treinos"
-            className="text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
+            className="text-xs text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
           >
             Ver treinos
           </Link>
-        )}
-      </div>
-
+        ) : undefined
+      }
+    >
       {nothingYet ? (
         <Empty />
       ) : (
-        <ul className="mt-4 space-y-2">
+        <ul className="space-y-2">
           {today.map((session) => (
             <li key={session.id}>
               <FinishedSession session={session} />
@@ -79,7 +83,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
           ))}
         </ul>
       )}
-    </Card>
+    </Section>
   );
 }
 
@@ -94,7 +98,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
  */
 function Empty() {
   return (
-    <div className="mt-4 flex flex-col items-center gap-3 py-6 text-center">
+    <div className="flex flex-col items-center gap-3 py-6 text-center">
       <ICONS.workouts aria-hidden className="size-8 text-ink-subtle" />
       <p className="text-sm text-ink-muted">Nada registrado hoje.</p>
       <Link href="/treinos" className={buttonClasses("secondary", "sm")}>
