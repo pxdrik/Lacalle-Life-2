@@ -124,6 +124,19 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                           </span>
                         )}
                       </span>
+                    ) : set.reps !== null || set.weightKg !== null ? (
+                      // Digitado mas nunca confirmado no check — auditoria
+                      // externa de 19/08 (BUG-009): finalizar sem confirmar
+                      // lia como "não realizada", e o valor digitado (que
+                      // continua salvo, `isCompleted` só controla a marcação)
+                      // desaparecia da tela como se tivesse sido descartado.
+                      <span className="text-ink-subtle">
+                        {set.reps ?? "—"} ×{" "}
+                        {set.weightKg === null
+                          ? "—"
+                          : formatDecimal(set.weightKg)}{" "}
+                        kg <span className="italic">(não confirmada)</span>
+                      </span>
                     ) : (
                       <span className="text-ink-subtle">não realizada</span>
                     )}

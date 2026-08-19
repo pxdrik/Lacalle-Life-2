@@ -88,4 +88,26 @@ describe("SessionSummary", () => {
       screen.queryByText(/ficou de fora do volume|ficaram de fora do volume/),
     ).not.toBeInTheDocument();
   });
+
+  it("shows a typed but unconfirmed set's values instead of only 'não realizada'", () => {
+    // BUG-009 (auditoria externa, 19/08): reps/peso digitados sobrevivem ao
+    // Finalizar mesmo sem o check — `isCompleted` só marca a confirmação —
+    // mas o resumo lia como "não realizada" e escondia o que a pessoa
+    // digitou, como se tivesse sido descartado.
+    mount(sessionWith([{ reps: 10, weightKg: 20, isCompleted: false }]));
+
+    expect(screen.getByText(/10 × 20 kg/)).toBeInTheDocument();
+    expect(screen.getByText("(não confirmada)")).toBeInTheDocument();
+    expect(screen.queryByText("não realizada")).not.toBeInTheDocument();
+  });
+
+  it("still says 'não realizada' when a set has nothing typed at all", () => {
+    mount(
+      sessionWith([
+        { reps: null, weightKg: null, isCompleted: false },
+      ]),
+    );
+
+    expect(screen.getByText("não realizada")).toBeInTheDocument();
+  });
 });
