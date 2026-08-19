@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
 import type { EntityId } from "@/core/domain/entity";
@@ -35,6 +35,12 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
   const [state, setState] = useState<SessionRunnerState>({ status: "loading" });
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  /**
+   * Mirrors `state`, but written synchronously by `apply` itself rather than
+   * read back from React's state. See the note on `apply` for why.
+   */
+  const stateRef = useRef(state);
+
   useEffect(() => {
     let active = true;
 
@@ -42,14 +48,21 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
       try {
         const session = await (await repositories).sessions.getById(sessionId);
         if (!active) return;
-        setState(
+        const next: SessionRunnerState =
           session === undefined
             ? { status: "missing" }
-            : { status: "ready", session },
-        );
+            : { status: "ready", session };
+        stateRef.current = next;
+        setState(next);
       } catch (cause) {
-        if (active)
-          setState({ status: "error", message: describeDataError(cause) });
+        if (active) {
+          const next: SessionRunnerState = {
+            status: "error",
+            message: describeDataError(cause),
+          };
+          stateRef.current = next;
+          setState(next);
+        }
       }
     }
 
@@ -61,24 +74,35 @@ export function useSessionRunner(sessionId: EntityId): SessionRunner {
   }, [repositories, sessionId]);
 
   /**
-   * The functional form of `setState` is what makes several `apply()` calls
-   * landing in the same tick — marking two sets done in a row, faster than a
-   * render — compose instead of the last one silently winning: each updater
-   * sees the previous updater's result as `prevState`, not the stale value
-   * this closure was created with. The version passed to `save` falls out of
-   * that same read.
+   * Reads and writes `stateRef` rather than using the functional form of
+   * `setState`, on purpose — that used to be `setState((prevState) => {
+   * ...; void persist(...); return next; })`, and it produced a real,
+   * reproducible bug: the function passed to `setState` is a *render-phase*
+   * function, and React Strict Mode (`reactStrictMode: true` in
+   * `next.config.ts`) deliberately invokes it twice to catch exactly this —
+   * an impure updater with a side effect inside it. Both invocations read the
+   * same `prevState.session.updatedAt` and both called `persist`, so one
+   * completed set or one "Finalizar" fired two writes racing on the same
+   * expected version; the second always lost, surfacing as "Isso foi
+   * alterado em outro lugar" from a single tap on a single tab. `apply`
+   * itself is an ordinary callback, not a render function, so React never
+   * double-invokes it — the ref gives it the same "read the version this
+   * edit actually grew out of" guarantee the old comment described, without
+   * living inside a function React is allowed to call twice.
    */
   const apply = useCallback(
     (change: (session: Session) => Session) => {
-      setState((prevState) => {
-        if (prevState.status !== "ready") return prevState;
+      const prevState = stateRef.current;
+      if (prevState.status !== "ready") return;
 
-        const next = change(prevState.session);
-        if (next === prevState.session) return prevState;
+      const next = change(prevState.session);
+      if (next === prevState.session) return;
 
-        void persist(next, prevState.session.updatedAt);
-        return { status: "ready", session: next };
-      });
+      const nextState: SessionRunnerState = { status: "ready", session: next };
+      stateRef.current = nextState;
+      setState(nextState);
+
+      void persist(next, prevState.session.updatedAt);
 
       async function persist(session: Session, expectedUpdatedAt: number) {
         setSaveError(null);

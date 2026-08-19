@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
 import type { EntityId } from "@/core/domain/entity";
@@ -38,6 +38,12 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
   const [state, setState] = useState<RoutineEditorState>({ status: "loading" });
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  /**
+   * Mirrors `state`, but written synchronously by `apply` itself rather than
+   * read back from React's state. See the note on `apply` for why.
+   */
+  const stateRef = useRef(state);
+
   useEffect(() => {
     let active = true;
 
@@ -45,14 +51,21 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
       try {
         const routine = await (await repositories).routines.getById(routineId);
         if (!active) return;
-        setState(
+        const next: RoutineEditorState =
           routine === undefined
             ? { status: "missing" }
-            : { status: "ready", routine },
-        );
+            : { status: "ready", routine };
+        stateRef.current = next;
+        setState(next);
       } catch (cause) {
-        if (active)
-          setState({ status: "error", message: describeDataError(cause) });
+        if (active) {
+          const next: RoutineEditorState = {
+            status: "error",
+            message: describeDataError(cause),
+          };
+          stateRef.current = next;
+          setState(next);
+        }
       }
     }
 
@@ -68,27 +81,35 @@ export function useRoutineEditor(routineId: EntityId): RoutineEditor {
    * keystroke would make the editor stutter; a failed save surfaces as a
    * banner without discarding the edit.
    *
-   * The functional form of `setState` matters here beyond React convention:
-   * when several `apply()` calls land in the same batch — two fields edited
-   * fast enough to land in one tick — each updater sees the *previous
-   * updater's* result as `prevState`, not the stale value this closure was
-   * created with. That is what makes the edits compose instead of the last
-   * one silently winning, and it is also where the version passed to `save`
-   * comes from: each write's expected version is exactly the version the
-   * updater it grew out of actually read.
+   * Reads and writes `stateRef` rather than the functional form of
+   * `setState`, on purpose — that used to be `setState((prevState) => {
+   * ...; void persist(...); return next; })`, and it produced a real,
+   * reproducible bug: the function passed to `setState` is a *render-phase*
+   * function, and React Strict Mode (`reactStrictMode: true` in
+   * `next.config.ts`) deliberately invokes it twice to catch exactly this —
+   * an impure updater with a side effect inside it. Both invocations read the
+   * same `prevState.routine.updatedAt` and both called `persist`, so adding
+   * one exercise fired two writes racing on the same expected version; the
+   * second always lost, surfacing as "Isso foi alterado em outro lugar" from
+   * a single click on a single tab. `apply` itself is an ordinary callback,
+   * not a render function, so React never double-invokes it — the ref gives
+   * it the same "read the version this edit actually grew out of" guarantee
+   * without living inside a function React is allowed to call twice.
    */
   const apply = useCallback(
     (change: (routine: Routine) => Routine) => {
-      setState((prevState) => {
-        if (prevState.status !== "ready") return prevState;
+      const prevState = stateRef.current;
+      if (prevState.status !== "ready") return;
 
-        const next = change(prevState.routine);
-        // Edits addressing something already gone return the same routine.
-        if (next === prevState.routine) return prevState;
+      const next = change(prevState.routine);
+      // Edits addressing something already gone return the same routine.
+      if (next === prevState.routine) return;
 
-        void persist(next, prevState.routine.updatedAt);
-        return { status: "ready", routine: next };
-      });
+      const nextState: RoutineEditorState = { status: "ready", routine: next };
+      stateRef.current = nextState;
+      setState(nextState);
+
+      void persist(next, prevState.routine.updatedAt);
 
       async function persist(routine: Routine, expectedUpdatedAt: number) {
         setSaveError(null);

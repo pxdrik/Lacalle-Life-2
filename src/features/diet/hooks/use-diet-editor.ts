@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
 import type { EntityId } from "@/core/domain/entity";
@@ -34,6 +34,13 @@ export function useDietEditor(dietId: EntityId): DietEditor {
   const [state, setState] = useState<DietEditorState>({ status: "loading" });
   const [saveError, setSaveError] = useState<string | null>(null);
 
+  /**
+   * Mirrors `state`, but written synchronously by `apply` itself rather than
+   * read back from React's state. See the note on `apply` for why: reading
+   * `state` there would be the same bug this replaced.
+   */
+  const stateRef = useRef(state);
+
   useEffect(() => {
     let active = true;
 
@@ -41,14 +48,18 @@ export function useDietEditor(dietId: EntityId): DietEditor {
       try {
         const diet = await (await repository).getById(dietId);
         if (!active) return;
-        setState(
-          diet === undefined
-            ? { status: "missing" }
-            : { status: "ready", diet },
-        );
+        const next: DietEditorState =
+          diet === undefined ? { status: "missing" } : { status: "ready", diet };
+        stateRef.current = next;
+        setState(next);
       } catch (error) {
         if (active) {
-          setState({ status: "error", message: describeDataError(error) });
+          const next: DietEditorState = {
+            status: "error",
+            message: describeDataError(error),
+          };
+          stateRef.current = next;
+          setState(next);
         }
       }
     }
@@ -69,26 +80,37 @@ export function useDietEditor(dietId: EntityId): DietEditor {
    * editor. A failed save surfaces as a banner without discarding the edit.
    */
   /**
-   * The functional form of `setState` matters beyond convention here: when
-   * several `apply()` calls land in the same batch, each updater sees the
-   * previous updater's result as `prevState`, not the stale value this
-   * closure closed over — that is what makes same-tick edits compose instead
-   * of the last one silently winning. The version passed to `save` is exactly
-   * the version the updater it grew out of actually read.
+   * Reads and writes `stateRef` rather than using the functional form of
+   * `setState`, on purpose — that used to be `setState((prevState) => {
+   * ...; void persist(...); return next; })`, and it produced a real,
+   * reproducible bug: the function passed to `setState` is a *render-phase*
+   * function, and React Strict Mode (on here, `reactStrictMode: true` in
+   * `next.config.ts`) deliberately invokes it twice to catch exactly this —
+   * an impure updater with a side effect inside it. Both invocations read the
+   * same `prevState.diet.updatedAt` and both called `persist`, so one edit
+   * fired two writes racing on the same expected version; the second always
+   * lost, surfacing as "Isso foi alterado em outro lugar" on a single tab
+   * with a single edit. `apply` itself is an ordinary callback, not a render
+   * function, so React never double-invokes it — the ref gives it the same
+   * "read the version this edit actually grew out of" guarantee the comment
+   * above described, without living inside a function React is allowed to
+   * call twice.
    */
   const apply = useCallback(
     (change: (diet: Diet) => Diet) => {
-      setState((prevState) => {
-        if (prevState.status !== "ready") return prevState;
+      const prevState = stateRef.current;
+      if (prevState.status !== "ready") return;
 
-        const next = change(prevState.diet);
-        // Edits addressing a meal or item that is no longer there return the
-        // same diet. Nothing to store, nothing to re-render.
-        if (next === prevState.diet) return prevState;
+      const next = change(prevState.diet);
+      // Edits addressing a meal or item that is no longer there return the
+      // same diet. Nothing to store, nothing to re-render.
+      if (next === prevState.diet) return;
 
-        void persist(next, prevState.diet.updatedAt);
-        return { status: "ready", diet: next };
-      });
+      const nextState: DietEditorState = { status: "ready", diet: next };
+      stateRef.current = nextState;
+      setState(nextState);
+
+      void persist(next, prevState.diet.updatedAt);
 
       async function persist(diet: Diet, expectedUpdatedAt: number) {
         setSaveError(null);
