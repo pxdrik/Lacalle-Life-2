@@ -2374,5 +2374,4020 @@
       "carbsG": 8,
       "fatG": 7
     }
+  },
+  {
+    "id": "arroz-integral-cru",
+    "name": "Arroz integral cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 360,
+      "proteinG": 7.3,
+      "carbsG": 77.5,
+      "fatG": 1.9
+    }
+  },
+  {
+    "id": "arroz-tipo-1-cozido",
+    "name": "Arroz tipo 1 cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 128,
+      "proteinG": 2.5,
+      "carbsG": 28.1,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "arroz-tipo-1-cru",
+    "name": "Arroz tipo 1 cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 358,
+      "proteinG": 7.2,
+      "carbsG": 78.8,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "arroz-tipo-2-cozido",
+    "name": "Arroz tipo 2 cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 130,
+      "proteinG": 2.6,
+      "carbsG": 28.2,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "arroz-tipo-2-cru",
+    "name": "Arroz tipo 2 cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 358,
+      "proteinG": 7.2,
+      "carbsG": 78.9,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "biscoito-salgado-cream-cracker",
+    "name": "Biscoito salgado cream cracker",
+    "category": "carb",
+    "per100g": {
+      "kcal": 432,
+      "proteinG": 10.1,
+      "carbsG": 68.7,
+      "fatG": 14.4
+    }
+  },
+  {
+    "id": "cereais-milho-flocos-sem-sal",
+    "name": "Cereais milho flocos sem sal",
+    "category": "carb",
+    "per100g": {
+      "kcal": 363,
+      "proteinG": 6.9,
+      "carbsG": 80.4,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "cereais-mistura-para-vitamina-trigo-cevada-e-aveia",
+    "name": "Cereais mistura para vitamina trigo cevada e aveia",
+    "category": "carb",
+    "per100g": {
+      "kcal": 381,
+      "proteinG": 8.9,
+      "carbsG": 81.6,
+      "fatG": 2.1
+    }
+  },
+  {
+    "id": "cereal-matinal-milho-acucar",
+    "name": "Cereal matinal milho açúcar",
+    "category": "carb",
+    "per100g": {
+      "kcal": 377,
+      "proteinG": 4.7,
+      "carbsG": 88.8,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "creme-de-arroz-po",
+    "name": "Creme de arroz pó",
+    "category": "carb",
+    "per100g": {
+      "kcal": 386,
+      "proteinG": 7,
+      "carbsG": 83.9,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "creme-de-milho-po",
+    "name": "Creme de milho pó",
+    "category": "carb",
+    "per100g": {
+      "kcal": 333,
+      "proteinG": 4.8,
+      "carbsG": 86.1,
+      "fatG": 1.6
+    }
+  },
+  {
+    "id": "curau-milho-verde-mistura-para",
+    "name": "Curau milho verde mistura para",
+    "category": "carb",
+    "per100g": {
+      "kcal": 402,
+      "proteinG": 2.2,
+      "carbsG": 79.8,
+      "fatG": 13.4
+    }
+  },
+  {
+    "id": "farinha-de-arroz-enriquecida",
+    "name": "Farinha de arroz enriquecida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 363,
+      "proteinG": 1.3,
+      "carbsG": 85.5,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "farinha-de-centeio-integral",
+    "name": "Farinha de centeio integral",
+    "category": "carb",
+    "per100g": {
+      "kcal": 336,
+      "proteinG": 12.5,
+      "carbsG": 73.3,
+      "fatG": 1.8
+    }
+  },
+  {
+    "id": "farinha-de-milho-amarela",
+    "name": "Farinha de milho amarela",
+    "category": "carb",
+    "per100g": {
+      "kcal": 351,
+      "proteinG": 7.2,
+      "carbsG": 79.1,
+      "fatG": 1.5
+    }
+  },
+  {
+    "id": "farinha-de-rosca",
+    "name": "Farinha de rosca",
+    "category": "carb",
+    "per100g": {
+      "kcal": 371,
+      "proteinG": 11.4,
+      "carbsG": 75.8,
+      "fatG": 1.5
+    }
+  },
+  {
+    "id": "farinha-de-trigo",
+    "name": "Farinha de trigo",
+    "category": "carb",
+    "per100g": {
+      "kcal": 360,
+      "proteinG": 9.8,
+      "carbsG": 75.1,
+      "fatG": 1.4
+    }
+  },
+  {
+    "id": "farinha-lactea-de-cereais",
+    "name": "Farinha láctea de cereais",
+    "category": "carb",
+    "per100g": {
+      "kcal": 415,
+      "proteinG": 11.9,
+      "carbsG": 77.8,
+      "fatG": 5.8
+    }
+  },
+  {
+    "id": "macarrao-instantaneo",
+    "name": "Macarrão instantâneo",
+    "category": "carb",
+    "per100g": {
+      "kcal": 436,
+      "proteinG": 8.8,
+      "carbsG": 62.4,
+      "fatG": 17.2
+    }
+  },
+  {
+    "id": "macarrao-trigo-cru",
+    "name": "Macarrão trigo cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 371,
+      "proteinG": 10,
+      "carbsG": 77.9,
+      "fatG": 1.3
+    }
+  },
+  {
+    "id": "milho-amido-cru",
+    "name": "Milho amido cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 361,
+      "proteinG": 0.6,
+      "carbsG": 87.1,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "milho-fuba-cru",
+    "name": "Milho fubá cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 353,
+      "proteinG": 7.2,
+      "carbsG": 78.9,
+      "fatG": 1.9
+    }
+  },
+  {
+    "id": "milho-verde-cru",
+    "name": "Milho verde cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 138,
+      "proteinG": 6.6,
+      "carbsG": 28.6,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "milho-verde-enlatado-drenado",
+    "name": "Milho verde enlatado drenado",
+    "category": "carb",
+    "per100g": {
+      "kcal": 98,
+      "proteinG": 3.2,
+      "carbsG": 17.1,
+      "fatG": 2.4
+    }
+  },
+  {
+    "id": "pamonha-barra-para-cozimento-pre-cozida",
+    "name": "Pamonha barra para cozimento pré-cozida",
+    "category": "carb",
+    "per100g": {
+      "kcal": 171,
+      "proteinG": 2.6,
+      "carbsG": 30.7,
+      "fatG": 4.8
+    }
+  },
+  {
+    "id": "pao-de-soja",
+    "name": "Pão de soja",
+    "category": "carb",
+    "per100g": {
+      "kcal": 309,
+      "proteinG": 11.3,
+      "carbsG": 56.5,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "pao-gluten-forma",
+    "name": "Pão glúten forma",
+    "category": "carb",
+    "per100g": {
+      "kcal": 253,
+      "proteinG": 12,
+      "carbsG": 44.1,
+      "fatG": 2.7
+    }
+  },
+  {
+    "id": "pao-trigo-sovado",
+    "name": "Pão trigo sovado",
+    "category": "carb",
+    "per100g": {
+      "kcal": 311,
+      "proteinG": 8.4,
+      "carbsG": 61.5,
+      "fatG": 2.8
+    }
+  },
+  {
+    "id": "pipoca-com-oleo-de-soja-sem-sal",
+    "name": "Pipoca com óleo de soja sem sal",
+    "category": "carb",
+    "per100g": {
+      "kcal": 448,
+      "proteinG": 9.9,
+      "carbsG": 70.3,
+      "fatG": 15.9
+    }
+  },
+  {
+    "id": "torrada-pao-frances",
+    "name": "Torrada pão francês",
+    "category": "carb",
+    "per100g": {
+      "kcal": 377,
+      "proteinG": 10.5,
+      "carbsG": 74.6,
+      "fatG": 3.3
+    }
+  },
+  {
+    "id": "abobora-menina-brasileira-crua",
+    "name": "Abóbora menina brasileira crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 14,
+      "proteinG": 0.6,
+      "carbsG": 3.3,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "abobora-moranga-crua",
+    "name": "Abóbora moranga crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 12,
+      "proteinG": 1,
+      "carbsG": 2.7,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abobora-moranga-refogada",
+    "name": "Abóbora moranga refogada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 29,
+      "proteinG": 0.4,
+      "carbsG": 6,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "abobora-pescoco-crua",
+    "name": "Abóbora pescoço crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 24,
+      "proteinG": 0.7,
+      "carbsG": 6.1,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abobrinha-italiana-refogada",
+    "name": "Abobrinha italiana refogada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 24,
+      "proteinG": 1.1,
+      "carbsG": 4.2,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "abobrinha-paulista-crua",
+    "name": "Abobrinha paulista crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 0.6,
+      "carbsG": 7.9,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "agriao-cru",
+    "name": "Agrião cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 17,
+      "proteinG": 2.7,
+      "carbsG": 2.3,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "aipo-cru",
+    "name": "Aipo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 0.8,
+      "carbsG": 4.3,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "alface-crespa-crua",
+    "name": "Alface crespa crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 11,
+      "proteinG": 1.3,
+      "carbsG": 1.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "alface-lisa-crua",
+    "name": "Alface lisa crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 14,
+      "proteinG": 1.7,
+      "carbsG": 2.4,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "alfavaca-crua",
+    "name": "Alfavaca crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 29,
+      "proteinG": 2.7,
+      "carbsG": 5.2,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "alho-poro-cru",
+    "name": "Alho-poró cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 32,
+      "proteinG": 1.4,
+      "carbsG": 6.9,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "almeirao-cru",
+    "name": "Almeirão cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 18,
+      "proteinG": 1.8,
+      "carbsG": 3.3,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "almeirao-refogado",
+    "name": "Almeirão refogado",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 65,
+      "proteinG": 1.7,
+      "carbsG": 5.7,
+      "fatG": 4.8
+    }
+  },
+  {
+    "id": "batata-baroa-crua",
+    "name": "Batata baroa crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 101,
+      "proteinG": 1,
+      "carbsG": 24,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "batata-doce-crua",
+    "name": "Batata doce crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 118,
+      "proteinG": 1.3,
+      "carbsG": 28.2,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "batata-frita-tipo-chips-industrializada",
+    "name": "Batata frita tipo chips industrializada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 543,
+      "proteinG": 5.6,
+      "carbsG": 51.2,
+      "fatG": 36.6
+    }
+  },
+  {
+    "id": "batata-inglesa-crua",
+    "name": "Batata inglesa crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 64,
+      "proteinG": 1.8,
+      "carbsG": 14.7,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "batata-inglesa-saute",
+    "name": "Batata inglesa sauté",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 68,
+      "proteinG": 1.3,
+      "carbsG": 14.1,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "berinjela-cozida",
+    "name": "Berinjela cozida",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 0.7,
+      "carbsG": 4.5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "berinjela-crua",
+    "name": "Berinjela crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 20,
+      "proteinG": 1.2,
+      "carbsG": 4.4,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "biscoito-polvilho-doce",
+    "name": "Biscoito polvilho doce",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 438,
+      "proteinG": 1.3,
+      "carbsG": 80.5,
+      "fatG": 12.2
+    }
+  },
+  {
+    "id": "cara-cru",
+    "name": "Cará cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 96,
+      "proteinG": 2.3,
+      "carbsG": 23,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "caruru-cru",
+    "name": "Caruru cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 3.2,
+      "carbsG": 6,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "catalonha-crua",
+    "name": "Catalonha crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 24,
+      "proteinG": 1.9,
+      "carbsG": 4.8,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "catalonha-refogada",
+    "name": "Catalonha refogada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 63,
+      "proteinG": 2,
+      "carbsG": 4.8,
+      "fatG": 4.8
+    }
+  },
+  {
+    "id": "cebolinha-crua",
+    "name": "Cebolinha crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 20,
+      "proteinG": 1.9,
+      "carbsG": 3.4,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "chicoria-crua",
+    "name": "Chicória crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 14,
+      "proteinG": 1.1,
+      "carbsG": 2.9,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "coentro-folhas-desidratadas",
+    "name": "Coentro folhas desidratadas",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 309,
+      "proteinG": 20.9,
+      "carbsG": 48,
+      "fatG": 10.4
+    }
+  },
+  {
+    "id": "couve-manteiga-refogada",
+    "name": "Couve manteiga refogada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 90,
+      "proteinG": 1.7,
+      "carbsG": 8.7,
+      "fatG": 6.6
+    }
+  },
+  {
+    "id": "espinafre-nova-zelandia-refogado",
+    "name": "Espinafre Nova Zelândia refogado",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 67,
+      "proteinG": 2.7,
+      "carbsG": 4.2,
+      "fatG": 5.4
+    }
+  },
+  {
+    "id": "farinha-de-mandioca-crua",
+    "name": "Farinha de mandioca crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 361,
+      "proteinG": 1.6,
+      "carbsG": 87.9,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "farinha-de-mandioca-torrada",
+    "name": "Farinha de mandioca torrada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 365,
+      "proteinG": 1.2,
+      "carbsG": 89.2,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "farinha-de-puba",
+    "name": "Farinha de puba",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 360,
+      "proteinG": 1.6,
+      "carbsG": 87.3,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "fecula-de-mandioca",
+    "name": "Fécula de mandioca",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 331,
+      "proteinG": 0.5,
+      "carbsG": 81.1,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "inhame-cru",
+    "name": "Inhame cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 97,
+      "proteinG": 2.1,
+      "carbsG": 23.2,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "jilo-cru",
+    "name": "Jiló cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 27,
+      "proteinG": 1.4,
+      "carbsG": 6.2,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "jurubeba-crua",
+    "name": "Jurubeba crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 126,
+      "proteinG": 4.4,
+      "carbsG": 23.1,
+      "fatG": 3.9
+    }
+  },
+  {
+    "id": "mandioca-crua",
+    "name": "Mandioca crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 151,
+      "proteinG": 1.1,
+      "carbsG": 36.2,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "mandioca-frita",
+    "name": "Mandioca frita",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 300,
+      "proteinG": 1.4,
+      "carbsG": 50.3,
+      "fatG": 11.2
+    }
+  },
+  {
+    "id": "manjericao-cru",
+    "name": "Manjericão cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 21,
+      "proteinG": 2,
+      "carbsG": 3.6,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "maxixe-cru",
+    "name": "Maxixe cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 14,
+      "proteinG": 1.4,
+      "carbsG": 2.7,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "mostarda-folha-crua",
+    "name": "Mostarda folha crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 18,
+      "proteinG": 2.1,
+      "carbsG": 3.2,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "nhoque-batata-cozido",
+    "name": "Nhoque batata cozido",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 181,
+      "proteinG": 5.9,
+      "carbsG": 36.8,
+      "fatG": 1.9
+    }
+  },
+  {
+    "id": "nabo-cru",
+    "name": "Nabo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 18,
+      "proteinG": 1.2,
+      "carbsG": 4.1,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "palmito-pupunha-em-conserva",
+    "name": "Palmito pupunha em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 29,
+      "proteinG": 2.5,
+      "carbsG": 5.5,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "pao-de-queijo-cru",
+    "name": "Pão de queijo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 295,
+      "proteinG": 3.6,
+      "carbsG": 38.5,
+      "fatG": 14
+    }
+  },
+  {
+    "id": "polvilho-doce",
+    "name": "Polvilho doce",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 351,
+      "proteinG": 0.4,
+      "carbsG": 86.8,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "quiabo-cru",
+    "name": "Quiabo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 1.9,
+      "carbsG": 6.4,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "repolho-roxo-cru",
+    "name": "Repolho roxo cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 1.9,
+      "carbsG": 7.2,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "repolho-roxo-refogado",
+    "name": "Repolho roxo refogado",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 42,
+      "proteinG": 1.8,
+      "carbsG": 7.6,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "salsa-crua",
+    "name": "Salsa crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 33,
+      "proteinG": 3.3,
+      "carbsG": 5.7,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "seleta-de-legumes-enlatada",
+    "name": "Seleta de legumes enlatada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 57,
+      "proteinG": 3.4,
+      "carbsG": 12.7,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "serralha-crua",
+    "name": "Serralha crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 30,
+      "proteinG": 2.7,
+      "carbsG": 4.9,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "taioba-crua",
+    "name": "Taioba crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 2.9,
+      "carbsG": 5.4,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "tomate-com-semente-cru",
+    "name": "Tomate com semente cru",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 15,
+      "proteinG": 1.1,
+      "carbsG": 3.1,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "tomate-molho-industrializado",
+    "name": "Tomate molho industrializado",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 38,
+      "proteinG": 1.4,
+      "carbsG": 7.7,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "tomate-pure",
+    "name": "Tomate purê",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 28,
+      "proteinG": 1.4,
+      "carbsG": 6.9,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "tomate-salada",
+    "name": "Tomate salada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 21,
+      "proteinG": 0.8,
+      "carbsG": 5.1,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "vagem-crua",
+    "name": "Vagem crua",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 25,
+      "proteinG": 1.8,
+      "carbsG": 5.3,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "abacaxi-polpa-congelada",
+    "name": "Abacaxi polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 31,
+      "proteinG": 0.5,
+      "carbsG": 7.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "abiu-cru",
+    "name": "Abiu cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 62,
+      "proteinG": 0.8,
+      "carbsG": 14.9,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "acai-polpa-congelada",
+    "name": "Açaí polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 58,
+      "proteinG": 0.8,
+      "carbsG": 6.2,
+      "fatG": 3.9
+    }
+  },
+  {
+    "id": "acerola-crua",
+    "name": "Acerola crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 33,
+      "proteinG": 0.9,
+      "carbsG": 8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "acerola-polpa-congelada",
+    "name": "Acerola polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 22,
+      "proteinG": 0.6,
+      "carbsG": 5.5,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "ameixa-calda-enlatada",
+    "name": "Ameixa calda enlatada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 183,
+      "proteinG": 0.4,
+      "carbsG": 46.9,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "ameixa-em-calda-enlatada-drenada",
+    "name": "Ameixa em calda enlatada drenada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 177,
+      "proteinG": 1,
+      "carbsG": 47.7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "atemoia-crua",
+    "name": "Atemóia crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 97,
+      "proteinG": 1,
+      "carbsG": 25.3,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "banana-figo-crua",
+    "name": "Banana figo crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 105,
+      "proteinG": 1.1,
+      "carbsG": 27.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "banana-maca-crua",
+    "name": "Banana maçã crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 87,
+      "proteinG": 1.8,
+      "carbsG": 22.3,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "banana-nanica-crua",
+    "name": "Banana nanica crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 92,
+      "proteinG": 1.4,
+      "carbsG": 23.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "banana-ouro-crua",
+    "name": "Banana ouro crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 112,
+      "proteinG": 1.5,
+      "carbsG": 29.3,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "banana-pacova-crua",
+    "name": "Banana pacova crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 78,
+      "proteinG": 1.2,
+      "carbsG": 20.3,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "banana-prata-crua",
+    "name": "Banana prata crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 98,
+      "proteinG": 1.3,
+      "carbsG": 26,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "cacau-cru",
+    "name": "Cacau cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 74,
+      "proteinG": 1,
+      "carbsG": 19.4,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "caja-polpa-congelada",
+    "name": "Cajá polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 26,
+      "proteinG": 0.6,
+      "carbsG": 6.4,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "caju-cru",
+    "name": "Caju cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 43,
+      "proteinG": 1,
+      "carbsG": 10.3,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "caju-polpa-congelada",
+    "name": "Caju polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 37,
+      "proteinG": 0.5,
+      "carbsG": 9.4,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "caju-suco-concentrado-envasado",
+    "name": "Caju suco concentrado envasado",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 45,
+      "proteinG": 0.4,
+      "carbsG": 10.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "carambola-crua",
+    "name": "Carambola crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 46,
+      "proteinG": 0.9,
+      "carbsG": 11.5,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "ciriguela-crua",
+    "name": "Ciriguela crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 76,
+      "proteinG": 1.4,
+      "carbsG": 18.9,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "cupuacu-cru",
+    "name": "Cupuaçu cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 1.2,
+      "carbsG": 10.4,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "cupuacu-polpa-congelada",
+    "name": "Cupuaçu polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 0.8,
+      "carbsG": 11.4,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "figo-enlatado-em-calda",
+    "name": "Figo enlatado em calda",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 184,
+      "proteinG": 0.6,
+      "carbsG": 50.3,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "fruta-pao-crua",
+    "name": "Fruta-pão crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 67,
+      "proteinG": 1.1,
+      "carbsG": 17.2,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "goiaba-vermelha-com-casca-crua",
+    "name": "Goiaba vermelha com casca crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 54,
+      "proteinG": 1.1,
+      "carbsG": 13,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "graviola-crua",
+    "name": "Graviola crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 62,
+      "proteinG": 0.8,
+      "carbsG": 15.8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "graviola-polpa-congelada",
+    "name": "Graviola polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 38,
+      "proteinG": 0.6,
+      "carbsG": 9.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "jaca-crua",
+    "name": "Jaca crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 88,
+      "proteinG": 1.4,
+      "carbsG": 22.5,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "jambo-cru",
+    "name": "Jambo cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 27,
+      "proteinG": 0.9,
+      "carbsG": 6.5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "jamelao-cru",
+    "name": "Jamelão cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 41,
+      "proteinG": 0.5,
+      "carbsG": 10.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "laranja-baia-suco",
+    "name": "Laranja baía suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 37,
+      "proteinG": 0.7,
+      "carbsG": 8.7,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "laranja-da-terra-crua",
+    "name": "Laranja da terra crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 51,
+      "proteinG": 1.1,
+      "carbsG": 12.9,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "laranja-da-terra-suco",
+    "name": "Laranja da terra suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 41,
+      "proteinG": 0.7,
+      "carbsG": 9.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "laranja-lima-crua",
+    "name": "Laranja lima crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 46,
+      "proteinG": 1.1,
+      "carbsG": 11.5,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "laranja-lima-suco",
+    "name": "Laranja lima suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 39,
+      "proteinG": 0.7,
+      "carbsG": 9.2,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "laranja-pera-suco",
+    "name": "Laranja pêra suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 33,
+      "proteinG": 0.7,
+      "carbsG": 7.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "laranja-valencia-crua",
+    "name": "Laranja valência crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 46,
+      "proteinG": 0.8,
+      "carbsG": 11.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "laranja-valencia-suco",
+    "name": "Laranja valência suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 36,
+      "proteinG": 0.5,
+      "carbsG": 8.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "limao-galego-suco",
+    "name": "Limão galego suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 22,
+      "proteinG": 0.6,
+      "carbsG": 7.3,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "limao-tahiti-cru",
+    "name": "Limão tahiti cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 32,
+      "proteinG": 0.9,
+      "carbsG": 11.1,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "maca-fuji-com-casca-crua",
+    "name": "Maçã Fuji com casca crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 56,
+      "proteinG": 0.3,
+      "carbsG": 15.2,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "macauba-crua",
+    "name": "Macaúba crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 404,
+      "proteinG": 2.1,
+      "carbsG": 13.9,
+      "fatG": 40.7
+    }
+  },
+  {
+    "id": "mamao-formosa-cru",
+    "name": "Mamão Formosa cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 45,
+      "proteinG": 0.8,
+      "carbsG": 11.6,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "manga-haden-crua",
+    "name": "Manga Haden crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 64,
+      "proteinG": 0.4,
+      "carbsG": 16.7,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "manga-palmer-crua",
+    "name": "Manga Palmer crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 72,
+      "proteinG": 0.4,
+      "carbsG": 19.4,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "manga-polpa-congelada",
+    "name": "Manga polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 48,
+      "proteinG": 0.4,
+      "carbsG": 12.5,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "manga-tommy-atkins-crua",
+    "name": "Manga Tommy Atkins crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 51,
+      "proteinG": 0.9,
+      "carbsG": 12.8,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "maracuja-cru",
+    "name": "Maracujá cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 68,
+      "proteinG": 2,
+      "carbsG": 12.3,
+      "fatG": 2.1
+    }
+  },
+  {
+    "id": "maracuja-polpa-congelada",
+    "name": "Maracujá polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 39,
+      "proteinG": 0.8,
+      "carbsG": 9.6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "maracuja-suco-concentrado-envasado",
+    "name": "Maracujá suco concentrado envasado",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 42,
+      "proteinG": 0.8,
+      "carbsG": 9.6,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "mexerica-murcote-crua",
+    "name": "Mexerica Murcote crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 58,
+      "proteinG": 0.9,
+      "carbsG": 14.9,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "mexerica-rio-crua",
+    "name": "Mexerica Rio crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 37,
+      "proteinG": 0.7,
+      "carbsG": 9.3,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "nespera-crua",
+    "name": "Nêspera crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 43,
+      "proteinG": 0.3,
+      "carbsG": 11.5,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "pequi-cru",
+    "name": "Pequi cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 205,
+      "proteinG": 2.3,
+      "carbsG": 13,
+      "fatG": 18
+    }
+  },
+  {
+    "id": "pera-park-crua",
+    "name": "Pêra Park crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 61,
+      "proteinG": 0.2,
+      "carbsG": 16.1,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "pera-williams-crua",
+    "name": "Pêra Williams crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 53,
+      "proteinG": 0.6,
+      "carbsG": 14,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "pessego-enlatado-em-calda",
+    "name": "Pêssego enlatado em calda",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 63,
+      "proteinG": 0.7,
+      "carbsG": 16.9,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "pinha-crua",
+    "name": "Pinha crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 88,
+      "proteinG": 1.5,
+      "carbsG": 22.4,
+      "fatG": 0.3
+    }
+  },
+  {
+    "id": "pitanga-polpa-congelada",
+    "name": "Pitanga polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 19,
+      "proteinG": 0.3,
+      "carbsG": 4.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "tamarindo-cru",
+    "name": "Tamarindo cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 276,
+      "proteinG": 3.2,
+      "carbsG": 72.5,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "tangerina-ponca-suco",
+    "name": "Tangerina Poncã suco",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 36,
+      "proteinG": 0.5,
+      "carbsG": 8.8,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "tucuma-cru",
+    "name": "Tucumã cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 262,
+      "proteinG": 2.1,
+      "carbsG": 26.5,
+      "fatG": 19.1
+    }
+  },
+  {
+    "id": "umbu-cru",
+    "name": "Umbu cru",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 37,
+      "proteinG": 0.8,
+      "carbsG": 9.4,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "umbu-polpa-congelada",
+    "name": "Umbu polpa congelada",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 34,
+      "proteinG": 0.5,
+      "carbsG": 8.8,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "uva-rubi-crua",
+    "name": "Uva Rubi crua",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 49,
+      "proteinG": 0.6,
+      "carbsG": 12.7,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "uva-suco-concentrado-envasado",
+    "name": "Uva suco concentrado envasado",
+    "category": "fruit",
+    "per100g": {
+      "kcal": 58,
+      "proteinG": 0,
+      "carbsG": 14.7,
+      "fatG": 0
+    }
+  },
+  {
+    "id": "azeite-de-dende",
+    "name": "Azeite de dendê",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "manteiga-sem-sal",
+    "name": "Manteiga sem sal",
+    "category": "fat",
+    "per100g": {
+      "kcal": 758,
+      "proteinG": 0.4,
+      "carbsG": 0,
+      "fatG": 86
+    }
+  },
+  {
+    "id": "margarina-com-oleo-hidrogenado-com-sal-65-de-lipideos",
+    "name": "Margarina com óleo hidrogenado com sal (65% de lipídeos)",
+    "category": "fat",
+    "per100g": {
+      "kcal": 596,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 67.4
+    }
+  },
+  {
+    "id": "margarina-com-oleo-hidrogenado-sem-sal-80-de-lipideos",
+    "name": "Margarina com óleo hidrogenado sem sal (80% de lipídeos)",
+    "category": "fat",
+    "per100g": {
+      "kcal": 723,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 81.7
+    }
+  },
+  {
+    "id": "margarina-com-oleo-interesterificado-com-sal-65-de-lipideos",
+    "name": "Margarina com óleo interesterificado com sal (65%de lipídeos)",
+    "category": "fat",
+    "per100g": {
+      "kcal": 594,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 67.2
+    }
+  },
+  {
+    "id": "margarina-com-oleo-interesterificado-sem-sal-65-de-lipideos",
+    "name": "Margarina com óleo interesterificado sem sal (65% de lipídeos)",
+    "category": "fat",
+    "per100g": {
+      "kcal": 593,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 67.1
+    }
+  },
+  {
+    "id": "oleo-de-babacu",
+    "name": "Óleo de babaçu",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "oleo-de-milho",
+    "name": "Óleo de milho",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "oleo-de-pequi",
+    "name": "Óleo de pequi",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "oleo-de-soja",
+    "name": "Óleo de soja",
+    "category": "fat",
+    "per100g": {
+      "kcal": 884,
+      "proteinG": 0,
+      "carbsG": 0,
+      "fatG": 100
+    }
+  },
+  {
+    "id": "abadejo-file-congelado-assado",
+    "name": "Abadejo filé congelado assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 112,
+      "proteinG": 23.5,
+      "carbsG": 0,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "abadejo-file-congelado-cozido",
+    "name": "Abadejo filé congelado cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 91,
+      "proteinG": 19.3,
+      "carbsG": 0,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "abadejo-file-congelado-cru",
+    "name": "Abadejo filé congelado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 59,
+      "proteinG": 13.1,
+      "carbsG": 0,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "abadejo-file-congelado-grelhado",
+    "name": "Abadejo filé congelado grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 130,
+      "proteinG": 27.6,
+      "carbsG": 0,
+      "fatG": 1.3
+    }
+  },
+  {
+    "id": "atum-conserva-em-oleo",
+    "name": "Atum conserva em óleo",
+    "category": "protein",
+    "per100g": {
+      "kcal": 166,
+      "proteinG": 26.2,
+      "carbsG": 0,
+      "fatG": 6
+    }
+  },
+  {
+    "id": "atum-fresco-cru",
+    "name": "Atum fresco cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 118,
+      "proteinG": 25.7,
+      "carbsG": 0,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "bacalhau-salgado-refogado",
+    "name": "Bacalhau salgado refogado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 140,
+      "proteinG": 24,
+      "carbsG": 1.2,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "cacao-posta-com-farinha-de-trigo-frita",
+    "name": "Cação posta com farinha de trigo frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 208,
+      "proteinG": 25,
+      "carbsG": 3.1,
+      "fatG": 10
+    }
+  },
+  {
+    "id": "cacao-posta-cozida",
+    "name": "Cação posta cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 116,
+      "proteinG": 25.6,
+      "carbsG": 0,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "cacao-posta-crua",
+    "name": "Cação posta crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 83,
+      "proteinG": 17.9,
+      "carbsG": 0,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "camarao-rio-grande-grande-cozido",
+    "name": "Camarão Rio Grande grande cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 90,
+      "proteinG": 19,
+      "carbsG": 0,
+      "fatG": 1
+    }
+  },
+  {
+    "id": "camarao-rio-grande-grande-cru",
+    "name": "Camarão Rio Grande grande cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 47,
+      "proteinG": 10,
+      "carbsG": 0,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "camarao-sete-barbas-sem-cabeca-com-casca-frito",
+    "name": "Camarão Sete Barbas sem cabeça com casca frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 231,
+      "proteinG": 18.4,
+      "carbsG": 2.9,
+      "fatG": 15.6
+    }
+  },
+  {
+    "id": "caranguejo-cozido",
+    "name": "Caranguejo cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 83,
+      "proteinG": 18.5,
+      "carbsG": 0,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "corimba-cru",
+    "name": "Corimba cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 128,
+      "proteinG": 17.4,
+      "carbsG": 0,
+      "fatG": 6
+    }
+  },
+  {
+    "id": "corimbata-assado",
+    "name": "Corimbatá assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 261,
+      "proteinG": 19.9,
+      "carbsG": 0,
+      "fatG": 19.6
+    }
+  },
+  {
+    "id": "corimbata-cozido",
+    "name": "Corimbatá cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 239,
+      "proteinG": 20.1,
+      "carbsG": 0,
+      "fatG": 16.9
+    }
+  },
+  {
+    "id": "corvina-de-agua-doce-crua",
+    "name": "Corvina de água doce crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 101,
+      "proteinG": 18.9,
+      "carbsG": 0,
+      "fatG": 2.2
+    }
+  },
+  {
+    "id": "corvina-do-mar-crua",
+    "name": "Corvina do mar crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 94,
+      "proteinG": 18.6,
+      "carbsG": 0,
+      "fatG": 1.6
+    }
+  },
+  {
+    "id": "corvina-grande-assada",
+    "name": "Corvina grande assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 147,
+      "proteinG": 26.8,
+      "carbsG": 0,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "corvina-grande-cozida",
+    "name": "Corvina grande cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 100,
+      "proteinG": 23.4,
+      "carbsG": 0,
+      "fatG": 2.6
+    }
+  },
+  {
+    "id": "dourada-de-agua-doce-fresca",
+    "name": "Dourada de água doce fresca",
+    "category": "protein",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 18.8,
+      "carbsG": 0,
+      "fatG": 5.6
+    }
+  },
+  {
+    "id": "lambari-congelado-cru",
+    "name": "Lambari congelado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 16.8,
+      "carbsG": 0,
+      "fatG": 6.5
+    }
+  },
+  {
+    "id": "lambari-congelado-frito",
+    "name": "Lambari congelado frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 327,
+      "proteinG": 28.4,
+      "carbsG": 0,
+      "fatG": 22.8
+    }
+  },
+  {
+    "id": "lambari-fresco-cru",
+    "name": "Lambari fresco cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 152,
+      "proteinG": 15.7,
+      "carbsG": 0,
+      "fatG": 9.4
+    }
+  },
+  {
+    "id": "manjuba-com-farinha-de-trigo-frita",
+    "name": "Manjuba com farinha de trigo frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 344,
+      "proteinG": 23.5,
+      "carbsG": 10.2,
+      "fatG": 22.6
+    }
+  },
+  {
+    "id": "manjuba-frita",
+    "name": "Manjuba frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 349,
+      "proteinG": 30.1,
+      "carbsG": 0,
+      "fatG": 24.5
+    }
+  },
+  {
+    "id": "merluza-file-assado",
+    "name": "Merluza filé assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 122,
+      "proteinG": 26.6,
+      "carbsG": 0,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "merluza-file-cru",
+    "name": "Merluza filé cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 89,
+      "proteinG": 16.6,
+      "carbsG": 0,
+      "fatG": 2
+    }
+  },
+  {
+    "id": "merluza-file-frito",
+    "name": "Merluza filé frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 192,
+      "proteinG": 26.9,
+      "carbsG": 0,
+      "fatG": 8.5
+    }
+  },
+  {
+    "id": "pescada-branca-crua",
+    "name": "Pescada branca crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 111,
+      "proteinG": 16.3,
+      "carbsG": 0,
+      "fatG": 4.6
+    }
+  },
+  {
+    "id": "pescada-branca-frita",
+    "name": "Pescada branca frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 223,
+      "proteinG": 27.4,
+      "carbsG": 0,
+      "fatG": 11.8
+    }
+  },
+  {
+    "id": "pescada-file-com-farinha-de-trigo-frito",
+    "name": "Pescada filé com farinha de trigo frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 283,
+      "proteinG": 21.4,
+      "carbsG": 5,
+      "fatG": 19.1
+    }
+  },
+  {
+    "id": "pescada-file-cru",
+    "name": "Pescada filé cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 107,
+      "proteinG": 16.7,
+      "carbsG": 0,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "pescada-file-frito",
+    "name": "Pescada filé frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 154,
+      "proteinG": 28.6,
+      "carbsG": 0,
+      "fatG": 3.6
+    }
+  },
+  {
+    "id": "pescada-file-molho-escabeche",
+    "name": "Pescada filé molho escabeche",
+    "category": "protein",
+    "per100g": {
+      "kcal": 142,
+      "proteinG": 11.8,
+      "carbsG": 5,
+      "fatG": 8
+    }
+  },
+  {
+    "id": "pescadinha-crua",
+    "name": "Pescadinha crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 76,
+      "proteinG": 15.5,
+      "carbsG": 0,
+      "fatG": 1.1
+    }
+  },
+  {
+    "id": "pintado-assado",
+    "name": "Pintado assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 192,
+      "proteinG": 36.5,
+      "carbsG": 0,
+      "fatG": 4
+    }
+  },
+  {
+    "id": "pintado-cru",
+    "name": "Pintado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 91,
+      "proteinG": 18.6,
+      "carbsG": 0,
+      "fatG": 1.3
+    }
+  },
+  {
+    "id": "pintado-grelhado",
+    "name": "Pintado grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 152,
+      "proteinG": 30.8,
+      "carbsG": 0,
+      "fatG": 2.3
+    }
+  },
+  {
+    "id": "porquinho-cru",
+    "name": "Porquinho cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 93,
+      "proteinG": 20.5,
+      "carbsG": 0,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "salmao-sem-pele-fresco-cru",
+    "name": "Salmão sem pele fresco cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 170,
+      "proteinG": 19.3,
+      "carbsG": 0,
+      "fatG": 9.7
+    }
+  },
+  {
+    "id": "salmao-sem-pele-fresco-grelhado",
+    "name": "Salmão sem pele fresco grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 243,
+      "proteinG": 26.1,
+      "carbsG": 0,
+      "fatG": 14.5
+    }
+  },
+  {
+    "id": "sardinha-conserva-em-oleo",
+    "name": "Sardinha conserva em óleo",
+    "category": "protein",
+    "per100g": {
+      "kcal": 285,
+      "proteinG": 15.9,
+      "carbsG": 0,
+      "fatG": 24
+    }
+  },
+  {
+    "id": "sardinha-frita",
+    "name": "Sardinha frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 257,
+      "proteinG": 33.4,
+      "carbsG": 0,
+      "fatG": 12.7
+    }
+  },
+  {
+    "id": "sardinha-inteira-crua",
+    "name": "Sardinha inteira crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 114,
+      "proteinG": 21.1,
+      "carbsG": 0,
+      "fatG": 2.7
+    }
+  },
+  {
+    "id": "tucunare-file-congelado-cru",
+    "name": "Tucunaré filé congelado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 88,
+      "proteinG": 18,
+      "carbsG": 0,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "apresuntado",
+    "name": "Apresuntado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 129,
+      "proteinG": 13.5,
+      "carbsG": 2.9,
+      "fatG": 6.7
+    }
+  },
+  {
+    "id": "caldo-de-carne-tablete",
+    "name": "Caldo de carne tablete",
+    "category": "protein",
+    "per100g": {
+      "kcal": 241,
+      "proteinG": 7.8,
+      "carbsG": 15.1,
+      "fatG": 16.6
+    }
+  },
+  {
+    "id": "caldo-de-galinha-tablete",
+    "name": "Caldo de galinha tablete",
+    "category": "protein",
+    "per100g": {
+      "kcal": 251,
+      "proteinG": 6.3,
+      "carbsG": 10.6,
+      "fatG": 20.4
+    }
+  },
+  {
+    "id": "carne-bovina-acem-moido-cozido",
+    "name": "Carne bovina acém moído cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 212,
+      "proteinG": 26.7,
+      "carbsG": 0,
+      "fatG": 10.9
+    }
+  },
+  {
+    "id": "carne-bovina-acem-moido-cru",
+    "name": "Carne bovina acém moído cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 137,
+      "proteinG": 19.4,
+      "carbsG": 0,
+      "fatG": 5.9
+    }
+  },
+  {
+    "id": "carne-bovina-acem-sem-gordura-cozido",
+    "name": "Carne bovina acém sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 215,
+      "proteinG": 27.3,
+      "carbsG": 0,
+      "fatG": 10.9
+    }
+  },
+  {
+    "id": "carne-bovina-acem-sem-gordura-cru",
+    "name": "Carne bovina acém sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 144,
+      "proteinG": 20.8,
+      "carbsG": 0,
+      "fatG": 6.1
+    }
+  },
+  {
+    "id": "carne-bovina-bucho-cozido",
+    "name": "Carne bovina bucho cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 133,
+      "proteinG": 21.6,
+      "carbsG": 0,
+      "fatG": 4.5
+    }
+  },
+  {
+    "id": "carne-bovina-bucho-cru",
+    "name": "Carne bovina bucho cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 137,
+      "proteinG": 20.5,
+      "carbsG": 0,
+      "fatG": 5.5
+    }
+  },
+  {
+    "id": "carne-bovina-capa-de-contra-file-com-gordura-crua",
+    "name": "Carne bovina capa de contra-filé com gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 217,
+      "proteinG": 19.2,
+      "carbsG": 0,
+      "fatG": 15
+    }
+  },
+  {
+    "id": "carne-bovina-capa-de-contra-file-com-gordura-grelhada",
+    "name": "Carne bovina capa de contra-filé com gordura grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 312,
+      "proteinG": 30.7,
+      "carbsG": 0,
+      "fatG": 20
+    }
+  },
+  {
+    "id": "carne-bovina-capa-de-contra-file-sem-gordura-crua",
+    "name": "Carne bovina capa de contra-filé sem gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 131,
+      "proteinG": 21.5,
+      "carbsG": 0,
+      "fatG": 4.3
+    }
+  },
+  {
+    "id": "carne-bovina-capa-de-contra-file-sem-gordura-grelhada",
+    "name": "Carne bovina capa de contra-filé sem gordura grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 239,
+      "proteinG": 35.1,
+      "carbsG": 0,
+      "fatG": 10
+    }
+  },
+  {
+    "id": "carne-bovina-charque-cozido",
+    "name": "Carne bovina charque cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 263,
+      "proteinG": 36.4,
+      "carbsG": 0,
+      "fatG": 11.9
+    }
+  },
+  {
+    "id": "carne-bovina-charque-cru",
+    "name": "Carne bovina charque cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 249,
+      "proteinG": 22.7,
+      "carbsG": 0,
+      "fatG": 16.8
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-de-costela-cru",
+    "name": "Carne bovina contra-filé de costela cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 202,
+      "proteinG": 19.8,
+      "carbsG": 0,
+      "fatG": 13.1
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-de-costela-grelhado",
+    "name": "Carne bovina contra-filé de costela grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 275,
+      "proteinG": 29.9,
+      "carbsG": 0,
+      "fatG": 16.3
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-com-gordura-cru",
+    "name": "Carne bovina contra-filé com gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 206,
+      "proteinG": 21.2,
+      "carbsG": 0,
+      "fatG": 12.8
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-com-gordura-grelhado",
+    "name": "Carne bovina contra-filé com gordura grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 278,
+      "proteinG": 32.4,
+      "carbsG": 0,
+      "fatG": 15.5
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-sem-gordura-cru",
+    "name": "Carne bovina contra-filé sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 157,
+      "proteinG": 24,
+      "carbsG": 0,
+      "fatG": 6
+    }
+  },
+  {
+    "id": "carne-bovina-contra-file-sem-gordura-grelhado",
+    "name": "Carne bovina contra-filé sem gordura grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 194,
+      "proteinG": 35.9,
+      "carbsG": 0,
+      "fatG": 4.5
+    }
+  },
+  {
+    "id": "carne-bovina-costela-assada",
+    "name": "Carne bovina costela assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 373,
+      "proteinG": 28.8,
+      "carbsG": 0,
+      "fatG": 27.7
+    }
+  },
+  {
+    "id": "carne-bovina-costela-crua",
+    "name": "Carne bovina costela crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 358,
+      "proteinG": 16.7,
+      "carbsG": 0,
+      "fatG": 31.8
+    }
+  },
+  {
+    "id": "carne-bovina-coxao-duro-sem-gordura-cozido",
+    "name": "Carne bovina coxão duro sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 217,
+      "proteinG": 31.9,
+      "carbsG": 0,
+      "fatG": 8.9
+    }
+  },
+  {
+    "id": "carne-bovina-coxao-duro-sem-gordura-cru",
+    "name": "Carne bovina coxão duro sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 148,
+      "proteinG": 21.5,
+      "carbsG": 0,
+      "fatG": 6.2
+    }
+  },
+  {
+    "id": "carne-bovina-coxao-mole-sem-gordura-cozido",
+    "name": "Carne bovina coxão mole sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 219,
+      "proteinG": 32.4,
+      "carbsG": 0,
+      "fatG": 8.9
+    }
+  },
+  {
+    "id": "carne-bovina-coxao-mole-sem-gordura-cru",
+    "name": "Carne bovina coxão mole sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 169,
+      "proteinG": 21.2,
+      "carbsG": 0,
+      "fatG": 8.7
+    }
+  },
+  {
+    "id": "carne-bovina-cupim-assado",
+    "name": "Carne bovina cupim assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 28.6,
+      "carbsG": 0,
+      "fatG": 23
+    }
+  },
+  {
+    "id": "carne-bovina-cupim-cru",
+    "name": "Carne bovina cupim cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 221,
+      "proteinG": 19.5,
+      "carbsG": 0,
+      "fatG": 15.3
+    }
+  },
+  {
+    "id": "carne-bovina-figado-cru",
+    "name": "Carne bovina fígado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 141,
+      "proteinG": 20.7,
+      "carbsG": 1.1,
+      "fatG": 5.4
+    }
+  },
+  {
+    "id": "carne-bovina-figado-grelhado",
+    "name": "Carne bovina fígado grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 225,
+      "proteinG": 29.9,
+      "carbsG": 4.2,
+      "fatG": 9
+    }
+  },
+  {
+    "id": "carne-bovina-file-mignon-sem-gordura-cru",
+    "name": "Carne bovina filé mignon sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 143,
+      "proteinG": 21.6,
+      "carbsG": 0,
+      "fatG": 5.6
+    }
+  },
+  {
+    "id": "carne-bovina-file-mignon-sem-gordura-grelhado",
+    "name": "Carne bovina filé mignon sem gordura grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 32.8,
+      "carbsG": 0,
+      "fatG": 8.8
+    }
+  },
+  {
+    "id": "carne-bovina-flanco-sem-gordura-cozido",
+    "name": "Carne bovina flanco sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 196,
+      "proteinG": 29.4,
+      "carbsG": 0,
+      "fatG": 7.8
+    }
+  },
+  {
+    "id": "carne-bovina-flanco-sem-gordura-cru",
+    "name": "Carne bovina flanco sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 141,
+      "proteinG": 20,
+      "carbsG": 0,
+      "fatG": 6.2
+    }
+  },
+  {
+    "id": "carne-bovina-fraldinha-com-gordura-cozida",
+    "name": "Carne bovina fraldinha com gordura cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 338,
+      "proteinG": 24.2,
+      "carbsG": 0,
+      "fatG": 26
+    }
+  },
+  {
+    "id": "carne-bovina-fraldinha-com-gordura-crua",
+    "name": "Carne bovina fraldinha com gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 221,
+      "proteinG": 17.6,
+      "carbsG": 0,
+      "fatG": 16.1
+    }
+  },
+  {
+    "id": "carne-bovina-lagarto-cozido",
+    "name": "Carne bovina lagarto cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 222,
+      "proteinG": 32.9,
+      "carbsG": 0,
+      "fatG": 9.1
+    }
+  },
+  {
+    "id": "carne-bovina-lagarto-cru",
+    "name": "Carne bovina lagarto cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 135,
+      "proteinG": 20.5,
+      "carbsG": 0,
+      "fatG": 5.2
+    }
+  },
+  {
+    "id": "carne-bovina-lingua-crua",
+    "name": "Carne bovina língua crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 215,
+      "proteinG": 17.1,
+      "carbsG": 0,
+      "fatG": 15.8
+    }
+  },
+  {
+    "id": "carne-bovina-maminha-crua",
+    "name": "Carne bovina maminha crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 153,
+      "proteinG": 20.9,
+      "carbsG": 0,
+      "fatG": 7
+    }
+  },
+  {
+    "id": "carne-bovina-maminha-grelhada",
+    "name": "Carne bovina maminha grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 153,
+      "proteinG": 30.7,
+      "carbsG": 0,
+      "fatG": 2.4
+    }
+  },
+  {
+    "id": "carne-bovina-miolo-de-alcatra-sem-gordura-cru",
+    "name": "Carne bovina miolo de alcatra sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 163,
+      "proteinG": 21.6,
+      "carbsG": 0,
+      "fatG": 7.8
+    }
+  },
+  {
+    "id": "carne-bovina-miolo-de-alcatra-sem-gordura-grelhado",
+    "name": "Carne bovina miolo de alcatra sem gordura grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 241,
+      "proteinG": 31.9,
+      "carbsG": 0,
+      "fatG": 11.6
+    }
+  },
+  {
+    "id": "carne-bovina-musculo-sem-gordura-cozido",
+    "name": "Carne bovina músculo sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 194,
+      "proteinG": 31.2,
+      "carbsG": 0,
+      "fatG": 6.7
+    }
+  },
+  {
+    "id": "carne-bovina-musculo-sem-gordura-cru",
+    "name": "Carne bovina músculo sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 142,
+      "proteinG": 21.6,
+      "carbsG": 0,
+      "fatG": 5.5
+    }
+  },
+  {
+    "id": "carne-bovina-paleta-com-gordura-crua",
+    "name": "Carne bovina paleta com gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 159,
+      "proteinG": 21.4,
+      "carbsG": 0,
+      "fatG": 7.5
+    }
+  },
+  {
+    "id": "carne-bovina-paleta-sem-gordura-cozida",
+    "name": "Carne bovina paleta sem gordura cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 194,
+      "proteinG": 29.7,
+      "carbsG": 0,
+      "fatG": 7.4
+    }
+  },
+  {
+    "id": "carne-bovina-paleta-sem-gordura-crua",
+    "name": "Carne bovina paleta sem gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 141,
+      "proteinG": 21,
+      "carbsG": 0,
+      "fatG": 5.7
+    }
+  },
+  {
+    "id": "carne-bovina-patinho-sem-gordura-cru",
+    "name": "Carne bovina patinho sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 133,
+      "proteinG": 21.7,
+      "carbsG": 0,
+      "fatG": 4.5
+    }
+  },
+  {
+    "id": "carne-bovina-patinho-sem-gordura-grelhado",
+    "name": "Carne bovina patinho sem gordura grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 219,
+      "proteinG": 35.9,
+      "carbsG": 0,
+      "fatG": 7.3
+    }
+  },
+  {
+    "id": "carne-bovina-peito-sem-gordura-cozido",
+    "name": "Carne bovina peito sem gordura cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 338,
+      "proteinG": 22.2,
+      "carbsG": 0,
+      "fatG": 27
+    }
+  },
+  {
+    "id": "carne-bovina-peito-sem-gordura-cru",
+    "name": "Carne bovina peito sem gordura cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 259,
+      "proteinG": 17.6,
+      "carbsG": 0,
+      "fatG": 20.4
+    }
+  },
+  {
+    "id": "carne-bovina-picanha-com-gordura-crua",
+    "name": "Carne bovina picanha com gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 213,
+      "proteinG": 18.8,
+      "carbsG": 0,
+      "fatG": 14.7
+    }
+  },
+  {
+    "id": "carne-bovina-picanha-com-gordura-grelhada",
+    "name": "Carne bovina picanha com gordura grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 289,
+      "proteinG": 26.4,
+      "carbsG": 0,
+      "fatG": 19.5
+    }
+  },
+  {
+    "id": "carne-bovina-picanha-sem-gordura-crua",
+    "name": "Carne bovina picanha sem gordura crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 134,
+      "proteinG": 21.3,
+      "carbsG": 0,
+      "fatG": 4.7
+    }
+  },
+  {
+    "id": "carne-bovina-picanha-sem-gordura-grelhada",
+    "name": "Carne bovina picanha sem gordura grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 238,
+      "proteinG": 31.9,
+      "carbsG": 0,
+      "fatG": 11.3
+    }
+  },
+  {
+    "id": "carne-bovina-seca-cozida",
+    "name": "Carne bovina seca cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 313,
+      "proteinG": 26.9,
+      "carbsG": 0,
+      "fatG": 21.9
+    }
+  },
+  {
+    "id": "carne-bovina-seca-crua",
+    "name": "Carne bovina seca crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 313,
+      "proteinG": 19.7,
+      "carbsG": 0,
+      "fatG": 25.4
+    }
+  },
+  {
+    "id": "coxinha-de-frango-frita",
+    "name": "Coxinha de frango frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 283,
+      "proteinG": 9.6,
+      "carbsG": 34.5,
+      "fatG": 11.8
+    }
+  },
+  {
+    "id": "empada-de-frango-pre-cozida-assada",
+    "name": "Empada de frango pré-cozida assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 358,
+      "proteinG": 6.9,
+      "carbsG": 47.5,
+      "fatG": 15.6
+    }
+  },
+  {
+    "id": "empada-de-frango-pre-cozida",
+    "name": "Empada de frango pré-cozida",
+    "category": "protein",
+    "per100g": {
+      "kcal": 377,
+      "proteinG": 7.3,
+      "carbsG": 35.5,
+      "fatG": 22.9
+    }
+  },
+  {
+    "id": "frango-asa-com-pele-crua",
+    "name": "Frango asa com pele crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 213,
+      "proteinG": 18.1,
+      "carbsG": 0,
+      "fatG": 15.1
+    }
+  },
+  {
+    "id": "frango-caipira-inteiro-com-pele-cozido",
+    "name": "Frango caipira inteiro com pele cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 243,
+      "proteinG": 23.9,
+      "carbsG": 0,
+      "fatG": 15.6
+    }
+  },
+  {
+    "id": "frango-caipira-inteiro-sem-pele-cozido",
+    "name": "Frango caipira inteiro sem pele cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 196,
+      "proteinG": 29.6,
+      "carbsG": 0,
+      "fatG": 7.7
+    }
+  },
+  {
+    "id": "frango-coracao-cru",
+    "name": "Frango coração cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 222,
+      "proteinG": 12.6,
+      "carbsG": 0,
+      "fatG": 18.6
+    }
+  },
+  {
+    "id": "frango-coracao-grelhado",
+    "name": "Frango coração grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 207,
+      "proteinG": 22.4,
+      "carbsG": 0.6,
+      "fatG": 12.1
+    }
+  },
+  {
+    "id": "frango-coxa-com-pele-crua",
+    "name": "Frango coxa com pele crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 161,
+      "proteinG": 17.1,
+      "carbsG": 0,
+      "fatG": 9.8
+    }
+  },
+  {
+    "id": "frango-coxa-sem-pele-crua",
+    "name": "Frango coxa sem pele crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 120,
+      "proteinG": 17.8,
+      "carbsG": 0,
+      "fatG": 4.9
+    }
+  },
+  {
+    "id": "frango-figado-cru",
+    "name": "Frango fígado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 106,
+      "proteinG": 17.6,
+      "carbsG": 0,
+      "fatG": 3.5
+    }
+  },
+  {
+    "id": "frango-inteiro-sem-pele-assado",
+    "name": "Frango inteiro sem pele assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 187,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7.5
+    }
+  },
+  {
+    "id": "frango-inteiro-sem-pele-cozido",
+    "name": "Frango inteiro sem pele cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 170,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 7.1
+    }
+  },
+  {
+    "id": "frango-inteiro-sem-pele-cru",
+    "name": "Frango inteiro sem pele cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 129,
+      "proteinG": 20.6,
+      "carbsG": 0,
+      "fatG": 4.6
+    }
+  },
+  {
+    "id": "frango-peito-com-pele-assado",
+    "name": "Frango peito com pele assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 212,
+      "proteinG": 33.4,
+      "carbsG": 0,
+      "fatG": 7.6
+    }
+  },
+  {
+    "id": "frango-peito-com-pele-cru",
+    "name": "Frango peito com pele cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 149,
+      "proteinG": 20.8,
+      "carbsG": 0,
+      "fatG": 6.7
+    }
+  },
+  {
+    "id": "frango-peito-sem-pele-cru",
+    "name": "Frango peito sem pele cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 119,
+      "proteinG": 21.5,
+      "carbsG": 0,
+      "fatG": 3
+    }
+  },
+  {
+    "id": "frango-sobrecoxa-com-pele-assada",
+    "name": "Frango sobrecoxa com pele assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 28.7,
+      "carbsG": 0,
+      "fatG": 15.2
+    }
+  },
+  {
+    "id": "frango-sobrecoxa-com-pele-crua",
+    "name": "Frango sobrecoxa com pele crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 255,
+      "proteinG": 15.5,
+      "carbsG": 0,
+      "fatG": 20.9
+    }
+  },
+  {
+    "id": "frango-sobrecoxa-sem-pele-assada",
+    "name": "Frango sobrecoxa sem pele assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 233,
+      "proteinG": 29.2,
+      "carbsG": 0,
+      "fatG": 12
+    }
+  },
+  {
+    "id": "frango-sobrecoxa-sem-pele-crua",
+    "name": "Frango sobrecoxa sem pele crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 162,
+      "proteinG": 17.6,
+      "carbsG": 0,
+      "fatG": 9.6
+    }
+  },
+  {
+    "id": "linguica-frango-crua",
+    "name": "Lingüiça frango crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 218,
+      "proteinG": 14.2,
+      "carbsG": 0,
+      "fatG": 17.4
+    }
+  },
+  {
+    "id": "linguica-frango-frita",
+    "name": "Lingüiça frango frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 245,
+      "proteinG": 18.3,
+      "carbsG": 0,
+      "fatG": 18.5
+    }
+  },
+  {
+    "id": "linguica-frango-grelhada",
+    "name": "Lingüiça frango grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 244,
+      "proteinG": 18.2,
+      "carbsG": 0,
+      "fatG": 18.4
+    }
+  },
+  {
+    "id": "linguica-porco-crua",
+    "name": "Lingüiça porco crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 227,
+      "proteinG": 16.1,
+      "carbsG": 0,
+      "fatG": 17.6
+    }
+  },
+  {
+    "id": "linguica-porco-frita",
+    "name": "Lingüiça porco frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 20.5,
+      "carbsG": 0,
+      "fatG": 21.3
+    }
+  },
+  {
+    "id": "linguica-porco-grelhada",
+    "name": "Lingüiça porco grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 296,
+      "proteinG": 23.2,
+      "carbsG": 0,
+      "fatG": 21.9
+    }
+  },
+  {
+    "id": "mortadela",
+    "name": "Mortadela",
+    "category": "protein",
+    "per100g": {
+      "kcal": 269,
+      "proteinG": 12,
+      "carbsG": 5.8,
+      "fatG": 21.6
+    }
+  },
+  {
+    "id": "peru-congelado-assado",
+    "name": "Peru congelado assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 163,
+      "proteinG": 26.2,
+      "carbsG": 0,
+      "fatG": 5.7
+    }
+  },
+  {
+    "id": "peru-congelado-cru",
+    "name": "Peru congelado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 94,
+      "proteinG": 18.1,
+      "carbsG": 0,
+      "fatG": 1.8
+    }
+  },
+  {
+    "id": "porco-bisteca-crua",
+    "name": "Porco bisteca crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 164,
+      "proteinG": 21.5,
+      "carbsG": 0,
+      "fatG": 8
+    }
+  },
+  {
+    "id": "porco-bisteca-frita",
+    "name": "Porco bisteca frita",
+    "category": "protein",
+    "per100g": {
+      "kcal": 311,
+      "proteinG": 33.7,
+      "carbsG": 0,
+      "fatG": 18.5
+    }
+  },
+  {
+    "id": "porco-bisteca-grelhada",
+    "name": "Porco bisteca grelhada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 28.9,
+      "carbsG": 0,
+      "fatG": 17.4
+    }
+  },
+  {
+    "id": "porco-costela-assada",
+    "name": "Porco costela assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 402,
+      "proteinG": 30.2,
+      "carbsG": 0,
+      "fatG": 30.3
+    }
+  },
+  {
+    "id": "porco-costela-crua",
+    "name": "Porco costela crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 256,
+      "proteinG": 18,
+      "carbsG": 0,
+      "fatG": 19.8
+    }
+  },
+  {
+    "id": "porco-lombo-assado",
+    "name": "Porco lombo assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 210,
+      "proteinG": 35.7,
+      "carbsG": 0,
+      "fatG": 6.4
+    }
+  },
+  {
+    "id": "porco-lombo-cru",
+    "name": "Porco lombo cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 176,
+      "proteinG": 22.6,
+      "carbsG": 0,
+      "fatG": 8.8
+    }
+  },
+  {
+    "id": "porco-orelha-salgada-crua",
+    "name": "Porco orelha salgada crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 258,
+      "proteinG": 18.5,
+      "carbsG": 0,
+      "fatG": 19.9
+    }
+  },
+  {
+    "id": "porco-pernil-assado",
+    "name": "Porco pernil assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 262,
+      "proteinG": 32.1,
+      "carbsG": 0,
+      "fatG": 13.9
+    }
+  },
+  {
+    "id": "porco-pernil-cru",
+    "name": "Porco pernil cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 186,
+      "proteinG": 20.1,
+      "carbsG": 0,
+      "fatG": 11.1
+    }
+  },
+  {
+    "id": "porco-rabo-salgado-cru",
+    "name": "Porco rabo salgado cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 377,
+      "proteinG": 15.6,
+      "carbsG": 0,
+      "fatG": 34.5
+    }
+  },
+  {
+    "id": "presunto-com-capa-de-gordura",
+    "name": "Presunto com capa de gordura",
+    "category": "protein",
+    "per100g": {
+      "kcal": 128,
+      "proteinG": 14.4,
+      "carbsG": 1.4,
+      "fatG": 6.8
+    }
+  },
+  {
+    "id": "presunto-sem-capa-de-gordura",
+    "name": "Presunto sem capa de gordura",
+    "category": "protein",
+    "per100g": {
+      "kcal": 94,
+      "proteinG": 14.3,
+      "carbsG": 2.1,
+      "fatG": 2.7
+    }
+  },
+  {
+    "id": "salame",
+    "name": "Salame",
+    "category": "protein",
+    "per100g": {
+      "kcal": 398,
+      "proteinG": 25.8,
+      "carbsG": 2.9,
+      "fatG": 30.6
+    }
+  },
+  {
+    "id": "toucinho-cru",
+    "name": "Toucinho cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 593,
+      "proteinG": 11.5,
+      "carbsG": 0,
+      "fatG": 60.3
+    }
+  },
+  {
+    "id": "toucinho-frito",
+    "name": "Toucinho frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 697,
+      "proteinG": 27.3,
+      "carbsG": 0,
+      "fatG": 64.3
+    }
+  },
+  {
+    "id": "bebida-lactea-pessego",
+    "name": "Bebida láctea pêssego",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 55,
+      "proteinG": 2.1,
+      "carbsG": 7.6,
+      "fatG": 1.9
+    }
+  },
+  {
+    "id": "iogurte-sabor-morango",
+    "name": "Iogurte sabor morango",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 70,
+      "proteinG": 2.7,
+      "carbsG": 9.7,
+      "fatG": 2.3
+    }
+  },
+  {
+    "id": "iogurte-sabor-pessego",
+    "name": "Iogurte sabor pêssego",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 68,
+      "proteinG": 2.5,
+      "carbsG": 9.4,
+      "fatG": 2.3
+    }
+  },
+  {
+    "id": "leite-condensado",
+    "name": "Leite condensado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 313,
+      "proteinG": 7.7,
+      "carbsG": 57,
+      "fatG": 6.7
+    }
+  },
+  {
+    "id": "leite-de-vaca-achocolatado",
+    "name": "Leite de vaca achocolatado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 83,
+      "proteinG": 2.1,
+      "carbsG": 14.2,
+      "fatG": 2.2
+    }
+  },
+  {
+    "id": "leite-de-vaca-integral-po",
+    "name": "Leite de vaca integral pó",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 497,
+      "proteinG": 25.4,
+      "carbsG": 39.2,
+      "fatG": 26.9
+    }
+  },
+  {
+    "id": "leite-fermentado",
+    "name": "Leite fermentado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 70,
+      "proteinG": 1.9,
+      "carbsG": 15.7,
+      "fatG": 0.1
+    }
+  },
+  {
+    "id": "queijo-minas-frescal",
+    "name": "Queijo minas frescal",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 264,
+      "proteinG": 17.4,
+      "carbsG": 3.2,
+      "fatG": 20.2
+    }
+  },
+  {
+    "id": "queijo-mozarela",
+    "name": "Queijo mozarela",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22.6,
+      "carbsG": 3,
+      "fatG": 25.2
+    }
+  },
+  {
+    "id": "queijo-pasteurizado",
+    "name": "Queijo pasteurizado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 303,
+      "proteinG": 9.4,
+      "carbsG": 5.7,
+      "fatG": 27.4
+    }
+  },
+  {
+    "id": "queijo-petit-suisse-morango",
+    "name": "Queijo petit suisse morango",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 121,
+      "proteinG": 5.8,
+      "carbsG": 18.5,
+      "fatG": 2.8
+    }
+  },
+  {
+    "id": "queijo-prato",
+    "name": "Queijo prato",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 360,
+      "proteinG": 22.7,
+      "carbsG": 1.9,
+      "fatG": 29.1
+    }
+  },
+  {
+    "id": "maria-mole",
+    "name": "Maria mole",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 257,
+      "proteinG": 9.6,
+      "carbsG": 2.4,
+      "fatG": 23.4
+    }
+  },
+  {
+    "id": "ovo-de-galinha-inteiro-cozido-10minutos",
+    "name": "Ovo de galinha inteiro cozido/10minutos",
+    "category": "protein",
+    "per100g": {
+      "kcal": 146,
+      "proteinG": 13.3,
+      "carbsG": 0.6,
+      "fatG": 9.5
+    }
+  },
+  {
+    "id": "ovo-de-galinha-inteiro-cru",
+    "name": "Ovo de galinha inteiro cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 143,
+      "proteinG": 13,
+      "carbsG": 1.6,
+      "fatG": 8.9
+    }
+  },
+  {
+    "id": "ovo-de-galinha-inteiro-frito",
+    "name": "Ovo de galinha inteiro frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 240,
+      "proteinG": 15.6,
+      "carbsG": 1.2,
+      "fatG": 18.6
+    }
+  },
+  {
+    "id": "amendoim-grao-cru",
+    "name": "Amendoim grão cru",
+    "category": "fat",
+    "per100g": {
+      "kcal": 544,
+      "proteinG": 27.2,
+      "carbsG": 20.3,
+      "fatG": 43.9
+    }
+  },
+  {
+    "id": "amendoim-torrado-salgado",
+    "name": "Amendoim torrado salgado",
+    "category": "fat",
+    "per100g": {
+      "kcal": 606,
+      "proteinG": 22.5,
+      "carbsG": 18.7,
+      "fatG": 54
+    }
+  },
+  {
+    "id": "ervilha-em-vagem",
+    "name": "Ervilha em vagem",
+    "category": "carb",
+    "per100g": {
+      "kcal": 88,
+      "proteinG": 7.5,
+      "carbsG": 14.2,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "ervilha-enlatada-drenada",
+    "name": "Ervilha enlatada drenada",
+    "category": "carb",
+    "per100g": {
+      "kcal": 74,
+      "proteinG": 4.6,
+      "carbsG": 13.4,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "feijao-carioca-cru",
+    "name": "Feijão carioca cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 329,
+      "proteinG": 20,
+      "carbsG": 61.2,
+      "fatG": 1.3
+    }
+  },
+  {
+    "id": "feijao-fradinho-cozido",
+    "name": "Feijão fradinho cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 78,
+      "proteinG": 5.1,
+      "carbsG": 13.5,
+      "fatG": 0.6
+    }
+  },
+  {
+    "id": "feijao-fradinho-cru",
+    "name": "Feijão fradinho cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 339,
+      "proteinG": 20.2,
+      "carbsG": 61.2,
+      "fatG": 2.4
+    }
+  },
+  {
+    "id": "feijao-jalo-cozido",
+    "name": "Feijão jalo cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 93,
+      "proteinG": 6.1,
+      "carbsG": 16.5,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "feijao-jalo-cru",
+    "name": "Feijão jalo cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 328,
+      "proteinG": 20.1,
+      "carbsG": 61.5,
+      "fatG": 0.9
+    }
+  },
+  {
+    "id": "feijao-preto-cru",
+    "name": "Feijão preto cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 324,
+      "proteinG": 21.3,
+      "carbsG": 58.8,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "feijao-rajado-cozido",
+    "name": "Feijão rajado cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 85,
+      "proteinG": 5.5,
+      "carbsG": 15.3,
+      "fatG": 0.4
+    }
+  },
+  {
+    "id": "feijao-rajado-cru",
+    "name": "Feijão rajado cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 326,
+      "proteinG": 17.3,
+      "carbsG": 62.9,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "feijao-rosinha-cozido",
+    "name": "Feijão rosinha cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 68,
+      "proteinG": 4.5,
+      "carbsG": 11.8,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "feijao-rosinha-cru",
+    "name": "Feijão rosinha cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 337,
+      "proteinG": 20.9,
+      "carbsG": 62.2,
+      "fatG": 1.3
+    }
+  },
+  {
+    "id": "feijao-roxo-cozido",
+    "name": "Feijão roxo cozido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 77,
+      "proteinG": 5.7,
+      "carbsG": 12.9,
+      "fatG": 0.5
+    }
+  },
+  {
+    "id": "feijao-roxo-cru",
+    "name": "Feijão roxo cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 331,
+      "proteinG": 22.2,
+      "carbsG": 60,
+      "fatG": 1.2
+    }
+  },
+  {
+    "id": "guandu-cru",
+    "name": "Guandu cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 344,
+      "proteinG": 19,
+      "carbsG": 64,
+      "fatG": 2.1
+    }
+  },
+  {
+    "id": "lentilha-crua",
+    "name": "Lentilha crua",
+    "category": "carb",
+    "per100g": {
+      "kcal": 339,
+      "proteinG": 23.2,
+      "carbsG": 62,
+      "fatG": 0.8
+    }
+  },
+  {
+    "id": "soja-farinha",
+    "name": "Soja farinha",
+    "category": "carb",
+    "per100g": {
+      "kcal": 404,
+      "proteinG": 36,
+      "carbsG": 38.4,
+      "fatG": 14.6
+    }
+  },
+  {
+    "id": "soja-extrato-soluvel-natural-fluido",
+    "name": "Soja extrato solúvel natural fluido",
+    "category": "carb",
+    "per100g": {
+      "kcal": 39,
+      "proteinG": 2.4,
+      "carbsG": 4.3,
+      "fatG": 1.6
+    }
+  },
+  {
+    "id": "soja-extrato-soluvel-po",
+    "name": "Soja extrato solúvel pó",
+    "category": "carb",
+    "per100g": {
+      "kcal": 459,
+      "proteinG": 35.7,
+      "carbsG": 28.5,
+      "fatG": 26.2
+    }
+  },
+  {
+    "id": "tremoco-cru",
+    "name": "Tremoço cru",
+    "category": "carb",
+    "per100g": {
+      "kcal": 381,
+      "proteinG": 33.6,
+      "carbsG": 43.8,
+      "fatG": 10.3
+    }
+  },
+  {
+    "id": "tremoco-em-conserva",
+    "name": "Tremoço em conserva",
+    "category": "carb",
+    "per100g": {
+      "kcal": 121,
+      "proteinG": 11.1,
+      "carbsG": 12.4,
+      "fatG": 3.8
+    }
+  },
+  {
+    "id": "castanha-do-brasil-crua",
+    "name": "Castanha-do-Brasil crua",
+    "category": "fat",
+    "per100g": {
+      "kcal": 643,
+      "proteinG": 14.5,
+      "carbsG": 15.1,
+      "fatG": 63.5
+    }
+  },
+  {
+    "id": "coco-cru",
+    "name": "Coco cru",
+    "category": "fat",
+    "per100g": {
+      "kcal": 406,
+      "proteinG": 3.7,
+      "carbsG": 10.4,
+      "fatG": 42
+    }
+  },
+  {
+    "id": "farinha-de-mesocarpo-de-babacu-crua",
+    "name": "Farinha de mesocarpo de babaçu crua",
+    "category": "fat",
+    "per100g": {
+      "kcal": 329,
+      "proteinG": 1.4,
+      "carbsG": 79.2,
+      "fatG": 0.2
+    }
+  },
+  {
+    "id": "gergelim-semente",
+    "name": "Gergelim semente",
+    "category": "fat",
+    "per100g": {
+      "kcal": 584,
+      "proteinG": 21.2,
+      "carbsG": 21.6,
+      "fatG": 50.4
+    }
+  },
+  {
+    "id": "linhaca-semente",
+    "name": "Linhaça semente",
+    "category": "fat",
+    "per100g": {
+      "kcal": 495,
+      "proteinG": 14.1,
+      "carbsG": 43.3,
+      "fatG": 32.3
+    }
+  },
+  {
+    "id": "pinhao-cozido",
+    "name": "Pinhão cozido",
+    "category": "fat",
+    "per100g": {
+      "kcal": 174,
+      "proteinG": 3,
+      "carbsG": 43.9,
+      "fatG": 0.7
+    }
+  },
+  {
+    "id": "pupunha-cozida",
+    "name": "Pupunha cozida",
+    "category": "fat",
+    "per100g": {
+      "kcal": 219,
+      "proteinG": 2.5,
+      "carbsG": 29.6,
+      "fatG": 12.8
+    }
   }
 ]

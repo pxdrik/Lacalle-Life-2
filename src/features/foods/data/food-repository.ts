@@ -30,6 +30,6 @@ export interface FoodRepository {
 
   remove(id: EntityId): Promise<void>;
 
-  /** Whether anything has been stored yet. Drives first-run seeding. */
+  /** Whether anything has been stored yet. */
   isEmpty(): Promise<boolean>;
 }

@@ -77,7 +77,7 @@ function profile(): Profile {
   } as unknown as Profile;
 }
 
-// Forces the one-time catalogue seed (216 foods, 183 exercises) to happen
+// Forces the one-time catalogue seed (581 foods, 183 exercises) to happen
 // before any test's `clearAllStores` runs — otherwise whichever test
 // happens to call `getRepositories()` first triggers it mid-test, and the
 // seed shows up as unexpected records in that test's assertions.

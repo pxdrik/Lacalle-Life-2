@@ -91,22 +91,49 @@ describe("seedCatalogue", () => {
     expect(first?.updatedAt).toBe(first?.createdAt);
   });
 
-  it("does nothing when foods already exist", async () => {
+  it("never touches a custom food, even though its id is not in the catalogue", async () => {
     const foods = repository();
-    await foods.save({
+    const custom = {
       id: "custom",
       name: "Meu alimento",
-      category: "protein",
+      category: "protein" as const,
       per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
       isCustom: true,
       isFavorite: false,
       createdAt: 1,
       updatedAt: 1,
-    });
+    };
+    await foods.save(custom);
 
     await seedCatalogue(foods);
 
-    // A user's own food must never be buried under 216 catalogue rows.
-    expect(await foods.listAll()).toHaveLength(1);
+    // Seeding now runs regardless of what is already stored — see the note
+    // on `seedCatalogue` for why an empty-store-only guard stopped being
+    // correct. What must never change is this one row: not its fields, not
+    // its existence.
+    const all = await foods.listAll();
+    expect(all.find((f) => f.id === "custom")).toEqual(custom);
+  });
+
+  it("adds only the entries missing from an already-seeded repository", async () => {
+    const foods = repository();
+    await seedCatalogue(foods);
+
+    // Someone favourited a catalogue food before this release shipped —
+    // re-seeding must never reset that.
+    const [first] = await foods.listAll();
+    await foods.save({ ...first!, isFavorite: true });
+
+    // Simulates "release ships one more food": the repository now has
+    // everything except one catalogue entry.
+    const before = await foods.listAll();
+    const missing = catalogue.find((entry) => entry.id !== before[0]?.id)!;
+    await foods.remove(missing.id);
+
+    await seedCatalogue(foods);
+
+    const after = await foods.listAll();
+    expect(after).toHaveLength(catalogue.length);
+    expect(after.find((f) => f.id === first!.id)?.isFavorite).toBe(true);
   });
 });

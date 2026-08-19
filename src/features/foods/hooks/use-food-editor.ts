@@ -37,7 +37,7 @@ export interface FoodEditor {
  * pointing at that food.
  *
  * Deliberately does not load the whole catalogue. This screen writes one row;
- * reading 216 to do it would be work done for nothing.
+ * reading 581 to do it would be work done for nothing.
  */
 export function useFoodEditor(id: EntityId | null): FoodEditor {
   const repository = useFoodRepository();

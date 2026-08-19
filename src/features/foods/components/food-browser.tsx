@@ -37,7 +37,7 @@ export function FoodBrowser() {
       ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
 
-  // Bounds how many rows exist in the DOM at once, so 216 catalogue foods —
+  // Bounds how many rows exist in the DOM at once, so 581 catalogue foods —
   // already unpaginated on this screen, unlike the picker's old 8-result
   // cap — cannot make every keystroke re-render the whole table. See
   // `useIncrementalReveal`.
@@ -64,7 +64,7 @@ export function FoodBrowser() {
         {/* Collapsed behind a control, as `/exercicios` already does. Left
             open, the chips wrapped to three rows and cost ~200px on every
             visit — measured — pushing the table to 444px on a phone. Filtering
-            is the secondary action here; searching 216 foods is the primary
+            is the secondary action here; searching 581 foods is the primary
             one, so the field stays and the chips fold away.
 
             The count rides on the button so a filter left on from last time is

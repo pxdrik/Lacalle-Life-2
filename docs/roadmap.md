@@ -11,7 +11,7 @@ depender da memória de nenhuma conversa.
 | --- | --- |
 | Fundação local-first | Contrato `Store<T>`, dois adapters conformes, migrações declarativas |
 | Design system | Tokens OKLCH, dark mode sem flash, contraste asserido por teste |
-| Alimentos | 216 curados da V1, busca sem acento, favoritos, personalizados |
+| Alimentos | 581 — 216 curados da V1 + 365 da TACO (ingrediente simples), busca sem acento, favoritos, personalizados |
 | Dietas | Refeições, itens, totais automáticos, metas opcionais |
 | Motor nutricional | TMB, TDEE, metas, macros, validações — fonte única em `core/nutrition` |
 | Perfil | Opcional de ponta a ponta; sem ele a dieta funciona igual |
@@ -45,6 +45,7 @@ depender da memória de nenhuma conversa.
 | Regra modal vs inline | Escrita no `AGENTS.md` e em `dialog.tsx`, com o caso difícil nomeado |
 | Criar exercício ao buscar | Antes só existia no estado vazio: com 8 resultados e nenhum sendo o seu, não havia saída |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
+| Catálogo TACO | 365 alimentos da Tabela Brasileira de Composição de Alimentos somados aos 216 da V1 — só ingrediente simples, pratos compostos ficaram de fora; `seedCatalogue` passou de "só roda se o banco está vazio" para diff por id, senão a expansão não chegava a quem já tinha o app instalado |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
