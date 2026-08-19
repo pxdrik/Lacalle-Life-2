@@ -46,6 +46,8 @@ depender da memória de nenhuma conversa.
 | Criar exercício ao buscar | Antes só existia no estado vazio: com 8 resultados e nenhum sendo o seu, não havia saída |
 | Ícone de tela inicial no iOS | PNG gerado pelo Next a partir do próprio traço, sem binário no repositório |
 | Catálogo TACO | 365 alimentos da Tabela Brasileira de Composição de Alimentos somados aos 216 da V1 — só ingrediente simples, pratos compostos ficaram de fora; `seedCatalogue` passou de "só roda se o banco está vazio" para diff por id, senão a expansão não chegava a quem já tinha o app instalado |
+| Fundo consistente em Hoje | Alimentação e Treino sempre com o cinza do `Card` padrão — antes só o treino em andamento tinha superfície, e o verde continua reservado só para esse estado |
+| Corrigir início de treino travado | Campo "Início" na execução: uma sessão esquecida aberta parava de mostrar "começou há 56 horas" só depois de finalizada — agora dá para corrigir o horário sem sair do treino |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
