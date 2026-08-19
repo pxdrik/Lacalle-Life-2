@@ -1952,12 +1952,33 @@ saturada, gordura trans, colesterol)
    sem opacidade e sem verde espalhado. Ver o relato na Sprint 7, acima.
 5. **Exercício sem foto — ocultar como quarta opção:** decidir junto da
    auditoria de catálogo (C).
-6. **Page Reveal Global (I):** entrada na sequência confirmada em 16/08 —
-   agendado como Sprint 8. Fica só o mecanismo: por padrão, a Sprint 8 usa
-   `--animate-rise` num `template.tsx` por rota (recomendação técnica), não
-   a máscara circular literal em toda navegação. Se a intenção real for a
-   máscara mesmo assim (ou uma terceira rota, reservando-a para um momento
-   raro específico), avisar antes da sprint começar para trocar o escopo.
+6. ~~**Page Reveal Global (I)**~~ — **decidido e entregue na Sprint 8**:
+   `--animate-rise` via `template.tsx`, em nove das dez rotas listadas
+   (`/sessao/[id]` ficou de fora — ver abaixo). A máscara circular via
+   `<ViewTransition>` do React foi reavaliada duas vezes: a Fase 2.5 da
+   Sprint 8 leu o guia do Next.js e concluiu que era viável porque "o App
+   Router já suporta `<ViewTransition>` nativamente, sem configuração" —
+   e essa conclusão **não sobreviveu à verificação**. O pacote `react`
+   instalado neste projeto é `19.2.8`, uma versão estável, não uma
+   canary; `ViewTransition` não existe nos arquivos publicados do pacote
+   (conferido com `grep`, não com a documentação). O guia do Next.js
+   pressupõe uma build canary do React que este projeto não tem, e
+   instalar uma seria mudança de arquitetura fora do escopo desta sprint.
+   `--animate-rise` foi o fallback que o próprio pedido já previa para
+   esse cenário.
+
+   **`/sessao/[id]` ficou sem `template.tsx` de propósito.** `translate`
+   (o que a keyframe `rise` anima) estabelece novo *containing block*
+   para descendentes `position: fixed` enquanto tiver valor diferente de
+   `none` — inclusive depois da animação terminar, porque
+   `animation-fill-mode: both` mantém `translate: 0 0`, não `none`.
+   `RestTimerBar` é `fixed` e vive dentro do conteúdo de `/sessao/[id]`;
+   embrulhá-lo teria quebrado seu posicionamento relativo à viewport.
+   Conferido por grep em todo o app: `Toast` e a navegação (`bottom-nav`,
+   `sidebar`) já vivem no layout raiz, fora de qualquer `template.tsx`, e
+   não correm esse risco — só `RestTimerBar` corria. Evitado, não
+   corrigido: o risco não valia a complexidade de resetar o `translate`
+   depois da animação numa tela que segura um cronômetro de treino.
 
 ---
 
