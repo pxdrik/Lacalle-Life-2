@@ -49,6 +49,7 @@ depender da memória de nenhuma conversa.
 | Fundo consistente em Hoje | Alimentação e Treino sempre com o cinza do `Card` padrão — antes só o treino em andamento tinha superfície, e o verde continua reservado só para esse estado |
 | Corrigir início de treino travado | Campo "Início" na execução: uma sessão esquecida aberta parava de mostrar "começou há 56 horas" só depois de finalizada — agora dá para corrigir o horário sem sair do treino |
 | Corrigir conflito falso em Treinos/Dietas | `use-diet-editor`, `use-routine-editor`, `use-session-runner` chamavam `persist()` de dentro do updater de `setState` — o React (`reactStrictMode: true`) invoca esse updater duas vezes de propósito, então uma única edição disparava duas gravações e a segunda perdia a corrida, aparecendo como "alterado em outro lugar" numa única aba. Corrigido com uma `ref` síncrona em vez do padrão funcional de `setState`. Achado pela auditoria externa de 19/08 (BUG-008) |
+| `Select` no design system | Todo `<select>` nativo do app (unidade g/ml, mover item, RPE, categoria, sexo/atividade/objetivo) ganhou borda, hover e chevron próprios — o popup continua nativo de propósito, mesma razão do `RpeSelect` original. Pedido depois que o seletor g/ml saiu "meio invisível" |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
