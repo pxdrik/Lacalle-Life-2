@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/design-system/cn";
+import { Select } from "@/design-system/components/select";
 
 import { RPE_SCALE, describeRpe } from "../taxonomy/rpe";
 
@@ -24,7 +25,8 @@ interface Props {
  */
 export function RpeSelect({ value, onChange, label, className }: Props) {
   return (
-    <select
+    <Select
+      variant="compact"
       value={value === null ? "" : String(value)}
       aria-label={label}
       title={value === null ? "Sem RPE" : (describeRpe(value) ?? undefined)}
@@ -32,8 +34,7 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
         onChange(event.target.value === "" ? null : Number(event.target.value));
       }}
       className={cn(
-        "rounded-md border border-line bg-surface px-1.5 py-1 text-center text-sm tabular-nums",
-        "transition-colors duration-150 ease-out hover:border-line-strong",
+        "text-center tabular-nums",
         value === null && "text-ink-subtle",
         className,
       )}
@@ -44,6 +45,6 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
           {step.label} · {step.description}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

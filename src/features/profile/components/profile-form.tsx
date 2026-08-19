@@ -19,6 +19,7 @@ import { cn } from "@/design-system/cn";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 import { Section } from "@/design-system/components/section";
+import { Select } from "@/design-system/components/select";
 
 interface Props {
   readonly initial: NutritionProfile | null;
@@ -36,9 +37,6 @@ type Draft = {
   bodyFatPercent: string;
   weeklyChangeKg: string;
 };
-
-const SELECT_CLASS =
-  "h-11 w-full rounded-md border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong";
 
 export function ProfileForm({ initial, pending, onSubmit }: Props) {
   const [draft, setDraft] = useState<Draft>(() => toDraft(initial));
@@ -92,20 +90,19 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <Field label="Sexo" id="sex">
             {({ id }) => (
-              <select
+              <Select
                 id={id}
                 value={draft.sex}
                 onChange={(event) => {
                   update("sex", event.target.value as Draft["sex"]);
                 }}
-                className={SELECT_CLASS}
               >
                 {BIOLOGICAL_SEXES.map((sex) => (
                   <option key={sex} value={sex}>
                     {SEX_LABELS[sex]}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
 
@@ -163,7 +160,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
         <div className="space-y-3">
           <Field label="Nível de atividade" id="activityLevel">
             {({ id }) => (
-              <select
+              <Select
                 id={id}
                 value={draft.activityLevel}
                 onChange={(event) => {
@@ -172,33 +169,31 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
                     event.target.value as Draft["activityLevel"],
                   );
                 }}
-                className={SELECT_CLASS}
               >
                 {ACTIVITY_LEVELS.map((level) => (
                   <option key={level} value={level}>
                     {ACTIVITY_LABELS[level]}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
 
           <Field label="Objetivo" id="goal">
             {({ id }) => (
-              <select
+              <Select
                 id={id}
                 value={draft.goal}
                 onChange={(event) => {
                   update("goal", event.target.value as Draft["goal"]);
                 }}
-                className={SELECT_CLASS}
               >
                 {GOALS.map((goal) => (
                   <option key={goal} value={goal}>
                     {GOAL_LABELS[goal]}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
         </div>

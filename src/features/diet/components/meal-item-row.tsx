@@ -6,6 +6,7 @@ import { useState } from "react";
 import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
+import { Select } from "@/design-system/components/select";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
@@ -83,17 +84,17 @@ export function MealItemRow({
             segunda grandeza. Não existe "1 unidade" aqui porque nenhuma
             fonte deste app (catálogo, TACO) carrega peso por unidade; um
             valor inventado seria pior que a pergunta ficar sem resposta. */}
-        <select
+        <Select
+          variant="compact"
           value={item.unit}
           aria-label={`Unidade de ${item.name}`}
           onChange={(event) => {
             onUnitChange(event.target.value === "ml" ? "ml" : "g");
           }}
-          className="rounded-md border border-transparent bg-transparent py-1 text-xs text-ink-subtle transition-colors duration-150 ease-out hover:border-line hover:text-ink"
         >
           <option value="g">g</option>
           <option value="ml">ml</option>
-        </select>
+        </Select>
       </div>
 
       {/* Forces the wrap here and nowhere else. A zero-height item with a
@@ -119,7 +120,8 @@ export function MealItemRow({
           of two buttons on an already dense row. Hidden when there is nowhere
           to send the food. */}
       {otherMeals.length > 0 && (
-        <select
+        <Select
+          variant="compact"
           value=""
           aria-label={`Mover ou copiar ${item.name} para outra refeição`}
           onChange={(event) => {
@@ -127,7 +129,7 @@ export function MealItemRow({
             if (mode === undefined || mealId === undefined) return;
             onSend(mealId, mode === "copy" ? "copy" : "move");
           }}
-          className="w-7 shrink-0 rounded-md border border-transparent bg-transparent text-xs text-ink-subtle transition-colors duration-150 ease-out hover:border-line hover:text-ink"
+          className="shrink-0"
         >
           <option value="">⋯</option>
           <optgroup label="Mover para">
@@ -144,7 +146,7 @@ export function MealItemRow({
               </option>
             ))}
           </optgroup>
-        </select>
+        </Select>
       )}
 
       <button

@@ -9,6 +9,7 @@ import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
+import { Select } from "@/design-system/components/select";
 import { useToast } from "@/design-system/components/toast";
 import { MACRO_CODING } from "@/design-system/macros";
 
@@ -159,20 +160,19 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
 
       <Field label="Categoria" id="category">
         {({ id }) => (
-          <select
+          <Select
             id={id}
             value={draft.category}
             onChange={(event) => {
               update("category", event.target.value);
             }}
-            className="h-11 w-full rounded-md border border-line bg-surface px-3 text-base text-ink transition-[border-color] duration-150 ease-out hover:border-line-strong"
           >
             {FOOD_CATEGORIES.map((category) => (
               <option key={category} value={category}>
                 {FOOD_CATEGORY_LABELS[category]}
               </option>
             ))}
-          </select>
+          </Select>
         )}
       </Field>
 
