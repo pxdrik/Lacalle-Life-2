@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
@@ -28,11 +29,12 @@ import { mealMacros } from "../services/diet-macros";
  * meals to a day the moment it is started, and listing "Café da manhã — 0 kcal"
  * four times over reports a plan as though it were a record.
  *
- * **`Section`, not `Card`.** Second in the reading order the Sprint 8
- * direction sets for Hoje — after the hero, before Treino — and one of two
- * screen-level groupings that no longer draw a border around themselves. The
- * icon that used to sit beside the heading is gone with the card: at this
- * compact a label, a glyph reads as filler rather than as identity.
+ * **`Section` for the heading, `Card` for the body.** Second in the reading
+ * order the Sprint 8 direction sets for Hoje — after the hero, before Treino.
+ * The body keeps the grey `default` surface so it reads as a peer of the
+ * workout block beside it in every state, not only while a session is
+ * running — `TodayWorkout` is the one that earns `hero` when something is
+ * actually happening now.
  */
 export function TodayMeals({ day }: { readonly day: string }) {
   const { state } = useFoodLogDay(day);
@@ -64,34 +66,36 @@ export function TodayMeals({ day }: { readonly day: string }) {
         ) : undefined
       }
     >
-      {eaten.length === 0 ? (
-        <Empty />
-      ) : (
-        <ul className="divide-y divide-line">
-          {eaten.map((meal) => (
-            <li
-              key={meal.id}
-              className="flex items-baseline justify-between gap-4 py-2.5 first:pt-0 last:pb-0"
-            >
-              <div className="min-w-0">
-                <p className="truncate text-sm text-ink">{meal.name}</p>
-                <p className="mt-0.5 truncate text-xs text-ink-subtle">
-                  {meal.items.length}{" "}
-                  {meal.items.length === 1 ? "item" : "itens"}
-                  {meal.time !== null && ` · ${meal.time}`}
-                </p>
-              </div>
+      <Card tone="default">
+        {eaten.length === 0 ? (
+          <Empty />
+        ) : (
+          <ul className="divide-y divide-line">
+            {eaten.map((meal) => (
+              <li
+                key={meal.id}
+                className="flex items-baseline justify-between gap-4 py-2.5 first:pt-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm text-ink">{meal.name}</p>
+                  <p className="mt-0.5 truncate text-xs text-ink-subtle">
+                    {meal.items.length}{" "}
+                    {meal.items.length === 1 ? "item" : "itens"}
+                    {meal.time !== null && ` · ${meal.time}`}
+                  </p>
+                </div>
 
-              <p className="shrink-0 text-sm tabular-nums text-ink-muted">
-                <span className="text-ink">
-                  {formatDecimal(Math.round(mealMacros(meal).kcal))}
-                </span>{" "}
-                kcal
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
+                <p className="shrink-0 text-sm tabular-nums text-ink-muted">
+                  <span className="text-ink">
+                    {formatDecimal(Math.round(mealMacros(meal).kcal))}
+                  </span>{" "}
+                  kcal
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </Section>
   );
 }

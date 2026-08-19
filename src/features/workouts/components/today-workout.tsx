@@ -5,6 +5,7 @@ import Link from "next/link";
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
 import { buttonClasses } from "@/design-system/components/button";
+import { Card } from "@/design-system/components/card";
 import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
@@ -28,11 +29,11 @@ import { InProgressBanner } from "./in-progress-banner";
  *
  * **Two different registers for two different facts.** A session in progress
  * keeps the hero-adjacent treatment `InProgressBanner` already had — the one
- * thing on the screen that is happening *right now* earns it. Everything else
- * (finished today, or nothing yet) reads as `Section`, the same weight
- * `TodayMeals` uses for the other half of the day, so the two questions the
- * screen answers stay peers instead of one out-ranking the other by
- * accident.
+ * thing on the screen that is happening *right now* earns it, via
+ * `cardSurface("hero")`. Everything else (finished today, or nothing yet)
+ * gets the plain grey `default` surface instead — never no surface at all,
+ * so the block reads as a peer of `TodayMeals` beside it whether or not
+ * anything is running.
  */
 export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
@@ -72,17 +73,19 @@ export function TodayWorkout({ day }: { readonly day: string }) {
         ) : undefined
       }
     >
-      {nothingYet ? (
-        <Empty />
-      ) : (
-        <ul className="space-y-2">
-          {today.map((session) => (
-            <li key={session.id}>
-              <FinishedSession session={session} />
-            </li>
-          ))}
-        </ul>
-      )}
+      <Card tone="default">
+        {nothingYet ? (
+          <Empty />
+        ) : (
+          <ul className="space-y-2">
+            {today.map((session) => (
+              <li key={session.id}>
+                <FinishedSession session={session} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </Section>
   );
 }
