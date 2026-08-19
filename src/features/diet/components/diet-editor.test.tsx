@@ -185,7 +185,7 @@ describe("adding food", () => {
     await addChicken();
 
     expect(
-      screen.getByLabelText("Gramas de Peito de frango grelhado"),
+      screen.getByLabelText("Quantidade de Peito de frango grelhado"),
     ).toHaveValue("100");
     await waitFor(async () => {
       expect((await diets.getById(diet.id))?.meals[0]?.items).toHaveLength(1);
@@ -211,7 +211,7 @@ describe("adding food", () => {
     await screen.findByLabelText("Nome da dieta");
     await addChicken();
 
-    const grams = screen.getByLabelText("Gramas de Peito de frango grelhado");
+    const grams = screen.getByLabelText("Quantidade de Peito de frango grelhado");
     await userEvent.clear(grams);
     await userEvent.type(grams, "200");
 

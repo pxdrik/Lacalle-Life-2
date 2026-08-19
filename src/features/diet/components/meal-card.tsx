@@ -43,6 +43,7 @@ interface Props {
   readonly onMove: (offset: number) => void;
   readonly onAddFood: (food: Food) => void;
   readonly onItemGramsChange: (itemId: string, grams: number) => void;
+  readonly onItemUnitChange: (itemId: string, unit: MealItem["unit"]) => void;
   readonly onRemoveItem: (itemId: string) => void;
   readonly onReorderItems: (activeId: string, overId: string) => void;
   /** The other meals a food can be sent to. Empty when this is the only one. */
@@ -68,6 +69,7 @@ export function MealCard({
   onMove,
   onAddFood,
   onItemGramsChange,
+  onItemUnitChange,
   onRemoveItem,
   onReorderItems,
   otherMeals,
@@ -185,6 +187,9 @@ export function MealCard({
                     otherMeals={otherMeals}
                     onGramsChange={(grams) => {
                       onItemGramsChange(item.id, grams);
+                    }}
+                    onUnitChange={(unit) => {
+                      onItemUnitChange(item.id, unit);
                     }}
                     onRemove={() => {
                       onRemoveItem(item.id);

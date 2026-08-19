@@ -34,6 +34,7 @@ import {
   reorderMealItems,
   reorderMeals,
   setItemGrams,
+  setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
 import { startDayFromDiet } from "../services/start-day";
@@ -267,6 +268,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         onItemGramsChange={(itemId, grams) => {
                           apply((current) =>
                             setItemGrams(current, meal.id, itemId, grams),
+                          );
+                        }}
+                        onItemUnitChange={(itemId, unit) => {
+                          apply((current) =>
+                            setItemUnit(current, meal.id, itemId, unit),
                           );
                         }}
                         onRemoveItem={(itemId) => {

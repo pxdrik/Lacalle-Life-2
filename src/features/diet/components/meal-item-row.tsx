@@ -22,6 +22,7 @@ interface Props {
     readonly name: string;
   }[];
   readonly onGramsChange: (grams: number) => void;
+  readonly onUnitChange: (unit: MealItem["unit"]) => void;
   readonly onRemove: () => void;
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
 }
@@ -38,6 +39,7 @@ export function MealItemRow({
   dragHandle,
   otherMeals,
   onGramsChange,
+  onUnitChange,
   onRemove,
   onSend,
 }: Props) {
@@ -74,10 +76,24 @@ export function MealItemRow({
       <div className="flex shrink-0 items-center gap-1">
         <GramsField
           grams={item.grams}
-          label={`Gramas de ${item.name}`}
+          label={`Quantidade de ${item.name}`}
           onChange={onGramsChange}
         />
-        <span className="text-xs text-ink-subtle">g</span>
+        {/* g e ml só trocam o rótulo — 1 ml ≈ 1 g é a aproximação, não uma
+            segunda grandeza. Não existe "1 unidade" aqui porque nenhuma
+            fonte deste app (catálogo, TACO) carrega peso por unidade; um
+            valor inventado seria pior que a pergunta ficar sem resposta. */}
+        <select
+          value={item.unit}
+          aria-label={`Unidade de ${item.name}`}
+          onChange={(event) => {
+            onUnitChange(event.target.value === "ml" ? "ml" : "g");
+          }}
+          className="rounded-md border border-transparent bg-transparent py-1 text-xs text-ink-subtle transition-colors duration-150 ease-out hover:border-line hover:text-ink"
+        >
+          <option value="g">g</option>
+          <option value="ml">ml</option>
+        </select>
       </div>
 
       {/* Forces the wrap here and nowhere else. A zero-height item with a

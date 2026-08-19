@@ -64,6 +64,7 @@ function logOf(kcal: number, proteinG: number): FoodLog {
             foodId: "x",
             name: "Comida",
             grams: 100,
+            unit: "g",
             per100g: { kcal, proteinG, carbsG: 0, fatG: 0 },
           },
         ],

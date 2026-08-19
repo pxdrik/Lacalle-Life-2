@@ -64,6 +64,7 @@ describe("isEmptyLog", () => {
                 foodId: "frango",
                 name: "Peito de frango",
                 grams: 200,
+                unit: "g",
                 per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 },
               },
             ],

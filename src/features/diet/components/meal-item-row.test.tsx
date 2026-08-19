@@ -25,11 +25,13 @@ const ITEM: MealItem = {
   foodId: "abacate",
   name: "Abacate",
   grams: 0,
+  unit: "g",
   per100g: { kcal: 160, proteinG: 2, carbsG: 9, fatG: 15 },
 };
 
 function mount(item: MealItem = ITEM) {
   const onGramsChange = vi.fn();
+  const onUnitChange = vi.fn();
 
   render(
     <ul>
@@ -38,6 +40,7 @@ function mount(item: MealItem = ITEM) {
         dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
         otherMeals={[]}
         onGramsChange={onGramsChange}
+        onUnitChange={onUnitChange}
         onRemove={() => undefined}
         onSend={() => undefined}
       />
@@ -45,8 +48,10 @@ function mount(item: MealItem = ITEM) {
   );
 
   return {
-    field: screen.getByLabelText("Gramas de Abacate"),
+    field: screen.getByLabelText("Quantidade de Abacate"),
+    unitField: screen.getByLabelText("Unidade de Abacate"),
     onGramsChange,
+    onUnitChange,
   };
 }
 
@@ -137,5 +142,33 @@ describe("the portion field", () => {
     await userEvent.clear(field);
 
     expect(last(onGramsChange)).toBe(0);
+  });
+});
+
+describe("the unit selector", () => {
+  it("defaults to grams", () => {
+    const { unitField } = mount();
+
+    expect(unitField).toHaveValue("g");
+  });
+
+  it("switches to millilitres without changing the stored quantity", async () => {
+    // 1 ml ≈ 1 g is the whole approximation — the number itself never moves,
+    // only the label. `onGramsChange` must not fire from a unit change.
+    const { unitField, onUnitChange, onGramsChange } = mount({
+      ...ITEM,
+      grams: 250,
+    });
+
+    await userEvent.selectOptions(unitField, "ml");
+
+    expect(onUnitChange).toHaveBeenCalledWith("ml");
+    expect(onGramsChange).not.toHaveBeenCalled();
+  });
+
+  it("shows ml when the item is already stored that way", () => {
+    const { unitField } = mount({ ...ITEM, unit: "ml" });
+
+    expect(unitField).toHaveValue("ml");
   });
 });

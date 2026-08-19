@@ -12,12 +12,23 @@ import type { Macros } from "@/core/domain/macros";
  * Not an `Entity`: it lives inside the diet aggregate, which carries the
  * timestamps. It has an `id` so it can be addressed and reordered.
  */
+/**
+ * What the quantity is measured in. `grams` never changes meaning — a
+ * `unit` of `"ml"` is a display choice for a liquid, on the assumption that
+ * 1 ml ≈ 1 g, not a second physical quantity. The catalogue has no
+ * per-food density (or per-food portion weight — "1 ovo" needs one and the
+ * TACO source this app draws from does not carry it), so this is the one
+ * unit conversion that needs no food-specific data to be honest.
+ */
+export type MealItemUnit = "g" | "ml";
+
 export interface MealItem {
   readonly id: EntityId;
   /** Where it came from. `null` once that catalogue entry is gone. */
   readonly foodId: EntityId | null;
   readonly name: string;
   readonly grams: number;
+  readonly unit: MealItemUnit;
   readonly per100g: Macros;
 }
 

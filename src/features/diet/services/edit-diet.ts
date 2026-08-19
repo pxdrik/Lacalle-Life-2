@@ -205,6 +205,25 @@ export function setItemGrams<T extends MealOwner>(
 }
 
 /**
+ * Relabels the quantity as grams or millilitres. The stored number never
+ * changes — see `MealItemUnit` for why that is not a shortcut but the whole
+ * point: there is no per-food density to convert with.
+ */
+export function setItemUnit<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  itemId: EntityId,
+  unit: MealItem["unit"],
+): T {
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    items: meal.items.map((item) =>
+      item.id === itemId ? { ...item, unit } : item,
+    ),
+  }));
+}
+
+/**
  * Applies `change` to one meal, leaving the rest of the diet identical.
  *
  * Returns the original diet — same reference, same `updatedAt` — when the meal

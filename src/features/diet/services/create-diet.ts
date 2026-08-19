@@ -96,6 +96,7 @@ export function createMealItem(source: {
     foodId: source.foodId,
     name: source.name,
     grams: source.grams,
+    unit: "g",
     per100g: source.per100g,
   };
 }
