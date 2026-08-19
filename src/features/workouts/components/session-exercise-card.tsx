@@ -41,9 +41,16 @@ export function SessionExerciseCard({
 }: Props) {
   const done = exercise.sets.filter((set) => set.isCompleted).length;
   const isComplete = done === exercise.sets.length && exercise.sets.length > 0;
+  // The exercise holding the set someone is about to do — never more than one
+  // at a time, because `nextIncompleteSet` in `session-runner.tsx` only ever
+  // names one. Sprint 8: the same hero treatment `RoutineList` already gives
+  // "rotina em andamento", carried into execution — the card someone is
+  // actually standing in front of reads as the answer this screen exists to
+  // give, not as one more box in a column of exercise cards.
+  const isCurrent = nextSetId !== null;
 
   return (
-    <Card as="section">
+    <Card as="section" tone={isCurrent ? "hero" : "default"}>
       {/* Thumbnail-sized and no larger. This card is read standing up between
           sets: a big photo here would push the set rows off the screen, which
           costs more than the photo adds. Tapping it opens the detail. */}

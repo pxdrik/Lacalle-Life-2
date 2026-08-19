@@ -50,4 +50,33 @@ describe("SessionExerciseCard", () => {
     expect(header).toHaveTextContent("Peso");
     expect(header).toHaveTextContent("RPE");
   });
+
+  describe("Sprint 8 — the exercise holding the next set reads as the hero", () => {
+    function mount(nextSetId: string | null) {
+      render(
+        <SessionExerciseCard
+          exercise={EXERCISE}
+          catalogue={undefined}
+          onOpenDetail={vi.fn()}
+          nextSetId={nextSetId}
+          lastTime={undefined}
+          onSetChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemoveSet={vi.fn()}
+          onAddSet={vi.fn()}
+          onNotesChange={vi.fn()}
+        />,
+      );
+
+      return screen.getByText("Supino reto").closest("section");
+    }
+
+    it("gets the hero rail when it holds the next set", () => {
+      expect(mount("set1")?.className).toContain("border-l-accent");
+    });
+
+    it("stays a plain card once nothing in it is next", () => {
+      expect(mount(null)?.className).not.toContain("border-l-accent");
+    });
+  });
 });
