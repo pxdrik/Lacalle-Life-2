@@ -129,6 +129,20 @@ function delta(actual: number | null, planned: number | null): number | null {
   return Math.round((actual - planned) * 100) / 100;
 }
 
+/**
+ * A timestamp as the local `YYYY-MM-DDTHH:mm` a `datetime-local` input wants.
+ *
+ * Built from local parts, the same reasoning as `dayKey`: `toISOString()`
+ * converts to UTC first, so a workout started at 21:00 in São Paulo would
+ * show as tomorrow morning in the field meant to correct it.
+ */
+export function toDateTimeLocal(ms: number): string {
+  const date = new Date(ms);
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return `${String(date.getFullYear()).padStart(4, "0")}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function formatDuration(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);

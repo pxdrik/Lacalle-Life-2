@@ -26,6 +26,7 @@ import {
   finishSession,
   removePerformedSet,
   setSessionExerciseNotes,
+  setSessionStartedAt,
   uncompleteSet,
   updatePerformedSet,
 } from "../services/edit-session";
@@ -35,6 +36,7 @@ import {
   sessionElapsedMs,
   sessionProgress,
   sessionVolumeKg,
+  toDateTimeLocal,
 } from "../services/session-stats";
 import type { Session } from "../types/session";
 import {
@@ -133,6 +135,28 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
       <h1 className="mt-3 text-2xl font-medium tracking-normal">
         {session.name}
       </h1>
+
+      {/* Corrects a phone locked mid-workout: the session stays open and
+          "Tempo" below climbs into the hours until someone tells it when the
+          workout actually began. Always visible rather than behind an edit
+          toggle — the field this app already has for the same fix on a
+          finished session (`SessionEditor`'s "Data do treino") is out in the
+          open too. */}
+      <label className="mt-2 flex items-center gap-2">
+        <span className="text-xs text-ink-subtle">Início</span>
+        <input
+          type="datetime-local"
+          value={toDateTimeLocal(session.startedAt)}
+          max={toDateTimeLocal(now)}
+          aria-label="Horário de início do treino"
+          onChange={(event) => {
+            if (event.target.value === "") return;
+            const startedAt = new Date(event.target.value).getTime();
+            apply((current) => setSessionStartedAt(current, startedAt));
+          }}
+          className="h-8 rounded-md border border-transparent bg-transparent px-1.5 text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+        />
+      </label>
 
       {/* The two numbers worth glancing at mid-set, and nothing else. */}
       <div

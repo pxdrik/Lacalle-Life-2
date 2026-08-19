@@ -10,6 +10,7 @@ import {
   removePerformedSet,
   reopenSession,
   setSessionExerciseNotes,
+  setSessionStartedAt,
   uncompleteSet,
   updatePerformedSet,
 } from "./edit-session";
@@ -408,5 +409,38 @@ describe("moveSessionToDay", () => {
 
     expect(moveSessionToDay(session, "")).toBe(session);
     expect(moveSessionToDay(session, "ontem")).toBe(session);
+  });
+});
+
+describe("setSessionStartedAt", () => {
+  it("corrects when a running session began", () => {
+    const { session } = runningSession();
+    const correctedStart = session.startedAt + 5 * 60_000;
+
+    const after = setSessionStartedAt(session, correctedStart);
+
+    expect(after.startedAt).toBe(correctedStart);
+    expect(after.finishedAt).toBeNull();
+  });
+
+  it("never touches a finished session — that is moveSessionToDay's job", () => {
+    const { session } = runningSession();
+    const finished = finishSession(session, session.startedAt + 60_000);
+
+    expect(setSessionStartedAt(finished, session.startedAt + 5_000)).toBe(
+      finished,
+    );
+  });
+
+  it("rejects a start time in the future", () => {
+    const { session } = runningSession();
+
+    expect(setSessionStartedAt(session, Date.now() + 60_000)).toBe(session);
+  });
+
+  it("returns the same session when nothing changed", () => {
+    const { session } = runningSession();
+
+    expect(setSessionStartedAt(session, session.startedAt)).toBe(session);
   });
 });

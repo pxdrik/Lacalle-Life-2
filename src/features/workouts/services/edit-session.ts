@@ -150,6 +150,27 @@ export function renameSession(session: Session, name: string): Session {
 }
 
 /**
+ * Corrects when a running workout actually started.
+ *
+ * Only `startedAt` moves, and only while the session is still running —
+ * `moveSessionToDay` is the tool for a finished one, and it deliberately
+ * shifts both stamps together to keep the measured duration intact. This one
+ * exists for the opposite problem: a phone locked mid-workout leaves the
+ * session open, and "começou há 56 horas" is wrong until someone tells it
+ * when the workout actually began.
+ */
+export function setSessionStartedAt(
+  session: Session,
+  startedAt: number,
+): Session {
+  if (session.finishedAt !== null) return session;
+  if (!Number.isFinite(startedAt)) return session;
+  if (startedAt > Date.now() || startedAt === session.startedAt) return session;
+
+  return revise(session, { startedAt });
+}
+
+/**
  * Ends the workout. Incomplete sets are left exactly as they are rather than
  * discarded — "I planned four and did three" is information, and deleting the
  * fourth would erase it.
