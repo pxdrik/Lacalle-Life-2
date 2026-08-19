@@ -9,6 +9,7 @@ import { EvolutionScreen } from "@/features/workouts/components/evolution-screen
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
+import { Section } from "@/design-system/components/section";
 
 export const metadata: Metadata = {
   title: "Evolução · LaCalle Life",
@@ -40,18 +41,19 @@ export default function EvolutionPage() {
         </BodyDataProvider>
       </div>
 
-      <div className="mt-12 border-t border-line pt-10">
-        <h2 className="text-lg font-semibold tracking-tight">Treinos</h2>
-        <p className="mt-1 text-sm text-ink-muted">
-          O que você levantou, e como isso mudou.
-        </p>
-
-        <div className="mt-6">
-          <WorkoutDataProvider>
-            <EvolutionScreen />
-          </WorkoutDataProvider>
-        </div>
-      </div>
+      {/* Sprint 8: this was the one place the app already drew a titled
+          group with no card around it, written by hand. `Section` (the
+          generalised version, now used across the app) replaces it with the
+          same visual result — nothing here should look different. */}
+      <Section
+        title="Treinos"
+        subtitle="O que você levantou, e como isso mudou."
+        divider
+      >
+        <WorkoutDataProvider>
+          <EvolutionScreen />
+        </WorkoutDataProvider>
+      </Section>
     </PageShell>
   );
 }
