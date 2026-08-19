@@ -2108,3 +2108,44 @@ reinício do Windows costuma resolver.
 
 Enquanto isso, `npm run build && npm run start` serve normalmente — com a
 diferença de que **não recarrega ao editar**.
+
+---
+
+## Auditoria externa — 19/08/2026 (produto)
+
+Veredito **READY WITH KNOWN RISKS**, sem P0, nove achados. Cada um foi
+reproduzido ao vivo antes de qualquer correção — nem todo achado sobreviveu.
+
+- **BUG-001** (sessão "em andamento" que não fecha) — **diagnóstico
+  incorreto**. A sessão fantasma mostrada era "Upper", 0/6 séries, abandonada
+  num teste anterior do próprio auditor — não a sessão recém-finalizada.
+  Testado do zero: finalizar funciona, a sessão some de Hoje.
+- **BUG-002** (janela de confirmação de exclusão curta demais) — **provável
+  falso positivo**. `DISARM_AFTER_MS` é 4000ms, não algo minúsculo; a
+  reprodução com cliques espaçados por chamadas de screenshot (latência real
+  de vários segundos) comeu a própria janela — o mesmo padrão que
+  provavelmente enganou o auditor. Não alterado.
+- **BUG-003** (hora em AM/PM) — **real, corrigido**. `TimeField` substitui
+  `<input type="time">`/`datetime-local` — o Chrome segue a região do
+  Windows, não o `lang="pt-BR"` da página.
+- **BUG-004** (sem unidade além de grama) — real, mas é melhoria de escopo,
+  não bug; não corrigido nesta rodada.
+- **BUG-005** (quantidade sem limite superior) — **já corrigido antes da
+  auditoria** (commit `f25e36d`, 15/08). O build testado provavelmente veio
+  do cache do service worker.
+- **BUG-006** (sinal negativo descartado em silêncio) — **decisão
+  intencional**, documentada no próprio código (`meal-item-row.tsx`): "um
+  sinal de menos não tem significado numa porção". Não alterado.
+- **BUG-007** (peso vazio falha silenciosa) — **não é bug**: todo campo do
+  formulário de Evolução é opcional por design (`BodyEntryForm`), e um
+  registro totalmente vazio é tratado como nada a salvar, não como erro.
+- **BUG-008** (aviso de conflito falso) — **real, corrigido**. Os hooks de
+  edição (`use-diet-editor`, `use-routine-editor`, `use-session-runner`)
+  chamavam a gravação de dentro do updater de `setState`; com
+  `reactStrictMode: true` o React invoca esse updater duas vezes de
+  propósito, disparando duas gravações concorrentes por uma edição só.
+  Corrigido com uma `ref` síncrona em `apply`.
+- **BUG-009** (série preenchida mas não confirmada "desaparece") — **real,
+  corrigido**. O dado sempre sobreviveu (`isCompleted` só marca a
+  confirmação); o resumo é que escondia os valores digitados atrás de "não
+  realizada". Agora mostra o valor com "(não confirmada)".
