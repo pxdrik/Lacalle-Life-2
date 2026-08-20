@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 
 import { ToastProvider } from "@/design-system/components/toast";
+import { DensityProvider } from "@/design-system/density/density-provider";
+import { DensityScript } from "@/design-system/density/density-script";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
@@ -63,20 +65,23 @@ export default function RootLayout({
     <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <body>
         <ThemeScript />
+        <DensityScript />
         <ThemeProvider>
-          <ToastProvider>
-            {/* Two navigations, one at a time. `Sidebar` owns `lg` and up;
-                below that it is not rendered and `AppNav` carries the header
-                and the phone's tab bar. The padding is what keeps content
-                clear of the fixed column, and it lives here rather than on
-                each of eleven pages. */}
-            <Sidebar />
-            <div className="lg:pl-(--sidebar-w)">
-              <AppNav />
-              {children}
-            </div>
-            <ServiceWorker />
-          </ToastProvider>
+          <DensityProvider>
+            <ToastProvider>
+              {/* Two navigations, one at a time. `Sidebar` owns `lg` and up;
+                  below that it is not rendered and `AppNav` carries the header
+                  and the phone's tab bar. The padding is what keeps content
+                  clear of the fixed column, and it lives here rather than on
+                  each of eleven pages. */}
+              <Sidebar />
+              <div className="lg:pl-(--sidebar-w)">
+                <AppNav />
+                {children}
+              </div>
+              <ServiceWorker />
+            </ToastProvider>
+          </DensityProvider>
         </ThemeProvider>
       </body>
     </html>

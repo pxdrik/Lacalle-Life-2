@@ -518,6 +518,39 @@
 }
 
 /**
+ * Densidade de botão — preferência pessoal, não do brand system.
+ *
+ * Redefine só `--control-h*`/`--control-px*`, os tokens que `Button` já lê —
+ * nenhum componente precisa saber que essa preferência existe. `--input-h`
+ * fica de fora de propósito: a pág. 26 fixa 44 px sem variação, e mexer nisso
+ * reabriria o zoom automático do iOS Safari em campo com fonte menor. O
+ * padding de card também fica de fora — já é um eixo de densidade próprio,
+ * por breakpoint, e misturar os dois eixos deixaria "confortável" no celular
+ * imprevisível.
+ *
+ * `default` não aparece aqui — ausência de atributo já cai nos valores base
+ * declarados acima, então redeclará-los seria uma segunda fonte da verdade
+ * que só pode divergir da primeira.
+ */
+[data-density="compact"] {
+  --control-h: 34px;
+  --control-h-sm: 28px;
+  --control-h-lg: 40px;
+  --control-px: 14px;
+  --control-px-sm: 10px;
+  --control-px-lg: 18px;
+}
+
+[data-density="comfortable"] {
+  --control-h: 44px;
+  --control-h-sm: 36px;
+  --control-h-lg: 52px;
+  --control-px: 22px;
+  --control-px-sm: 16px;
+  --control-px-lg: 28px;
+}
+
+/**
  * A escala tipográfica da pág. 17, inteira, com line-height e tracking **presos
  * ao tamanho**.
  *

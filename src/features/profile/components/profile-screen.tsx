@@ -8,6 +8,8 @@ import { useState } from "react";
 import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { useToast } from "@/design-system/components/toast";
+import { DensityToggle } from "@/design-system/density/density-toggle";
+import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
 import { useProfile } from "../hooks/use-profile";
 import { BackupPanel } from "./backup-panel";
@@ -43,6 +45,22 @@ export function ProfileScreen() {
           {writeError}
         </p>
       )}
+
+      {/* Independent of the nutrition profile below — a display preference
+          applies whether or not the person has ever filled out a goal. */}
+      <div>
+        <h2 className="text-sm font-medium text-ink">Aparência</h2>
+        <div className="mt-3 flex flex-wrap items-center gap-4">
+          <div>
+            <p className="mb-1.5 text-xs text-ink-subtle">Tema</p>
+            <ThemeToggle />
+          </div>
+          <div>
+            <p className="mb-1.5 text-xs text-ink-subtle">Tamanho dos botões</p>
+            <DensityToggle />
+          </div>
+        </div>
+      </div>
 
       {showForm ? (
         <ProfileForm
