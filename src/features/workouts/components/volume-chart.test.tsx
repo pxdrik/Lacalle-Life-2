@@ -12,9 +12,9 @@ import { VolumeChart } from "./volume-chart";
  */
 
 const points: readonly VolumePoint[] = [
-  { startsAt: 3, volumeKg: 4200, sets: 12, sessions: 2 },
-  { startsAt: 2, volumeKg: 0, sets: 0, sessions: 0 },
-  { startsAt: 1, volumeKg: 8450, sets: 14, sessions: 3 },
+  { startsAt: 3, volumeKg: 4200, sets: 12, sessions: 2, durationMs: 0 },
+  { startsAt: 2, volumeKg: 0, sets: 0, sessions: 0, durationMs: 0 },
+  { startsAt: 1, volumeKg: 8450, sets: 14, sessions: 3, durationMs: 0 },
 ];
 
 const format = (point: VolumePoint) => `período ${String(point.startsAt)}`;
@@ -84,7 +84,7 @@ describe("VolumeChart", () => {
 
   it("uses the singular for exactly one set", () => {
     const single: readonly VolumePoint[] = [
-      { startsAt: 1, volumeKg: 100, sets: 1, sessions: 1 },
+      { startsAt: 1, volumeKg: 100, sets: 1, sessions: 1, durationMs: 0 },
     ];
 
     render(<VolumeChart points={single} format={format} />);
@@ -110,5 +110,29 @@ describe("VolumeChart", () => {
     const { container } = render(<VolumeChart points={[]} format={format} />);
 
     expect(container.querySelectorAll("button")).toHaveLength(0);
+  });
+});
+
+describe("charting a different metric", () => {
+  // `metric`/`formatMetric` existem pra este gráfico virar o de duração em
+  // Evolução sem duplicar a barra, o resumo e o teclado inteiros — kg
+  // continua sendo o padrão para quem já chamava sem os dois props.
+  const withDuration: readonly VolumePoint[] = [
+    { startsAt: 2, volumeKg: 1000, sets: 5, sessions: 1, durationMs: 90_000 },
+    { startsAt: 1, volumeKg: 500, sets: 3, sessions: 1, durationMs: 30_000 },
+  ];
+
+  it("draws bars and summary from the chosen metric, not volumeKg", () => {
+    render(
+      <VolumeChart
+        points={withDuration}
+        format={format}
+        metric={(point) => point.durationMs}
+        formatMetric={(ms) => `${String(ms / 1000)}s`}
+      />,
+    );
+
+    expect(screen.getByText("90s")).toBeInTheDocument();
+    expect(screen.queryByText(/kg/)).not.toBeInTheDocument();
   });
 });

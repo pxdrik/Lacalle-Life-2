@@ -3,6 +3,7 @@
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import Link from "next/link";
+import { useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
@@ -28,6 +29,9 @@ import { VolumeChart } from "./volume-chart";
 
 export function EvolutionScreen() {
   const state = useSessionHistory();
+  const [chartMetric, setChartMetric] = useState<"volume" | "duration">(
+    "volume",
+  );
 
   if (state.status === "loading") {
     return (
@@ -71,22 +75,79 @@ export function EvolutionScreen() {
   const monthly = volumeByPeriod(history, 6, startOfMonth);
   const records = personalRecords(history);
 
+  const isDuration = chartMetric === "duration";
+  const metric = isDuration
+    ? (point: VolumePoint) => point.durationMs
+    : (point: VolumePoint) => point.volumeKg;
+  const formatMetric = isDuration
+    ? formatDuration
+    : (kg: number) => `${formatDecimal(kg)} kg`;
+
   return (
     <div className="space-y-8">
+      <div
+        role="group"
+        aria-label="Métrica do gráfico"
+        className="inline-flex rounded-md border border-line p-0.5 text-xs"
+      >
+        <button
+          type="button"
+          aria-pressed={!isDuration}
+          onClick={() => {
+            setChartMetric("volume");
+          }}
+          className={cn(
+            "rounded-[5px] px-3 py-1.5 font-medium transition-colors",
+            !isDuration ? "bg-muted text-ink" : "text-ink-subtle",
+          )}
+        >
+          Volume
+        </button>
+        <button
+          type="button"
+          aria-pressed={isDuration}
+          onClick={() => {
+            setChartMetric("duration");
+          }}
+          className={cn(
+            "rounded-[5px] px-3 py-1.5 font-medium transition-colors",
+            isDuration ? "bg-muted text-ink" : "text-ink-subtle",
+          )}
+        >
+          Duração
+        </button>
+      </div>
+
       <section>
-        <h2 className="text-sm font-medium text-ink">Volume semanal</h2>
+        <h2 className="text-sm font-medium text-ink">
+          {isDuration ? "Duração semanal" : "Volume semanal"}
+        </h2>
         <p className="mt-0.5 text-xs text-ink-subtle">
-          Últimas 12 semanas, em quilos movidos
+          {isDuration
+            ? "Últimas 12 semanas, horas treinadas"
+            : "Últimas 12 semanas, em quilos movidos"}
         </p>
         <div className="mt-3">
-          <VolumeChart points={weekly} format={formatWeek} />
+          <VolumeChart
+            points={weekly}
+            format={formatWeek}
+            metric={metric}
+            formatMetric={formatMetric}
+          />
         </div>
       </section>
 
       <section>
-        <h2 className="text-sm font-medium text-ink">Volume mensal</h2>
+        <h2 className="text-sm font-medium text-ink">
+          {isDuration ? "Duração mensal" : "Volume mensal"}
+        </h2>
         <div className="mt-3">
-          <VolumeChart points={monthly} format={formatMonth} />
+          <VolumeChart
+            points={monthly}
+            format={formatMonth}
+            metric={metric}
+            formatMetric={formatMetric}
+          />
         </div>
       </section>
 

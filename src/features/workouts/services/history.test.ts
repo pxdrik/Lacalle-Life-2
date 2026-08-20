@@ -267,7 +267,15 @@ describe("volumeByPeriod", () => {
     const points = volumeByPeriod(history, 4, startOfWeek, now);
 
     expect(points).toHaveLength(4);
-    expect(points[2]).toMatchObject({ volumeKg: 0, sessions: 0 });
+    expect(points[2]).toMatchObject({ volumeKg: 0, sessions: 0, durationMs: 0 });
+  });
+
+  it("adds up finished session duration per week alongside volume", () => {
+    // `session()` finishes every session an hour after it starts.
+    const points = volumeByPeriod(history, 4, startOfWeek, now);
+
+    expect(points[0]?.durationMs).toBe(3_600_000);
+    expect(points[1]?.durationMs).toBe(3_600_000);
   });
 
   it("orders most recent first", () => {

@@ -52,6 +52,7 @@ depender da memória de nenhuma conversa.
 | `Select` no design system | Todo `<select>` nativo do app (unidade g/ml, mover item, RPE, categoria, sexo/atividade/objetivo) ganhou borda, hover e chevron próprios — o popup continua nativo de propósito, mesma razão do `RpeSelect` original. Pedido depois que o seletor g/ml saiu "meio invisível" |
 | Tamanho de botão personalizável | Preferência por aparelho (Compacto/Padrão/Confortável) em Perfil → Aparência, mesma arquitetura do tema. Só afeta altura/padding de botão — input fica fixo em 44px por regra do brandbook, card tem eixo de densidade próprio |
 | Dieta vinculada a dia da semana | Iniciativa E do roadmap, decidida e entregue: uma dieta pode ocupar vários dias, um dia aponta pra uma dieta só, o Diário sugere direto em vez de precisar abrir a lista. Atalhos de "fim de semana" e um preset pessoal de "dias de treino" |
+| Gráfico de duração em Evolução | Alternância Volume/Duração nos gráficos semanal e mensal de Treinos — mesmo componente de barras, generalizado com `metric`/`formatMetric` em vez de duplicado. Inspirado num app de referência que o Pedro trouxe; único item das sete telas comparadas que valia a pena, o resto (feed social, conta/assinatura, donut de macro) não coube na arquitetura ou na regra de "um destaque por tela" |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.

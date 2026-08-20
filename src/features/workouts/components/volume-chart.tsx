@@ -4,15 +4,26 @@ import { useState } from "react";
 
 import { Card } from "@/design-system/components/card";
 import { cn } from "@/design-system/cn";
+import { formatDecimal } from "@/core/format/decimal";
 
 import type { VolumePoint } from "../services/history";
-import { formatDecimal } from "@/core/format/decimal";
 
 interface Props {
   /** Most recent first, as the service returns them. */
   readonly points: readonly VolumePoint[];
   readonly format: (point: VolumePoint) => string;
+  /**
+   * Which number the bars draw. Defaults to `volumeKg`, kept as the
+   * default rather than a required prop so every existing call site — this
+   * chart drew nothing else for a long time — reads the same as before.
+   */
+  readonly metric?: (point: VolumePoint) => number;
+  /** How the chosen metric reads in the summary line and each bar's name. */
+  readonly formatMetric?: (value: number) => string;
 }
+
+const defaultMetric = (point: VolumePoint) => point.volumeKg;
+const defaultFormatMetric = (value: number) => `${formatDecimal(value)} kg`;
 
 /**
  * Volume per period, as plain divs.
@@ -42,9 +53,15 @@ interface Props {
  * bastante por si só (a coluna inteira da barra, não só o traço desenhado),
  * então não precisa do `touch-44` que os controles pequenos do app usam.
  */
-export function VolumeChart({ points, format }: Props) {
+export function VolumeChart({
+  points,
+  format,
+  metric = defaultMetric,
+  formatMetric = defaultFormatMetric,
+}: Props) {
   const chronological = [...points].reverse();
-  const peak = Math.max(...chronological.map((point) => point.volumeKg), 1);
+  const value = (point: VolumePoint) => metric(point);
+  const peak = Math.max(...chronological.map(value), 1);
 
   // `null` até alguém tocar numa barra, o que mantém o resumo seguindo o
   // período mais recente mesmo que `points` seja recarregado — um índice fixo
@@ -61,7 +78,7 @@ export function VolumeChart({ points, format }: Props) {
       {active !== undefined && (
         <p className="mb-3 text-sm">
           <span className="font-medium tabular-nums text-ink">
-            {formatDecimal(active.volumeKg)} kg
+            {formatMetric(value(active))}
           </span>{" "}
           <span className="text-ink-subtle">
             · {active.sets} {active.sets === 1 ? "série" : "séries"} ·{" "}
@@ -85,8 +102,8 @@ export function VolumeChart({ points, format }: Props) {
                 setSelected(index);
               }}
               aria-pressed={index === activeIndex}
-              aria-label={`${format(point)}: ${formatDecimal(point.volumeKg)} kg em ${String(point.sets)} ${point.sets === 1 ? "série" : "séries"}`}
-              title={`${formatDecimal(point.volumeKg)} kg · ${String(point.sets)} séries`}
+              aria-label={`${format(point)}: ${formatMetric(value(point))} em ${String(point.sets)} ${point.sets === 1 ? "série" : "séries"}`}
+              title={`${formatMetric(value(point))} · ${String(point.sets)} séries`}
               // A coluna inteira, não só o traço visível: um período quase sem
               // volume desenha `min-h-1` (4px), e o alvo de toque não pode
               // ficar do tamanho do desenho — é o mesmo erro do BUG-006, numa
@@ -100,12 +117,12 @@ export function VolumeChart({ points, format }: Props) {
               <span
                 aria-hidden
                 className={
-                  point.volumeKg === 0
+                  value(point) === 0
                     ? "min-h-0.5 rounded-t-full bg-line-strong"
                     : "min-h-1 rounded-t-full bg-accent transition-[height] duration-(--duration-standard) ease-out"
                 }
                 style={{
-                  height: `${String(Math.max((point.volumeKg / peak) * 100, 1))}%`,
+                  height: `${String(Math.max((value(point) / peak) * 100, 1))}%`,
                 }}
               />
             </button>

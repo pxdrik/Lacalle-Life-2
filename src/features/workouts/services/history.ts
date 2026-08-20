@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 
+import { sessionDurationMs } from "./session-stats";
 import type { PerformedSet, Session, SessionExercise } from "../types/session";
 
 /**
@@ -167,6 +168,8 @@ export interface VolumePoint {
   readonly volumeKg: number;
   readonly sets: number;
   readonly sessions: number;
+  /** Sum of every finished session's duration in the period. */
+  readonly durationMs: number;
 }
 
 /** Monday, local time, of the week containing `timestamp`. */
@@ -213,13 +216,13 @@ export function volumeByPeriod(
 ): readonly VolumePoint[] {
   const buckets = new Map<
     number,
-    { volumeKg: number; sets: number; sessions: number }
+    { volumeKg: number; sets: number; sessions: number; durationMs: number }
   >();
 
   // Seed every period so gaps survive into the output.
   let cursor = bucketOf(now);
   for (let index = 0; index < periods; index += 1) {
-    buckets.set(cursor, { volumeKg: 0, sets: 0, sessions: 0 });
+    buckets.set(cursor, { volumeKg: 0, sets: 0, sessions: 0, durationMs: 0 });
     cursor = bucketOf(cursor - 1);
   }
 
@@ -232,6 +235,7 @@ export function volumeByPeriod(
     if (bucket === undefined) continue;
 
     bucket.sessions += 1;
+    bucket.durationMs += sessionDurationMs(session) ?? 0;
     for (const exercise of session.exercises) {
       bucket.sets += countSets(exercise);
       for (const set of exercise.sets) bucket.volumeKg += setVolume(set);
@@ -244,6 +248,7 @@ export function volumeByPeriod(
       volumeKg: Math.round(totals.volumeKg),
       sets: totals.sets,
       sessions: totals.sessions,
+      durationMs: totals.durationMs,
     }))
     .sort((a, b) => b.startsAt - a.startsAt);
 }
