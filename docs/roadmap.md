@@ -50,6 +50,8 @@ depender da memória de nenhuma conversa.
 | Corrigir início de treino travado | Campo "Início" na execução: uma sessão esquecida aberta parava de mostrar "começou há 56 horas" só depois de finalizada — agora dá para corrigir o horário sem sair do treino |
 | Corrigir conflito falso em Treinos/Dietas | `use-diet-editor`, `use-routine-editor`, `use-session-runner` chamavam `persist()` de dentro do updater de `setState` — o React (`reactStrictMode: true`) invoca esse updater duas vezes de propósito, então uma única edição disparava duas gravações e a segunda perdia a corrida, aparecendo como "alterado em outro lugar" numa única aba. Corrigido com uma `ref` síncrona em vez do padrão funcional de `setState`. Achado pela auditoria externa de 19/08 (BUG-008) |
 | `Select` no design system | Todo `<select>` nativo do app (unidade g/ml, mover item, RPE, categoria, sexo/atividade/objetivo) ganhou borda, hover e chevron próprios — o popup continua nativo de propósito, mesma razão do `RpeSelect` original. Pedido depois que o seletor g/ml saiu "meio invisível" |
+| Tamanho de botão personalizável | Preferência por aparelho (Compacto/Padrão/Confortável) em Perfil → Aparência, mesma arquitetura do tema. Só afeta altura/padding de botão — input fica fixo em 44px por regra do brandbook, card tem eixo de densidade próprio |
+| Dieta vinculada a dia da semana | Iniciativa E do roadmap, decidida e entregue: uma dieta pode ocupar vários dias, um dia aponta pra uma dieta só, o Diário sugere direto em vez de precisar abrir a lista. Atalhos de "fim de semana" e um preset pessoal de "dias de treino" |
 
 **Marco atingido:** criar treino → adicionar exercícios → configurar séries →
 salvar → executar → rever no histórico.
@@ -1266,7 +1268,14 @@ importante, **P3** melhoria, **P4** polish/futuro.
   toque, nunca ao estado" (P4 da sprint de redesign) precisa continuar
   passando — qualquer novo estilo de linha não pode disparar na montagem.
 
-### E — Planejamento semanal de dieta (estrutural)
+### E — Planejamento semanal de dieta (estrutural) ✅ entregue em 20/08/2026
+
+Decidido direto com o Pedro, sem esperar a Iniciativa B: dieta pode repetir
+em vários dias; um dia aponta pra uma dieta só (vincular rouba de qualquer
+outra); apagar a dieta avisa quantos dias desvincula; apagar só o dia no
+Diário não mexe na dieta. `Diet.weekdays`, `assignWeekdays` em
+`diet-schedule.ts`, sugestão no `EmptyDay` do Diário. Ver a entrada
+correspondente em "Entregue".
 
 - **objetivo:** abrir o Diário num dia e já ver a dieta planejada, sem
   reconstruir a escolha manualmente todo dia.
