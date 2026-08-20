@@ -25,6 +25,10 @@ next-env.d.ts
 .cert/
 https-server-temp.mjs
 
+# binário do cloudflared, baixado sob demanda para o túnel de teste — não é
+# dependência do projeto, não entra no controle de versão
+.tools/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

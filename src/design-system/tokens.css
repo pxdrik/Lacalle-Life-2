@@ -533,21 +533,21 @@
  * que só pode divergir da primeira.
  */
 [data-density="compact"] {
-  --control-h: 34px;
-  --control-h-sm: 28px;
-  --control-h-lg: 40px;
-  --control-px: 14px;
-  --control-px-sm: 10px;
-  --control-px-lg: 18px;
+  --control-h: 30px;
+  --control-h-sm: 24px;
+  --control-h-lg: 36px;
+  --control-px: 12px;
+  --control-px-sm: 8px;
+  --control-px-lg: 16px;
 }
 
 [data-density="comfortable"] {
-  --control-h: 44px;
-  --control-h-sm: 36px;
-  --control-h-lg: 52px;
-  --control-px: 22px;
-  --control-px-sm: 16px;
-  --control-px-lg: 28px;
+  --control-h: 48px;
+  --control-h-sm: 40px;
+  --control-h-lg: 56px;
+  --control-px: 24px;
+  --control-px-sm: 18px;
+  --control-px-lg: 30px;
 }
 
 /**

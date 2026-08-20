@@ -147,7 +147,7 @@ function DietRow({
       padded={false}
       className="group transition-colors duration-150 ease-out hover:border-line-strong"
     >
-      <Link href={`/dietas/${diet.id}`} className="flex items-center gap-4 p-4">
+      <Link href={`/dietas/${diet.id}`} className="flex items-center gap-4 p-4 pb-3">
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium text-ink">
             {diet.name === "" ? "Dieta sem nome" : diet.name}
@@ -155,29 +155,29 @@ function DietRow({
           <p className="mt-0.5 text-xs text-ink-subtle">
             {meals} {meals === 1 ? "refeição" : "refeições"}
           </p>
-          {diet.weekdays.length > 0 && (
-            <p className="mt-1 truncate text-xs text-accent-text">
-              {diet.weekdays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")}
-            </p>
-          )}
         </div>
         <div className="hidden shrink-0 sm:block">
           <MacroSummary macros={macros} />
         </div>
-        <span className="w-24 shrink-0" />
+        <span className="w-16 shrink-0" />
       </Link>
 
-      {/* Outside the link: buttons nested in an anchor are invalid and swallow
-          the click on the row. */}
-      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
-        <button
-          type="button"
-          onClick={onOpenSchedule}
-          aria-label={`Vincular dias da semana a ${diet.name}`}
-          className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-        >
-          <CalendarDays aria-hidden className="size-4" />
-        </button>
+      {/* Sempre visível, nunca só um ícone — o ícone sozinho ao lado de
+          duplicar/excluir era fácil de nunca notar, e no celular não tem
+          hover pra revelar o rótulo. Fora do `Link`: um botão dentro de uma
+          âncora é inválido e engole o clique da linha inteira. */}
+      <button
+        type="button"
+        onClick={onOpenSchedule}
+        className="mx-4 mb-4 flex items-center gap-1.5 text-xs text-ink-subtle underline-offset-4 transition-colors duration-150 ease-out hover:text-ink hover:underline"
+      >
+        <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+        {diet.weekdays.length > 0
+          ? diet.weekdays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")
+          : "Vincular a dias da semana"}
+      </button>
+
+      <div className="absolute top-4 right-4 flex items-center">
         <button
           type="button"
           onClick={onDuplicate}
