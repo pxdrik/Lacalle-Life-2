@@ -59,6 +59,17 @@ export function ProfileScreen() {
             <p className="mb-1.5 text-xs text-ink-subtle">Tamanho dos botões</p>
             <DensityToggle />
           </div>
+          {/* Exemplo ao vivo, colado no seletor de propósito — o efeito real
+              fica em botões espalhados pela tela (Calcular metas, Criar em
+              Dietas), às vezes fora da vista ou longe o bastante do controle
+              pra a mudança passar despercebida. Isto nunca é o único lugar
+              que muda, só o mais rápido de conferir. */}
+          <div>
+            <p className="mb-1.5 text-xs text-ink-subtle">Exemplo</p>
+            <Button variant="secondary" disabled>
+              Assim
+            </Button>
+          </div>
         </div>
       </div>
 
