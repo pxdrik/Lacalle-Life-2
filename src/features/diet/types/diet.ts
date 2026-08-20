@@ -58,7 +58,21 @@ export interface Meal {
  */
 export type MealOwner = Entity & { readonly meals: readonly Meal[] };
 
+/**
+ * Monday-first, unlike `Date#getDay()` — see `weekdayOf` in
+ * `services/diet-schedule.ts` for the conversion. The week starting on
+ * Monday is the convention `formatLongDay` and every date picker in the app
+ * already renders in pt-BR.
+ */
+export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
 export interface Diet extends Entity {
   readonly name: string;
   readonly meals: readonly Meal[];
+  /**
+   * The days of the week this diet is the plan for. Empty means "not
+   * scheduled" — the diet still exists and can be started manually from the
+   * Diário, it just has no day that suggests it on its own.
+   */
+  readonly weekdays: readonly Weekday[];
 }

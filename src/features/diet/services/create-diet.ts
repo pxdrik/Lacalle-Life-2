@@ -18,6 +18,7 @@ export function createDiet(name: string): Diet {
     id: createEntityId(),
     name: name.trim(),
     meals: [createMeal(1)],
+    weekdays: [],
     createdAt: now,
     updatedAt: now,
   };
@@ -64,6 +65,10 @@ export function duplicateDiet(diet: Diet): Diet {
     id: createEntityId(),
     name: `${diet.name} (cópia)`,
     meals: diet.meals.map(copyMeal),
+    // Not carried over. A weekday points at one diet at a time (see
+    // `assignWeekdays`), and a copy that silently took over the original's
+    // days would be a stranger change than "duplicate" promises.
+    weekdays: [],
     createdAt: now,
     updatedAt: now,
   };

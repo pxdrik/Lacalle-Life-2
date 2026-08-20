@@ -21,6 +21,7 @@ import { useNutritionTargets } from "@/features/profile";
 import { useDietList } from "../hooks/use-diet-list";
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
+import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
 import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
@@ -52,6 +53,17 @@ function shiftDay(day: string, offset: number): string {
   return dayKey(new Date(year, month - 1, date + offset));
 }
 
+/** The same local-parts construction `shiftDay` uses, for reading a weekday
+ * out of a `YYYY-MM-DD` string without `new Date(string)`'s UTC parsing —
+ * that would read 21:00 in São Paulo as the next calendar day. */
+function parseDayLocal(day: string): Date | null {
+  const [year, month, date] = day.split("-").map(Number);
+  if (year === undefined || month === undefined || date === undefined)
+    return null;
+
+  return new Date(year, month - 1, date);
+}
+
 /**
  * What was eaten on one day.
  *
@@ -70,6 +82,14 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   const [picking, setPicking] = useState(false);
 
   const today = dayKey(new Date());
+
+  // The diet scheduled for this weekday, if any — `undefined` while diets
+  // are still loading, same as "no link" for the empty state's purposes.
+  const parsedDay = parseDayLocal(day);
+  const linkedDiet =
+    dietList.status === "ready" && parsedDay !== null
+      ? dietForWeekday(dietList.diets, weekdayOf(parsedDay))
+      : undefined;
 
   /**
    * Days are a query parameter, not a route segment, so the default can be
@@ -173,6 +193,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             <EmptyDay
               day={day}
               diets={dietList.status === "ready" ? dietList.diets : []}
+              linkedDiet={linkedDiet}
               picking={picking}
               onPick={(diet) => {
                 replace(startDayFromDiet(diet, day));
@@ -340,6 +361,7 @@ function DayStep({
 function EmptyDay({
   day,
   diets,
+  linkedDiet,
   picking,
   onPick,
   onOpenPicker,
@@ -347,6 +369,8 @@ function EmptyDay({
 }: {
   readonly day: string;
   readonly diets: readonly Diet[];
+  /** The diet scheduled for this weekday, if any — see `dietForWeekday`. */
+  readonly linkedDiet: Diet | undefined;
   readonly picking: boolean;
   readonly onPick: (diet: Diet) => void;
   readonly onOpenPicker: () => void;
@@ -359,13 +383,33 @@ function EmptyDay({
     <Card tone="quiet" className="mt-6 text-center">
       <p className="text-ink">Nada registrado em {formatDay(day)}.</p>
       <p className="mx-auto mt-1.5 max-w-sm text-sm text-ink-subtle">
-        Comece de uma dieta que você já montou e ajuste o que mudou, ou monte o
-        dia do zero.
+        {linkedDiet !== undefined
+          ? // A dieta vinculada ao dia da semana já é a resposta pronta —
+            // continua sendo um convite, não uma escrita automática: alguém
+            // ainda escolhe o botão.
+            `"${linkedDiet.name}" está vinculada a este dia da semana.`
+          : "Comece de uma dieta que você já montou e ajuste o que mudou, ou monte o dia do zero."}
       </p>
 
       <div className="mt-5 flex flex-wrap justify-center gap-2">
-        {diets.length > 0 && !picking && (
-          <Button onClick={onOpenPicker}>Começar de uma dieta</Button>
+        {linkedDiet !== undefined ? (
+          <Button
+            onClick={() => {
+              onPick(linkedDiet);
+            }}
+          >
+            Começar de &quot;{linkedDiet.name}&quot;
+          </Button>
+        ) : (
+          diets.length > 0 &&
+          !picking && (
+            <Button onClick={onOpenPicker}>Começar de uma dieta</Button>
+          )
+        )}
+        {linkedDiet !== undefined && diets.length > 1 && !picking && (
+          <Button variant="secondary" onClick={onOpenPicker}>
+            Escolher outra dieta
+          </Button>
         )}
         <Button variant="secondary" onClick={onAddMeal}>
           <Plus aria-hidden className="size-4" />

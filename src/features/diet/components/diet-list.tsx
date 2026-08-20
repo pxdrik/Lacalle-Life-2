@@ -2,7 +2,7 @@
 
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { CalendarDays, Copy, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,14 +14,18 @@ import { Input } from "@/design-system/components/input";
 
 import { useDietList } from "../hooks/use-diet-list";
 import { dietMacros } from "../services/diet-macros";
+import { WEEKDAY_SHORT_LABELS } from "../services/diet-schedule";
 import type { Diet } from "../types/diet";
 import { MacroSummary } from "./macro-summary";
+import { WeekdayPicker } from "./weekday-picker";
 
 export function DietList() {
   const router = useRouter();
-  const { state, writeError, create, duplicate, remove } = useDietList();
+  const { state, writeError, create, duplicate, remove, setWeekdays } =
+    useDietList();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [schedulingId, setSchedulingId] = useState<string | null>(null);
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -93,10 +97,32 @@ export function DietList() {
                 diet={diet}
                 onDuplicate={() => void duplicate(diet)}
                 onRemove={() => void remove(diet)}
+                onOpenSchedule={() => {
+                  setSchedulingId(diet.id);
+                }}
               />
             ))}
           </ul>
         ))}
+
+      {state.status === "ready" && (
+        <WeekdayPicker
+          open={schedulingId !== null}
+          dietName={
+            state.diets.find((diet) => diet.id === schedulingId)?.name ?? ""
+          }
+          selected={
+            state.diets.find((diet) => diet.id === schedulingId)?.weekdays ??
+            []
+          }
+          onSave={(weekdays) => {
+            if (schedulingId !== null) void setWeekdays(schedulingId, weekdays);
+          }}
+          onClose={() => {
+            setSchedulingId(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -105,10 +131,12 @@ function DietRow({
   diet,
   onDuplicate,
   onRemove,
+  onOpenSchedule,
 }: {
   readonly diet: Diet;
   readonly onDuplicate: () => void;
   readonly onRemove: () => void;
+  readonly onOpenSchedule: () => void;
 }) {
   const macros = dietMacros(diet);
   const meals = diet.meals.length;
@@ -127,16 +155,29 @@ function DietRow({
           <p className="mt-0.5 text-xs text-ink-subtle">
             {meals} {meals === 1 ? "refeição" : "refeições"}
           </p>
+          {diet.weekdays.length > 0 && (
+            <p className="mt-1 truncate text-xs text-accent-text">
+              {diet.weekdays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")}
+            </p>
+          )}
         </div>
         <div className="hidden shrink-0 sm:block">
           <MacroSummary macros={macros} />
         </div>
-        <span className="w-16 shrink-0" />
+        <span className="w-24 shrink-0" />
       </Link>
 
       {/* Outside the link: buttons nested in an anchor are invalid and swallow
           the click on the row. */}
       <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
+        <button
+          type="button"
+          onClick={onOpenSchedule}
+          aria-label={`Vincular dias da semana a ${diet.name}`}
+          className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+        >
+          <CalendarDays aria-hidden className="size-4" />
+        </button>
         <button
           type="button"
           onClick={onDuplicate}
@@ -149,7 +190,14 @@ function DietRow({
         <ConfirmButton
           onConfirm={onRemove}
           label={`Excluir ${diet.name}`}
-          confirmLabel="Excluir?"
+          // Apagar a dieta apaga o vínculo com todo dia que ela ocupa — o
+          // pedido do Pedro foi que isso ficasse explícito bem aqui, e não
+          // só na tela do Diário no dia em que o efeito aparece.
+          confirmLabel={
+            diet.weekdays.length > 0
+              ? `Excluir e desvincular ${String(diet.weekdays.length)} ${diet.weekdays.length === 1 ? "dia" : "dias"}?`
+              : "Excluir?"
+          }
           className="h-8 min-w-8"
         >
           <Trash2 aria-hidden className="size-4" />

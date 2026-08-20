@@ -6,7 +6,8 @@ import { describeDataError } from "@/core/domain/describe-data-error";
 
 import { useDietRepository } from "../data/diet-repository-context";
 import { createDiet, duplicateDiet } from "../services/create-diet";
-import type { Diet } from "../types/diet";
+import { assignWeekdays } from "../services/diet-schedule";
+import type { Diet, Weekday } from "../types/diet";
 
 export type DietListState =
   | { readonly status: "loading" }
@@ -21,6 +22,8 @@ export interface DietList {
   /** Copies a whole diet. Stays on the list — you copied it to keep both. */
   readonly duplicate: (diet: Diet) => Promise<void>;
   readonly remove: (diet: Diet) => Promise<void>;
+  /** Links `dietId` to exactly these weekdays, unlinking them from any other diet. */
+  readonly setWeekdays: (dietId: string, weekdays: readonly Weekday[]) => Promise<void>;
 }
 
 export function useDietList(): DietList {
@@ -110,5 +113,34 @@ export function useDietList(): DietList {
     [repository],
   );
 
-  return { state, writeError, create, duplicate, remove };
+  const setWeekdays = useCallback(
+    async (dietId: string, weekdays: readonly Weekday[]) => {
+      if (state.status !== "ready") return;
+      const diets = state.diets;
+      setWriteError(null);
+
+      const next = assignWeekdays(diets, dietId, weekdays);
+      // `assignWeekdays` returns the same reference for every diet it left
+      // untouched, so this only ever writes the ones that actually moved —
+      // usually one or two, never the whole list.
+      const changed = next.filter((diet, index) => diet !== diets[index]);
+      if (changed.length === 0) return;
+
+      try {
+        const repo = await repository;
+        await Promise.all(
+          changed.map((diet) => {
+            const previous = diets.find((item) => item.id === diet.id);
+            return repo.save(diet, previous?.updatedAt ?? null);
+          }),
+        );
+        setState({ status: "ready", diets: next });
+      } catch (error) {
+        setWriteError(describeDataError(error));
+      }
+    },
+    [repository, state],
+  );
+
+  return { state, writeError, create, duplicate, remove, setWeekdays };
 }
