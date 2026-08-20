@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { dayKey, formatDay, isFutureDay } from "@/core/format/day";
+import { dayKey, formatDay } from "@/core/format/day";
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import {
@@ -113,21 +113,26 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
           <ChevronLeft aria-hidden className="size-4" />
         </DayStep>
 
+        {/* Dias futuros deixaram de ser bloqueados aqui — a dieta vinculada
+            a um dia da semana (`dietForWeekday`) só pode ser conferida
+            andando pra frente no calendário, e um dia sem nada registrado
+            ainda é um convite válido a planejar, não um erro. O que
+            continua sendo verdade é que o Diário nunca inventa dado: nada
+            é escrito num dia futuro sem alguém clicar "Começar de X" ou
+            "Adicionar refeição", exatamente como hoje. */}
         <input
           type="date"
           value={day}
-          max={today}
           aria-label="Dia do registro"
           onChange={(event) => {
             const next = event.target.value;
-            if (next !== "" && !isFutureDay(next)) goToDay(next);
+            if (next !== "") goToDay(next);
           }}
           className="h-(--control-h) rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
 
         <DayStep
           label="Próximo dia"
-          disabled={day >= today}
           onClick={() => {
             goToDay(shiftDay(day, 1));
           }}
@@ -329,12 +334,10 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
 
 function DayStep({
   label,
-  disabled,
   onClick,
   children,
 }: {
   readonly label: string;
-  readonly disabled?: boolean;
   readonly onClick: () => void;
   readonly children: React.ReactNode;
 }) {
@@ -342,9 +345,8 @@ function DayStep({
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
       aria-label={label}
-      className="flex size-(--control-h) items-center justify-center rounded-lg border border-line text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink disabled:opacity-40"
+      className="flex size-(--control-h) items-center justify-center rounded-lg border border-line text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
     >
       {children}
     </button>

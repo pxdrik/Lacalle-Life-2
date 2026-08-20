@@ -18,7 +18,7 @@
 
 // Bump to retire every previous cache. Old entries are deleted on activate, so
 // a stale shell cannot outlive a deploy.
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL = `lacalle-shell-${VERSION}`;
 const ASSETS = `lacalle-assets-${VERSION}`;
 const PAYLOADS = `lacalle-payloads-${VERSION}`;

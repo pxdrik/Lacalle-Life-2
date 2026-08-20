@@ -127,3 +127,25 @@ describe("duplicating a meal in the diary", () => {
     });
   });
 });
+
+describe("navigating to a future day", () => {
+  // Passou a ser permitido: é como alguém confere se a dieta vinculada a um
+  // dia da semana (`dietForWeekday`) caiu no dia certo antes de a semana
+  // chegar lá. O Diário continua sem escrever nada sozinho — só passou a
+  // deixar olhar.
+  it("does not disable 'Próximo dia' on today", async () => {
+    mount(logWithMeal());
+    await screen.findByDisplayValue("Café da manhã");
+
+    expect(screen.getByRole("button", { name: "Próximo dia" })).toBeEnabled();
+  });
+
+  it("does not cap the date field at today", async () => {
+    mount(logWithMeal());
+    await screen.findByDisplayValue("Café da manhã");
+
+    expect(screen.getByLabelText("Dia do registro")).not.toHaveAttribute(
+      "max",
+    );
+  });
+});

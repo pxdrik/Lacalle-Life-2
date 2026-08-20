@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { FoodLogDataProvider } from "@/composition/data-providers";
-import { dayKey, isFutureDay } from "@/core/format/day";
+import { dayKey } from "@/core/format/day";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
@@ -42,12 +42,11 @@ function DayFromUrl() {
   const params = useSearchParams();
   const requested = params.get("dia");
 
-  // A day in the future is never a record of anything, and a malformed one in
-  // the URL should land somewhere sensible rather than on an error.
-  const valid =
-    requested !== null &&
-    /^\d{4}-\d{2}-\d{2}$/.test(requested) &&
-    !isFutureDay(requested);
+  // Um dia futuro passou a ser um destino válido — é como alguém confere se
+  // a dieta vinculada a um dia da semana (`dietForWeekday`) caiu certo antes
+  // de a semana chegar lá. Um formato malformado ainda cai em algo sensato
+  // em vez de erro.
+  const valid = requested !== null && /^\d{4}-\d{2}-\d{2}$/.test(requested);
 
   return <FoodLogScreen day={valid ? requested : dayKey(new Date())} />;
 }

@@ -44,7 +44,7 @@ describe("networkFirst never caches a failing response", () => {
 
     expect(result.status).toBe(500);
 
-    const shell = sw.caches.peek("lacalle-shell-v3");
+    const shell = sw.caches.peek("lacalle-shell-v4");
     expect(shell?.size ?? 0).toBe(0);
   });
 
@@ -142,7 +142,7 @@ describe("activate", () => {
 
     const remaining = await sw.caches.keys();
     expect(remaining).not.toContain("lacalle-shell-v0");
-    expect(remaining).toContain("lacalle-shell-v3");
+    expect(remaining).toContain("lacalle-shell-v4");
     expect(remaining.some((n) => n.includes("payload"))).toBe(true);
   });
 });
