@@ -20,6 +20,11 @@ next-env.d.ts
 *.pem
 .vercel
 
+# certificado autoassinado gerado sob demanda para testar em HTTPS na rede
+# local, e o servidor descartável que o usa — nenhum dos dois é parte do app
+.cert/
+https-server-temp.mjs
+
 # debug
 npm-debug.log*
 yarn-debug.log*
