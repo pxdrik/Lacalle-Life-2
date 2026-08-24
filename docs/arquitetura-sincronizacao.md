@@ -744,17 +744,32 @@ create table public.user_exercise_favorites (
 
 ### 18.3 RLS — mesma política em toda tabela, sem política de `DELETE`
 
+**Corrigido depois da revisão adversarial de §19 — a versão original deste
+documento permitia UPDATE direto de tabela sem checar `server_updated_at`,
+o que quebrava a garantia de "nunca sobrescreve silenciosamente" toda vez
+que alguém (código ou pessoa) chamasse a tabela em vez da função RPC.** A
+correção: **só a função RPC pode escrever.** RLS continua sendo a fronteira
+de propriedade (quem é dono da linha), mas o `authenticated` não recebe
+`INSERT`/`UPDATE` direto na tabela — só `EXECUTE` na função, que é onde o
+`server_updated_at` esperado é de fato comparado. Ver §19.1 para o raciocínio
+completo.
+
 ```sql
 alter table public.diets enable row level security;
 
+-- SELECT continua liberado direto na tabela — ler não tem o problema do
+-- OCC, só INSERT/UPDATE precisam ser forçados a passar pela função.
 create policy "diets_select_own" on public.diets
   for select using (auth.uid() = user_id);
 
-create policy "diets_insert_own" on public.diets
-  for insert with check (auth.uid() = user_id);
+-- Nenhuma política de INSERT nem de UPDATE aqui de propósito — ver abaixo.
+-- Sem política, o RLS nega por padrão; a única porta de escrita é a função
+-- `save_diet` (§18.5), que roda `security definer` e escreve por dentro
+-- dela mesma, já validado.
 
-create policy "diets_update_own" on public.diets
-  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+revoke insert, update on public.diets from authenticated;
+revoke insert, update on public.diets from anon;
+-- select continua concedido — a política acima decide o que cada um vê.
 
 create trigger diets_set_server_updated_at
   before insert or update on public.diets
@@ -788,11 +803,32 @@ pensar.
 
 ### 18.5 Escrita condicional — a versão em Postgres de `putIfVersionMatches`
 
+**Corrigido depois de §19.1: `security definer`, não `security invoker`.**
+Com `invoker`, a função roda com os privilégios de quem chama — e como
+§18.3 revogou `INSERT`/`UPDATE` direto de `authenticated` na tabela, uma
+função `invoker` ficaria travada pela própria revogação que existe para
+protegê-la. `definer` roda com os privilégios de quem **criou** a função
+(o dono, fora do alcance do `REVOKE` de §18.3), o que é exatamente o ponto:
+esta função é a única porta de escrita.
+
+Isso troca um risco por outro — `security definer` é o jeito clássico de
+introduzir escalonamento de privilégio no Postgres se a função confiar em
+qualquer coisa que o chamador possa manipular. Duas regras não-negociáveis
+nela, não só nesta como em toda função `definer` deste schema:
+
+1. **Nunca aceitar `user_id` como parâmetro.** Sempre `auth.uid()` lido de
+   dentro da função — um parâmetro seria o chamador dizendo de quem são os
+   dados, e a função confiando cegamente.
+2. **`set search_path = public, pg_temp` fixo na declaração da função** —
+   sem isso, um `search_path` manipulado na sessão poderia fazer a função
+   resolver `public.diets` para uma tabela diferente com o mesmo nome
+   criada em outro schema.
+
 O outbox local não fala SQL cru; chama uma função RPC por entidade, que faz
 o mesmo "ler, comparar, escrever" atômico que `Store.putIfVersionMatches`
 já faz localmente — só que comparando contra `server_updated_at` em vez de
 `updatedAt` (§8.5). Esboço para `diets`, o mesmo formato vale para as
-outras tabelas com `payload`:
+outras tabelas com `payload` e chave UUID:
 
 ```sql
 create or replace function public.save_diet(
@@ -802,12 +838,19 @@ create or replace function public.save_diet(
   p_expected_server_updated_at timestamptz -- null = criação
 ) returns table (server_updated_at timestamptz)
 language plpgsql
-security invoker
+security definer
+set search_path = public, pg_temp
 as $$
+declare
+  v_uid uuid := auth.uid();
 begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
   if p_expected_server_updated_at is null then
     insert into public.diets (id, user_id, payload, client_updated_at)
-    values (p_id, auth.uid(), p_payload, p_client_updated_at)
+    values (p_id, v_uid, p_payload, p_client_updated_at)
     on conflict (id) do nothing;
   else
     update public.diets
@@ -815,26 +858,72 @@ begin
         client_updated_at = p_client_updated_at,
         deleted_at = null
     where id = p_id
-      and user_id = auth.uid()
+      and user_id = v_uid
       and server_updated_at = p_expected_server_updated_at;
   end if;
 
   return query
     select d.server_updated_at from public.diets d
-    where d.id = p_id and d.user_id = auth.uid();
+    where d.id = p_id and d.user_id = v_uid;
 end;
 $$;
+
+revoke execute on function public.save_diet from public;
+grant execute on function public.save_diet to authenticated;
+
+-- A mesma exclusão de verdade, com o mesmo guarda de versão — nunca um
+-- DELETE incondicional (§19.2). Reaproveita o parâmetro de versão
+-- esperada; sem isso, o dispositivo A poderia apagar por cima de uma
+-- edição do B sem passar pelo conflito visível.
+create or replace function public.delete_diet(
+  p_id uuid,
+  p_expected_server_updated_at timestamptz
+) returns table (server_updated_at timestamptz)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  update public.diets
+  set deleted_at = now()
+  where id = p_id
+    and user_id = v_uid
+    and server_updated_at = p_expected_server_updated_at;
+
+  return query
+    select d.server_updated_at from public.diets d
+    where d.id = p_id and d.user_id = v_uid;
+end;
+$$;
+
+revoke execute on function public.delete_diet from public;
+grant execute on function public.delete_diet to authenticated;
 ```
 
-Zero linhas afetadas pelo `insert`/`update` (mas a linha existe com outro
-`server_updated_at`) é exatamente o mesmo sinal de conflito que
+Zero linhas afetadas pelo `insert`/`update`/`delete` (mas a linha existe
+com outro `server_updated_at`) é exatamente o mesmo sinal de conflito que
 `VersionedWriteResult.ok === false` já usa localmente — o motor de sync lê
 o `server_updated_at` retornado, compara com o que esperava, e se
-divergiu, é o gatilho para a UI de conflito da §8. **Este é um esboço para
-revisão na Sprint de Schema, não uma função pronta para aplicar** — falta,
-por exemplo, decidir se o merge por `Meal.id` de `food_logs` (§17.2)
-acontece dentro de uma função equivalente no Postgres ou inteiramente no
-cliente antes de chamar uma função "burra" igual a esta.
+divergiu, é o gatilho para a UI de conflito da §8.
+
+**Este é um esboço para revisão na Sprint de Schema, não uma função pronta
+para aplicar** — falta, por exemplo, decidir se o merge por `Meal.id` de
+`food_logs` (§17.2) acontece dentro de uma função equivalente no Postgres
+ou inteiramente no cliente antes de chamar uma função "burra" igual a esta
+(recomendação em §19.5: no cliente, a função no banco continua burra).
+
+Toda tabela `payload` com chave UUID (`diets`, `routines`,
+`workout_sessions`, `user_custom_foods`, `user_custom_exercises`) recebe o
+mesmo par `save_*`/`delete_*`. As duas de chave composta (`profiles` por
+`user_id` sozinho, `body_entries`/`food_logs` por `user_id, day`) seguem o
+mesmo formato trocando o `where id = p_id` por `where day = p_day` — sem
+`on conflict (id)`, usa `on conflict (user_id, day)`.
 
 ### 18.6 Cursor de sincronização — não é uma tabela do Postgres
 
@@ -844,3 +933,258 @@ puxou, o servidor não precisa saber quem puxou o quê. Uma nona store local
 (§7, `pendingSync`) mais uma décima (`syncState`) são as duas únicas
 adições ao schema local do IndexedDB que a sincronização exige; nenhuma das
 oito stores de domínio muda de forma.
+
+---
+
+## 19. Revisão adversarial do §18 — 24/08/2026
+
+Feita para quebrar o schema, não para confirmá-lo. **Veredito: não
+aprovado como estava escrito.** Um achado estrutural real (§19.1) já foi
+corrigido diretamente em §18.3/§18.5 acima — as duas seções já refletem a
+versão corrigida, não a original. Os demais são precisão que faltava ou
+limitações a aceitar de olhos abertos, não bugs de segurança.
+
+### 19.1 P0 — RLS de `UPDATE` sozinho não impõe o OCC. Corrigido.
+
+Este é o achado que teria passado despercebido se a régua fosse só "RLS
+habilitado, `auth.uid() = user_id` em toda política" — exatamente o ponto
+cego que você citou.
+
+A versão original de §18.3 tinha uma política `for update using (auth.uid()
+= user_id) with check (auth.uid() = user_id)` **direta na tabela**, ao lado
+da função `save_diet`. RLS de UPDATE só verifica **propriedade** — quem é
+dono da linha — nunca o conteúdo da escrita. Isso significa que qualquer
+chamada `supabase.from('diets').update({payload}).eq('id', x)` feita
+**fora** da função RPC teria sucesso, sobrescrevendo o `payload` sem
+nenhuma checagem de `server_updated_at`. O dono da linha sempre pode
+atualizar sua própria linha via RLS — a proteção contra sobrescrita
+concorrente não é responsabilidade do RLS, é responsabilidade exclusiva da
+função `save_*`, e a política de UPDATE direta na tabela dava um caminho
+que ignorava a função inteiramente.
+
+Consequência prática, se isso não fosse corrigido: um bug no motor de sync
+(chamar `.from().update()` em vez do RPC por engano, um dia de pressa) ou
+uma chamada direta via API do Supabase reintroduziria exatamente o
+last-write-wins silencioso que §17.1 promete que nunca vai acontecer — e o
+schema, sozinho, não impediria. **Um schema "bonito" com RLS habilitado em
+toda tabela e ainda assim inseguro para a garantia que mais importa aqui.**
+
+Correção aplicada em §18.3 e §18.5: `REVOKE` de `INSERT`/`UPDATE` direto de
+`authenticated` em toda tabela sincronizável — só `SELECT` continua
+concedido direto na tabela. Escrever passa a exigir a função `security
+definer`, que é a única com privilégio para inserir/atualizar. Duas regras
+fixadas para toda função `definer` deste schema (nunca aceitar `user_id`
+como parâmetro; `search_path` fixo) fecham o risco clássico de
+escalonamento de privilégio que vem junto de qualquer `security definer`.
+
+### 19.2 Tombstones
+
+- **Reviver ao sincronizar — verificado, seguro, com uma correção.** A
+  primeira versão de `save_diet` fazia `update ... set deleted_at = null`
+  incondicionalmente dentro do UPDATE de edição — reviver um registro
+  apagado é o comportamento pretendido para "editar depois de apagar", mas
+  só é seguro porque o `where server_updated_at = p_expected_...` já
+  protege esse caso: se o dispositivo A apagou (o que também passa pelo
+  guarda de versão, via `delete_diet`) e o dispositivo B tenta editar com
+  uma versão antiga esperada, a atualização de B falha por versão
+  divergente — cai em conflito visível, não revive silenciosamente por
+  cima do apagamento de A. **Isso só é verdade agora que existe uma função
+  `delete_diet` com o mesmo guarda de versão** — a versão original do
+  documento nunca chegou a especificar como o apagamento em si era
+  escrito, o que deixava em aberto se ele passava pela mesma checagem.
+  Fechado: ver o par `save_*`/`delete_*` em §18.5.
+- **`service_role` não interfere no fluxo normal — verificado.**
+  `service_role` no Supabase tem `bypassrls`, então nunca passa pelas
+  políticas nem pelas funções acima — é uma chave separada, usada só pelo
+  processo de exclusão de conta e por uma eventual limpeza periódica.
+  Nenhuma chamada que o app faz com a chave `anon`/sessão de usuário chega
+  perto dela.
+- **Achado não resolvido, para decisão explícita: janela de retenção do
+  tombstone.** Um dispositivo que fica offline por mais tempo do que a
+  limpeza física periódica mantém as linhas apagadas (`deleted_at`
+  preenchido, nunca purgadas) — se um job de limpeza um dia apagar de
+  verdade linhas com `deleted_at` antigo, e um dispositivo muito tempo
+  offline nunca chegou a puxar aquele tombstone, seu registro local não
+  sincronizado poderia "reviver" o que foi definitivamente apagado, sem
+  ninguém decidir isso. **Recomendação: não implementar nenhuma limpeza
+  física de tombstone no V1.** O custo de armazenamento de linhas mortas é
+  pequeno comparado ao risco de ressuscitar dado apagado; se um dia isso
+  precisar existir, a janela tem que ser maior que qualquer offline
+  razoável (meses, não dias) e é decisão de produto, não faz parte deste
+  schema.
+
+### 19.3 `server_updated_at`
+
+- **Só o trigger altera — verificado.** O trigger roda `before insert or
+  update`, incondicional, e sobrescreve `new.server_updated_at` não
+  importa o que o cliente mandou no INSERT/UPDATE. Como a única porta de
+  escrita agora é a função `definer` (§19.1), e o trigger dispara mesmo
+  assim (triggers não são afetados por `security definer`/`invoker`), não
+  existe caminho para o cliente escolher esse valor.
+- **Dois relógios de dispositivo diferentes não quebram o cursor —
+  verificado.** O cursor de pull (§18.6) compara contra
+  `server_updated_at`, carimbado pelo Postgres num relógio só, nunca
+  contra `client_updated_at`. Os dois relógios do PC e do iPhone nunca
+  entram nessa comparação.
+
+### 19.4 Concorrência — `Profile`, `Diet`, `Routine`, `BodyEntry`
+
+A garantia ("o segundo recebe conflito, nunca last-write-wins silencioso")
+**dependia inteiramente da correção de §19.1** — sem revogar o acesso
+direto de UPDATE, a resposta a este item do checklist seria não. Com a
+correção aplicada, e assumindo que o motor de sync realmente só chama as
+funções `save_*`/`delete_*` (nunca `.from().update()` direto — isso passa
+a ser uma regra de código a impor na Sprint de Sync, o schema sozinho
+garante que a tabela recusaria a tentativa, mas não pode obrigar o cliente
+a *tentar* pelo caminho certo, só impedir que o caminho errado funcione):
+sim, o segundo dispositivo a tentar salvar com uma `server_updated_at`
+esperada desatualizada recebe zero linhas afetadas, o motor de sync lê
+isso como conflito, e a UI de §8 aparece. Verificado por construção, não
+por teste — vale um teste de integração real na Sprint de Sync que
+literalmente abre duas conexões, edita a mesma linha pelas duas, e
+confirma que uma das duas chamadas retorna a versão antiga.
+
+### 19.5 `FoodLog` — merge por `Meal.id`
+
+- **Duas adições independentes no mesmo dia não geram conflito —
+  verificado, com a mecânica precisada.** `Meal` não tem `updatedAt`
+  próprio (não é uma `Entity`, só carrega `id`) — o merge não pode
+  comparar timestamp por refeição, e o §17.2 original deixava isso
+  implícito de um jeito que soa como se comparasse. A mecânica real é
+  **diff estrutural por conjunto de ids, não por tempo**: união dos
+  `Meal.id` dos dois lados; um id presente só de um lado entra sem
+  questionar; um id presente dos dois lados com conteúdo idêntico não gera
+  nada; um id presente dos dois lados com conteúdo diferente é o único
+  caso que vira conflito visível. Isso funciona sem precisar guardar uma
+  versão-base de referência.
+- **Onde a mecânica roda: no cliente, não numa função Postgres.** O
+  Postgres nunca vê o merge — ele só recebe o `payload` de `food_logs` já
+  resolvido a cada `save_food_log`, com o mesmo par de guarda de versão
+  (`server_updated_at` esperado) de qualquer outra tabela. O merge por
+  `Meal.id` é lógica do motor de sync local, que primeiro puxa o `payload`
+  remoto, faz o diff contra o local, resolve ou pergunta, e só então chama
+  `save_food_log` com o resultado — a função no banco continua "burra"
+  como as outras.
+- **Achado não resolvido, para decisão de produto: ordem das refeições
+  após a união.** `Meal[]` é um array — a interface já tem
+  drag-and-drop de refeições (roadmap), então a ordem é dado de produto,
+  não só exibição. Uma união simples por id não define ordem nenhuma para
+  o resultado. **Recomendação: ordenar o resultado da união por
+  `Meal.time` quando presente, e pelas refeições sem horário no final na
+  ordem em que apareceram localmente** — mas isso é uma escolha de UX que
+  fica para a Sprint de Sync, não uma propriedade do schema.
+- **Granularidade confirmada: por refeição inteira, nunca por item dentro
+  dela.** Editar o nome de uma refeição num aparelho e adicionar um item a
+  ela no outro, ambos offline, é tratado como o mesmo caso "mesmo
+  `Meal.id`, conteúdo diferente" — conflito visível na refeição inteira,
+  não um merge de campo. Consistente com §14 (fora de escopo: merge
+  campo-a-campo).
+
+### 19.6 `Session`
+
+- **Sessão em progresso permanece local — verificado por construção**, já
+  que ela nunca entra no outbox enquanto `finishedAt === null` (§17.3) —
+  não há um "esquecimento" possível porque não existe o gatilho que a
+  colocaria na fila antes da hora.
+- **Fechar o app durante o treino não cria lixo na nuvem — verificado**,
+  pelo mesmo motivo: nada é enfileirado até o treino terminar.
+- **Achado adjacente, já rastreado, não deste schema:** uma sessão que
+  nunca é finalizada (usuário abandona o treino sem tocar em "Finalizar")
+  fica órfã localmente para sempre e nunca sincroniza — o roadmap já lista
+  "sessão de treino não tem teto de duração" como item aberto,
+  independente de sync. Sincronização não piora nem resolve esse problema
+  específico; só está registrado aqui para não parecer esquecido.
+
+### 19.7 Migração
+
+- **"Merge não duplica entidades" — verdadeiro só no sentido técnico, e é
+  importante não deixar a frase original enganar.** Para `BodyEntry` e
+  `FoodLog`, a chave é o próprio dia — duplicação é estruturalmente
+  impossível, e a colisão vira o mesmo conflito visível de §8.1/§8.2
+  aplicado em lote durante o primeiro sync. Para `Diet`, `Routine` e
+  entidades de UUID: **duplicação técnica é impossível (dois UUIDs
+  distintos nunca colidem), mas duplicação semântica é possível e não
+  resolvida** — duas rotinas chamadas "Treino A", criadas
+  independentemente em cada aparelho antes de existir conta, sobrevivem
+  as duas depois do merge. Isso é uma limitação aceita do V1, não um bug:
+  detectar "duas rotinas que provavelmente são a mesma coisa" exigiria
+  comparação de conteúdo com um limiar de similaridade, que é uma feature
+  própria (fica fora do V1, §14) — o usuário vê as duas e apaga a
+  redundante manualmente.
+- **"Descarte é irreversível e só ocorre após confirmação" — a UI está
+  descrita, o mecanismo não estava.** §10/§17.5 diziam que a tela nunca
+  decide silenciosamente, mas nunca disseram **o que "descartar" faz
+  tecnicamente**: apagar os dados locais do aparelho que está entrando
+  (equivalente a um `forgetDevice()` só do domínio, mantendo login) ou
+  simplesmente nunca subir aqueles registros locais e deixá-los orfãos no
+  aparelho? **Decisão fechada agora:** descartar apaga localmente
+  (`forgetDevice()` de domínio, preservando a sessão de login) e então
+  sincroniza do zero a partir da nuvem — do jeito que ficam órfãos e
+  divergindo de novo silenciosamente é pior que apagar de vez, e é
+  consistente com o mecanismo que "Esquecer este dispositivo" já
+  implementa hoje.
+
+### 19.8 Backup
+
+- **Import não destrói dado mais novo na nuvem — depende inteiramente da
+  correção de §19.1, e por isso vale repetir aqui.** Sem revogar o UPDATE
+  direto, uma importação de backup antigo por cima de dado mais novo na
+  nuvem teria sucesso silencioso assim que sincronizasse — exatamente o
+  cenário que o checklist pediu para verificar, e a resposta seria não.
+  Com a correção: cada registro importado tenta salvar via `save_*`, e um
+  registro cuja versão na nuvem já avançou entra em conflito visível como
+  qualquer outra escrita — o import não ganha um caminho especial que
+  ignora a checagem.
+- **Achado novo, não estava no documento: nada valida o formato do
+  `payload` depois que ele já está no Postgres.** `jsonb` aceita qualquer
+  JSON — nenhuma coluna ou função aqui restringe a forma de
+  `payload`. Isso reabre exatamente o problema que a Sprint 3/Round 3 já
+  resolveu para importação de arquivo (`backup-schemas.ts`, os schemas Zod
+  que validam um backup antes de gravar): se um bug numa versão futura do
+  app, uma chamada manual, ou uma migração mal escrita colocar um
+  `payload` malformado numa linha, hoje nada impede que ele seja puxado e
+  escrito direto no IndexedDB local de outro aparelho. **Recomendação
+  obrigatória, não opcional: todo registro que chega por `pull` passa
+  pelos mesmos `RECORD_SCHEMAS` (Zod) que já validam um arquivo de backup
+  importado, antes de tocar o IndexedDB local.** O Postgres nunca devia
+  ser tratado como "já validado só por ter vindo do próprio banco" — é
+  exatamente o mesmo raciocínio que already existe documentado em
+  `composition/backup.ts` para arquivo, agora estendido para rede.
+
+### 19.9 Matriz de segurança por tabela
+
+Igual em todas as dez tabelas — a checagem de dono nunca varia por tabela,
+só a chave muda (`id` nas seis de UUID, `user_id`/`day` nas duas de dia,
+`user_id` sozinho em `profiles`, `user_id + food_id`/`exercise_id` nas
+duas de favorito).
+
+| Operação | Dono | Outro usuário | Sem autenticação (`anon`) | `service_role` |
+| --- | --- | --- | --- | --- |
+| `SELECT` direto na tabela | ✅ (política RLS) | ❌ (`auth.uid() ≠ user_id`) | ❌ (`auth.uid()` é `null`) | ✅ (`bypassrls`) |
+| `INSERT`/`UPDATE` direto na tabela | ❌ (revogado, §19.1) | ❌ | ❌ | ✅ |
+| `INSERT`/`UPDATE` via `save_*`/`delete_*` (`security definer`) | ✅, só a própria linha (`auth.uid()` lido de dentro, nunca por parâmetro) | ❌ (a função só escreve com `user_id = auth.uid()`) | ❌ (`raise exception` se `auth.uid()` é `null`) | não usa esse caminho — escreve direto |
+| `DELETE` físico | ❌ (nenhuma política de `delete`, nenhuma função expõe) | ❌ | ❌ | ✅ (fora do RLS, processo de exclusão de conta) |
+| Soft delete (`deleted_at`) | ✅, só via `delete_*` | ❌ | ❌ | ✅ |
+
+Duas colunas do formato original do Pedro colapsam numa linha aqui —
+"`INSERT`" e "`UPDATE`" — porque neste schema as duas sempre andam juntas:
+não existe tabela em que uma está aberta e a outra revogada, e separar em
+duas linhas idênticas não acrescentaria informação.
+
+### 19.10 Veredito
+
+**Não aprovado na forma original.** Um achado P0 real (§19.1), já corrigido
+diretamente em §18. Dois achados P1 que exigiam decisão de mecanismo, não
+só de UI, e foram fechados agora (§19.2 apagamento com guarda de versão,
+§19.7 o que "descartar" faz de fato). Um achado que fica como recomendação
+obrigatória para a Sprint de Sync, fora do escopo do schema em si mas
+registrado para não ser esquecido (§19.8, validar `payload` no pull com os
+mesmos schemas Zod do backup). Um achado sem decisão ainda, deliberadamente
+adiado (§19.2, janela de retenção de tombstone — recomendação é não
+purgar no V1).
+
+Com essas correções aplicadas em §18, considero o schema pronto para a
+Sprint de Auth começar em paralelo — auth não depende de nenhuma tabela de
+domínio. **A Sprint de Schema (criar as migrations de verdade) só deveria
+começar depois de você concordar com as correções desta seção**, em
+especial §19.1, que muda a forma de duas seções inteiras do documento.

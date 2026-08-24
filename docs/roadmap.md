@@ -483,10 +483,29 @@ exceção, `Session` em progresso não sincroniza até `finishedAt`.
 documento) e o schema completo do Postgres/Supabase está desenhado (§18):
 DDL de todas as tabelas, RLS sem política de `DELETE` (tombstone via
 `deleted_at`, apagar de verdade só por `service_role`), trigger de
-`server_updated_at` para nunca confiar no relógio do cliente, e o esboço da
-função RPC que faz o equivalente ao `putIfVersionMatches` local contra o
-Postgres. Nenhum arquivo de migration real foi criado e nenhum código de
-app foi tocado — é desenho para revisão antes da Sprint de Auth.
+`server_updated_at` para nunca confiar no relógio do cliente, e a função
+RPC que faz o equivalente ao `putIfVersionMatches` local contra o Postgres.
+
+**Revisão adversarial do schema, mesmo dia (§19):** achado P0 real —
+RLS de `UPDATE` sozinho não impunha o controle de versão, então qualquer
+chamada direta na tabela (bug de sync, ou API do Supabase usada fora do
+caminho certo) reintroduzia o last-write-wins silencioso que a arquitetura
+inteira existe para evitar. Corrigido revogando `INSERT`/`UPDATE` direto de
+`authenticated` e forçando toda escrita por funções `security definer` —
+que por sua vez exigiu fixar `search_path` e nunca aceitar `user_id` como
+parâmetro, para não abrir a porta clássica de escalonamento de privilégio
+que uma função `definer` mal escrita costuma abrir. Também fechou o
+mecanismo de apagamento (antes só a UI estava descrita, não a escrita —
+agora `delete_*` usa o mesmo guarda de versão) e precisou a mecânica do
+merge de `FoodLog` (diff estrutural por `Meal.id`, não por timestamp — a
+entidade `Meal` não tem `updatedAt` próprio). Ficou registrada como
+recomendação obrigatória para a Sprint de Sync, não do schema: todo
+registro que chega por `pull` do Postgres precisa passar pelos mesmos
+schemas Zod que já validam um backup importado, antes de tocar o IndexedDB
+local — `jsonb` não valida forma nenhuma sozinho.
+
+Nenhum arquivo de migration real foi criado e nenhum código de app foi
+tocado — é desenho para revisão antes da Sprint de Auth.
 
 ---
 
