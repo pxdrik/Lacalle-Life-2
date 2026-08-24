@@ -470,6 +470,17 @@ Trocar local por remoto é editar `composition/`.
 Exigirá tombstones para deleção propagar — decisão adiada de propósito, e que
 muda implementações de adapter, nunca portas nem UI.
 
+**Sprint de arquitetura entregue em 24/08/2026, ainda sem código** — ver
+`docs/arquitetura-sincronizacao.md`. Mapeou as oito entidades, separou
+catálogo de foods/exercises (dado de referência, nunca por usuário) dos
+favoritos e customizados (dado real de usuário), propôs o schema conceitual
+do Postgres com RLS, e resolveu a pergunta central por família de entidade —
+`BodyEntry` e `Profile` sempre em conflito visível (nunca last-write-wins
+silencioso, mesmo sendo "só um número"), `FoodLog` com merge estruturado por
+`Meal.id` como única exceção, `Session` em progresso não sincroniza até
+`finishedAt`. Seis perguntas de produto aguardam decisão do Pedro antes da
+próxima sprint (schema SQL definitivo); estão listadas no documento.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026
