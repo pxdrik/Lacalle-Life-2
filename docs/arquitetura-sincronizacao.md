@@ -472,7 +472,7 @@ no desenho de UI quando a Sprint de implementação chegar lá.
 
 ---
 
-## 15. Perguntas que precisam da decisão do Pedro antes da próxima sprint
+## 15. Perguntas — fechadas em 24/08/2026, ver §17
 
 1. **Confirma a regra de conflito por família de entidade (§8.1)?** Em
    especial: concorda em tratar `BodyEntry` com conflito visível em vez de
@@ -490,25 +490,26 @@ no desenho de UI quando a Sprint de implementação chegar lá.
    esperado?
 
 Nenhuma dessas é uma pergunta técnica — são decisões de produto que mudam o
-comportamento que a pessoa vê. Faz sentido responder todas antes de desenhar
-o schema final do Postgres em detalhe, porque a resposta de 1–3 muda quais
-colunas cada tabela precisa (ex.: se a resposta a 2 fosse "não, quero LWW
-simples em tudo", a tabela `food_logs` não precisaria carregar
-`Meal.id` como chave de merge no motor de sync).
+comportamento que a pessoa vê. Respondidas em §17 depois do aval do Pedro em
+24/08/2026 à direção geral do documento; o schema de §18 já é desenhado em
+cima dessas respostas, não das recomendações em aberto.
 
 ---
 
 ## 16. Sequência de sprints sugerida (desenho, sem código)
 
-1. **Esta sprint (concluída):** mapeamento de entidades, regra de conflito
-   por família, decisões de escopo — este documento.
-2. **Sprint de decisão:** Pedro responde §15; ajustar este documento até
-   fechar.
-3. **Sprint de schema:** desenhar o DDL completo do Postgres + políticas RLS
-   com base nas respostas — ainda sem código de app, só migrations SQL e
-   revisão.
-4. **Sprint de auth:** Supabase Auth isolado, sem tocar em dados de domínio
-   ainda (login/signup/logout funcionando, `user_id` disponível).
+1. **Sprint de arquitetura (concluída, 24/08/2026):** mapeamento de
+   entidades, regra de conflito por família, decisões de escopo.
+2. **Sprint de decisão (concluída, 24/08/2026):** ver §17 — as seis
+   perguntas de §15 estão fechadas.
+3. **Sprint de schema (concluída nesta rodada, ver §18):** DDL completo do
+   Postgres + RLS + índices + funções de escrita condicional — desenho
+   revisável, ainda **nenhum arquivo de migration real criado no projeto e
+   nenhum código de app tocado.**
+4. **Próxima sprint — auth:** Supabase Auth isolado, sem tocar em dados de
+   domínio ainda (login/signup/logout funcionando, `user_id` disponível).
+   Só começa depois que o schema de §18 for revisado e aprovado como está,
+   ou ajustado.
 5. **Sprint de outbox + push:** fila de mutações pendentes e push
    condicional, uma entidade por vez, começando pela mais simples
    (`Profile`, que já tem toda a UX de conflito pronta).
@@ -519,3 +520,327 @@ simples em tudo", a tabela `food_logs` não precisaria carregar
 8. **Sprint de auditoria:** repetir o mesmo rigor do Round 3 anterior — agora
    testando explicitamente cenários offline/offline/reconecta, não só
    duas-abas-do-mesmo-navegador.
+
+---
+
+## 17. Especificação fechada — respostas às seis perguntas de §15
+
+Fechadas em 24/08/2026, depois de o Pedro validar a direção geral do
+documento (Supabase Auth + Postgres como fonte compartilhada, IndexedDB
+nunca removido, catálogo fora da sincronização por usuário). O schema em
+§18 já reflete estas seis respostas — não as alternativas descartadas.
+
+**1. Regra de conflito por família (§8.1) — confirmada como está.**
+`Profile`, `Diet`, `Routine` e `BodyEntry` sempre em conflito visível,
+documento inteiro, nunca last-write-wins silencioso — inclusive peso, pelo
+motivo já registrado em §8.2: uma única regra sem exceção por "isso é só um
+número" é mais fácil de manter correta do que uma tabela de casos especiais.
+
+**2. Merge por `Meal.id` — confirmado, só para `FoodLog`.** `Diet` e
+`Routine` continuam documento inteiro. Nenhuma outra entidade ganha merge
+estruturado no V1.
+
+**3. `Session` não sincroniza em progresso — confirmado.** Só entra na fila
+de sincronização quando `finishedAt !== null`. Isso também define uma regra
+de schema: `workout_sessions.finished_at` é a coluna que o outbox local
+verifica antes de sequer tentar enfileirar uma mutação de sessão.
+
+**4. Catálogo fora da sincronização — confirmado.** `foods` e `exercises`
+com `isCustom: false` nunca viram linha em tabela por usuário. O schema de
+§18 não tem tabela `foods`/`exercises` nenhuma — só `user_custom_foods`,
+`user_custom_exercises`, `user_food_favorites` e `user_exercise_favorites`.
+
+**5. Migração com dois dispositivos já divergentes (§10, caso 2) — decisão
+fechada:** tela de escolha explícita, sem default silencioso em nenhuma
+direção, com **mesclar como opção recomendada e destacada**, não as duas
+opções em pé de igualdade. Motivo: descartar dados é a única ação
+irreversível das duas, então a UI não deve tratá-la como equivalente a
+mesclar. Mecanismo: no primeiro login de um dispositivo que já tem dado
+local, se a conta já tem dados remotos, a mesclagem aplica a mesma regra de
+conflito por família do item 1 — um "primeiro sync" nada mais é que aplicar
+§8 a cada registro que existe dos dois lados, uma única vez em lote, em vez
+de inventar uma lógica de mesclagem paralela.
+
+**6. Importar backup estando logado — decisão fechada:** o import continua
+substituindo **o local** exatamente como hoje (nenhuma mudança na tela ou no
+aviso existente — "substitui completamente, não soma, não mescla"), e o
+resultado dessa substituição entra na fila de sincronização como qualquer
+outra mutação local, registro por registro. Ou seja: **não existe um modo
+especial de "importar para a nuvem"** — importar é uma escrita local grande,
+e a nuvem recebe o que sempre recebe de uma escrita local: cada registro
+tentando sincronizar com a regra de conflito da sua família. Um import que
+colide com dado mais novo no servidor gera os mesmos conflitos visíveis que
+qualquer outra edição geraria, um por registro — não um bloqueio único na
+tela de import.
+
+---
+
+## 18. Schema PostgreSQL completo (Supabase)
+
+DDL de referência para a Sprint de Schema. **Não é migration pronta para
+rodar** — é o desenho a ser revisado, versionado como
+`supabase/migrations/NNNN_*.sql` só depois de aprovado, seguindo a mesma
+regra de "append only, nunca editar uma entrada já liberada" que
+`composition/migrations.ts` já usa para o IndexedDB local.
+
+### 18.1 Convenções que valem para toda tabela sincronizável
+
+- `id uuid primary key` para agregados com UUID local (`diets`, `routines`,
+  `workout_sessions`, `user_custom_foods`, `user_custom_exercises`) — o
+  mesmo UUID que `crypto.randomUUID()` já gera no cliente, sem tradução.
+- `primary key (user_id, day)` para as duas entidades cuja identidade local
+  já é o dia (`body_entries`, `food_logs`) — nenhuma coluna `id` extra.
+- `payload jsonb not null` para o corpo do agregado, espelhando a decisão já
+  tomada localmente de que o documento inteiro é a unidade de escrita (§5).
+- `client_updated_at bigint not null` — o `updatedAt` que já existe hoje,
+  preservado como histórico e para o `putIfVersionMatches` local. **Nunca
+  usado para arbitrar conflito entre dispositivos** (§8.5).
+- `server_updated_at timestamptz not null default now()` — carimbado por
+  trigger, nunca aceito como valor vindo do cliente (§18.3). É o único
+  árbitro de ordem e o cursor de sincronização incremental.
+- `deleted_at timestamptz` — tombstone (§9). Nenhuma tabela de domínio tem
+  política de `DELETE` real; apagar é sempre um `UPDATE` que preenche esta
+  coluna.
+- `created_at timestamptz not null default now()`.
+- RLS habilitado, mesma política nas quatro operações: `auth.uid() =
+  user_id`.
+
+```sql
+create or replace function public.set_server_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.server_updated_at := now();
+  return new;
+end;
+$$;
+```
+Uma função só, reaproveitada num trigger `before insert or update` por
+tabela — repetida em cada `create trigger` abaixo, não recriada.
+
+### 18.2 Tabelas
+
+```sql
+-- Perfil: singleton por usuário, tal como PROFILE_ID = "me" localmente.
+create table public.profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  payload jsonb not null,              -- NutritionProfile inteiro
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+-- Evolução corporal: id local já é o dia.
+create table public.body_entries (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  day date not null,
+  weight_kg numeric,
+  body_fat_percent numeric,
+  measurements jsonb not null default '{}'::jsonb,
+  notes text not null default '',
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  primary key (user_id, day)
+);
+
+-- Dietas: aggregate root, documento inteiro.
+create table public.diets (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  payload jsonb not null,              -- { name, meals, weekdays }
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index diets_user_sync_idx on public.diets (user_id, server_updated_at);
+
+-- Diário: id local já é o dia. Único com merge estruturado (§8.3, §17.2) —
+-- o motor de sync lê `payload->'meals'` para o merge por Meal.id, não o SQL.
+create table public.food_logs (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  day date not null,
+  payload jsonb not null,              -- { meals, dietId }
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now(),
+  primary key (user_id, day)
+);
+
+-- Rotinas: aggregate root, documento inteiro.
+create table public.routines (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  payload jsonb not null,              -- { name, notes, exercises }
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index routines_user_sync_idx on public.routines (user_id, server_updated_at);
+
+-- Sessões: só sincroniza com finished_at preenchido (§17.3).
+-- routine_id é referência solta (cópia congelada) — sem FK de propósito,
+-- igual ao Session.routineId local ("deliberately not a live link").
+create table public.workout_sessions (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  routine_id uuid,
+  name text not null,
+  started_at bigint not null,
+  finished_at bigint,
+  payload jsonb not null,              -- { exercises }
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index sessions_user_started_idx on public.workout_sessions (user_id, started_at desc);
+create index sessions_user_sync_idx on public.workout_sessions (user_id, server_updated_at);
+
+-- Alimentos e exercícios personalizados — nunca o catálogo (§17.4).
+create table public.user_custom_foods (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  payload jsonb not null,              -- { name, category, per100g }
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table public.user_custom_exercises (
+  id uuid primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  payload jsonb not null,              -- todos os campos de Exercise exceto isCustom/isFavorite
+  client_updated_at bigint not null,
+  server_updated_at timestamptz not null default now(),
+  deleted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+-- Favoritos: sem tombstone de propósito — ver §18.4.
+-- food_id/exercise_id aceita tanto slug de catálogo ("abdominal-bicicleta")
+-- quanto uuid de user_custom_*, por isso `text` e não `uuid`.
+create table public.user_food_favorites (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  food_id text not null,
+  server_updated_at timestamptz not null default now(),
+  primary key (user_id, food_id)
+);
+
+create table public.user_exercise_favorites (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  exercise_id text not null,
+  server_updated_at timestamptz not null default now(),
+  primary key (user_id, exercise_id)
+);
+```
+
+### 18.3 RLS — mesma política em toda tabela, sem política de `DELETE`
+
+```sql
+alter table public.diets enable row level security;
+
+create policy "diets_select_own" on public.diets
+  for select using (auth.uid() = user_id);
+
+create policy "diets_insert_own" on public.diets
+  for insert with check (auth.uid() = user_id);
+
+create policy "diets_update_own" on public.diets
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create trigger diets_set_server_updated_at
+  before insert or update on public.diets
+  for each row execute function public.set_server_updated_at();
+```
+
+Repetir para `body_entries`, `food_logs`, `routines`, `workout_sessions`,
+`profiles`, `user_custom_foods`, `user_custom_exercises` (com política
+própria de `delete` só nas duas de favoritos, ver §18.4).
+
+**De propósito, não existe política de `for delete`** nas tabelas com
+tombstone. Um cliente não pode fisicamente apagar uma linha — só pode dar
+`UPDATE ... set deleted_at = now()`, que a política de `update` já cobre.
+Apagar de verdade só acontece via `service_role` (fora do RLS), acionado
+pelo processo de exclusão de conta (§12) ou por uma limpeza periódica de
+tombstones antigos — nenhum dos dois é uma chamada que o app faz direto.
+
+### 18.4 Por que `user_food_favorites`/`user_exercise_favorites` não têm tombstone
+
+Única exceção deliberada à regra de §9. Um favorito é um booleano puro sem
+valor autoral: perder silenciosamente um "isso ficou favoritado de novo"
+por causa de uma corrida rara entre dois dispositivos não apaga histórico
+de ninguém — o pior caso é reabrir a lista de favoritos e favoritar de
+novo. Diferente de perder uma medição de peso ou uma refeição registrada,
+que são fatos que aconteceram e não voltam. Por isso essas duas tabelas
+usam `insert ... on conflict do nothing` para favoritar e `delete` de
+verdade para desfavoritar, sem fila de conflito nenhuma — o único par de
+tabelas em todo o schema com essa simplicidade, e é importante que
+continue sendo exceção rara, não o padrão que a próxima tabela copia sem
+pensar.
+
+### 18.5 Escrita condicional — a versão em Postgres de `putIfVersionMatches`
+
+O outbox local não fala SQL cru; chama uma função RPC por entidade, que faz
+o mesmo "ler, comparar, escrever" atômico que `Store.putIfVersionMatches`
+já faz localmente — só que comparando contra `server_updated_at` em vez de
+`updatedAt` (§8.5). Esboço para `diets`, o mesmo formato vale para as
+outras tabelas com `payload`:
+
+```sql
+create or replace function public.save_diet(
+  p_id uuid,
+  p_payload jsonb,
+  p_client_updated_at bigint,
+  p_expected_server_updated_at timestamptz -- null = criação
+) returns table (server_updated_at timestamptz)
+language plpgsql
+security invoker
+as $$
+begin
+  if p_expected_server_updated_at is null then
+    insert into public.diets (id, user_id, payload, client_updated_at)
+    values (p_id, auth.uid(), p_payload, p_client_updated_at)
+    on conflict (id) do nothing;
+  else
+    update public.diets
+    set payload = p_payload,
+        client_updated_at = p_client_updated_at,
+        deleted_at = null
+    where id = p_id
+      and user_id = auth.uid()
+      and server_updated_at = p_expected_server_updated_at;
+  end if;
+
+  return query
+    select d.server_updated_at from public.diets d
+    where d.id = p_id and d.user_id = auth.uid();
+end;
+$$;
+```
+
+Zero linhas afetadas pelo `insert`/`update` (mas a linha existe com outro
+`server_updated_at`) é exatamente o mesmo sinal de conflito que
+`VersionedWriteResult.ok === false` já usa localmente — o motor de sync lê
+o `server_updated_at` retornado, compara com o que esperava, e se
+divergiu, é o gatilho para a UI de conflito da §8. **Este é um esboço para
+revisão na Sprint de Schema, não uma função pronta para aplicar** — falta,
+por exemplo, decidir se o merge por `Meal.id` de `food_logs` (§17.2)
+acontece dentro de uma função equivalente no Postgres ou inteiramente no
+cliente antes de chamar uma função "burra" igual a esta.
+
+### 18.6 Cursor de sincronização — não é uma tabela do Postgres
+
+O cursor por tabela (`syncState.lastPulledAt`, um por store) vive **no
+IndexedDB local**, não no servidor — cada dispositivo lembra até onde já
+puxou, o servidor não precisa saber quem puxou o quê. Uma nona store local
+(§7, `pendingSync`) mais uma décima (`syncState`) são as duas únicas
+adições ao schema local do IndexedDB que a sincronização exige; nenhuma das
+oito stores de domínio muda de forma.

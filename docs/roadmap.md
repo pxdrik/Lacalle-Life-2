@@ -473,13 +473,20 @@ muda implementações de adapter, nunca portas nem UI.
 **Sprint de arquitetura entregue em 24/08/2026, ainda sem código** — ver
 `docs/arquitetura-sincronizacao.md`. Mapeou as oito entidades, separou
 catálogo de foods/exercises (dado de referência, nunca por usuário) dos
-favoritos e customizados (dado real de usuário), propôs o schema conceitual
-do Postgres com RLS, e resolveu a pergunta central por família de entidade —
-`BodyEntry` e `Profile` sempre em conflito visível (nunca last-write-wins
-silencioso, mesmo sendo "só um número"), `FoodLog` com merge estruturado por
-`Meal.id` como única exceção, `Session` em progresso não sincroniza até
-`finishedAt`. Seis perguntas de produto aguardam decisão do Pedro antes da
-próxima sprint (schema SQL definitivo); estão listadas no documento.
+favoritos e customizados (dado real de usuário), e resolveu a pergunta
+central por família de entidade — `BodyEntry` e `Profile` sempre em
+conflito visível (nunca last-write-wins silencioso, mesmo sendo "só um
+número"), `FoodLog` com merge estruturado por `Meal.id` como única
+exceção, `Session` em progresso não sincroniza até `finishedAt`.
+
+**As seis perguntas de produto foram fechadas no mesmo dia** (§17 do
+documento) e o schema completo do Postgres/Supabase está desenhado (§18):
+DDL de todas as tabelas, RLS sem política de `DELETE` (tombstone via
+`deleted_at`, apagar de verdade só por `service_role`), trigger de
+`server_updated_at` para nunca confiar no relógio do cliente, e o esboço da
+função RPC que faz o equivalente ao `putIfVersionMatches` local contra o
+Postgres. Nenhum arquivo de migration real foi criado e nenhum código de
+app foi tocado — é desenho para revisão antes da Sprint de Auth.
 
 ---
 
