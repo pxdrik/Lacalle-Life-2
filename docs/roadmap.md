@@ -504,8 +504,32 @@ registro que chega por `pull` do Postgres precisa passar pelos mesmos
 schemas Zod que já validam um backup importado, antes de tocar o IndexedDB
 local — `jsonb` não valida forma nenhuma sozinho.
 
+**Pedro aprovou a direção em 24/08/2026 e pediu duas coisas antes de liberar
+a migration de verdade** (§19.10/§19.11 do documento): fechar a ordenação
+de `FoodLog` depois do merge, e atacar as funções `save_*`/`delete_*` na
+prática — não só reler o SQL. Ordenação fechada: por `Meal.time`, empate
+desempatado por `Meal.id` — a recomendação original ("ordem em que
+apareceram localmente") não sobreviveu à segunda olhada, porque não é
+determinística entre dois dispositivos executando o mesmo merge cada um do
+seu lado. Ataque nos oito cenários pedidos (usuário A tentando ler/escrever/
+apagar dado de B, alterar `updated_at`, manipular `user_id`, chamar sem
+autenticação, versão antiga/futura, IDs aleatórios): todos corretamente
+rejeitados pela versão já corrigida. A tentativa de ataque real, e não a
+leitura do SQL, ainda achou mais um problema: `search_path` incluía
+`pg_temp`, o próprio vetor de sequestro que a regra existia para evitar —
+só não era explorável nesta versão porque toda referência de tabela já
+estava qualificada por extenso, o que é sorte de estilo, não desenho.
+Corrigido para `search_path = public` sozinho.
+
+**Auth pode começar agora**, isolado, sem tocar em nenhuma tabela de
+domínio — decisão do Pedro, escopo deliberadamente pequeno (cadastro,
+login, logout, sessão persistente, refresh, confirmação de e-mail,
+recuperação de senha, `user.id` disponível). Zero migração, zero outbox,
+zero sync engine, zero alteração no IndexedDB nesta sprint.
+
 Nenhum arquivo de migration real foi criado e nenhum código de app foi
-tocado — é desenho para revisão antes da Sprint de Auth.
+tocado — é desenho para revisão, e a Sprint de Schema (migrations de
+verdade) segue atrás da Sprint de Auth, não em paralelo com ela.
 
 ---
 

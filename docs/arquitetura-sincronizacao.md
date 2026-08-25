@@ -819,10 +819,18 @@ nela, não só nesta como em toda função `definer` deste schema:
 1. **Nunca aceitar `user_id` como parâmetro.** Sempre `auth.uid()` lido de
    dentro da função — um parâmetro seria o chamador dizendo de quem são os
    dados, e a função confiando cegamente.
-2. **`set search_path = public, pg_temp` fixo na declaração da função** —
-   sem isso, um `search_path` manipulado na sessão poderia fazer a função
-   resolver `public.diets` para uma tabela diferente com o mesmo nome
-   criada em outro schema.
+2. **`set search_path = public` fixo na declaração da função — sem
+   `pg_temp`.** Corrigido depois de §19.10: a primeira versão deste
+   documento incluía `pg_temp` no `search_path`, que é o próprio vetor de
+   sequestro que a regra existe para evitar — `pg_temp` é o schema
+   temporário **do chamador**, e um chamador malicioso pode criar uma
+   tabela temporária chamada `diets` nele antes de invocar a função. Toda
+   referência de tabela no corpo da função já é escrita como
+   `public.diets` (nunca `diets` sozinho), o que neutraliza o sequestro
+   mesmo com `pg_temp` no caminho — mas depender de "sempre qualificamos
+   por engano certo" é pior que remover o vetor de propósito. `public`
+   sozinho fecha isso sem depender de disciplina de quem editar a função
+   depois.
 
 O outbox local não fala SQL cru; chama uma função RPC por entidade, que faz
 o mesmo "ler, comparar, escrever" atômico que `Store.putIfVersionMatches`
@@ -839,7 +847,7 @@ create or replace function public.save_diet(
 ) returns table (server_updated_at timestamptz)
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = public
 as $$
 declare
   v_uid uuid := auth.uid();
@@ -869,6 +877,7 @@ end;
 $$;
 
 revoke execute on function public.save_diet from public;
+revoke execute on function public.save_diet from anon;
 grant execute on function public.save_diet to authenticated;
 
 -- A mesma exclusão de verdade, com o mesmo guarda de versão — nunca um
@@ -881,7 +890,7 @@ create or replace function public.delete_diet(
 ) returns table (server_updated_at timestamptz)
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = public
 as $$
 declare
   v_uid uuid := auth.uid();
@@ -903,6 +912,7 @@ end;
 $$;
 
 revoke execute on function public.delete_diet from public;
+revoke execute on function public.delete_diet from anon;
 grant execute on function public.delete_diet to authenticated;
 ```
 
@@ -1065,14 +1075,24 @@ confirma que uma das duas chamadas retorna a versão antiga.
   remoto, faz o diff contra o local, resolve ou pergunta, e só então chama
   `save_food_log` com o resultado — a função no banco continua "burra"
   como as outras.
-- **Achado não resolvido, para decisão de produto: ordem das refeições
-  após a união.** `Meal[]` é um array — a interface já tem
-  drag-and-drop de refeições (roadmap), então a ordem é dado de produto,
-  não só exibição. Uma união simples por id não define ordem nenhuma para
-  o resultado. **Recomendação: ordenar o resultado da união por
-  `Meal.time` quando presente, e pelas refeições sem horário no final na
-  ordem em que apareceram localmente** — mas isso é uma escolha de UX que
-  fica para a Sprint de Sync, não uma propriedade do schema.
+- **Ordem das refeições após a união — fechada em 24/08/2026, corrigindo a
+  primeira recomendação deste documento.** `Meal[]` é um array — a
+  interface já tem drag-and-drop de refeições (roadmap), então a ordem é
+  dado de produto, não só exibição. A recomendação original ("refeições
+  sem horário no final, na ordem em que apareceram localmente") não
+  resiste a uma segunda olhada: **"localmente" não é uma referência única**
+  quando dois dispositivos fizeram a união cada um do seu lado — o
+  aparelho A vê sua própria ordem local como "a ordem", o aparelho B vê a
+  dele, e os dois calculariam resultados diferentes para o mesmo merge,
+  cada um tentando depois "corrigir" o outro numa sincronização sem fim.
+  Uma regra de merge que depende de qual lado a executa não é uma regra.
+
+  **Decisão fechada:** ordenar o resultado da união por `Meal.time`
+  quando presente (refeições sem horário vão para o final), e entre
+  refeições empatadas em horário (inclusive as duas sem horário) desempatar
+  por `Meal.id` em ordem lexicográfica. `Meal.id` é um UUID estável dos
+  dois lados — qualquer dispositivo que rode o merge chega exatamente à
+  mesma ordem, porque a regra não depende de qual array veio "primeiro".
 - **Granularidade confirmada: por refeição inteira, nunca por item dentro
   dela.** Editar o nome de uma refeição num aparelho e adicionar um item a
   ela no outro, ambos offline, é tratado como o mesmo caso "mesmo
@@ -1171,7 +1191,97 @@ Duas colunas do formato original do Pedro colapsam numa linha aqui —
 não existe tabela em que uma está aberta e a outra revogada, e separar em
 duas linhas idênticas não acrescentaria informação.
 
-### 19.10 Veredito
+### 19.10 Atacando `save_*`/`delete_*` de verdade — 24/08/2026
+
+Pedido direto: não ler o SQL de novo e confirmar que parece certo — rodar
+cada cenário do checklist contra o corpo real das funções, linha por linha,
+e só marcar como rejeitado o que de fato falha na execução. Oito cenários,
+todos contra `save_diet`/`delete_diet` (o mesmo raciocínio vale para o par
+de qualquer outra tabela, porque o formato é idêntico).
+
+1. **Usuário A tenta salvar registro de B.** Caminho de criação
+   (`p_expected_server_updated_at = null`): `insert ... on conflict (id) do
+   nothing` — o `id` já existe (de B), o `ON CONFLICT` dispara, nada é
+   inserido. Caminho de atualização: `where id = p_id and user_id = v_uid
+   and server_updated_at = ...` — `user_id` da linha real é B, `v_uid` é A,
+   a cláusula nunca bate, `0` linhas afetadas nos dois caminhos. O `select`
+   final também filtra por `user_id = v_uid`, então A recebe um resultado
+   **vazio**, nunca o conteúdo de B. **Rejeitado — e sem vazar o conteúdo
+   de B na resposta.**
+2. **Usuário A tenta alterar `server_updated_at`.** Não existe parâmetro
+   para isso em nenhuma das duas funções — o valor nunca é aceito como
+   entrada, só escrito pelo trigger (`before insert or update`, incondicional,
+   sempre `now()`). **Rejeitado por construção: não há como sequer tentar.**
+3. **Usuário A tenta deletar registro de B.** Mesmo caminho do item 1 em
+   `delete_diet`: `where id = p_id and user_id = v_uid and
+   server_updated_at = ...` nunca bate porque a linha é de B. **Rejeitado —
+   `deleted_at` de B nunca muda.**
+4. **Usuário A envia versão antiga (o conflito de verdade, não ataque).**
+   `server_updated_at = p_expected` não bate contra o valor atual (mais
+   novo), `0` linhas afetadas, o `select` final devolve o
+   `server_updated_at` **atual**, diferente do que A esperava — o motor de
+   sync lê isso como `CONFLICT`. **Funciona como desenhado**, com uma
+   lacuna de precisão encontrada no caminho: a função devolve só o
+   timestamp, não o registro inteiro, diferente do `VersionedWriteResult`
+   local (que devolve `current: T | undefined` completo). Não é falha de
+   segurança — o dono sempre pode ler a própria linha inteira via `SELECT`
+   direto, permitido por RLS — mas custa uma chamada extra que o
+   `putIfVersionMatches` local não custa. Registrado como ajuste de
+   protocolo para a Sprint de Sync, não do schema.
+5. **Usuário A envia versão futura.** A comparação é `=` estrita, nunca
+   `>=`/`<=` — não existe tratamento especial para um timestamp "no
+   futuro"; ele simplesmente não bate com o valor real armazenado, do
+   mesmo jeito que qualquer outro valor errado. **Rejeitado, sem
+   diferença de comportamento por direção do erro** — o que importa, já
+   que "no futuro" não é uma categoria mais perigosa que "errado" aqui.
+6. **Usuário A chama a RPC com IDs aleatórios.** Criação com id novo:
+   sucesso normal — é exatamente o fluxo pretendido (o cliente já escolhe
+   o UUID). Atualização com id inexistente: `0` linhas, `select` final
+   vazio. **Não é um ataque que quebra nada, mas expôs uma ambiguidade
+   real de protocolo**, não de segurança: hoje "id não existe", "id existe
+   mas é de outro usuário" e "id existe, é seu, mas a versão não bate"
+   devolvem exatamente o mesmo resultado vazio/divergente para quem chama.
+   O motor de sync consegue decidir corretamente o que fazer em cada um
+   dos três casos (são tratamentos diferentes: recriar, nunca recriar,
+   mostrar conflito) só inferindo pelo contexto que ele mesmo já tinha
+   antes de chamar — funciona, mas é frágil o bastante para valer a pena
+   registrar como melhoria de protocolo antes de escrever o motor de sync:
+   a função poderia devolver um status explícito (`created` / `updated` /
+   `conflict` / `not_found`) em vez de só `server_updated_at`.
+7. **Usuário sem autenticação chama a RPC.** Duas camadas, não uma:
+   `EXECUTE` nunca foi concedido a `anon` (só a `authenticated`, e o
+   `REVOKE` explícito de `anon` fechado nesta revisão remove qualquer
+   ambiguidade sobre isso) — a chamada é recusada pelo Postgres antes da
+   função rodar. Mesmo que rodasse, `auth.uid()` seria `null` e `if v_uid
+   is null then raise exception` aborta. **Rejeitado nas duas camadas,
+   redundância proposital.**
+8. **Usuário A tenta manipular `user_id`.** Não existe parâmetro
+   `p_user_id` em nenhuma função — `user_id` nunca é entrada, só
+   `auth.uid()` lido de dentro. **Rejeitado pela mesma razão do item 2: não
+   há superfície para tentar.**
+
+**Dois achados adicionais, fora da lista original, que só apareceram
+tentando de verdade em vez de ler:**
+
+- **`search_path = public, pg_temp` era o próprio vetor que a regra dizia
+  evitar.** `pg_temp` é o schema temporário de quem chama a função — um
+  chamador poderia criar uma tabela temporária chamada `diets` nele antes
+  de invocar `save_diet`. Como todo `insert`/`update`/`select` no corpo da
+  função já escreve `public.diets` por extenso (nunca `diets` sozinho), o
+  sequestro não tinha efeito prático nesta versão — mas contar com
+  "sempre qualificamos por hábito" para fechar um vetor de ataque é frágil
+  para quem editar a função depois sem saber por quê. **Corrigido em
+  §18.5: `search_path = public`, sem `pg_temp`.**
+- **Corrida entre dois dispositivos do mesmo usuário — verificada, não é
+  falha.** Duas chamadas concorrentes de A (PC e iPhone) com o mesmo
+  `server_updated_at` esperado: o `UPDATE` do Postgres adquire lock de
+  linha durante a avaliação do `WHERE`; a segunda chamada só executa depois
+  da primeira commitar, e a essa altura o `server_updated_at` já mudou —
+  a segunda vê `0` linhas, exatamente o conflito que deveria ver.
+  Garantia do MVCC do Postgres, não precisa de `SELECT ... FOR UPDATE`
+  explícito.
+
+### 19.11 Veredito
 
 **Não aprovado na forma original.** Um achado P0 real (§19.1), já corrigido
 diretamente em §18. Dois achados P1 que exigiam decisão de mecanismo, não
@@ -1181,7 +1291,17 @@ obrigatória para a Sprint de Sync, fora do escopo do schema em si mas
 registrado para não ser esquecido (§19.8, validar `payload` no pull com os
 mesmos schemas Zod do backup). Um achado sem decisão ainda, deliberadamente
 adiado (§19.2, janela de retenção de tombstone — recomendação é não
-purgar no V1).
+purgar no V1). A ordenação de `FoodLog` depois do merge, fechada acima em
+§19.5 — a primeira recomendação deste documento não era determinística
+entre dois dispositivos e foi corrigida para uma regra que é.
+
+**A tentativa de ataque às RPCs (§19.10) não encontrou nenhuma falha de
+segurança nova** — os oito cenários pedidos são todos corretamente
+rejeitados pela versão corrigida das funções — mas encontrou dois ajustes
+reais de qualquer jeito: o `search_path` continha um vetor de sequestro que
+só não era explorável por sorte de estilo, não por desenho (corrigido), e o
+protocolo de retorno das funções é ambíguo o bastante para valer um ajuste
+antes da Sprint de Sync (registrado, não bloqueia migration).
 
 Com essas correções aplicadas em §18, considero o schema pronto para a
 Sprint de Auth começar em paralelo — auth não depende de nenhuma tabela de
