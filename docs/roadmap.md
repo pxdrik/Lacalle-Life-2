@@ -567,13 +567,37 @@ conta B loga, refresh, `user.id = B` — nunca as duas juntas. Não substitui
 a validação manual contra o Supabase real; prova a metade que dá para
 provar sem rede. 1150 testes no total agora.
 
-**Status: 🟡 READY FOR FINAL VALIDATION, não READY FOR SCHEMA ainda.**
-Falta uma coisa só: rodar o fluxo E2E real uma vez (cadastro → e-mail →
-confirmação → login → fechar/reabrir → sessão persistida → logout → rota
-protegida inacessível) contra o Supabase de verdade. Bloqueado pelo rate
-limit do SMTP embutido do plano free — decisão pendente entre esperar a
-janela resetar ou configurar SMTP customizado no projeto. Só depois disso
-começa a Sprint 2 (schema/migrations reais).
+**Fluxo E2E real fechado em 25/08/2026 — Status: 🟢 READY FOR SCHEMA.**
+Rate limit resetou; e-mail de teste real (`pedrofunesctt@gmail.com`, com
+autorização de quem o controla) usado para o fluxo completo contra o
+Supabase de produção — não simulado:
+
+1. Cadastro real em `/cadastro` → "Confira seu e-mail" ✅
+2. E-mail de confirmação chegou de verdade, link clicado por quem controla
+   a caixa de entrada ✅
+3. Callback trocou o código por sessão e voltou pro LaCalle Life já logado
+   (`exchangeCodeForSession`, sem passo de login manual — o próprio clique
+   no e-mail já autentica) ✅
+4. `/conta` mostrando `user.id` real (`835d04ec-dae6-48a2-aa55-b940d1555145`) ✅
+5. Fechar a aba e abrir uma nova, direto em `/conta`: sessão persistiu por
+   cookie sem pedir login de novo ✅
+6. Logout: redirecionou para `/entrar` ✅
+7. `/conta` depois do logout: volta a mostrar "Você não está logado" ✅
+8. Confirmado direto no banco: `auth.users.email_confirmed_at` e
+   `last_sign_in_at` preenchidos com timestamps reais de 25/08/2026 ✅
+
+**Uma diferença do roteiro original, registrada por transparência:** o
+décimo passo pedido era "confirmar que rota protegida não está mais
+acessível". Nesta sprint **nenhuma rota de domínio é protegida por
+auth** — foi decisão explícita desde o início ("o resto do app continua
+funcionando 100% como hoje, sem depender de login"). O que existe e foi
+confirmado é `/conta` refletindo corretamente o estado de sessão nos dois
+sentidos. Proteger rota é decisão de uma sprint futura, quando sync de
+domínio existir de verdade.
+
+Com isso, a Sprint 1 está fechada. Próxima: **Sprint 2 — Schema real**,
+as migrations do `docs/arquitetura-sincronizacao.md` §18 aplicadas de
+verdade no projeto Supabase.
 
 ---
 
