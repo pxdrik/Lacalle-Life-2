@@ -553,6 +553,28 @@ janela de rate limit resetar para fechar essa validação manual.
 
 1143 testes (1132 + 11 novos), typecheck/lint/build limpos, zero regressão.
 
+**Revisão de segurança automatizada, mesmo dia:** open redirect em
+`/auth/callback?next=` — o parâmetro ia sem validação para
+`NextResponse.redirect`. A concatenação com `origin` já bloqueava os casos
+óbvios, mas não vale contar com isso: `//evil.com` e `/\evil.com` dependem
+de como o navegador normaliza. Fechado com `safeNextPath()` (só aceita
+caminho local de uma barra só); provado revertendo a validação e vendo 4
+dos 5 testos caírem nos casos maliciosos, restaurando depois.
+
+**Teste obrigatório de vazamento de sessão entre contas, pedido pelo
+Pedro:** conta A loga, refresh (remount do zero), `user.id = A`; desloga;
+conta B loga, refresh, `user.id = B` — nunca as duas juntas. Não substitui
+a validação manual contra o Supabase real; prova a metade que dá para
+provar sem rede. 1150 testes no total agora.
+
+**Status: 🟡 READY FOR FINAL VALIDATION, não READY FOR SCHEMA ainda.**
+Falta uma coisa só: rodar o fluxo E2E real uma vez (cadastro → e-mail →
+confirmação → login → fechar/reabrir → sessão persistida → logout → rota
+protegida inacessível) contra o Supabase de verdade. Bloqueado pelo rate
+limit do SMTP embutido do plano free — decisão pendente entre esperar a
+janela resetar ou configurar SMTP customizado no projeto. Só depois disso
+começa a Sprint 2 (schema/migrations reais).
+
 ---
 
 ## Auditoria de robustez — 13/08/2026
