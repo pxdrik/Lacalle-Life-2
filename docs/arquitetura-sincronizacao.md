@@ -1404,6 +1404,74 @@ Dados de teste criados durante o ataque foram apagados pelas próprias
 `delete_*` (tombstone real, não faxina bruta) — o mesmo caminho que
 qualquer usuário real percorreria.
 
+### 20.4 Dois achados a mais, desenhando o motor de sync (25/08/2026, migrations 0021–0030)
+
+Antes de escrever qualquer código do motor de sync, tentei desenhar como o
+cliente chamaria `save_*`/`delete_*` de verdade — e o próprio desenho
+revelou dois problemas reais no schema que só apareceram testando de novo
+contra o banco.
+
+**1. `server_updated_at` sozinho não deixa o cliente saber se a escrita
+aconteceu.** Exatamente a lacuna já registrada em §19.10 como "ajuste de
+protocolo antes da Sprint de Sync" — chegou a hora. Depois de uma chamada,
+`server_updated_at` muda tanto quando a escrita teve sucesso (valor novo,
+gerado por esta chamada) quanto quando houve conflito (valor atual do
+servidor, que já não batia com o esperado) — os dois casos são
+indistinguíveis só pelo timestamp. Corrigido acrescentando `applied
+boolean` ao retorno de todas as 16 funções, calculado via `GET DIAGNOSTICS
+... ROW_COUNT` — `true` só quando a linha realmente mudou por causa desta
+chamada específica.
+
+**2. `INSERT ... ON CONFLICT DO NOTHING` nunca revive uma linha
+tombstoned.** Achado testando o cenário mais comum de todos — apagar um
+registro e recriá-lo — no `profile` de teste do Pedro (que já tinha sido
+tombstoned durante os ataques do Sprint 2): a segunda "criação" chegava
+como `p_expected_server_updated_at: null` (o cliente achava que não
+existia nada ainda), mas a linha já existia no servidor, só que apagada —
+`DO NOTHING` não fazia nada, `applied` ficava `false` para sempre depois
+do primeiro apagamento. Trocado para `DO UPDATE ... WHERE deleted_at is
+not null`: revive se a linha existente estava tombstoned, nunca sobrescreve
+silenciosamente uma linha viva (esse caso é um conflito de verdade — dois
+dispositivos "criando" a mesma coisa ao mesmo tempo — não uma recriação).
+
+**Achado de segurança dentro do achado 2, antes de propagar o padrão
+errado para as outras tabelas:** dentro de uma função `security definer`,
+RLS **não filtra automaticamente**. A primeira versão do `DO UPDATE`
+revivia qualquer linha tombstoned que colidisse no `id`, sem checar se ela
+pertencia ao mesmo usuário que estava chamando — um UUID colidindo entre
+dois usuários (improvável, mas não impossível: um id observado em algum
+lugar e reenviado de propósito) deixaria um deles reviver e sobrescrever o
+registro apagado do outro, mantendo o `user_id` original mas com o
+`payload` do atacante. Fechado antes de sair do `diets` (a primeira
+tabela testada): o `WHERE` do `DO UPDATE` agora exige `deleted_at is not
+null` **e** `user_id = v_uid` explicitamente — nunca `excluded.user_id`,
+que é sempre o do chamador e não prova nada sobre a linha que já existia.
+
+Isso só se aplica às cinco tabelas cuja chave de conflito é `id` (UUID)
+sozinho — `diets`, `routines`, `workout_sessions`, `user_custom_foods`,
+`user_custom_exercises`. As três restantes (`profiles`, `body_entries`,
+`food_logs`) já têm `user_id` dentro da própria chave de conflito
+(`user_id` sozinho, ou `user_id, day`), então o `ON CONFLICT` por si só já
+garante que a linha em conflito só pode ser do mesmo dono — não precisam
+da checagem extra.
+
+Confirmado contra produção depois da correção: `revive` com `applied:
+true` em `diets` e `body_entries`, ciclo completo criar→apagar→recriar
+testado de ponta a ponta nos dois. Advisor de segurança revisado de novo,
+mesmos 17 avisos esperados, nada novo.
+
+### 20.5 Estado do schema
+
+**Aplicado e íntegro em produção — 30 migrations no total.** As migrations
+em `supabase/migrations/` espelham fielmente o histórico real do projeto,
+incluindo as versões com bug ao lado das correções, sempre como entradas
+append-only separadas — nunca reescritas. Ninguém que ler os arquivos do
+zero vai encontrar uma versão silenciosamente "consertada" sem o registro
+de que ela já existiu quebrada.
+
 Nenhuma tabela de domínio tem dado real do Pedro ainda. A Sprint de Sync
 (outbox, pull, motor de merge) é a próxima, e é a primeira que
-efetivamente lê/escreve dado de domínio do dispositivo local.
+efetivamente lê/escreve dado de domínio do dispositivo local. Plano:
+começar por uma entidade só (`Profile`, que já tem toda a UX de conflito
+pronta — §16), provar de ponta a ponta contra o Supabase real, e só depois
+expandir para as outras sete.

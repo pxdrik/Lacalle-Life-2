@@ -1,0 +1,99 @@
+-- body_entries tem user_id na própria chave de conflito (user_id, day), então
+-- ao contrário das tabelas de id UUID sozinho, não precisa da checagem
+-- extra de dono no WHERE do DO UPDATE — o ON CONFLICT já garante isso.
+drop function public.save_body_entry(date, numeric, numeric, jsonb, text, bigint, timestamptz);
+drop function public.delete_body_entry(date, timestamptz);
+
+create or replace function public.save_body_entry(
+  p_day date,
+  p_weight_kg numeric,
+  p_body_fat_percent numeric,
+  p_measurements jsonb,
+  p_notes text,
+  p_client_updated_at bigint,
+  p_expected_server_updated_at timestamptz
+) returns table (server_updated_at timestamptz, applied boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_row_count int;
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  if p_expected_server_updated_at is null then
+    insert into public.body_entries
+      (user_id, day, weight_kg, body_fat_percent, measurements, notes, client_updated_at)
+    values
+      (v_uid, p_day, p_weight_kg, p_body_fat_percent, p_measurements, p_notes, p_client_updated_at)
+    on conflict (user_id, day) do update
+      set weight_kg = excluded.weight_kg,
+          body_fat_percent = excluded.body_fat_percent,
+          measurements = excluded.measurements,
+          notes = excluded.notes,
+          client_updated_at = excluded.client_updated_at,
+          deleted_at = null
+      where public.body_entries.deleted_at is not null;
+    get diagnostics v_row_count = row_count;
+  else
+    update public.body_entries
+    set weight_kg = p_weight_kg,
+        body_fat_percent = p_body_fat_percent,
+        measurements = p_measurements,
+        notes = p_notes,
+        client_updated_at = p_client_updated_at,
+        deleted_at = null
+    where public.body_entries.user_id = v_uid
+      and public.body_entries.day = p_day
+      and public.body_entries.server_updated_at = p_expected_server_updated_at;
+    get diagnostics v_row_count = row_count;
+  end if;
+
+  return query
+    select b.server_updated_at, (v_row_count > 0) as applied
+    from public.body_entries b
+    where b.user_id = v_uid and b.day = p_day;
+end;
+$$;
+
+revoke execute on function public.save_body_entry from public;
+revoke execute on function public.save_body_entry from anon;
+grant execute on function public.save_body_entry to authenticated;
+
+create or replace function public.delete_body_entry(
+  p_day date,
+  p_expected_server_updated_at timestamptz
+) returns table (server_updated_at timestamptz, applied boolean)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_row_count int;
+begin
+  if v_uid is null then
+    raise exception 'not authenticated';
+  end if;
+
+  update public.body_entries
+  set deleted_at = now()
+  where public.body_entries.user_id = v_uid
+    and public.body_entries.day = p_day
+    and public.body_entries.server_updated_at = p_expected_server_updated_at;
+  get diagnostics v_row_count = row_count;
+
+  return query
+    select b.server_updated_at, (v_row_count > 0) as applied
+    from public.body_entries b
+    where b.user_id = v_uid and b.day = p_day;
+end;
+$$;
+
+revoke execute on function public.delete_body_entry from public;
+revoke execute on function public.delete_body_entry from anon;
+grant execute on function public.delete_body_entry to authenticated;

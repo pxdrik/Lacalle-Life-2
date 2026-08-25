@@ -631,8 +631,28 @@ padrão do Supabase) — fica como item não bloqueante para um segundo teste
 E2E futuro.
 
 Dados de teste apagados pelas próprias funções `delete_*` (tombstone real).
+
+**Mais dois achados desenhando o motor de sync, mesmo dia (migrations
+0021–0030):** `server_updated_at` sozinho não deixava o cliente saber se a
+escrita aconteceu ou houve conflito (os dois casos mudam o timestamp) —
+corrigido com `applied boolean` em todas as 16 funções, via `GET
+DIAGNOSTICS ROW_COUNT`. E `INSERT ... ON CONFLICT DO NOTHING` nunca revivia
+uma linha tombstoned — achado testando o cenário mais comum de todos
+(apagar e recriar) no perfil de teste do Pedro; corrigido para `DO UPDATE
+... WHERE deleted_at is not null`. Dentro dessa correção, achado um
+problema de segurança antes de propagar para as outras tabelas: `security
+definer` não filtra por RLS automaticamente — o revive tinha que checar
+`user_id = v_uid` explicitamente (não `excluded.user_id`), senão um UUID
+colidindo entre dois usuários deixaria um reviver o registro apagado do
+outro. Fechado nas cinco tabelas de chave só-`id`; as três de chave
+composta com `user_id` já eram seguras por design. Confirmado contra
+produção depois da correção, advisor de segurança revisado de novo, nada
+novo. **30 migrations no total.**
+
 Nenhum dado de domínio do Pedro nas tabelas ainda — a Sprint de Sync
-(outbox, pull, motor de merge) é a próxima.
+(outbox, pull, motor de merge) é a próxima. Plano: começar por uma
+entidade só (`Profile`), provar de ponta a ponta contra o Supabase real,
+só depois expandir para as outras sete.
 
 ---
 
