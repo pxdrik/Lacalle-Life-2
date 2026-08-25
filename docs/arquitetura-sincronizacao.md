@@ -1566,3 +1566,109 @@ idempotente sem edição nenhuma. As outras sete entidades
 favoritos de alimento/exercício) seguem sem sync — mesmo padrão
 (`syncTracker` + decorator + `push*`/`pull*`), uma de cada vez, só depois
 desta ser revisada e aprovada.
+
+## 22. Ataque adversarial ao motor de sync do Profile (25/08/2026)
+
+Antes de generalizar o padrão para as outras sete entidades: "se o
+Profile sobreviver a isso, aí sim temos um motor que merece ser
+generalizado". Treze cenários, definidos para forçar exatamente as
+falhas que oito cópias do mesmo bug tornariam caras.
+
+### 22.1 Como foi testado
+
+`src/composition/sync/profile-sync.adversarial.test.ts` simula dois
+dispositivos reais (`deviceA`/`deviceB` — ou PC/celular), cada um com seu
+próprio `IndexedDB` isolado (`MemoryStore` por dispositivo), contra um
+servidor fake (`FakeServer`) que reproduz fielmente o contrato das RPCs
+reais: cria se não existir, revive incondicionalmente uma linha
+tombstoned, aplica só se `expected` bater com a versão viva atual — o
+mesmo `WHERE` das migrations reais atacadas em produção no §20.4. Não é
+mock ingênuo do SDK: é o comportamento já verificado contra o Supabase de
+verdade, reencenado sem precisar de rede para os 13 cenários lógicos.
+
+Os cenários que dependem só do ciclo local↔servidor único (push de uma
+edição real, pull reaplicando o servidor, ciclo idempotente) já tinham
+sido confirmados ao vivo contra produção no §21.3. Confirmar os cenários
+de dois dispositivos *fisicamente* exigiria uma segunda conta/sessão
+autenticada de verdade — não perseguido agora pelo mesmo motivo que
+bloqueou a primeira validação E2E de Auth (rate limit de e-mail); fica
+como item em aberto, não bloqueante, se o Pedro quiser essa evidência
+antes de generalizar.
+
+### 22.2 Resultado: 11/11 cenários lógicos passam
+
+1. PC altera peso → celular sincroniza. ✅
+2. Celular altera peso → PC sincroniza. ✅
+3. PC offline → altera → volta online → sincroniza. ✅
+4. Celular offline → altera → volta online → sincroniza. ✅
+5. Dois dispositivos alteram simultaneamente → o segundo push vira
+   `"conflict"`, não sobrescreve o servidor, e a edição do perdedor
+   continua pendente e intacta localmente. ✅
+6. Dispositivo A tem edição pendente e recebe uma edição de B via pull →
+   ver §22.3, **achado real**. ⚠️
+7. Fecha a aba (rede cai) durante o push → a chamada rejeita, e nada é
+   perdido: a pendência local continua lá, com o valor certo, e o
+   servidor nunca recebeu a escrita. ✅
+8. Reabre com outbox pendente → o retry usa o mesmo `IndexedDB` (é
+   exatamente o que sobrevive a um reload de verdade) e completa
+   normalmente. ✅
+9. Service Worker com versão antiga → já não é hipotético: aconteceu de
+   verdade nesta sessão (§21.3), causa raiz identificada e documentada.
+   Não é um bug do motor de sync — é um lembrete operacional para
+   qualquer depuração futura nesta PWA. ✅
+10. Perde conexão durante o push → mesmo teste do 7 (a chamada nunca
+    chega a mutar o servidor; a pendência local sobrevive intacta). ✅
+11. Push funciona, mas o pull seguinte falha → o push já aplicado
+    continua de pé; uma falha no passo seguinte não desfaz o anterior. ✅
+12. Pull traz dado do servidor, mas a gravação local falha →
+    `markPulled` nunca roda (está depois do `save` no código, não antes),
+    então a versão do servidor conhecida não avança e o próximo pull tenta
+    de novo — sem isso, um retry acharia que já sincronizou um dado que na
+    verdade nunca foi gravado local. ✅
+13. Repetir o mesmo sync várias vezes seguidas → sempre
+    `"nothing-pending"`/`"applied"`, um único registro de tracker, valor
+    estável. Sem duplicação nem deriva. ✅
+
+### 22.3 O achado real — cenário 6
+
+`pullProfile`, ao devolver `"local-pending-conflict"`, chama `markPulled`
+para gravar a versão do servidor recém-descoberta — sem isso, o próximo
+push tentaria com uma versão esperada desatualizada e sempre bateria
+conflito, mesmo depois do usuário decidir manter a edição local. Isso é
+correto por si só.
+
+O problema é o que isso habilita silenciosamente: depois desse pull, a
+versão do servidor conhecida por A **já é a versão que B acabou de
+gravar**. Se A simplesmente tentar sincronizar de novo — sem nenhuma tela
+de resolução de conflito, só clicando "sincronizar" outra vez — o push
+agora bate com o `expected` certo e **sobrescreve o valor de B sem
+nenhum aviso**. É exatamente o "last-write-wins silencioso" que a
+arquitetura promete que a família Profile nunca teria
+(docs/arquitetura-sincronizacao.md §8.1/§16, e a razão de existir do
+próprio OCC local entre abas — ver `local-profile-repository.ts` e
+[[revisao-adversarial-de-arquitetura]]).
+
+Não é um bug de implementação — `pushProfile`/`pullProfile` fazem
+exatamente o que foram desenhados para fazer. É uma lacuna de UX/produto:
+não existe hoje nenhum passo que force o usuário a *decidir* diante de
+um `"local-pending-conflict"` antes de deixá-lo sincronizar nada de novo.
+O botão manual "Sincronizar perfil agora" trata os dois casos (sem
+conflito, com conflito) da mesma forma.
+
+Duas direções possíveis, nenhuma implementada ainda — decisão do Pedro
+antes de generalizar o padrão:
+
+- **Bloquear o próximo push** enquanto o tracker estiver em estado de
+  conflito conhecido (`local-pending-conflict` já visto, ainda não
+  resolvido), até uma ação explícita do usuário limpar esse estado —
+  exigiria um novo campo no `SyncTracker` (algo como
+  `conflictAcknowledged`) e uma tela mínima mostrando os dois valores.
+- **Aceitar o comportamento atual** para o `Profile` especificamente
+  (um campo simples, onde "o último a sincronizar ganha, mas de forma
+  visível — o usuário vê os dois valores antes de decidir sincronizar de
+  novo" pode ser suficiente), e reservar o bloqueio automático para
+  entidades onde perder um valor é mais caro (`Diet`, `Routine`,
+  `BodyEntry`, listadas no §16 como sempre-conflito-visível).
+
+Sem essa decisão, generalizar o padrão para as outras sete entidades
+multiplicaria esta mesma lacuna por oito.
