@@ -290,7 +290,12 @@ const mealItemSchema = z
   })
   .strict();
 
-const mealSchema = z
+/**
+ * Exportado para o motor de sync reaproveitar (`composition/sync/food-log-sync.ts`)
+ * — o formato de fio de uma refeição estende exatamente isto com
+ * `deletedAt`, em vez de duplicar as regras de `MealItem`/`Meal`.
+ */
+export const mealSchema = z
   .object({
     id: z.string().min(1).max(200),
     name: z.string().min(1).max(NAME_MAX),

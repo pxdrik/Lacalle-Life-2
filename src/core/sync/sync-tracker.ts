@@ -30,6 +30,15 @@ export interface SyncTracker extends Entity {
   readonly recordId: string;
   readonly serverUpdatedAt: string | null;
   readonly status: SyncStatus;
+  /**
+   * Bookkeeping opaco por entidade, só para quem precisa de mais que um
+   * timestamp para saber "o que mudou desde a última sincronização" —
+   * `Profile` nunca grava isto. `FoodLog` guarda aqui o último payload de
+   * fio sincronizado (refeições vivas + tombstones) para detectar uma
+   * exclusão local fresca sem tocar no `Meal` de domínio nem na UI — ver
+   * docs/arquitetura-sincronizacao.md §19.5.
+   */
+  readonly snapshot?: unknown;
 }
 
 export const SYNC_TRACKER_STORE: StoreDefinition = {
@@ -48,6 +57,7 @@ async function put(
   recordId: EntityId,
   status: SyncStatus,
   serverUpdatedAt: string | null,
+  snapshot: unknown,
 ): Promise<void> {
   const id = trackerId(store, recordId);
   const existing = await tracker.get(id);
@@ -59,6 +69,7 @@ async function put(
     recordId,
     status,
     serverUpdatedAt,
+    snapshot,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   });
@@ -80,27 +91,61 @@ export async function markPending(
 ): Promise<void> {
   const existing = await tracker.get(trackerId(store, recordId));
   if (existing?.status === "conflict") return;
-  await put(tracker, store, recordId, "pending", existing?.serverUpdatedAt ?? null);
+  await put(
+    tracker,
+    store,
+    recordId,
+    "pending",
+    existing?.serverUpdatedAt ?? null,
+    existing?.snapshot,
+  );
+}
+
+/**
+ * Marca pendente com uma versão do servidor e um snapshot novos, calculados
+ * por um merge limpo (sem conflito) — o único outro lugar, além da
+ * resolução de conflito, que tem autoridade para escrever um snapshot.
+ * Nunca chamada quando o registro está em `"conflict"` — quem chama já
+ * verificou isso antes (o merge não roda enquanto há conflito não
+ * resolvido).
+ *
+ * `serverUpdatedAt` é obrigatório aqui, diferente de `markPending` — quem
+ * chama acabou de aprender essa versão num pull, e preservar a antiga (como
+ * `markPending` faz de propósito para uma edição local comum) faria o
+ * próximo push mandar um `expected` desatualizado e bater conflito à toa.
+ */
+export async function markPendingWithSnapshot(
+  tracker: Store<SyncTracker>,
+  store: string,
+  recordId: EntityId,
+  serverUpdatedAt: string,
+  snapshot: unknown,
+): Promise<void> {
+  await put(tracker, store, recordId, "pending", serverUpdatedAt, snapshot);
 }
 
 /**
  * Local em dia com o servidor — depois de um push aplicado com sucesso, de
  * um pull sem pendência local, ou de uma resolução de conflito que aceitou
  * o valor do servidor.
+ *
+ * `snapshot` é opcional e opaco — só quem precisa dele (`FoodLog`) passa um
+ * valor; `Profile` nunca passa, e o campo fica `undefined`.
  */
 export async function markClean(
   tracker: Store<SyncTracker>,
   store: string,
   recordId: EntityId,
   serverUpdatedAt: string | null,
+  snapshot?: unknown,
 ): Promise<void> {
-  await put(tracker, store, recordId, "clean", serverUpdatedAt);
+  await put(tracker, store, recordId, "clean", serverUpdatedAt, snapshot);
 }
 
 /**
  * Um conflito real foi detectado — por uma corrida no push (`applied:
  * false`) ou por um pull achando uma versão mais nova do servidor enquanto
- * havia uma edição local pendente. A partir daqui `pushProfile` se recusa a
+ * havia uma edição local pendente. A partir daqui o push se recusa a
  * tentar de novo sozinho.
  */
 export async function markConflict(
@@ -108,14 +153,15 @@ export async function markConflict(
   store: string,
   recordId: EntityId,
   serverUpdatedAt: string,
+  snapshot?: unknown,
 ): Promise<void> {
-  await put(tracker, store, recordId, "conflict", serverUpdatedAt);
+  await put(tracker, store, recordId, "conflict", serverUpdatedAt, snapshot);
 }
 
 /**
  * Única porta de saída de `"conflict"` para `"pending"` — chamada **apenas**
- * pela resolução explícita de "manter a edição local"
- * (`resolveProfileConflict`). Nome deliberadamente verboso: nunca deveria
+ * pela resolução explícita de um conflito (`resolveProfileConflict`,
+ * `resolveFoodLogConflict`). Nome deliberadamente verboso: nunca deveria
  * parecer uma função de uso comum que um editor futuro chama por engano ao
  * mexer no botão de sincronizar.
  */
@@ -123,9 +169,17 @@ export async function forcePendingAfterResolution(
   tracker: Store<SyncTracker>,
   store: string,
   recordId: EntityId,
+  snapshot?: unknown,
 ): Promise<void> {
   const existing = await tracker.get(trackerId(store, recordId));
-  await put(tracker, store, recordId, "pending", existing?.serverUpdatedAt ?? null);
+  await put(
+    tracker,
+    store,
+    recordId,
+    "pending",
+    existing?.serverUpdatedAt ?? null,
+    snapshot ?? existing?.snapshot,
+  );
 }
 
 /** Todos os registros de uma store com uma mutação pendente de envio (não em conflito). */

@@ -8,6 +8,7 @@ import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 
 import { pullProfile, pushProfile, resolveProfileConflict } from "./profile-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
+import { chainableEq } from "./sync-query-builder.test-helper";
 
 const USER_ID = "aaaaaaaa-0000-0000-0000-000000000000";
 
@@ -175,9 +176,7 @@ describe("pullProfile", () => {
 
   function fromReturning(rows: readonly Record<string, unknown>[]) {
     return vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ data: rows, error: null }),
-      }),
+      select: vi.fn().mockReturnValue(chainableEq({ data: rows, error: null })),
     });
   }
 

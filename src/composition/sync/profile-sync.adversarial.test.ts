@@ -8,6 +8,7 @@ import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 
 import { pullProfile, pushProfile, resolveProfileConflict } from "./profile-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
+import { chainableEqLazy } from "./sync-query-builder.test-helper";
 
 /**
  * Ataque adversarial ao motor de sync do `Profile`, antes de generalizar o
@@ -122,8 +123,8 @@ function deviceClient(
       throw new Error(`unexpected rpc in this fake: ${fn}`);
     }) as SyncSupabaseClient["rpc"],
     from: vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn(async () => {
+      select: vi.fn().mockReturnValue(
+        chainableEqLazy(() => {
           const row = server.currentRow();
           if (row === undefined) return { data: [], error: null };
           return {
@@ -138,7 +139,7 @@ function deviceClient(
             error: null,
           };
         }),
-      }),
+      ),
     }),
     ...overrides,
   };
@@ -369,12 +370,12 @@ describe("motor de sync do Profile — ataque adversarial", () => {
 
     const brokenPullClient = deviceClient(server, {
       from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue(
+          chainableEqLazy(() => ({
             data: null,
             error: { message: "connection reset" },
-          }),
-        }),
+          })),
+        ),
       }),
     });
 

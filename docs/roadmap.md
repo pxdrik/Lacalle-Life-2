@@ -716,6 +716,41 @@ sem sync. Próxima: `FoodLog`, com merge por `Meal.id` em vez de conflito
 por versão — duas refeições criadas offline em dispositivos diferentes
 podem legitimamente coexistir.
 
+**`FoodLog` (mesmo dia): motor de merge por `Meal.id` provado, sem UI
+ainda.** Antes de escrever código, achada uma lacuna real no §19.5: a
+regra de merge resolve adição, mas nunca falava em remoção — aplicada ao
+pé da letra, uma refeição apagada num dispositivo seria ressuscitada
+pelo outro, o mesmo bug de revive-de-tombstone do Sprint 2 numa escala
+menor. Fechado com o Pedro antes de codar: tombstone por refeição, só no
+payload de fio (`deletedAt` opcional em `Meal`), nunca no `Meal` de
+domínio que a UI usa.
+
+`src/composition/sync/food-log-merge.ts` — algoritmo puro, testado
+isolado contra as 5 propriedades pedidas (adição sem conflito, edição
+concorrente da mesma refeição vira conflito visível, exclusão
+concorrente sem ressuscitar, offline/retry idempotente, ordem
+determinística nos dois dispositivos) mais 4 casos adversariais extras.
+Passou de primeira — o desenho cuidadoso antes de codar, motivado pela
+lacuna achada, compensou.
+
+A orquestração (`food-log-sync.ts`, push/pull/resolve, reaproveitando o
+`SyncTracker` genérico do `Profile`) achou 2 bugs reais testando de
+verdade: `markPendingWithSnapshot` preservava a versão antiga do
+servidor em vez da que o próprio pull tinha acabado de aprender
+(conflito fantasma no próximo push); e a resolução de conflito confundia
+o snapshot gravado (que para uma refeição em conflito guarda o lado
+*local* de propósito) com o payload real do servidor, marcando "clean"
+por engano depois de "manter local". Os dois corrigidos, suíte
+reexecutada: 5/5 na orquestração, `npm run verify` limpo (105 arquivos,
+1192 testes). Detalhes completos em
+`docs/arquitetura-sincronizacao.md` §23.
+
+**Sem UI ainda, de propósito** — nenhum botão em `/diario` chama o
+motor, e não existe tela de resolução de conflito por refeição.
+Consistente com a ordem pedida (merge mínimo → testar → tentar quebrar
+→ corrigir → reexecutar → só então a próxima parte): a UI é a próxima
+parte, não um passo pulado.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

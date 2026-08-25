@@ -1099,6 +1099,43 @@ confirma que uma das duas chamadas retorna a versão antiga.
   `Meal.id`, conteúdo diferente" — conflito visível na refeição inteira,
   não um merge de campo. Consistente com §14 (fora de escopo: merge
   campo-a-campo).
+- **Remoção de uma refeição — lacuna achada na Sprint FoodLog (25/08/2026),
+  fechada antes de escrever código.** A regra acima ("id presente só de um
+  lado entra sem questionar") resolve adição, mas não distingue "B
+  adicionou algo que A não tem" de "A apagou algo que B ainda tem" — as
+  duas parecem idênticas num diff de conjunto sem mais contexto. Aplicada
+  literalmente, um dispositivo que apaga uma refeição localmente a veria
+  **ressuscitada** no próximo merge, porque o outro lado ainda a tem — o
+  mesmo bug de revive-de-tombstone do §20.4, só que na refeição em vez da
+  linha inteira.
+
+  **Decisão fechada:** cada `Meal`, só na representação de fio (o
+  `payload` que trafega entre o motor de sync e `save_food_log`/
+  `food_logs.payload` — nunca o `Meal` de domínio que a UI/o editor de
+  dieta usam, que continua exatamente como é hoje), ganha um
+  `deletedAt: string | null` opcional. Apagar uma refeição no app
+  continua sendo uma remoção normal do array local — a UI nunca sabe que
+  tombstone existe. O motor de sync, no momento de montar o `payload` a
+  enviar, compara o conjunto de ids ao vivo local contra o último
+  `payload` sincronizado que ele mesmo guardou (bookkeeping só do motor,
+  não uma segunda estratégia de merge — o mesmo papel que
+  `SyncTracker.serverUpdatedAt` já cumpre para `Profile`, só carregando
+  o conteúdo em vez de um timestamp): um id que estava vivo na última
+  sincronização e sumiu do local virou uma refeição apagada agora —
+  entra no `payload` de saída com `deletedAt` preenchido, nunca é
+  simplesmente omitida (omitir seria indistinguível de "nunca existiu",
+  o mesmo problema de novo).
+  - **Refeição apagada de um lado, editada do outro é conflito visível —
+    não uma regra nova.** Tombstoned vs. editada é só mais um caso de
+    "mesmo `Meal.id`, conteúdo diferente" (a regra já fechada acima),
+    não um terceiro comportamento. Nunca aplica automaticamente nem a
+    exclusão nem a edição — pede resolução explícita, do mesmo jeito que
+    duas edições do mesmo `Meal.id` já pedem.
+  - **Tombstone nunca é ressuscitado por uma refeição idêntica sem
+    edição.** Se um lado apagou e o outro não tocou a refeição (mesmo
+    conteúdo do que já era conhecido), não há conflito — a exclusão
+    vence, porque não houve edição real do outro lado para justificar
+    perguntar.
 
 ### 19.6 `Session`
 
@@ -1748,3 +1785,110 @@ regra de merge por `Meal.id` em vez de conflito por versão — duas
 refeições criadas offline em dispositivos diferentes podem legitimamente
 coexistir, o que é um teste genuinamente diferente do que "qual versão
 ganha".
+
+## 23. Motor de sync do FoodLog — merge por `Meal.id` provado (25/08/2026)
+
+Antes de qualquer código: a regra do §19.5 resolve adição ("id presente
+só de um lado entra sem questionar"), mas nunca fala em remoção — e
+aplicada literalmente a uma remoção real, ressuscitaria a refeição
+apagada, o mesmo bug de revive-de-tombstone do §20.4 numa escala menor.
+Decisão fechada com o Pedro antes de escrever qualquer código: cada
+`Meal`, só na representação de fio (nunca o `Meal` de domínio que a UI
+usa), ganha um `deletedAt` opcional. Detalhes técnicos completos —
+inclusive por que "delete vs. edição real" é só mais um caso de "mesmo
+id, conteúdo diferente" e não uma regra nova — no §19.5, atualizado no
+mesmo dia.
+
+### 23.1 O algoritmo puro, provado isolado
+
+`src/composition/sync/food-log-merge.ts` — `mergeFoodLogMeals(local,
+remote, lastSynced)`, sem rede nem IndexedDB. `lastSynced` é o que
+distingue "o outro lado adicionou" de "eu apaguei": um id vivo na última
+sincronização e ausente do local agora virou uma remoção agora, nunca
+uma ausência que nunca existiu.
+
+`food-log-merge.test.ts` prova as 5 propriedades pedidas, mais 4 casos
+adversariais adicionais escritos para tentar quebrar de propósito (todos
+passaram já na primeira versão do algoritmo — o desenho cuidadoso antes
+de escrever código, movido pela lacuna achada acima, compensou):
+
+1. Duas adições independentes — sem conflito, sem duplicar.
+2. Mesmo `Meal.id` editado nos dois lados — conflito visível, nenhum
+   merge de campo inventado.
+3. Exclusão concorrente (A apaga, B nunca tocou) — tombstone aplicado,
+   nunca ressuscitado pelo pull de B. E o caso complementar: exclusão
+   concorrente com edição real do outro lado vira conflito, não deixa
+   nem a exclusão nem a edição vencerem sozinhas.
+4. Offline + retry (fechar/reabrir com outbox pendente) — idempotente,
+   sem duplicar.
+5. Ordem das refeições depois da união — a mesma nos dois dispositivos,
+   independente de quem sincronizou primeiro (`Meal.time`, desempate por
+   `Meal.id` lexicográfico, já fechado no §19.5).
+
+Adversariais extras: um conflito numa refeição não contamina a união
+normal de outras no mesmo merge; uma exclusão que aconteceu **depois**
+de uma edição real não é confundida com "nunca mudou"; três
+sincronizações em sequência (A→B→C) convergem sem perder nem duplicar;
+uma refeição criada e apagada no mesmo dispositivo sem nunca ter
+sincronizado não deixa rastro nenhum no payload de fio.
+
+### 23.2 A orquestração — dois bugs achados testando de verdade
+
+`src/composition/sync/food-log-sync.ts` — `pushFoodLog`/`pullFoodLog`/
+`resolveFoodLogConflict`, reaproveitando o `SyncTracker` genérico que já
+existia para `Profile` (`status: clean/pending/conflict` bloqueia
+`pushFoodLog` exatamente como bloqueia `pushProfile` — o "registro" que
+bloqueia aqui é o dia inteiro, não a refeição individual: um conflito
+numa refeição impede o push do dia até resolução, mesmo que outras
+refeições do mesmo dia estejam limpas. Escolha deliberada de escopo para
+esta primeira fatia, reaproveitando o mecanismo já provado do Profile em
+vez de inventar bloqueio por refeição — registrado aqui para revisar se
+algum dia incomodar na prática).
+
+O `SyncTracker` ganhou um campo novo, `snapshot?: unknown` — bookkeeping
+opaco por entidade que `Profile` nunca usa. `FoodLog` guarda ali o
+último payload de fio sincronizado (vivo + tombstones), o "terceiro
+lado" que `mergeFoodLogMeals` precisa para saber o que foi apagado desde
+então. `markPending`/`markClean`/`markConflict`/
+`forcePendingAfterResolution` ganharam um parâmetro opcional de
+snapshot, preservando o comportamento exato de `Profile` (que nunca o
+passa).
+
+`food-log-sync.test.ts` — 5/5 na orquestração real (push/pull/resolve,
+não só o algoritmo), depois de achar e corrigir dois bugs reais no
+primeiro rodar:
+
+1. **`markPendingWithSnapshot` preservava a versão antiga do servidor.**
+   Depois de um pull trazer um merge limpo com algo novo para enviar, a
+   função reusava `existing?.serverUpdatedAt` em vez do
+   `row.server_updated_at` que o próprio pull acabara de aprender — o
+   próximo push mandava um `expected` desatualizado (`null` ou um valor
+   velho) e batia `applied: false` à toa, um conflito fantasma que não
+   deveria existir. Corrigido exigindo `serverUpdatedAt` como parâmetro
+   explícito da função, não mais opcional/derivado.
+2. **Resolução de conflito confundia "snapshot gravado" com "payload real
+   do servidor".** A primeira versão de `resolveFoodLogConflict` tentava
+   decidir "ainda falta enviar algo?" comparando o resultado da resolução
+   contra o snapshot gravado por `markConflict` — mas esse snapshot, para
+   uma refeição em conflito, guarda deliberadamente o lado **local** (a
+   mecânica de conflito nunca aplica o remoto sozinho), não o que o
+   servidor realmente tem. Isso fazia "manter local" ser marcado como
+   `"clean"` por engano, como se nada precisasse subir. Corrigido
+   voltando sempre para `"pending"` depois de qualquer resolução — um
+   push seguinte que não tinha nada de novo a enviar de verdade (ex.:
+   "usar servidor" em tudo) é só um envio idempotente, a mesma
+   propriedade já provada no cenário 4/13 — não vale a pena arriscar uma
+   inconsistência sutil para economizar essa chamada.
+
+`npm run verify` — 105 arquivos, 1192 testes, typecheck e lint limpos.
+
+### 23.3 Estado depois desta fatia
+
+O motor de sync do `FoodLog` está provado — merge, conflito, tombstone,
+retry, ordem — mas **ainda não tem UI**. Nenhum botão em `/diario`
+chama `pushFoodLog`/`pullFoodLog`, e não existe tela de resolução de
+conflito por refeição (o equivalente ao "Manter X kg / Usar Y kg" que
+`/conta` já tem para `Profile`). Consistente com a ordem que o Pedro
+pediu — "implementar merge mínimo → testar → tentar quebrar → corrigir
+→ reexecutar → só então a próxima parte" — a UI é a próxima parte,
+não um passo pulado.
