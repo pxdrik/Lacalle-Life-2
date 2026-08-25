@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
 
@@ -21,8 +22,20 @@ export class LocalExerciseRepository implements ExerciseRepository {
     return exercise === undefined ? undefined : normalize(exercise);
   }
 
-  save(exercise: Exercise): Promise<void> {
-    return this.#store.put(exercise);
+  async save(
+    exercise: Exercise,
+    expectedUpdatedAt: number | null,
+  ): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      exercise,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Este exercício foi alterado em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   saveMany(exercises: readonly Exercise[]): Promise<void> {

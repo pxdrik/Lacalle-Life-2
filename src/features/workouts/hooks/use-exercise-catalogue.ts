@@ -84,7 +84,7 @@ export function useExerciseCatalogue(): ExerciseCatalogue {
       const updated = revise(exercise, { isFavorite: !exercise.isFavorite });
 
       try {
-        await (await repository).save(updated);
+        await (await repository).save(updated, exercise.updatedAt);
         setExercises((current) =>
           current === null
             ? current
@@ -103,7 +103,7 @@ export function useExerciseCatalogue(): ExerciseCatalogue {
       const exercise = createCustomExercise(input);
 
       try {
-        await (await repository).save(exercise);
+        await (await repository).save(exercise, null);
         // Inserted locally rather than re-read: the list is already sorted and
         // a full reload would cost a round trip for one row.
         setExercises((current) =>

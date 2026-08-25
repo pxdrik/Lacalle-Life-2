@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { DataError } from "@/core/domain/data-error";
 import { describeDataError } from "@/core/domain/describe-data-error";
 
 import { useFoodLogRepository } from "../data/food-log-repository-context";
@@ -16,6 +17,8 @@ export type FoodLogState =
 export interface FoodLogDay {
   readonly state: FoodLogState;
   readonly saveError: string | null;
+  /** `true` specifically for `DataError("CONFLICT")` — see `reload`. */
+  readonly hasConflict: boolean;
   /**
    * Applies a pure edit and persists the result.
    *
@@ -26,6 +29,17 @@ export interface FoodLogDay {
   /** Replaces the whole day — used when starting it from a diet. */
   readonly replace: (log: FoodLog) => void;
   readonly clear: () => void;
+  /**
+   * Re-reads this day from storage, replacing whatever is on screen.
+   *
+   * Once a save is rejected as a conflict, `expectedVersionRef` is
+   * permanently stale until something re-reads the day — otherwise every
+   * `apply` after the first one fails the same way, silently, because it
+   * keeps sending the same version storage already moved past. This is that
+   * re-read, offered as an explicit action rather than happening on the
+   * person's behalf.
+   */
+  readonly reload: () => void;
 }
 
 /**
@@ -47,6 +61,7 @@ export interface FoodLogDay {
 export function useFoodLogDay(day: string): FoodLogDay {
   const repository = useFoodLogRepository();
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [hasConflict, setHasConflict] = useState(false);
 
   /**
    * The loaded day travels with its own date.
@@ -93,6 +108,14 @@ export function useFoodLogDay(day: string): FoodLogDay {
     [loaded, day],
   );
 
+  /**
+   * Bumped by `reload` to re-run the effect below. Kept as a token the effect
+   * depends on, rather than an extracted `load` function called from inside
+   * it: the latter is exactly the shape `react-hooks/set-state-in-effect`
+   * flags, even though the write only ever happens after the `await`.
+   */
+  const [reloadToken, setReloadToken] = useState(0);
+
   useEffect(() => {
     let active = true;
 
@@ -125,7 +148,14 @@ export function useFoodLogDay(day: string): FoodLogDay {
     return () => {
       active = false;
     };
-  }, [repository, day]);
+  }, [repository, day, reloadToken]);
+
+  const reload = useCallback(() => {
+    setSaveError(null);
+    setHasConflict(false);
+    setLoaded({ day, state: { status: "loading" } });
+    setReloadToken((token) => token + 1);
+  }, [day]);
 
   const setState = useCallback(
     (next: FoodLogState) => {
@@ -137,6 +167,7 @@ export function useFoodLogDay(day: string): FoodLogDay {
   const persist = useCallback(
     (log: FoodLog, expectedUpdatedAt: number | null) => {
       setSaveError(null);
+      setHasConflict(false);
 
       void (async () => {
         try {
@@ -145,6 +176,7 @@ export function useFoodLogDay(day: string): FoodLogDay {
           else await store.save(log, expectedUpdatedAt);
         } catch (cause) {
           setSaveError(describeDataError(cause));
+          setHasConflict(cause instanceof DataError && cause.code === "CONFLICT");
         }
       })();
     },
@@ -191,5 +223,5 @@ export function useFoodLogDay(day: string): FoodLogDay {
     replace(createFoodLog(day));
   }, [replace, day]);
 
-  return { state, saveError, apply, replace, clear };
+  return { state, saveError, hasConflict, apply, replace, clear, reload };
 }

@@ -10,7 +10,11 @@ import {
   seriesOf,
 } from "./body-log";
 import { MEASUREMENT_SITES } from "../taxonomy/measurement-sites";
-import { isEmptyEntry, type BodyEntry } from "../types/body-entry";
+import {
+  isEmptyEntry,
+  isRenderableEntry,
+  type BodyEntry,
+} from "../types/body-entry";
 
 function entry(day: string, over: Partial<BodyEntry> = {}): BodyEntry {
   return { ...createBodyEntry(day), ...over };
@@ -78,6 +82,35 @@ describe("isEmptyEntry", () => {
         }),
       ),
     ).toBe(false);
+  });
+});
+
+describe("isRenderableEntry", () => {
+  it("accepts a well-formed entry", () => {
+    expect(isRenderableEntry(entry("2026-08-07"))).toBe(true);
+  });
+
+  /**
+   * Reproduces the exact shape that crashed `/evolucao` in production on
+   * 2026-08-24: a `bodyEntries` record whose `day` was missing entirely
+   * (the payload had `date` instead) reached `formatDay`'s `.split("-")` as
+   * `undefined`. Import validation now rejects a record like this outright
+   * — see `composition/backup-schemas.ts` — but `useBodyLog` filters on
+   * this too, for anything already in a browser's IndexedDB from before
+   * that fix, or written some other way this app has not anticipated.
+   */
+  it("rejects an entry with no day at all", () => {
+    const malformed: Partial<Record<keyof BodyEntry, unknown>> = {
+      ...entry("2026-08-07"),
+    };
+    delete malformed.day;
+
+    expect(isRenderableEntry(malformed as BodyEntry)).toBe(false);
+  });
+
+  it("rejects a day in the wrong format", () => {
+    expect(isRenderableEntry(entry("07/08/2026"))).toBe(false);
+    expect(isRenderableEntry(entry(""))).toBe(false);
   });
 });
 

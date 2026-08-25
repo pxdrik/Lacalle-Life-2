@@ -22,8 +22,18 @@ export interface ExerciseRepository {
 
   getById(id: EntityId): Promise<Exercise | undefined>;
 
-  save(exercise: Exercise): Promise<void>;
+  /**
+   * `expectedUpdatedAt` is the version this caller last read — `null` for an
+   * exercise that has never been saved. Throws `DataError("CONFLICT")`
+   * instead of overwriting when the stored version has moved since.
+   */
+  save(exercise: Exercise, expectedUpdatedAt: number | null): Promise<void>;
 
+  /**
+   * Seeds or replaces many records at once, unconditionally — the catalogue
+   * import path, not a user edit. There is no "since I last read it" for a
+   * bulk seed to compare against.
+   */
   saveMany(exercises: readonly Exercise[]): Promise<void>;
 
   remove(id: EntityId): Promise<void>;

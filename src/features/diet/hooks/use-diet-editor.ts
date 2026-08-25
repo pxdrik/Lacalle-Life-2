@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { DataError } from "@/core/domain/data-error";
 import { describeDataError } from "@/core/domain/describe-data-error";
 import type { EntityId } from "@/core/domain/entity";
 
@@ -18,8 +19,29 @@ export interface DietEditor {
   readonly state: DietEditorState;
   /** Set when a save failed. The edit stays on screen; it is just not stored. */
   readonly saveError: string | null;
+  /**
+   * `true` specifically when `saveError` came from `DataError("CONFLICT")` —
+   * distinct from a `QUOTA_EXCEEDED` or `UNAVAILABLE` failure, which retrying
+   * the exact same write might still recover from. A conflict never will:
+   * `expectedUpdatedAt` is permanently stale until something re-reads the
+   * diet, which is what `reload` is for.
+   */
+  readonly hasConflict: boolean;
   /** Applies a pure edit and persists the result. */
   readonly apply: (change: (diet: Diet) => Diet) => void;
+  /**
+   * Re-reads the diet from storage, replacing whatever is on screen.
+   *
+   * Before this existed, a losing tab's every `apply` after the first
+   * conflict failed the same way, silently: `stateRef.current` kept the
+   * locally-applied edit, so the next edit built on it and sent the same
+   * stale `expectedUpdatedAt` right back. Nothing the person did in that tab
+   * could ever be saved again short of a manual page reload. This is the
+   * same recovery, offered as an explicit action instead — the person decides
+   * when to give up their local edit and see the current version, rather
+   * than it happening on their behalf or never happening at all.
+   */
+  readonly reload: () => void;
 }
 
 /**
@@ -33,6 +55,7 @@ export function useDietEditor(dietId: EntityId): DietEditor {
   const repository = useDietRepository();
   const [state, setState] = useState<DietEditorState>({ status: "loading" });
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [hasConflict, setHasConflict] = useState(false);
 
   /**
    * Mirrors `state`, but written synchronously by `apply` itself rather than
@@ -40,6 +63,18 @@ export function useDietEditor(dietId: EntityId): DietEditor {
    * `state` there would be the same bug this replaced.
    */
   const stateRef = useRef(state);
+
+  /**
+   * Bumped by `reload` to re-run the effect below without adding a
+   * `load`-the-function to its dependency array — an extracted `useCallback`
+   * called from inside the effect is exactly the "setState inside an effect"
+   * shape `react-hooks/set-state-in-effect` exists to flag, even though the
+   * actual write only ever happens after the `await`. Keeping the fetch
+   * inline in the effect, the way it was before `reload` existed, and giving
+   * `reload` a token to depend on instead keeps the same effect shape while
+   * still letting it re-run on demand.
+   */
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -69,7 +104,16 @@ export function useDietEditor(dietId: EntityId): DietEditor {
     return () => {
       active = false;
     };
-  }, [repository, dietId]);
+  }, [repository, dietId, reloadToken]);
+
+  const reload = useCallback(() => {
+    setSaveError(null);
+    setHasConflict(false);
+    const loadingState: DietEditorState = { status: "loading" };
+    stateRef.current = loadingState;
+    setState(loadingState);
+    setReloadToken((token) => token + 1);
+  }, []);
 
   /**
    * The screen updates first, then storage.
@@ -114,15 +158,17 @@ export function useDietEditor(dietId: EntityId): DietEditor {
 
       async function persist(diet: Diet, expectedUpdatedAt: number) {
         setSaveError(null);
+        setHasConflict(false);
         try {
           await (await repository).save(diet, expectedUpdatedAt);
         } catch (error) {
           setSaveError(describeDataError(error));
+          setHasConflict(error instanceof DataError && error.code === "CONFLICT");
         }
       }
     },
     [repository],
   );
 
-  return { state, saveError, apply };
+  return { state, saveError, hasConflict, apply, reload };
 }

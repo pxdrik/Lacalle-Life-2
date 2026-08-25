@@ -46,3 +46,21 @@ export function isEmptyEntry(entry: BodyEntry): boolean {
     Object.values(entry.measurements).every((value) => value === null)
   );
 }
+
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Whether `entry.day` is safe to hand to `core/format/day.ts` and to the
+ * chart — a plain `YYYY-MM-DD` string, not whatever a corrupted or
+ * hand-edited record happens to hold.
+ *
+ * `composition/backup-schemas.ts` rejects a record shaped like this on
+ * import now, so this is a second, independent line: a record already sitting
+ * in IndexedDB from before that existed — or written some other way this app
+ * has not anticipated — must not be able to take the whole evolution screen
+ * down with it. `useBodyLog` filters on this and reports how many entries it
+ * skipped, so the entries that *are* readable keep rendering.
+ */
+export function isRenderableEntry(entry: BodyEntry): boolean {
+  return typeof entry.day === "string" && DAY_PATTERN.test(entry.day);
+}

@@ -39,11 +39,30 @@ describe("formatDay", () => {
   it("returns anything unparseable unchanged instead of throwing", () => {
     expect(formatDay("hoje")).toBe("hoje");
   });
+
+  /**
+   * Reproduces the 2026-08-24 production crash directly: a `bodyEntries`
+   * record imported without a `day` field reached this function with
+   * `undefined` — a value the `string` parameter type promises never
+   * happens — and `.split("-")` on it threw straight through `/evolucao`.
+   * `composition/backup-schemas.ts` now rejects that record on import, but
+   * this guards the function itself, for any other caller and any record
+   * already sitting in someone's IndexedDB from before that fix shipped.
+   */
+  it("does not throw when day is not a string", () => {
+    // @ts-expect-error — exercising exactly the value the type rules out.
+    expect(() => formatDay(undefined)).not.toThrow();
+  });
 });
 
 describe("formatShortDay", () => {
   it("drops the year, for axes where it is implied", () => {
     expect(formatShortDay("2026-08-07")).toBe("07/08");
+  });
+
+  it("does not throw when day is not a string", () => {
+    // @ts-expect-error — see the same case in `formatDay`.
+    expect(() => formatShortDay(undefined)).not.toThrow();
   });
 });
 
@@ -78,5 +97,10 @@ describe("formatLongDay", () => {
   it("returns anything unparseable unchanged, rather than inventing a date", () => {
     expect(formatLongDay("nao e um dia")).toBe("nao e um dia");
     expect(formatLongDay("2026-13-45")).toBe("2026-13-45");
+  });
+
+  it("does not throw when day is not a string", () => {
+    // @ts-expect-error — see the same case in `formatDay`.
+    expect(() => formatLongDay(undefined)).not.toThrow();
   });
 });

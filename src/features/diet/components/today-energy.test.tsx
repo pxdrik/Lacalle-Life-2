@@ -83,7 +83,7 @@ function mount(log: FoodLog | null, profile: Profile | null) {
 
   const ready = Promise.all([
     log === null ? Promise.resolve() : logs.save(log, null),
-    profile === null ? Promise.resolve() : profiles.save(profile),
+    profile === null ? Promise.resolve() : profiles.save(profile, null),
   ]);
 
   render(

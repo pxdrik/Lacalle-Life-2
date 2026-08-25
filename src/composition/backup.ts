@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { RECORD_SCHEMAS } from "./backup-schemas";
 import { DataError } from "@/core/domain/data-error";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
@@ -102,36 +103,40 @@ export async function exportAll(): Promise<BackupFile> {
 }
 
 /**
- * The minimum every stored record has, regardless of which store it is in.
+ * Every record is validated against the same schema the app itself writes
+ * through — `RECORD_SCHEMAS`, in `./backup-schemas` — not just a shallow
+ * `id`/`createdAt`/`updatedAt` shape.
  *
- * Deliberately not a deep, per-domain schema: that would mean maintaining a
- * second description of `Diet`, `Routine`, `Session` and five other types
- * that already exist as TypeScript types, and would drift from them the first
- * time either changed alone. What matters for import safety is catching
- * garbage — a truncated file, a hand-edited field with the wrong type, a file
- * from something that is not this app's export — not re-verifying every
- * business rule an entity already enforces on the way in.
+ * That shallow check is what this used to be, on the reasoning that a second
+ * description of `Diet`, `Routine`, `Session` and five other types would drift
+ * from the real ones. It shipped anyway, and the 2026-08-24 adversarial audit
+ * against production walked straight through the gap it left: `kcal:
+ * 999999999`, `weightKg: -999999999`, a 50 000-character name and `role:
+ * "admin"` all imported and persisted without complaint, and a `bodyEntries`
+ * record shaped nothing like `BodyEntry` crashed `/evolucao` outright. A
+ * backup is a file someone else can hand you, exactly like a form submission
+ * — the difference is only that nothing here rejects a bad one at the point
+ * where a form would.
+ *
+ * `RECORD_SCHEMAS` closes that by composing from the domain's own schemas and
+ * types instead of restating them, so a bound changed in `body-schema.ts` or
+ * `food-schema.ts` is enforced on import automatically. Where none existed —
+ * diets, food logs, routines, sessions — the schema is built from the domain
+ * type directly, `.strict()`, so an unrecognised field is rejected rather
+ * than written to IndexedDB verbatim.
  */
-const entityRecordSchema = z
-  .object({
-    id: z.string().min(1),
-    createdAt: z.number(),
-    updatedAt: z.number(),
-  })
-  .loose();
-
 const backupFileSchema = z.object({
   schemaVersion: z.number(),
   exportedAt: z.number(),
   stores: z.object({
-    body: z.array(entityRecordSchema),
-    foodLogs: z.array(entityRecordSchema),
-    foods: z.array(entityRecordSchema),
-    diets: z.array(entityRecordSchema),
-    profile: z.array(entityRecordSchema).max(1),
-    exercises: z.array(entityRecordSchema),
-    routines: z.array(entityRecordSchema),
-    sessions: z.array(entityRecordSchema),
+    body: z.array(RECORD_SCHEMAS.body),
+    foodLogs: z.array(RECORD_SCHEMAS.foodLogs),
+    foods: z.array(RECORD_SCHEMAS.foods),
+    diets: z.array(RECORD_SCHEMAS.diets),
+    profile: z.array(RECORD_SCHEMAS.profile).max(1),
+    exercises: z.array(RECORD_SCHEMAS.exercises),
+    routines: z.array(RECORD_SCHEMAS.routines),
+    sessions: z.array(RECORD_SCHEMAS.sessions),
   }),
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/design-system/cn";
+import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
@@ -40,7 +41,7 @@ import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 
 export function DietEditor({ dietId }: { readonly dietId: string }) {
-  const { state, saveError, apply } = useDietEditor(dietId);
+  const { state, saveError, hasConflict, apply, reload } = useDietEditor(dietId);
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
 
@@ -99,9 +100,18 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
       </div>
 
       {saveError !== null && (
-        <p role="alert" className={cn("mt-4", noticeClasses())}>
-          {saveError}
-        </p>
+        <div role="alert" className={cn("mt-4", noticeClasses())}>
+          <p>{saveError}</p>
+          {/* The one way out of a conflict: give up this tab's edit and
+              load what is actually stored, instead of every keystroke from
+              here on failing the same way. See `useDietEditor`'s doc
+              comment on `reload`. */}
+          {hasConflict && (
+            <Button variant="secondary" size="sm" className="mt-2" onClick={reload}>
+              Recarregar dados
+            </Button>
+          )}
+        </div>
       )}
 
       <SortableList

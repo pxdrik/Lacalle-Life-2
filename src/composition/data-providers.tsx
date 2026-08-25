@@ -9,7 +9,10 @@ import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { BackupRepositoryProvider } from "@/features/profile/data/backup-repository-context";
-import type { BackupRepository } from "@/features/profile/data/backup-repository";
+import type {
+  BackupRepository,
+  ForgetDeviceResult,
+} from "@/features/profile/data/backup-repository";
 import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repository-context";
 import type { ProfileRepository } from "@/features/profile/data/profile-repository";
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
@@ -20,6 +23,7 @@ import {
 } from "@/features/workouts/data/workout-repository-context";
 
 import { exportAll, importAll, previewImport } from "./backup";
+import { forgetDevice as forgetDeviceDetailed } from "./forget-device";
 import { getRepositories } from "./repositories";
 
 /**
@@ -111,11 +115,28 @@ const profileRepository = once<ProfileRepository>(async () => {
   return (await getRepositories()).profile;
 });
 
+/**
+ * Narrows `forgetDeviceDetailed`'s per-mechanism result to what
+ * `BackupRepository` exposes — see that type's own doc comment for why the
+ * feature-facing contract stays a plain ok/partial shape rather than naming
+ * `caches`/`serviceWorker`/`indexedDb` individually: those are composition's
+ * concern, not the screen's.
+ */
+async function forgetDevice(): Promise<ForgetDeviceResult> {
+  const detailed = await forgetDeviceDetailed();
+  const values = Object.values(detailed);
+
+  if (values.every(Boolean)) return { ok: true };
+
+  return { ok: false, partiallyCompleted: values.some(Boolean) };
+}
+
 const backupRepository = once<BackupRepository>(() =>
   Promise.resolve({
     exportAll,
     importAll,
     previewImport: (raw: string) => Promise.resolve(previewImport(raw)),
+    forgetDevice,
   }),
 );
 

@@ -30,7 +30,13 @@ export const themeScriptSource = source;
  * only interpolations are two compile-time constants passed through
  * `JSON.stringify`. No value reaches it at runtime, from storage or anywhere
  * else — the script *reads* storage, it is never *built* from it.
+ *
+ * `nonce` comes from `RootLayout`, which reads it off the `x-nonce` request
+ * header `middleware.ts` sets alongside the same value in the
+ * `Content-Security-Policy` response header. Without it, `script-src`'s
+ * nonce-only policy would block this exact script — the one legitimate
+ * inline script in the app has to carry the same token the policy expects.
  */
-export function ThemeScript() {
-  return <script dangerouslySetInnerHTML={{ __html: source }} />;
+export function ThemeScript({ nonce }: { readonly nonce?: string | undefined }) {
+  return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: source }} />;
 }

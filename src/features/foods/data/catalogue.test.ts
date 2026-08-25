@@ -103,7 +103,7 @@ describe("seedCatalogue", () => {
       createdAt: 1,
       updatedAt: 1,
     };
-    await foods.save(custom);
+    await foods.save(custom, null);
 
     await seedCatalogue(foods);
 
@@ -122,7 +122,7 @@ describe("seedCatalogue", () => {
     // Someone favourited a catalogue food before this release shipped —
     // re-seeding must never reset that.
     const [first] = await foods.listAll();
-    await foods.save({ ...first!, isFavorite: true });
+    await foods.save({ ...first!, isFavorite: true }, first!.updatedAt);
 
     // Simulates "release ships one more food": the repository now has
     // everything except one catalogue entry.

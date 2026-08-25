@@ -161,8 +161,13 @@ export function MealItemRow({
   );
 }
 
-/** Guards against a pasted number so long it stops being a number. */
-const MAX_GRAMS = 100_000;
+/**
+ * Guards against a pasted number so long it stops being a number.
+ *
+ * Exported so the backup importer can reject the same absurd quantities the
+ * form itself would never let through — one bound, not two that could drift.
+ */
+export const MAX_GRAMS = 100_000;
 
 /**
  * A portion you can actually type.

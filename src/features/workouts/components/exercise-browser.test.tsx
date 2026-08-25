@@ -52,7 +52,9 @@ function mount(catalogue: readonly Exercise[]) {
   const repository = new LocalExerciseRepository(
     new MemoryStore<Exercise>(EXERCISES_STORE),
   );
-  const ready = Promise.all(catalogue.map((item) => repository.save(item)));
+  const ready = Promise.all(
+    catalogue.map((item) => repository.save(item, null)),
+  );
 
   render(
     <ExerciseRepositoryProvider repository={ready.then(() => repository)}>

@@ -24,8 +24,18 @@ export interface FoodRepository {
 
   getById(id: EntityId): Promise<Food | undefined>;
 
-  save(food: Food): Promise<void>;
+  /**
+   * `expectedUpdatedAt` is the version this caller last read — `null` for a
+   * food that has never been saved. Throws `DataError("CONFLICT")` instead
+   * of overwriting when the stored version has moved since.
+   */
+  save(food: Food, expectedUpdatedAt: number | null): Promise<void>;
 
+  /**
+   * Seeds or replaces many records at once, unconditionally — the catalogue
+   * import path, not a user edit. There is no "since I last read it" for a
+   * bulk seed to compare against.
+   */
   saveMany(foods: readonly Food[]): Promise<void>;
 
   remove(id: EntityId): Promise<void>;

@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
 
@@ -28,8 +29,17 @@ export class LocalFoodRepository implements FoodRepository {
     return food === undefined ? undefined : normalize(food);
   }
 
-  save(food: Food): Promise<void> {
-    return this.#store.put(food);
+  async save(food: Food, expectedUpdatedAt: number | null): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      food,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `Este alimento foi alterado em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   saveMany(foods: readonly Food[]): Promise<void> {

@@ -93,6 +93,7 @@ export function useFoodEditor(id: EntityId | null): FoodEditor {
           existing === null
             ? createCustomFood(input)
             : updateCustomFood(existing, input),
+          existing === null ? null : existing.updatedAt,
         );
         return true;
       } catch (cause) {

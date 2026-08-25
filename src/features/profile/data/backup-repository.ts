@@ -12,6 +12,19 @@ export type ImportResult =
   | { readonly ok: true; readonly recordCount: number }
   | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
 
+/**
+ * `forgetDevice` clears five independent mechanisms (IndexedDB, two Web
+ * Storages, Cache Storage, the Service Worker registration) and none of
+ * them can be rolled back if a later one fails. `partiallyCompleted`
+ * exists so the screen can tell "nothing happened, try again" apart from
+ * "some of this is already gone, whatever you do next should not assume
+ * this device still has your data" — two different sentences, not one
+ * generic failure message standing in for both.
+ */
+export type ForgetDeviceResult =
+  | { readonly ok: true }
+  | { readonly ok: false; readonly partiallyCompleted: boolean };
+
 export interface BackupRepository {
   /** Everything needed to reconstruct the app's state, ready to serialise. */
   exportAll(): Promise<unknown>;
@@ -22,4 +35,12 @@ export interface BackupRepository {
   previewImport(raw: string): Promise<ImportResult>;
   /** Validates before writing anything; never partially replaces the database. */
   importAll(raw: string): Promise<ImportResult>;
+  /**
+   * Erases every trace of the app from this browser — every IndexedDB store,
+   * `localStorage`, `sessionStorage`, every Service Worker cache, and the
+   * Service Worker registration itself. See `composition/forget-device.ts`
+   * for exactly what that covers, why IndexedDB is cleared last, and why the
+   * result is not a bare boolean.
+   */
+  forgetDevice(): Promise<ForgetDeviceResult>;
 }

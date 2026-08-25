@@ -7,11 +7,25 @@ import { revise } from "@/core/domain/entity";
 
 import { useBodyRepository } from "../data/body-repository-context";
 import { createBodyEntry } from "../services/body-log";
-import { isEmptyEntry, type BodyEntry } from "../types/body-entry";
+import {
+  isEmptyEntry,
+  isRenderableEntry,
+  type BodyEntry,
+} from "../types/body-entry";
 
 export type BodyLogState =
   | { readonly status: "loading" }
-  | { readonly status: "ready"; readonly entries: readonly BodyEntry[] }
+  | {
+      readonly status: "ready";
+      readonly entries: readonly BodyEntry[];
+      /**
+       * Entries that failed {@link isRenderableEntry} and were left out of
+       * `entries` — not deleted, not rewritten, just not handed to the chart.
+       * `BodyScreen` reports the count so a corrupted record is not simply
+       * invisible.
+       */
+      readonly skippedCount: number;
+    }
   | { readonly status: "error"; readonly message: string };
 
 export interface BodyLog {
@@ -128,7 +142,13 @@ export function useBodyLog(): BodyLog {
             (item) =>
               item.day !== updated.day && (!moved || item.day !== previousDay),
           );
-          return [...rest, updated].sort((a, b) => a.day.localeCompare(b.day));
+          // `String(day ?? "")` rather than a bare `.localeCompare`: `rest`
+          // can still hold an entry `isRenderableEntry` already excluded from
+          // the chart — its `day` is not guaranteed to be a string at all,
+          // and this must not be the second place that crashes on it.
+          return [...rest, updated].sort((a, b) =>
+            String(a.day ?? "").localeCompare(String(b.day ?? "")),
+          );
         });
         return true;
       } catch (cause) {
@@ -146,12 +166,22 @@ export function useBodyLog(): BodyLog {
     [entries],
   );
 
-  const state: BodyLogState =
-    error !== null
-      ? { status: "error", message: error }
-      : entries === null
-        ? { status: "loading" }
-        : { status: "ready", entries };
+  const state = buildState(error, entries);
 
   return { state, writeError, saveDay, removeDay: removeEntry, entryFor };
+}
+
+function buildState(
+  error: string | null,
+  entries: readonly BodyEntry[] | null,
+): BodyLogState {
+  if (error !== null) return { status: "error", message: error };
+  if (entries === null) return { status: "loading" };
+
+  const renderable = entries.filter(isRenderableEntry);
+  return {
+    status: "ready",
+    entries: renderable,
+    skippedCount: entries.length - renderable.length,
+  };
 }

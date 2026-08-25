@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, Upload } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
 
 import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
@@ -29,6 +29,7 @@ export function BackupPanel() {
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [forgetting, setForgetting] = useState(false);
   const [persisted, setPersisted] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -128,6 +129,50 @@ export function BackupPanel() {
     }
   }
 
+  /**
+   * Reloads the page once everything is cleared, rather than resetting each
+   * screen's own state by hand. Every hook in the app assumes its repository
+   * connection is still pointed at data that exists; a reload is what a fresh
+   * install already does correctly, so this reaches the same state through
+   * the same path instead of a second one that has to agree with it.
+   *
+   * On failure, the message depends on `partiallyCompleted`: `forgetDevice`
+   * clears five independent mechanisms with no rollback for any of them, so
+   * "não foi possível apagar" is only true when nothing happened at all. If
+   * something did — see `composition/forget-device.ts` — the honest message
+   * says so and still offers a reload, since whatever is left of this
+   * device's data is now in an unknown state relative to what the app
+   * expects, and a fresh read is safer than continuing on stale in-memory
+   * state either way.
+   */
+  async function handleForgetConfirmed() {
+    setForgetting(true);
+    setError(null);
+    try {
+      const result = await (await repository).forgetDevice();
+      if (result.ok) {
+        window.location.reload();
+        return;
+      }
+
+      if (result.partiallyCompleted) {
+        setError(
+          "Não foi possível concluir a limpeza deste dispositivo, mas parte dos dados já foi apagada. Recarregue a página para conferir o que restou.",
+        );
+      } else {
+        setError(
+          "Não foi possível apagar os dados deste dispositivo. Nada foi alterado.",
+        );
+      }
+      setForgetting(false);
+    } catch {
+      setError(
+        "Não foi possível apagar os dados deste dispositivo. Recarregue a página para conferir o que restou.",
+      );
+      setForgetting(false);
+    }
+  }
+
   return (
     <div className="space-y-3 rounded-lg border border-line bg-surface p-4">
       <h2 className="text-sm font-semibold text-ink">Backup</h2>
@@ -213,6 +258,34 @@ export function BackupPanel() {
           )}
         </div>
       )}
+
+      {/* Distinct from "Apagar dados" on the profile card above: that clears
+          only the profile and its targets. This clears every domain store,
+          both browser storages the app uses, every Service Worker cache, and
+          the Service Worker registration itself — see
+          `composition/forget-device.ts` for the exact list. A hard divider
+          rather than sitting inside the export/import group: this is not a
+          third backup operation, it stands apart from the two that come
+          before it. */}
+      <div className="space-y-2 border-t border-line pt-3">
+        <h3 className="text-xs font-semibold text-ink">Esquecer este dispositivo</h3>
+        <p className="text-xs text-ink-subtle">
+          Apaga todos os dados do LaCalle Life salvos neste navegador — dietas,
+          treinos, diário, evolução, perfil e preferências. Sem volta, a não
+          ser que você tenha um backup.
+        </p>
+        <ConfirmButton
+          onConfirm={() => {
+            void handleForgetConfirmed();
+          }}
+          label="Esquecer este dispositivo e apagar todos os dados"
+          confirmLabel="Apagar tudo, sem volta?"
+          className="h-(--control-h-sm) px-3 text-xs"
+        >
+          <Trash2 aria-hidden className="size-4" />
+          {forgetting ? "Apagando…" : "Esquecer este dispositivo"}
+        </ConfirmButton>
+      </div>
     </div>
   );
 }

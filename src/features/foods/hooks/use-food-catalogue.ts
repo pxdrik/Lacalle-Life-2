@@ -76,7 +76,7 @@ export function useFoodCatalogue(): FoodCatalogue {
       const updated = revise(food, { isFavorite: !food.isFavorite });
 
       try {
-        await (await repository).save(updated);
+        await (await repository).save(updated, food.updatedAt);
         setState((current) =>
           current.status === "ready"
             ? {

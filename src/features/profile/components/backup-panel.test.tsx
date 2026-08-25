@@ -19,6 +19,7 @@ function mount(overrides: Partial<BackupRepository> = {}) {
     exportAll: vi.fn().mockResolvedValue({ some: "backup" }),
     previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 3 }),
     importAll: vi.fn().mockResolvedValue({ ok: true, recordCount: 3 }),
+    forgetDevice: vi.fn().mockResolvedValue({ ok: true }),
     ...overrides,
   };
 
@@ -218,5 +219,110 @@ describe("import confirmation", () => {
       );
     });
     expect(screen.getByText("backup.json")).toBeInTheDocument();
+  });
+});
+
+/**
+ * `forgetDevice` clears five independent mechanisms with no rollback for
+ * any of them — the 2026-08-24 pre-deploy review found the panel showing
+ * "não foi possível apagar" even when part of the device's data was, in
+ * fact, already gone. These tests are the three states that message has to
+ * tell apart: full success, full failure (nothing touched), and partial
+ * failure (something was, and the message has to say so).
+ */
+describe("esquecer este dispositivo", () => {
+  async function confirm() {
+    const button = screen.getByRole("button", {
+      name: "Esquecer este dispositivo e apagar todos os dados",
+    });
+    await userEvent.click(button);
+    await userEvent.click(
+      screen.getByRole("button", { name: /Apagar tudo, sem volta\?/ }),
+    );
+  }
+
+  it("reloads the page on success, without an error banner", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+
+    const repository = mount({
+      forgetDevice: vi.fn().mockResolvedValue({ ok: true }),
+    });
+
+    await confirm();
+
+    await waitFor(() => {
+      expect(repository.forgetDevice).toHaveBeenCalledOnce();
+    });
+    await waitFor(() => {
+      expect(reload).toHaveBeenCalledOnce();
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+  });
+
+  it("says nothing was altered when nothing completed, and does not reload", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+
+    mount({
+      forgetDevice: vi
+        .fn()
+        .mockResolvedValue({ ok: false, partiallyCompleted: false }),
+    });
+
+    await confirm();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Nada foi alterado.",
+      );
+    });
+    expect(reload).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
+  });
+
+  it("says data was already erased when the failure was partial, distinctly from a total failure", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+
+    mount({
+      forgetDevice: vi
+        .fn()
+        .mockResolvedValue({ ok: false, partiallyCompleted: true }),
+    });
+
+    await confirm();
+
+    await waitFor(() => {
+      const alert = screen.getByRole("alert");
+      expect(alert).toHaveTextContent("parte dos dados já foi apagada");
+      expect(alert).not.toHaveTextContent("Nada foi alterado.");
+    });
+    expect(reload).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
+  });
+
+  it("shows a message and offers no false reassurance when forgetDevice itself throws", async () => {
+    const reload = vi.fn();
+    vi.stubGlobal("location", { ...window.location, reload });
+
+    mount({
+      forgetDevice: vi.fn().mockRejectedValue(new Error("unexpected")),
+    });
+
+    await confirm();
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Não foi possível apagar os dados deste dispositivo.",
+      );
+    });
+    expect(reload).not.toHaveBeenCalled();
+
+    vi.unstubAllGlobals();
   });
 });

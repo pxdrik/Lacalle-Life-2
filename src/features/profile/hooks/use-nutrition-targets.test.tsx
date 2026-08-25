@@ -39,7 +39,7 @@ async function mountWith(stored?: Profile) {
   const repository = new LocalProfileRepository(
     new MemoryStore<Profile>(PROFILE_STORE),
   );
-  if (stored !== undefined) await repository.save(stored);
+  if (stored !== undefined) await repository.save(stored, null);
 
   render(
     <ProfileRepositoryProvider repository={Promise.resolve(repository)}>

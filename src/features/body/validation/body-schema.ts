@@ -25,7 +25,12 @@ import {
  * applies to the same two quantities. Two ranges for one measurement is how
  * the app would come to disagree with itself about what a plausible weight is.
  */
-const MEASUREMENT_BOUNDS = { min: 10, max: 300 } as const;
+/**
+ * Exported so `composition/backup-schemas.ts` can validate an imported
+ * measurement against the same range this form does, rather than re-stating
+ * `10`/`300` as a second, driftable copy of the same fact.
+ */
+export const MEASUREMENT_BOUNDS = { min: 10, max: 300 } as const;
 
 /**
  * Every field is optional — blank means "not measured", which the model

@@ -68,7 +68,17 @@ function normalize(entry: BodyEntry): BodyEntry {
   };
 }
 
-/** `YYYY-MM-DD` sorts correctly as a string, oldest first. */
+/**
+ * `YYYY-MM-DD` sorts correctly as a string, oldest first.
+ *
+ * `String(day ?? "")` rather than a bare `.localeCompare`: a record this
+ * store returns is whatever was actually written, not what `BodyEntry`
+ * promises — see the file-level note on `normalize`. `composition/
+ * backup-schemas.ts` rejects an import missing `day` now, but a record
+ * already sitting in someone's IndexedDB from before that existed must not
+ * make every `listAll()` throw before `useBodyLog` even gets a chance to
+ * filter it out.
+ */
 function byDay(a: BodyEntry, b: BodyEntry): number {
-  return a.day.localeCompare(b.day);
+  return String(a.day ?? "").localeCompare(String(b.day ?? ""));
 }

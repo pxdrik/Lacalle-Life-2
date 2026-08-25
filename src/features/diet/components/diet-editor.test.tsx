@@ -45,7 +45,7 @@ function mount(dietId: string, seed?: Diet): Harness {
 
   const ready = Promise.all([
     seed === undefined ? Promise.resolve() : diets.save(seed, null),
-    foods.save(CHICKEN),
+    foods.save(CHICKEN, null),
   ]);
 
   render(
@@ -248,10 +248,10 @@ describe("adding food", () => {
     });
 
     // The catalogue entry is corrected afterwards. The saved plan must not move.
-    await foods.save({
-      ...CHICKEN,
-      per100g: { ...CHICKEN.per100g, proteinG: 5 },
-    });
+    await foods.save(
+      { ...CHICKEN, per100g: { ...CHICKEN.per100g, proteinG: 5 } },
+      CHICKEN.updatedAt,
+    );
 
     const stored = await diets.getById(diet.id);
     expect(stored?.meals[0]?.items[0]?.per100g.proteinG).toBe(31);

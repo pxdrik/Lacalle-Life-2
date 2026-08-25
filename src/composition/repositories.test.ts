@@ -17,16 +17,19 @@ describe("createRepositories", () => {
 
     await expect(foods.isEmpty()).resolves.toBe(true);
 
-    await foods.save({
-      id: "ovo",
-      name: "Ovo",
-      category: "protein",
-      per100g: { kcal: 143, proteinG: 13, carbsG: 1, fatG: 10 },
-      isCustom: false,
-      isFavorite: false,
-      createdAt: 1,
-      updatedAt: 1,
-    });
+    await foods.save(
+      {
+        id: "ovo",
+        name: "Ovo",
+        category: "protein",
+        per100g: { kcal: 143, proteinG: 13, carbsG: 1, fatG: 10 },
+        isCustom: false,
+        isFavorite: false,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+      null,
+    );
 
     await expect(foods.getById("ovo")).resolves.toMatchObject({ name: "Ovo" });
     db.close();

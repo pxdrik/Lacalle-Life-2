@@ -29,16 +29,57 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   /**
-   * The one file that must never be cached by HTTP.
+   * `/sw.js` keeps its own rule: a service worker updates only when the
+   * browser fetches a *different* `sw.js`, so if an intermediary is allowed
+   * to hold the old copy, the offline shell it installs becomes permanent —
+   * every future deploy invisible to anyone who already visited. The caching
+   * this file performs is deliberate; caching the file itself is a trap.
    *
-   * A service worker updates only when the browser fetches a *different*
-   * `sw.js`. If an intermediary is allowed to hold the old copy, the offline
-   * shell it installs becomes permanent — every future deploy invisible to
-   * anyone who already visited. The caching this file performs is deliberate;
-   * caching the file itself is a trap.
+   * Everything else here is baseline hardening applied to every response.
+   * `Content-Security-Policy` is deliberately **not** here: it needs a fresh
+   * nonce per request for the app's two inline scripts, which a static header
+   * list cannot produce — see `src/middleware.ts`, which sets it instead.
+   *
+   * - `X-Frame-Options: DENY` — belt-and-suspenders alongside the CSP's own
+   *   `frame-ancestors 'none'`, for the handful of older browsers that read
+   *   the header but not the directive. This app never needs to be framed by
+   *   anything, including itself.
+   * - `X-Content-Type-Options: nosniff` — stops a browser from executing a
+   *   response as script or HTML because it guessed a content type, rather
+   *   than trusting the `Content-Type` this app actually sent.
+   * - `Referrer-Policy: strict-origin-when-cross-origin` — this app has no
+   *   ids or tokens in a URL to leak (data lives in IndexedDB, never in query
+   *   strings), but a diet or routine id in the path is still nothing a
+   *   destination site needs, so cross-origin navigation sends only the
+   *   origin rather than the full path.
+   * - `Permissions-Policy` — every browser API the app does not use, turned
+   *   off for this origin and every one it could be framed by (moot given
+   *   `frame-ancestors 'none'`, kept for defence in depth). Grepped for each
+   *   before disabling it, not assumed: no camera, microphone, geolocation,
+   *   payment UI, USB, display capture, or fullscreen call exists anywhere
+   *   in `src/`.
    */
   async headers() {
+    const globalHeaders = [
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: [
+          "camera=()",
+          "microphone=()",
+          "geolocation=()",
+          "payment=()",
+          "usb=()",
+          "display-capture=()",
+          "fullscreen=()",
+        ].join(", "),
+      },
+    ];
+
     return [
+      { source: "/(.*)", headers: globalHeaders },
       {
         source: "/sw.js",
         headers: [

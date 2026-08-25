@@ -28,8 +28,18 @@ export function dayKey(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-/** `2026-08-07` → `07/08/2026`. Returns anything unparseable unchanged. */
+/**
+ * `2026-08-07` → `07/08/2026`. Returns anything unparseable unchanged.
+ *
+ * `day` is typed as `string`, but a record read from IndexedDB does not
+ * obey the type — a corrupted or hand-edited entry can hand this
+ * `undefined` or a number, and `.split` on that used to throw straight
+ * through this function and out through whatever rendered it. Every
+ * function here treats `day` as `unknown` for that one check, on purpose.
+ */
 export function formatDay(day: string): string {
+  if (typeof day !== "string") return String(day);
+
   const [year, month, date] = day.split("-");
   if (year === undefined || month === undefined || date === undefined)
     return day;
@@ -46,6 +56,8 @@ export function formatDay(day: string): string {
  * midnight and prints the day before for anyone west of Greenwich.
  */
 export function formatLongDay(day: string): string {
+  if (typeof day !== "string") return String(day);
+
   const [year, month, date] = day.split("-").map(Number);
   if (year === undefined || month === undefined || date === undefined)
     return day;
@@ -75,6 +87,8 @@ export function formatLongDay(day: string): string {
 
 /** `2026-08-07` → `07/08`, for axis labels where the year is implied. */
 export function formatShortDay(day: string): string {
+  if (typeof day !== "string") return String(day);
+
   const [, month, date] = day.split("-");
   if (month === undefined || date === undefined) return day;
 

@@ -78,7 +78,7 @@ export function BodyScreen() {
     );
   }
 
-  const { entries } = state;
+  const { entries, skippedCount } = state;
   const points = seriesOf(entries, readMetric(metric));
   const change = changeIn(points);
 
@@ -120,6 +120,14 @@ export function BodyScreen() {
       {writeError !== null && (
         <p role="alert" className={noticeClasses()}>
           {writeError}
+        </p>
+      )}
+
+      {skippedCount > 0 && (
+        <p role="alert" className={noticeClasses()}>
+          {skippedCount === 1
+            ? "1 registro não pôde ser exibido — os dados estão corrompidos ou num formato que este app não reconhece."
+            : `${String(skippedCount)} registros não puderam ser exibidos — os dados estão corrompidos ou num formato que este app não reconhece.`}
         </p>
       )}
 

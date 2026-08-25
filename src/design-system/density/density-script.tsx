@@ -15,6 +15,10 @@ document.documentElement.setAttribute(${JSON.stringify(DENSITY_ATTRIBUTE)},d);
 /** Exported so the tests can execute the real script rather than a copy. */
 export const densityScriptSource = source;
 
-export function DensityScript() {
-  return <script dangerouslySetInnerHTML={{ __html: source }} />;
+/**
+ * `nonce` comes from `RootLayout` — see the matching doc comment on
+ * `ThemeScript` for why it is required now that `script-src` is nonce-only.
+ */
+export function DensityScript({ nonce }: { readonly nonce?: string | undefined }) {
+  return <script nonce={nonce} dangerouslySetInnerHTML={{ __html: source }} />;
 }

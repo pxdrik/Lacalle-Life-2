@@ -66,14 +66,14 @@ describe.each(ADAPTERS)("LocalFoodRepository — $name", ({ create }) => {
   });
 
   it("stops being empty once something is saved", async () => {
-    await repository.save(food("Ovo"));
+    await repository.save(food("Ovo"), null);
 
     await expect(repository.isEmpty()).resolves.toBe(false);
   });
 
   it("round-trips a food by id", async () => {
     const ovo = food("Ovo");
-    await repository.save(ovo);
+    await repository.save(ovo, null);
 
     await expect(repository.getById(ovo.id)).resolves.toEqual(ovo);
   });
@@ -84,7 +84,7 @@ describe.each(ADAPTERS)("LocalFoodRepository — $name", ({ create }) => {
 
   it("removes a food", async () => {
     const ovo = food("Ovo");
-    await repository.save(ovo);
+    await repository.save(ovo, null);
     await repository.remove(ovo.id);
 
     await expect(repository.isEmpty()).resolves.toBe(true);
@@ -136,10 +136,47 @@ describe.each(ADAPTERS)("LocalFoodRepository — $name", ({ create }) => {
       const withoutFavorite: Record<string, unknown> = { ...legacy };
       delete withoutFavorite["isFavorite"];
 
-      await repository.save(withoutFavorite as unknown as Food);
+      await repository.save(withoutFavorite as unknown as Food, null);
 
       const [stored] = await repository.listAll();
       expect(stored?.isFavorite).toBe(false);
+    });
+  });
+
+  /**
+   * `save` had no version check at all until the 2026-08-24 adversarial audit
+   * against production reproduced the consequence directly: two tabs open on
+   * the same food (most commonly reached through "favoritar"), the second one
+   * to save silently overwrote the first with no error and no warning — the
+   * exact "ping-pong" the audit report describes for the profile screen.
+   */
+  describe("concurrent writers", () => {
+    it("rejects a stale writer instead of silently overwriting the winner", async () => {
+      const original = food("Ovo");
+      await repository.save(original, null);
+
+      // Two tabs both read `original.updatedAt` before either saves.
+      const fromTabA = { ...original, isFavorite: true, updatedAt: 2 };
+      const fromTabB = { ...original, category: "dairy" as const, updatedAt: 3 };
+
+      await repository.save(fromTabA, original.updatedAt);
+
+      await expect(
+        repository.save(fromTabB, original.updatedAt),
+      ).rejects.toMatchObject({ code: "CONFLICT" });
+
+      const stored = await repository.getById(original.id);
+      expect(stored?.isFavorite).toBe(true);
+      expect(stored?.category).toBe("protein");
+    });
+
+    it("accepts a create with expected version null, rejects a second create at the same id", async () => {
+      const ovo = food("Ovo");
+
+      await repository.save(ovo, null);
+      await expect(repository.save(ovo, null)).rejects.toMatchObject({
+        code: "CONFLICT",
+      });
     });
   });
 });

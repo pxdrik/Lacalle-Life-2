@@ -75,7 +75,8 @@ function parseDayLocal(day: string): Date | null {
  */
 export function FoodLogScreen({ day }: { readonly day: string }) {
   const router = useRouter();
-  const { state, saveError, apply, replace } = useFoodLogDay(day);
+  const { state, saveError, hasConflict, apply, replace, reload } =
+    useFoodLogDay(day);
   const { state: dietList } = useDietList();
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
@@ -189,9 +190,19 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
           </div>
 
           {saveError !== null && (
-            <p role="alert" className={cn("mt-4", noticeClasses())}>
-              {saveError}
-            </p>
+            <div role="alert" className={cn("mt-4", noticeClasses())}>
+              <p>{saveError}</p>
+              {hasConflict && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="mt-2"
+                  onClick={reload}
+                >
+                  Recarregar dados
+                </Button>
+              )}
+            </div>
           )}
 
           {state.log.meals.length === 0 ? (

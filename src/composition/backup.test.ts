@@ -62,19 +62,39 @@ function customExercise(name: string): Exercise {
     id: `exercise-${name}`,
     name,
     aliases: [],
+    primaryMuscles: [],
+    secondaryMuscles: [],
+    stabilizerMuscles: [],
+    equipment: [],
+    movementPattern: null,
+    movementPlanes: [],
+    technicalDifficulty: null,
+    isUnilateral: null,
+    isCompound: null,
+    media: null,
+    classification: "user",
+    isCustom: true,
+    isFavorite: false,
     createdAt: now,
     updatedAt: now,
-  } as unknown as Exercise;
+  };
 }
 
 function profile(): Profile {
   const now = Date.now();
   return {
     id: PROFILE_ID,
-    nutrition: { sex: "female", goal: "maintain" },
+    nutrition: {
+      sex: "female",
+      ageYears: 30,
+      heightCm: 165,
+      weightKg: 60,
+      activityLevel: "moderate",
+      goal: "maintain",
+    },
     createdAt: now,
     updatedAt: now,
-  } as unknown as Profile;
+  };
 }
 
 // Forces the one-time catalogue seed (581 foods, 183 exercises) to happen
@@ -108,9 +128,9 @@ describe("exportAll / importAll", () => {
       repositories.sessions.save(session, null),
       repositories.foodLogs.save(foodLog, null),
       repositories.body.save(bodyEntry, null),
-      repositories.foods.save(food),
-      repositories.exercises.save(exercise),
-      repositories.profile.save(profileRecord),
+      repositories.foods.save(food, null),
+      repositories.exercises.save(exercise, null),
+      repositories.profile.save(profileRecord, null),
     ]);
 
     const backup = await exportAll();

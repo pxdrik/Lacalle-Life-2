@@ -38,6 +38,25 @@ describe("LocalBodyRepository", () => {
     ]);
   });
 
+  /**
+   * Reproduces the 2026-08-24 production crash directly at the layer it
+   * actually happened in: a record without `day` — reachable through backup
+   * import before `composition/backup-schemas.ts` existed to reject it —
+   * made `listAll()`'s sort throw on `undefined.localeCompare`, before
+   * `/evolucao` ever got a chance to render anything. Import validation
+   * closes the write side; this proves the read side survives a record that
+   * predates it, or one written some other way.
+   */
+  it("does not throw when a stored record has no day", async () => {
+    await store.put({
+      ...entry("2026-08-10"),
+      day: undefined,
+    } as unknown as BodyEntry);
+    await repository.save(entry("2026-08-02"), null);
+
+    await expect(repository.listAll()).resolves.toHaveLength(2);
+  });
+
   it("replaces the day rather than adding a second entry for it", async () => {
     const first = entry("2026-08-07", { weightKg: 82 });
     await repository.save(first, null);

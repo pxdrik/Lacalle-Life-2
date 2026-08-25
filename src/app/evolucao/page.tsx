@@ -6,6 +6,7 @@ import {
 } from "@/composition/data-providers";
 import { BodyScreen } from "@/features/body/components/body-screen";
 import { EvolutionScreen } from "@/features/workouts/components/evolution-screen";
+import { ErrorBoundary } from "@/design-system/components/error-boundary";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
@@ -37,7 +38,12 @@ export default function EvolutionPage() {
 
       <div className="mt-8">
         <BodyDataProvider>
-          <BodyScreen />
+          {/* Isolated from the workout half below: a corrupted body record
+              must not take the whole page down with it. See the doc comment
+              on `ErrorBoundary` for why this exists. */}
+          <ErrorBoundary message="Não foi possível exibir seus dados de peso e medidas. O restante da página continua funcionando.">
+            <BodyScreen />
+          </ErrorBoundary>
         </BodyDataProvider>
       </div>
 

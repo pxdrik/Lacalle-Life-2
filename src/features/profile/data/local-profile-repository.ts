@@ -1,3 +1,4 @@
+import { DataError } from "@/core/domain/data-error";
 import type { Store } from "@/core/storage/store";
 
 import { PROFILE_ID, type Profile } from "../types/profile";
@@ -14,8 +15,20 @@ export class LocalProfileRepository implements ProfileRepository {
     return this.#store.get(PROFILE_ID);
   }
 
-  save(profile: Profile): Promise<void> {
-    return this.#store.put(profile);
+  async save(
+    profile: Profile,
+    expectedUpdatedAt: number | null,
+  ): Promise<void> {
+    const result = await this.#store.putIfVersionMatches(
+      profile,
+      expectedUpdatedAt,
+    );
+    if (!result.ok) {
+      throw new DataError(
+        "CONFLICT",
+        `O perfil foi alterado em outro lugar desde a última leitura.`,
+      );
+    }
   }
 
   clear(): Promise<void> {

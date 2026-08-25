@@ -18,7 +18,7 @@ import { ProfileForm } from "./profile-form";
 import { StaleWeightNotice } from "./stale-weight-notice";
 
 export function ProfileScreen() {
-  const { state, writeError, save, clear } = useProfile();
+  const { state, writeError, hasConflict, save, clear, reload } = useProfile();
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -41,9 +41,18 @@ export function ProfileScreen() {
   return (
     <div className="space-y-6">
       {writeError !== null && (
-        <p role="alert" className={noticeClasses()}>
-          {writeError}
-        </p>
+        <div role="alert" className={noticeClasses()}>
+          <p>{writeError}</p>
+          {/* The one way out of a conflict: reload discards this tab's
+              unsaved edit and shows what is actually stored, rather than
+              this screen silently re-submitting the same rejected version
+              forever. See `useProfile`'s doc comment on `reload`. */}
+          {hasConflict && (
+            <Button variant="secondary" size="sm" className="mt-2" onClick={reload}>
+              Recarregar dados
+            </Button>
+          )}
+        </div>
       )}
 
       {/* Independent of the nutrition profile below — a display preference
@@ -75,6 +84,16 @@ export function ProfileScreen() {
 
       {showForm ? (
         <ProfileForm
+          // Forces a remount whenever the stored version changes — a
+          // successful save of course, but critically also `reload()` after
+          // a conflict. `ProfileForm` seeds its draft from `initial` only
+          // once, in a lazy `useState` initializer; without a `key` tied to
+          // the version, a conflict-then-reload left the form showing the
+          // same stale draft it had before, and a second "Salvar" would
+          // then silently succeed and overwrite whatever the other tab had
+          // just saved — the 2026-08-24 pre-deploy review caught this
+          // exact sequence. See `useProfile`'s doc comment on `reload`.
+          key={state.status === "ready" ? state.profile.updatedAt : "empty"}
           initial={state.status === "ready" ? state.profile.nutrition : null}
           pending={saving}
           onSubmit={(nutrition) => {

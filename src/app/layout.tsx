@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Inter } from "next/font/google";
 
 import { ToastProvider } from "@/design-system/components/toast";
@@ -53,19 +54,30 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+/**
+ * Async because `headers()` is: `middleware.ts` mints a fresh nonce every
+ * request and hands it down through the `x-nonce` header. It has to be read
+ * here rather than generated in `middleware.ts` and passed some other way
+ * because a Server Component's props cannot come from middleware directly —
+ * a request header is the channel Next.js's own documented pattern for this
+ * uses, and it is also how Next.js finds the same nonce again to apply to
+ * the RSC bootstrap scripts it injects itself.
+ */
+export default async function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
+
   return (
     /* `suppressHydrationWarning` is required, not a workaround: ThemeScript
        intentionally sets `data-theme` on this element before React hydrates,
        so the server markup and the live DOM differ by design. */
     <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
       <body>
-        <ThemeScript />
-        <DensityScript />
+        <ThemeScript nonce={nonce} />
+        <DensityScript nonce={nonce} />
         <ThemeProvider>
           <DensityProvider>
             <ToastProvider>
