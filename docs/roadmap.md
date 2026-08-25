@@ -654,6 +654,45 @@ Nenhum dado de domínio do Pedro nas tabelas ainda — a Sprint de Sync
 entidade só (`Profile`), provar de ponta a ponta contra o Supabase real,
 só depois expandir para as outras sete.
 
+## Sprint 3 — Motor de sync (Profile) ✅ primeira fatia entregue em 25/08/2026
+
+Primeira fatia real do motor de sync (`docs/arquitetura-sincronizacao.md`
+§21): outbox local (`syncTracker`, migration local versão 8),
+`SyncingProfileRepository` decorando o repositório local sem a UI saber
+que sync existe, e `pushProfile`/`pullProfile` chamando `save_profile`/
+`delete_profile` e lendo a tabela `profiles` de verdade. Só `Profile`,
+por trás de um botão manual em `/conta` — de propósito, para provar o
+mecanismo antes de decidir quando ele dispara sozinho.
+
+**Achado 1 — no teste que faltava.** O caso comum de `pullProfile` (já
+existe registro local, sem edição pendente) não tinha teste; escrevendo-o,
+o código sempre chamava `localOnly.save(profile, null)`, mas
+`expectedUpdatedAt: null` só é válido quando não existe registro local
+ainda. Rejeitava com `DataError("CONFLICT")` mesmo sem conflito real — o
+mesmo erro visto ao vivo no navegador antes do teste existir para provar
+a causa. Corrigido lendo o registro local atual antes de escrever.
+Provado pelo ritual de sempre: reverter, ver o teste falhar com a
+mensagem exata vista no navegador, restaurar, ver 9/9 passar.
+
+**Achado 2 — não era código, era cache.** Depois de restaurar a
+correção e confirmar `npm run verify` verde, o mesmo erro continuou
+aparecendo ao vivo, idêntico, a cada sincronização — mesmo com o arquivo
+certo em disco e o dev server compilando sem erro. Causa: o Service
+Worker da PWA servia um bundle JS antigo, de antes da correção existir.
+`BUG-005` da auditoria de 19/08 já tinha batido nisso uma vez
+("o build testado provavelmente veio do cache do service worker") — desta
+vez confirmado com certeza, via `unregister()` do Service Worker e
+`caches.delete()` de cada cache nomeado. Depois disso, o ciclo completo
+confirmado ao vivo contra o projeto Supabase real: push de uma edição
+real (`pushed`), pull reaplicando o estado do servidor (`applied`), e o
+ciclo rodando de novo sem nada pendente (`nothing-pending`/`applied`),
+duas vezes seguidas, sem erro.
+
+As outras sete entidades (`body_entries`, `diets`, `food_logs`,
+`routines`, `workout_sessions`, favoritos de alimento/exercício) seguem
+sem sync — mesmo padrão, uma de cada vez, só depois desta ser revisada e
+aprovada.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

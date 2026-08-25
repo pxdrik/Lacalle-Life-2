@@ -15,6 +15,7 @@ import type {
 } from "@/features/profile/data/backup-repository";
 import { ProfileRepositoryProvider } from "@/features/profile/data/profile-repository-context";
 import type { ProfileRepository } from "@/features/profile/data/profile-repository";
+import { SyncingProfileRepository } from "@/features/profile/data/syncing-profile-repository";
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
 import { ExerciseRepositoryProvider } from "@/features/workouts/data/exercise-repository-context";
 import {
@@ -22,8 +23,13 @@ import {
   type WorkoutRepositories,
 } from "@/features/workouts/data/workout-repository-context";
 
+import { openDatabase } from "@/core/storage/indexeddb/database";
+import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
+
 import { exportAll, importAll, previewImport } from "./backup";
 import { forgetDevice as forgetDeviceDetailed } from "./forget-device";
+import { DATABASE_NAME, MIGRATIONS } from "./migrations";
 import { getRepositories } from "./repositories";
 
 /**
@@ -111,8 +117,20 @@ const dietRepository = once<DietRepository>(async () => {
   return (await getRepositories()).diets;
 });
 
+/**
+ * Decorado com o outbox de sync (`SyncingProfileRepository`) — toda escrita
+ * grava local primeiro, exatamente como antes, e também marca uma
+ * pendência de envio. Sem conta logada isso é inofensivo: a pendência fica
+ * gravada e nunca é drenada, porque `pushProfile` devolve
+ * `"not-authenticated"` sem fazer nada. Uma segunda conexão ao mesmo banco,
+ * separada da que `getRepositories()` já abre — `idb` permite múltiplas
+ * conexões simultâneas à mesma versão sem conflito.
+ */
 const profileRepository = once<ProfileRepository>(async () => {
-  return (await getRepositories()).profile;
+  const local = (await getRepositories()).profile;
+  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  return new SyncingProfileRepository(local, tracker);
 });
 
 /**

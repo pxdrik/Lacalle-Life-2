@@ -1475,3 +1475,94 @@ efetivamente lê/escreve dado de domínio do dispositivo local. Plano:
 começar por uma entidade só (`Profile`, que já tem toda a UX de conflito
 pronta — §16), provar de ponta a ponta contra o Supabase real, e só depois
 expandir para as outras sete.
+
+## 21. Motor de sync — Profile provado de ponta a ponta (25/08/2026)
+
+Primeira fatia do motor de sync real, escrita e provada contra o Supabase
+de produção, seguindo o plano do §20.5: só `Profile`, com outbox local
+antes de mexer nas outras sete entidades.
+
+### 21.1 O mecanismo
+
+- **`syncTracker`** — novo store local (`composition/migrations.ts`,
+  versão 8), um registro por `store:recordId`, guardando
+  `serverUpdatedAt` (última versão do servidor que este dispositivo já
+  viu) e `pendingPush` (há uma edição local ainda não enviada).
+- **`SyncingProfileRepository`** — decorator sobre o
+  `LocalProfileRepository` puro: todo `save`/`clear` grava local
+  normalmente e depois marca `pendingPush`. É o que a UI usa hoje —
+  nenhuma tela precisou saber que sync existe.
+- **`pushProfile`** — só age se `pendingPush` for `true`. Chama
+  `save_profile`/`delete_profile` com o `expected_server_updated_at`
+  conhecido; `applied: false` (§20.4) nunca decide sozinho o que fazer —
+  só atualiza a versão do servidor conhecida e devolve `"conflict"`, sem
+  limpar a pendência. Quem chama decide reagir, do mesmo jeito que o
+  conflito local de duas abas já funciona.
+- **`pullProfile`** — busca a linha do servidor; se houver edição local
+  pendente ainda não enviada, nunca sobrescreve silenciosamente (a regra
+  do §8.1/§17.1) — só atualiza a versão conhecida e devolve
+  `"local-pending-conflict"`. O `payload` vindo do banco passa pelo mesmo
+  Zod que já protege um backup importado (§19.8) antes de tocar o
+  IndexedDB local.
+- Botão manual "Sincronizar perfil agora" em `/conta`
+  (`app/(auth)/conta/manual-sync-button.tsx`, não em `features/auth` —
+  chamar `@/composition/sync` de dentro de `features/**` violaria a regra
+  4 do `AGENTS.md`). Manual de propósito: provar o mecanismo antes de
+  decidir quando ele deve disparar sozinho.
+
+### 21.2 Bug achado escrevendo o teste que faltava
+
+O teste original de `pullProfile` só cobria "sem registro local ainda".
+O caso comum — já existe um `profile` local, sem edição pendente — não
+tinha teste. Escrevendo-o, `pullProfile` sempre chamava
+`localOnly.save(profile, null)`; `expectedUpdatedAt: null` só é válido
+quando **não existe** registro local ainda, e nesse caso já existia (de
+um push anterior). O OCC local rejeitava com
+`DataError("CONFLICT")` mesmo sem nenhum conflito real — o mesmo erro
+visto ao vivo no navegador contra o Supabase real, antes do teste existir
+para provar a causa.
+
+Corrigido lendo o registro local atual antes de escrever
+(`localOnly.get()`) e usando o `updatedAt` dele como versão esperada, em
+vez de assumir `null`. Provado pelo ritual de sempre: reverter a correção,
+rodar o teste novo, ver o erro exato (`DataError: O perfil foi alterado em
+outro lugar desde a última leitura.`) reproduzindo a mensagem real vista
+no navegador — restaurar, ver os 9/9 passarem de novo.
+
+### 21.3 Um segundo bug — não no código, no cache
+
+Depois de restaurar a correção e confirmar `npm run verify` verde, o
+mesmo erro **continuou aparecendo ao vivo no navegador**, idêntico,
+determinístico, a cada clique em "Sincronizar perfil agora" — mesmo com
+o `.ts` correto em disco e o dev server compilando sem erro. Um
+`console.log` de diagnóstico colocado dentro de
+`IndexedDbStore.putIfVersionMatches` nunca apareceu no console nem no log
+do servidor, mesmo o Next.js mostrando `✓ Compiled` a cada edição — sinal
+de que o código que rodava no navegador não era o que estava em disco.
+
+Causa: o LaCalle Life é uma PWA com Service Worker
+(`lacalle-shell-v6`/`lacalle-payloads-v6`/`lacalle-assets-v6`), e o
+navegador estava servindo um bundle JS antigo do cache do Service Worker,
+de antes da correção existir — não o bundle novo do dev server.
+Resolvido via `navigator.serviceWorker.getRegistrations()` →
+`unregister()` + `caches.delete()` de cada cache nomeado, seguido de
+reload. Depois disso o ciclo completo — editar peso localmente → "push:
+pushed" → "pull: applied", e rodar de novo em seguida → "push:
+nothing-pending" → "pull: applied", sem erro — confirmado ao vivo contra
+o projeto Supabase real (`rtvscxcfwfsamxatkwit`), duas vezes seguidas
+(idempotente) e uma vez com edição real (push de verdade).
+
+Isto não é um bug do motor de sync, mas um lembrete válido para qualquer
+depuração futura nesta PWA: quando o comportamento no navegador não bate
+com o código em disco e o dev server, checar o Service Worker antes de
+suspeitar de HMR ou de re-introduzir a mesma correção.
+
+### 21.4 Estado depois desta fatia
+
+`Profile` sincroniza de ponta a ponta, provado contra produção: push de
+edição local, pull de estado remoto, conflito local-pendente, e o ciclo
+idempotente sem edição nenhuma. As outras sete entidades
+(`body_entries`, `diets`, `food_logs`, `routines`, `workout_sessions`,
+favoritos de alimento/exercício) seguem sem sync — mesmo padrão
+(`syncTracker` + decorator + `push*`/`pull*`), uma de cada vez, só depois
+desta ser revisada e aprovada.

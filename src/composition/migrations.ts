@@ -1,4 +1,5 @@
 import type { Migration } from "@/core/storage/schema";
+import { SYNC_TRACKER_STORE } from "@/core/sync/sync-tracker";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
@@ -64,5 +65,11 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Food log: what was eaten each day, kept apart from the diet that planned it.",
     createStores: [FOOD_LOGS_STORE],
+  },
+  {
+    version: 8,
+    description:
+      "Sync tracker: per-record last-known server version and pending-push flag, for the Supabase sync engine.",
+    createStores: [SYNC_TRACKER_STORE],
   },
 ];
