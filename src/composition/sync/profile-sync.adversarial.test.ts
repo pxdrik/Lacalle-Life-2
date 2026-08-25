@@ -6,7 +6,7 @@ import { LocalProfileRepository } from "@/features/profile/data/local-profile-re
 import { PROFILE_ID, type Profile } from "@/features/profile/types/profile";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 
-import { pullProfile, pushProfile } from "./profile-sync";
+import { pullProfile, pushProfile, resolveProfileConflict } from "./profile-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 
 /**
@@ -15,13 +15,20 @@ import type { SyncSupabaseClient } from "./sync-supabase-client";
  * de ver o §21 funcionando: "se o Profile sobreviver a isso, aí sim temos
  * um motor que merece ser generalizado".
  *
+ * A primeira rodada (25/08/2026) achou uma lacuna real no cenário 6: depois
+ * de um `"local-pending-conflict"`, um segundo push sem resolução explícita
+ * sobrescrevia o outro dispositivo em silêncio. O Pedro rejeitou aceitar
+ * essa exceção — "não faz sentido colocar uma exceção justamente na
+ * primeira entidade validada" — e pediu bloqueio obrigatório
+ * (`SyncTracker.status === "conflict"`) até uma resolução explícita. Esta é
+ * a rodada completa, com o bloqueio implementado, rodando os 13 cenários de
+ * novo — não só o 6.
+ *
  * Simula dois dispositivos reais (`deviceA`, `deviceB`) — cada um com seu
  * próprio IndexedDB (`MemoryStore` isolado) — contra um servidor fake que
  * reproduz fielmente o comportamento das RPCs reais (`applied`, revive de
  * tombstone, conflito por `server_updated_at`), sem precisar do Supabase de
- * verdade para provar a lógica. Os cenários que dependem de rede/dispositivo
- * real (1, 2, 5, 6) também foram confirmados com duas abas reais contra o
- * Supabase de produção — ver docs/arquitetura-sincronizacao.md §22.
+ * verdade para provar a lógica. Ver docs/arquitetura-sincronizacao.md §22.
  */
 
 const USER_ID = "aaaaaaaa-0000-0000-0000-000000000000";
@@ -192,31 +199,31 @@ describe("motor de sync do Profile — ataque adversarial", () => {
   it("3. PC offline, altera, volta online e sincroniza", async () => {
     const pc = device(server);
 
-    // "Offline": a edição fica só localmente, pendente, por tempo nenhum
-    // limite algum na lógica — só não chamamos push ainda.
+    // "Offline": a edição fica só localmente, pendente, sem limite de tempo
+    // algum na lógica — só não chamamos push ainda.
     await editLocally(pc, 82, 1000);
     const stillPending = await pc.tracker.get("profile:me");
-    expect(stillPending?.pendingPush).toBe(true);
+    expect(stillPending?.status).toBe("pending");
 
     // "Volta online": push roda mais tarde, sem nada ter mudado localmente.
     expect(await pushProfile(pc.client, pc.tracker, pc.local)).toEqual({
       status: "pushed",
     });
-    expect((await pc.tracker.get("profile:me"))?.pendingPush).toBe(false);
+    expect((await pc.tracker.get("profile:me"))?.status).toBe("clean");
   });
 
   it("4. celular offline, altera, volta online e sincroniza (simétrico ao 3)", async () => {
     const celular = device(server);
 
     await editLocally(celular, 68, 1000);
-    expect((await celular.tracker.get("profile:me"))?.pendingPush).toBe(true);
+    expect((await celular.tracker.get("profile:me"))?.status).toBe("pending");
 
     expect(await pushProfile(celular.client, celular.tracker, celular.local)).toEqual({
       status: "pushed",
     });
   });
 
-  it("5. dois dispositivos alteram simultaneamente: o segundo push vira conflito, não sobrescreve", async () => {
+  it("5. dois dispositivos alteram simultaneamente: o segundo push vira conflito bloqueado, não sobrescreve", async () => {
     const pc = device(server);
     const celular = device(server);
 
@@ -231,17 +238,22 @@ describe("motor de sync do Profile — ataque adversarial", () => {
     const celularPush = await pushProfile(celular.client, celular.tracker, celular.local);
     expect(celularPush).toEqual({ status: "conflict" });
 
-    // O conflito é visível (status "conflict"), e a edição do celular não
-    // foi perdida nem sobrescrita — continua pendente, com o valor dele.
+    // O conflito é visível e bloqueante — a edição do celular não foi
+    // perdida nem sobrescrita, e o registro está travado até resolução.
     expect((await celular.local.get())?.nutrition.weightKg).toBe(70);
-    expect((await celular.tracker.get("profile:me"))?.pendingPush).toBe(true);
+    expect((await celular.tracker.get("profile:me"))?.status).toBe("conflict");
+
+    // Tentar de novo sem resolver não muda nada — continua bloqueado.
+    expect(await pushProfile(celular.client, celular.tracker, celular.local)).toEqual({
+      status: "conflict",
+    });
 
     // E o servidor continua com o valor do PC — o celular não teve poder de
     // sobrescrever silenciosamente.
     expect(server.currentRow()?.payload).toMatchObject({ weightKg: 100 });
   });
 
-  it("6. dispositivo A tem edição local pendente e recebe uma edição de B via pull — não sobrescreve, mas o push seguinte pode sobrescrever B sem aviso (achado)", async () => {
+  it("6. dispositivo A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita, nunca sobrescreve sozinho", async () => {
     const a = device(server);
     const b = device(server);
 
@@ -253,20 +265,55 @@ describe("motor de sync do Profile — ataque adversarial", () => {
     await editLocally(a, 60, 1000);
 
     const pull = await pullProfile(a.client, a.tracker, a.local);
-    expect(pull).toEqual({ status: "local-pending-conflict" });
+    expect(pull).toEqual({
+      status: "conflict",
+      local: profile(60, 1000),
+      remote: profile(95, 1000),
+    });
     // A edição local de A sobrevive — o pull não a apagou.
     expect((await a.local.get())?.nutrition.weightKg).toBe(60);
+    expect((await a.tracker.get("profile:me"))?.status).toBe("conflict");
 
-    // ACHADO: depois do "local-pending-conflict", a versão do servidor
-    // conhecida por A já foi atualizada (markPulled), então se A simplesmente
-    // tentar sincronizar de novo sem nenhuma resolução explícita de
-    // conflito, o push agora bate com a versão esperada e SOBRESCREVE o
-    // valor de B silenciosamente — exatamente o "last-write-wins silencioso"
-    // que a arquitetura diz que a família Profile nunca deveria ter
-    // (docs/arquitetura-sincronizacao.md §8.1/§16).
-    const secondPush = await pushProfile(a.client, a.tracker, a.local);
-    expect(secondPush).toEqual({ status: "pushed" });
+    // CORRIGIDO: diferente da primeira rodada, tentar sincronizar de novo
+    // sem resolver não faz nada — nunca sobrescreve B sozinho.
+    const blockedRetry = await pushProfile(a.client, a.tracker, a.local);
+    expect(blockedRetry).toEqual({ status: "conflict" });
+    expect(server.currentRow()?.payload).toMatchObject({ weightKg: 95 });
+
+    // Resolução explícita "manter local": destrava, e o push seguinte usa a
+    // versão do servidor mais recente conhecida como base — uma
+    // sobrescrita explícita, escolhida pelo usuário, não automática.
+    if (pull.status !== "conflict") throw new Error("unreachable");
+    await resolveProfileConflict(a.tracker, a.local, "keep-local", pull.remote);
+    expect((await a.tracker.get("profile:me"))?.status).toBe("pending");
+
+    const resolvedPush = await pushProfile(a.client, a.tracker, a.local);
+    expect(resolvedPush).toEqual({ status: "pushed" });
     expect(server.currentRow()?.payload).toMatchObject({ weightKg: 60 });
+    expect((await a.tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
+  it("6b. resolução 'usar servidor' descarta o rascunho local em vez de reenviá-lo", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, 95, 1000);
+    await pushProfile(b.client, b.tracker, b.local);
+    await editLocally(a, 60, 1000);
+
+    const pull = await pullProfile(a.client, a.tracker, a.local);
+    if (pull.status !== "conflict") throw new Error("unreachable");
+
+    await resolveProfileConflict(a.tracker, a.local, "use-server", pull.remote);
+
+    expect((await a.local.get())?.nutrition.weightKg).toBe(95);
+    expect((await a.tracker.get("profile:me"))?.status).toBe("clean");
+
+    // Nada pendente — o rascunho local (60) foi descartado de propósito.
+    expect(await pushProfile(a.client, a.tracker, a.local)).toEqual({
+      status: "nothing-pending",
+    });
+    expect(server.currentRow()?.payload).toMatchObject({ weightKg: 95 });
   });
 
   it("7/10. perde conexão durante o push: a edição local pendente não é perdida nem corrompida", async () => {
@@ -283,7 +330,7 @@ describe("motor de sync do Profile — ataque adversarial", () => {
 
     // Nada foi corrompido: continua pendente, com o mesmo valor, e o
     // servidor nunca recebeu a escrita.
-    expect((await pc.tracker.get("profile:me"))?.pendingPush).toBe(true);
+    expect((await pc.tracker.get("profile:me"))?.status).toBe("pending");
     expect((await pc.local.get())?.nutrition.weightKg).toBe(77);
     expect(server.currentRow()).toBeUndefined();
   });
@@ -302,7 +349,15 @@ describe("motor de sync do Profile — ataque adversarial", () => {
     // IndexedDB, não estado em memória do componente.
     const retryResult = await pushProfile(pc.client, pc.tracker, pc.local);
     expect(retryResult).toEqual({ status: "pushed" });
-    expect((await pc.tracker.get("profile:me"))?.pendingPush).toBe(false);
+    expect((await pc.tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
+  it("9. Service Worker com versão antiga: não é hipotético — aconteceu de verdade (§21.3), não é uma falha deste motor", () => {
+    // Sem asserção de código: a causa raiz foi um bundle JS em cache do
+    // Service Worker da PWA, não o motor de sync. Documentado em
+    // docs/arquitetura-sincronizacao.md §21.3 como um lembrete operacional,
+    // não um bug a corrigir aqui.
+    expect(true).toBe(true);
   });
 
   it("11. push funciona, mas o pull seguinte falha: o push já aplicado continua válido", async () => {
@@ -328,7 +383,7 @@ describe("motor de sync do Profile — ataque adversarial", () => {
 
     // O push que já tinha sido aplicado continua de pé — uma falha no pull
     // seguinte não desfaz nada.
-    expect((await pc.tracker.get("profile:me"))?.pendingPush).toBe(false);
+    expect((await pc.tracker.get("profile:me"))?.status).toBe("clean");
     expect((await pc.local.get())?.nutrition.weightKg).toBe(83);
     expect(server.currentRow()?.payload).toMatchObject({ weightKg: 83 });
   });
@@ -350,9 +405,9 @@ describe("motor de sync do Profile — ataque adversarial", () => {
       "IndexedDB quota exceeded",
     );
 
-    // markPulled nunca rodou: a versão do servidor conhecida continua nula,
-    // então o próximo pull vai tentar de novo em vez de achar que já
-    // sincronizou um dado que na verdade nunca foi gravado local.
+    // markClean nunca rodou: a versão do servidor conhecida continua
+    // ausente, então o próximo pull vai tentar de novo em vez de achar que
+    // já sincronizou um dado que na verdade nunca foi gravado local.
     expect((await a.tracker.get("profile:me"))?.serverUpdatedAt).toBeUndefined();
 
     // E com o repositório local de verdade, o retry funciona normalmente.

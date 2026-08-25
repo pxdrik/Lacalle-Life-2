@@ -7,12 +7,25 @@ import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
 
 import { DATABASE_NAME, MIGRATIONS } from "../migrations";
-import { pullProfile, pushProfile } from "./profile-sync";
-import type { PullProfileResult, PushProfileResult } from "./profile-sync";
+import { pullProfile, pushProfile, resolveProfileConflict } from "./profile-sync";
+import type {
+  ProfileConflictResolution,
+  PullProfileResult,
+  PushProfileResult,
+} from "./profile-sync";
 
 export interface ProfileSyncOutcome {
   readonly push: PushProfileResult;
   readonly pull: PullProfileResult;
+}
+
+async function openProfileSyncStores() {
+  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalProfileRepository(
+    new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
+  );
+  return { tracker, localOnly };
 }
 
 /**
@@ -30,15 +43,27 @@ export interface ProfileSyncOutcome {
  */
 export async function runProfileSync(): Promise<ProfileSyncOutcome> {
   const supabase = getSupabaseBrowserClient();
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
-
-  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  const localOnly = new LocalProfileRepository(
-    new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
-  );
+  const { tracker, localOnly } = await openProfileSyncStores();
 
   const push = await pushProfile(supabase, tracker, localOnly);
   const pull = await pullProfile(supabase, tracker, localOnly);
 
   return { push, pull };
+}
+
+/**
+ * Única forma de destravar um `Profile` em conflito. `remote` tem que vir
+ * do resultado `"conflict"` que a UI mostrou na tela — nunca busca de novo
+ * aqui, para nunca resolver um par de valores diferente do que o usuário
+ * viu ao decidir. Depois de resolver, roda `runProfileSync` de novo para
+ * completar o ciclo (enviar, se "manter local"; nada a enviar, se "usar
+ * servidor").
+ */
+export async function resolveProfileConflictAndSync(
+  resolution: ProfileConflictResolution,
+  remote: Profile,
+): Promise<ProfileSyncOutcome> {
+  const { tracker, localOnly } = await openProfileSyncStores();
+  await resolveProfileConflict(tracker, localOnly, resolution, remote);
+  return runProfileSync();
 }

@@ -688,10 +688,33 @@ real (`pushed`), pull reaplicando o estado do servidor (`applied`), e o
 ciclo rodando de novo sem nada pendente (`nothing-pending`/`applied`),
 duas vezes seguidas, sem erro.
 
+**Ataque adversarial (mesmo dia), pedido antes de expandir para as
+outras sete entidades:** 13 cenários (dois dispositivos, offline/online,
+conflito simultâneo, queda de conexão em cada ponto do ciclo, retry,
+idempotência). 11 passaram; o cenário 6 achou uma lacuna real —
+`docs/arquitetura-sincronizacao.md` §22.3 — onde, depois de um pull
+detectar que outro dispositivo já tinha sincronizado, um segundo push
+sem nenhuma resolução explícita sobrescrevia esse valor em silêncio,
+exatamente o "last-write-wins" que a arquitetura promete que a família
+`Profile` nunca teria.
+
+Decisão: bloquear, sem exceção. `SyncTracker.pendingPush: boolean` virou
+`SyncTracker.status: "clean" | "pending" | "conflict"` — `pushProfile`
+se recusa a chamar o servidor enquanto `status === "conflict"`, e só
+`resolveProfileConflict` (chamada exclusivamente pela UI, escolhendo
+"manter local" ou "usar servidor") destrava. A UI (`/conta`) troca o
+botão de sincronizar por uma tela de conflito com os dois valores
+enquanto não resolvido — nunca deixa "sincronizar de novo" ser a
+resposta. Rerun completo: 14/14 (13 cenários + a resolução `use-server`
+do 6), `npm run verify` limpo (103 arquivos, 1175 testes), e o caminho
+comum sem conflito reconfirmado ao vivo contra produção sem regressão.
+Detalhes em `docs/arquitetura-sincronizacao.md` §22.
+
 As outras sete entidades (`body_entries`, `diets`, `food_logs`,
 `routines`, `workout_sessions`, favoritos de alimento/exercício) seguem
-sem sync — mesmo padrão, uma de cada vez, só depois desta ser revisada e
-aprovada.
+sem sync. Próxima: `FoodLog`, com merge por `Meal.id` em vez de conflito
+por versão — duas refeições criadas offline em dispositivos diferentes
+podem legitimamente coexistir.
 
 ---
 

@@ -2,9 +2,9 @@ import { nutritionProfileSchema } from "@/core/nutrition";
 import type { Store } from "@/core/storage/store";
 import {
   getExpectedServerUpdatedAt,
-  markPending,
-  markPulled,
-  markPushed,
+  markClean,
+  markConflict,
+  forcePendingAfterResolution,
   trackerId,
   type SyncTracker,
 } from "@/core/sync/sync-tracker";
@@ -26,10 +26,12 @@ export type PushProfileResult =
 /**
  * Envia a edição local pendente de `profile`, se houver.
  *
- * Nunca decide sozinho o que fazer num conflito — `applied: false` só
- * atualiza a versão do servidor conhecida (`markPulled`, preservando a
- * pendência) e devolve `"conflict"`. É quem chama que decide reagir,
- * exatamente como o conflito local de duas abas já funciona hoje.
+ * **Nunca tenta resolver um conflito sozinho.** Se o tracker já está em
+ * `"conflict"`, devolve `"conflict"` sem chamar o servidor — só
+ * `resolveProfileConflict` destrava isto. E se esta chamada perder uma
+ * corrida (`applied: false`), o resultado é o mesmo bloqueio, não uma
+ * sobrescrita silenciosa na próxima tentativa. Ver
+ * docs/arquitetura-sincronizacao.md §22.3.
  *
  * `localOnly` tem que ser o `LocalProfileRepository` puro, nunca o
  * `SyncingProfileRepository` — chamar `.get()` não teria problema nos dois,
@@ -43,7 +45,12 @@ export async function pushProfile(
   localOnly: ProfileRepository,
 ): Promise<PushProfileResult> {
   const entry = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
-  if (entry?.pendingPush !== true) {
+
+  if (entry?.status === "conflict") {
+    return { status: "conflict" };
+  }
+
+  if (entry?.status !== "pending") {
     return { status: "nothing-pending" };
   }
 
@@ -57,12 +64,8 @@ export async function pushProfile(
 
   if (profile === undefined) {
     if (expected === null) {
-      // Nunca existiu no servidor — nada a apagar lá, só desliga a pendência.
-      await markPending(tracker, STORE_NAME, PROFILE_ID);
-      const cleared = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
-      if (cleared !== undefined) {
-        await tracker.put({ ...cleared, pendingPush: false });
-      }
+      // Nunca existiu no servidor — nada a apagar lá, só volta a "clean".
+      await markClean(tracker, STORE_NAME, PROFILE_ID, null);
       return { status: "deleted-remote" };
     }
 
@@ -76,11 +79,11 @@ export async function pushProfile(
     if (result === undefined) return { status: "error", message: "empty response" };
 
     if (result.applied) {
-      await markPushed(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
+      await markClean(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
       return { status: "deleted-remote" };
     }
 
-    await markPulled(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
+    await markConflict(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
     return { status: "conflict" };
   }
 
@@ -98,11 +101,13 @@ export async function pushProfile(
   if (result === undefined) return { status: "error", message: "empty response" };
 
   if (result.applied) {
-    await markPushed(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
+    await markClean(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
     return { status: "pushed" };
   }
 
-  await markPulled(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
+  // Corrida real: alguém mudou o servidor entre a leitura da versão
+  // esperada e esta chamada. Bloqueia — não tenta de novo sozinho.
+  await markConflict(tracker, STORE_NAME, PROFILE_ID, result.server_updated_at);
   return { status: "conflict" };
 }
 
@@ -110,7 +115,8 @@ export type PullProfileResult =
   | { readonly status: "not-authenticated" }
   | { readonly status: "no-remote-data" }
   | { readonly status: "applied" }
-  | { readonly status: "local-pending-conflict" }
+  | { readonly status: "pending-unpushed" }
+  | { readonly status: "conflict"; readonly local: Profile; readonly remote: Profile }
   | { readonly status: "invalid-payload" }
   | { readonly status: "error"; readonly message: string };
 
@@ -122,11 +128,14 @@ interface RemoteProfileRow {
 }
 
 /**
- * Traz o `profile` do servidor, se houver, e aplica localmente — **exceto**
- * quando há uma edição local ainda não enviada (`pendingPush`), caso em que
- * sobrescrever silenciosamente é exatamente o que a arquitetura proíbe
- * (docs/arquitetura-sincronizacao.md §8.1/§17.1). Nesse caso só atualiza a
- * versão do servidor conhecida e devolve `"local-pending-conflict"`.
+ * Traz o `profile` do servidor, se houver.
+ *
+ * Sem pendência local: aplica direto. Com pendência local mas o servidor
+ * não mudou desde a última vez que este dispositivo olhou: `"pending-unpushed"`
+ * — ainda não há nada para resolver, só falta enviar. Com pendência local
+ * **e** o servidor mudou (ou já havia um conflito conhecido): `"conflict"`,
+ * carregando os dois valores para a UI decidir — nunca aplica nem descarta
+ * nada sozinho (docs/arquitetura-sincronizacao.md §8.1/§17.1/§22.3).
  *
  * `payload` nunca é confiado só por ter vindo do próprio banco — mesma
  * validação Zod que já protege um backup importado (§19.8), fechando a
@@ -156,31 +165,79 @@ export async function pullProfile(
     return { status: "no-remote-data" };
   }
 
-  const entry = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
-  if (entry?.pendingPush === true) {
-    await markPulled(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
-    return { status: "local-pending-conflict" };
-  }
-
   const parsed = nutritionProfileSchema.safeParse(row.payload);
   if (!parsed.success) {
     return { status: "invalid-payload" };
   }
 
-  const profile: Profile = {
+  const remote: Profile = {
     id: PROFILE_ID,
     nutrition: parsed.data,
     createdAt: row.client_updated_at,
     updatedAt: row.client_updated_at,
   };
 
+  const entry = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
+  const currentLocal = await localOnly.get();
+
+  if (entry?.status === "conflict") {
+    // Já bloqueado — atualiza a versão do servidor conhecida (pode ter
+    // avançado de novo) e devolve os dois valores outra vez.
+    await markConflict(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
+    return { status: "conflict", local: currentLocal ?? remote, remote };
+  }
+
+  if (entry?.status === "pending") {
+    if (entry.serverUpdatedAt !== row.server_updated_at) {
+      // O servidor mudou desde a última vez que este dispositivo soube —
+      // dois dispositivos editaram o mesmo registro. Nunca sobrescreve
+      // nenhum dos dois sozinho.
+      await markConflict(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
+      return { status: "conflict", local: currentLocal ?? remote, remote };
+    }
+
+    // O servidor não mudou — só ainda não enviamos a nossa edição local.
+    return { status: "pending-unpushed" };
+  }
+
   // `expectedUpdatedAt: null` só é válido para criar um registro que ainda
   // não existe localmente — achado testando de verdade: sem isto, aplicar
   // um pull sobre um registro que já existe local (o caso comum, não a
   // exceção) sempre lançava DataError("CONFLICT") do próprio OCC local,
   // mesmo sem nenhuma edição pendente de verdade.
-  const currentLocal = await localOnly.get();
-  await localOnly.save(profile, currentLocal?.updatedAt ?? null);
-  await markPulled(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
+  await localOnly.save(remote, currentLocal?.updatedAt ?? null);
+  await markClean(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
   return { status: "applied" };
+}
+
+export type ProfileConflictResolution = "keep-local" | "use-server";
+
+/**
+ * Única forma de sair de `"conflict"`. A UI escolhe entre manter a edição
+ * local (o motor destrava o próximo push, que vai usar a versão do
+ * servidor mais recente conhecida como base — uma sobrescrita explícita,
+ * escolhida pelo usuário, não automática) ou usar o valor do servidor
+ * (descarta o rascunho local e aplica `remote`).
+ *
+ * `remote` vem do resultado `"conflict"` de `pullProfile` — nunca é
+ * buscado de novo aqui, para a UI sempre resolver exatamente o par de
+ * valores que mostrou na tela, não um terceiro estado que chegou entre o
+ * clique e esta chamada.
+ */
+export async function resolveProfileConflict(
+  tracker: Store<SyncTracker>,
+  localOnly: ProfileRepository,
+  resolution: ProfileConflictResolution,
+  remote: Profile,
+): Promise<void> {
+  if (resolution === "use-server") {
+    const entry = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
+    const serverUpdatedAt = getExpectedServerUpdatedAt(entry);
+    const currentLocal = await localOnly.get();
+    await localOnly.save(remote, currentLocal?.updatedAt ?? null);
+    await markClean(tracker, STORE_NAME, PROFILE_ID, serverUpdatedAt);
+    return;
+  }
+
+  await forcePendingAfterResolution(tracker, STORE_NAME, PROFILE_ID);
 }

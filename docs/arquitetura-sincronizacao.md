@@ -1655,20 +1655,96 @@ um `"local-pending-conflict"` antes de deixá-lo sincronizar nada de novo.
 O botão manual "Sincronizar perfil agora" trata os dois casos (sem
 conflito, com conflito) da mesma forma.
 
-Duas direções possíveis, nenhuma implementada ainda — decisão do Pedro
-antes de generalizar o padrão:
+Duas direções foram propostas — decisão do Pedro antes de generalizar o
+padrão:
 
 - **Bloquear o próximo push** enquanto o tracker estiver em estado de
-  conflito conhecido (`local-pending-conflict` já visto, ainda não
-  resolvido), até uma ação explícita do usuário limpar esse estado —
-  exigiria um novo campo no `SyncTracker` (algo como
-  `conflictAcknowledged`) e uma tela mínima mostrando os dois valores.
-- **Aceitar o comportamento atual** para o `Profile` especificamente
-  (um campo simples, onde "o último a sincronizar ganha, mas de forma
-  visível — o usuário vê os dois valores antes de decidir sincronizar de
-  novo" pode ser suficiente), e reservar o bloqueio automático para
-  entidades onde perder um valor é mais caro (`Diet`, `Routine`,
-  `BodyEntry`, listadas no §16 como sempre-conflito-visível).
+  conflito conhecido, até uma ação explícita do usuário limpar esse
+  estado.
+- **Aceitar o comportamento atual** para o `Profile` especificamente, e
+  reservar o bloqueio automático para entidades onde perder um valor é
+  mais caro (`Diet`, `Routine`, `BodyEntry`).
 
-Sem essa decisão, generalizar o padrão para as outras sete entidades
-multiplicaria esta mesma lacuna por oito.
+**Decisão: bloquear. Rejeitada explicitamente a segunda opção** — "não
+faz sentido colocar uma exceção justamente na primeira entidade validada
+e depois carregar essa exceção mentalmente para as outras". O `Profile`
+não vira um caso especial; a garantia é a mesma para as oito entidades.
+
+### 22.4 A correção: `SyncStatus` explícito, bloqueio real
+
+`SyncTracker.pendingPush: boolean` virou `SyncTracker.status: "clean" |
+"pending" | "conflict"` (`src/core/sync/sync-tracker.ts`). Não é só
+renomear — o objetivo era estrutural, pedido nestes termos: "isso impede
+que alguém, daqui a três meses, altere o botão 'Sincronizar' e
+reintroduza o bug sem perceber."
+
+- `pushProfile` verifica `status === "conflict"` **antes** de qualquer
+  chamada ao servidor e devolve `"conflict"` sem tentar nada — inclusive
+  quando o próprio `pushProfile` é quem acabou de detectar o conflito
+  (`applied: false` numa corrida real, cenário 5).
+- `pullProfile` também nunca aplica nem descarta nada sozinho num
+  conflito: devolve `{ status: "conflict", local, remote }` com os dois
+  valores, para a UI decidir.
+- `markPending` **nunca** tira um registro de `"conflict"` — editar por
+  cima de um conflito não resolvido continua bloqueado. A única porta de
+  saída é `forcePendingAfterResolution`, um nome deliberadamente verboso,
+  chamado só por `resolveProfileConflict`, nunca por uma escrita comum.
+- Refinamento além do pedido original: `pullProfile` agora distingue
+  "há uma edição pendente, mas o servidor não mudou desde a última vez
+  que este dispositivo olhou" (`"pending-unpushed"` — não é conflito,
+  só falta enviar) de "há uma edição pendente **e** o servidor mudou"
+  (`"conflict"` de verdade). A versão anterior tratava as duas a mesma
+  coisa, o que teria mostrado a tela de conflito sem necessidade toda vez
+  que alguém sincronizasse duas vezes seguidas com uma edição no meio.
+- `resolveProfileConflict(tracker, local, resolution, remote)` — única
+  função que sai de `"conflict"`. `"keep-local"` destrava o próximo push
+  (que usa a versão do servidor mais recente conhecida como base — uma
+  sobrescrita explícita, escolhida pelo usuário). `"use-server"`
+  descarta o rascunho local e aplica `remote`, que **vem do resultado que
+  a UI mostrou na tela** — nunca busca de novo, para nunca resolver um
+  par de valores diferente do que o usuário viu ao decidir.
+
+UI (`app/(auth)/conta/manual-sync-button.tsx`): enquanto há conflito, o
+botão "Sincronizar perfil agora" desaparece — só a tela de conflito
+existe, com os dois valores e dois botões (`Manter X kg` / `Usar Y kg`).
+Não há caminho na interface que deixe "sincronizar de novo" ser a
+resposta a um conflito.
+
+**Sobre o quarto estado pedido (`syncing`):** implementado como uma
+guarda em memória no componente React (`pending`, desabilita o botão
+durante uma chamada em curso), não como um quinto valor persistido no
+`SyncTracker`. Persistir "syncing" e não conseguir garantir que ele
+sempre é limpo — a aba fecha, o processo morre no meio de um `await` — 
+criaria um jeito novo de travar um registro para sempre, a mesma classe
+de problema que os cenários 7/8/10 desta campanha provam que o motor
+evita hoje. Guardar isso em memória (que zera sozinho a cada reload)
+preserva a proteção contra duplo clique sem esse risco.
+
+### 22.5 Rerun completo — 13 de 13 (na prática, 14, com o 6b)
+
+Não só o cenário 6: a suíte inteira rodou de novo depois da correção.
+`src/composition/sync/profile-sync.adversarial.test.ts` — 14/14. O
+cenário 6 passou a provar exatamente o oposto do que provava antes: um
+segundo push sem resolução explícita continua bloqueado
+(`{ status: "conflict" }`, sem chamar o servidor), e só depois de
+`resolveProfileConflict("keep-local", ...)` o push seguinte aplica —
+com o valor local, não o `remote` que só existia para a UI mostrar.
+Acrescentado o cenário 6b (resolução `"use-server"`), coberto pela mesma
+suíte.
+
+`npm run verify` — 103 arquivos, 1175 testes, typecheck e lint limpos.
+Confirmado também no navegador contra o Supabase real: o caminho comum
+(sem conflito) continua limpo depois do refactor —
+`push: nothing-pending · pull: applied`, sem regressão. Uma simulação
+completa de "dois dispositivos" ao vivo contra produção (chamando
+`save_profile` como um segundo dispositivo faria, fora do fluxo do
+próprio app) foi bloqueada pelo classificador de segurança da sessão por
+escrever em produção fora do app — respeitado sem contornar; a suíte
+automatizada, que reproduz fielmente o contrato das RPCs reais, é a
+evidência para este cenário específico.
+
+`Profile` está pronto para o próximo passo do plano: `FoodLog`, com a
+regra de merge por `Meal.id` em vez de conflito por versão — duas
+refeições criadas offline em dispositivos diferentes podem legitimamente
+coexistir, o que é um teste genuinamente diferente do que "qual versão
+ganha".
