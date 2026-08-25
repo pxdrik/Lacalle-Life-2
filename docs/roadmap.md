@@ -595,9 +595,44 @@ confirmado é `/conta` refletindo corretamente o estado de sessão nos dois
 sentidos. Proteger rota é decisão de uma sprint futura, quando sync de
 domínio existir de verdade.
 
-Com isso, a Sprint 1 está fechada. Próxima: **Sprint 2 — Schema real**,
-as migrations do `docs/arquitetura-sincronizacao.md` §18 aplicadas de
-verdade no projeto Supabase.
+Com isso, a Sprint 1 está fechada.
+
+## Sprint 2 — Schema real ✅ entregue em 25/08/2026
+
+As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
+§18) aplicadas de verdade no projeto `rtvscxcfwfsamxatkwit`: 10 tabelas, RLS
+em todas, 16 funções `save_*`/`delete_*`. `list_tables` e o advisor de
+segurança do próprio Supabase confirmaram o desenho — só os 16 avisos
+esperados ("`authenticated` executa função `security definer`", o desenho
+pretendido) e um item de hardening de Auth não relacionado ao schema
+(proteção contra senha vazada, desligada — registrado, não bloqueia).
+
+**Achado real, só apareceu atacando o banco de verdade, não a leitura do
+SQL:** as 16 funções tinham um bug — `returns table (server_updated_at
+timestamptz)` cria uma variável de saída com esse nome dentro do corpo da
+função, que colidia com a coluna real da tabela no `WHERE` sem
+qualificação, e o Postgres rejeitava com "column reference is ambiguous"
+todo caminho de `UPDATE` — ou seja, **todo conflito de verdade**, o
+mecanismo central da arquitetura inteira, quebrado em produção. A leitura
+estática do mesmo SQL, feita duas vezes antes desta sessão, nunca pegou —
+a ambiguidade só existe em tempo de execução. Corrigido qualificando cada
+referência com o nome completo da tabela; as 8 correções (0013–0020) ficam
+como entradas separadas e append-only ao lado das 8 versões originais com
+bug (0005–0012) — ninguém lendo os arquivos do zero encontra uma versão
+silenciosamente consertada sem o registro de que já existiu quebrada.
+
+Confirmado contra o banco real com um usuário autenticado de verdade:
+criação, conflito com versão antiga/futura (rejeitado, conteúdo real
+confirmado intacto), chamada sem autenticação (`401`, bloqueado antes da
+função rodar), `workout_sessions` com sessão em progresso (rejeitado no
+próprio banco, reforçando §17.3), tombstone real funcionando. Isolamento
+entre dois usuários reais distintos segue verificado só por desenho (RLS
+padrão do Supabase) — fica como item não bloqueante para um segundo teste
+E2E futuro.
+
+Dados de teste apagados pelas próprias funções `delete_*` (tombstone real).
+Nenhum dado de domínio do Pedro nas tabelas ainda — a Sprint de Sync
+(outbox, pull, motor de merge) é a próxima.
 
 ---
 

@@ -1308,3 +1308,102 @@ Sprint de Auth começar em paralelo — auth não depende de nenhuma tabela de
 domínio. **A Sprint de Schema (criar as migrations de verdade) só deveria
 começar depois de você concordar com as correções desta seção**, em
 especial §19.1, que muda a forma de duas seções inteiras do documento.
+
+---
+
+## 20. Sprint de Schema — migrations reais aplicadas em 25/08/2026
+
+As 20 migrations de `supabase/migrations/` (numeradas 0001–0020) aplicaram
+o desenho de §18 no projeto `rtvscxcfwfsamxatkwit` de verdade — 10
+tabelas, RLS, triggers, 16 funções `save_*`/`delete_*`. `list_tables`
+confirmou as 10 tabelas com `rls_enabled: true`, PKs e FKs exatamente como
+desenhado. `get_advisors(type: security)` só apontou os 16 avisos
+esperados ("`authenticated` pode executar função `security definer`" —
+exatamente o desenho pretendido, a única porta de escrita) e um item de
+hardening de Auth não relacionado ao schema (proteção contra senha
+vazada, desligada — recomendação registrada, não bloqueia).
+
+### 20.1 Achado real — só apareceu atacando o banco de verdade
+
+Os oito cenários de ataque de §19.10 tinham sido verificados só contra o
+**desenho**. Rodá-los de novo contra as funções **de verdade**, com um
+usuário real autenticado (o mesmo `pedrofunesctt@gmail.com` da validação
+E2E do Sprint 1), achou um bug funcional real que nenhuma leitura do SQL
+pegou: toda chamada de `UPDATE` (ou seja, todo caminho de conflito — o
+mecanismo central da arquitetura inteira) falhava com
+
+```
+column reference "server_updated_at" is ambiguous
+```
+
+**Causa:** `returns table (server_updated_at timestamptz)` cria, dentro do
+corpo `plpgsql` da função, uma variável de saída chamada
+`server_updated_at`. A cláusula `where ... and server_updated_at =
+p_expected_server_updated_at` não qualificava essa referência com o nome
+da tabela — e o Postgres não consegue decidir se `server_updated_at` ali
+é a variável de saída da função ou a coluna real da tabela. Erro `42702`,
+em produção, nas 8 funções `save_*` e nas 8 `delete_*` — as 16 funções que
+existiam.
+
+Isso não é um problema de segurança (nada vazou, nada foi sobrescrito
+indevidamente) — é um bug funcional que teria quebrado toda edição e todo
+apagamento reais assim que a Sprint de Sync começasse a chamar essas
+funções. **A leitura estática do SQL em §18.5, feita duas vezes antes
+desta sessão, não pegou isso** — o texto lê perfeitamente bem, a
+ambiguidade só existe em tempo de execução, dentro do escopo de nomes do
+`plpgsql`. É exatamente o motivo de "não confiar na leitura, atacar de
+verdade" (§19.10) ter sido a exigência certa desde o início — só que
+faltava fazer isso contra o banco real, não só contra o desenho.
+
+**Correção:** qualificar toda referência a `server_updated_at` dentro do
+`WHERE` com o nome completo da tabela (`public.diets.server_updated_at`,
+não `server_updated_at` sozinho). Aplicado nas 8 tabelas, cada correção
+testada individualmente contra o banco real antes de seguir para a
+próxima — criação, tentativa de conflito com versão antiga, e leitura do
+conteúdo real da linha confirmando que a tentativa maliciosa não foi
+aplicada.
+
+### 20.2 Confirmado contra o banco real, não simulado
+
+Com um único usuário real autenticado (token de acesso obtido via login
+de verdade), rodados contra as 8 tabelas:
+
+- **Criação real** — todas as 8 `save_*` criaram um registro com sucesso,
+  `server_updated_at` real devolvido.
+- **Conflito real (cenário 4/5 de §19.10, agora contra produção)** —
+  chamada com `server_updated_at` esperado desatualizado (passado e
+  futuro, os dois testados) devolveu o timestamp atual sem aplicar a
+  mudança; conteúdo da linha lido depois confirma que o valor malicioso
+  nunca chegou a gravar.
+- **Sem autenticação (cenário 7)** — `401 permission denied for function
+  save_diet`, bloqueado na camada de `GRANT`/`REVOKE`, antes mesmo da
+  função rodar.
+- **`workout_sessions` com `finished_at = null` (§17.3 reforçada no
+  banco)** — `400`, `"workout_sessions only sync once finished"`.
+- **Tombstone real** — `delete_diet` com versão errada não mudou
+  `deleted_at`; com a versão certa, `deleted_at` foi preenchido com
+  timestamp real.
+
+Os cenários 1 e 3 de §19.10 (A tenta ler/escrever/apagar dado de B)
+seguem verificados só por desenho (RLS `auth.uid() = user_id`, o
+primitivo padrão do próprio Supabase) — um segundo usuário real para
+testar isolamento entre contas de verdade fica como item em aberto, não
+bloqueante, para quando fizer sentido criar um segundo teste E2E.
+
+### 20.3 Estado do schema
+
+**Aplicado e íntegro em produção.** As migrations em `supabase/migrations/`
+espelham fielmente o histórico real do projeto — incluindo as 8 versões
+com o bug (0005–0012) e as 8 correções (0013–0020) como entradas
+separadas, append-only, a mesma regra que `composition/migrations.ts` já
+usa para o schema local. Ninguém que ler os arquivos do zero vai encontrar
+uma versão silenciosamente "consertada" sem o registro de que ela já
+existiu quebrada.
+
+Dados de teste criados durante o ataque foram apagados pelas próprias
+`delete_*` (tombstone real, não faxina bruta) — o mesmo caminho que
+qualquer usuário real percorreria.
+
+Nenhuma tabela de domínio tem dado real do Pedro ainda. A Sprint de Sync
+(outbox, pull, motor de merge) é a próxima, e é a primeira que
+efetivamente lê/escreve dado de domínio do dispositivo local.
