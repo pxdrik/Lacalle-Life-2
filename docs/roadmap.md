@@ -527,9 +527,31 @@ login, logout, sessão persistente, refresh, confirmação de e-mail,
 recuperação de senha, `user.id` disponível). Zero migração, zero outbox,
 zero sync engine, zero alteração no IndexedDB nesta sprint.
 
-Nenhum arquivo de migration real foi criado e nenhum código de app foi
-tocado — é desenho para revisão, e a Sprint de Schema (migrations de
-verdade) segue atrás da Sprint de Auth, não em paralelo com ela.
+**Sprint 1 — Auth isolado, entregue em 24/08/2026.** Supabase Auth via
+`@supabase/ssr`, atrás de `src/features/auth` (mesma fronteira de
+repositório de toda outra feature). Cadastro, login, logout, sessão
+persistente por cookie, refresh de token em `middleware.ts`, confirmação
+de e-mail e recuperação de senha — zero tabela de domínio tocada. Projeto
+Supabase real: `rtvscxcfwfsamxatkwit` ("Lacalle-Life"), criado no mesmo
+dia.
+
+Achado real só na validação manual no navegador: os quatro formulários
+espalhavam `{...control}` do render-prop de `Field` direto no `<input>`,
+vazando `describedBy` como atributo DOM inválido — três "issues" no overlay
+de dev do Next.js. Nem typecheck, nem lint, nem os 1132 testes existentes
+pegaram; só apareceu olhando a tela de verdade. Corrigido nos quatro
+formulários, mesma forma que `profile-form.tsx` já usava.
+
+Testado contra o Supabase real: cadastro chega ao servidor (CSP
+`connect-src` liberando o domínio), login com credencial errada devolve o
+erro real do Supabase mapeado pro português. **O teste de sucesso completo
+ponta a ponta (cadastro confirmado → login → sessão sobrevive a refresh →
+logout) ficou bloqueado pelo limite de envio de e-mail do SMTP embutido do
+plano free do Supabase** — não é bug, é limitação operacional conhecida do
+serviço de teste; precisa de SMTP customizado no projeto ou esperar a
+janela de rate limit resetar para fechar essa validação manual.
+
+1143 testes (1132 + 11 novos), typecheck/lint/build limpos, zero regressão.
 
 ---
 
