@@ -539,6 +539,7 @@
   --control-px: 12px;
   --control-px-sm: 8px;
   --control-px-lg: 16px;
+  --ui-scale: 0.85;
 }
 
 [data-density="comfortable"] {
@@ -548,6 +549,41 @@
   --control-px: 24px;
   --control-px-sm: 18px;
   --control-px-lg: 30px;
+  --ui-scale: 1.15;
+}
+
+/**
+ * A escala tipográfica da pág. 17 fica em px, presa ao tamanho por
+ * desenho (ver o `@theme` abaixo) — mudar o token não muda um pixel do
+ * que já está desenhado em px absoluto. `--control-h*` acima cobre os
+ * controles que já leem esses tokens, mas título, texto corrido, ícone e
+ * imagem não leem nenhum deles.
+ *
+ * `zoom` é o único jeito de fazer os dois lados concordarem sem reescrever
+ * a escala inteira do brandbook em cada componente: ele redesenha a
+ * página inteira na escala pedida — texto, ícone, imagem, espaçamento —
+ * mantendo tudo alinhado entre si, porque continua sendo a mesma
+ * proporção, só maior ou menor (Pedro, 26/08/2026: "tudo tudo tudo...
+ * deixando tudo alinhado mesmo com a mudança de tamanho").
+ *
+ * Campo de formulário é a única exceção, e por um motivo funcional, não
+ * estético: a pág. 26 já fixa a fonte do campo em 16px porque um campo
+ * abaixo disso faz o Safari do iOS dar zoom no viewport ao focar — o
+ * mesmo bug que `Input`'s próprio comentário documenta. Se o campo também
+ * encolhesse com o `zoom` do Compacto, esse limite de 16px passaria a
+ * valer só *antes* do zoom aplicar, reabrindo o bug. `1 / --ui-scale`
+ * cancela o zoom ambiente só para o campo, então o que a pessoa vê
+ * sempre bate com os 16px reais que o Safari está medindo.
+ */
+html {
+  --ui-scale: 1;
+  zoom: var(--ui-scale);
+}
+
+input,
+select,
+textarea {
+  zoom: calc(1 / var(--ui-scale));
 }
 
 /**
