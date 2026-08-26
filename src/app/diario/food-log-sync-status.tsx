@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { isSupabaseConfigured } from "@/core/auth/env";
 import {
   resolveFoodLogConflictAndSync,
   runFoodLogSync,
@@ -60,6 +61,16 @@ export function FoodLogSyncStatus({ day }: { readonly day: string }) {
     let active = true;
 
     async function autoSync() {
+      // Not configured is a permanent state in some environments (a
+      // production deploy missing its Supabase env vars, a local-only
+      // checkout), not a transient failure — sitting quietly in it, the
+      // same way `pushFoodLog`/`pullFoodLog` already sit quietly in
+      // "not-authenticated", is correct. Throwing here instead meant this
+      // effect re-fired on every day change and logged the same exception
+      // each time, with an alarming "Falha ao sincronizar." Notice for a
+      // state that isn't a failure of anything that happened this session.
+      if (!isSupabaseConfigured()) return;
+
       try {
         const outcome = await runFoodLogSync(day);
         if (!active) return;

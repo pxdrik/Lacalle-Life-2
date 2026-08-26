@@ -13,6 +13,21 @@ export interface SupabaseEnv {
   readonly anonKey: string;
 }
 
+/**
+ * Whether the two variables `getSupabaseEnv` needs are actually set —
+ * without throwing. For a caller that treats "not configured" as a normal,
+ * permanent state to sit quietly in (an auto-sync effect, say) rather than
+ * an error to catch and report on every attempt.
+ */
+export function isSupabaseConfigured(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== undefined &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== "" &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== undefined &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== ""
+  );
+}
+
 export function getSupabaseEnv(): SupabaseEnv {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
