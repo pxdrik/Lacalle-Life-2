@@ -31,7 +31,12 @@ function ColumnHeader() {
         <span className="w-9 text-right">Carb</span>
         <span className="w-9 text-right">Gord</span>
       </span>
-      <span className="w-8 shrink-0" />
+      {/* w-16, não w-8: tem que bater com o espaço reservado em `FoodRow`
+          para editar/excluir (§achado 25/08/2026) — só um alimento
+          personalizado usa esse espaço, mas toda linha o reserva, e um
+          cabeçalho mais estreito desalinhava as colunas de macros em 32px
+          de todas as linhas, sempre, não só nas personalizadas. */}
+      <span className="w-16 shrink-0" />
     </div>
   );
 }
