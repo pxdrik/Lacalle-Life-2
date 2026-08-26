@@ -50,6 +50,16 @@ export function CustomExerciseForm({
   const [equipment, setEquipment] = useState<ReadonlySet<Equipment>>(new Set());
   const [error, setError] = useState<string | undefined>(undefined);
 
+  const trimmedLength = name.trim().length;
+  // Sem isto, o botão só fica desabilitado — achado testando ao vivo (nome
+  // curto, "Criar e usar" clicável na aparência, mas o clique não faz nada e
+  // nenhuma mensagem explica o porquê). `handleSubmit` nunca roda enquanto
+  // `disabled` é verdadeiro, então o erro do schema também nunca aparecia.
+  const tooShort =
+    trimmedLength > 0 && trimmedLength < 3
+      ? "Dê um nome com pelo menos 3 letras."
+      : undefined;
+
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
@@ -70,7 +80,11 @@ export function CustomExerciseForm({
 
   return (
     <form onSubmit={handleSubmit} className={cn(cardSurface(), "space-y-4")}>
-      <Field label="Nome do exercício" id="custom-exercise-name" error={error}>
+      <Field
+        label="Nome do exercício"
+        id="custom-exercise-name"
+        error={error ?? tooShort}
+      >
         {({ id, describedBy, invalid }) => (
           <Input
             id={id}
