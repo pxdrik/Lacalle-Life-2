@@ -10,6 +10,8 @@ import { PageHeader } from "@/design-system/components/page-header";
 import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
 import { PageShell } from "@/design-system/components/page-shell";
 
+import { FoodLogSyncStatus } from "./food-log-sync-status";
+
 /**
  * The food diary — what was eaten, on a date.
  *
@@ -47,6 +49,12 @@ function DayFromUrl() {
   // de a semana chegar lá. Um formato malformado ainda cai em algo sensato
   // em vez de erro.
   const valid = requested !== null && /^\d{4}-\d{2}-\d{2}$/.test(requested);
+  const day = valid ? requested : dayKey(new Date());
 
-  return <FoodLogScreen day={valid ? requested : dayKey(new Date())} />;
+  return (
+    <>
+      <FoodLogSyncStatus day={day} />
+      <FoodLogScreen day={day} />
+    </>
+  );
 }

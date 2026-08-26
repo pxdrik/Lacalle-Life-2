@@ -1969,3 +1969,101 @@ vez de escondido.
 Nenhuma lacuna arquitetural nova (além da já corrigida em §24.1) —
 condição do Pedro para dar sinal verde à UI. Próximo passo: construir a
 tela de sincronização/conflito do `FoodLog` em `/diario`.
+
+## 25. UI do FoodLog em `/diario` (25/08/2026)
+
+Regra de partida do Pedro: **a UI não cria lógica de sincronização
+nova, só expõe o estado que o motor já definiu.** Nenhuma decisão de
+merge, conflito ou bloqueio foi tomada aqui — tudo isso já existia em
+`food-log-sync.ts`/`food-log-merge.ts` (§23/§24).
+
+### 25.1 Peças novas, todas plumbing, nenhuma estratégia nova
+
+- `SyncingFoodLogRepository` — mesmo desenho do
+  `SyncingProfileRepository`: grava local, marca pendente. A UI (o
+  editor de dieta, `MealCard`, tudo que já existia) nunca soube que
+  sync existe, e continua sem saber — nenhuma linha do editor de dieta
+  foi tocada.
+- `runFoodLogSync(day)` / `resolveFoodLogConflictAndSync(day, ...)` em
+  `composition/sync/sync-engine.ts` — encapsulam `pushFoodLog`/
+  `pullFoodLog`/`resolveFoodLogConflict`, mesmo padrão do `Profile`.
+- `app/diario/food-log-sync-status.tsx` — o único componente novo de
+  UI. Vive em `app/`, não em `features/diet`, porque chama
+  `@/composition/sync` diretamente (regra 4 do `AGENTS.md`).
+
+### 25.2 O que a tela mostra, por estado
+
+- **Dia normal (`clean`):** só um botão discreto "Sincronizar" acima da
+  navegação do dia. Sincroniza sozinho ao abrir o dia também — a
+  sincronização é transparente, não pede um clique para um dia comum
+  parecer em dia.
+- **`stale`** (corrida de versão perdida, §24.1): **não aparece nada
+  diferente.** O componente só olha para `pull.status === "conflict"`
+  — um `push` que voltou `"stale"` é seguido do `pull` de sempre no
+  mesmo `runFoodLogSync`, que resolve a situação sem nunca expor esse
+  status como se fosse um erro. Nenhum "conflito" assusta por causa de
+  uma corrida que não era conflito de verdade.
+- **`conflict`:** o botão "Sincronizar" desaparece da árvore — só a
+  tela de resolução existe, um cartão por refeição em conflito ("Uma
+  refeição foi alterada em outro dispositivo", os dois lados lado a
+  lado, dois botões: "Manter neste dispositivo" / "Usar outra
+  versão"). Sem terceira opção de merge automático — o motor não
+  definiu uma, a UI não inventa uma. Um lado apagado mostra "Refeição
+  apagada" em vez de uma lista vazia enganosa, e os botões trocam para
+  "Manter exclusão" / "Usar exclusão do outro" quando é esse o caso.
+
+### 25.3 Onde o `Meal` de domínio para, onde o `WireMeal` começa
+
+`food-log-sync-status.tsx` é o único lugar na UI que conhece
+`WireMeal` (a representação com `deletedAt`) — porque os conflitos que
+`pullFoodLog` devolve são, por definição, pares de `WireMeal`. Nenhum
+outro componente (`MealCard`, `food-log-screen.tsx`,
+`use-food-log.ts`) foi tocado ou precisa saber que esse campo existe —
+o `Meal` que eles leem e escrevem continua exatamente como era antes
+de sync existir.
+
+### 25.4 Um detalhe de implementação: por que o sync automático não
+    chama `setState` "dentro" do efeito
+
+`react-hooks/set-state-in-effect` (a mesma regra que já apareceu antes
+neste projeto) rejeitaria uma função definida fora do efeito e só
+referenciada por identidade — mesmo que ela só chame `setState` depois
+de um `await`, o linter não consegue provar isso estaticamente através
+da referência. A solução foi a mesma que `useFoodLogDay.load()` já usa:
+definir a função de sync **dentro** do próprio `useEffect`, com uma
+flag `active` para descartar o resultado se o dia mudar no meio do
+caminho — não uma exceção nova, o padrão que já existia.
+
+### 25.5 Achado colateral, fora do escopo desta sprint — não corrigido
+
+Testando ao vivo em `/diario`, uma dieta local pré-existente
+("Dieta Cutting", conta de teste) travava a tela inteira com
+`TypeError: Cannot read properties of undefined (reading 'includes')`
+em `dietForWeekday`/`diet-schedule.ts:93` — o registro não tinha o
+campo `weekdays` (provavelmente de antes desse campo existir, o mesmo
+padrão de dado legado que `LocalFoodLogRepository`'s `normalize()` já
+trata para `meals`/`dietId`, mas que `LocalDietRepository` aparentemente
+não trata para `weekdays`). **Não é um bug do motor de sync nem da UI
+desta sprint** — é uma lacuna pré-existente e não relacionada, fora do
+escopo pedido. Só apliquei um patch direto no IndexedDB daquele
+registro de teste (`weekdays: []`, `meals: []`) para conseguir testar a
+UI do FoodLog — **isso zerou as refeições daquela dieta de teste**, o
+que é aceitável numa conta de teste dedicada, mas registrado aqui para
+transparência. Recomendação para uma sprint futura (não esta): 
+`LocalDietRepository` devia normalizar `weekdays` na leitura, do mesmo
+jeito que `LocalFoodLogRepository` já normaliza `meals`/`dietId`.
+
+### 25.6 Confirmado ao vivo contra o Supabase real
+
+Criar uma refeição, sincronizar, e apagá-la de novo — tudo confirmado
+com uma consulta direta à tabela `food_logs` em produção
+(`rtvscxcfwfsamxatkwit`): o `payload` da criação chegou com
+`deletedAt: null` na refeição; depois de apagar e sincronizar de novo,
+o mesmo `Meal.id` chegou com `deletedAt` preenchido (timestamp real),
+**enquanto a linha do dia continuou com `deleted_at: null`** —
+confirmando que o tombstone é por refeição, não por dia, exatamente o
+desenho do §19.5/§23. Nenhum conflito falso apareceu no fluxo normal.
+
+O ataque adversarial com dois dispositivos de verdade em `/diario` (não
+só via `execute_sql` simulando um lado) fica para a próxima sessão,
+como o Pedro já anunciou que faria manualmente.

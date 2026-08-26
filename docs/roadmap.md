@@ -771,6 +771,35 @@ suspeitava é real, não hipotético. Nenhum problema de consistência
 documentado em `docs/arquitetura-sincronizacao.md` §24.3 em vez de
 escondido. Sinal verde dado para construir a UI do FoodLog em `/diario`.
 
+**UI do FoodLog entregue em `/diario` (mesmo dia).** Regra de partida:
+a UI não cria lógica de sincronização nova, só expõe o estado que o
+motor já definiu. Dia normal mostra só um botão discreto "Sincronizar"
+(sincroniza sozinho ao abrir o dia também); `stale` não aparece
+diferente de um dia limpo — nenhum "conflito" falso; `conflict` troca o
+botão por um cartão por refeição em conflito, os dois lados lado a
+lado, "Manter neste dispositivo" / "Usar outra versão", sem terceira
+opção de merge automático. `Meal` de domínio continua sem saber que
+`deletedAt` existe — só o componente novo, que já é sync-aware por
+natureza, conhece `WireMeal`.
+
+Confirmado ao vivo contra o Supabase real (não simulado): criar uma
+refeição, sincronizar, apagar, sincronizar de novo — o `payload` em
+produção mostrou o `deletedAt` da refeição preenchido enquanto a linha
+do dia continuou viva, exatamente o desenho por refeição do §19.5.
+`npm run verify` limpo (106 arquivos, 1205 testes).
+
+Achado colateral, fora do escopo, não corrigido: uma dieta de teste
+pré-existente sem o campo `weekdays` travava `/diario` inteiro
+(`dietForWeekday`/`diet-schedule.ts`) — dado legado, mesma classe de
+problema que `LocalFoodLogRepository` já normaliza para `meals`/
+`dietId`, mas que `LocalDietRepository` não trata para `weekdays`.
+Registrado como item futuro, não mexido nesta sprint. Detalhes em
+`docs/arquitetura-sincronizacao.md` §25.
+
+Próximo passo: campanha manual com dois dispositivos de verdade em
+`/diario` (anunciada pelo Pedro), verificando se a interface respeita
+todas as garantias que o motor já prova sozinho.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026
