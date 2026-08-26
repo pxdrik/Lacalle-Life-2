@@ -44,7 +44,7 @@ export function ThemeToggle() {
           />
           <span
             className={cn(
-              "flex size-8 items-center justify-center rounded-md text-ink-subtle",
+              "flex size-(--control-h-sm) items-center justify-center rounded-md text-ink-subtle",
               "transition-[background-color,color] duration-150 ease-out",
               "hover:text-ink",
               "peer-checked:bg-muted peer-checked:text-ink",

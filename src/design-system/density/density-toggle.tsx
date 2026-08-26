@@ -42,7 +42,7 @@ export function DensityToggle() {
           />
           <span
             className={cn(
-              "flex h-8 items-center justify-center rounded-md px-3 text-xs text-ink-subtle",
+              "flex h-(--control-h-sm) items-center justify-center rounded-md px-3 text-xs text-ink-subtle",
               "transition-[background-color,color] duration-150 ease-out",
               "hover:text-ink",
               "peer-checked:bg-muted peer-checked:text-ink peer-checked:font-medium",
