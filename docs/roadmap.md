@@ -5,6 +5,76 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## Correções P0/P1/P2 — 26/08/2026
+
+Rodada de correções pedida pelo Pedro depois de usar o app de verdade em
+`/diario`, com uma trava explícita: não alterar sync/Supabase/Auth/RPC/RLS
+nem a arquitetura multi-device além do estritamente necessário. Nada disso
+foi tocado.
+
+**P0/P1 — dois fluxos reportados como quebrados:**
+
+- **"Criar uma Dieta" não funciona** — investigado a fundo, **não é um bug
+  do app**. Era efeito colateral de um patch de teste que eu mesmo apliquei
+  antes, direto no IndexedDB, para contornar o crash pré-existente do
+  campo `weekdays` ausente numa dieta de teste ("Dieta Cutting") — zerei as
+  refeições dela sem querer. Selecionar essa dieta específica no
+  "Começar de uma dieta" volta para a mesma tela vazia (0 refeições →
+  0 refeições), o que parece "nada aconteceu". Com qualquer dieta que
+  realmente tem refeições, o fluxo funciona perfeitamente — confirmado ao
+  vivo. Nenhum código mudou aqui.
+- **"Adicionar" exercício personalizado não funciona — real, corrigido.**
+  `custom-exercise-form.tsx` exige nome com pelo menos 3 letras
+  (`disabled={name.trim().length < 3}`), mas não mostrava nenhuma mensagem
+  explicando por quê — o botão parecia clicável e o clique não fazia nada.
+  Reproduzido ao vivo (nome de 2 letras, botão sem resposta nem aviso) e
+  corrigido: agora mostra "Dê um nome com pelo menos 3 letras." assim que o
+  nome fica curto demais, usando a mesma mensagem que o schema já tinha.
+  Provado pelo ritual de sempre — reverter, ver o teste novo falhar,
+  restaurar, ver passar — com um teste novo para o componente, que não
+  tinha nenhum antes (`custom-exercise-form.test.tsx`).
+
+**P2 — UX/conteúdo:**
+
+- **Controle de tamanho dos botões** — confirmado ao vivo (densidade
+  compacta, pixel a pixel) que já afeta botões reais em toda a tela, não
+  só o botão de exemplo — não era um bug, só o exemplo sendo o feedback
+  mais óbvio. Removido o botão de exemplo mesmo assim, como pedido.
+- **Tabela de Alimentos** — achado e corrigido um desalinhamento real de
+  32px entre o cabeçalho (`kcal/Prot/Carb/Gord`) e os números de cada
+  linha, medido em pixels na página real: o cabeçalho reservava `w-8` no
+  fim da linha, as linhas reservam `w-16` (o espaço de editar/excluir, que
+  toda linha aloca mesmo quando vazio). Corrigido igualando o cabeçalho a
+  `w-16`.
+- **Dashboard Hoje** — proteína/carboidrato/gordura agora mostram
+  "consumido / meta" em vez de só o consumido, só quando existe meta
+  configurada (nunca inventa uma).
+- **Mensagem da fibra no Perfil** — mantida, não removida. O próprio
+  comentário no código já justifica por quê: fibra não é somada por
+  alimento no app, então a mensagem evita prometer uma medição que não
+  existe. Decisão registrada aqui para o Pedro reverter se discordar.
+- **Travessões tipográficos removidos do texto visível da UI** — 16
+  arquivos com texto que realmente aparece na tela, reescritos em
+  português natural (vírgula, dois-pontos, ponto, parênteses — nunca
+  " - " como substituto, que ainda é um travessão). 311 arquivos
+  confirmados como travessão só em comentário/JSDoc e **não tocados**,
+  varredura linha a linha da árvore inteira. Deixado de propósito: o
+  glifo `"—"` que `formatDecimal` e ~12 componentes usam para "sem valor"
+  (`placeholder="—"`, `value ?? "—"`) — não é pontuação de prosa, é um
+  símbolo de design deliberado para ausência de dado, categoria diferente
+  do que foi pedido.
+- **Visualização de exercícios** — o loop início/fim com controle manual
+  que o Pedro descreveu **já existe** (`exercise-photos.tsx`, ~1,1 s por
+  fase, botões de fase + play/pausar). Nunca houve vídeo real no código.
+  Nada mudado aqui.
+
+`npm run verify` (typecheck + lint + 1208 testes) e `npm run build` limpos
+depois de tudo. Testado manualmente ao vivo: os dois fluxos, a densidade,
+a tabela de alimentos, o dashboard e uma amostra das telas com texto
+reescrito.
+
+---
+
 ## Entregue
 
 | Módulo | Estado |
