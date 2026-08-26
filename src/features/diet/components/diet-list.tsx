@@ -46,8 +46,14 @@ export function DietList() {
         onSubmit={(event) => void handleCreate(event)}
         className="flex gap-2"
       >
+        {/* `defaultValue`, não `value`: um campo controlado é reconciliado
+            na hidratação, e o React sobrescreve o valor real do DOM de
+            volta pro estado inicial ("") — apagando em silêncio o que foi
+            digitado rápido, antes do JS assumir. Sem `value` amarrado,
+            a hidratação nunca toca o campo; `onChange` continua
+            atualizando `name` normalmente para o botão e o envio. */}
         <Input
-          value={name}
+          defaultValue={name}
           onChange={(event) => {
             setName(event.target.value);
           }}
