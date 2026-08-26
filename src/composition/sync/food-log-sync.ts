@@ -50,18 +50,32 @@ export type PushFoodLogResult =
   | { readonly status: "not-authenticated" }
   | { readonly status: "pushed" }
   | { readonly status: "conflict" }
+  | { readonly status: "stale" }
   | { readonly status: "error"; readonly message: string };
 
 /**
- * Envia o dia pendente, se houver — mesmo desenho de `pushProfile`: nunca
- * chama o servidor enquanto `status === "conflict"`, e uma corrida real
- * (`applied: false`) bloqueia em vez de tentar de novo sozinha.
+ * Envia o dia pendente, se houver. Nunca chama o servidor enquanto
+ * `status === "conflict"` — esse bloqueio duro só é decidido por
+ * `pullFoodLog`, depois de um merge de verdade (ver abaixo por quê).
  *
  * O payload enviado é reconstruído a partir do local ao vivo + do último
  * snapshot conhecido (`mergeFoodLogMeals(local, snapshot, snapshot)` —
  * mesclar contra si mesmo produz exatamente "local como fio", com
  * tombstones para o que foi apagado desde então, sem nenhum conflito
  * possível, porque não há um segundo lado real envolvido).
+ *
+ * **Perder a corrida de versão (`applied: false`) nunca vira `"conflict"`
+ * sozinho — achado atacando de verdade (§24).** Ao contrário de `Profile`
+ * (um valor só, onde uma corrida perdida É o conflito), para `FoodLog` uma
+ * corrida perdida só significa "o servidor mudou, preciso reavaliar" — o
+ * outro dispositivo pode ter só adicionado uma refeição diferente, sem
+ * tocar em nada que este dispositivo também mudou, caso em que o merge de
+ * `pullFoodLog` não acha conflito nenhum. Marcar `"conflict"` aqui, antes
+ * de qualquer merge rodar, bloquearia o dia inteiro por uma corrida que
+ * não era um conflito de verdade. Em vez disso, volta para `"pending"` com
+ * a versão fresca do servidor (`markPendingWithSnapshot`) e devolve
+ * `"stale"` — quem chama sempre roda `pullFoodLog` em seguida, que faz o
+ * merge de verdade e só aí decide se há conflito.
  */
 export async function pushFoodLog(
   client: SyncSupabaseClient,
@@ -108,8 +122,14 @@ export async function pushFoodLog(
     return { status: "pushed" };
   }
 
-  await markConflict(tracker, STORE_NAME, day, result.server_updated_at, snapshot ?? []);
-  return { status: "conflict" };
+  await markPendingWithSnapshot(
+    tracker,
+    STORE_NAME,
+    day,
+    result.server_updated_at,
+    snapshot ?? [],
+  );
+  return { status: "stale" };
 }
 
 export type PullFoodLogResult =

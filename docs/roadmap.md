@@ -751,6 +751,26 @@ Consistente com a ordem pedida (merge mínimo → testar → tentar quebrar
 → corrigir → reexecutar → só então a próxima parte): a UI é a próxima
 parte, não um passo pulado.
 
+**Ataque adversarial ao FoodLog com dois dispositivos, mesmo dia,
+condição: não mexer na implementação na primeira rodada.** 13 cenários
+contra a orquestração de verdade (não só o algoritmo). 12/13 de
+primeira; achado real no cenário 1 (adição independente): perder uma
+corrida de versão no push virava `"conflict"` (bloqueio duro, certo para
+`Profile`, errado para `FoodLog` — dois dispositivos criando o dia ao
+mesmo tempo com refeições diferentes não têm conflito nenhum de
+conteúdo, só uma corrida de versão). Corrigido com um status novo,
+`"stale"`: só `pullFoodLog`, depois de um merge de verdade, tem
+autoridade para bloquear. Rerun completo: 13/13, `npm run verify` limpo
+(106 arquivos, 1205 testes), nenhuma lacuna nova.
+
+Ataque específico pedido à decisão de bloqueio por dia inteiro (em vez
+de por refeição): confirmado que um conflito numa refeição bloqueia o
+push de outras refeições limpas no mesmo dia — o custo de UX que o Pedro
+suspeitava é real, não hipotético. Nenhum problema de consistência
+(nada corrompe, nada se perde). Decisão mantida para a V1, custo
+documentado em `docs/arquitetura-sincronizacao.md` §24.3 em vez de
+escondido. Sinal verde dado para construir a UI do FoodLog em `/diario`.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

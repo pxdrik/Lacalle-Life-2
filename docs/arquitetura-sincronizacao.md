@@ -1892,3 +1892,80 @@ conflito por refeição (o equivalente ao "Manter X kg / Usar Y kg" que
 pediu — "implementar merge mínimo → testar → tentar quebrar → corrigir
 → reexecutar → só então a próxima parte" — a UI é a próxima parte,
 não um passo pulado.
+
+## 24. Ataque adversarial ao FoodLog com dois dispositivos (25/08/2026)
+
+Antes de qualquer UI: campanha com dois dispositivos de verdade contra a
+orquestração (não só o algoritmo puro do §23.1), condição explícita do
+Pedro — **não alterar a implementação na primeira rodada**, só atacar,
+registrar cada falha, e depois de cada correção reexecutar a campanha
+inteira mais a suíte completa.
+
+### 24.1 Primeira rodada — 12/13, um achado real
+
+`src/composition/sync/food-log-sync.adversarial.test.ts`, 13 cenários
+(os mesmos do pedido: adição independente, edição concorrente do mesmo
+`Meal.id`, exclusão com cópia antiga do outro lado, exclusão+edição em
+ordens diferentes, offline com criar/editar/apagar antes de reconectar,
+queda durante push, queda durante pull, falha ao persistir o pull,
+idempotência com sync repetido, ordem convergente, tombstone
+sobrevivendo até reconciliar, e o ataque à granularidade por dia
+inteiro). Rodados sem tocar em `food-log-sync.ts`/`food-log-merge.ts`.
+
+**Achado (cenário 1, adição independente):** `pushFoodLog` tratava
+qualquer corrida de versão perdida (`applied: false`) como
+`"conflict"` — o mesmo bloqueio duro que `pushProfile` usa. Para
+`Profile` isso é certo: um valor só, uma corrida perdida É o conflito.
+Para `FoodLog` é errado: dois dispositivos criando o dia
+**simultaneamente**, cada um com uma refeição diferente (`meal-A` e
+`meal-B`, ids diferentes, sem nenhum choque de conteúdo), fazem o
+segundo push perder a corrida de versão — mas o merge de verdade (que só
+`pullFoodLog` calcula) não acharia conflito nenhum entre eles. Bloquear
+o dia inteiro aqui, antes de qualquer merge rodar, seria travar por uma
+corrida que não era um conflito de verdade.
+
+**Corrigido:** perder a corrida no push nunca mais vira `"conflict"` —
+vira um novo status, `"stale"`, que só volta o tracker para `"pending"`
+com a versão fresca do servidor aprendida na resposta. Quem chama
+(`sync-engine`, ou qualquer código que sempre roda `pullFoodLog` depois
+de `pushFoodLog`) deixa o pull de verdade decidir se há conflito,
+calculando o merge com o remoto de verdade. Só `pullFoodLog` — depois de
+um merge que realmente encontrou um `Meal.id` com conteúdo diferente nos
+dois lados — tem autoridade para marcar `"conflict"` e bloquear o dia.
+
+### 24.2 Rerun completo depois da correção — 13/13
+
+Mesma campanha, do zero: 13/13. `npm run verify` — 106 arquivos, 1205
+testes, typecheck e lint limpos (§24.4 repete os números). Nenhuma
+lacuna arquitetural nova encontrada nesta rodada, além da já corrigida
+em §24.1.
+
+### 24.3 O ataque específico à granularidade por dia inteiro
+
+Cenário 13, pedido explicitamente pelo Pedro antes de cristalizar a
+decisão do §23.2 (bloqueio por dia, não por refeição): um dia com
+`meal-A` (limpa), `meal-B` (editada nos dois lados — conflito) e
+`meal-C` (adicionada por B, sem nenhum choque). Resultado confirmado:
+**o conflito em `meal-B` bloqueia o push do dia inteiro, inclusive
+`meal-C`, que não tem conflito nenhum.** B não consegue sincronizar o
+jantar novo enquanto o almoço não for resolvido — exatamente o custo de
+UX que o Pedro suspeitava.
+
+Nenhum problema de **consistência** apareceu: os dados nunca se
+corrompem, nada é perdido, nada é sobrescrito por engano — o preço é
+só de **disponibilidade** (uma refeição sem conflito fica presa atrás de
+uma que tem). Não é um achado que force mudar a decisão, mas confirma
+que ela tem um custo real, não hipotético — registrado para reavaliar
+se incomodar na prática (a saída, se algum dia for necessária, é o
+`SyncTracker` guardar o conflito por `Meal.id` em vez de por dia,
+permitindo o push do que não colide; mais complexo, não decidido agora).
+
+**Decisão mantida: bloqueio por dia na V1**, com o custo documentado em
+vez de escondido.
+
+### 24.4 Estado depois da campanha
+
+`npm run verify` — 106 arquivos, 1205 testes, typecheck e lint limpos.
+Nenhuma lacuna arquitetural nova (além da já corrigida em §24.1) —
+condição do Pedro para dar sinal verde à UI. Próximo passo: construir a
+tela de sincronização/conflito do `FoodLog` em `/diario`.
