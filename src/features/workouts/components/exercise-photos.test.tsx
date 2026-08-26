@@ -101,19 +101,37 @@ describe("ExercisePhotos", () => {
     );
   });
 
-  it("does not animate, or offer to, when the system asks for reduced motion", () => {
+  it("does not animate on its own when the system asks for reduced motion", () => {
     // The CSS rule in globals.css cannot reach this: the movement here is a
     // component swapping frames on a timer, not a property the browser eases.
     stubMotionPreference(true);
     render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
 
+    // Starts paused, offering to play rather than already playing.
     expect(
-      screen.queryByRole("button", { name: /animação|movimento/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: "Animar movimento" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Início" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
+  });
+
+  it("still plays on request when the system asks for reduced motion", async () => {
+    // Found 26/08/2026: reduced motion used to hide the play control
+    // entirely, leaving no way to see the animation at all. WCAG 2.3.3
+    // treats motion someone explicitly asks for differently from motion a
+    // page starts on its own — the OS setting should stop the second, not
+    // the first.
+    stubMotionPreference(true);
+    const user = userEvent.setup();
+    render(<ExercisePhotos exercise={exercise(["a/0.jpg", "a/1.jpg"])} />);
+
+    await user.click(screen.getByRole("button", { name: "Animar movimento" }));
+
+    expect(
+      screen.getByRole("button", { name: "Pausar animação" }),
+    ).toBeInTheDocument();
   });
 
   it("describes only the visible frame, so it is not announced twice", () => {

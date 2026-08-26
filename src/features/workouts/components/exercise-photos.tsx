@@ -28,7 +28,14 @@ const PHASE_LABELS = ["Início", "Fim"] as const;
  */
 export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
   const reducedMotion = useReducedMotion();
-  const [wantsPlaying, setWantsPlaying] = useState(true);
+  // Starts off whenever the OS asks for reduced motion, so nothing moves
+  // without being asked — but from then on this is the person's own choice,
+  // not the OS setting re-applied on every render. Tapping play is a
+  // deliberate, in-the-moment request, which is a different thing from
+  // motion a page starts on its own; WCAG 2.3.3 draws exactly that line, and
+  // it's why the button below stays reachable instead of disappearing
+  // (found 26/08/2026: reduced motion was hiding the only way to ask).
+  const [wantsPlaying, setWantsPlaying] = useState(() => !reducedMotion);
   const [phase, setPhase] = useState(0);
 
   const media = exercise.media;
@@ -39,9 +46,8 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
           .map((_, index) => mediaUrl(media, index))
           .filter((url): url is string => url !== null);
 
-  // The OS setting always wins over the toggle, and a single frame has nothing
-  // to alternate with.
-  const playing = wantsPlaying && !reducedMotion && urls.length > 1;
+  // A single frame has nothing to alternate with.
+  const playing = wantsPlaying && urls.length > 1;
   const frames = urls.length;
 
   // A counter advanced by the interval, not a phase derived from the clock.
@@ -134,22 +140,20 @@ export function ExercisePhotos({ exercise }: { readonly exercise: Exercise }) {
             ))}
           </div>
 
-          {!reducedMotion && (
-            <button
-              type="button"
-              onClick={() => {
-                setWantsPlaying(!playing);
-              }}
-              aria-label={playing ? "Pausar animação" : "Animar movimento"}
-              className="flex size-8 items-center justify-center rounded-lg border border-line text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
-            >
-              {playing ? (
-                <Pause aria-hidden className="size-3.5" />
-              ) : (
-                <Play aria-hidden className="size-3.5" />
-              )}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              setWantsPlaying(!playing);
+            }}
+            aria-label={playing ? "Pausar animação" : "Animar movimento"}
+            className="flex size-8 items-center justify-center rounded-lg border border-line text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
+          >
+            {playing ? (
+              <Pause aria-hidden className="size-3.5" />
+            ) : (
+              <Play aria-hidden className="size-3.5" />
+            )}
+          </button>
         </div>
       )}
     </div>
