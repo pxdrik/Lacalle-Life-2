@@ -21,13 +21,18 @@ sync/Supabase/Auth/RPC/RLS além do estritamente necessário.
 - **Criar dieta a partir do Diário** — link direto para `/dietas` ao lado de
   "Adicionar refeição" no dia vazio, sem duplicar o fluxo de criação
   existente.
-- **Animação de exercícios "quebrada" — ainda sem causa raiz, pendente.**
-  Toggle manual sempre funcionou; só a troca automática não acontece no
-  iPhone do Pedro. Duas hipóteses testadas e descartadas: Modo de Baixo
-  Consumo desligado, "Reduzir Movimento" (Acessibilidade) também
-  desligado — então não é `prefers-reduced-motion`. Precisa de depuração
-  no dispositivo real (o que a sessão nunca chegou a fazer, redirecionada
-  para o item de densidade abaixo).
+- **Animação de exercícios "quebrada" — não era bug, causa raiz confirmada
+  no dispositivo real.** "Reduzir Movimento" estava ligado o tempo todo —
+  as duas negativas anteriores (Baixo Consumo, e depois "desligado
+  também") estavam erradas; só confirmado de verdade com print de
+  Ajustes → Acessibilidade → Movimento, depois de um overlay de depuração
+  temporário direto na tela (sem inspetor remoto disponível pro aparelho).
+  O app sempre respeitou `prefers-reduced-motion` corretamente. O bug real
+  era outro: o botão de play/pause desaparecia inteiro com a preferência
+  ligada, sem deixar nenhum jeito de pedir a animação por escolha própria.
+  Corrigido — nada mais toca sozinho com a preferência ligada, mas o botão
+  continua alcançável e funciona quando tocado (WCAG 2.3.3: movimento
+  pedido explicitamente é diferente de movimento automático).
 - **"Criar" (dieta/treino) e "Adicionar refeição" sem reação no toque —
   causa raiz real, corrigida.** `crypto.randomUUID()`, usado para todo id
   novo, não existe fora de um contexto seguro (HTTPS, ou
