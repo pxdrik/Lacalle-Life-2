@@ -5,6 +5,21 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## Produção destravada + ajustes finais — 26/08/2026
+
+- **Env vars do Supabase configuradas na Vercel, com redeploy.** O
+  Blocker #1 da auditoria abaixo está resolvido — login, cadastro,
+  recuperação de senha e conta funcionam em produção agora. Confirmado
+  ao vivo em `lacalle-life-2.vercel.app/entrar`.
+- **Perfil corrigido para usar `PageShell`** como toda outra tela —
+  achado do Pedro: no desktop, só essa tela tinha margens fixas em vez
+  das responsivas do resto do app, e lia como uma coluna de celular
+  presa no meio da página.
+- **Confortável é o padrão de densidade em telas de desktop** (>=1024px,
+  o mesmo breakpoint da sidebar) — pedido do Pedro, "a tela do PC é
+  maior". Só o padrão muda com a tela; uma escolha explícita continua
+  valendo em qualquer largura.
+
 ## Auditoria externa de produção — 26/08/2026
 
 Auditoria pedida pelo Pedro contra `lacalle-life-2.vercel.app` (commit
