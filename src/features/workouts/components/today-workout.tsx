@@ -118,7 +118,7 @@ function FinishedSession({ session }: { readonly session: Session }) {
   return (
     <Link
       href={`/sessao/${session.id}`}
-      className="flex items-baseline gap-3 rounded-sm px-2 py-1.5 -mx-2 transition-colors duration-150 ease-out hover:bg-muted"
+      className="flex min-h-(--control-h-sm) items-baseline gap-3 rounded-sm px-2 py-1.5 -mx-2 transition-colors duration-150 ease-out hover:bg-muted"
     >
       <span className="min-w-0 flex-1 truncate text-sm text-ink">
         {session.name}
