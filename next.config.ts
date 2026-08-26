@@ -19,6 +19,16 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  /**
+   * Sem isto, o dev server recusa os assets (`_next/*`) quando a página é
+   * aberta pelo IP da rede local em vez de `localhost` — a proteção contra
+   * DNS rebinding do próprio Next.js, que trata a origem do IP como
+   * estranha por padrão. Necessário para testar em outro aparelho na
+   * mesma Wi-Fi (celular, outro navegador) durante a campanha manual de
+   * sync — nunca ativo em produção, `next dev` só.
+   */
+  allowedDevOrigins: ["192.168.0.18", "26.8.131.253"],
+
   // Automatic memoization. Removes the need to hand-write useMemo/useCallback,
   // which is the main source of stale-closure bugs in interactive UIs.
   reactCompiler: true,

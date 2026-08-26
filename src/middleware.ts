@@ -92,7 +92,14 @@ export async function middleware(request: NextRequest) {
     `base-uri 'self'`,
     `form-action 'self'`,
     `frame-ancestors 'none'`,
-    `upgrade-insecure-requests`,
+    // Só em produção — achado testando pelo IP da rede local (25/08/2026).
+    // Essa diretiva manda o navegador trocar todo `http://` por `https://`
+    // sozinho, inclusive nos assets (`_next/static/*`). Em `next dev`,
+    // servido só por HTTP, isso fazia o navegador tentar buscar cada asset
+    // por HTTPS e receber 503 de tudo — a tela carregava sem nenhum CSS/JS
+    // ao abrir pelo IP da rede (nunca reproduzia em `localhost`, que o
+    // navegador já trata como seguro e não tenta trocar).
+    ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 
   const requestHeaders = new Headers(request.headers);

@@ -800,6 +800,18 @@ Próximo passo: campanha manual com dois dispositivos de verdade em
 `/diario` (anunciada pelo Pedro), verificando se a interface respeita
 todas as garantias que o motor já prova sozinho.
 
+**Achado de infraestrutura, antes da campanha começar (25/08/2026):**
+abrir o app pelo IP da rede local (necessário para testar num celular
+de verdade) carregava a tela sem nenhum CSS/JS — todo asset
+(`_next/static/*`) voltava `503`. Causa: o CSP tinha
+`upgrade-insecure-requests` sem condição, que manda o navegador trocar
+todo `http://` por `https://` sozinho; em `next dev` (só HTTP), isso
+incluía os próprios assets, que passavam a pedir HTTPS a um servidor
+que só fala HTTP. Nunca aparecia em `localhost`, que o navegador já
+trata como seguro e não tenta trocar — só pelo IP. Corrigido para essa
+diretiva só entrar em produção (`src/middleware.ts`); confirmado
+reabrindo pelo IP da rede, `npm run verify` limpo (106/1205).
+
 ---
 
 ## Auditoria de robustez — 13/08/2026
