@@ -225,7 +225,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
             onClick={() => {
               setPicking(true);
             }}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-3.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+            className="inline-flex h-(--control-h-lg) w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
           >
             <Plus aria-hidden className="size-4" />
             Adicionar exercício
