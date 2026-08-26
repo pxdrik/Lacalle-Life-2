@@ -4,11 +4,12 @@ import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { dayKey, formatDay } from "@/core/format/day";
-import { Button } from "@/design-system/components/button";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import {
   SortableItem,
@@ -428,6 +429,13 @@ function EmptyDay({
           <Plus aria-hidden className="size-4" />
           Adicionar refeição
         </Button>
+        {/* Quem percebe aqui que precisa se organizar não deveria ter que
+            descobrir sozinho o caminho Diário → Dietas → criar. Leva direto
+            para o formulário de criação que já existe no topo de `/dietas`
+            (`DietList`) — sem um segundo fluxo de criação. */}
+        <Link href="/dietas" className={buttonClasses("secondary")}>
+          Criar uma dieta
+        </Link>
       </div>
 
       {picking && (

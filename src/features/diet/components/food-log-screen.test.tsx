@@ -39,6 +39,17 @@ vi.mock("next/navigation", () => ({
 
 const TODAY = dayKey(new Date());
 
+function emptyLog(): FoodLog {
+  return {
+    id: TODAY,
+    day: TODAY,
+    dietId: null,
+    meals: [],
+    createdAt: 1,
+    updatedAt: 1,
+  };
+}
+
 function logWithMeal(): FoodLog {
   return {
     id: TODAY,
@@ -125,6 +136,21 @@ describe("duplicating a meal in the diary", () => {
       expect(copy?.id).not.toBe(original?.id);
       expect(copy?.items[0]?.id).not.toBe(original?.items[0]?.id);
     });
+  });
+});
+
+describe("an empty day", () => {
+  // A criação de dieta ficou acessível direto daqui, ao lado de "Adicionar
+  // refeição" — sem exigir Diário → Dietas → criar como dois passos.
+  it("offers a direct link to create a diet, next to 'Adicionar refeição'", async () => {
+    mount(emptyLog());
+    await screen.findByText(/Nada registrado em/);
+
+    const link = screen.getByRole("link", { name: "Criar uma dieta" });
+    expect(link).toHaveAttribute("href", "/dietas");
+    expect(
+      screen.getByRole("button", { name: "Adicionar refeição" }),
+    ).toBeInTheDocument();
   });
 });
 
