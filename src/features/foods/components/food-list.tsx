@@ -24,7 +24,15 @@ function ColumnHeader() {
       className="flex items-center gap-3 border-b border-line px-3 pb-2 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
     >
       <span className="w-8 shrink-0" />
-      <span className="flex-1">Por 100 g</span>
+      {/* O espaço que sobra pro `flex-1`, entre os espaçadores fixos e as
+          quatro colunas de macro, é estreito de verdade num iPhone real —
+          uns 30-40px. "Por 100 g" nesse espaço quebrava em três linhas
+          (POR / 100 / G) enquanto kcal/Prot/Carb/Gord ficavam numa só,
+          torcendo a linha inteira do cabeçalho — print do Pedro,
+          26/08/2026. "100 g" é curto o bastante pra caber numa linha só
+          nesse espaço; `truncate` é a rede de segurança para uma tela
+          ainda mais estreita, não a correção em si. */}
+      <span className="flex-1 truncate">100 g</span>
       <span className="flex shrink-0 gap-3 sm:gap-4">
         <span className="w-11 text-right">kcal</span>
         <span className="w-9 text-right">Prot</span>
