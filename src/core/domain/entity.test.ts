@@ -21,6 +21,35 @@ describe("createEntityId", () => {
 
     expect(ids.size).toBe(500);
   });
+
+  // `crypto.randomUUID` does not exist at all outside a secure context — a
+  // plain `http://` origin, not just an older browser. Found 26/08/2026: a
+  // phone reached over the LAN by IP hit exactly this, and every "Criar" /
+  // "Adicionar refeição" silently did nothing, every time.
+  it("still produces collision-free ids when randomUUID is unavailable", () => {
+    // `delete crypto.randomUUID` does not actually remove it in this test
+    // environment (it survives on the object either way), so the property
+    // has to be overridden explicitly to reproduce an insecure context,
+    // where the browser does not define this method at all.
+    const original = Object.getOwnPropertyDescriptor(crypto, "randomUUID");
+    Object.defineProperty(crypto, "randomUUID", {
+      value: undefined,
+      configurable: true,
+    });
+
+    try {
+      const ids = Array.from({ length: 500 }, createEntityId);
+
+      expect(new Set(ids).size).toBe(500);
+      for (const id of ids) {
+        expect(id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+        );
+      }
+    } finally {
+      if (original !== undefined) Object.defineProperty(crypto, "randomUUID", original);
+    }
+  });
 });
 
 describe("revise", () => {
