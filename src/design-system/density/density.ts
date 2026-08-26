@@ -40,3 +40,24 @@ export function parseDensity(value: unknown): Density {
     ? (value as Density)
     : DEFAULT_DENSITY;
 }
+
+/**
+ * The breakpoint above which a screen counts as "desktop" for the density
+ * default — the same one the sidebar itself switches on
+ * (`lg:pl-(--sidebar-w)` in the root layout), so "desktop" means the same
+ * thing here as it does to the rest of the shell.
+ */
+export const DESKTOP_DENSITY_BREAKPOINT_PX = 1024;
+
+/**
+ * What density starts on, before anyone has chosen one — a function of
+ * screen width rather than one fixed constant. A phone screen keeps
+ * `default`; a desktop screen this wide already has the room `comfortable`
+ * asks for, and starting cramped there was never the point of `default`
+ * being the conservative choice (Pedro, 26/08/2026). Only the *default*
+ * moves with the screen — an explicit choice, once made, is read from
+ * storage and never overridden by this.
+ */
+export function defaultDensityForWidth(widthPx: number): Density {
+  return widthPx >= DESKTOP_DENSITY_BREAKPOINT_PX ? "comfortable" : DEFAULT_DENSITY;
+}

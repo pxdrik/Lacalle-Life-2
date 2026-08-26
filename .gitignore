@@ -45,3 +45,6 @@ yarn-error.log*
 scripts/.cache-*.json
 scripts/.matches.json
 scripts/.cache-wger.json
+
+.vercel
+.env*

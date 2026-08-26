@@ -1,7 +1,8 @@
 import {
   DEFAULT_DENSITY,
+  defaultDensityForWidth,
+  DENSITIES,
   DENSITY_STORAGE_KEY,
-  parseDensity,
   type Density,
 } from "./density";
 
@@ -20,10 +21,27 @@ function notify(): void {
   for (const listener of listeners) listener();
 }
 
+/**
+ * What "no explicit choice" resolves to right now — `defaultDensityForWidth`
+ * when nothing valid is in storage, not the fixed `DEFAULT_DENSITY`. Keeps
+ * this in step with `DensityScript`, which already applied that same
+ * resolution to the DOM before hydration; falling back to the fixed
+ * constant here would make `DensityProvider`'s own effect immediately
+ * overwrite the script's attribute on a desktop screen, right after load.
+ */
+function resolveDensity(stored: string | null): Density {
+  if (stored !== null && DENSITIES.includes(stored as Density)) {
+    return stored as Density;
+  }
+  return typeof window === "undefined"
+    ? DEFAULT_DENSITY
+    : defaultDensityForWidth(window.innerWidth);
+}
+
 function handleStorage(event: StorageEvent): void {
   if (event.key !== null && event.key !== DENSITY_STORAGE_KEY) return;
 
-  current = parseDensity(read());
+  current = resolveDensity(read());
   notify();
 }
 
@@ -44,7 +62,7 @@ export function subscribeToDensity(onChange: () => void): () => void {
 }
 
 export function getDensity(): Density {
-  current ??= parseDensity(read());
+  current ??= resolveDensity(read());
   return current;
 }
 
