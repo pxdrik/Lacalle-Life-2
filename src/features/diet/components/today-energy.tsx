@@ -107,7 +107,11 @@ export function TodayEnergy({ day }: { readonly day: string }) {
         {MACRO_CODING.map(({ key, short, text }) => (
           <Metric
             key={key}
-            value={formatDecimal(totals[key])}
+            // "Consumido / meta" responde de imediato "quanto falta?" — o
+            // número sozinho exigia lembrar a meta de cor ou abrir o
+            // perfil. Só aparece aqui porque este ramo já garantiu
+            // `targets !== null`; nunca inventa uma meta que não existe.
+            value={`${formatDecimal(totals[key])} / ${formatDecimal(targets[key])}`}
             unit="g"
             label={short}
             size="sm"
