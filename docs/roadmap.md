@@ -5,6 +5,53 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## Correções pós-teste real em iPhone — 26/08/2026
+
+Segunda rodada da mesma sessão, depois que o Pedro testou os itens da rodada
+anterior no próprio iPhone/Safari e reabriu três pontos. Mesma trava: nada de
+sync/Supabase/Auth/RPC/RLS além do estritamente necessário.
+
+- **Fibra** — removido o aviso e o cálculo escalado por caloria
+  (14 g/1000 kcal). `FIBER_REFERENCE_G` (35 g/dia) é uma meta de referência
+  fixa do produto, igual para qualquer perfil — nunca uma recomendação
+  médica personalizada. O dashboard de Hoje mostra só a meta, sem
+  "consumido": nenhum alimento do catálogo carrega dado de fibra, e um
+  número aqui seria sempre "0 g" — dado real parece, mas é ausência de dado
+  (na dúvida, omitir).
+- **Criar dieta a partir do Diário** — link direto para `/dietas` ao lado de
+  "Adicionar refeição" no dia vazio, sem duplicar o fluxo de criação
+  existente.
+- **Animação de exercícios "quebrada"** — investigado sem achar causa real
+  no código (toggle manual sempre funcionou). Hipótese mais provável:
+  Modo de Baixo Consumo no iOS faz o Safari reportar
+  `prefers-reduced-motion: reduce`, e o app respeita isso corretamente
+  desligando a troca automática — não é bug, é o comportamento do sistema.
+- **"Criar" (dieta/treino) e "Adicionar refeição" sem reação no toque —
+  causa raiz real, corrigida.** `crypto.randomUUID()`, usado para todo id
+  novo, não existe fora de um contexto seguro (HTTPS, ou
+  `http://localhost` especificamente). Testando pelo IP da máquina na rede
+  (`http://192.168.0.18:3000`, um contexto HTTP puro), a função nem existe,
+  e todo clique que cria uma entidade lançava `TypeError` em silêncio —
+  "toda vez, nada muda na tela". `createEntityId` agora cai para
+  `crypto.getRandomValues` quando `randomUUID` está ausente, montando à mão
+  o mesmo formato de UUID v4. Provado por reverter-e-conferir: o teste novo
+  falha com o erro exato do log real quando a correção é desfeita.
+- **Tabela de alimentos desalinhada no iPhone — causa raiz real, corrigida.**
+  Não era só o cabeçalho quebrando linha: a soma das colunas fixas (estrela,
+  kcal, Prot, Carb, Gord, espaço de editar/excluir) já passa da largura de
+  um iPhone, e o espaço que sobrava pro nome do alimento ia a zero — o nome
+  inteiro sumia, não só quebrava. Encurtar texto não resolve quando o
+  espaço disponível é zero. A tabela agora rola de lado
+  (`overflow-x-auto` + piso de largura) em vez de esmagar qualquer coluna
+  até ficar ilegível ou invisível.
+- **Achado lateral, não corrigido**: o servidor de dev ficou servindo um
+  bundle Turbopack desatualizado depois de um `taskkill` largo demais que
+  eu rodei sem querer durante a investigação — o código-fonte já tinha a
+  correção da tabela, mas o navegador recebia JS antigo. Resolvido reiniciando
+  o servidor com o cache `.next` limpo. Vale lembrar disso se um fix "não
+  aparecer" de novo sem motivo aparente: conferir se o chunk servido
+  realmente contém o texto/classe esperado antes de suspeitar do código.
+
 ## Correções P0/P1/P2 — 26/08/2026
 
 Rodada de correções pedida pelo Pedro depois de usar o app de verdade em
