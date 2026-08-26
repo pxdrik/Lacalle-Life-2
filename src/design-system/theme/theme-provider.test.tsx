@@ -47,6 +47,10 @@ const renderToggle = () =>
 
 const theme = () => document.documentElement.getAttribute(THEME_ATTRIBUTE);
 
+/** The one button's accessible name changes with the resolved theme — see
+ * `ThemeToggle`'s own doc comment for why the label names the action. */
+const toggleButton = () => screen.getByRole("button", { name: /Mudar para tema/ });
+
 beforeEach(() => {
   window.localStorage.clear();
   document.documentElement.removeAttribute(THEME_ATTRIBUTE);
@@ -62,7 +66,7 @@ describe("ThemeProvider", () => {
     renderToggle();
 
     expect(theme()).toBe("dark");
-    expect(screen.getByRole("radio", { name: "Escuro" })).toBeChecked();
+    expect(toggleButton()).toHaveAccessibleName("Mudar para tema claro");
   });
 
   it("applies a stored preference over the OS setting", () => {
@@ -74,9 +78,8 @@ describe("ThemeProvider", () => {
   });
 
   it("keeps tracking the OS while the preference is system", () => {
-    // `system` has to be chosen now that it is no longer the default, which
-    // is the point: the option still works, it just is not what you get for
-    // free any more.
+    // `system` is not reachable from the toggle any more, but a value
+    // stored before that change still has to resolve correctly.
     window.localStorage.setItem(THEME_STORAGE_KEY, "system");
     const media = installMatchMedia(false);
     renderToggle();
@@ -88,13 +91,15 @@ describe("ThemeProvider", () => {
   });
 
   it("stops tracking the OS once a theme is chosen explicitly", async () => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, "system");
     const media = installMatchMedia(false);
     renderToggle();
+    expect(theme()).toBe("light");
 
-    await userEvent.click(screen.getByRole("radio", { name: "Escuro" }));
+    await userEvent.click(toggleButton());
     expect(theme()).toBe("dark");
 
-    // The OS flips to light; the explicit choice must survive it.
+    // The OS flips back to light; the explicit choice must survive it.
     media.setPrefersDark(false);
 
     expect(theme()).toBe("dark");
@@ -104,10 +109,8 @@ describe("ThemeProvider", () => {
     installMatchMedia(false);
     renderToggle();
 
-    // "Claro", not "Escuro": dark is the default now, so clicking it selects
-    // what is already selected and fires no change at all — the test would
-    // pass on a component that persisted nothing.
-    await userEvent.click(screen.getByRole("radio", { name: "Claro" }));
+    // Starts dark by default, so one tap picks light.
+    await userEvent.click(toggleButton());
 
     expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
   });
@@ -116,9 +119,9 @@ describe("ThemeProvider", () => {
     installMatchMedia(false);
     renderToggle();
 
-    await userEvent.click(screen.getByRole("radio", { name: "Escuro" }));
+    await userEvent.click(toggleButton());
 
-    expect(document.documentElement.style.colorScheme).toBe("dark");
+    expect(document.documentElement.style.colorScheme).toBe("light");
   });
 
   it("recovers when storage is blocked entirely", async () => {
@@ -128,36 +131,47 @@ describe("ThemeProvider", () => {
     });
 
     renderToggle();
-    await userEvent.click(screen.getByRole("radio", { name: "Escuro" }));
+    await userEvent.click(toggleButton());
 
     // The choice cannot be persisted, but it must still take effect.
-    expect(theme()).toBe("dark");
+    expect(theme()).toBe("light");
     vi.restoreAllMocks();
   });
 });
 
 describe("ThemeToggle", () => {
-  it("exposes the three options as a labelled radio group", () => {
+  it("is a single button, not three options", () => {
     installMatchMedia(false);
     renderToggle();
 
-    expect(screen.getByRole("group", { name: "Tema" })).toBeInTheDocument();
-    expect(screen.getAllByRole("radio")).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: /Mudar para tema/ })).toHaveLength(1);
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+  });
+
+  it("flips between light and dark on every click", async () => {
+    installMatchMedia(false);
+    renderToggle();
+
+    expect(theme()).toBe("dark");
+
+    await userEvent.click(toggleButton());
+    expect(theme()).toBe("light");
+    expect(toggleButton()).toHaveAccessibleName("Mudar para tema escuro");
+
+    await userEvent.click(toggleButton());
+    expect(theme()).toBe("dark");
+    expect(toggleButton()).toHaveAccessibleName("Mudar para tema claro");
   });
 
   it("is operable by keyboard alone", async () => {
     installMatchMedia(false);
     renderToggle();
 
-    // Tab enters a radio group at the selected option, and arrows move
-    // between them. All of it is native behaviour — which is the reason this
-    // is built on real radios instead of buttons with aria-checked.
     await userEvent.tab();
-    expect(screen.getByRole("radio", { name: "Escuro" })).toHaveFocus();
+    expect(toggleButton()).toHaveFocus();
 
-    await userEvent.keyboard("{ArrowLeft}");
+    await userEvent.keyboard("{Enter}");
 
-    expect(screen.getByRole("radio", { name: "Claro" })).toBeChecked();
     expect(theme()).toBe("light");
   });
 });

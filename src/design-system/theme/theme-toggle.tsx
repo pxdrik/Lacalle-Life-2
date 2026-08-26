@@ -1,62 +1,41 @@
 "use client";
 
-import { Monitor, Moon, Sun } from "lucide-react";
-
-import { cn } from "@/design-system/cn";
+import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "./theme-provider";
-import type { ThemePreference } from "./theme";
-
-const OPTIONS = [
-  { value: "light", label: "Claro", Icon: Sun },
-  { value: "dark", label: "Escuro", Icon: Moon },
-  { value: "system", label: "Sistema", Icon: Monitor },
-] as const satisfies readonly {
-  value: ThemePreference;
-  label: string;
-  Icon: typeof Sun;
-}[];
 
 /**
- * Built on native radio inputs rather than buttons with `aria-checked`.
+ * Claro ↔ escuro, num botão só.
  *
- * These are three mutually exclusive choices, which is exactly what a radio
- * group is. Using the real element means arrow-key navigation, roving focus
- * and screen-reader announcements all come from the browser — none of it is
- * custom keyboard code that can be subtly wrong.
+ * Era um grupo de 3 rádios (Claro/Escuro/Sistema) — pequeno demais pro que
+ * carregava, e "Sistema" como uma terceira opção ao lado das outras duas
+ * pesava mais do que valia: a tela já abre no tema escolhido (`DEFAULT_THEME`
+ * é `"dark"`, nunca `"system"`), então seguir o SO nunca foi o caminho comum.
+ * Um alguém que tinha `"system"` salvo de antes continua resolvendo
+ * normalmente por `resolveTheme` — só não tem mais como escolher esse
+ * terceiro estado de novo por aqui.
+ *
+ * O ícone mostra o tema atual, não o que o toque vai escolher — mesmo padrão
+ * do play/pause em `ExercisePhotos`, onde o rótulo é que descreve a ação.
  */
 export function ThemeToggle() {
-  const { preference, setPreference } = useTheme();
+  const { resolved, setPreference } = useTheme();
+  const isDark = resolved === "dark";
 
   return (
-    <fieldset className="inline-flex rounded-md border border-line bg-surface p-0.5">
-      <legend className="sr-only">Tema</legend>
-
-      {OPTIONS.map(({ value, label, Icon }) => (
-        <label key={value} className="cursor-pointer">
-          <input
-            type="radio"
-            name="theme"
-            value={value}
-            checked={preference === value}
-            onChange={() => setPreference(value)}
-            className="peer sr-only"
-          />
-          <span
-            className={cn(
-              "flex size-(--control-h-sm) items-center justify-center rounded-md text-ink-subtle",
-              "transition-[background-color,color] duration-150 ease-out",
-              "hover:text-ink",
-              "peer-checked:bg-muted peer-checked:text-ink",
-              "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2",
-              "peer-focus-visible:outline-focus",
-            )}
-          >
-            <Icon aria-hidden className="size-4" />
-            <span className="sr-only">{label}</span>
-          </span>
-        </label>
-      ))}
-    </fieldset>
+    <button
+      type="button"
+      onClick={() => {
+        setPreference(isDark ? "light" : "dark");
+      }}
+      aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
+      className="flex size-(--control-h-sm) items-center justify-center rounded-md border border-line bg-surface text-ink-subtle transition-colors duration-150 ease-out hover:text-ink"
+    >
+      {isDark ? (
+        <Moon aria-hidden className="size-4" />
+      ) : (
+        <Sun aria-hidden className="size-4" />
+      )}
+    </button>
   );
 }

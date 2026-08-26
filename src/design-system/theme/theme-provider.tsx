@@ -7,7 +7,12 @@ import {
   useSyncExternalStore,
 } from "react";
 
-import { resolveTheme, THEME_ATTRIBUTE, type ThemePreference } from "./theme";
+import {
+  resolveTheme,
+  THEME_ATTRIBUTE,
+  type ResolvedTheme,
+  type ThemePreference,
+} from "./theme";
 import {
   getPreference,
   getServerPreference,
@@ -22,13 +27,11 @@ interface ThemeContextValue {
   /** What the user chose, which may be `system`. */
   readonly preference: ThemePreference;
   readonly setPreference: (preference: ThemePreference) => void;
+  /** What is actually painted — never `system`. The single-button toggle
+   * needs this to know which icon and which direction "the other one" is;
+   * the CSS tokens still do the actual painting on their own. */
+  readonly resolved: ResolvedTheme;
 }
-
-/**
- * The resolved theme is computed here but deliberately not exposed. Nothing
- * needs to branch on it yet — the tokens do that work in CSS — and an unused
- * context field is API surface that has to be kept correct for no one.
- */
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -65,7 +68,7 @@ export function ThemeProvider({
   }, [resolved]);
 
   return (
-    <ThemeContext value={{ preference, setPreference }}>
+    <ThemeContext value={{ preference, setPreference, resolved }}>
       {children}
     </ThemeContext>
   );

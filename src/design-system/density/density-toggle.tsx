@@ -17,9 +17,14 @@ const OPTIONS: readonly { value: Density; label: string }[] = [
  * A range slider has no good way to announce "Compacto" versus a bare
  * number to a screen reader without extra wiring, and three fixed positions
  * gain nothing from being draggable — the value people asked for was more
- * than two choices, not a continuous scale. Same pattern as `ThemeToggle`:
- * native radios, so arrow-key navigation and roving focus come from the
- * browser instead of custom keyboard code that can be subtly wrong.
+ * than two choices, not a continuous scale. Built on native radios, so
+ * arrow-key navigation and roving focus come from the browser instead of
+ * custom keyboard code that can be subtly wrong.
+ *
+ * `ThemeToggle` used to share this exact shape — three radios, Claro/
+ * Escuro/Sistema — before it was cut down to a single two-state button.
+ * This one stays a 3-way picker: unlike light/dark, "quanto maior" has no
+ * natural opposite to collapse into a toggle.
  */
 export function DensityToggle() {
   const { density, setDensity } = useDensity();
