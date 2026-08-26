@@ -58,26 +58,36 @@ export function FoodList({
 }: Props) {
   return (
     <Card padded={false} className="overflow-hidden">
-      <div className="pt-3">
-        <ColumnHeader />
+      {/* Print real do Pedro num iPhone (26/08/2026): a soma das colunas
+          fixas (estrela, kcal, Prot, Carb, Gord, espaço de editar/excluir)
+          já passa da largura da tela, e o que sobrava pro nome do alimento
+          e pro rótulo "100 g" ia a zero — não só quebrava, sumia por
+          completo. Encurtar texto não resolve quando o espaço disponível
+          já é zero. `overflow-x-auto` com um piso de largura deixa a
+          tabela rolar de lado numa tela estreita, em vez de espremer
+          colunas até ficarem ilegíveis ou invisíveis. */}
+      <div className="overflow-x-auto">
+        <div className="min-w-[26rem] pt-3">
+          <ColumnHeader />
+        </div>
+
+        <ul className="min-w-[26rem] divide-y divide-line">
+          {foods.map((food) => (
+            <FoodRow
+              key={food.id}
+              food={food}
+              onToggleFavorite={onToggleFavorite}
+              onRemove={onRemove}
+            />
+          ))}
+
+          {/* Unrendered rows below this point exist in the catalogue, not in
+              the DOM yet — see `useIncrementalReveal`. */}
+          {hasMore && sentinelRef !== undefined && (
+            <li ref={sentinelRef} aria-hidden className="h-px" />
+          )}
+        </ul>
       </div>
-
-      <ul className="divide-y divide-line">
-        {foods.map((food) => (
-          <FoodRow
-            key={food.id}
-            food={food}
-            onToggleFavorite={onToggleFavorite}
-            onRemove={onRemove}
-          />
-        ))}
-
-        {/* Unrendered rows below this point exist in the catalogue, not in
-            the DOM yet — see `useIncrementalReveal`. */}
-        {hasMore && sentinelRef !== undefined && (
-          <li ref={sentinelRef} aria-hidden className="h-px" />
-        )}
-      </ul>
     </Card>
   );
 }
