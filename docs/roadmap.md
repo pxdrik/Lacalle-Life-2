@@ -5,6 +5,43 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## Auditoria externa de produção — 26/08/2026
+
+Auditoria pedida pelo Pedro contra `lacalle-life-2.vercel.app` (commit
+`03ab45c`), investigação sem alteração de código. Achou dois blockers reais.
+
+- **⚠️ Pendente, só o Pedro resolve**: `NEXT_PUBLIC_SUPABASE_URL` e
+  `NEXT_PUBLIC_SUPABASE_ANON_KEY` não estão configuradas no projeto Vercel
+  de produção — nenhuma requisição a domínio Supabase acontece em toda a
+  sessão auditada. Sem isso, **login, cadastro, recuperação de senha e a
+  tela de conta ficam inacessíveis para todo mundo**. Precisa ser
+  configurado em Vercel → Project Settings → Environment Variables
+  (ambiente Production), com redeploy depois.
+- **Corrigido — nenhum error boundary em todo o app.** `(auth)/layout.tsx`
+  cria o cliente Supabase dentro de `useState(fn)`, durante a própria
+  renderização, fora de qualquer `try/catch` — com a env var ausente, as
+  4 rotas de auth quebravam com a tela crua do navegador ("This page
+  didn't load"), sem nada que o app pudesse dizer. `src/app/error.tsx`
+  (pega qualquer throw abaixo do layout raiz) e
+  `src/app/global-error.tsx` (o único nível acima, para um throw no
+  próprio layout raiz) resolvem isso — verificado ao vivo com um build
+  de produção sem as env vars, mostrando a tela tratada em vez da crash
+  nativa, com o resto do app continuando funcional.
+- **Corrigido — log repetido no console durante sincronização automática.**
+  O auto-sync do Diário tratava "Supabase não configurado" como falha
+  transitória igual a qualquer outra, tentando de novo a cada dia
+  carregado. `isSupabaseConfigured()` (não-lançante) deixa esse caso ser
+  tratado como estado permanente e silencioso, igual "não autenticado" já
+  era.
+- **Confirmado, não é bug** (os 3 itens que o próprio pedido de auditoria
+  citou como suspeitos): meta de fibra sem "consumido" (por desenho — sem
+  dado real de fibra no catálogo), validação de nome curto em exercício
+  personalizado, e a animação de exercícios (corrigida no mesmo dia,
+  commit `e5a0d3c`).
+- Achados menores registrados, não corrigidos: 404 em `/favicon.ico`
+  (cosmético), botão de concluir série aceita confirmação vazia sem dados
+  preenchidos (UX).
+
 ## Correções pós-teste real em iPhone — 26/08/2026
 
 Segunda rodada da mesma sessão, depois que o Pedro testou os itens da rodada
