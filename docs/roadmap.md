@@ -21,11 +21,13 @@ sync/Supabase/Auth/RPC/RLS além do estritamente necessário.
 - **Criar dieta a partir do Diário** — link direto para `/dietas` ao lado de
   "Adicionar refeição" no dia vazio, sem duplicar o fluxo de criação
   existente.
-- **Animação de exercícios "quebrada"** — investigado sem achar causa real
-  no código (toggle manual sempre funcionou). Hipótese mais provável:
-  Modo de Baixo Consumo no iOS faz o Safari reportar
-  `prefers-reduced-motion: reduce`, e o app respeita isso corretamente
-  desligando a troca automática — não é bug, é o comportamento do sistema.
+- **Animação de exercícios "quebrada" — ainda sem causa raiz, pendente.**
+  Toggle manual sempre funcionou; só a troca automática não acontece no
+  iPhone do Pedro. Duas hipóteses testadas e descartadas: Modo de Baixo
+  Consumo desligado, "Reduzir Movimento" (Acessibilidade) também
+  desligado — então não é `prefers-reduced-motion`. Precisa de depuração
+  no dispositivo real (o que a sessão nunca chegou a fazer, redirecionada
+  para o item de densidade abaixo).
 - **"Criar" (dieta/treino) e "Adicionar refeição" sem reação no toque —
   causa raiz real, corrigida.** `crypto.randomUUID()`, usado para todo id
   novo, não existe fora de um contexto seguro (HTTPS, ou
@@ -51,6 +53,51 @@ sync/Supabase/Auth/RPC/RLS além do estritamente necessário.
   o servidor com o cache `.next` limpo. Vale lembrar disso se um fix "não
   aparecer" de novo sem motivo aparente: conferir se o chunk servido
   realmente contém o texto/classe esperado antes de suspeitar do código.
+
+## Terceira rodada: densidade de botão virou escala de interface — 26/08/2026
+
+Ainda a mesma sessão. O Pedro reabriu "Tamanho dos botões" (Perfil) várias
+vezes seguidas, cada vez achando mais um elemento que não acompanhava —
+até pedir explicitamente que a preferência deixasse de ser só sobre botão e
+passasse a escalar título, texto, ícone, imagem e espaçamento do app
+inteiro, mantendo tudo alinhado.
+
+- Botões tracejados de "Adicionar" (Diário, editor de dieta, editor de
+  treino) tinham `py-3.5` fixo, fora do sistema de densidade — trocado por
+  `h-(--control-h-lg)`.
+- Os dois seletores de Perfil (Tema e o próprio "Tamanho dos botões") eram
+  os únicos controles que não acompanhavam a própria densidade — `h-8`/
+  `size-8` fixo em vez de `--control-h-sm`.
+- Seletor de Tema trocado de 3 rádios (Claro/Escuro/Sistema) por um botão
+  só, alternando claro ↔ escuro — pedido à parte, motivado pelo tamanho
+  pequeno do controle de 3 opções. `ThemeContextValue` passou a expor
+  `resolved` para o botão saber qual ícone mostrar.
+- Linhas clicáveis do dashboard (peso → `/evolucao`, sessão de treino
+  finalizada) ganharam `min-h-(--control-h-sm)` — um piso, não um valor
+  fixo, então onde o conteúdo já é mais alto que o piso (a linha de peso,
+  hoje) o tamanho continua vindo do conteúdo.
+- **A peça central**: `--control-h*` não cobre título, texto corrido, ícone
+  solto ou imagem, e a escala tipográfica do brandbook (pág. 17) é toda em
+  px absoluto, presa ao tamanho por desenho — reescrevê-la em cada
+  componente não era uma opção real. `zoom` no `html`, dirigido por um novo
+  token `--ui-scale` (0.85 / 1 / 1.15) nos mesmos blocos `[data-density]`
+  que já existiam, resolve isso numa linha: redesenha a página inteira na
+  escala escolhida, mantendo tudo alinhado porque continua sendo a mesma
+  proporção. Campo de formulário cancela o zoom ambiente
+  (`zoom: calc(1 / var(--ui-scale))`) por motivo funcional: a pág. 26 fixa
+  a fonte do campo em 16px pra não reabrir o zoom automático do Safari no
+  iOS, e um campo que também encolhesse no Compacto reabriria exatamente
+  esse bug.
+- Verificado por medição de layout (`getBoundingClientRect` confere a
+  proporção exata), não só visualmente — o ambiente de teste usado nesta
+  sessão fixa o viewport da captura de tela, o que mascara o zoom nos
+  screenshots mesmo com o cálculo correto por baixo. Confirmado bom pelo
+  Pedro no iPhone real.
+- O bundle Turbopack desatualizado (achado lateral acima) se repetiu mais
+  duas vezes ao longo desta rodada, sempre resolvido do mesmo jeito
+  (reiniciar com `.next` limpo). Terceira vez que isso aconteceu na mesma
+  sessão — se voltar a acontecer em sessões futuras, vale investigar a
+  causa de verdade em vez de só contornar.
 
 ## Correções P0/P1/P2 — 26/08/2026
 
