@@ -76,7 +76,7 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
                 ? []
                 : [TECHNICAL_DIFFICULTY_LABELS[exercise.technicalDifficulty]]
             }
-            hint="Técnica exigida para carregar com segurança — não é o esforço."
+            hint="Técnica exigida para carregar com segurança, não é o esforço."
           />
           <Row
             label="Tipo"

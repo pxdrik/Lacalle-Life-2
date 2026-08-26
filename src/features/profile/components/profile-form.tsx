@@ -308,7 +308,7 @@ function RatePresetChips({
                 : "border-line-strong text-ink-muted hover:border-accent hover:text-ink",
             )}
           >
-            {preset.label} — {formatDecimal(preset.weeklyChangeKg, 2)} kg
+            {preset.label} ({formatDecimal(preset.weeklyChangeKg, 2)} kg)
           </button>
         );
       })}

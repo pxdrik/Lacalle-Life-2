@@ -25,12 +25,12 @@ describe("weekly rate presets in the profile form", () => {
 
     expect(
       screen.getByRole("button", {
-        name: `${light?.label} — 0,30 kg`,
+        name: `${light?.label} (0,30 kg)`,
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", {
-        name: `${moderate?.label} — 0,60 kg`,
+        name: `${moderate?.label} (0,60 kg)`,
       }),
     ).toBeInTheDocument();
   });

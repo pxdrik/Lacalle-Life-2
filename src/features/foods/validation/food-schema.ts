@@ -38,7 +38,7 @@ const per100gSchema = macrosSchema.refine(
   ({ proteinG, carbsG, fatG }) => proteinG + carbsG + fatG <= 100,
   {
     message:
-      "Proteína, carboidrato e gordura somam mais de 100 g — impossível em 100 g de alimento.",
+      "Proteína, carboidrato e gordura somam mais de 100 g, impossível em 100 g de alimento.",
   },
 );
 

@@ -19,7 +19,7 @@ export function describeAuthError(error: unknown): string {
       case "weak_password":
         return "Senha fraca demais. Use pelo menos 8 caracteres.";
       case "email_not_confirmed":
-        return "Confirme seu e-mail antes de entrar — veja o link que enviamos.";
+        return "Confirme seu e-mail antes de entrar. Veja o link que enviamos.";
       case "over_email_send_rate_limit":
         return "Muitos e-mails pedidos em pouco tempo. Espere alguns minutos e tente de novo.";
       case "same_password":

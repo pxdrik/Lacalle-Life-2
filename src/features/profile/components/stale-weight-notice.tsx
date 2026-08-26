@@ -64,7 +64,7 @@ export function StaleWeightNotice({ profile, onApply, pending }: Props) {
           </p>
           <p className="mt-1 text-xs text-ink-muted">
             {difference < 0 ? "Você perdeu" : "Você ganhou"}{" "}
-            {formatDecimal(Math.abs(difference))} kg desde então — atualizar
+            {formatDecimal(Math.abs(difference))} kg desde então. Atualizar
             recalcula suas metas.
           </p>
         </div>

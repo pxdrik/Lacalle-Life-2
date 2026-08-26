@@ -102,7 +102,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
       >
         <span>{formatShortDay(points[0]?.day ?? "")}</span>
         <span>
-          {formatDecimal(min)}–{formatDecimal(max)} {unit}
+          {formatDecimal(min)} a {formatDecimal(max)} {unit}
         </span>
         <span>{formatShortDay(points.at(-1)?.day ?? "")}</span>
       </div>

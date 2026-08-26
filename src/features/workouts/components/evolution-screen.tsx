@@ -155,7 +155,7 @@ export function EvolutionScreen() {
         <section>
           <h2 className="text-sm font-medium text-ink">Recordes</h2>
           <p className="mt-0.5 text-xs text-ink-subtle">
-            Série mais pesada e melhor estimativa de 1RM — quase sempre séries
+            Série mais pesada e melhor estimativa de 1RM, quase sempre séries
             diferentes
           </p>
 

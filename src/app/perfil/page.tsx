@@ -15,7 +15,7 @@ export default function ProfilePage() {
       <PageHeader
         icon={ICONS.profile}
         title="Perfil"
-        subtitle="Opcional. Preencha se quiser ver suas dietas comparadas a uma meta — montar dieta funciona igual sem isso."
+        subtitle="Opcional. Preencha se quiser ver suas dietas comparadas a uma meta. Montar dieta funciona igual sem isso."
       />
 
       <div className="mt-8">

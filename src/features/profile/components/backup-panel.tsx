@@ -111,7 +111,7 @@ export function BackupPanel() {
       const result = await (await repository).importAll(text);
 
       if (result.ok) {
-        toast(`Backup restaurado — ${String(result.recordCount)} registros.`);
+        toast(`Backup restaurado, ${String(result.recordCount)} registros.`);
         setPendingFile(null);
         setPreview(null);
         return;
@@ -179,7 +179,7 @@ export function BackupPanel() {
       <p className="text-xs text-ink-subtle">
         Exporta dietas, treinos, diário, evolução e perfil num arquivo que
         você guarda. Importar substitui completamente os dados atuais pelo
-        conteúdo do arquivo — não soma, não mescla.
+        conteúdo do arquivo. Não soma, não mescla.
       </p>
 
       {persisted !== null && (
@@ -270,7 +270,7 @@ export function BackupPanel() {
       <div className="space-y-2 border-t border-line pt-3">
         <h3 className="text-xs font-semibold text-ink">Esquecer este dispositivo</h3>
         <p className="text-xs text-ink-subtle">
-          Apaga todos os dados do LaCalle Life salvos neste navegador — dietas,
+          Apaga todos os dados do LaCalle Life salvos neste navegador: dietas,
           treinos, diário, evolução, perfil e preferências. Sem volta, a não
           ser que você tenha um backup.
         </p>

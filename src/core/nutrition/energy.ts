@@ -81,7 +81,7 @@ export function computeEnergyTarget(
     advisories.push({
       code: "WEEKLY_RATE_CLAMPED",
       message:
-        `Ritmo reduzido para ${round(maxWeeklyKg, 2)} kg por semana — o pedido de ` +
+        `Ritmo reduzido para ${round(maxWeeklyKg, 2)} kg por semana, pois o pedido de ` +
         `${round(requestedWeeklyKg, 2)} kg excede o limite sustentável de ` +
         `${round(maxWeeklyRatio * 100, 2)}% do peso corporal.`,
     });

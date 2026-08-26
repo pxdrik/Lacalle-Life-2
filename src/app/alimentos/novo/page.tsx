@@ -32,7 +32,7 @@ export default function NewFoodPage() {
       <PageHeader
         icon={ICONS.foods}
         title="Novo alimento"
-        subtitle="Para o que o banco não tem — seu suplemento, a marca que você compra, a receita da sua casa."
+        subtitle="Para o que o banco não tem: seu suplemento, a marca que você compra, a receita da sua casa."
         className="mt-4"
       />
 

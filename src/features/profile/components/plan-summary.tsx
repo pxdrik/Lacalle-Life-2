@@ -100,7 +100,7 @@ function Plan({
         <Notice tone="info" className="mt-3">
           <p className="text-sm text-ink-muted">
             A fibra é uma referência (14 g por 1000 kcal) para conferir no
-            rótulo — o app ainda não soma a fibra dos alimentos.
+            rótulo: o app ainda não soma a fibra dos alimentos.
           </p>
         </Notice>
 
@@ -116,7 +116,7 @@ function Plan({
                 <>
                   Seu objetivo era {goal === "cut" ? "perder peso" : "ganhar massa"}
                   ; com seus dados atuais, o limite seguro de ritmo não permite
-                  esse resultado — a meta ficou{" "}
+                  esse resultado, a meta ficou{" "}
                   {balance === 0
                     ? "em manutenção"
                     : balance > 0
@@ -131,7 +131,7 @@ function Plan({
                   <span className="tabular-nums">
                     {formatDecimal(Math.abs(balance))}
                   </span>{" "}
-                  kcal por dia — cerca de{" "}
+                  kcal por dia, cerca de{" "}
                   <span className="tabular-nums">
                     {formatDecimal(Math.abs(plan.projectedWeeklyChangeKg), 2)}
                   </span>{" "}

@@ -230,7 +230,7 @@ function MealSide({
           ) : (
             meal.items.map((item) => (
               <li key={item.id}>
-                {item.name} — {item.grams}
+                {item.name} {item.grams}
                 {item.unit}
               </li>
             ))

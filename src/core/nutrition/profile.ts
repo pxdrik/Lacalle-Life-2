@@ -93,11 +93,11 @@ export type NutritionProfile = z.infer<typeof nutritionProfileSchema>;
 export const ACTIVITY_LABELS: Readonly<
   Record<NutritionProfile["activityLevel"], string>
 > = {
-  sedentary: "Sedentário — pouco ou nenhum exercício",
-  light: "Leve — 1 a 3 treinos por semana",
-  moderate: "Moderado — 3 a 5 treinos por semana",
-  active: "Ativo — 6 a 7 treinos por semana",
-  athlete: "Atleta — treino intenso ou duas vezes ao dia",
+  sedentary: "Sedentário, pouco ou nenhum exercício",
+  light: "Leve, 1 a 3 treinos por semana",
+  moderate: "Moderado, 3 a 5 treinos por semana",
+  active: "Ativo, 6 a 7 treinos por semana",
+  athlete: "Atleta, treino intenso ou duas vezes ao dia",
 };
 
 export const GOAL_LABELS: Readonly<Record<NutritionProfile["goal"], string>> = {

@@ -126,8 +126,8 @@ export function BodyScreen() {
       {skippedCount > 0 && (
         <p role="alert" className={noticeClasses()}>
           {skippedCount === 1
-            ? "1 registro não pôde ser exibido — os dados estão corrompidos ou num formato que este app não reconhece."
-            : `${String(skippedCount)} registros não puderam ser exibidos — os dados estão corrompidos ou num formato que este app não reconhece.`}
+            ? "1 registro não pôde ser exibido, os dados estão corrompidos ou num formato que este app não reconhece."
+            : `${String(skippedCount)} registros não puderam ser exibidos, os dados estão corrompidos ou num formato que este app não reconhece.`}
         </p>
       )}
 

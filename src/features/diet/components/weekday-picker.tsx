@@ -73,7 +73,7 @@ export function WeekdayPicker({
       <div className="space-y-5">
         <p className="text-sm text-ink-subtle">
           O Diário sugere essa dieta nos dias marcados. Um dia só pode
-          apontar para uma dieta — marcar aqui desmarca de qualquer outra.
+          apontar para uma dieta: marcar aqui desmarca de qualquer outra.
         </p>
 
         <div className="flex flex-wrap gap-1.5">
