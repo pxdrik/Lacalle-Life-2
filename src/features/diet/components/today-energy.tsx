@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
+import { FIBER_REFERENCE_G } from "@/core/nutrition";
 import { cn } from "@/design-system/cn";
 import { Card } from "@/design-system/components/card";
 import { Metric } from "@/design-system/components/metric";
@@ -120,6 +121,18 @@ export function TodayEnergy({ day }: { readonly day: string }) {
           />
         ))}
       </div>
+
+      {/* Sem "consumido" ao lado — nenhum alimento do catálogo carrega
+          fibra, então mostrar um número aqui seria sempre "0 g", que
+          parece dado real quando é só ausência de dado (na dúvida,
+          omitir). É uma linha de texto, não um `Metric` como os três
+          acima, de propósito: os três rastreiam o que foi comido contra
+          uma meta calculada do perfil; isto é só uma referência fixa do
+          produto (Pedro, 26/08/2026) — nunca uma recomendação médica
+          personalizada, nunca comparada a nada. */}
+      <p className="mt-2 text-xs text-ink-subtle">
+        Fibra · meta de referência {FIBER_REFERENCE_G} g/dia
+      </p>
     </Card>
   );
 }

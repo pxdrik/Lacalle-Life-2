@@ -6,7 +6,6 @@ import {
   KCAL_PER_GRAM,
   PROTEIN_G_PER_KG,
 } from "./constants";
-import { computeDistribution } from "./distribution";
 import { computeBmr, computeTdee } from "./energy";
 import { buildNutritionPlan } from "./plan";
 import { nutritionProfileSchema, type NutritionProfile } from "./profile";
@@ -229,11 +228,6 @@ describe("macro consistency", () => {
     ]);
   });
 
-  it("scales fibre with energy intake", () => {
-    expect(computeDistribution(BASE, 3200).fiberG).toBeGreaterThan(
-      computeDistribution(BASE, 1600).fiberG,
-    );
-  });
 });
 
 describe("input validation", () => {

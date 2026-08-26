@@ -5,7 +5,6 @@ import {
   FAT_G_PER_KG_MIN,
   FAT_KCAL_RATIO_DEFAULT,
   FAT_KCAL_RATIO_MIN,
-  FIBER_G_PER_1000_KCAL,
   KCAL_PER_GRAM,
   PROTEIN_G_PER_KG,
 } from "./constants";
@@ -14,7 +13,6 @@ import { round } from "./result";
 
 export interface Distribution {
   readonly targets: Macros;
-  readonly fiberG: number;
 }
 
 /**
@@ -83,6 +81,5 @@ export function computeDistribution(
       carbsG: round(Math.max(carbsKcal / KCAL_PER_GRAM.carbs, 0)),
       fatG: roundedFatG,
     },
-    fiberG: round((targetKcal / 1000) * FIBER_G_PER_1000_KCAL),
   };
 }

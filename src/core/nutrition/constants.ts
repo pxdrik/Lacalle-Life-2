@@ -72,8 +72,14 @@ export const FAT_KCAL_RATIO_DEFAULT = 0.25;
  */
 export const CARB_G_ABSOLUTE_MIN = 50;
 
-/** Fibre guidance, scaled per 1000 kcal. */
-export const FIBER_G_PER_1000_KCAL = 14;
+/**
+ * Meta de referência de fibra, em gramas por dia — fixa, igual para
+ * qualquer perfil, nunca escalada por caloria ou peso. Não é uma
+ * recomendação médica personalizada, é um valor de referência configurado
+ * no produto (Pedro, 26/08/2026) — substitui o cálculo anterior
+ * (14 g por 1000 kcal), que dependia do alvo calórico de cada perfil.
+ */
+export const FIBER_REFERENCE_G = 35;
 
 export const ACTIVITY_LEVELS = [
   "sedentary",

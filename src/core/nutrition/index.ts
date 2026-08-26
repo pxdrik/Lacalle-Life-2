@@ -13,6 +13,7 @@
 export {
   ACTIVITY_LEVELS,
   BIOLOGICAL_SEXES,
+  FIBER_REFERENCE_G,
   GOALS,
   INPUT_BOUNDS,
   type ActivityLevel,

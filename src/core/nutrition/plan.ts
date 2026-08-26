@@ -19,7 +19,7 @@ export function buildNutritionPlan(profile: NutritionProfile): PlanResult {
   const tdeeKcal = computeTdee(profile, bmrKcal);
 
   const energy = computeEnergyTarget(profile, tdeeKcal, bmrKcal);
-  const { targets, fiberG } = computeDistribution(profile, energy.targetKcal);
+  const { targets } = computeDistribution(profile, energy.targetKcal);
 
   const violations = findViolations(profile, targets, bmrKcal);
   if (violations.length > 0) return { ok: false, violations };
@@ -30,7 +30,6 @@ export function buildNutritionPlan(profile: NutritionProfile): PlanResult {
       bmrKcal,
       tdeeKcal,
       targets,
-      fiberG,
       energyBalanceKcal: energy.energyBalanceKcal,
       projectedWeeklyChangeKg: energy.projectedWeeklyChangeKg,
       advisories: energy.advisories,

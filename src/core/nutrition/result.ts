@@ -43,7 +43,6 @@ export interface NutritionPlan {
    * conversion. `kcal` here is the energy target.
    */
   readonly targets: Macros;
-  readonly fiberG: number;
   /** Signed: negative for a deficit, positive for a surplus. */
   readonly energyBalanceKcal: number;
   readonly projectedWeeklyChangeKg: number;

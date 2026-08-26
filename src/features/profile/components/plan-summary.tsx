@@ -75,7 +75,7 @@ function Plan({
           ))}
         </dl>
 
-        <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-4 text-sm">
           <Derivation
             label="TMB"
             value={`${formatDecimal(Math.round(plan.bmrKcal))} kcal`}
@@ -84,25 +84,7 @@ function Plan({
             label="Gasto diário (TDEE)"
             value={`${formatDecimal(Math.round(plan.tdeeKcal))} kcal`}
           />
-          <Derivation label="Fibra" value={`${formatDecimal(plan.fiberG)} g`} />
         </dl>
-
-        {/* Said out loud because the number looks like the three above it and
-            is not the same kind of thing. Protein, carbs and fat are targets
-            the app checks against what you ate; fibre is a recommendation it
-            cannot check, because no food in the catalogue carries a fibre
-            value. Showing it silently beside tracked targets promises a
-            measurement that never arrives.
-
-            This used to claim "out loud" while rendering in `text-xs
-            text-ink-subtle` — the faintest style the app owns. The comment was
-            right about the intent and the code was doing the opposite. */}
-        <Notice tone="info" className="mt-3">
-          <p className="text-sm text-ink-muted">
-            A fibra é uma referência (14 g por 1000 kcal) para conferir no
-            rótulo: o app ainda não soma a fibra dos alimentos.
-          </p>
-        </Notice>
 
         {/* The result the whole screen exists to answer, next to the goal it
             answers for. A signed number on its own reads fine to someone who
