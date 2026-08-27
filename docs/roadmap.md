@@ -18,7 +18,13 @@ depender da memória de nenhuma conversa.
 - **Confortável é o padrão de densidade em telas de desktop** (>=1024px,
   o mesmo breakpoint da sidebar) — pedido do Pedro, "a tela do PC é
   maior". Só o padrão muda com a tela; uma escolha explícita continua
-  valendo em qualquer largura.
+  valendo em qualquer largura. Depois disso, a escala inteira subiu mais
+  um degrau a pedido dele: Compacto = Padrão antigo, Padrão = Confortável
+  antigo, Confortável = ainda maior que isso.
+- **Conta (e-mail, trocar senha, sair) agora vive dentro de Perfil.**
+  Existia só em `/conta`, uma rota que nenhuma navegação linkava — por
+  isso nunca tinha sido testada. Perfil passa a ser também a única tela
+  do app que leva a `/entrar`/`/cadastro`.
 
 ## Auditoria externa de produção — 26/08/2026
 
