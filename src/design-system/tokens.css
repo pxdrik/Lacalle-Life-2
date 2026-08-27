@@ -424,34 +424,41 @@
   --corner-2xl: 24px;
 
   /**
-   * Alturas de controle — pág. 25 e 26.
+   * Alturas de controle — pág. 25 e 26, com um desvio deliberado do lado do
+   * produto (Pedro, 26/08/2026).
    *
-   * Botão: 48 grande, 40 padrão, 32 pequeno. Input: **44 px em celular e
-   * desktop**, que a pág. 26 fixa sem variação.
+   * A pág. 25 dá 48 grande / 40 padrão / 32 pequeno — e é essa a base que
+   * ainda define `[data-density="compact"]` abaixo. Mas o Padrão do
+   * brandbook lia pequeno demais numa tela de desktop, então o produto
+   * decidiu subir um degrau inteiro: o que era o tamanho de "Confortável"
+   * virou o novo Padrão (56/48/40), e "Confortável" subiu de novo a partir
+   * dali (64/56/48). Input: **44 px em celular e desktop**, que a pág. 26
+   * fixa sem variação — não faz parte deste degrau.
    *
    * A decisão antiga de densidade — controles maiores no celular porque "é o
    * que um polegar suado acerta entre séries" — não morre aqui, muda de
-   * mecanismo: a ação do meio do treino usa o tamanho **grande**, que agora tem
-   * 48 px em todo lugar, contra os 46 de antes no celular. O argumento
-   * sobrevive escolhendo o token certo em vez de mudando o token com a tela.
+   * mecanismo: a ação do meio do treino usa o tamanho **grande**, que agora
+   * escala com a mesma preferência de densidade do resto do app, em vez de
+   * mudar com a tela.
    *
    * A área de toque de 44 × 44 da pág. 48 continua vindo do utilitário
    * `touch-44`, que cresce o alvo sem crescer o desenho.
    */
-  --control-h: 40px;
-  --control-h-sm: 32px;
-  --control-h-lg: 48px;
+  --control-h: 48px;
+  --control-h-sm: 40px;
+  --control-h-lg: 56px;
   /**
    * O padding horizontal do botão, pela fórmula da pág. 25: "1,5 × a altura ÷
-   * 3, arredondado para a escala: 24 / 18 / 12".
+   * 3" — aplicada ao novo Padrão (56/48/40) em vez do original da página
+   * (48/40/32), pela mesma razão do bloco acima.
    *
    * 18 não está na escala base 4 da pág. 22, e as duas páginas se contradizem.
    * Vale a pág. 25, que é a específica e dá o número escrito por extenso; a
    * pág. 22 governa layout, não o interior de um controle.
    */
-  --control-px: 18px;
-  --control-px-sm: 12px;
-  --control-px-lg: 24px;
+  --control-px: 24px;
+  --control-px-sm: 18px;
+  --control-px-lg: 30px;
 
   --input-h: 44px;
   /* Pág. 26. Diferente do botão de propósito: o texto de um campo alinha com o
@@ -530,7 +537,9 @@
  *
  * `default` não aparece aqui — ausência de atributo já cai nos valores base
  * declarados acima, então redeclará-los seria uma segunda fonte da verdade
- * que só pode divergir da primeira.
+ * que só pode divergir da primeira. `compact` continua exatamente nos
+ * valores originais da pág. 25 (30/24/36) — o degrau que subiu foi o de
+ * Padrão pra cima, não este.
  */
 [data-density="compact"] {
   --control-h: 30px;
@@ -542,14 +551,21 @@
   --ui-scale: 0.85;
 }
 
+/**
+ * "O Padrão deve estar do tamanho do Confortável, e aí o Confortável deve
+ * aumentar mais ainda" (Pedro, 26/08/2026). Padrão já subiu para estes
+ * números na base `:root` acima; Confortável sobe de novo a partir dali,
+ * pelo mesmo passo (+8 / +6 / +0,15) que já separava Padrão de Confortável
+ * antes desta mudança — a progressão continua igual, só um degrau adiante.
+ */
 [data-density="comfortable"] {
-  --control-h: 48px;
-  --control-h-sm: 40px;
-  --control-h-lg: 56px;
-  --control-px: 24px;
-  --control-px-sm: 18px;
-  --control-px-lg: 30px;
-  --ui-scale: 1.15;
+  --control-h: 56px;
+  --control-h-sm: 48px;
+  --control-h-lg: 64px;
+  --control-px: 30px;
+  --control-px-sm: 24px;
+  --control-px-lg: 36px;
+  --ui-scale: 1.3;
 }
 
 /**
@@ -574,9 +590,12 @@
  * valer só *antes* do zoom aplicar, reabrindo o bug. `1 / --ui-scale`
  * cancela o zoom ambiente só para o campo, então o que a pessoa vê
  * sempre bate com os 16px reais que o Safari está medindo.
+ *
+ * `1.15`, não `1`: segue o mesmo degrau que `--control-h*` deu acima — o
+ * Padrão inteiro subiu, não só a altura dos controles (Pedro, 26/08/2026).
  */
 html {
-  --ui-scale: 1;
+  --ui-scale: 1.15;
   zoom: var(--ui-scale);
 }
 

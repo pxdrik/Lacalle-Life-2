@@ -29,13 +29,18 @@ const VARIANTS = {
 } satisfies Record<ButtonVariant, string>;
 
 /**
- * Alturas 48 / 40 / 32 e padding 24 / 18 / 12 — pág. 25, onde o padding sai de
- * "1,5 × a altura ÷ 3".
+ * As alturas e o padding vêm de `--control-h*`/`--control-px*`
+ * (`tokens.css`), na proporção "1,5 × a altura ÷ 3" da pág. 25 — não mais
+ * literalmente 48/40/32, desde que o Padrão do produto subiu um degrau
+ * inteiro acima do da página (Pedro, 26/08/2026; ver o comentário em
+ * `tokens.css` sobre por quê). A fórmula sobreviveu; os números de
+ * referência da página, não.
  *
  * **Deixaram de variar por breakpoint**, e a decisão que os fazia variar
  * sobreviveu por outro caminho: um controle maior para o polegar suado entre
- * séries agora é o tamanho `lg`, que tem 48 px em todo lugar contra os 46 que o
- * celular tinha. É escolher o token certo em vez de mudar o token com a tela.
+ * séries agora é o tamanho `lg`, que é o mesmo em todo lugar, contra o que o
+ * celular tinha antes. É escolher o token certo em vez de mudar o token com
+ * a tela.
  *
  * O ícone é 16 px com gap de 8 nos três tamanhos, também da pág. 25 — o gap não
  * encolhe junto com o botão, porque o que ele separa não encolheu.
