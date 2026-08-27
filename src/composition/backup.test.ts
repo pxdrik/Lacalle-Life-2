@@ -219,25 +219,156 @@ describe("exportAll / importAll", () => {
     ]);
   });
 
-  it("rejects a file with records missing the base entity shape", async () => {
+  it("discards a record missing the base entity shape, importing the rest of an otherwise-empty store", async () => {
     const repositories = await getRepositories();
-    await repositories.diets.save(createDiet("Keep me"), null);
+    await repositories.diets.save(createDiet("Will be replaced"), null);
 
+    const backup = await exportAll(); // diets: [] — nothing was saved before this call
+    const onlyGarbage = {
+      ...backup,
+      stores: { ...backup.stores, diets: [{ name: "sem id, sem datas" }] },
+    };
+
+    const result = await importAll(onlyGarbage);
+
+    // A record with no `id`/`createdAt`/`updatedAt` has nothing a bound
+    // repair could fix — the whole record is dropped, not just ignored.
+    expect(result).toMatchObject({ ok: true, discardedCount: 1 });
+    // "Replace, never merge" still applies: the file's `diets` was, in
+    // effect, empty — same outcome as the intentionally-empty-backup test
+    // above, for the same reason.
+    await expect(repositories.diets.listAll()).resolves.toEqual([]);
+  });
+
+  it("preserves every valid record in a store when one other record in the same store is invalid", async () => {
+    const repositories = await getRepositories();
+
+    const keep = createDiet("Keep me");
+    await repositories.diets.save(keep, null);
     const backup = await exportAll();
-    const corrupted = {
+
+    const mixed = {
       ...backup,
       stores: {
         ...backup.stores,
-        diets: [{ name: "sem id, sem datas" }],
+        diets: [...backup.stores.diets, { name: "sem id, sem datas" }],
       },
     };
 
-    const result = await importAll(corrupted);
+    await clearAllStores();
+    const result = await importAll(mixed);
 
-    expect(result).toEqual({ ok: false, reason: "invalid" });
+    expect(result).toMatchObject({
+      ok: true,
+      recordCount: 1,
+      discardedCount: 1,
+    });
     await expect(repositories.diets.listAll()).resolves.toMatchObject([
       { name: "Keep me" },
     ]);
+  });
+
+  /**
+   * The bug an external audit against production found (27/08/2026): a real
+   * backup, exported by this app's own "Exportar dados" button, failed to
+   * reimport whole — because one workout set, saved before this session's
+   * fix started rejecting a negative `weightKg`, still carried one. Round
+   * trip: export → read → import → verify, the exact sequence the audit ran
+   * by hand in a browser.
+   */
+  it("round-trips a backup containing a legacy negative weightKg, sanitising that one field", async () => {
+    const repositories = await getRepositories();
+
+    const routine = createRoutine("Legado");
+    const session = startSession(routine);
+    const legacySession: Session = {
+      ...session,
+      exercises: [
+        {
+          id: "se1",
+          exerciseId: "supino",
+          name: "Supino",
+          restSeconds: null,
+          notes: "",
+          sets: [
+            {
+              id: "set1",
+              reps: 10,
+              weightKg: -20,
+              rpe: null,
+              isCompleted: true,
+              planned: { reps: null, weightKg: null, rpe: null },
+            },
+          ],
+        },
+      ],
+    };
+    await repositories.sessions.save(legacySession, null);
+
+    const backup = await exportAll();
+    expect(backup.stores.sessions[0]?.exercises[0]?.sets[0]?.weightKg).toBe(
+      -20,
+    );
+
+    await clearAllStores();
+    const result = await importAll(backup);
+
+    // Sanitised, not rejected — and not silently kept negative either.
+    expect(result).toMatchObject({
+      ok: true,
+      sanitizedCount: 1,
+      discardedCount: 0,
+    });
+
+    const [restored] = await repositories.sessions.listAll();
+    const restoredWeight = restored?.exercises[0]?.sets[0]?.weightKg;
+    // Never turned positive, never invented — absent, the same as any other
+    // set nobody entered a weight for.
+    expect(restoredWeight).toBeNull();
+    expect(restoredWeight).not.toBe(-20);
+  });
+
+  /**
+   * The importer repairs an out-of-range *field*; it never widens what a
+   * live edit is allowed to write. This is the live path's own guard
+   * (`edit-session.ts`'s `sanitizeSetChanges`), unrelated code, asserted
+   * here only to document that the two protections are independent — this
+   * backup fix does not touch, weaken, or route through that one.
+   */
+  it("does not affect live validation: a negative weight typed today is still rejected before it ever reaches a backup", async () => {
+    const { updatePerformedSet } = await import(
+      "@/features/workouts/services/edit-session"
+    );
+    const routine = createRoutine("Hoje");
+    const session = startSession(routine);
+    const withOneSet: Session = {
+      ...session,
+      exercises: [
+        {
+          id: "se1",
+          exerciseId: "supino",
+          name: "Supino",
+          restSeconds: null,
+          notes: "",
+          sets: [
+            {
+              id: "set1",
+              reps: null,
+              weightKg: null,
+              rpe: null,
+              isCompleted: false,
+              planned: null,
+            },
+          ],
+        },
+      ],
+    };
+
+    const updated = updatePerformedSet(withOneSet, "se1", "set1", {
+      weightKg: -20,
+    });
+
+    expect(updated.exercises[0]?.sets[0]?.weightKg).not.toBe(-20);
   });
 
   it("rejects a file from an incompatible schema version, and leaves existing data untouched", async () => {
@@ -263,7 +394,12 @@ describe("exportAll / importAll", () => {
       const backup = await exportAll(); // one diet, nothing else
       const preview = previewImport(backup);
 
-      expect(preview).toEqual({ ok: true, recordCount: 1 });
+      expect(preview).toEqual({
+        ok: true,
+        recordCount: 1,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      });
       // Not a second copy of "Untouched" — the database was never touched.
       await expect(repositories.diets.listAll()).resolves.toMatchObject([
         { name: "Untouched" },
@@ -286,7 +422,12 @@ describe("exportAll / importAll", () => {
         },
       };
 
-      expect(previewImport(emptyBackup)).toEqual({ ok: true, recordCount: 0 });
+      expect(previewImport(emptyBackup)).toEqual({
+        ok: true,
+        recordCount: 0,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      });
     });
 
     it("reports the same validation failures importAll would, on the same inputs", () => {
@@ -322,7 +463,12 @@ describe("exportAll / importAll", () => {
 
     const result = await importAll(emptyBackup);
 
-    expect(result).toEqual({ ok: true, recordCount: 0 });
+    expect(result).toEqual({
+      ok: true,
+      recordCount: 0,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    });
     await expect(repositories.diets.listAll()).resolves.toEqual([]);
   });
 });

@@ -17,8 +17,18 @@ import { BackupPanel } from "./backup-panel";
 function mount(overrides: Partial<BackupRepository> = {}) {
   const repository: BackupRepository = {
     exportAll: vi.fn().mockResolvedValue({ some: "backup" }),
-    previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 3 }),
-    importAll: vi.fn().mockResolvedValue({ ok: true, recordCount: 3 }),
+    previewImport: vi.fn().mockResolvedValue({
+      ok: true,
+      recordCount: 3,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    }),
+    importAll: vi.fn().mockResolvedValue({
+      ok: true,
+      recordCount: 3,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    }),
     forgetDevice: vi.fn().mockResolvedValue({ ok: true }),
     ...overrides,
   };
@@ -79,7 +89,12 @@ describe("export", () => {
 describe("import preview", () => {
   it("previews the file as soon as it's chosen, before any confirmation tap", async () => {
     const repository = mount({
-      previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 42 }),
+      previewImport: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 42,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      }),
     });
 
     chooseFile('{"schemaVersion":1}');
@@ -97,7 +112,12 @@ describe("import preview", () => {
 
   it("names a genuinely empty file rather than treating it like any other", async () => {
     mount({
-      previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 0 }),
+      previewImport: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 0,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      }),
     });
 
     chooseFile('{"schemaVersion":1}');
@@ -113,7 +133,12 @@ describe("import preview", () => {
   });
 
   it("does not offer to confirm until the preview resolves", async () => {
-    let resolvePreview!: (value: { ok: true; recordCount: number }) => void;
+    let resolvePreview!: (value: {
+      ok: true;
+      recordCount: number;
+      sanitizedCount: number;
+      discardedCount: number;
+    }) => void;
     mount({
       previewImport: vi.fn().mockReturnValue(
         new Promise((resolve) => {
@@ -129,9 +154,72 @@ describe("import preview", () => {
       screen.queryByRole("button", { name: /Importar backup\.json/ }),
     ).not.toBeInTheDocument();
 
-    resolvePreview({ ok: true, recordCount: 5 });
+    resolvePreview({
+      ok: true,
+      recordCount: 5,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    });
     expect(
       await screen.findByRole("button", { name: /Importar backup\.json/ }),
+    ).toBeInTheDocument();
+  });
+
+  /**
+   * External audit (27/08/2026): a failed preview left "Lendo arquivo…"
+   * showing forever, on top of the error banner that correctly explained
+   * what went wrong — the two together read as the app being stuck, not as
+   * an error already handled. `preview` now has an explicit `"failed"`
+   * state instead of staying `null` on both "still reading" and "gave up".
+   */
+  it("stops saying 'Lendo arquivo…' once the preview fails, and says so plainly instead", async () => {
+    mount({
+      previewImport: vi
+        .fn()
+        .mockResolvedValue({ ok: false, reason: "invalid" }),
+    });
+
+    chooseFile("not json");
+
+    expect(
+      await screen.findByText("Não foi possível ler o arquivo."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Lendo arquivo…")).not.toBeInTheDocument();
+  });
+
+  it("stops saying 'Lendo arquivo…' when reading the file itself throws", async () => {
+    mount({
+      previewImport: vi.fn().mockRejectedValue(new Error("boom")),
+    });
+
+    chooseFile('{"schemaVersion":1}');
+
+    expect(
+      await screen.findByText("Não foi possível ler o arquivo."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Lendo arquivo…")).not.toBeInTheDocument();
+  });
+
+  it("names how many legacy records will be adjusted or discarded, before the confirming tap", async () => {
+    mount({
+      previewImport: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 10,
+        sanitizedCount: 1,
+        discardedCount: 2,
+      }),
+    });
+
+    chooseFile('{"schemaVersion":1}');
+
+    expect(
+      await screen.findByText("Este arquivo contém 10 registros."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/1 registro antigo será ajustado/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/2 registros não puderam ser recuperados/),
     ).toBeInTheDocument();
   });
 
@@ -174,8 +262,18 @@ describe("import preview", () => {
 describe("import confirmation", () => {
   it("imports on confirmation and reports the record count, clearing the pending file", async () => {
     const repository = mount({
-      previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 42 }),
-      importAll: vi.fn().mockResolvedValue({ ok: true, recordCount: 42 }),
+      previewImport: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 42,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      }),
+      importAll: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 42,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      }),
     });
 
     chooseFile('{"schemaVersion":1}');
@@ -199,7 +297,12 @@ describe("import confirmation", () => {
 
   it("keeps the pending file and shows an error if the write itself fails", async () => {
     mount({
-      previewImport: vi.fn().mockResolvedValue({ ok: true, recordCount: 5 }),
+      previewImport: vi.fn().mockResolvedValue({
+        ok: true,
+        recordCount: 5,
+        sanitizedCount: 0,
+        discardedCount: 0,
+      }),
       importAll: vi.fn().mockRejectedValue(new Error("quota exceeded")),
     });
 

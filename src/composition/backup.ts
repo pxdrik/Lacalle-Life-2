@@ -103,61 +103,172 @@ export async function exportAll(): Promise<BackupFile> {
 }
 
 /**
- * Every record is validated against the same schema the app itself writes
- * through — `RECORD_SCHEMAS`, in `./backup-schemas` — not just a shallow
- * `id`/`createdAt`/`updatedAt` shape.
- *
- * That shallow check is what this used to be, on the reasoning that a second
- * description of `Diet`, `Routine`, `Session` and five other types would drift
- * from the real ones. It shipped anyway, and the 2026-08-24 adversarial audit
- * against production walked straight through the gap it left: `kcal:
- * 999999999`, `weightKg: -999999999`, a 50 000-character name and `role:
- * "admin"` all imported and persisted without complaint, and a `bodyEntries`
- * record shaped nothing like `BodyEntry` crashed `/evolucao` outright. A
- * backup is a file someone else can hand you, exactly like a form submission
- * — the difference is only that nothing here rejects a bad one at the point
- * where a form would.
- *
- * `RECORD_SCHEMAS` closes that by composing from the domain's own schemas and
- * types instead of restating them, so a bound changed in `body-schema.ts` or
- * `food-schema.ts` is enforced on import automatically. Where none existed —
- * diets, food logs, routines, sessions — the schema is built from the domain
- * type directly, `.strict()`, so an unrecognised field is rejected rather
- * than written to IndexedDB verbatim.
+ * The file's own envelope — versioning and which eight arrays exist — kept
+ * deliberately separate from `RECORD_SCHEMAS`. This is the one check that
+ * still fails the *whole* file: a file with no `stores`, or `stores` missing
+ * an array, is not "a backup with some bad records", it is not a backup at
+ * all, and no per-record repair belongs anywhere near it. Each array's
+ * elements are `z.unknown()` here on purpose — what makes a single diet or
+ * session record valid is `RECORD_SCHEMAS`' job, run per record in
+ * `processStore` below, not this schema's.
  */
-const backupFileSchema = z.object({
+const backupEnvelopeSchema = z.object({
   schemaVersion: z.number(),
   exportedAt: z.number(),
   stores: z.object({
-    body: z.array(RECORD_SCHEMAS.body),
-    foodLogs: z.array(RECORD_SCHEMAS.foodLogs),
-    foods: z.array(RECORD_SCHEMAS.foods),
-    diets: z.array(RECORD_SCHEMAS.diets),
-    profile: z.array(RECORD_SCHEMAS.profile).max(1),
-    exercises: z.array(RECORD_SCHEMAS.exercises),
-    routines: z.array(RECORD_SCHEMAS.routines),
-    sessions: z.array(RECORD_SCHEMAS.sessions),
+    body: z.array(z.unknown()),
+    foodLogs: z.array(z.unknown()),
+    foods: z.array(z.unknown()),
+    diets: z.array(z.unknown()),
+    profile: z.array(z.unknown()).max(1),
+    exercises: z.array(z.unknown()),
+    routines: z.array(z.unknown()),
+    sessions: z.array(z.unknown()),
   }),
 });
 
 export type ImportResult =
-  | { readonly ok: true; readonly recordCount: number }
+  | {
+      readonly ok: true;
+      readonly recordCount: number;
+      /**
+       * Records kept only after nulling one out-of-range field — see
+       * `repairRecord`. Never zero for a backup written before a bound this
+       * app enforces today existed; that is expected, not a warning sign.
+       */
+      readonly sanitizedCount: number;
+      /** Records that could not be recovered safely, and were dropped. */
+      readonly discardedCount: number;
+    }
   | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
-
-type ParsedBackupFile = z.infer<typeof backupFileSchema>;
 
 type ParsedBackup =
   | {
       readonly ok: true;
-      readonly file: ParsedBackupFile;
+      readonly stores: StoresResult;
       readonly recordCount: number;
+      readonly sanitizedCount: number;
+      readonly discardedCount: number;
     }
   | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
 
 /**
- * Validation and record-counting, with no store touched — the read half of
- * `importAll`, split out so a caller can show what a file contains **before**
- * asking for the confirmation that replaces every domain with it.
+ * The zod-inferred shape of each store, not the domain type directly:
+ * `RECORD_SCHEMAS` already mirrors what each repository's own `normalize()`
+ * tolerates (see that file's doc comment), which is a few fields optional
+ * where the domain type has them required-but-nullable. `writeStore` puts
+ * these straight into IndexedDB the same way `normalize()` would read them
+ * back, so the mismatch is exactly as harmless here as it already is there.
+ */
+interface StoresResult {
+  readonly body: readonly z.infer<typeof RECORD_SCHEMAS.body>[];
+  readonly foodLogs: readonly z.infer<typeof RECORD_SCHEMAS.foodLogs>[];
+  readonly foods: readonly z.infer<typeof RECORD_SCHEMAS.foods>[];
+  readonly diets: readonly z.infer<typeof RECORD_SCHEMAS.diets>[];
+  readonly profile: readonly z.infer<typeof RECORD_SCHEMAS.profile>[];
+  readonly exercises: readonly z.infer<typeof RECORD_SCHEMAS.exercises>[];
+  readonly routines: readonly z.infer<typeof RECORD_SCHEMAS.routines>[];
+  readonly sessions: readonly z.infer<typeof RECORD_SCHEMAS.sessions>[];
+}
+
+/**
+ * A single field, out of range, is the one class of "invalid" a backup can
+ * legitimately contain: not corruption, just a record written before this
+ * app enforced a bound it enforces today. `weightKg: -20` on a set from
+ * before this session's fix is the case that found this — the exact rule
+ * `updatePerformedSet`'s own `sanitizeSetChanges` already applies live (see
+ * `edit-session.ts`): a value nobody can make sense of is *absent*, not
+ * corrected into some other number nobody typed. Same decision, same
+ * reasoning, now also on the read side of a backup instead of only the
+ * write side of a live edit.
+ *
+ * Generic on purpose, over one field name at a time: every bound in
+ * `backup-schemas.ts` already states, in the schema itself, whether "absent"
+ * is a meaning that field has (`.nullable()`) or not. Reading that off the
+ * schema — attempt null, see if the record now parses — means a bound added
+ * to some other store next month is repaired the same way automatically,
+ * with nothing here naming that field by hand. A `too_small`/`too_big` issue
+ * is the only thing ever touched: a wrong *type* (a string where a number
+ * belongs), a missing required field, or an unrecognised key is not a
+ * bound violation and is never "repaired" — see `processStore` for what
+ * happens to a record repair cannot save.
+ */
+function repairRecord(raw: unknown, issues: readonly z.core.$ZodIssue[]): unknown {
+  const repaired = structuredClone(raw);
+
+  for (const issue of issues) {
+    if (issue.code !== "too_small" && issue.code !== "too_big") continue;
+    setAtPath(repaired, issue.path, null);
+  }
+
+  return repaired;
+}
+
+/** Mutates `target` at `path`, doing nothing if the path does not exist as an object/array chain. */
+function setAtPath(
+  target: unknown,
+  path: readonly PropertyKey[],
+  value: unknown,
+): void {
+  if (path.length === 0) return;
+
+  let cursor = target;
+  for (let i = 0; i < path.length - 1; i++) {
+    if (cursor === null || typeof cursor !== "object") return;
+    cursor = (cursor as Record<PropertyKey, unknown>)[path[i]!];
+  }
+  if (cursor === null || typeof cursor !== "object") return;
+  (cursor as Record<PropertyKey, unknown>)[path[path.length - 1]!] = value;
+}
+
+interface StoreOutcome<T> {
+  readonly records: readonly T[];
+  readonly sanitizedCount: number;
+  readonly discardedCount: number;
+}
+
+/**
+ * Validates one store's array against its `RECORD_SCHEMAS` entry, record by
+ * record — the fix for the whole file failing over one legacy value. A
+ * record that fails validation gets one repair attempt (`repairRecord`); if
+ * the repaired version still does not parse, that one record is dropped and
+ * every other record in the store is unaffected. Nothing here invents a
+ * value or turns a negative number positive — a field either already parses,
+ * or becomes `null` because the schema says `null` is a meaning that field
+ * already has, or the whole record is discarded.
+ */
+function processStore<T>(
+  schema: z.ZodType<T>,
+  rawRecords: readonly unknown[],
+): StoreOutcome<T> {
+  const records: T[] = [];
+  let sanitizedCount = 0;
+  let discardedCount = 0;
+
+  for (const raw of rawRecords) {
+    const parsed = schema.safeParse(raw);
+    if (parsed.success) {
+      records.push(parsed.data);
+      continue;
+    }
+
+    const repaired = repairRecord(raw, parsed.error.issues);
+    const reparsed = schema.safeParse(repaired);
+    if (reparsed.success) {
+      records.push(reparsed.data);
+      sanitizedCount++;
+    } else {
+      discardedCount++;
+    }
+  }
+
+  return { records, sanitizedCount, discardedCount };
+}
+
+/**
+ * Validation, repair and record-counting, with no store touched — the read
+ * half of `importAll`, split out so a caller can show what a file contains
+ * **before** asking for the confirmation that replaces every domain with it.
  *
  * A technically valid backup with zero records used to reach that same
  * confirmation dialog as any other file, because `recordCount` was only ever
@@ -178,25 +289,51 @@ function parseBackupFile(raw: unknown): ParsedBackup {
     parsedJson = raw;
   }
 
-  const parsed = backupFileSchema.safeParse(parsedJson);
-  if (!parsed.success) return { ok: false, reason: "invalid" };
+  const envelope = backupEnvelopeSchema.safeParse(parsedJson);
+  if (!envelope.success) return { ok: false, reason: "invalid" };
 
-  if (parsed.data.schemaVersion !== BACKUP_FORMAT_VERSION) {
+  if (envelope.data.schemaVersion !== BACKUP_FORMAT_VERSION) {
     return { ok: false, reason: "incompatible" };
   }
 
-  const { stores } = parsed.data;
-  const recordCount =
-    stores.body.length +
-    stores.foodLogs.length +
-    stores.foods.length +
-    stores.diets.length +
-    stores.profile.length +
-    stores.exercises.length +
-    stores.routines.length +
-    stores.sessions.length;
+  const stores = envelope.data.stores;
 
-  return { ok: true, file: parsed.data, recordCount };
+  const body = processStore(RECORD_SCHEMAS.body, stores.body);
+  const foodLogs = processStore(RECORD_SCHEMAS.foodLogs, stores.foodLogs);
+  const foods = processStore(RECORD_SCHEMAS.foods, stores.foods);
+  const diets = processStore(RECORD_SCHEMAS.diets, stores.diets);
+  const profile = processStore(RECORD_SCHEMAS.profile, stores.profile);
+  const exercises = processStore(RECORD_SCHEMAS.exercises, stores.exercises);
+  const routines = processStore(RECORD_SCHEMAS.routines, stores.routines);
+  const sessions = processStore(RECORD_SCHEMAS.sessions, stores.sessions);
+
+  const outcomes = [
+    body,
+    foodLogs,
+    foods,
+    diets,
+    profile,
+    exercises,
+    routines,
+    sessions,
+  ];
+
+  return {
+    ok: true,
+    stores: {
+      body: body.records,
+      foodLogs: foodLogs.records,
+      foods: foods.records,
+      diets: diets.records,
+      profile: profile.records,
+      exercises: exercises.records,
+      routines: routines.records,
+      sessions: sessions.records,
+    },
+    recordCount: outcomes.reduce((sum, o) => sum + o.records.length, 0),
+    sanitizedCount: outcomes.reduce((sum, o) => sum + o.sanitizedCount, 0),
+    discardedCount: outcomes.reduce((sum, o) => sum + o.discardedCount, 0),
+  };
 }
 
 /**
@@ -206,26 +343,36 @@ function parseBackupFile(raw: unknown): ParsedBackup {
 export function previewImport(raw: unknown): ImportResult {
   const parsed = parseBackupFile(raw);
   return parsed.ok
-    ? { ok: true, recordCount: parsed.recordCount }
+    ? {
+        ok: true,
+        recordCount: parsed.recordCount,
+        sanitizedCount: parsed.sanitizedCount,
+        discardedCount: parsed.discardedCount,
+      }
     : { ok: false, reason: parsed.reason };
 }
 
 /**
- * Validates the whole file before writing anything, and writes every store in
- * one IndexedDB transaction spanning all of them.
+ * Validates (and repairs what it safely can) before writing anything, and
+ * writes every store in one IndexedDB transaction spanning all of them.
  *
- * The ordering is the point: a file that fails validation never opens a
- * transaction, so a bad import cannot leave the database half-replaced. And
+ * The ordering is the point: a file that fails the envelope check never opens
+ * a transaction, so a bad import cannot leave the database half-replaced. And
  * because every store clears and refills inside one transaction rather than
  * one each, a failure partway through — a quota hit on the sixth store, say —
  * rolls back every store already written in this call, not just that one.
  * The person either gets their new data or keeps exactly what they had.
+ *
+ * A store that discards every one of its records still writes — as an empty
+ * store, the same as an intentionally empty backup already does. "Replace,
+ * never merge" is this feature's contract regardless of why a record did not
+ * make it into the replacement.
  */
 export async function importAll(raw: unknown): Promise<ImportResult> {
   const parsed = parseBackupFile(raw);
   if (!parsed.ok) return parsed;
 
-  const { stores } = parsed.file;
+  const { stores } = parsed;
   const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
 
   try {
@@ -249,17 +396,12 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
       : new DataError("FAILED", "Falha ao restaurar o backup.", { cause });
   }
 
-  const recordCount =
-    stores.body.length +
-    stores.foodLogs.length +
-    stores.foods.length +
-    stores.diets.length +
-    stores.profile.length +
-    stores.exercises.length +
-    stores.routines.length +
-    stores.sessions.length;
-
-  return { ok: true, recordCount };
+  return {
+    ok: true,
+    recordCount: parsed.recordCount,
+    sanitizedCount: parsed.sanitizedCount,
+    discardedCount: parsed.discardedCount,
+  };
 }
 
 /** Clears the store and writes every record, as part of the caller's transaction. */

@@ -46,8 +46,20 @@ const INITIAL: NutritionProfile = {
 
 const noopBackup: BackupRepository = {
   exportAll: () => Promise.resolve({}),
-  previewImport: () => Promise.resolve({ ok: true, recordCount: 0 }),
-  importAll: () => Promise.resolve({ ok: true, recordCount: 0 }),
+  previewImport: () =>
+    Promise.resolve({
+      ok: true,
+      recordCount: 0,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    }),
+  importAll: () =>
+    Promise.resolve({
+      ok: true,
+      recordCount: 0,
+      sanitizedCount: 0,
+      discardedCount: 0,
+    }),
   forgetDevice: () => Promise.resolve({ ok: true }),
 };
 
@@ -159,5 +171,64 @@ describe("ProfileScreen — conflict recovery", () => {
       const stored = await repository.get();
       expect(stored?.nutrition.weightKg).toBe(90);
     });
+  });
+});
+
+/**
+ * External audit (27/08/2026): "Dados e segurança" closed itself partway
+ * through choosing a backup file to import — right when the preview,
+ * confirmation and any error that follows are what someone most needs to
+ * see. `open` used to be the native uncontrolled default; these tests fail
+ * on that regression and pass only once it stays open through a state
+ * change the `<details>` itself did not request.
+ */
+describe("ProfileScreen — Dados e segurança stays open", () => {
+  function chooseFile(contents: string, name = "backup.json") {
+    const input = document.querySelector('input[type="file"]');
+    if (input === null) throw new Error("file input not found");
+
+    const file = new File([contents], name, { type: "application/json" });
+    Object.defineProperty(input, "files", { value: [file] });
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  it("stays open across the several re-renders choosing a backup file causes", async () => {
+    const user = userEvent.setup();
+    const store = new MemoryStore<Profile>(PROFILE_STORE);
+    const repository = new LocalProfileRepository(store);
+    await repository.save(profile(INITIAL, 1), null);
+
+    mount(repository);
+
+    const summary = await screen.findByText("Dados e segurança");
+    await user.click(summary);
+
+    const details = summary.closest("details");
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(true);
+
+    chooseFile('{"schemaVersion":1}');
+    await screen.findByText("Este arquivo contém 0 registros.");
+
+    expect(details?.open).toBe(true);
+  });
+
+  it("still opens and closes normally on the person's own click", async () => {
+    const user = userEvent.setup();
+    const store = new MemoryStore<Profile>(PROFILE_STORE);
+    const repository = new LocalProfileRepository(store);
+    await repository.save(profile(INITIAL, 1), null);
+
+    mount(repository);
+
+    const summary = await screen.findByText("Dados e segurança");
+    const details = summary.closest("details");
+    expect(details?.open).toBe(false);
+
+    await user.click(summary);
+    expect(details?.open).toBe(true);
+
+    await user.click(summary);
+    expect(details?.open).toBe(false);
   });
 });

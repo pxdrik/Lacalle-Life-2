@@ -11,6 +11,24 @@ import { useToast } from "@/design-system/components/toast";
 import { useBackupRepository } from "../data/backup-repository-context";
 
 /**
+ * What the chosen file's own row shows, distinct from the `error` banner
+ * above it. Three explicit states rather than "`null` means still reading,
+ * unless it also failed" — that collapsed shape is what let a failed read
+ * keep showing "Lendo arquivo…" forever (external audit, 27/08/2026): the
+ * label had no way to tell "still working" apart from "already stopped, and
+ * did not work".
+ */
+type Preview =
+  | { readonly status: "reading" }
+  | {
+      readonly status: "ready";
+      readonly recordCount: number;
+      readonly sanitizedCount: number;
+      readonly discardedCount: number;
+    }
+  | { readonly status: "failed" };
+
+/**
  * The only durability mechanism this app has that survives clearing the
  * browser, uninstalling the PWA, or losing the phone.
  * `navigator.storage.persist()`, requested silently at startup, is hardening
@@ -22,10 +40,8 @@ export function BackupPanel() {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
-  /** `null` while the chosen file is still being read and validated. */
-  const [preview, setPreview] = useState<
-    { readonly recordCount: number } | null
-  >(null);
+  /** `null` while no file has been chosen at all. */
+  const [preview, setPreview] = useState<Preview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -65,7 +81,7 @@ export function BackupPanel() {
   function handleFileChosen(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0] ?? null;
     setError(null);
-    setPreview(null);
+    setPreview(file === null ? null : { status: "reading" });
     setPendingFile(file);
     // Clears the input's own memory of the file, so choosing the exact same
     // file a second time still fires `onChange` instead of being a no-op.
@@ -87,16 +103,23 @@ export function BackupPanel() {
       const result = await (await repository).previewImport(text);
 
       if (result.ok) {
-        setPreview({ recordCount: result.recordCount });
+        setPreview({
+          status: "ready",
+          recordCount: result.recordCount,
+          sanitizedCount: result.sanitizedCount,
+          discardedCount: result.discardedCount,
+        });
         return;
       }
 
+      setPreview({ status: "failed" });
       setError(
         result.reason === "incompatible"
           ? "Este arquivo é de uma versão do backup que este app não sabe ler. Verifique se há uma atualização do app."
           : "Este arquivo não é um backup válido do LaCalle Life, ou está corrompido.",
       );
     } catch {
+      setPreview({ status: "failed" });
       setError("Não foi possível ler o arquivo selecionado.");
     }
   }
@@ -111,7 +134,7 @@ export function BackupPanel() {
       const result = await (await repository).importAll(text);
 
       if (result.ok) {
-        toast(`Backup restaurado, ${String(result.recordCount)} registros.`);
+        toast(importedToastMessage(result));
         setPendingFile(null);
         setPreview(null);
         return;
@@ -228,23 +251,41 @@ export function BackupPanel() {
         />
       </div>
 
-      {pendingFile !== null && (
+      {pendingFile !== null && preview !== null && (
         <div className="flex flex-wrap items-center gap-3 rounded-md border border-line-strong bg-muted px-3 py-2">
           <div className="min-w-0">
             <p className="text-sm text-ink">{pendingFile.name}</p>
-            {/* The number that has to be seen before the confirming tap, not
-                after — a file with 0 registros is technically valid and
-                would otherwise sail through the same confirmation as any
-                other. */}
-            <p className="text-xs text-ink-subtle">
-              {preview === null
-                ? "Lendo arquivo…"
-                : `Este arquivo contém ${String(preview.recordCount)} ${
-                    preview.recordCount === 1 ? "registro" : "registros"
-                  }.`}
-            </p>
+            {/* Three distinct states, not "still `null`, or already failed
+                and stayed `null` anyway" — a failed read used to leave this
+                permanently saying "Lendo arquivo…" even after the error
+                banner above already explained what went wrong (external
+                audit, 27/08/2026). */}
+            {preview.status === "reading" && (
+              <p className="text-xs text-ink-subtle">Lendo arquivo…</p>
+            )}
+            {preview.status === "failed" && (
+              <p className="text-xs text-ink-subtle">
+                Não foi possível ler o arquivo.
+              </p>
+            )}
+            {preview.status === "ready" && (
+              <>
+                {/* The number that has to be seen before the confirming tap,
+                    not after — a file with 0 registros is technically valid
+                    and would otherwise sail through the same confirmation as
+                    any other. */}
+                <p className="text-xs text-ink-subtle">
+                  {recordCountLabel(preview)}
+                </p>
+                {(preview.sanitizedCount > 0 || preview.discardedCount > 0) && (
+                  <p className="text-xs text-ink-subtle">
+                    {legacyRecordsLabel(preview)}
+                  </p>
+                )}
+              </>
+            )}
           </div>
-          {preview !== null && (
+          {preview.status === "ready" && (
             <ConfirmButton
               onConfirm={() => {
                 void handleImportConfirmed();
@@ -288,4 +329,67 @@ export function BackupPanel() {
       </div>
     </div>
   );
+}
+
+function recordCountLabel(preview: {
+  readonly recordCount: number;
+}): string {
+  return `Este arquivo contém ${String(preview.recordCount)} ${
+    preview.recordCount === 1 ? "registro" : "registros"
+  }.`;
+}
+
+/**
+ * What a legacy value in the file becomes on import — see `repairRecord` in
+ * `composition/backup.ts` for the rule itself. Said here, before the
+ * confirming tap, not only in the toast after: someone who exported this
+ * file expects it back exactly as it was, and a set that predates a bound
+ * this app enforces today either loses that one field or, if it cannot be
+ * recovered safely, the whole record — both worth knowing before "Substituir
+ * tudo?", not as a surprise afterwards.
+ */
+function legacyRecordsLabel(preview: {
+  readonly sanitizedCount: number;
+  readonly discardedCount: number;
+}): string {
+  const parts: string[] = [];
+
+  if (preview.sanitizedCount > 0) {
+    parts.push(
+      `${String(preview.sanitizedCount)} ${
+        preview.sanitizedCount === 1
+          ? "registro antigo será ajustado"
+          : "registros antigos serão ajustados"
+      } (um valor que não é mais aceito vira "não informado")`,
+    );
+  }
+  if (preview.discardedCount > 0) {
+    parts.push(
+      `${String(preview.discardedCount)} ${
+        preview.discardedCount === 1
+          ? "registro não pôde ser recuperado e será descartado"
+          : "registros não puderam ser recuperados e serão descartados"
+      }`,
+    );
+  }
+
+  return `${parts.join("; ")}.`;
+}
+
+function importedToastMessage(result: {
+  readonly recordCount: number;
+  readonly sanitizedCount: number;
+  readonly discardedCount: number;
+}): string {
+  const base = `Backup restaurado, ${String(result.recordCount)} registros.`;
+  if (result.sanitizedCount === 0 && result.discardedCount === 0) return base;
+
+  const notes: string[] = [];
+  if (result.sanitizedCount > 0) {
+    notes.push(`${String(result.sanitizedCount)} ajustados`);
+  }
+  if (result.discardedCount > 0) {
+    notes.push(`${String(result.discardedCount)} descartados`);
+  }
+  return `${base} (${notes.join(", ")})`;
 }

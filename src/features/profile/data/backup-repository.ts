@@ -9,7 +9,14 @@
  * produces something JSON-serialisable and importing reports what happened.
  */
 export type ImportResult =
-  | { readonly ok: true; readonly recordCount: number }
+  | {
+      readonly ok: true;
+      readonly recordCount: number;
+      /** Records kept only after nulling one out-of-range legacy field. */
+      readonly sanitizedCount: number;
+      /** Records that could not be recovered safely, and were dropped. */
+      readonly discardedCount: number;
+    }
   | { readonly ok: false; readonly reason: "invalid" | "incompatible" };
 
 /**

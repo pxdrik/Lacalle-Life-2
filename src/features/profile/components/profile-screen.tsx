@@ -22,6 +22,7 @@ export function ProfileScreen() {
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [backupOpen, setBackupOpen] = useState(false);
 
   if (state.status === "loading") {
     return <Skeleton className="h-72 rounded-lg" />;
@@ -158,11 +159,25 @@ export function ProfileScreen() {
           whether or not a profile does, and covers every domain, not just
           this one. Moved to a secondary, collapsed area (H.1): it used to
           be the first card on the screen, ahead of the profile fields
-          someone actually came here to fill in. Collapsed, not hidden — the
-          `<details>` element gets this for free, with no JS state and no
-          dependency, and stays reachable to a screen reader and to
-          find-in-page either way. */}
-      <details className="group rounded-lg border border-line">
+          someone actually came here to fill in. Collapsed, not hidden —
+          reachable to a screen reader and to find-in-page either way.
+          `open` is controlled, not the native uncontrolled default: an
+          external audit (27/08/2026) found this section closing itself
+          partway through choosing a backup file to import, right when
+          seeing the preview/confirmation/error that follows matters most.
+          No re-render anywhere in this file's own state should ever be able
+          to close `<details>` out from under the person reading it — an
+          explicit `open`, only ever changed by the person's own click on
+          `<summary>` (`onToggle`, the native event for exactly that),
+          removes the possibility regardless of what triggered the
+          re-render. */}
+      <details
+        className="group rounded-lg border border-line"
+        open={backupOpen}
+        onToggle={(event) => {
+          setBackupOpen(event.currentTarget.open);
+        }}
+      >
         <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
           Dados e segurança
           <ChevronDown
