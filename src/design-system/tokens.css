@@ -427,13 +427,15 @@
    * Alturas de controle — pág. 25 e 26, com um desvio deliberado do lado do
    * produto (Pedro, 26/08/2026).
    *
-   * A pág. 25 dá 48 grande / 40 padrão / 32 pequeno — e é essa a base que
-   * ainda define `[data-density="compact"]` abaixo. Mas o Padrão do
+   * A pág. 25 dá 48 grande / 40 padrão / 32 pequeno. Mas o Padrão do
    * brandbook lia pequeno demais numa tela de desktop, então o produto
-   * decidiu subir um degrau inteiro: o que era o tamanho de "Confortável"
-   * virou o novo Padrão (56/48/40), e "Confortável" subiu de novo a partir
-   * dali (64/56/48). Input: **44 px em celular e desktop**, que a pág. 26
-   * fixa sem variação — não faz parte deste degrau.
+   * subiu a escala inteira um degrau: o que era "Confortável" virou o
+   * novo Padrão (56/48/40), "Confortável" subiu de novo a partir dali
+   * (64/56/48), e o que era o Padrão original da página virou o novo
+   * Compacto (40/32/48, em `[data-density="compact"]` abaixo) — nenhum
+   * dos três patamares atuais é o valor original de nenhum dos três nomes
+   * da página. Input: **44 px em celular e desktop**, que a pág. 26 fixa
+   * sem variação — não faz parte deste degrau.
    *
    * A decisão antiga de densidade — controles maiores no celular porque "é o
    * que um polegar suado acerta entre séries" — não morre aqui, muda de
@@ -537,18 +539,23 @@
  *
  * `default` não aparece aqui — ausência de atributo já cai nos valores base
  * declarados acima, então redeclará-los seria uma segunda fonte da verdade
- * que só pode divergir da primeira. `compact` continua exatamente nos
- * valores originais da pág. 25 (30/24/36) — o degrau que subiu foi o de
- * Padrão pra cima, não este.
+ * que só pode divergir da primeira.
+ *
+ * "O Compacto deve ser o Padrão antigo agora" (Pedro, 26/08/2026, logo
+ * depois de subir Padrão e Confortável um degrau). Compacto sobe também,
+ * pros números que eram do Padrão original da pág. 25 (40/32/48, padding
+ * 18/12/24, escala 1) — a escala inteira subiu um degrau, não só os dois
+ * de cima. Os valores originais de Compacto (30/24/36) não sobrevivem em
+ * nenhum dos três patamares agora.
  */
 [data-density="compact"] {
-  --control-h: 30px;
-  --control-h-sm: 24px;
-  --control-h-lg: 36px;
-  --control-px: 12px;
-  --control-px-sm: 8px;
-  --control-px-lg: 16px;
-  --ui-scale: 0.85;
+  --control-h: 40px;
+  --control-h-sm: 32px;
+  --control-h-lg: 48px;
+  --control-px: 18px;
+  --control-px-sm: 12px;
+  --control-px-lg: 24px;
+  --ui-scale: 1;
 }
 
 /**
