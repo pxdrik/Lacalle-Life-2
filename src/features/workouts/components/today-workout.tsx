@@ -115,15 +115,24 @@ function FinishedSession({ session }: { readonly session: Session }) {
   const duration = sessionDurationMs(session);
   const volume = sessionVolumeKg(session);
 
+  // Achado de auditoria externa (27/08/2026): sem `aria-label`, o nome
+  // acessível deste link era a concatenação crua dos três textos visíveis —
+  // "Supino6:55·280 kg", sem separador nenhum para quem ouve em vez de ver.
+  // O texto visível continua o mesmo; só o nome lido em voz alta ganha
+  // vírgulas nos lugares onde a tela já usa "·" para separar visualmente.
+  const durationLabel = duration === null ? "sem duração registrada" : formatDuration(duration);
+  const accessibleName = `Ver treino ${session.name}, ${durationLabel}, ${formatDecimal(volume.kg)} kg movidos`;
+
   return (
     <Link
       href={`/sessao/${session.id}`}
+      aria-label={accessibleName}
       className="flex min-h-(--control-h-sm) items-baseline gap-3 rounded-sm px-2 py-1.5 -mx-2 transition-colors duration-150 ease-out hover:bg-muted"
     >
-      <span className="min-w-0 flex-1 truncate text-sm text-ink">
+      <span className="min-w-0 flex-1 truncate text-sm text-ink" aria-hidden>
         {session.name}
       </span>
-      <span className="shrink-0 text-xs tabular-nums text-ink-muted">
+      <span className="shrink-0 text-xs tabular-nums text-ink-muted" aria-hidden>
         {duration === null ? "—" : formatDuration(duration)}
         <span className="mx-1.5 text-line-strong">·</span>
         {formatDecimal(volume.kg)} kg

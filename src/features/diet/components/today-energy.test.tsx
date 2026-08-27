@@ -130,6 +130,28 @@ describe("with a profile", () => {
   });
 });
 
+describe("fiber", () => {
+  // Pedro, 27/08/2026: "remove completamente o aviso 'meta de referência'".
+  // Só o número — nenhuma explicação, e nenhum "consumido" inventado, já
+  // que nenhum alimento do catálogo carrega dado de fibra.
+  it("shows the flat goal without the words 'meta de referência'", async () => {
+    mount(logOf(600, 40), PROFILE);
+    await screen.findByText(/kcal restantes/);
+
+    expect(screen.getByText("Fibra · 35 g/dia")).toBeInTheDocument();
+    expect(screen.queryByText(/meta de referência/i)).not.toBeInTheDocument();
+  });
+
+  it("never shows a consumed value for fiber, real or fabricated", async () => {
+    mount(logOf(600, 40), PROFILE);
+    await screen.findByText(/kcal restantes/);
+
+    // The other three macros read "consumido / meta" (a `Metric`); fiber
+    // is deliberately not one of them, so it must never gain a "/" pair.
+    expect(screen.queryByText(/^0\s*\/\s*35/)).not.toBeInTheDocument();
+  });
+});
+
 describe("with nothing recorded yet", () => {
   it("invites a first entry instead of showing an empty card", async () => {
     mount(null, null);

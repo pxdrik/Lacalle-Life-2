@@ -58,6 +58,35 @@ describe("typing a weight with a comma", () => {
   });
 });
 
+describe("typing a minus sign", () => {
+  // Found by an external audit (27/08/2026): typing "-20" was accepted as a
+  // real weight, and the negative set silently *subtracted* from the Volume
+  // total in Evolução instead of failing anywhere visible.
+  it("never lets the character land in the field", async () => {
+    render(<Harness />);
+
+    await userEvent.type(field(), "-20");
+
+    expect(field()).toHaveValue("20");
+    expect(parsed()).toBe("20");
+  });
+
+  it("drops a leading minus and keeps the rest of the number", async () => {
+    render(<Harness />);
+
+    await userEvent.type(field(), "-62,5");
+
+    expect(field()).toHaveValue("62,5");
+    expect(parsed()).toBe("62.5");
+  });
+
+  it("still accepts zero and ordinary positive decimals", async () => {
+    render(<Harness />);
+    await userEvent.type(field(), "0");
+    expect(parsed()).toBe("0");
+  });
+});
+
 describe("when the value changes from outside", () => {
   it("shows the new number, because a stepper moved it", async () => {
     function Stepper() {

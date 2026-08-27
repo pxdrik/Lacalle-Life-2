@@ -99,6 +99,58 @@ describe("editing during the workout", () => {
     expect(set?.planned).toEqual({ reps: 8, weightKg: 60, rpe: 8 });
   });
 
+  // Found by an external audit (27/08/2026): a negative weight was accepted
+  // here, and the negative set silently subtracted from the Volume total in
+  // Evolução instead of failing anywhere. `WeightField` no longer lets the
+  // character be typed, but this is the guarantee, not the UI's courtesy —
+  // every caller (live UI, a future import path, a test) goes through here.
+  describe("rejecting a negative weight", () => {
+    it.each([-1, -10, -0.5, -100])(
+      "leaves the set's weight unchanged for %s kg",
+      (invalid) => {
+        const { session, exerciseId, setIds } = runningSession();
+        const after = updatePerformedSet(session, exerciseId, setIds[0]!, {
+          weightKg: invalid,
+        });
+
+        // Unchanged from `runningSession`'s planned 60 kg — not clamped to 0,
+        // not the invalid number: a no-op, the same contract every other
+        // stale-tap operation in this file already has.
+        expect(after.exercises[0]?.sets[0]?.weightKg).toBe(60);
+      },
+    );
+
+    it("still applies reps and rpe from the same call, dropping only the weight", () => {
+      const { session, exerciseId, setIds } = runningSession();
+      const after = updatePerformedSet(session, exerciseId, setIds[0]!, {
+        reps: 6,
+        weightKg: -20,
+        rpe: 9,
+      });
+
+      const set = after.exercises[0]?.sets[0];
+      expect(set).toMatchObject({ reps: 6, weightKg: 60, rpe: 9 });
+    });
+
+    it.each([0, 5, 10, 10.5, 100])("accepts %s kg as a valid weight", (valid) => {
+      const { session, exerciseId, setIds } = runningSession();
+      const after = updatePerformedSet(session, exerciseId, setIds[0]!, {
+        weightKg: valid,
+      });
+
+      expect(after.exercises[0]?.sets[0]?.weightKg).toBe(valid);
+    });
+
+    it("lets weight go back to null (not entered), which is not negative", () => {
+      const { session, exerciseId, setIds } = runningSession();
+      const after = updatePerformedSet(session, exerciseId, setIds[0]!, {
+        weightKg: null,
+      });
+
+      expect(after.exercises[0]?.sets[0]?.weightKg).toBeNull();
+    });
+  });
+
   it("adds an extra set with no plan behind it", () => {
     const { session, exerciseId } = runningSession();
     const after = addPerformedSet(session, exerciseId);

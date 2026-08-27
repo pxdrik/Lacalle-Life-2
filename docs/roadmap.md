@@ -2563,6 +2563,9 @@ lógica de não empilhar duas mudanças estruturais no mesmo domínio.
   pode ser ignorado por ora**, a menos que a fase de decisão de nutrientes
   opcionais (abaixo) crie o campo que faltava, e mesmo assim isso não
   obriga a fechar o item de fibra imediatamente.
+- Duplicar dieta — apontado pela auditoria externa de 27/08/2026 como
+  oportunidade, não como bug; deliberadamente fora desta rodada de
+  correções.
 
 ### Alimentos — nutrientes opcionais (fibra, sódio, açúcar, gordura
 saturada, gordura trans, colesterol)

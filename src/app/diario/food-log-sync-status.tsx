@@ -9,6 +9,7 @@ import {
 } from "@/composition/sync/sync-engine";
 import type { MealConflict } from "@/composition/sync/food-log-merge";
 import type { FoodLogConflictResolution } from "@/composition/sync/food-log-sync";
+import { createSupabaseAuthRepository } from "@/features/auth/data/supabase-auth-repository";
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
@@ -42,13 +43,47 @@ interface SyncedState {
 
 const IDLE: SyncedState = { day: "", conflicts: null, error: null };
 
+type AuthKnowledge = "unknown" | "anonymous" | "authenticated";
+
 export function FoodLogSyncStatus({ day }: { readonly day: string }) {
   const [pending, setPending] = useState(false);
+  // Achado de auditoria externa (27/08/2026): sem sessão, "Sincronizar" era
+  // um clique morto — `pushFoodLog`/`pullFoodLog` já voltam
+  // "not-authenticated" em silêncio (por design, ver `runFoodLogSync`), então
+  // nada visível acontecia e nada explicava por quê. `"unknown"` cobre o
+  // instante entre montar e `getUser()` responder, para quem já está logado
+  // não ver o aviso piscar antes do botão; não configurado resolve direto em
+  // "anonymous", sem round-trip nenhum.
+  const [auth, setAuth] = useState<AuthKnowledge>(() =>
+    isSupabaseConfigured() ? "unknown" : "anonymous",
+  );
   // Marcado com o próprio dia, do mesmo jeito que `useFoodLogDay` marca
   // `loaded` — assim trocar de dia não mostra por um instante o conflito
   // (ou a falta dele) do dia anterior antes do novo sync terminar.
   const [synced, setSynced] = useState<SyncedState>(IDLE);
   const current = synced.day === day ? synced : IDLE;
+
+  // Roda uma vez por sessão de página, não por dia — trocar de dia no
+  // diário não muda quem está logado.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    const repository = createSupabaseAuthRepository();
+    let active = true;
+
+    void repository.getUser().then((user) => {
+      if (active) setAuth(user === null ? "anonymous" : "authenticated");
+    });
+
+    const unsubscribe = repository.onAuthStateChange((user) => {
+      if (active) setAuth(user === null ? "anonymous" : "authenticated");
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, []);
 
   // Sincroniza sozinho ao abrir o dia — a UI não espera um clique para um
   // dia comum parecer em dia. Sem spinner aqui (transparente); `sync`,
@@ -161,11 +196,23 @@ export function FoodLogSyncStatus({ day }: { readonly day: string }) {
     );
   }
 
+  if (auth === "anonymous") {
+    return (
+      <div className="mt-4 flex items-center gap-2">
+        <p className="text-xs text-ink-subtle">
+          Dados salvos neste dispositivo. Entre na sua conta para sincronizar.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 flex items-center gap-2">
-      <Button variant="ghost" size="sm" pending={pending} onClick={() => void sync()}>
-        Sincronizar
-      </Button>
+      {auth === "authenticated" && (
+        <Button variant="ghost" size="sm" pending={pending} onClick={() => void sync()}>
+          Sincronizar
+        </Button>
+      )}
       {error !== null && <Notice tone="warning">{error}</Notice>}
     </div>
   );

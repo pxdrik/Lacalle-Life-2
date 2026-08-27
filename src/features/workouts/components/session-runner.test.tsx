@@ -235,6 +235,111 @@ describe("finishing a completed workout", () => {
  * o teste tem de forçar os dois toques no mesmo lote, não confiar em cliques
  * devagar.
  */
+/**
+ * Achado de auditoria externa (27/08/2026): tocar em concluir numa série sem
+ * reps nem peso a marcava concluída na hora, sem nenhum aviso — um treino
+ * inteiro podia terminar sem carga real registrada. A confirmação preserva o
+ * caso legítimo de aquecimento (BUG-01: "não simplesmente desabilite o
+ * botão"), só que agora exige um segundo toque.
+ */
+describe("completing a set with no reps or weight recorded", () => {
+  function sessionWithEmptySet(): Session {
+    const session = sessionWith(0, 1);
+    return {
+      ...session,
+      exercises: [
+        {
+          ...session.exercises[0]!,
+          sets: [
+            { ...session.exercises[0]!.sets[0]!, reps: null, weightKg: null },
+          ],
+        },
+      ],
+    };
+  }
+
+  it("asks for confirmation instead of completing right away", async () => {
+    const sessions = mount(sessionWithEmptySet());
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Concluir série sem registrar carga?",
+      }),
+    ).toBeInTheDocument();
+    // Not completed yet — the confirmation is still open.
+    expect((await sessions.getById("s1"))?.exercises[0]?.sets[0]).toMatchObject(
+      { isCompleted: false },
+    );
+  });
+
+  it("does nothing when 'Voltar' is pressed", async () => {
+    const sessions = mount(sessionWithEmptySet());
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Voltar" }));
+
+    expect(
+      screen.queryByRole("heading", {
+        name: "Concluir série sem registrar carga?",
+      }),
+    ).not.toBeInTheDocument();
+    expect((await sessions.getById("s1"))?.exercises[0]?.sets[0]).toMatchObject(
+      { isCompleted: false },
+    );
+  });
+
+  it("completes the set when 'Concluir mesmo assim' is pressed", async () => {
+    const sessions = mount(sessionWithEmptySet());
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir mesmo assim" }),
+    );
+
+    await waitFor(async () => {
+      const stored = await sessions.getById("s1");
+      expect(stored?.exercises[0]?.sets[0]).toMatchObject({
+        isCompleted: true,
+        reps: null,
+        weightKg: null,
+      });
+    });
+  });
+
+  it("completes directly, without asking, once reps or weight is filled", async () => {
+    // sessionWith(0, 8) fills every set with reps:10, weightKg:60 — the
+    // ordinary case this confirmation must never get in the way of.
+    const sessions = mount(sessionWith(0, 1));
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+
+    expect(
+      screen.queryByRole("heading", {
+        name: "Concluir série sem registrar carga?",
+      }),
+    ).not.toBeInTheDocument();
+    await waitFor(async () => {
+      expect(
+        (await sessions.getById("s1"))?.exercises[0]?.sets[0],
+      ).toMatchObject({ isCompleted: true });
+    });
+  });
+});
+
 describe("marking two different sets done in the same React batch", () => {
   it("keeps both edits — neither the UI nor storage drops one", async () => {
     const sessions = mount(sessionWith(0, 8));

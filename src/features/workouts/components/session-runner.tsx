@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { Dialog } from "@/design-system/components/dialog";
 import { DisarmProgress } from "@/design-system/components/disarm-progress";
 import { useArmed } from "@/design-system/hooks/use-armed";
 
@@ -60,6 +61,16 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const timer = useRestTimer();
   const finish = useArmed();
   const [editing, setEditing] = useState(false);
+  // Um toque em "concluir" numa série sem reps nem peso pede confirmação em
+  // vez de completar direto — achado de auditoria externa (27/08/2026): sem
+  // isso, um treino inteiro podia ser "finalizado" sem nenhuma carga real
+  // registrada. `null` quando nada está pendente; guarda o par
+  // exercício/série, não um booleano, porque mais de um cartão de exercício
+  // pode estar na tela ao mesmo tempo.
+  const [pendingComplete, setPendingComplete] = useState<{
+    readonly exerciseId: string;
+    readonly setId: string;
+  } | null>(null);
 
   const running = state.status === "ready" && state.session.finishedAt === null;
   const now = useTicker(running);
@@ -114,6 +125,18 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         }}
       />
     );
+  }
+
+  /** Completes a set and starts the rest timer — the actual effect behind a
+   * tap, shared by the direct path (set already has data) and the confirm
+   * dialog's "Concluir mesmo assim" (set does not). */
+  function completeSetWithTimer(
+    exerciseId: string,
+    setId: string,
+    restSeconds: number | null,
+  ) {
+    apply((current) => completeSet(current, exerciseId, setId));
+    if (restSeconds !== null && restSeconds > 0) timer.start(restSeconds);
   }
 
   const next = nextIncompleteSet(session);
@@ -311,21 +334,26 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
                 const set = exercise.sets.find((item) => item.id === setId);
                 const wasCompleted = set?.isCompleted === true;
 
-                apply((current) =>
-                  wasCompleted
-                    ? uncompleteSet(current, exercise.id, setId)
-                    : completeSet(current, exercise.id, setId),
-                );
-
-                // Rest starts on completion and stops on an undo, because an
-                // undo means the set is not over.
-                if (wasCompleted) timer.stop();
-                else if (
-                  exercise.restSeconds !== null &&
-                  exercise.restSeconds > 0
-                ) {
-                  timer.start(exercise.restSeconds);
+                if (wasCompleted) {
+                  apply((current) =>
+                    uncompleteSet(current, exercise.id, setId),
+                  );
+                  // Stops, because an undo means the set is not over.
+                  timer.stop();
+                  return;
                 }
+
+                // Sem reps nem peso: pede confirmação em vez de completar
+                // direto — RPE sozinho não conta como "carga registrada"
+                // pra este aviso, e uma série de aquecimento sem anotação
+                // continua um caso legítimo, só que agora confirmado, não
+                // silencioso.
+                if (set?.reps === null && set.weightKg === null) {
+                  setPendingComplete({ exerciseId: exercise.id, setId });
+                  return;
+                }
+
+                completeSetWithTimer(exercise.id, setId, exercise.restSeconds);
               }}
               onRemoveSet={(setId) => {
                 apply((current) =>
@@ -384,6 +412,51 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
 
       <RestTimerBar timer={timer} />
       <ExerciseDetailDialog control={detail} />
+
+      {/* Achado de auditoria externa (27/08/2026): tocar em concluir numa
+          série vazia a marcava concluída na hora, sem repetições nem peso,
+          sem nenhum sinal disso no resumo do treino. Preserva o caso
+          legítimo — aquecimento sem anotação — em vez de bloquear: uma
+          confirmação de um toque, não um formulário. */}
+      <Dialog
+        open={pendingComplete !== null}
+        title="Concluir série sem registrar carga?"
+        onClose={() => {
+          setPendingComplete(null);
+        }}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-ink-muted">
+            Nenhuma repetição nem peso foi preenchido para esta série.
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setPendingComplete(null);
+              }}
+            >
+              Voltar
+            </Button>
+            <Button
+              onClick={() => {
+                if (pendingComplete === null) return;
+                const exercise = session.exercises.find(
+                  (item) => item.id === pendingComplete.exerciseId,
+                );
+                completeSetWithTimer(
+                  pendingComplete.exerciseId,
+                  pendingComplete.setId,
+                  exercise?.restSeconds ?? null,
+                );
+                setPendingComplete(null);
+              }}
+            >
+              Concluir mesmo assim
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 }

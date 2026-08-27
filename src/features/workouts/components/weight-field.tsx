@@ -50,12 +50,38 @@ export function WeightField({ value, label, onChange, className }: Props) {
       aria-label={label}
       placeholder="—"
       onChange={(event) => {
-        setDraft(event.target.value);
-        onChange(parseDecimal(event.target.value));
+        const next = readWeight(event.target.value);
+        setDraft(next.text);
+        onChange(next.weightKg);
       }}
       className={className}
     />
   );
+}
+
+/**
+ * What may be typed into a set's weight: digits and one separator, nothing
+ * else — no minus sign.
+ *
+ * Found by an external audit (27/08/2026): this field passed `event.target
+ * .value` straight to `parseDecimal`, which happily parses "-20" as −20.
+ * That −20 then persisted as a real set, silently *subtracting* from the
+ * Volume total in Evolução instead of erroring anywhere. The portion field
+ * in the diary (`meal-item-row.tsx`'s `readGrams`) already solved exactly
+ * this for grams — same technique here, kept as its own function because
+ * the two fields disagree on what an empty result means: a portion defaults
+ * to `0`, a set's weight stays `null` ("not entered"), same as before this
+ * fix.
+ */
+function readWeight(input: string): {
+  readonly text: string;
+  readonly weightKg: number | null;
+} {
+  const kept = input.replace(/[^\d,.]/g, "");
+  const [whole = "", ...rest] = kept.split(/[.,]/);
+  const text = rest.length === 0 ? whole : `${whole},${rest.join("")}`;
+
+  return { text, weightKg: parseDecimal(text) };
 }
 
 /**

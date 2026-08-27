@@ -1,9 +1,12 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+
 import { HomeDataProvider } from "@/composition/data-providers";
 import { dayKey, formatLongDay } from "@/core/format/day";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { Skeleton } from "@/design-system/components/skeleton";
 import { TodayProgress } from "@/features/body";
 import { TodayEnergy } from "@/features/diet/components/today-energy";
 import { TodayMeals } from "@/features/diet/components/today-meals";
@@ -49,34 +52,69 @@ import { PageShell } from "@/design-system/components/page-shell";
  *
  * A client route for the same reason as `/diario` — only the browser knows
  * what today is where the reader is standing.
+ *
+ * **`today` reads through `useSyncExternalStore`, the same mechanism
+ * `ThemeProvider` already uses for "the server cannot know this value".**
+ * `dayKey(new Date())` read straight into render used to run once on the
+ * server (its own clock, usually UTC) and again on the client (the reader's
+ * local clock) — two different day keys, so the subtitle text and every
+ * child fetching by `day` disagreed with what the server had sent, and React
+ * refused to hydrate (external audit, 27/08/2026: error #418 on every load).
+ * `getServerToday` hands back `null` for both the server render and the
+ * first client render, so hydration always matches; React then re-renders
+ * once, immediately, with `getToday`'s real answer — no effect, no manual
+ * `setState`, and nothing for `react-hooks/set-state-in-effect` to flag,
+ * because there is no effect calling `setState` at all.
  */
+function getToday(): string | null {
+  return dayKey(new Date());
+}
+
+function getServerToday(): string | null {
+  return null;
+}
+
+function subscribeToNothing() {
+  // The day this page opened to never changes again on its own — nothing to
+  // subscribe to. `useSyncExternalStore` still needs a function here to do
+  // the one resync after hydration described above.
+  return () => {};
+}
+
 export default function HomePage() {
-  const today = dayKey(new Date());
+  const today = useSyncExternalStore(subscribeToNothing, getToday, getServerToday);
 
   return (
     <PageShell padding="tight">
       <PageHeader
         icon={ICONS.today}
         title="Hoje"
-        subtitle={capitalise(formatLongDay(today))}
+        subtitle={today === null ? undefined : capitalise(formatLongDay(today))}
       />
 
-      <HomeDataProvider>
-        <ProfileIncompleteNotice />
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <TodayEnergy day={today} />
+      {today === null ? (
+        <div className="mt-8 space-y-4">
+          <Skeleton className="h-72 w-full rounded-lg" />
+          <Skeleton className="h-40 w-full rounded-lg" />
         </div>
+      ) : (
+        <HomeDataProvider>
+          <ProfileIncompleteNotice />
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <TodayMeals day={today} />
-          <TodayWorkout day={today} />
-        </div>
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <TodayEnergy day={today} />
+          </div>
 
-        <div className="mt-6 border-t border-line pt-3">
-          <TodayProgress />
-        </div>
-      </HomeDataProvider>
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <TodayMeals day={today} />
+            <TodayWorkout day={today} />
+          </div>
+
+          <div className="mt-6 border-t border-line pt-3">
+            <TodayProgress />
+          </div>
+        </HomeDataProvider>
+      )}
     </PageShell>
   );
 }

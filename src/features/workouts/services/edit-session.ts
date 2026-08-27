@@ -45,7 +45,34 @@ export function updatePerformedSet(
   setId: EntityId,
   changes: PerformedSetChanges,
 ): Session {
-  return mapSet(session, exerciseId, setId, (set) => ({ ...set, ...changes }));
+  return mapSet(session, exerciseId, setId, (set) => ({
+    ...set,
+    ...sanitizeSetChanges(changes),
+  }));
+}
+
+/**
+ * Negative weight has no meaning for a set someone actually performed, and
+ * this is the one function every caller — the live UI, a future import path,
+ * a test — goes through to write it. Found by an external audit
+ * (27/08/2026): `WeightField` passed a typo'd minus sign straight through,
+ * and the negative set *subtracted* from the Volume total in Evolução
+ * instead of failing anywhere. `WeightField` itself no longer lets the
+ * character be typed, but that is the UI being polite, not the guarantee —
+ * this is.
+ *
+ * Drops the field rather than clamping it to `0` or throwing: a no-op that
+ * leaves the set's previous weight in place is the same "stale tap changes
+ * nothing" contract every other operation in this file already has, and
+ * inventing a `0` the person never typed would be exactly the kind of
+ * fabricated number this codebase refuses to show elsewhere.
+ */
+function sanitizeSetChanges(changes: PerformedSetChanges): PerformedSetChanges {
+  if (changes.weightKg === undefined || changes.weightKg === null) return changes;
+  if (changes.weightKg >= 0) return changes;
+
+  const { weightKg: _rejected, ...rest } = changes;
+  return rest;
 }
 
 /**

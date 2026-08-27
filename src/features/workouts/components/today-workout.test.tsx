@@ -115,4 +115,20 @@ describe("TodayWorkout", () => {
       await screen.findByRole("link", { name: "Começar" }),
     ).toBeInTheDocument();
   });
+
+  /**
+   * Achado de auditoria externa (27/08/2026): sem `aria-label`, o nome
+   * acessível de um treino concluído era a concatenação crua dos três
+   * textos visíveis — "Peito e tríceps45:00·600 kg", sem separador nenhum
+   * para quem ouve a tela em vez de olhar para ela.
+   */
+  it("gives the finished-session link a spoken name with real separators", async () => {
+    mount([session({ id: "a", name: "Peito e tríceps" })]);
+
+    expect(
+      await screen.findByRole("link", {
+        name: "Ver treino Peito e tríceps, 45:00, 600 kg movidos",
+      }),
+    ).toBeInTheDocument();
+  });
 });

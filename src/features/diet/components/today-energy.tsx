@@ -127,11 +127,14 @@ export function TodayEnergy({ day }: { readonly day: string }) {
           parece dado real quando é só ausência de dado (na dúvida,
           omitir). É uma linha de texto, não um `Metric` como os três
           acima, de propósito: os três rastreiam o que foi comido contra
-          uma meta calculada do perfil; isto é só uma referência fixa do
-          produto (Pedro, 26/08/2026) — nunca uma recomendação médica
-          personalizada, nunca comparada a nada. */}
+          uma meta calculada do perfil; isto é só um valor fixo do
+          produto, igual para qualquer perfil.
+          Texto sem "meta de referência" nem qualquer explicação — só o
+          número (Pedro, 27/08/2026): a apresentação enxuta já basta, e
+          nunca é uma recomendação médica personalizada nem comparada a
+          nada. */}
       <p className="mt-2 text-xs text-ink-subtle">
-        Fibra · meta de referência {FIBER_REFERENCE_G} g/dia
+        Fibra · {FIBER_REFERENCE_G} g/dia
       </p>
     </Card>
   );
