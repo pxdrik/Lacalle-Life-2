@@ -43,11 +43,18 @@ describe("AccountStatus", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the user's id and email when a session exists", async () => {
+  it("shows the user's email when a session exists", async () => {
     mount({ getUser: vi.fn().mockResolvedValue(USER) });
 
     expect(await screen.findByText("pedro@example.com")).toBeInTheDocument();
-    expect(screen.getByText(USER.id)).toBeInTheDocument();
+  });
+
+  it("offers a way to change the password", async () => {
+    mount({ getUser: vi.fn().mockResolvedValue(USER) });
+
+    expect(
+      await screen.findByRole("link", { name: "Trocar senha" }),
+    ).toHaveAttribute("href", "/atualizar-senha");
   });
 
   it("calls signOut and does not crash when Sair is pressed", async () => {

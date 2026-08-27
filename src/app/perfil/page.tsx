@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
+import { AuthDataProvider } from "@/composition/auth-data-provider";
 import { ProfileScreenDataProvider } from "@/composition/data-providers";
+import { AccountStatus } from "@/features/auth/components/account-status";
 import { ProfileScreen } from "@/features/profile/components/profile-screen";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
@@ -26,7 +28,24 @@ export default function ProfilePage() {
         subtitle="Opcional. Preencha se quiser ver suas dietas comparadas a uma meta. Montar dieta funciona igual sem isso."
       />
 
-      <div className="mt-8 max-w-lg">
+      <div className="mt-8 max-w-lg space-y-6">
+        {/* Composta aqui, não dentro de `ProfileScreen`: `features/profile`
+            não pode importar de dentro de `features/auth` (regra do
+            AGENTS.md — cada feature só expõe o próprio `index.ts`, e
+            `features/auth` nunca teve um). `app/` é o único lugar que já
+            tem licença para amarrar as duas. Pedido do Pedro, 26/08/2026:
+            "quero uma parte na aba de perfil dizendo qual é meu e-mail,
+            senha, etc" — e hoje esta é também a única tela do app que leva
+            a `/entrar`/`/cadastro`, que nenhuma navegação linka. */}
+        <div>
+          <h2 className="text-sm font-medium text-ink">Conta</h2>
+          <div className="mt-3">
+            <AuthDataProvider>
+              <AccountStatus />
+            </AuthDataProvider>
+          </div>
+        </div>
+
         <ProfileScreenDataProvider>
           <ProfileScreen />
         </ProfileScreenDataProvider>
