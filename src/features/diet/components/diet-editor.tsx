@@ -174,6 +174,7 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                           name: food.name,
                           grams: DEFAULT_GRAMS,
                           per100g: food.per100g,
+                          practicalUnit: food.practicalUnit,
                         }),
                       ),
                     );

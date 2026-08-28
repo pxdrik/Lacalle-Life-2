@@ -1709,59 +1709,59 @@ importante, **P3** melhoria, **P4** polish/futuro.
 - **critérios de aceite:** não há métrica automática — critério é revisão
   humana contra o brandbook.
 
-### B — Modelo de unidade e porção de alimento (estrutural)
+### B — Modelo de unidade e porção de alimento (estrutural) — ENTREGUE 28/08/2026
 
 - **objetivo:** permitir registrar comida do jeito que as pessoas comem —
   "1 ovo", "1 fatia", "100 ml de leite" — não só em grama.
-- **problema:** `MealItem.grams: number` é o único campo de quantidade em
-  todo o domínio de dieta (`diet/types/diet.ts`) — `Meal`, `MealOwner` e
-  `Diet` não carregam nenhum conceito de unidade alternativa.
-  `itemMacros` calcula direto `scaleMacros(item.per100g, item.grams)`
-  (`diet/services/diet-macros.ts:16-17`). O seletor de quantidade
-  (`meal-item-row.tsx`) é um stepper numérico de grama, com teto de 100 kg
-  já documentado como guarda contra colagem, não opinião nutricional.
-- **impacto no usuário:** quem não pesa comida — a maioria — converte de
-  cabeça toda vez, ou desiste de registrar.
-- **dependências:** compartilha schema de `Food` com o item de nutrientes
-  opcionais (ver Alimentos, abaixo) — fazer as duas mudanças na mesma
-  decisão evita duas migrações separadas do mesmo tipo. **É pré-requisito
-  de sequenciamento (não técnico) para a Iniciativa E** — evitar duas
-  mudanças estruturais grandes em paralelo no mesmo domínio de dieta.
-- **escopo da fase de decisão** (não é ainda escopo de implementação):
-  - quais unidades são universais (g, kg, ml, l) vs. específicas por
-    alimento (unidade, fatia, colher, xícara, porção);
-  - como cada unidade converte para grama/mililitro por alimento;
-  - como representar líquidos (densidade varia — leite ≠ água ≠ óleo, "100
-    ml" não é sempre "100 g");
-  - como tratar alimento vendido por unidade, onde "1 ovo" pode ter um
-    valor nutricional diferente de "100 g de ovo" dependendo da fonte;
-  - pesquisar/avaliar fonte de dado nutricional que já traga porção por
-    unidade (mesma pesquisa já cogitada para fibra — TACO ou equivalente);
-  - como preservar compatibilidade com os 216 alimentos já curados e com
-    todo `MealItem` já gravado.
-- **proposta técnica preliminar** (a confirmar na fase de decisão): **não
-  generalizar `MealItem.grams`** — é a base de cálculo confiável hoje, e
-  mexer nele arrisca quebrar silenciosamente cinco lugares (total da
-  refeição, do dia, anel, meta, histórico). Rota aditiva: `Food` ganha uma
-  lista opcional de unidades nomeadas (`{ label, grams }[]`), a UI de
-  adicionar/editar item oferece "unidade + quantidade" e converte para
-  grama **na entrada** — `MealItem.grams` continua sendo o dado gravado,
-  zero migração do que já existe.
-- **fora do escopo (agora):** qualquer código de produção. Isto é desenho
-  de dado.
-- **prioridade:** **P1 estrutural** — é a mudança mais citada como
-  importante ("SUPER IMPORTANTE" no seu próprio texto), mas é também a
-  maior mudança estrutural desta rodada inteira. Fase de decisão antes de
-  qualquer sprint de implementação.
-- **critérios de aceite (da fase de decisão):** documento de schema final,
-  plano de conversão por unidade, decisão sobre os 216 alimentos existentes
-  e sobre a fonte de dado nutricional, revisado antes de qualquer PR.
-- **evidência necessária:** nenhuma de código ainda — a evidência que falta
-  é de produto (fonte de dado, escopo de curadoria).
-- **riscos:** subestimar o tamanho é o risco real aqui — toca cadastro de
-  alimento, catálogo curado, seletor de quantidade, picker, editor de dieta,
-  diário e o cálculo nutricional em si. Por isso a fase de decisão vem
-  antes, não depois.
+- **o que mudou de "proposta preliminar" para "entregue":** a fase de
+  decisão prevista aqui ficou obsoleta na prática. O Pedro trouxe uma
+  curadoria pronta de medida caseira para os 581 alimentos do catálogo,
+  feita a partir de TBCA, TACO 4ª edição e USDA Food Buying Guide, com
+  peso de referência em grama por alimento e a mesma fórmula que a
+  proposta preliminar já previa (`macro por medida = macro por 100 g ×
+  peso da medida / 100`). Com o dado real em mãos, a rota aditiva descrita
+  abaixo foi implementada diretamente — não foi preciso escrever o
+  documento de decisão à parte, porque as perguntas que ele levantaria
+  (quais alimentos têm unidade confiável, qual o peso de cada uma) já
+  vieram respondidas pelos dados.
+- **o que foi implementado, exatamente como a proposta preliminar previa:**
+  `MealItem.grams` **não foi generalizado** — continua sendo o único valor
+  gravado e a base de todo cálculo (`itemMacros` em `diet-macros.ts` não
+  mudou uma linha). `Food` ganhou um campo opcional
+  `practicalUnit?: { label, grams }` (`foods/types/food.ts`), copiado para
+  `MealItem.practicalUnit` no momento de adicionar o alimento — mesma regra
+  de "cópia, não referência" que `per100g` já seguia, pelo mesmo motivo
+  (editar o catálogo depois não pode reescrever silenciosamente um plano
+  já montado). Na UI (`meal-item-row.tsx`), quando o alimento tem uma
+  medida conhecida, um segundo campo aparece ao lado do campo de gramas —
+  digitar "2" nele grava `2 × peso_da_medida` em `item.grams` através do
+  mesmo callback que o campo de gramas usa; o campo de gramas continua
+  sempre disponível e funcionando exatamente como antes para os 26
+  alimentos sem medida confiável ou para quem prefere gramas de qualquer
+  jeito.
+- **cobertura:** 555 dos 581 alimentos (95,5%) têm `practicalUnit`. Os 26
+  restantes (batatas/tubérculos em vários preparos, alguns peixes, morango,
+  jabuticaba, tremoço, uma bebida láctea) ficaram deliberadamente em grama
+  — sem unidade caseira confiável o suficiente para publicar, mesmo depois
+  de duas rodadas de curadoria.
+- **compatibilidade:** zero migração de `MealItem` gravado — o campo é
+  opcional e um item antigo sem `practicalUnit` continua igual. Quem já
+  tinha o catálogo semeado no IndexedDB antes desta entrega recebe os
+  novos `practicalUnit` via `refreshFoodPracticalUnits`
+  (`foods/data/catalogue.ts`), com o mesmo mecanismo de revisão em
+  `localStorage` que `refreshExerciseMedia` já usava para as fotos de
+  exercício — sem re-seed, sem apagar favoritos.
+- **fora do escopo desta entrega:** unidades universais configuráveis
+  (g/kg/ml/l independente do alimento), densidade de líquido, e a lista de
+  múltiplas unidades por alimento que a proposta original cogitava — os
+  dados reais trouxeram no máximo uma medida confiável por alimento, então
+  o campo é um objeto opcional, não um array; virar array é aditivo e
+  simples de fazer se um dia houver uma segunda medida por alimento.
+- **critérios de aceite:** todos atendidos — `npm run verify` verde (1329
+  testes, incluindo cobertura nova para `createMealItem`, o campo de
+  quantidade em `meal-item-row.test.tsx`, o backfill em `catalogue.test.ts`
+  e o roundtrip de backup em `backup-legacy-compat.test.ts`), `npm run
+  build` limpo, checado ao vivo nos dois temas.
 
 ### C — Descoberta e catálogo de exercícios
 
@@ -2584,9 +2584,14 @@ saturada, gordura trans, colesterol)
   quais a fonte de dado escolhida sequer traz de forma confiável. Adicionar
   os seis de uma vez, "porque existem", é o oposto do princípio de manter a
   interface simples que você mesmo pediu.
-- **dependências:** compartilha schema de `Food` com a Iniciativa B — decidir
-  junto, uma migração só, não duas.
-- **escopo (fase de decisão, dentro da fase de decisão da Iniciativa B):**
+- **dependências:** compartilhava schema de `Food` com a Iniciativa B — mas
+  B (28/08/2026) foi entregue como um campo opcional aditivo, sem fase de
+  decisão nem migração, porque o dado real chegou pronto. Não há mais uma
+  migração conjunta para coordenar; isto só compartilha o precedente (mais
+  um campo opcional em `Food`, mesma técnica de backfill via
+  `refreshFoodPracticalUnits`/`refreshExerciseMedia`), não um trabalho em
+  aberto.
+- **escopo (fase de decisão):**
   lista final de nutrientes opcionais (provavelmente menor que os seis
   citados), todos opcionais/nunca obrigatórios, com `scaleMacros`/
   `roundMacros` estendidos para propagar os campos presentes sem quebrar

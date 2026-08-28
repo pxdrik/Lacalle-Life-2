@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
 
 import { catalogueEntrySchema } from "../validation/food-schema";
 import type { Food } from "../types/food";
 import catalogue from "./catalogue.json";
-import { seedCatalogue } from "./catalogue";
+import { refreshFoodPracticalUnits, seedCatalogue } from "./catalogue";
 import { FOODS_STORE } from "./food-store";
 import { LocalFoodRepository } from "./local-food-repository";
 
@@ -135,5 +135,105 @@ describe("seedCatalogue", () => {
     const after = await foods.listAll();
     expect(after).toHaveLength(catalogue.length);
     expect(after.find((f) => f.id === first!.id)?.isFavorite).toBe(true);
+  });
+});
+
+describe("refreshFoodPracticalUnits", () => {
+  const repository = () =>
+    new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
+
+  /** A catalogue food with a known practical unit. */
+  const MAPPED_ID = "abacate";
+  /** One deliberately without, read from the catalogue rather than named —
+   * a hardcoded id here rots the moment that food gains a unit. */
+  const UNMAPPED_ID = (() => {
+    const first = catalogue.find((food) => food.practicalUnit === undefined);
+    if (first === undefined) {
+      throw new Error("Todo alimento tem medida prática: escolha outro caso.");
+    }
+    return first.id;
+  })();
+
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it("backfills a catalogue seeded before practical units existed", async () => {
+    const foods = repository();
+    await seedCatalogue(foods);
+
+    const before = await foods.getById(MAPPED_ID);
+    if (before === undefined) throw new Error("fixture ausente");
+    // A row as an older release actually left it: no `practicalUnit` key at
+    // all, not the key set to `undefined` — that already describes a row
+    // that has been through this code.
+    const { practicalUnit: _omit, ...withoutUnit } = before;
+    await foods.save(withoutUnit as Food, before.updatedAt);
+
+    await refreshFoodPracticalUnits(foods);
+
+    const after = await foods.getById(MAPPED_ID);
+    expect(after?.practicalUnit).toEqual(
+      catalogue.find((f) => f.id === MAPPED_ID)?.practicalUnit,
+    );
+  });
+
+  it("writes nothing when the stored unit already matches", async () => {
+    const foods = repository();
+    await seedCatalogue(foods);
+    await refreshFoodPracticalUnits(foods);
+
+    const before = await foods.getById(MAPPED_ID);
+
+    await refreshFoodPracticalUnits(foods);
+
+    const after = await foods.getById(MAPPED_ID);
+    expect(after?.updatedAt).toBe(before?.updatedAt);
+  });
+
+  it("skips the read entirely once the revision is marked", async () => {
+    const foods = repository();
+    await seedCatalogue(foods);
+    await refreshFoodPracticalUnits(foods);
+
+    const before = await foods.getById(MAPPED_ID);
+    if (before === undefined) throw new Error("fixture ausente");
+    const { practicalUnit: _omit, ...withoutUnit } = before;
+    await foods.save(withoutUnit as Food, before.updatedAt);
+
+    await refreshFoodPracticalUnits(foods);
+
+    const after = await foods.getById(MAPPED_ID);
+    expect(after?.practicalUnit).toBeUndefined();
+  });
+
+  it("leaves an unmapped food untouched", async () => {
+    const foods = repository();
+    await seedCatalogue(foods);
+
+    await refreshFoodPracticalUnits(foods);
+
+    const after = await foods.getById(UNMAPPED_ID);
+    expect(after?.practicalUnit).toBeUndefined();
+  });
+
+  it("never touches a custom food, even one sharing no id with the catalogue", async () => {
+    const foods = repository();
+    const custom: Food = {
+      id: "custom",
+      name: "Meu alimento",
+      category: "protein",
+      per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
+      isCustom: true,
+      isFavorite: false,
+      createdAt: 1,
+      updatedAt: 1,
+    };
+    await foods.save(custom, null);
+    await seedCatalogue(foods);
+
+    await refreshFoodPracticalUnits(foods);
+
+    expect(await foods.getById("custom")).toEqual(custom);
   });
 });

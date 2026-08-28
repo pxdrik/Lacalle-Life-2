@@ -25,11 +25,25 @@ export const FOOD_CATEGORY_LABELS: Record<FoodCategory, string> = {
   fruit: "Frutas",
 };
 
+/**
+ * A named household measure for one food — "1 fatia média" is 80 g of
+ * abacaxi. `undefined` on a `Food` means no source this catalogue draws from
+ * (TBCA, TACO, USDA Food Buying Guide) had a weight confident enough to
+ * publish, not that nobody has looked — grams/ml stays the only way to log
+ * that food, exactly as before this field existed.
+ */
+export interface PracticalUnit {
+  readonly label: string;
+  readonly grams: number;
+}
+
 export interface Food extends Entity {
   readonly name: string;
   readonly category: FoodCategory;
   /** Nutrition per 100 g — the unit the whole catalogue is normalised to. */
   readonly per100g: Macros;
+  /** The catalogue's household measure for this food, when one is known. */
+  readonly practicalUnit?: PracticalUnit | undefined;
   /**
    * Catalogue entries are `false`; foods the user created are `true`.
    *

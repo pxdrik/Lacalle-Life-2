@@ -18,7 +18,10 @@ import { LocalDietRepository } from "@/features/diet/data/local-diet-repository"
 import { LocalFoodLogRepository } from "@/features/diet/data/local-food-log-repository";
 import type { Diet } from "@/features/diet/types/diet";
 import type { FoodLog } from "@/features/diet/types/food-log";
-import { seedCatalogue } from "@/features/foods/data/catalogue";
+import {
+  refreshFoodPracticalUnits,
+  seedCatalogue,
+} from "@/features/foods/data/catalogue";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { LocalFoodRepository } from "@/features/foods/data/local-food-repository";
@@ -133,9 +136,11 @@ async function build(): Promise<Repositories> {
   // Both seeds skip themselves once their store holds anything, so this is
   // first-run work only. Run together because they are independent.
   await Promise.all([
-    seedCatalogue(repositories.foods),
     // Seed then refresh, in order: on a first run the seed already writes the
-    // current illustrations and the refresh finds nothing to do.
+    // current practical units and the refresh finds nothing to do.
+    seedCatalogue(repositories.foods).then(() =>
+      refreshFoodPracticalUnits(repositories.foods),
+    ),
     seedExerciseCatalogue(repositories.exercises).then(() =>
       refreshExerciseMedia(repositories.exercises),
     ),

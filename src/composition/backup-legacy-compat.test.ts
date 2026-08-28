@@ -71,6 +71,77 @@ beforeEach(async () => {
   await clearAllStores();
 });
 
+describe("COM MEDIDA PRÁTICA → PASS", () => {
+  it("a food carrying a practicalUnit imports and round-trips", async () => {
+    const stores = emptyStores();
+    stores.foods = [
+      {
+        id: "abacate",
+        name: "Abacate",
+        category: "fruit",
+        per100g: { kcal: 160, proteinG: 2, carbsG: 9, fatG: 15 },
+        practicalUnit: { label: "1/2 unidade média", grams: 100 },
+        isCustom: false,
+        isFavorite: false,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ];
+
+    const result = await importAll(envelope(stores));
+    expect(result).toMatchObject({ ok: true, recordCount: 1 });
+
+    const repositories = await getRepositories();
+    await expect(
+      repositories.foods.getById("abacate"),
+    ).resolves.toMatchObject({
+      practicalUnit: { label: "1/2 unidade média", grams: 100 },
+    });
+  });
+
+  it("a diet whose meal item carries a practicalUnit imports and round-trips", async () => {
+    const stores = emptyStores();
+    stores.diets = [
+      {
+        id: "diet-1",
+        name: "Plano",
+        weekdays: [],
+        meals: [
+          {
+            id: "meal-1",
+            name: "Refeição 1",
+            time: null,
+            notes: "",
+            items: [
+              {
+                id: "item-1",
+                foodId: "abacate",
+                name: "Abacate",
+                grams: 200,
+                unit: "g",
+                per100g: { kcal: 160, proteinG: 2, carbsG: 9, fatG: 15 },
+                practicalUnit: { label: "1/2 unidade média", grams: 100 },
+              },
+            ],
+          },
+        ],
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    ];
+
+    const result = await importAll(envelope(stores));
+    expect(result).toMatchObject({ ok: true, recordCount: 1 });
+
+    const repositories = await getRepositories();
+    const diet = await repositories.diets.getById("diet-1");
+    expect(diet?.meals[0]?.items[0]?.practicalUnit).toEqual({
+      label: "1/2 unidade média",
+      grams: 100,
+    });
+  });
+});
+
 describe("LEGACY LEGÍTIMO → PASS", () => {
   it("a food from before isFavorite existed", async () => {
     const stores = emptyStores();

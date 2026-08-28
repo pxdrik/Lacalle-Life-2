@@ -8,6 +8,10 @@
       "proteinG": 2,
       "carbsG": 9,
       "fatG": 15
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -19,6 +23,10 @@
       "proteinG": 0.5,
       "carbsG": 13,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 80
     }
   },
   {
@@ -30,6 +38,10 @@
       "proteinG": 1,
       "carbsG": 8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -41,6 +53,10 @@
       "proteinG": 1,
       "carbsG": 6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -52,6 +68,10 @@
       "proteinG": 1.2,
       "carbsG": 3.5,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -63,6 +83,10 @@
       "proteinG": 1.5,
       "carbsG": 3.5,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -74,6 +98,10 @@
       "proteinG": 1.5,
       "carbsG": 5,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -85,6 +113,10 @@
       "proteinG": 1.8,
       "carbsG": 3.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 50
     }
   },
   {
@@ -96,6 +128,10 @@
       "proteinG": 1.8,
       "carbsG": 3.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 50
     }
   },
   {
@@ -118,6 +154,10 @@
       "proteinG": 1.4,
       "carbsG": 2.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "3 folhas",
+      "grams": 30
     }
   },
   {
@@ -129,6 +169,10 @@
       "proteinG": 1.4,
       "carbsG": 2.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "3 folhas",
+      "grams": 30
     }
   },
   {
@@ -140,6 +184,10 @@
       "proteinG": 1.4,
       "carbsG": 2.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "3 folhas",
+      "grams": 30
     }
   },
   {
@@ -151,6 +199,10 @@
       "proteinG": 6.4,
       "carbsG": 33,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 dente",
+      "grams": 3
     }
   },
   {
@@ -162,6 +214,10 @@
       "proteinG": 0.7,
       "carbsG": 11,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 65
     }
   },
   {
@@ -173,6 +229,10 @@
       "proteinG": 21,
       "carbsG": 22,
       "fatG": 50
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 12
     }
   },
   {
@@ -184,6 +244,10 @@
       "proteinG": 26,
       "carbsG": 16,
       "fatG": 49
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 10
     }
   },
   {
@@ -195,6 +259,10 @@
       "proteinG": 1.4,
       "carbsG": 10,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 70
     }
   },
   {
@@ -206,6 +274,10 @@
       "proteinG": 2.7,
       "carbsG": 28,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -217,6 +289,10 @@
       "proteinG": 4.5,
       "carbsG": 25,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -228,6 +304,10 @@
       "proteinG": 2.6,
       "carbsG": 26,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -239,6 +319,10 @@
       "proteinG": 2.5,
       "carbsG": 28,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -250,6 +334,10 @@
       "proteinG": 3.9,
       "carbsG": 21,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -261,6 +349,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 lata drenada",
+      "grams": 120
     }
   },
   {
@@ -272,6 +364,10 @@
       "proteinG": 5,
       "carbsG": 20,
       "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 200
     }
   },
   {
@@ -283,6 +379,10 @@
       "proteinG": 17,
       "carbsG": 66,
       "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 40
     }
   },
   {
@@ -294,6 +394,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -305,6 +409,10 @@
       "proteinG": 1.1,
       "carbsG": 3.8,
       "fatG": 15
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -316,6 +424,10 @@
       "proteinG": 1.1,
       "carbsG": 3.8,
       "fatG": 15
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -327,6 +439,10 @@
       "proteinG": 18,
       "carbsG": 0,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -338,6 +454,10 @@
       "proteinG": 1.1,
       "carbsG": 23,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 90
     }
   },
   {
@@ -415,6 +535,10 @@
       "proteinG": 1.7,
       "carbsG": 10,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -426,6 +550,10 @@
       "proteinG": 1.6,
       "carbsG": 10,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -437,6 +565,10 @@
       "proteinG": 9,
       "carbsG": 76,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 30
     }
   },
   {
@@ -448,6 +580,10 @@
       "proteinG": 6,
       "carbsG": 70,
       "fatG": 16
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 30
     }
   },
   {
@@ -459,6 +595,10 @@
       "proteinG": 9,
       "carbsG": 65,
       "fatG": 8
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 30
     }
   },
   {
@@ -470,6 +610,10 @@
       "proteinG": 0.7,
       "carbsG": 14,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 75
     }
   },
   {
@@ -481,6 +625,10 @@
       "proteinG": 6,
       "carbsG": 58,
       "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -492,6 +640,10 @@
       "proteinG": 2.4,
       "carbsG": 7,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 90
     }
   },
   {
@@ -503,6 +655,10 @@
       "proteinG": 2.8,
       "carbsG": 7,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 90
     }
   },
   {
@@ -514,6 +670,10 @@
       "proteinG": 3,
       "carbsG": 6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 100
     }
   },
   {
@@ -525,6 +685,10 @@
       "proteinG": 24,
       "carbsG": 0,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -536,6 +700,10 @@
       "proteinG": 0.6,
       "carbsG": 18,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -558,6 +726,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 11
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -569,6 +741,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -580,6 +756,10 @@
       "proteinG": 25,
       "carbsG": 0,
       "fatG": 8.5
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -591,6 +771,10 @@
       "proteinG": 30,
       "carbsG": 0,
       "fatG": 4.5
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -602,6 +786,10 @@
       "proteinG": 27,
       "carbsG": 0,
       "fatG": 14
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -613,6 +801,10 @@
       "proteinG": 27,
       "carbsG": 0,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -624,6 +816,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -635,6 +831,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 15
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -646,6 +846,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 6.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -657,6 +861,10 @@
       "proteinG": 18,
       "carbsG": 30,
       "fatG": 44
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 15
     }
   },
   {
@@ -668,6 +876,10 @@
       "proteinG": 14,
       "carbsG": 12,
       "fatG": 66
+    },
+    "practicalUnit": {
+      "label": "2 unidades",
+      "grams": 10
     }
   },
   {
@@ -679,6 +891,10 @@
       "proteinG": 0.9,
       "carbsG": 8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -690,6 +906,10 @@
       "proteinG": 1.1,
       "carbsG": 9,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -701,6 +921,10 @@
       "proteinG": 0.7,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 60
     }
   },
   {
@@ -712,6 +936,10 @@
       "proteinG": 0.9,
       "carbsG": 10,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 60
     }
   },
   {
@@ -723,6 +951,10 @@
       "proteinG": 10,
       "carbsG": 73,
       "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -734,6 +966,10 @@
       "proteinG": 1.1,
       "carbsG": 16,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 80
     }
   },
   {
@@ -745,6 +981,10 @@
       "proteinG": 2.3,
       "carbsG": 28,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara cozida",
+      "grams": 100
     }
   },
   {
@@ -756,6 +996,10 @@
       "proteinG": 0.8,
       "carbsG": 4.5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -767,6 +1011,10 @@
       "proteinG": 0.8,
       "carbsG": 4.5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -778,6 +1026,10 @@
       "proteinG": 11,
       "carbsG": 0.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 clara",
+      "grams": 30
     }
   },
   {
@@ -789,6 +1041,10 @@
       "proteinG": 3.1,
       "carbsG": 3.3,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 70
     }
   },
   {
@@ -800,6 +1056,10 @@
       "proteinG": 3.1,
       "carbsG": 3.3,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 70
     }
   },
   {
@@ -811,6 +1071,10 @@
       "proteinG": 11,
       "carbsG": 4.3,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
     }
   },
   {
@@ -822,6 +1086,10 @@
       "proteinG": 3.3,
       "carbsG": 9,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 70
     }
   },
   {
@@ -833,6 +1101,10 @@
       "proteinG": 3.3,
       "carbsG": 9,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 30
     }
   },
   {
@@ -844,6 +1116,10 @@
       "proteinG": 1.9,
       "carbsG": 5,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 70
     }
   },
   {
@@ -855,6 +1131,10 @@
       "proteinG": 1.9,
       "carbsG": 5,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 30
     }
   },
   {
@@ -866,6 +1146,10 @@
       "proteinG": 1.7,
       "carbsG": 6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 30
     }
   },
   {
@@ -877,6 +1161,10 @@
       "proteinG": 23,
       "carbsG": 0,
       "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 90
     }
   },
   {
@@ -888,6 +1176,10 @@
       "proteinG": 2.1,
       "carbsG": 2.8,
       "fatG": 35
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -899,6 +1191,10 @@
       "proteinG": 3.8,
       "carbsG": 25,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -910,6 +1206,10 @@
       "proteinG": 5.4,
       "carbsG": 15,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -921,6 +1221,10 @@
       "proteinG": 5,
       "carbsG": 25,
       "fatG": 1.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 140
     }
   },
   {
@@ -932,6 +1236,10 @@
       "proteinG": 2.9,
       "carbsG": 3.6,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 90
     }
   },
   {
@@ -943,6 +1251,10 @@
       "proteinG": 2.7,
       "carbsG": 3.6,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -954,6 +1266,10 @@
       "proteinG": 4.8,
       "carbsG": 14,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -965,6 +1281,10 @@
       "proteinG": 4.8,
       "carbsG": 14,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -976,6 +1296,10 @@
       "proteinG": 5.2,
       "carbsG": 15,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -987,6 +1311,10 @@
       "proteinG": 0.8,
       "carbsG": 19,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 50
     }
   },
   {
@@ -998,6 +1326,10 @@
       "proteinG": 8,
       "carbsG": 85,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -1009,6 +1341,10 @@
       "proteinG": 1.2,
       "carbsG": 12,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 60
     }
   },
   {
@@ -1020,6 +1356,10 @@
       "proteinG": 1.2,
       "carbsG": 12,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 60
     }
   },
   {
@@ -1031,6 +1371,10 @@
       "proteinG": 1.2,
       "carbsG": 12,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 60
     }
   },
   {
@@ -1042,6 +1386,10 @@
       "proteinG": 25,
       "carbsG": 0,
       "fatG": 8
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 90
     }
   },
   {
@@ -1053,6 +1401,10 @@
       "proteinG": 31,
       "carbsG": 0,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1064,6 +1416,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 11
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -1075,6 +1431,10 @@
       "proteinG": 5,
       "carbsG": 25,
       "fatG": 1.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 140
     }
   },
   {
@@ -1086,6 +1446,10 @@
       "proteinG": 16,
       "carbsG": 0.6,
       "fatG": 26
+    },
+    "practicalUnit": {
+      "label": "1 gema",
+      "grams": 17
     }
   },
   {
@@ -1097,6 +1461,10 @@
       "proteinG": 2.6,
       "carbsG": 14,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -1108,6 +1476,10 @@
       "proteinG": 13,
       "carbsG": 64,
       "fatG": 19
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 50
     }
   },
   {
@@ -1119,6 +1491,10 @@
       "proteinG": 8.9,
       "carbsG": 27,
       "fatG": 2.6
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1141,6 +1517,10 @@
       "proteinG": 3.2,
       "carbsG": 15,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -1152,6 +1532,10 @@
       "proteinG": 10,
       "carbsG": 3.3,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -1163,6 +1547,10 @@
       "proteinG": 3.5,
       "carbsG": 4.7,
       "fatG": 3.3
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -1174,6 +1562,10 @@
       "proteinG": 3.5,
       "carbsG": 5.2,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -1196,6 +1588,10 @@
       "proteinG": 1.1,
       "carbsG": 15,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1207,6 +1603,10 @@
       "proteinG": 0.9,
       "carbsG": 12,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 130
     }
   },
   {
@@ -1218,6 +1618,10 @@
       "proteinG": 3.2,
       "carbsG": 4.6,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -1229,6 +1633,10 @@
       "proteinG": 3.4,
       "carbsG": 5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -1240,6 +1648,10 @@
       "proteinG": 3.2,
       "carbsG": 4.8,
       "fatG": 3.3
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -1251,6 +1663,10 @@
       "proteinG": 3.3,
       "carbsG": 4.9,
       "fatG": 1.6
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -1262,6 +1678,10 @@
       "proteinG": 9,
       "carbsG": 20,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -1273,6 +1693,10 @@
       "proteinG": 1.1,
       "carbsG": 9,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade (suco)",
+      "grams": 30
     }
   },
   {
@@ -1284,6 +1708,10 @@
       "proteinG": 19,
       "carbsG": 0,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -1295,6 +1723,10 @@
       "proteinG": 16,
       "carbsG": 3,
       "fatG": 1.4
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -1306,6 +1738,10 @@
       "proteinG": 0.3,
       "carbsG": 14,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 160
     }
   },
   {
@@ -1317,6 +1753,10 @@
       "proteinG": 0.3,
       "carbsG": 14,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 160
     }
   },
   {
@@ -1328,6 +1768,10 @@
       "proteinG": 0.3,
       "carbsG": 14,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 160
     }
   },
   {
@@ -1339,6 +1783,10 @@
       "proteinG": 13,
       "carbsG": 75,
       "fatG": 1.1
+    },
+    "practicalUnit": {
+      "label": "1 ovo inteiro (sem casca)",
+      "grams": 50
     }
   },
   {
@@ -1350,6 +1798,10 @@
       "proteinG": 5.8,
       "carbsG": 31,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 140
     }
   },
   {
@@ -1361,6 +1813,10 @@
       "proteinG": 5.3,
       "carbsG": 24,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 140
     }
   },
   {
@@ -1383,6 +1839,10 @@
       "proteinG": 0.8,
       "carbsG": 15,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -1394,6 +1854,10 @@
       "proteinG": 0.9,
       "carbsG": 0.1,
       "fatG": 81
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   },
   {
@@ -1405,6 +1869,10 @@
       "proteinG": 0.9,
       "carbsG": 0.1,
       "fatG": 81
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   },
   {
@@ -1416,6 +1884,10 @@
       "proteinG": 0.6,
       "carbsG": 7.6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 250
     }
   },
   {
@@ -1427,6 +1899,10 @@
       "proteinG": 0.6,
       "carbsG": 7.6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 250
     }
   },
   {
@@ -1438,6 +1914,10 @@
       "proteinG": 0.6,
       "carbsG": 7.6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 250
     }
   },
   {
@@ -1449,6 +1929,10 @@
       "proteinG": 0.8,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 150
     }
   },
   {
@@ -1460,6 +1944,10 @@
       "proteinG": 0.8,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 150
     }
   },
   {
@@ -1471,6 +1959,10 @@
       "proteinG": 0.8,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 150
     }
   },
   {
@@ -1482,6 +1974,10 @@
       "proteinG": 3.3,
       "carbsG": 19,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1493,6 +1989,10 @@
       "proteinG": 3.3,
       "carbsG": 19,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -1504,6 +2004,10 @@
       "proteinG": 3.2,
       "carbsG": 19,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1515,6 +2019,10 @@
       "proteinG": 3.5,
       "carbsG": 25,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1526,6 +2034,10 @@
       "proteinG": 0.7,
       "carbsG": 14,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 75
     }
   },
   {
@@ -1537,6 +2049,10 @@
       "proteinG": 0.7,
       "carbsG": 14,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 75
     }
   },
   {
@@ -1548,6 +2064,10 @@
       "proteinG": 0.7,
       "carbsG": 14,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 75
     }
   },
   {
@@ -1581,6 +2101,10 @@
       "proteinG": 12,
       "carbsG": 70,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 50
     }
   },
   {
@@ -1592,6 +2116,10 @@
       "proteinG": 1.1,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -1603,6 +2131,10 @@
       "proteinG": 1.1,
       "carbsG": 11,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 140
     }
   },
   {
@@ -1614,6 +2146,10 @@
       "proteinG": 9,
       "carbsG": 14,
       "fatG": 65
+    },
+    "practicalUnit": {
+      "label": "3 metades",
+      "grams": 12
     }
   },
   {
@@ -1625,6 +2161,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -1636,6 +2176,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -1647,6 +2191,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -1658,6 +2206,10 @@
       "proteinG": 13,
       "carbsG": 1,
       "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 ovo inteiro (sem casca)",
+      "grams": 50
     }
   },
   {
@@ -1669,6 +2221,10 @@
       "proteinG": 2.5,
       "carbsG": 4,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "3 pedaços",
+      "grams": 60
     }
   },
   {
@@ -1680,6 +2236,10 @@
       "proteinG": 8.5,
       "carbsG": 48,
       "fatG": 3.3
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -1691,6 +2251,10 @@
       "proteinG": 9,
       "carbsG": 49,
       "fatG": 3.3
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -1702,6 +2266,10 @@
       "proteinG": 7,
       "carbsG": 55,
       "fatG": 2.5
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -1713,6 +2281,10 @@
       "proteinG": 11,
       "carbsG": 30,
       "fatG": 19
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 30
     }
   },
   {
@@ -1724,6 +2296,10 @@
       "proteinG": 8,
       "carbsG": 58,
       "fatG": 3
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -1735,6 +2311,10 @@
       "proteinG": 13,
       "carbsG": 41,
       "fatG": 4.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -1746,6 +2326,10 @@
       "proteinG": 10,
       "carbsG": 48,
       "fatG": 2.5
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 60
     }
   },
   {
@@ -1757,6 +2341,10 @@
       "proteinG": 0.5,
       "carbsG": 11,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 150
     }
   },
   {
@@ -1768,6 +2356,10 @@
       "proteinG": 20,
       "carbsG": 0,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -1779,6 +2371,10 @@
       "proteinG": 25,
       "carbsG": 20,
       "fatG": 50
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 10
     }
   },
   {
@@ -1790,6 +2386,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -1801,6 +2401,10 @@
       "proteinG": 31,
       "carbsG": 0,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -1812,6 +2416,10 @@
       "proteinG": 31,
       "carbsG": 0,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -1823,6 +2431,10 @@
       "proteinG": 22,
       "carbsG": 0,
       "fatG": 1.6
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 30
     }
   },
   {
@@ -1834,6 +2446,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -1845,6 +2461,10 @@
       "proteinG": 5,
       "carbsG": 25,
       "fatG": 1.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 140
     }
   },
   {
@@ -1856,6 +2476,10 @@
       "proteinG": 0.7,
       "carbsG": 3.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -1867,6 +2491,10 @@
       "proteinG": 0.7,
       "carbsG": 3.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -1878,6 +2506,10 @@
       "proteinG": 0.4,
       "carbsG": 15,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -1889,6 +2521,10 @@
       "proteinG": 0.9,
       "carbsG": 10,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 150
     }
   },
   {
@@ -1900,6 +2536,10 @@
       "proteinG": 1,
       "carbsG": 7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1911,6 +2551,10 @@
       "proteinG": 1,
       "carbsG": 7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1922,6 +2566,10 @@
       "proteinG": 0.9,
       "carbsG": 7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1933,6 +2581,10 @@
       "proteinG": 0.9,
       "carbsG": 7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1944,6 +2596,10 @@
       "proteinG": 1,
       "carbsG": 6,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1955,6 +2611,10 @@
       "proteinG": 1,
       "carbsG": 6,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 75
     }
   },
   {
@@ -1966,6 +2626,10 @@
       "proteinG": 1.2,
       "carbsG": 12,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -1977,6 +2641,10 @@
       "proteinG": 6,
       "carbsG": 20,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -1988,6 +2656,10 @@
       "proteinG": 1.8,
       "carbsG": 18,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 100
     }
   },
   {
@@ -1999,6 +2671,10 @@
       "proteinG": 15,
       "carbsG": 2,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -2010,6 +2686,10 @@
       "proteinG": 20,
       "carbsG": 3,
       "fatG": 23
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -2021,6 +2701,10 @@
       "proteinG": 25,
       "carbsG": 1.3,
       "fatG": 33
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -2032,6 +2716,10 @@
       "proteinG": 25,
       "carbsG": 1.3,
       "fatG": 28
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -2043,6 +2731,10 @@
       "proteinG": 28,
       "carbsG": 3.1,
       "fatG": 17
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -2054,6 +2746,10 @@
       "proteinG": 38,
       "carbsG": 4.1,
       "fatG": 29
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -2065,6 +2761,10 @@
       "proteinG": 11,
       "carbsG": 3.1,
       "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 50
     }
   },
   {
@@ -2076,6 +2776,10 @@
       "proteinG": 4.4,
       "carbsG": 21,
       "fatG": 2.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara cozida",
+      "grams": 100
     }
   },
   {
@@ -2087,6 +2791,10 @@
       "proteinG": 0.7,
       "carbsG": 3.4,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -2098,6 +2806,10 @@
       "proteinG": 1.3,
       "carbsG": 5.2,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 90
     }
   },
   {
@@ -2109,6 +2821,10 @@
       "proteinG": 1.3,
       "carbsG": 5.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 90
     }
   },
   {
@@ -2120,6 +2836,10 @@
       "proteinG": 18,
       "carbsG": 2,
       "fatG": 28
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
     }
   },
   {
@@ -2131,6 +2851,10 @@
       "proteinG": 8,
       "carbsG": 25,
       "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 prato raso",
+      "grams": 250
     }
   },
   {
@@ -2142,6 +2866,10 @@
       "proteinG": 1.7,
       "carbsG": 19,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média (arilos)",
+      "grams": 80
     }
   },
   {
@@ -2153,6 +2881,10 @@
       "proteinG": 2.6,
       "carbsG": 3.7,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 20
     }
   },
   {
@@ -2164,6 +2896,10 @@
       "proteinG": 2.6,
       "carbsG": 3.7,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 20
     }
   },
   {
@@ -2186,6 +2922,10 @@
       "proteinG": 25,
       "carbsG": 0,
       "fatG": 11
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2197,6 +2937,10 @@
       "proteinG": 25,
       "carbsG": 15,
       "fatG": 49
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2208,6 +2952,10 @@
       "proteinG": 20,
       "carbsG": 20,
       "fatG": 51
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2219,6 +2967,10 @@
       "proteinG": 11,
       "carbsG": 11,
       "fatG": 6
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2230,6 +2982,10 @@
       "proteinG": 0.7,
       "carbsG": 12,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2241,6 +2997,10 @@
       "proteinG": 0.2,
       "carbsG": 82,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 70
     }
   },
   {
@@ -2252,6 +3012,10 @@
       "proteinG": 19,
       "carbsG": 7.6,
       "fatG": 11
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 100
     }
   },
   {
@@ -2263,6 +3027,10 @@
       "proteinG": 26,
       "carbsG": 0,
       "fatG": 2.7
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -2274,6 +3042,10 @@
       "proteinG": 8,
       "carbsG": 1.9,
       "fatG": 4.8
+    },
+    "practicalUnit": {
+      "label": "2 fatias",
+      "grams": 100
     }
   },
   {
@@ -2285,6 +3057,10 @@
       "proteinG": 0.9,
       "carbsG": 3.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2296,6 +3072,10 @@
       "proteinG": 0.9,
       "carbsG": 3.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 85
     }
   },
   {
@@ -2307,6 +3087,10 @@
       "proteinG": 8,
       "carbsG": 52,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 40
     }
   },
   {
@@ -2318,6 +3102,10 @@
       "proteinG": 5.7,
       "carbsG": 33,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara cozida",
+      "grams": 100
     }
   },
   {
@@ -2329,6 +3117,10 @@
       "proteinG": 20,
       "carbsG": 0,
       "fatG": 6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -2340,6 +3132,10 @@
       "proteinG": 0.7,
       "carbsG": 17,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 50
     }
   },
   {
@@ -2351,6 +3147,10 @@
       "proteinG": 0.7,
       "carbsG": 17,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 50
     }
   },
   {
@@ -2362,6 +3162,10 @@
       "proteinG": 0.7,
       "carbsG": 17,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 50
     }
   },
   {
@@ -2373,6 +3177,10 @@
       "proteinG": 80,
       "carbsG": 8,
       "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 scoop",
+      "grams": 30
     }
   },
   {
@@ -2384,6 +3192,10 @@
       "proteinG": 7.3,
       "carbsG": 77.5,
       "fatG": 1.9
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 90
     }
   },
   {
@@ -2395,6 +3207,10 @@
       "proteinG": 2.5,
       "carbsG": 28.1,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -2406,6 +3222,10 @@
       "proteinG": 7.2,
       "carbsG": 78.8,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 90
     }
   },
   {
@@ -2417,6 +3237,10 @@
       "proteinG": 2.6,
       "carbsG": 28.2,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -2428,6 +3252,10 @@
       "proteinG": 7.2,
       "carbsG": 78.9,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 90
     }
   },
   {
@@ -2439,6 +3267,10 @@
       "proteinG": 10.1,
       "carbsG": 68.7,
       "fatG": 14.4
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 30
     }
   },
   {
@@ -2450,6 +3282,10 @@
       "proteinG": 6.9,
       "carbsG": 80.4,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2461,6 +3297,10 @@
       "proteinG": 8.9,
       "carbsG": 81.6,
       "fatG": 2.1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 200
     }
   },
   {
@@ -2472,6 +3312,10 @@
       "proteinG": 4.7,
       "carbsG": 88.8,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -2483,6 +3327,10 @@
       "proteinG": 7,
       "carbsG": 83.9,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -2494,6 +3342,10 @@
       "proteinG": 4.8,
       "carbsG": 86.1,
       "fatG": 1.6
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2505,6 +3357,10 @@
       "proteinG": 2.2,
       "carbsG": 79.8,
       "fatG": 13.4
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2516,6 +3372,10 @@
       "proteinG": 1.3,
       "carbsG": 85.5,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -2527,6 +3387,10 @@
       "proteinG": 12.5,
       "carbsG": 73.3,
       "fatG": 1.8
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2538,6 +3402,10 @@
       "proteinG": 7.2,
       "carbsG": 79.1,
       "fatG": 1.5
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2549,6 +3417,10 @@
       "proteinG": 11.4,
       "carbsG": 75.8,
       "fatG": 1.5
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2560,6 +3432,10 @@
       "proteinG": 9.8,
       "carbsG": 75.1,
       "fatG": 1.4
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2571,6 +3447,10 @@
       "proteinG": 11.9,
       "carbsG": 77.8,
       "fatG": 5.8
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2582,6 +3462,10 @@
       "proteinG": 8.8,
       "carbsG": 62.4,
       "fatG": 17.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 80
     }
   },
   {
@@ -2593,6 +3477,10 @@
       "proteinG": 10,
       "carbsG": 77.9,
       "fatG": 1.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara cozida",
+      "grams": 80
     }
   },
   {
@@ -2604,6 +3492,10 @@
       "proteinG": 0.6,
       "carbsG": 87.1,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2615,6 +3507,10 @@
       "proteinG": 7.2,
       "carbsG": 78.9,
       "fatG": 1.9
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -2626,6 +3522,10 @@
       "proteinG": 6.6,
       "carbsG": 28.6,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2637,6 +3537,10 @@
       "proteinG": 3.2,
       "carbsG": 17.1,
       "fatG": 2.4
+    },
+    "practicalUnit": {
+      "label": "1/2 espiga ou 1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -2648,6 +3552,10 @@
       "proteinG": 2.6,
       "carbsG": 30.7,
       "fatG": 4.8
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 150
     }
   },
   {
@@ -2659,6 +3567,10 @@
       "proteinG": 11.3,
       "carbsG": 56.5,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -2670,6 +3582,10 @@
       "proteinG": 12,
       "carbsG": 44.1,
       "fatG": 2.7
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -2681,6 +3597,10 @@
       "proteinG": 8.4,
       "carbsG": 61.5,
       "fatG": 2.8
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 25
     }
   },
   {
@@ -2692,6 +3612,10 @@
       "proteinG": 9.9,
       "carbsG": 70.3,
       "fatG": 15.9
+    },
+    "practicalUnit": {
+      "label": "2 xícaras prontas",
+      "grams": 20
     }
   },
   {
@@ -2703,6 +3627,10 @@
       "proteinG": 10.5,
       "carbsG": 74.6,
       "fatG": 3.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -2714,6 +3642,10 @@
       "proteinG": 0.6,
       "carbsG": 3.3,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -2725,6 +3657,10 @@
       "proteinG": 1,
       "carbsG": 2.7,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -2736,6 +3672,10 @@
       "proteinG": 0.4,
       "carbsG": 6,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -2747,6 +3687,10 @@
       "proteinG": 0.7,
       "carbsG": 6.1,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -2758,6 +3702,10 @@
       "proteinG": 1.1,
       "carbsG": 4.2,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2769,6 +3717,10 @@
       "proteinG": 0.6,
       "carbsG": 7.9,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2780,6 +3732,10 @@
       "proteinG": 2.7,
       "carbsG": 2.3,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 35
     }
   },
   {
@@ -2791,6 +3747,10 @@
       "proteinG": 0.8,
       "carbsG": 4.3,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 talo",
+      "grams": 40
     }
   },
   {
@@ -2802,6 +3762,10 @@
       "proteinG": 1.3,
       "carbsG": 1.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "3 folhas",
+      "grams": 30
     }
   },
   {
@@ -2813,6 +3777,10 @@
       "proteinG": 1.7,
       "carbsG": 2.4,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "3 folhas",
+      "grams": 30
     }
   },
   {
@@ -2824,6 +3792,10 @@
       "proteinG": 2.7,
       "carbsG": 5.2,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa picada",
+      "grams": 5
     }
   },
   {
@@ -2835,6 +3807,10 @@
       "proteinG": 1.4,
       "carbsG": 6.9,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 90
     }
   },
   {
@@ -2846,6 +3822,10 @@
       "proteinG": 1.8,
       "carbsG": 3.3,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -2857,6 +3837,10 @@
       "proteinG": 1.7,
       "carbsG": 5.7,
       "fatG": 4.8
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 70
     }
   },
   {
@@ -2868,6 +3852,10 @@
       "proteinG": 1,
       "carbsG": 24,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -2879,6 +3867,10 @@
       "proteinG": 1.3,
       "carbsG": 28.2,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 130
     }
   },
   {
@@ -2890,6 +3882,10 @@
       "proteinG": 5.6,
       "carbsG": 51.2,
       "fatG": 36.6
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -2901,6 +3897,10 @@
       "proteinG": 1.8,
       "carbsG": 14.7,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 120
     }
   },
   {
@@ -2912,6 +3912,10 @@
       "proteinG": 1.3,
       "carbsG": 14.1,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 120
     }
   },
   {
@@ -2923,6 +3927,10 @@
       "proteinG": 0.7,
       "carbsG": 4.5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 150
     }
   },
   {
@@ -2934,6 +3942,10 @@
       "proteinG": 1.2,
       "carbsG": 4.4,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 150
     }
   },
   {
@@ -2945,6 +3957,10 @@
       "proteinG": 1.3,
       "carbsG": 80.5,
       "fatG": 12.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -2956,6 +3972,10 @@
       "proteinG": 2.3,
       "carbsG": 23,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -2967,6 +3987,10 @@
       "proteinG": 3.2,
       "carbsG": 6,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -2978,6 +4002,10 @@
       "proteinG": 1.9,
       "carbsG": 4.8,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -2989,6 +4017,10 @@
       "proteinG": 2,
       "carbsG": 4.8,
       "fatG": 4.8
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -3000,6 +4032,10 @@
       "proteinG": 1.9,
       "carbsG": 3.4,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa picada",
+      "grams": 6
     }
   },
   {
@@ -3011,6 +4047,10 @@
       "proteinG": 1.1,
       "carbsG": 2.9,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -3022,6 +4062,10 @@
       "proteinG": 20.9,
       "carbsG": 48,
       "fatG": 10.4
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -3033,6 +4077,10 @@
       "proteinG": 1.7,
       "carbsG": 8.7,
       "fatG": 6.6
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiada",
+      "grams": 70
     }
   },
   {
@@ -3044,6 +4092,10 @@
       "proteinG": 2.7,
       "carbsG": 4.2,
       "fatG": 5.4
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 90
     }
   },
   {
@@ -3055,6 +4107,10 @@
       "proteinG": 1.6,
       "carbsG": 87.9,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3066,6 +4122,10 @@
       "proteinG": 1.2,
       "carbsG": 89.2,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3077,6 +4137,10 @@
       "proteinG": 1.6,
       "carbsG": 87.3,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -3088,6 +4152,10 @@
       "proteinG": 0.5,
       "carbsG": 81.1,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3099,6 +4167,10 @@
       "proteinG": 2.1,
       "carbsG": 23.2,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3110,6 +4182,10 @@
       "proteinG": 1.4,
       "carbsG": 6.2,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 40
     }
   },
   {
@@ -3121,6 +4197,10 @@
       "proteinG": 4.4,
       "carbsG": 23.1,
       "fatG": 3.9
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 50
     }
   },
   {
@@ -3132,6 +4212,10 @@
       "proteinG": 1.1,
       "carbsG": 36.2,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3143,6 +4227,10 @@
       "proteinG": 1.4,
       "carbsG": 50.3,
       "fatG": 11.2
+    },
+    "practicalUnit": {
+      "label": "1 pedaço médio",
+      "grams": 100
     }
   },
   {
@@ -3154,6 +4242,10 @@
       "proteinG": 2,
       "carbsG": 3.6,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa picada",
+      "grams": 5
     }
   },
   {
@@ -3165,6 +4257,10 @@
       "proteinG": 1.4,
       "carbsG": 2.7,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 40
     }
   },
   {
@@ -3176,6 +4272,10 @@
       "proteinG": 2.1,
       "carbsG": 3.2,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara",
+      "grams": 30
     }
   },
   {
@@ -3187,6 +4287,10 @@
       "proteinG": 5.9,
       "carbsG": 36.8,
       "fatG": 1.9
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -3198,6 +4302,10 @@
       "proteinG": 1.2,
       "carbsG": 4.1,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3209,6 +4317,10 @@
       "proteinG": 2.5,
       "carbsG": 5.5,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "3 pedaços",
+      "grams": 60
     }
   },
   {
@@ -3220,6 +4332,10 @@
       "proteinG": 3.6,
       "carbsG": 38.5,
       "fatG": 14
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -3231,6 +4347,10 @@
       "proteinG": 0.4,
       "carbsG": 86.8,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -3242,6 +4362,10 @@
       "proteinG": 1.9,
       "carbsG": 6.4,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -3253,6 +4377,10 @@
       "proteinG": 1.9,
       "carbsG": 7.2,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 90
     }
   },
   {
@@ -3264,6 +4392,10 @@
       "proteinG": 1.8,
       "carbsG": 7.6,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara fatiado",
+      "grams": 90
     }
   },
   {
@@ -3275,6 +4407,10 @@
       "proteinG": 3.3,
       "carbsG": 5.7,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa picada",
+      "grams": 4
     }
   },
   {
@@ -3286,6 +4422,10 @@
       "proteinG": 3.4,
       "carbsG": 12.7,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 100
     }
   },
   {
@@ -3297,6 +4437,10 @@
       "proteinG": 2.7,
       "carbsG": 4.9,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 xícara picada",
+      "grams": 100
     }
   },
   {
@@ -3308,6 +4452,10 @@
       "proteinG": 2.9,
       "carbsG": 5.4,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 folha",
+      "grams": 30
     }
   },
   {
@@ -3319,6 +4467,10 @@
       "proteinG": 1.1,
       "carbsG": 3.1,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3330,6 +4482,10 @@
       "proteinG": 1.4,
       "carbsG": 7.7,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3341,6 +4497,10 @@
       "proteinG": 1.4,
       "carbsG": 6.9,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3352,6 +4512,10 @@
       "proteinG": 0.8,
       "carbsG": 5.1,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3363,6 +4527,10 @@
       "proteinG": 1.8,
       "carbsG": 5.3,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 80
     }
   },
   {
@@ -3374,6 +4542,10 @@
       "proteinG": 0.5,
       "carbsG": 7.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3385,6 +4557,10 @@
       "proteinG": 0.8,
       "carbsG": 14.9,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3396,6 +4572,10 @@
       "proteinG": 0.8,
       "carbsG": 6.2,
       "fatG": 3.9
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3407,6 +4587,10 @@
       "proteinG": 0.9,
       "carbsG": 8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 100
     }
   },
   {
@@ -3418,6 +4602,10 @@
       "proteinG": 0.6,
       "carbsG": 5.5,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3429,6 +4617,10 @@
       "proteinG": 0.4,
       "carbsG": 46.9,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 65
     }
   },
   {
@@ -3440,6 +4632,10 @@
       "proteinG": 1,
       "carbsG": 47.7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 65
     }
   },
   {
@@ -3451,6 +4647,10 @@
       "proteinG": 1,
       "carbsG": 25.3,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 150
     }
   },
   {
@@ -3462,6 +4662,10 @@
       "proteinG": 1.1,
       "carbsG": 27.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade pequena",
+      "grams": 80
     }
   },
   {
@@ -3473,6 +4677,10 @@
       "proteinG": 1.8,
       "carbsG": 22.3,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade pequena",
+      "grams": 75
     }
   },
   {
@@ -3484,6 +4692,10 @@
       "proteinG": 1.4,
       "carbsG": 23.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 90
     }
   },
   {
@@ -3495,6 +4707,10 @@
       "proteinG": 1.5,
       "carbsG": 29.3,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade pequena",
+      "grams": 40
     }
   },
   {
@@ -3506,6 +4722,10 @@
       "proteinG": 1.2,
       "carbsG": 20.3,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 90
     }
   },
   {
@@ -3517,6 +4737,10 @@
       "proteinG": 1.3,
       "carbsG": 26,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 70
     }
   },
   {
@@ -3528,6 +4752,10 @@
       "proteinG": 1,
       "carbsG": 19.4,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3539,6 +4767,10 @@
       "proteinG": 0.6,
       "carbsG": 6.4,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3550,6 +4782,10 @@
       "proteinG": 1,
       "carbsG": 10.3,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3561,6 +4797,10 @@
       "proteinG": 0.5,
       "carbsG": 9.4,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3572,6 +4812,10 @@
       "proteinG": 0.4,
       "carbsG": 10.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco",
+      "grams": 200
     }
   },
   {
@@ -3583,6 +4827,10 @@
       "proteinG": 0.9,
       "carbsG": 11.5,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 90
     }
   },
   {
@@ -3594,6 +4842,10 @@
       "proteinG": 1.4,
       "carbsG": 18.9,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 75
     }
   },
   {
@@ -3605,6 +4857,10 @@
       "proteinG": 1.2,
       "carbsG": 10.4,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3616,6 +4872,10 @@
       "proteinG": 0.8,
       "carbsG": 11.4,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3627,6 +4887,10 @@
       "proteinG": 0.6,
       "carbsG": 50.3,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 50
     }
   },
   {
@@ -3638,6 +4902,10 @@
       "proteinG": 1.1,
       "carbsG": 17.2,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -3649,6 +4917,10 @@
       "proteinG": 1.1,
       "carbsG": 13,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -3660,6 +4932,10 @@
       "proteinG": 0.8,
       "carbsG": 15.8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 xícara de polpa",
+      "grams": 150
     }
   },
   {
@@ -3671,6 +4947,10 @@
       "proteinG": 0.6,
       "carbsG": 9.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3682,6 +4962,10 @@
       "proteinG": 1.4,
       "carbsG": 22.5,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "5 bagos",
+      "grams": 100
     }
   },
   {
@@ -3693,6 +4977,10 @@
       "proteinG": 0.9,
       "carbsG": 6.5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 80
     }
   },
   {
@@ -3704,6 +4992,10 @@
       "proteinG": 0.5,
       "carbsG": 10.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -3715,6 +5007,10 @@
       "proteinG": 0.7,
       "carbsG": 8.7,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3726,6 +5022,10 @@
       "proteinG": 1.1,
       "carbsG": 12.9,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 130
     }
   },
   {
@@ -3737,6 +5037,10 @@
       "proteinG": 0.7,
       "carbsG": 9.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3748,6 +5052,10 @@
       "proteinG": 1.1,
       "carbsG": 11.5,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 130
     }
   },
   {
@@ -3759,6 +5067,10 @@
       "proteinG": 0.7,
       "carbsG": 9.2,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3770,6 +5082,10 @@
       "proteinG": 0.7,
       "carbsG": 7.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3781,6 +5097,10 @@
       "proteinG": 0.8,
       "carbsG": 11.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 130
     }
   },
   {
@@ -3792,6 +5112,10 @@
       "proteinG": 0.5,
       "carbsG": 8.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3803,6 +5127,10 @@
       "proteinG": 0.6,
       "carbsG": 7.3,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -3814,6 +5142,10 @@
       "proteinG": 0.9,
       "carbsG": 11.1,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade (suco)",
+      "grams": 30
     }
   },
   {
@@ -3825,6 +5157,10 @@
       "proteinG": 0.3,
       "carbsG": 15.2,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 160
     }
   },
   {
@@ -3836,6 +5172,10 @@
       "proteinG": 2.1,
       "carbsG": 13.9,
       "fatG": 40.7
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 20
     }
   },
   {
@@ -3847,6 +5187,10 @@
       "proteinG": 0.8,
       "carbsG": 11.6,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 150
     }
   },
   {
@@ -3858,6 +5202,10 @@
       "proteinG": 0.4,
       "carbsG": 16.7,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3869,6 +5217,10 @@
       "proteinG": 0.4,
       "carbsG": 19.4,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3880,6 +5232,10 @@
       "proteinG": 0.4,
       "carbsG": 12.5,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3891,6 +5247,10 @@
       "proteinG": 0.9,
       "carbsG": 12.8,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3902,6 +5262,10 @@
       "proteinG": 2,
       "carbsG": 12.3,
       "fatG": 2.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média (polpa)",
+      "grams": 50
     }
   },
   {
@@ -3913,6 +5277,10 @@
       "proteinG": 0.8,
       "carbsG": 9.6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -3924,6 +5292,10 @@
       "proteinG": 0.8,
       "carbsG": 9.6,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco",
+      "grams": 200
     }
   },
   {
@@ -3935,6 +5307,10 @@
       "proteinG": 0.9,
       "carbsG": 14.9,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3946,6 +5322,10 @@
       "proteinG": 0.7,
       "carbsG": 9.3,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -3957,6 +5337,10 @@
       "proteinG": 0.3,
       "carbsG": 11.5,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "3 unidades",
+      "grams": 90
     }
   },
   {
@@ -3968,6 +5352,10 @@
       "proteinG": 2.3,
       "carbsG": 13,
       "fatG": 18
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 30
     }
   },
   {
@@ -3979,6 +5367,10 @@
       "proteinG": 0.2,
       "carbsG": 16.1,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -3990,6 +5382,10 @@
       "proteinG": 0.6,
       "carbsG": 14,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 170
     }
   },
   {
@@ -4001,6 +5397,10 @@
       "proteinG": 0.7,
       "carbsG": 16.9,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 150
     }
   },
   {
@@ -4012,6 +5412,10 @@
       "proteinG": 1.5,
       "carbsG": 22.4,
       "fatG": 0.3
+    },
+    "practicalUnit": {
+      "label": "1/2 unidade média",
+      "grams": 100
     }
   },
   {
@@ -4023,6 +5427,10 @@
       "proteinG": 0.3,
       "carbsG": 4.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -4034,6 +5442,10 @@
       "proteinG": 3.2,
       "carbsG": 72.5,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa de polpa",
+      "grams": 20
     }
   },
   {
@@ -4045,6 +5457,10 @@
       "proteinG": 0.5,
       "carbsG": 8.8,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco (200 ml)",
+      "grams": 200
     }
   },
   {
@@ -4056,6 +5472,10 @@
       "proteinG": 2.1,
       "carbsG": 26.5,
       "fatG": 19.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade (polpa)",
+      "grams": 30
     }
   },
   {
@@ -4067,6 +5487,10 @@
       "proteinG": 0.8,
       "carbsG": 9.4,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -4078,6 +5502,10 @@
       "proteinG": 0.5,
       "carbsG": 8.8,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara de polpa",
+      "grams": 100
     }
   },
   {
@@ -4089,6 +5517,10 @@
       "proteinG": 0.6,
       "carbsG": 12.7,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 50
     }
   },
   {
@@ -4100,6 +5532,10 @@
       "proteinG": 0,
       "carbsG": 14.7,
       "fatG": 0
+    },
+    "practicalUnit": {
+      "label": "1 copo de suco",
+      "grams": 200
     }
   },
   {
@@ -4111,6 +5547,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4122,6 +5562,10 @@
       "proteinG": 0.4,
       "carbsG": 0,
       "fatG": 86
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   },
   {
@@ -4133,6 +5577,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 67.4
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4144,6 +5592,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 81.7
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4155,6 +5607,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 67.2
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4166,6 +5622,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 67.1
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4177,6 +5637,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4188,6 +5652,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4199,6 +5667,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4210,6 +5682,10 @@
       "proteinG": 0,
       "carbsG": 0,
       "fatG": 100
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 13.5
     }
   },
   {
@@ -4221,6 +5697,10 @@
       "proteinG": 23.5,
       "carbsG": 0,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4232,6 +5712,10 @@
       "proteinG": 19.3,
       "carbsG": 0,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4243,6 +5727,10 @@
       "proteinG": 13.1,
       "carbsG": 0,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4254,6 +5742,10 @@
       "proteinG": 27.6,
       "carbsG": 0,
       "fatG": 1.3
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4265,6 +5757,10 @@
       "proteinG": 26.2,
       "carbsG": 0,
       "fatG": 6
+    },
+    "practicalUnit": {
+      "label": "1 lata drenada",
+      "grams": 120
     }
   },
   {
@@ -4276,6 +5772,10 @@
       "proteinG": 25.7,
       "carbsG": 0,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 lata drenada",
+      "grams": 120
     }
   },
   {
@@ -4287,6 +5787,10 @@
       "proteinG": 24,
       "carbsG": 1.2,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4331,6 +5835,10 @@
       "proteinG": 19,
       "carbsG": 0,
       "fatG": 1
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -4342,6 +5850,10 @@
       "proteinG": 10,
       "carbsG": 0,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -4353,6 +5865,10 @@
       "proteinG": 18.4,
       "carbsG": 2.9,
       "fatG": 15.6
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -4364,6 +5880,10 @@
       "proteinG": 18.5,
       "carbsG": 0,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 porção de carne",
+      "grams": 100
     }
   },
   {
@@ -4375,6 +5895,10 @@
       "proteinG": 17.4,
       "carbsG": 0,
       "fatG": 6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4386,6 +5910,10 @@
       "proteinG": 19.9,
       "carbsG": 0,
       "fatG": 19.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4397,6 +5925,10 @@
       "proteinG": 20.1,
       "carbsG": 0,
       "fatG": 16.9
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4408,6 +5940,10 @@
       "proteinG": 18.9,
       "carbsG": 0,
       "fatG": 2.2
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4419,6 +5955,10 @@
       "proteinG": 18.6,
       "carbsG": 0,
       "fatG": 1.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4430,6 +5970,10 @@
       "proteinG": 26.8,
       "carbsG": 0,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4441,6 +5985,10 @@
       "proteinG": 23.4,
       "carbsG": 0,
       "fatG": 2.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4452,6 +6000,10 @@
       "proteinG": 18.8,
       "carbsG": 0,
       "fatG": 5.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4463,6 +6015,10 @@
       "proteinG": 16.8,
       "carbsG": 0,
       "fatG": 6.5
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4474,6 +6030,10 @@
       "proteinG": 28.4,
       "carbsG": 0,
       "fatG": 22.8
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4485,6 +6045,10 @@
       "proteinG": 15.7,
       "carbsG": 0,
       "fatG": 9.4
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4496,6 +6060,10 @@
       "proteinG": 23.5,
       "carbsG": 10.2,
       "fatG": 22.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4507,6 +6075,10 @@
       "proteinG": 30.1,
       "carbsG": 0,
       "fatG": 24.5
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4518,6 +6090,10 @@
       "proteinG": 26.6,
       "carbsG": 0,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4529,6 +6105,10 @@
       "proteinG": 16.6,
       "carbsG": 0,
       "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4540,6 +6120,10 @@
       "proteinG": 26.9,
       "carbsG": 0,
       "fatG": 8.5
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4551,6 +6135,10 @@
       "proteinG": 16.3,
       "carbsG": 0,
       "fatG": 4.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4562,6 +6150,10 @@
       "proteinG": 27.4,
       "carbsG": 0,
       "fatG": 11.8
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4573,6 +6165,10 @@
       "proteinG": 21.4,
       "carbsG": 5,
       "fatG": 19.1
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4584,6 +6180,10 @@
       "proteinG": 16.7,
       "carbsG": 0,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4595,6 +6195,10 @@
       "proteinG": 28.6,
       "carbsG": 0,
       "fatG": 3.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4606,6 +6210,10 @@
       "proteinG": 11.8,
       "carbsG": 5,
       "fatG": 8
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4617,6 +6225,10 @@
       "proteinG": 15.5,
       "carbsG": 0,
       "fatG": 1.1
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4628,6 +6240,10 @@
       "proteinG": 36.5,
       "carbsG": 0,
       "fatG": 4
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4639,6 +6255,10 @@
       "proteinG": 18.6,
       "carbsG": 0,
       "fatG": 1.3
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4650,6 +6270,10 @@
       "proteinG": 30.8,
       "carbsG": 0,
       "fatG": 2.3
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4694,6 +6318,10 @@
       "proteinG": 15.9,
       "carbsG": 0,
       "fatG": 24
+    },
+    "practicalUnit": {
+      "label": "1 lata drenada",
+      "grams": 84
     }
   },
   {
@@ -4705,6 +6333,10 @@
       "proteinG": 33.4,
       "carbsG": 0,
       "fatG": 12.7
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -4716,6 +6348,10 @@
       "proteinG": 21.1,
       "carbsG": 0,
       "fatG": 2.7
+    },
+    "practicalUnit": {
+      "label": "1 unidade média",
+      "grams": 100
     }
   },
   {
@@ -4727,6 +6363,10 @@
       "proteinG": 18,
       "carbsG": 0,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -4738,6 +6378,10 @@
       "proteinG": 13.5,
       "carbsG": 2.9,
       "fatG": 6.7
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 15
     }
   },
   {
@@ -4749,6 +6393,10 @@
       "proteinG": 7.8,
       "carbsG": 15.1,
       "fatG": 16.6
+    },
+    "practicalUnit": {
+      "label": "1 tablete",
+      "grams": 10
     }
   },
   {
@@ -4760,6 +6408,10 @@
       "proteinG": 6.3,
       "carbsG": 10.6,
       "fatG": 20.4
+    },
+    "practicalUnit": {
+      "label": "1 tablete",
+      "grams": 10
     }
   },
   {
@@ -4771,6 +6423,10 @@
       "proteinG": 26.7,
       "carbsG": 0,
       "fatG": 10.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4782,6 +6438,10 @@
       "proteinG": 19.4,
       "carbsG": 0,
       "fatG": 5.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4793,6 +6453,10 @@
       "proteinG": 27.3,
       "carbsG": 0,
       "fatG": 10.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4804,6 +6468,10 @@
       "proteinG": 20.8,
       "carbsG": 0,
       "fatG": 6.1
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4815,6 +6483,10 @@
       "proteinG": 21.6,
       "carbsG": 0,
       "fatG": 4.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4826,6 +6498,10 @@
       "proteinG": 20.5,
       "carbsG": 0,
       "fatG": 5.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4837,6 +6513,10 @@
       "proteinG": 19.2,
       "carbsG": 0,
       "fatG": 15
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4848,6 +6528,10 @@
       "proteinG": 30.7,
       "carbsG": 0,
       "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4859,6 +6543,10 @@
       "proteinG": 21.5,
       "carbsG": 0,
       "fatG": 4.3
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4870,6 +6558,10 @@
       "proteinG": 35.1,
       "carbsG": 0,
       "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4881,6 +6573,10 @@
       "proteinG": 36.4,
       "carbsG": 0,
       "fatG": 11.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4892,6 +6588,10 @@
       "proteinG": 22.7,
       "carbsG": 0,
       "fatG": 16.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4903,6 +6603,10 @@
       "proteinG": 19.8,
       "carbsG": 0,
       "fatG": 13.1
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 150
     }
   },
   {
@@ -4914,6 +6618,10 @@
       "proteinG": 29.9,
       "carbsG": 0,
       "fatG": 16.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 150
     }
   },
   {
@@ -4925,6 +6633,10 @@
       "proteinG": 21.2,
       "carbsG": 0,
       "fatG": 12.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4936,6 +6648,10 @@
       "proteinG": 32.4,
       "carbsG": 0,
       "fatG": 15.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4947,6 +6663,10 @@
       "proteinG": 24,
       "carbsG": 0,
       "fatG": 6
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4958,6 +6678,10 @@
       "proteinG": 35.9,
       "carbsG": 0,
       "fatG": 4.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -4969,6 +6693,10 @@
       "proteinG": 28.8,
       "carbsG": 0,
       "fatG": 27.7
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 150
     }
   },
   {
@@ -4980,6 +6708,10 @@
       "proteinG": 16.7,
       "carbsG": 0,
       "fatG": 31.8
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 150
     }
   },
   {
@@ -4991,6 +6723,10 @@
       "proteinG": 31.9,
       "carbsG": 0,
       "fatG": 8.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5002,6 +6738,10 @@
       "proteinG": 21.5,
       "carbsG": 0,
       "fatG": 6.2
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5013,6 +6753,10 @@
       "proteinG": 32.4,
       "carbsG": 0,
       "fatG": 8.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5024,6 +6768,10 @@
       "proteinG": 21.2,
       "carbsG": 0,
       "fatG": 8.7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5035,6 +6783,10 @@
       "proteinG": 28.6,
       "carbsG": 0,
       "fatG": 23
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5046,6 +6798,10 @@
       "proteinG": 19.5,
       "carbsG": 0,
       "fatG": 15.3
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5057,6 +6813,10 @@
       "proteinG": 20.7,
       "carbsG": 1.1,
       "fatG": 5.4
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5068,6 +6828,10 @@
       "proteinG": 29.9,
       "carbsG": 4.2,
       "fatG": 9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5079,6 +6843,10 @@
       "proteinG": 21.6,
       "carbsG": 0,
       "fatG": 5.6
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5090,6 +6858,10 @@
       "proteinG": 32.8,
       "carbsG": 0,
       "fatG": 8.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5101,6 +6873,10 @@
       "proteinG": 29.4,
       "carbsG": 0,
       "fatG": 7.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5112,6 +6888,10 @@
       "proteinG": 20,
       "carbsG": 0,
       "fatG": 6.2
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5123,6 +6903,10 @@
       "proteinG": 24.2,
       "carbsG": 0,
       "fatG": 26
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5134,6 +6918,10 @@
       "proteinG": 17.6,
       "carbsG": 0,
       "fatG": 16.1
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5145,6 +6933,10 @@
       "proteinG": 32.9,
       "carbsG": 0,
       "fatG": 9.1
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5156,6 +6948,10 @@
       "proteinG": 20.5,
       "carbsG": 0,
       "fatG": 5.2
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5167,6 +6963,10 @@
       "proteinG": 17.1,
       "carbsG": 0,
       "fatG": 15.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5178,6 +6978,10 @@
       "proteinG": 20.9,
       "carbsG": 0,
       "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5189,6 +6993,10 @@
       "proteinG": 30.7,
       "carbsG": 0,
       "fatG": 2.4
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5200,6 +7008,10 @@
       "proteinG": 21.6,
       "carbsG": 0,
       "fatG": 7.8
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5211,6 +7023,10 @@
       "proteinG": 31.9,
       "carbsG": 0,
       "fatG": 11.6
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5222,6 +7038,10 @@
       "proteinG": 31.2,
       "carbsG": 0,
       "fatG": 6.7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5233,6 +7053,10 @@
       "proteinG": 21.6,
       "carbsG": 0,
       "fatG": 5.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5244,6 +7068,10 @@
       "proteinG": 21.4,
       "carbsG": 0,
       "fatG": 7.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5255,6 +7083,10 @@
       "proteinG": 29.7,
       "carbsG": 0,
       "fatG": 7.4
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5266,6 +7098,10 @@
       "proteinG": 21,
       "carbsG": 0,
       "fatG": 5.7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5277,6 +7113,10 @@
       "proteinG": 21.7,
       "carbsG": 0,
       "fatG": 4.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5288,6 +7128,10 @@
       "proteinG": 35.9,
       "carbsG": 0,
       "fatG": 7.3
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5299,6 +7143,10 @@
       "proteinG": 22.2,
       "carbsG": 0,
       "fatG": 27
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5310,6 +7158,10 @@
       "proteinG": 17.6,
       "carbsG": 0,
       "fatG": 20.4
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5321,6 +7173,10 @@
       "proteinG": 18.8,
       "carbsG": 0,
       "fatG": 14.7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5332,6 +7188,10 @@
       "proteinG": 26.4,
       "carbsG": 0,
       "fatG": 19.5
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5343,6 +7203,10 @@
       "proteinG": 21.3,
       "carbsG": 0,
       "fatG": 4.7
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5354,6 +7218,10 @@
       "proteinG": 31.9,
       "carbsG": 0,
       "fatG": 11.3
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5365,6 +7233,10 @@
       "proteinG": 26.9,
       "carbsG": 0,
       "fatG": 21.9
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5376,6 +7248,10 @@
       "proteinG": 19.7,
       "carbsG": 0,
       "fatG": 25.4
+    },
+    "practicalUnit": {
+      "label": "1 bife ou porção",
+      "grams": 100
     }
   },
   {
@@ -5387,6 +7263,10 @@
       "proteinG": 9.6,
       "carbsG": 34.5,
       "fatG": 11.8
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 100
     }
   },
   {
@@ -5398,6 +7278,10 @@
       "proteinG": 6.9,
       "carbsG": 47.5,
       "fatG": 15.6
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 100
     }
   },
   {
@@ -5409,6 +7293,10 @@
       "proteinG": 7.3,
       "carbsG": 35.5,
       "fatG": 22.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 100
     }
   },
   {
@@ -5420,6 +7308,10 @@
       "proteinG": 18.1,
       "carbsG": 0,
       "fatG": 15.1
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 80
     }
   },
   {
@@ -5431,6 +7323,10 @@
       "proteinG": 23.9,
       "carbsG": 0,
       "fatG": 15.6
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -5442,6 +7338,10 @@
       "proteinG": 29.6,
       "carbsG": 0,
       "fatG": 7.7
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -5453,6 +7353,10 @@
       "proteinG": 12.6,
       "carbsG": 0,
       "fatG": 18.6
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -5464,6 +7368,10 @@
       "proteinG": 22.4,
       "carbsG": 0.6,
       "fatG": 12.1
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -5475,6 +7383,10 @@
       "proteinG": 17.1,
       "carbsG": 0,
       "fatG": 9.8
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 90
     }
   },
   {
@@ -5486,6 +7398,10 @@
       "proteinG": 17.8,
       "carbsG": 0,
       "fatG": 4.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 90
     }
   },
   {
@@ -5497,6 +7413,10 @@
       "proteinG": 17.6,
       "carbsG": 0,
       "fatG": 3.5
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -5508,6 +7428,10 @@
       "proteinG": 28,
       "carbsG": 0,
       "fatG": 7.5
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -5519,6 +7443,10 @@
       "proteinG": 25,
       "carbsG": 0,
       "fatG": 7.1
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -5530,6 +7458,10 @@
       "proteinG": 20.6,
       "carbsG": 0,
       "fatG": 4.6
+    },
+    "practicalUnit": {
+      "label": "1/4 frango",
+      "grams": 250
     }
   },
   {
@@ -5541,6 +7473,10 @@
       "proteinG": 33.4,
       "carbsG": 0,
       "fatG": 7.6
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -5552,6 +7488,10 @@
       "proteinG": 20.8,
       "carbsG": 0,
       "fatG": 6.7
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -5563,6 +7503,10 @@
       "proteinG": 21.5,
       "carbsG": 0,
       "fatG": 3
+    },
+    "practicalUnit": {
+      "label": "1 filé médio",
+      "grams": 150
     }
   },
   {
@@ -5574,6 +7518,10 @@
       "proteinG": 28.7,
       "carbsG": 0,
       "fatG": 15.2
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 120
     }
   },
   {
@@ -5585,6 +7533,10 @@
       "proteinG": 15.5,
       "carbsG": 0,
       "fatG": 20.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 120
     }
   },
   {
@@ -5596,6 +7548,10 @@
       "proteinG": 29.2,
       "carbsG": 0,
       "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 120
     }
   },
   {
@@ -5607,6 +7563,10 @@
       "proteinG": 17.6,
       "carbsG": 0,
       "fatG": 9.6
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 120
     }
   },
   {
@@ -5618,6 +7578,10 @@
       "proteinG": 14.2,
       "carbsG": 0,
       "fatG": 17.4
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5629,6 +7593,10 @@
       "proteinG": 18.3,
       "carbsG": 0,
       "fatG": 18.5
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5640,6 +7608,10 @@
       "proteinG": 18.2,
       "carbsG": 0,
       "fatG": 18.4
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5651,6 +7623,10 @@
       "proteinG": 16.1,
       "carbsG": 0,
       "fatG": 17.6
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5662,6 +7638,10 @@
       "proteinG": 20.5,
       "carbsG": 0,
       "fatG": 21.3
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5673,6 +7653,10 @@
       "proteinG": 23.2,
       "carbsG": 0,
       "fatG": 21.9
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -5684,6 +7668,10 @@
       "proteinG": 12,
       "carbsG": 5.8,
       "fatG": 21.6
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 15
     }
   },
   {
@@ -5695,6 +7683,10 @@
       "proteinG": 26.2,
       "carbsG": 0,
       "fatG": 5.7
+    },
+    "practicalUnit": {
+      "label": "1 filé ou porção",
+      "grams": 100
     }
   },
   {
@@ -5706,6 +7698,10 @@
       "proteinG": 18.1,
       "carbsG": 0,
       "fatG": 1.8
+    },
+    "practicalUnit": {
+      "label": "1 filé ou porção",
+      "grams": 100
     }
   },
   {
@@ -5717,6 +7713,10 @@
       "proteinG": 21.5,
       "carbsG": 0,
       "fatG": 8
+    },
+    "practicalUnit": {
+      "label": "1 bisteca média",
+      "grams": 150
     }
   },
   {
@@ -5728,6 +7728,10 @@
       "proteinG": 33.7,
       "carbsG": 0,
       "fatG": 18.5
+    },
+    "practicalUnit": {
+      "label": "1 bisteca média",
+      "grams": 150
     }
   },
   {
@@ -5739,6 +7743,10 @@
       "proteinG": 28.9,
       "carbsG": 0,
       "fatG": 17.4
+    },
+    "practicalUnit": {
+      "label": "1 bisteca média",
+      "grams": 150
     }
   },
   {
@@ -5750,6 +7758,10 @@
       "proteinG": 30.2,
       "carbsG": 0,
       "fatG": 30.3
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 100
     }
   },
   {
@@ -5761,6 +7773,10 @@
       "proteinG": 18,
       "carbsG": 0,
       "fatG": 19.8
+    },
+    "practicalUnit": {
+      "label": "1 pedaço",
+      "grams": 100
     }
   },
   {
@@ -5772,6 +7788,10 @@
       "proteinG": 35.7,
       "carbsG": 0,
       "fatG": 6.4
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -5783,6 +7803,10 @@
       "proteinG": 22.6,
       "carbsG": 0,
       "fatG": 8.8
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 100
     }
   },
   {
@@ -5794,6 +7818,10 @@
       "proteinG": 18.5,
       "carbsG": 0,
       "fatG": 19.9
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -5805,6 +7833,10 @@
       "proteinG": 32.1,
       "carbsG": 0,
       "fatG": 13.9
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -5816,6 +7848,10 @@
       "proteinG": 20.1,
       "carbsG": 0,
       "fatG": 11.1
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -5827,6 +7863,10 @@
       "proteinG": 15.6,
       "carbsG": 0,
       "fatG": 34.5
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 100
     }
   },
   {
@@ -5838,6 +7878,10 @@
       "proteinG": 14.4,
       "carbsG": 1.4,
       "fatG": 6.8
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 15
     }
   },
   {
@@ -5849,6 +7893,10 @@
       "proteinG": 14.3,
       "carbsG": 2.1,
       "fatG": 2.7
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 15
     }
   },
   {
@@ -5860,6 +7908,10 @@
       "proteinG": 25.8,
       "carbsG": 2.9,
       "fatG": 30.6
+    },
+    "practicalUnit": {
+      "label": "1 fatia",
+      "grams": 15
     }
   },
   {
@@ -5904,6 +7956,10 @@
       "proteinG": 2.7,
       "carbsG": 9.7,
       "fatG": 2.3
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -5915,6 +7971,10 @@
       "proteinG": 2.5,
       "carbsG": 9.4,
       "fatG": 2.3
+    },
+    "practicalUnit": {
+      "label": "1 pote",
+      "grams": 170
     }
   },
   {
@@ -5926,6 +7986,10 @@
       "proteinG": 7.7,
       "carbsG": 57,
       "fatG": 6.7
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
     }
   },
   {
@@ -5937,6 +8001,10 @@
       "proteinG": 2.1,
       "carbsG": 14.2,
       "fatG": 2.2
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -5948,6 +8016,10 @@
       "proteinG": 25.4,
       "carbsG": 39.2,
       "fatG": 26.9
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 20
     }
   },
   {
@@ -5959,6 +8031,10 @@
       "proteinG": 1.9,
       "carbsG": 15.7,
       "fatG": 0.1
+    },
+    "practicalUnit": {
+      "label": "1 copo",
+      "grams": 200
     }
   },
   {
@@ -5970,6 +8046,10 @@
       "proteinG": 17.4,
       "carbsG": 3.2,
       "fatG": 20.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 30
     }
   },
   {
@@ -5981,6 +8061,10 @@
       "proteinG": 22.6,
       "carbsG": 3,
       "fatG": 25.2
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -5992,6 +8076,10 @@
       "proteinG": 9.4,
       "carbsG": 5.7,
       "fatG": 27.4
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -6003,6 +8091,10 @@
       "proteinG": 5.8,
       "carbsG": 18.5,
       "fatG": 2.8
+    },
+    "practicalUnit": {
+      "label": "1 potinho",
+      "grams": 45
     }
   },
   {
@@ -6014,6 +8106,10 @@
       "proteinG": 22.7,
       "carbsG": 1.9,
       "fatG": 29.1
+    },
+    "practicalUnit": {
+      "label": "1 fatia média",
+      "grams": 20
     }
   },
   {
@@ -6025,6 +8121,10 @@
       "proteinG": 9.6,
       "carbsG": 2.4,
       "fatG": 23.4
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
     }
   },
   {
@@ -6036,6 +8136,10 @@
       "proteinG": 13.3,
       "carbsG": 0.6,
       "fatG": 9.5
+    },
+    "practicalUnit": {
+      "label": "1 ovo inteiro (sem casca)",
+      "grams": 50
     }
   },
   {
@@ -6047,6 +8151,10 @@
       "proteinG": 13,
       "carbsG": 1.6,
       "fatG": 8.9
+    },
+    "practicalUnit": {
+      "label": "1 ovo inteiro (sem casca)",
+      "grams": 50
     }
   },
   {
@@ -6058,6 +8166,10 @@
       "proteinG": 15.6,
       "carbsG": 1.2,
       "fatG": 18.6
+    },
+    "practicalUnit": {
+      "label": "1 ovo inteiro (sem casca)",
+      "grams": 50
     }
   },
   {
@@ -6069,6 +8181,10 @@
       "proteinG": 27.2,
       "carbsG": 20.3,
       "fatG": 43.9
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 10
     }
   },
   {
@@ -6080,6 +8196,10 @@
       "proteinG": 22.5,
       "carbsG": 18.7,
       "fatG": 54
+    },
+    "practicalUnit": {
+      "label": "10 unidades",
+      "grams": 10
     }
   },
   {
@@ -6091,6 +8211,10 @@
       "proteinG": 7.5,
       "carbsG": 14.2,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -6102,6 +8226,10 @@
       "proteinG": 4.6,
       "carbsG": 13.4,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 80
     }
   },
   {
@@ -6113,6 +8241,10 @@
       "proteinG": 20,
       "carbsG": 61.2,
       "fatG": 1.3
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6124,6 +8256,10 @@
       "proteinG": 5.1,
       "carbsG": 13.5,
       "fatG": 0.6
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -6135,6 +8271,10 @@
       "proteinG": 20.2,
       "carbsG": 61.2,
       "fatG": 2.4
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6146,6 +8286,10 @@
       "proteinG": 6.1,
       "carbsG": 16.5,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -6157,6 +8301,10 @@
       "proteinG": 20.1,
       "carbsG": 61.5,
       "fatG": 0.9
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6168,6 +8316,10 @@
       "proteinG": 21.3,
       "carbsG": 58.8,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6179,6 +8331,10 @@
       "proteinG": 5.5,
       "carbsG": 15.3,
       "fatG": 0.4
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -6190,6 +8346,10 @@
       "proteinG": 17.3,
       "carbsG": 62.9,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6201,6 +8361,10 @@
       "proteinG": 4.5,
       "carbsG": 11.8,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -6212,6 +8376,10 @@
       "proteinG": 20.9,
       "carbsG": 62.2,
       "fatG": 1.3
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6223,6 +8391,10 @@
       "proteinG": 5.7,
       "carbsG": 12.9,
       "fatG": 0.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 100
     }
   },
   {
@@ -6234,6 +8406,10 @@
       "proteinG": 22.2,
       "carbsG": 60,
       "fatG": 1.2
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 90
     }
   },
   {
@@ -6256,6 +8432,10 @@
       "proteinG": 23.2,
       "carbsG": 62,
       "fatG": 0.8
+    },
+    "practicalUnit": {
+      "label": "1/2 xícara",
+      "grams": 90
     }
   },
   {
@@ -6267,6 +8447,10 @@
       "proteinG": 36,
       "carbsG": 38.4,
       "fatG": 14.6
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 20
     }
   },
   {
@@ -6278,6 +8462,10 @@
       "proteinG": 2.4,
       "carbsG": 4.3,
       "fatG": 1.6
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 20
     }
   },
   {
@@ -6289,6 +8477,10 @@
       "proteinG": 35.7,
       "carbsG": 28.5,
       "fatG": 26.2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 20
     }
   },
   {
@@ -6322,6 +8514,10 @@
       "proteinG": 14.5,
       "carbsG": 15.1,
       "fatG": 63.5
+    },
+    "practicalUnit": {
+      "label": "2 unidades",
+      "grams": 10
     }
   },
   {
@@ -6333,6 +8529,10 @@
       "proteinG": 3.7,
       "carbsG": 10.4,
       "fatG": 42
+    },
+    "practicalUnit": {
+      "label": "1/4 xícara",
+      "grams": 20
     }
   },
   {
@@ -6344,6 +8544,10 @@
       "proteinG": 1.4,
       "carbsG": 79.2,
       "fatG": 0.2
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   },
   {
@@ -6355,6 +8559,10 @@
       "proteinG": 21.2,
       "carbsG": 21.6,
       "fatG": 50.4
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
     }
   },
   {
@@ -6366,6 +8574,10 @@
       "proteinG": 14.1,
       "carbsG": 43.3,
       "fatG": 32.3
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   },
   {
@@ -6377,6 +8589,10 @@
       "proteinG": 3,
       "carbsG": 43.9,
       "fatG": 0.7
+    },
+    "practicalUnit": {
+      "label": "5 unidades",
+      "grams": 50
     }
   },
   {
@@ -6388,6 +8604,10 @@
       "proteinG": 2.5,
       "carbsG": 29.6,
       "fatG": 12.8
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 14
     }
   }
 ]

@@ -42,11 +42,19 @@ const per100gSchema = macrosSchema.refine(
   },
 );
 
+const practicalUnitSchema = z.object({
+  label: z.string().min(1).max(120),
+  // Physical, not a bound on the app's own MAX_GRAMS: no household measure
+  // approaches that ceiling, and this schema should not have to know about it.
+  grams: z.number().positive().max(10_000),
+});
+
 export const catalogueEntrySchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1).max(120),
   category: z.enum(FOOD_CATEGORIES),
   per100g: per100gSchema,
+  practicalUnit: practicalUnitSchema.optional(),
 });
 
 export type CatalogueEntry = z.infer<typeof catalogueEntrySchema>;

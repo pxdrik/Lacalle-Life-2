@@ -279,6 +279,13 @@ const macrosSchema = z
   })
   .strict();
 
+const practicalUnitSchema = z
+  .object({
+    label: z.string().min(1).max(NAME_MAX),
+    grams: bounded("peso da medida inválido.", 0, 10_000),
+  })
+  .strict();
+
 const mealItemSchema = z
   .object({
     id: z.string().min(1).max(200),
@@ -287,6 +294,7 @@ const mealItemSchema = z
     grams: bounded("grams inválido.", 0, MAX_GRAMS),
     unit: z.enum(["g", "ml"]),
     per100g: macrosSchema,
+    practicalUnit: practicalUnitSchema.optional(),
   })
   .strict();
 

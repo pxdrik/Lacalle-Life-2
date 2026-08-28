@@ -1,4 +1,6 @@
-import type { Food } from "../types/food";
+import { revise } from "@/core/domain/entity";
+
+import type { Food, PracticalUnit } from "../types/food";
 import type { CatalogueEntry } from "../validation/food-schema";
 import type { FoodRepository } from "./food-repository";
 
@@ -49,4 +51,86 @@ export async function seedCatalogue(repository: FoodRepository): Promise<void> {
   }));
 
   await repository.saveMany(foods);
+}
+
+/**
+ * Bumped whenever `catalogue.json` changes which entries carry a
+ * `practicalUnit`.
+ *
+ * `seedCatalogue` only ever inserts ids missing from the store — see its own
+ * comment — so a browser that already seeded, say, "Abacate" before this
+ * field existed keeps the medialess (unit-less) copy forever unless
+ * something goes back and patches it in. This is that something, modelled
+ * directly on `refreshExerciseMedia` in the workouts feature, which solved
+ * the identical problem for exercise photos.
+ */
+const PRACTICAL_UNIT_REVISION = 1;
+const REVISION_KEY = "lacalle-life:food-practical-unit-revision";
+
+/**
+ * Brings stored catalogue foods up to the current set of practical units.
+ *
+ * Gated on a revision marker for the same reason as the exercise refresh:
+ * the honest check is "read every row and compare", and paying that on every
+ * cold start to usually find nothing changed is wasted work with no visible
+ * benefit. Custom foods are skipped — the curated mapping has nothing to say
+ * about a food the user typed in themselves.
+ */
+export async function refreshFoodPracticalUnits(
+  repository: FoodRepository,
+): Promise<void> {
+  if (readRevision() >= PRACTICAL_UNIT_REVISION) return;
+
+  const { default: entries } = await import("./catalogue.json");
+  const typed = entries as readonly CatalogueEntry[];
+  const unitById = new Map<string, PracticalUnit | undefined>(
+    typed.map((entry) => [entry.id, entry.practicalUnit]),
+  );
+
+  const stale = (await repository.listAll()).filter(
+    (food) =>
+      !food.isCustom &&
+      unitById.has(food.id) &&
+      !sameUnit(food.practicalUnit, unitById.get(food.id)),
+  );
+
+  if (stale.length > 0) {
+    await repository.saveMany(
+      stale.map((food) =>
+        revise(food, { practicalUnit: unitById.get(food.id) }),
+      ),
+    );
+  }
+
+  writeRevision();
+}
+
+function sameUnit(
+  a: PracticalUnit | undefined,
+  b: PracticalUnit | undefined,
+): boolean {
+  if (a === undefined || b === undefined) return a === b;
+  return a.label === b.label && a.grams === b.grams;
+}
+
+function readRevision(): number {
+  try {
+    return Number(globalThis.localStorage?.getItem(REVISION_KEY) ?? 0);
+  } catch {
+    // Storage blocked. Returning 0 means we do the work every boot, which is
+    // slow but correct — the alternative is silently never backfilling.
+    return 0;
+  }
+}
+
+function writeRevision(): void {
+  try {
+    globalThis.localStorage?.setItem(
+      REVISION_KEY,
+      String(PRACTICAL_UNIT_REVISION),
+    );
+  } catch {
+    // Nothing to do: the refresh already succeeded, and without the marker
+    // it simply runs again next time.
+  }
 }

@@ -1,5 +1,6 @@
 import type { Entity, EntityId } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
+import type { PracticalUnit } from "@/features/foods";
 
 /**
  * One food in one meal.
@@ -15,10 +16,11 @@ import type { Macros } from "@/core/domain/macros";
 /**
  * What the quantity is measured in. `grams` never changes meaning — a
  * `unit` of `"ml"` is a display choice for a liquid, on the assumption that
- * 1 ml ≈ 1 g, not a second physical quantity. The catalogue has no
- * per-food density (or per-food portion weight — "1 ovo" needs one and the
- * TACO source this app draws from does not carry it), so this is the one
- * unit conversion that needs no food-specific data to be honest.
+ * 1 ml ≈ 1 g, not a second physical quantity. A food's `practicalUnit` (a
+ * household measure like "1 fatia média") is a separate, optional thing:
+ * it only ever offers a second way to *enter* a quantity, converted to grams
+ * at input time — it is never a third value here, so a row without one
+ * behaves exactly as it always has.
  */
 export type MealItemUnit = "g" | "ml";
 
@@ -30,6 +32,13 @@ export interface MealItem {
   readonly grams: number;
   readonly unit: MealItemUnit;
   readonly per100g: Macros;
+  /**
+   * Copied from the food at add time, same as `per100g` and for the same
+   * reason: the catalogue's measure can change or disappear later without
+   * rewriting a plan the user already built around it. `undefined` when the
+   * food had none, or was custom, or predates this field.
+   */
+  readonly practicalUnit?: PracticalUnit | undefined;
 }
 
 export interface Meal {

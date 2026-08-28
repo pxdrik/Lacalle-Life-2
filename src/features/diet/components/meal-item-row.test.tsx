@@ -29,11 +29,27 @@ const ITEM: MealItem = {
   per100g: { kcal: 160, proteinG: 2, carbsG: 9, fatG: 15 },
 };
 
+function row(item: MealItem) {
+  return (
+    <ul>
+      <MealItemRow
+        item={item}
+        dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
+        otherMeals={[]}
+        onGramsChange={() => undefined}
+        onUnitChange={() => undefined}
+        onRemove={() => undefined}
+        onSend={() => undefined}
+      />
+    </ul>
+  );
+}
+
 function mount(item: MealItem = ITEM) {
   const onGramsChange = vi.fn();
   const onUnitChange = vi.fn();
 
-  render(
+  const { rerender } = render(
     <ul>
       <MealItemRow
         item={item}
@@ -52,6 +68,9 @@ function mount(item: MealItem = ITEM) {
     unitField: screen.getByLabelText("Unidade de Abacate"),
     onGramsChange,
     onUnitChange,
+    rerender: (next: MealItem) => {
+      rerender(row(next));
+    },
   };
 }
 
@@ -142,6 +161,76 @@ describe("the portion field", () => {
     await userEvent.clear(field);
 
     expect(last(onGramsChange)).toBe(0);
+  });
+});
+
+describe("the practical unit field", () => {
+  const WITH_UNIT: MealItem = {
+    ...ITEM,
+    grams: 100,
+    practicalUnit: { label: "1/2 unidade média", grams: 100 },
+  };
+
+  it("does not render when the food has no practical unit", () => {
+    mount(ITEM);
+
+    expect(
+      screen.queryByLabelText("Quantidade de Abacate em 1/2 unidade média"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the quantity the stored grams work out to", () => {
+    mount(WITH_UNIT);
+
+    expect(
+      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
+    ).toHaveValue("1");
+  });
+
+  it("shows a fractional quantity when grams is not a whole number of units", () => {
+    mount({ ...WITH_UNIT, grams: 150 });
+
+    expect(
+      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
+    ).toHaveValue("1,5");
+  });
+
+  it("converts a typed quantity to grams through the same callback as the grams field", async () => {
+    const { onGramsChange } = mount(WITH_UNIT);
+    const unitField = screen.getByLabelText(
+      "Quantidade de Abacate em 1/2 unidade média",
+    );
+
+    await userEvent.clear(unitField);
+    await userEvent.type(unitField, "2");
+
+    expect(last(onGramsChange)).toBe(200);
+  });
+
+  it("stays in sync when the grams prop changes from elsewhere", () => {
+    // The grams field's own edits reach `item.grams` through `onGramsChange`
+    // and a re-render with the new prop — exactly what `rerender` simulates
+    // here, and what typing into the grams field in this same mount cannot,
+    // since `onGramsChange` is a bare mock that never feeds back into `item`.
+    const { rerender } = mount(WITH_UNIT);
+
+    rerender({ ...WITH_UNIT, grams: 250 });
+
+    expect(
+      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
+    ).toHaveValue("2,5");
+  });
+
+  it("accepts a comma, like the grams field", async () => {
+    const { onGramsChange } = mount(WITH_UNIT);
+    const unitField = screen.getByLabelText(
+      "Quantidade de Abacate em 1/2 unidade média",
+    );
+
+    await userEvent.clear(unitField);
+    await userEvent.type(unitField, "1,5");
+
+    expect(last(onGramsChange)).toBe(150);
   });
 });
 

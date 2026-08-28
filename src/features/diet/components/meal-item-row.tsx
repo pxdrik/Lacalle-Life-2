@@ -10,6 +10,7 @@ import { Select } from "@/design-system/components/select";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
+import type { PracticalUnit } from "@/features/foods";
 
 interface Props {
   readonly item: MealItem;
@@ -80,10 +81,20 @@ export function MealItemRow({
           label={`Quantidade de ${item.name}`}
           onChange={onGramsChange}
         />
+        {/* Só aparece quando o alimento tem uma medida caseira confiável
+            (TBCA/TACO/USDA FBG) — nem todo alimento tem uma, e onde falta
+            não existe substituto honesto além de gramas/ml. Os dois campos
+            escrevem no mesmo `grams`: editar um atualiza o outro. */}
+        {item.practicalUnit && (
+          <UnitQuantityField
+            grams={item.grams}
+            unit={item.practicalUnit}
+            itemName={item.name}
+            onChange={onGramsChange}
+          />
+        )}
         {/* g e ml só trocam o rótulo — 1 ml ≈ 1 g é a aproximação, não uma
-            segunda grandeza. Não existe "1 unidade" aqui porque nenhuma
-            fonte deste app (catálogo, TACO) carrega peso por unidade; um
-            valor inventado seria pior que a pergunta ficar sem resposta. */}
+            segunda grandeza. */}
         <Select
           variant="compact"
           value={item.unit}
@@ -270,4 +281,88 @@ function readGrams(input: string): {
  */
 function text(grams: number): string {
   return grams === 0 ? "" : String(grams).replace(".", ",");
+}
+
+/**
+ * "Quantas medidas", not "quantos gramas" — a second view onto the same
+ * `grams` the app already stores, so this never needs its own persistence
+ * or migration. Typing "2" into "1/2 xícara" (100 g) calls `onChange(200)`
+ * through the exact callback `GramsField` uses; typing grams directly still
+ * works, and this field just shows what that comes out to (a quantity that
+ * is not a whole number of measures, like 1,5, is not an error — it is
+ * accurate).
+ *
+ * A second copy of `GramsField`'s draft/`seen` technique rather than a
+ * shared one: the two fields hold different units of the same value (count
+ * vs. grams), so unifying them means the shared component doing the
+ * count↔grams conversion internally, which is a bigger change than this
+ * field needs to make.
+ */
+function UnitQuantityField({
+  grams,
+  unit,
+  itemName,
+  onChange,
+}: {
+  readonly grams: number;
+  readonly unit: PracticalUnit;
+  readonly itemName: string;
+  readonly onChange: (grams: number) => void;
+}) {
+  const quantity = quantityOf(grams, unit.grams);
+  const [draft, setDraft] = useState(() => quantityText(quantity));
+  const [seen, setSeen] = useState(grams);
+
+  if (seen !== grams) {
+    setSeen(grams);
+    if (parseDecimal(draft) !== quantity) setDraft(quantityText(quantity));
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={draft}
+      aria-label={`Quantidade de ${itemName} em ${unit.label}`}
+      title={unit.label}
+      placeholder="0"
+      onChange={(event) => {
+        const next = readQuantity(event.target.value);
+        setDraft(next.text);
+        onChange(clampGrams(next.quantity * unit.grams));
+      }}
+      className="w-14 rounded-md border border-line bg-surface px-1.5 py-1 text-right text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong"
+    />
+  );
+}
+
+function quantityOf(grams: number, unitGrams: number): number {
+  if (unitGrams <= 0) return 0;
+  // Rounded to avoid float noise (200/100 as 1.9999999999998), not to limit
+  // precision the user actually typed — three decimals is well past what
+  // this field displays anyway.
+  return Math.round((grams / unitGrams) * 1000) / 1000;
+}
+
+function clampGrams(grams: number): number {
+  return Math.min(grams, MAX_GRAMS);
+}
+
+/** Same parsing shape as `readGrams`, for a quantity instead of a weight. */
+function readQuantity(input: string): {
+  readonly text: string;
+  readonly quantity: number;
+} {
+  const kept = input.replace(/[^\d,.]/g, "");
+  const [whole = "", ...rest] = kept.split(/[.,]/);
+  const text = rest.length === 0 ? whole : `${whole},${rest.join("")}`;
+
+  const value = parseDecimal(text);
+  if (value === null) return { text, quantity: 0 };
+
+  return { text, quantity: value };
+}
+
+function quantityText(quantity: number): string {
+  return quantity === 0 ? "" : String(quantity).replace(".", ",");
 }
