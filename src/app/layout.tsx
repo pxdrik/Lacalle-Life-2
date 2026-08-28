@@ -8,6 +8,7 @@ import { DensityScript } from "@/design-system/density/density-script";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
+import { AnonymousDataFoundPrompt } from "./_components/anonymous-data-found-prompt";
 import { AppNav } from "./_components/app-nav";
 import { ServiceWorker } from "./_components/service-worker";
 import { Sidebar } from "./_components/sidebar";
@@ -101,6 +102,7 @@ export default async function RootLayout({
                     <AppNav />
                     {children}
                   </div>
+                  <AnonymousDataFoundPrompt />
                 </>
               )}
               <ServiceWorker />

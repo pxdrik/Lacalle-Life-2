@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
@@ -11,12 +10,12 @@ import { Notice } from "@/design-system/components/notice";
 
 import { describeAuthError } from "../data/describe-auth-error";
 import { useAuthRepository } from "../data/auth-repository-context";
+import { hardNavigateTo } from "../data/hard-navigate";
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export function SignupForm() {
   const repository = useAuthRepository();
-  const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,8 +51,7 @@ export function SignupForm() {
         return;
       }
 
-      router.push("/hoje");
-      router.refresh();
+      hardNavigateTo("/hoje");
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);

@@ -17,8 +17,8 @@ export function AccountSection() {
           </h2>
           <p className="mt-3 text-ink-muted">
             O LaCalle Life funciona direto no seu aparelho, sem precisar de
-            conta. Criar uma conta é o que permite levar seus dados para outro
-            dispositivo.
+            conta. Criar uma conta é o que permite levar seu perfil e seu
+            diário para outro dispositivo.
           </p>
         </div>
 
@@ -36,8 +36,9 @@ export function AccountSection() {
             <Laptop aria-hidden className="size-6 text-accent-text" />
             <h3 className="mt-3 font-semibold text-ink">Com conta</h3>
             <p className="mt-1.5 text-sm text-ink-muted">
-              Seus dados podem ser sincronizados entre seus dispositivos,
-              quando você quiser entrar na sua conta em outro aparelho.
+              Seu perfil e seu diário podem ser sincronizados entre seus
+              dispositivos, quando você quiser entrar na sua conta em outro
+              aparelho.
             </p>
           </div>
         </div>

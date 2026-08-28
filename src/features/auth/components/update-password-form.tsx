@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/design-system/components/button";
 import { Field } from "@/design-system/components/field";
@@ -10,6 +9,7 @@ import { Notice } from "@/design-system/components/notice";
 
 import { describeAuthError } from "../data/describe-auth-error";
 import { useAuthRepository } from "../data/auth-repository-context";
+import { hardNavigateTo } from "../data/hard-navigate";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -22,7 +22,6 @@ const MIN_PASSWORD_LENGTH = 8;
  */
 export function UpdatePasswordForm() {
   const repository = useAuthRepository();
-  const router = useRouter();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -46,8 +45,7 @@ export function UpdatePasswordForm() {
 
     try {
       await repository.updatePassword(password);
-      router.push("/hoje");
-      router.refresh();
+      hardNavigateTo("/hoje");
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);

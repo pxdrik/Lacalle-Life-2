@@ -20,8 +20,9 @@ import type { Exercise } from "@/features/workouts/types/exercise";
 import type { Routine } from "@/features/workouts/types/routine";
 import type { Session } from "@/features/workouts/types/session";
 
-import { DATABASE_NAME, MIGRATIONS } from "./migrations";
-import { getRepositories } from "./repositories";
+import { ANONYMOUS_DATABASE_NAME, currentDatabaseName } from "./identity";
+import { MIGRATIONS } from "./migrations";
+import { createRepositories, getRepositories, type Repositories } from "./repositories";
 
 /**
  * Whole-database backup — every store, restorable on a clean install.
@@ -71,8 +72,7 @@ export interface BackupFile {
  * predate a field, and a backup is a bad place to reintroduce a shape the
  * rest of the app no longer has to handle.
  */
-export async function exportAll(): Promise<BackupFile> {
-  const repositories = await getRepositories();
+async function exportFrom(repositories: Repositories): Promise<BackupFile> {
   const profile = await repositories.profile.get();
 
   const [body, foodLogs, foods, diets, exercises, routines, sessions] =
@@ -100,6 +100,68 @@ export async function exportAll(): Promise<BackupFile> {
       sessions,
     },
   };
+}
+
+/** Everything in the *currently active identity's* database. */
+export async function exportAll(): Promise<BackupFile> {
+  return exportFrom(await getRepositories());
+}
+
+/**
+ * Everything in the anonymous database specifically, regardless of which
+ * identity is active right now — the read half of the "encontramos dados
+ * salvos neste dispositivo" migration prompt (`anonymous-data-found-prompt.tsx`).
+ * A fresh, independent connection: never the memoized one `getRepositories()`
+ * holds, which by the time this runs already points at the signed-in
+ * account's own database.
+ */
+export async function exportAnonymousData(): Promise<BackupFile> {
+  const db = await openDatabase(ANONYMOUS_DATABASE_NAME, MIGRATIONS);
+  try {
+    return await exportFrom(createRepositories(db));
+  } finally {
+    db.close();
+  }
+}
+
+/**
+ * Whether a backup holds anything a person actually entered. The food and
+ * exercise catalogues seed themselves into every database, anonymous or
+ * not, so their presence alone would say "yes" for absolutely everyone —
+ * only user-authored records (and custom/favourited catalogue rows,
+ * `isCustom`) count.
+ */
+function hasPersonalData(backup: BackupFile): boolean {
+  const { foods, exercises, ...personal } = backup.stores;
+  const customFoods = foods.filter((food) => food.isCustom);
+  const customExercises = exercises.filter((exercise) => exercise.isCustom);
+
+  return (
+    customFoods.length > 0 ||
+    customExercises.length > 0 ||
+    Object.values(personal).some((records) => records.length > 0)
+  );
+}
+
+/**
+ * Whether the anonymous database holds anything a person actually entered —
+ * the check that decides whether the "encontramos dados salvos neste
+ * dispositivo" migration prompt is worth showing at all.
+ */
+export async function anonymousDataExists(): Promise<boolean> {
+  return hasPersonalData(await exportAnonymousData());
+}
+
+/**
+ * Whether the *currently active identity* already has its own data on this
+ * device — the other half of the migration prompt's condition. An account
+ * that already has something here is not on this device for the first
+ * time, and the prompt never offers to merge into an account someone is
+ * already actively using: it only ever appears on a genuinely empty
+ * account database.
+ */
+export async function currentIdentityHasData(): Promise<boolean> {
+  return hasPersonalData(await exportAll());
 }
 
 /**
@@ -373,7 +435,7 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
   if (!parsed.ok) return parsed;
 
   const { stores } = parsed;
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
 
   try {
     const tx = db.transaction(STORE_NAMES, "readwrite");

@@ -52,7 +52,8 @@ import type { Exercise } from "@/features/workouts/types/exercise";
 import type { Routine } from "@/features/workouts/types/routine";
 import type { Session } from "@/features/workouts/types/session";
 
-import { DATABASE_NAME, MIGRATIONS } from "./migrations";
+import { currentDatabaseName } from "./identity";
+import { MIGRATIONS } from "./migrations";
 
 /**
  * The composition root: the single place that knows which implementation
@@ -126,7 +127,7 @@ export function getRepositories(): Promise<Repositories> {
 }
 
 async function build(): Promise<Repositories> {
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const repositories = createRepositories(db);
 
   // Both seeds skip themselves once their store holds anything, so this is

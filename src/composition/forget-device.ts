@@ -1,6 +1,7 @@
 import { openDatabase } from "@/core/storage/indexeddb/database";
 
-import { DATABASE_NAME, MIGRATIONS } from "./migrations";
+import { currentDatabaseName } from "./identity";
+import { MIGRATIONS } from "./migrations";
 
 /**
  * Every persistent resource this app writes to a browser, in one place — so
@@ -99,7 +100,7 @@ export async function forgetDevice(): Promise<ForgetDeviceResult> {
 
 async function clearIndexedDb(): Promise<boolean> {
   try {
-    const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+    const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
     const names = [...db.objectStoreNames];
     const tx = db.transaction(names, "readwrite");
     await Promise.all([

@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Notice } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 
+import { hardNavigateTo } from "../data/hard-navigate";
 import { useAuth } from "../hooks/use-auth";
 
 /**
@@ -18,7 +18,6 @@ import { useAuth } from "../hooks/use-auth";
  */
 export function AccountStatus() {
   const { state, signOut } = useAuth();
-  const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,8 +46,7 @@ export function AccountStatus() {
 
     try {
       await signOut();
-      router.push("/entrar");
-      router.refresh();
+      hardNavigateTo("/entrar");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Não foi possível sair.");
       setPending(false);

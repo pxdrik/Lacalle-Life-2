@@ -30,7 +30,8 @@ import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import { exportAll, importAll, previewImport } from "./backup";
 import { forgetDevice as forgetDeviceDetailed } from "./forget-device";
-import { DATABASE_NAME, MIGRATIONS } from "./migrations";
+import { currentDatabaseName } from "./identity";
+import { MIGRATIONS } from "./migrations";
 import { getRepositories } from "./repositories";
 
 /**
@@ -87,7 +88,7 @@ const foodRepository = once<FoodRepository>(async () => {
  */
 const foodLogRepository = once<FoodLogRepository>(async () => {
   const local = (await getRepositories()).foodLogs;
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   return new SyncingFoodLogRepository(local, tracker);
 });
@@ -136,7 +137,7 @@ const dietRepository = once<DietRepository>(async () => {
  */
 const profileRepository = once<ProfileRepository>(async () => {
   const local = (await getRepositories()).profile;
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   return new SyncingProfileRepository(local, tracker);
 });

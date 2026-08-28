@@ -9,7 +9,8 @@ import { LocalProfileRepository } from "@/features/profile/data/local-profile-re
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
 
-import { DATABASE_NAME, MIGRATIONS } from "../migrations";
+import { currentDatabaseName } from "../identity";
+import { MIGRATIONS } from "../migrations";
 import {
   pullFoodLog,
   pushFoodLog,
@@ -34,7 +35,7 @@ export interface ProfileSyncOutcome {
 }
 
 async function openProfileSyncStores() {
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalProfileRepository(
     new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
@@ -88,7 +89,7 @@ export interface FoodLogSyncOutcome {
 }
 
 async function openFoodLogSyncStores() {
-  const db = await openDatabase(DATABASE_NAME, MIGRATIONS);
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalFoodLogRepository(
     new IndexedDbStore<FoodLog>(db, FOOD_LOGS_STORE.name),
