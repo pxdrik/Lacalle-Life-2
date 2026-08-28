@@ -4,14 +4,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BottomNav } from "./bottom-nav";
 
-const pathname = vi.hoisted(() => ({ current: "/" }));
+const pathname = vi.hoisted(() => ({ current: "/hoje" }));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => pathname.current,
 }));
 
 afterEach(() => {
-  pathname.current = "/";
+  pathname.current = "/hoje";
 });
 
 function at(route: string) {
@@ -27,7 +27,7 @@ const current = () =>
 
 describe("which tab reads as current", () => {
   it("marks Hoje on the home route", () => {
-    at("/");
+    at("/hoje");
     expect(current()).toEqual(["Hoje"]);
   });
 
@@ -51,7 +51,7 @@ describe("which tab reads as current", () => {
 
 describe("the Mais sheet", () => {
   it("keeps the setup screens one tap away rather than dropping them", async () => {
-    at("/");
+    at("/hoje");
 
     await userEvent.click(screen.getByRole("button", { name: /Mais/ }));
 

@@ -46,7 +46,7 @@ export function UpdatePasswordForm() {
 
     try {
       await repository.updatePassword(password);
-      router.push("/");
+      router.push("/hoje");
       router.refresh();
     } catch (cause) {
       setError(describeAuthError(cause));

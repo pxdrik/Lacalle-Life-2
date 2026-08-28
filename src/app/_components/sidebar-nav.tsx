@@ -39,7 +39,7 @@ const GROUPS: readonly {
   {
     title: "Principal",
     links: [
-      { href: "/", label: "Hoje", icon: ICONS.today },
+      { href: "/hoje", label: "Hoje", icon: ICONS.today },
       { href: "/diario", label: "Diário", icon: ICONS.diary },
       { href: "/treinos", label: "Treinos", icon: ICONS.workouts },
       { href: "/dietas", label: "Dietas", icon: ICONS.diets },
@@ -57,7 +57,7 @@ const GROUPS: readonly {
 
 /** O home é prefixo de toda outra rota, então é o único caso exato. */
 function isActive(pathname: string, href: string): boolean {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  return href === "/hoje" ? pathname === "/hoje" : pathname.startsWith(href);
 }
 
 /**

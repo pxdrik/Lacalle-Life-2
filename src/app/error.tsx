@@ -54,7 +54,7 @@ export default function Error({
         <button type="button" onClick={reset} className={buttonClasses()}>
           Tentar de novo
         </button>
-        <Link href="/" className={buttonClasses("secondary")}>
+        <Link href="/hoje" className={buttonClasses("secondary")}>
           Ir para Hoje
         </Link>
       </div>

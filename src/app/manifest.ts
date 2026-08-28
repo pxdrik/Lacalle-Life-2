@@ -16,7 +16,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Monte dietas, monte treinos, acompanhe sua evolução.",
     lang: "pt-BR",
 
-    start_url: "/",
+    start_url: "/hoje",
     display: "standalone",
 
     /**

@@ -20,7 +20,7 @@ import { ICONS } from "@/design-system/icons";
  * bar 360px wide would give each of them 51px.
  */
 const TABS: readonly { href: Route; label: string; icon: LucideIcon }[] = [
-  { href: "/", label: "Hoje", icon: ICONS.today },
+  { href: "/hoje", label: "Hoje", icon: ICONS.today },
   { href: "/diario", label: "Diário", icon: ICONS.diary },
   { href: "/treinos", label: "Treinos", icon: ICONS.workouts },
   { href: "/evolucao", label: "Evolução", icon: ICONS.progress },
@@ -131,7 +131,7 @@ export function BottomNav() {
           // The home route is a prefix of every other one, so it is the single
           // case that has to match exactly.
           const active =
-            href === "/" ? pathname === "/" : pathname.startsWith(href);
+            href === "/hoje" ? pathname === "/hoje" : pathname.startsWith(href);
 
           return (
             <Link

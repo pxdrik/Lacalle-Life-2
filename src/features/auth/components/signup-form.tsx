@@ -52,7 +52,7 @@ export function SignupForm() {
         return;
       }
 
-      router.push("/");
+      router.push("/hoje");
       router.refresh();
     } catch (cause) {
       setError(describeAuthError(cause));

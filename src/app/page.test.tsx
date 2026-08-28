@@ -1,99 +1,76 @@
-import { act } from "@testing-library/react";
-import { hydrateRoot } from "react-dom/client";
-import { renderToStaticMarkup } from "react-dom/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import HomePage from "./page";
+import LandingPage from "./page";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+
+vi.mock("@/core/auth/env", () => ({
+  isSupabaseConfigured: () => false,
+}));
 
 /**
- * BUG-03 (auditoria externa, 27/08/2026): `dayKey(new Date())` era lido
- * direto no render, então rodava uma vez no servidor (com o relógio do
- * servidor) e de novo no cliente (com o relógio de quem estava lendo) — dois
- * dias diferentes, então o texto do subtítulo e os dados de cada card
- * discordavam do que o servidor mandou, e o React recusava a hidratação
- * (erro #418) a cada carregamento.
- *
- * Estes componentes filhos dependem de repositórios que só existem no
- * navegador (IndexedDB), então o teste aqui é sobre o mecanismo da correção
- * — o servidor nunca produz um dia — e não sobre os cards em si.
+ * Fumaça da Landing Page pública: as seções obrigatórias existem, e os três
+ * caminhos de entrada (criar conta, entrar, experimentar sem conta) levam
+ * para onde a especificação pede.
  */
-vi.mock("@/composition/data-providers", () => ({
-  HomeDataProvider: ({ children }: { children: React.ReactNode }) => (
-    <>{children}</>
-  ),
-}));
-vi.mock("@/features/body", () => ({
-  TodayProgress: () => <div>progresso</div>,
-}));
-vi.mock("@/features/diet/components/today-energy", () => ({
-  TodayEnergy: ({ day }: { day: string }) => <div>energia {day}</div>,
-}));
-vi.mock("@/features/diet/components/today-meals", () => ({
-  TodayMeals: ({ day }: { day: string }) => <div>refeições {day}</div>,
-}));
-vi.mock("@/features/profile/components/profile-incomplete-notice", () => ({
-  ProfileIncompleteNotice: () => null,
-}));
-vi.mock("@/features/workouts/components/today-workout", () => ({
-  TodayWorkout: ({ day }: { day: string }) => <div>treino {day}</div>,
-}));
+describe("LandingPage", () => {
+  it("renders the hero headline and both primary CTAs", () => {
+    render(<LandingPage />);
 
-describe("hydrating the home page across a day boundary", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /Seu treino\. Sua alimentação\. Sua evolução\./,
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getAllByRole("link", { name: "Criar minha conta" })[0],
+    ).toHaveAttribute("href", "/cadastro");
+    expect(
+      screen.getAllByRole("link", { name: "Entrar" })[0],
+    ).toHaveAttribute("href", "/entrar");
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+  it("offers a discrete way to try the app without an account", () => {
+    render(<LandingPage />);
 
-  it("renders the same markup on the server regardless of the server's clock", () => {
-    // The bug depended on the server and the client disagreeing about "now" —
-    // reproduced here as two servers with different clocks, both of which
-    // must render identically because neither one knows the reader's day.
-    vi.setSystemTime(new Date(2026, 7, 27, 23, 0));
-    const late = renderToStaticMarkup(<HomePage />);
-
-    vi.setSystemTime(new Date(2026, 7, 28, 1, 0));
-    const early = renderToStaticMarkup(<HomePage />);
-
-    expect(late).toBe(early);
-    // Nothing date-specific has leaked into the server markup.
-    expect(late).not.toMatch(/energia|refeições|treino/);
-  });
-
-  it("hydrates without warning even when the browser's clock is already a day ahead of the server's, then fills in the real day", async () => {
-    const consoleError = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
-
-    // The server rendered as if "now" were the 27th at 23:00.
-    vi.setSystemTime(new Date(2026, 7, 27, 23, 0));
-    const serverHtml = renderToStaticMarkup(<HomePage />);
-
-    const container = document.createElement("div");
-    container.innerHTML = serverHtml;
-    document.body.appendChild(container);
-
-    // The reader's browser is already on the 28th — exactly the divergence
-    // that used to make React refuse to hydrate.
-    vi.setSystemTime(new Date(2026, 7, 28, 1, 0));
-
-    act(() => {
-      hydrateRoot(container, <HomePage />);
+    const tryLinks = screen.getAllByRole("link", {
+      name: /experimente sem (criar )?conta/i,
     });
+    expect(tryLinks.length).toBeGreaterThan(0);
+    for (const link of tryLinks) {
+      expect(link).toHaveAttribute("href", "/hoje");
+    }
+  });
 
-    const hydrationWarning = consoleError.mock.calls.some((call) =>
-      call.some((arg) => typeof arg === "string" && arg.includes("Hydration")),
-    );
-    expect(hydrationWarning).toBe(false);
+  it("explains the difference between using with and without an account", () => {
+    render(<LandingPage />);
 
-    expect(container.textContent).toContain("energia 2026-08-28");
-    expect(container.textContent).toContain("refeições 2026-08-28");
-    expect(container.textContent).toContain("treino 2026-08-28");
-    expect(container.textContent).toMatch(/sexta-feira, 28 de agosto/i);
+    expect(screen.getByText("Sem conta")).toBeInTheDocument();
+    expect(screen.getByText("Com conta")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Seus dados ficam salvos neste dispositivo/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/podem ser sincronizados entre seus dispositivos/),
+    ).toBeInTheDocument();
+  });
 
-    consoleError.mockRestore();
-    document.body.removeChild(container);
+  it("presents the three existing pillars, not invented ones", () => {
+    render(<LandingPage />);
+
+    expect(
+      screen.getAllByRole("heading", { level: 2, name: "Alimentação" }).length,
+    ).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Treinos" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("heading", { level: 2, name: "Evolução" }).length,
+    ).toBeGreaterThan(0);
   });
 });

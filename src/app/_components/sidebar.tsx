@@ -28,7 +28,7 @@ export function Sidebar() {
           31. `--signature-h` já vale 22 px nesta faixa, então a altura vem do
           token e não de um número escrito aqui. */}
       <div className="flex h-(--header-h) shrink-0 items-center border-b border-line px-4">
-        <Link href="/">
+        <Link href="/hoje">
           <Signature />
         </Link>
       </div>

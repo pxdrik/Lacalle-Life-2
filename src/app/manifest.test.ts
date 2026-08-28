@@ -12,7 +12,7 @@ describe("web app manifest", () => {
   const value = manifest();
 
   it("starts at the home screen, which is the summary of the day", () => {
-    expect(value.start_url).toBe("/");
+    expect(value.start_url).toBe("/hoje");
   });
 
   it("opens without browser chrome, or installing buys nothing", () => {

@@ -74,7 +74,7 @@ export function AppNav() {
             `Signature` lê `--signature-h`, que vale 18 px neste cabeçalho e 22
             do tablet para cima, exatamente como a tabela da pág. 14 pede. E a
             logo é sempre o link para a home (pág. 30). */}
-        <Link href="/" className="shrink-0">
+        <Link href="/hoje" className="shrink-0">
           <Signature />
         </Link>
 

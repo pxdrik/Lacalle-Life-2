@@ -39,7 +39,7 @@ export default function NotFound() {
       {/* Links, not buttons: these change the address, and a middle click
           should open them in a tab like any other link. */}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href="/" className={buttonClasses()}>
+        <Link href="/hoje" className={buttonClasses()}>
           Ir para Hoje
         </Link>
         <Link href="/treinos" className={buttonClasses("secondary")}>

@@ -19,7 +19,7 @@ describe("Error", () => {
     expect(screen.queryByText("boom")).not.toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Ir para Hoje" }),
-    ).toHaveAttribute("href", "/");
+    ).toHaveAttribute("href", "/hoje");
   });
 
   it("logs the error for whoever is watching the console", () => {

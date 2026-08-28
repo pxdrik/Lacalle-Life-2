@@ -28,7 +28,7 @@ export function LoginForm() {
 
     try {
       await repository.signInWithPassword(email, password);
-      router.push("/");
+      router.push("/hoje");
       router.refresh();
     } catch (cause) {
       setError(describeAuthError(cause));
