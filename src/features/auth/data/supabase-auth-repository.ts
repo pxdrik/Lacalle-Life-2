@@ -25,12 +25,13 @@ export function createSupabaseAuthRepository(): AuthRepository {
       return toAuthUser(data.user);
     },
 
-    async signUp(email, password) {
+    async signUp(email, password, captchaToken) {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          captchaToken,
         },
       });
       if (error) throw error;
@@ -40,10 +41,11 @@ export function createSupabaseAuthRepository(): AuthRepository {
       return { needsEmailConfirmation: data.session === null };
     },
 
-    async signInWithPassword(email, password) {
+    async signInWithPassword(email, password, captchaToken) {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
       if (error) throw error;
     },
@@ -53,12 +55,13 @@ export function createSupabaseAuthRepository(): AuthRepository {
       if (error) throw error;
     },
 
-    async resetPasswordForEmail(email) {
+    async resetPasswordForEmail(email, captchaToken) {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         // Passa por `/auth/callback` para trocar o código por sessão antes
         // de chegar em `/atualizar-senha` — essa tela assume que a sessão
         // já existe, ela não recebe o código diretamente.
         redirectTo: `${window.location.origin}/auth/callback?next=/atualizar-senha`,
+        captchaToken,
       });
       if (error) throw error;
     },

@@ -11,9 +11,12 @@ import { Notice } from "@/design-system/components/notice";
 import { describeAuthError } from "../data/describe-auth-error";
 import { useAuthRepository } from "../data/auth-repository-context";
 import { hardNavigateTo } from "../data/hard-navigate";
+import { TurnstileWidget } from "./turnstile-widget";
+import { useTurnstile } from "../hooks/use-turnstile";
 
 export function LoginForm() {
   const repository = useAuthRepository();
+  const captcha = useTurnstile();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,14 +26,26 @@ export function LoginForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (captcha.siteKey !== undefined && captcha.token === "") {
+      setError("Confirme que você não é um robô antes de continuar.");
+      return;
+    }
+
     setPending(true);
 
     try {
-      await repository.signInWithPassword(email, password);
+      await repository.signInWithPassword(
+        email,
+        password,
+        captcha.token || undefined,
+      );
       hardNavigateTo("/hoje");
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);
+    } finally {
+      captcha.reset();
     }
   }
 
@@ -77,7 +92,14 @@ export function LoginForm() {
         </Link>
       </div>
 
-      <Button type="submit" pending={pending} className="w-full">
+      <TurnstileWidget captcha={captcha} />
+
+      <Button
+        type="submit"
+        pending={pending}
+        disabled={captcha.siteKey !== undefined && captcha.token === ""}
+        className="w-full"
+      >
         Entrar
       </Button>
     </form>

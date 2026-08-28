@@ -10,9 +10,12 @@ import { Notice } from "@/design-system/components/notice";
 
 import { describeAuthError } from "../data/describe-auth-error";
 import { useAuthRepository } from "../data/auth-repository-context";
+import { TurnstileWidget } from "./turnstile-widget";
+import { useTurnstile } from "../hooks/use-turnstile";
 
 export function ForgotPasswordForm() {
   const repository = useAuthRepository();
+  const captcha = useTurnstile();
 
   const [email, setEmail] = useState("");
   const [pending, setPending] = useState(false);
@@ -22,10 +25,16 @@ export function ForgotPasswordForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
+    if (captcha.siteKey !== undefined && captcha.token === "") {
+      setError("Confirme que você não é um robô antes de continuar.");
+      return;
+    }
+
     setPending(true);
 
     try {
-      await repository.resetPasswordForEmail(email);
+      await repository.resetPasswordForEmail(email, captcha.token || undefined);
       // Sempre mostra sucesso, exista ou não a conta — nunca revela se um
       // e-mail está cadastrado.
       setSent(true);
@@ -33,6 +42,7 @@ export function ForgotPasswordForm() {
       setError(describeAuthError(cause));
     } finally {
       setPending(false);
+      captcha.reset();
     }
   }
 
@@ -70,7 +80,14 @@ export function ForgotPasswordForm() {
         </Link>
       </p>
 
-      <Button type="submit" pending={pending} className="w-full">
+      <TurnstileWidget captcha={captcha} />
+
+      <Button
+        type="submit"
+        pending={pending}
+        disabled={captcha.siteKey !== undefined && captcha.token === ""}
+        className="w-full"
+      >
         Enviar link de redefinição
       </Button>
     </form>

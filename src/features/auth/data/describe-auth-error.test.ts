@@ -19,6 +19,9 @@ describe("describeAuthError", () => {
     expect(describeAuthError(authError("email_not_confirmed"))).toContain(
       "Confirme seu e-mail",
     );
+    expect(describeAuthError(authError("captcha_failed"))).toContain(
+      "robô",
+    );
   });
 
   it("falls back to a generic message for unmapped codes and non-auth errors", () => {

@@ -41,3 +41,19 @@ export function getSupabaseEnv(): SupabaseEnv {
 
   return { url, anonKey };
 }
+
+/**
+ * O CAPTCHA (Cloudflare Turnstile) do cadastro/login/recuperação de senha —
+ * mesmo modelo do LaCalle Finance. Opcional por construção: sem esta
+ * variável, `TurnstileWidget` nunca renderiza e os três formulários
+ * continuam funcionando exatamente como hoje, sem widget nenhum.
+ *
+ * Só a site key (pública) mora aqui. A secret key nunca entra neste
+ * repositório — vive só em Supabase → Authentication → Attack Protection →
+ * Enable CAPTCHA protection, que é quem de fato valida o token contra o
+ * provedor. Nenhum código deste app confia no token; ele só o repassa.
+ */
+export function getTurnstileSiteKey(): string | undefined {
+  const key = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  return key === undefined || key === "" ? undefined : key;
+}

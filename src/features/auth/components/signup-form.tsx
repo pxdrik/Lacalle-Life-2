@@ -11,11 +11,14 @@ import { Notice } from "@/design-system/components/notice";
 import { describeAuthError } from "../data/describe-auth-error";
 import { useAuthRepository } from "../data/auth-repository-context";
 import { hardNavigateTo } from "../data/hard-navigate";
+import { TurnstileWidget } from "./turnstile-widget";
+import { useTurnstile } from "../hooks/use-turnstile";
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export function SignupForm() {
   const repository = useAuthRepository();
+  const captcha = useTurnstile();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,6 +39,13 @@ export function SignupForm() {
       setError("As senhas não são iguais.");
       return;
     }
+    // Só uma conveniência de UX — poupa uma volta ao servidor quando o
+    // widget claramente ainda não resolveu. Quem valida de verdade é o
+    // Supabase, que rejeita a chamada de qualquer jeito sem um token real.
+    if (captcha.siteKey !== undefined && captcha.token === "") {
+      setError("Confirme que você não é um robô antes de continuar.");
+      return;
+    }
 
     setPending(true);
 
@@ -43,6 +53,7 @@ export function SignupForm() {
       const { needsEmailConfirmation } = await repository.signUp(
         email,
         password,
+        captcha.token || undefined,
       );
 
       if (needsEmailConfirmation) {
@@ -55,6 +66,8 @@ export function SignupForm() {
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);
+    } finally {
+      captcha.reset();
     }
   }
 
@@ -123,7 +136,14 @@ export function SignupForm() {
         </Link>
       </p>
 
-      <Button type="submit" pending={pending} className="w-full">
+      <TurnstileWidget captcha={captcha} />
+
+      <Button
+        type="submit"
+        pending={pending}
+        disabled={captcha.siteKey !== undefined && captcha.token === ""}
+        className="w-full"
+      >
         Criar conta
       </Button>
     </form>

@@ -85,7 +85,12 @@ export async function middleware(request: NextRequest) {
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data:`,
     `font-src 'self'`,
-    `connect-src 'self'${supabaseUrl === undefined ? "" : ` ${supabaseUrl}`}`,
+    `connect-src 'self' https://challenges.cloudflare.com${supabaseUrl === undefined ? "" : ` ${supabaseUrl}`}`,
+    // Só o Turnstile — mesmo CAPTCHA do LaCalle Finance, que também precisa
+    // desta diretiva (o widget "Managed" roda num iframe, nunca inline).
+    // Sem `frame-src` nenhum antes disto, a diretiva caía em `default-src
+    // 'self'`, que bloquearia qualquer iframe de outra origem.
+    `frame-src https://challenges.cloudflare.com`,
     `worker-src 'self'`,
     `manifest-src 'self'`,
     `object-src 'none'`,

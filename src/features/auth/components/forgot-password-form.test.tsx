@@ -4,11 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AuthRepositoryProvider } from "../data/auth-repository-context";
 import type { AuthRepository } from "../data/auth-repository";
-import { LoginForm } from "./login-form";
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-}));
+import { ForgotPasswordForm } from "./forgot-password-form";
 
 const getTurnstileSiteKey = vi.fn().mockReturnValue(undefined);
 vi.mock("@/core/auth/env", () => ({
@@ -29,9 +25,9 @@ function mount(overrides: Partial<AuthRepository> = {}) {
   const repository: AuthRepository = {
     getUser: vi.fn().mockResolvedValue(null),
     signUp: vi.fn(),
-    signInWithPassword: vi.fn().mockResolvedValue(undefined),
+    signInWithPassword: vi.fn(),
     signOut: vi.fn(),
-    resetPasswordForEmail: vi.fn(),
+    resetPasswordForEmail: vi.fn().mockResolvedValue(undefined),
     updatePassword: vi.fn(),
     onAuthStateChange: vi.fn().mockReturnValue(() => {}),
     ...overrides,
@@ -39,61 +35,59 @@ function mount(overrides: Partial<AuthRepository> = {}) {
 
   render(
     <AuthRepositoryProvider repository={repository}>
-      <LoginForm />
+      <ForgotPasswordForm />
     </AuthRepositoryProvider>,
   );
 
   return repository;
 }
 
-describe("LoginForm", () => {
-  it("submits the typed email and password", async () => {
+describe("ForgotPasswordForm", () => {
+  it("mostra sempre a mesma mensagem de sucesso, exista ou não a conta", async () => {
+    const user = userEvent.setup();
+    mount();
+
+    await user.type(screen.getByLabelText("E-mail"), "pedro@example.com");
+    await user.click(
+      screen.getByRole("button", { name: "Enviar link de redefinição" }),
+    );
+
+    expect(
+      await screen.findByText("Verifique seu e-mail"),
+    ).toBeInTheDocument();
+  });
+
+  it("sem CAPTCHA configurado, repassa undefined e funciona como sempre", async () => {
     const user = userEvent.setup();
     const repository = mount();
 
     await user.type(screen.getByLabelText("E-mail"), "pedro@example.com");
-    await user.type(screen.getByLabelText("Senha"), "senha-secreta");
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await user.click(
+      screen.getByRole("button", { name: "Enviar link de redefinição" }),
+    );
 
-    expect(repository.signInWithPassword).toHaveBeenCalledWith(
+    expect(repository.resetPasswordForEmail).toHaveBeenCalledWith(
       "pedro@example.com",
-      "senha-secreta",
-      // Sem CAPTCHA configurado neste teste — `undefined`, o mesmo que o
-      // Supabase já trata como "sem token" e ignora.
       undefined,
     );
   });
-
-  it("shows a translated error instead of the raw Supabase message", async () => {
-    const user = userEvent.setup();
-    mount({
-      signInWithPassword: vi.fn().mockRejectedValue(new Error("boom")),
-    });
-
-    await user.type(screen.getByLabelText("E-mail"), "pedro@example.com");
-    await user.type(screen.getByLabelText("Senha"), "senha-errada");
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
-
-    expect(
-      await screen.findByText("Algo deu errado. Tente novamente em instantes."),
-    ).toBeInTheDocument();
-  });
 });
 
-describe("LoginForm — CAPTCHA", () => {
+describe("ForgotPasswordForm — CAPTCHA", () => {
   it("desabilita o botão sem token quando o CAPTCHA está configurado", async () => {
     getTurnstileSiteKey.mockReturnValue("site-key-de-teste");
     const user = userEvent.setup();
     const repository = mount();
 
     await user.type(screen.getByLabelText("E-mail"), "pedro@example.com");
-    await user.type(screen.getByLabelText("Senha"), "senha-secreta");
 
-    const submitButton = screen.getByRole("button", { name: "Entrar" });
+    const submitButton = screen.getByRole("button", {
+      name: "Enviar link de redefinição",
+    });
     expect(submitButton).toBeDisabled();
 
     await user.click(submitButton);
-    expect(repository.signInWithPassword).not.toHaveBeenCalled();
+    expect(repository.resetPasswordForEmail).not.toHaveBeenCalled();
   });
 
   it("repassa o token do widget e reseta depois do envio", async () => {
@@ -114,13 +108,14 @@ describe("LoginForm — CAPTCHA", () => {
     capturedCallback?.("token-do-widget");
 
     await user.type(screen.getByLabelText("E-mail"), "pedro@example.com");
-    await user.type(screen.getByLabelText("Senha"), "senha-secreta");
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await user.click(
+      screen.getByRole("button", { name: "Enviar link de redefinição" }),
+    );
 
-    expect(repository.signInWithPassword).toHaveBeenCalledWith(
+    expect(repository.resetPasswordForEmail).toHaveBeenCalledWith(
       "pedro@example.com",
-      "senha-secreta",
       "token-do-widget",
     );
+    expect(reset).toHaveBeenCalled();
   });
 });

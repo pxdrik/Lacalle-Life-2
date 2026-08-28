@@ -28,6 +28,8 @@ export function describeAuthError(error: unknown): string {
         // Nunca dito ao pedir redefinição de senha — só chega aqui num
         // contexto onde a sessão já existe (ex.: atualizar senha).
         return "Não foi possível concluir. Faça login de novo e tente outra vez.";
+      case "captcha_failed":
+        return "Não foi possível confirmar que você não é um robô. Tente novamente.";
     }
   }
 

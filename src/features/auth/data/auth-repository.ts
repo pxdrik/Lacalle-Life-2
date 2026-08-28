@@ -18,18 +18,29 @@ export interface AuthRepository {
    * `needsEmailConfirmation` é `true` quando o projeto exige confirmar o
    * e-mail antes da sessão valer — a UI usa isso para mostrar "confira sua
    * caixa de entrada" em vez de tratar como login imediato.
+   *
+   * `captchaToken`, quando o CAPTCHA está configurado (ver
+   * `TurnstileWidget`), é repassado ao Supabase — é o próprio servidor de
+   * Auth quem valida o token contra o provedor; nada aqui confia no que o
+   * navegador diz. `undefined` quando o CAPTCHA não está ligado neste
+   * ambiente, e o Supabase simplesmente ignora o parâmetro ausente.
    */
   signUp(
     email: string,
     password: string,
+    captchaToken?: string,
   ): Promise<{ readonly needsEmailConfirmation: boolean }>;
 
-  signInWithPassword(email: string, password: string): Promise<void>;
+  signInWithPassword(
+    email: string,
+    password: string,
+    captchaToken?: string,
+  ): Promise<void>;
 
   signOut(): Promise<void>;
 
   /** Envia o e-mail com o link de redefinição. Nunca revela se o e-mail existe. */
-  resetPasswordForEmail(email: string): Promise<void>;
+  resetPasswordForEmail(email: string, captchaToken?: string): Promise<void>;
 
   /** Chamado só depois do link de redefinição — a sessão já existe nesse ponto. */
   updatePassword(newPassword: string): Promise<void>;
