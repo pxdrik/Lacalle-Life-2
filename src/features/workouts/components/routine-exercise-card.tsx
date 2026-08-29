@@ -57,6 +57,8 @@ export function RoutineExerciseCard({
   onRemoveSet,
   onSetChange,
 }: Props) {
+  const isCardio = catalogue?.movementPattern === "cardio";
+
   return (
     <Card
       as="section"
@@ -133,8 +135,14 @@ export function RoutineExerciseCard({
         className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
       >
         <span className="w-6 text-center">#</span>
-        <span className="flex-1 text-center">Reps</span>
-        <span className="flex-1 text-center">Peso</span>
+        {isCardio ? (
+          <span className="flex-[2] text-center">Duração (min)</span>
+        ) : (
+          <>
+            <span className="flex-1 text-center">Reps</span>
+            <span className="flex-1 text-center">Peso</span>
+          </>
+        )}
         <span className="w-16 text-center">RPE</span>
         <span className="w-7" />
       </div>
@@ -146,6 +154,7 @@ export function RoutineExerciseCard({
             set={set}
             index={index}
             exerciseName={exercise.name}
+            isCardio={isCardio}
             onChange={(changes) => {
               onSetChange(set.id, changes);
             }}

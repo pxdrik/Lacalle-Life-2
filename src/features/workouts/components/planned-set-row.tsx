@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 
 import type { PlannedSet } from "../types/routine";
 import type { SetChanges } from "../services/edit-routine";
+import { DurationField } from "./duration-field";
 import { RpeSelect } from "./rpe-select";
 import { WeightField } from "./weight-field";
 
@@ -11,6 +12,8 @@ interface Props {
   readonly set: PlannedSet;
   readonly index: number;
   readonly exerciseName: string;
+  /** Whether this exercise is measured by time rather than reps × weight. */
+  readonly isCardio: boolean;
   readonly onChange: (changes: SetChanges) => void;
   readonly onRemove: () => void;
 }
@@ -22,6 +25,7 @@ export function PlannedSetRow({
   set,
   index,
   exerciseName,
+  isCardio,
   onChange,
   onRemove,
 }: Props) {
@@ -33,26 +37,39 @@ export function PlannedSetRow({
         {number}
       </span>
 
-      <input
-        type="text"
-        inputMode="numeric"
-        value={set.reps === null ? "" : String(set.reps)}
-        aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
-        placeholder="—"
-        onChange={(event) => {
-          onChange({ reps: toWholeNumber(event.target.value) });
-        }}
-        className={`${CELL} flex-1`}
-      />
+      {isCardio ? (
+        <DurationField
+          value={set.durationSeconds}
+          label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
+          onChange={(durationSeconds) => {
+            onChange({ durationSeconds });
+          }}
+          className={`${CELL} flex-[2]`}
+        />
+      ) : (
+        <>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={set.reps === null ? "" : String(set.reps)}
+            aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
+            placeholder="—"
+            onChange={(event) => {
+              onChange({ reps: toWholeNumber(event.target.value) });
+            }}
+            className={`${CELL} flex-1`}
+          />
 
-      <WeightField
-        value={set.weightKg}
-        label={`Peso da série ${String(number)} de ${exerciseName}`}
-        onChange={(weightKg) => {
-          onChange({ weightKg });
-        }}
-        className={`${CELL} flex-1`}
-      />
+          <WeightField
+            value={set.weightKg}
+            label={`Peso da série ${String(number)} de ${exerciseName}`}
+            onChange={(weightKg) => {
+              onChange({ weightKg });
+            }}
+            className={`${CELL} flex-1`}
+          />
+        </>
+      )}
 
       <RpeSelect
         value={set.rpe}

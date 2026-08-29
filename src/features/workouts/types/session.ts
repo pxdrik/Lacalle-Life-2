@@ -12,6 +12,7 @@ export interface PlannedTarget {
   readonly reps: number | null;
   readonly weightKg: number | null;
   readonly rpe: number | null;
+  readonly durationSeconds: number | null;
 }
 
 export interface PerformedSet {
@@ -20,6 +21,8 @@ export interface PerformedSet {
   readonly weightKg: number | null;
   /** What it actually felt like. Optional, like everything about RPE. */
   readonly rpe: number | null;
+  /** See `PlannedSet.durationSeconds` — same field, same reason. */
+  readonly durationSeconds: number | null;
   readonly isCompleted: boolean;
   /** `null` for a set added mid-workout, which nothing planned. */
   readonly planned: PlannedTarget | null;

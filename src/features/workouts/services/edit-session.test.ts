@@ -96,7 +96,12 @@ describe("editing during the workout", () => {
     const set = after.exercises[0]?.sets[0];
     expect(set).toMatchObject({ reps: 6, weightKg: 65, rpe: 9 });
     // The frozen target is what makes the plan-versus-reality reading possible.
-    expect(set?.planned).toEqual({ reps: 8, weightKg: 60, rpe: 8 });
+    expect(set?.planned).toEqual({
+      reps: 8,
+      weightKg: 60,
+      rpe: 8,
+      durationSeconds: null,
+    });
   });
 
   // Found by an external audit (27/08/2026): a negative weight was accepted

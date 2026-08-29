@@ -33,6 +33,7 @@ export function createPlannedSet(previous?: PlannedSet): PlannedSet {
     reps: previous?.reps ?? null,
     weightKg: previous?.weightKg ?? null,
     rpe: previous?.rpe ?? null,
+    durationSeconds: previous?.durationSeconds ?? null,
   };
 }
 

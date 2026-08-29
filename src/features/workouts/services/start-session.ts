@@ -32,10 +32,16 @@ export function startSession(
       // — is confirming numbers rather than typing them.
       reps: set.reps,
       weightKg: set.weightKg,
+      durationSeconds: set.durationSeconds,
       // RPE is left blank: it is a report on a set that has not happened yet.
       rpe: null,
       isCompleted: false,
-      planned: { reps: set.reps, weightKg: set.weightKg, rpe: set.rpe },
+      planned: {
+        reps: set.reps,
+        weightKg: set.weightKg,
+        rpe: set.rpe,
+        durationSeconds: set.durationSeconds,
+      },
     })),
   }));
 

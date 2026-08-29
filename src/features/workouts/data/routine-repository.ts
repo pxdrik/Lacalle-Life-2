@@ -3,7 +3,7 @@ import type { EntityId } from "@/core/domain/entity";
 import type { StoreDefinition } from "@/core/storage/schema";
 import type { Store } from "@/core/storage/store";
 
-import type { Routine } from "../types/routine";
+import type { PlannedSet, Routine } from "../types/routine";
 
 export const ROUTINES_STORE: StoreDefinition = {
   name: "routines",
@@ -37,11 +37,12 @@ export class LocalRoutineRepository implements RoutineRepository {
 
   async listAll(): Promise<readonly Routine[]> {
     const routines = await this.#store.getAll();
-    return routines.sort((a, b) => b.updatedAt - a.updatedAt);
+    return routines.sort((a, b) => b.updatedAt - a.updatedAt).map(normalize);
   }
 
-  getById(id: EntityId): Promise<Routine | undefined> {
-    return this.#store.get(id);
+  async getById(id: EntityId): Promise<Routine | undefined> {
+    const routine = await this.#store.get(id);
+    return routine === undefined ? undefined : normalize(routine);
   }
 
   async save(routine: Routine, expectedUpdatedAt: number | null): Promise<void> {
@@ -60,4 +61,25 @@ export class LocalRoutineRepository implements RoutineRepository {
   remove(id: EntityId): Promise<void> {
     return this.#store.remove(id);
   }
+}
+
+/**
+ * A routine written before `PlannedSet.durationSeconds` existed has no such
+ * key in its stored sets at all — the type says `number | null`, but that is
+ * a promise about what this app writes today, not about what a record from
+ * an older release actually has. Same shape of fix as `LocalFoodRepository`'s
+ * `normalize()` for `isFavorite`.
+ */
+function normalize(routine: Routine): Routine {
+  return {
+    ...routine,
+    exercises: routine.exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map(normalizeSet),
+    })),
+  };
+}
+
+function normalizeSet(set: PlannedSet): PlannedSet {
+  return { ...set, durationSeconds: set.durationSeconds ?? null };
 }

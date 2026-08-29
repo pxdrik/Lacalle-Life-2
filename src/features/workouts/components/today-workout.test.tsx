@@ -53,6 +53,7 @@ function session(overrides: Partial<Session> & { id: string }): Session {
             reps: 10,
             weightKg: 60,
             rpe: null,
+            durationSeconds: null,
             isCompleted: true,
             planned: null,
           },

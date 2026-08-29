@@ -3,7 +3,7 @@ import type { EntityId } from "@/core/domain/entity";
 import type { StoreDefinition } from "@/core/storage/schema";
 import type { Store } from "@/core/storage/store";
 
-import type { Session } from "../types/session";
+import type { PerformedSet, Session } from "../types/session";
 
 export const SESSIONS_STORE: StoreDefinition = {
   name: "sessions",
@@ -41,7 +41,7 @@ export class LocalSessionRepository implements SessionRepository {
 
   async listAll(): Promise<readonly Session[]> {
     const sessions = await this.#store.getAllByIndex("byStartedAt", {});
-    return sessions.reverse();
+    return sessions.reverse().map(normalize);
   }
 
   async findInProgress(): Promise<Session | undefined> {
@@ -49,8 +49,9 @@ export class LocalSessionRepository implements SessionRepository {
     return sessions.find((session) => session.finishedAt === null);
   }
 
-  getById(id: EntityId): Promise<Session | undefined> {
-    return this.#store.get(id);
+  async getById(id: EntityId): Promise<Session | undefined> {
+    const session = await this.#store.get(id);
+    return session === undefined ? undefined : normalize(session);
   }
 
   async save(
@@ -72,4 +73,26 @@ export class LocalSessionRepository implements SessionRepository {
   remove(id: EntityId): Promise<void> {
     return this.#store.remove(id);
   }
+}
+
+/** See the identical comment on `normalize()` in `routine-repository.ts`. */
+function normalize(session: Session): Session {
+  return {
+    ...session,
+    exercises: session.exercises.map((exercise) => ({
+      ...exercise,
+      sets: exercise.sets.map(normalizeSet),
+    })),
+  };
+}
+
+function normalizeSet(set: PerformedSet): PerformedSet {
+  return {
+    ...set,
+    durationSeconds: set.durationSeconds ?? null,
+    planned:
+      set.planned === null
+        ? null
+        : { ...set.planned, durationSeconds: set.planned.durationSeconds ?? null },
+  };
 }

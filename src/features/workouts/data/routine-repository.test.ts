@@ -110,4 +110,41 @@ describe.each(ADAPTERS)("LocalRoutineRepository — $name", ({ create }) => {
       });
     });
   });
+
+  describe("normalize — backfilling durationSeconds", () => {
+    it("defaults a set written before the field existed to null, on both read paths", async () => {
+      const store = await create();
+      const withRepository = new LocalRoutineRepository(store);
+
+      const routine = createRoutine("Cardio");
+      const legacy = {
+        ...routine,
+        exercises: [
+          {
+            id: "ex1",
+            exerciseId: "esteira",
+            name: "Esteira",
+            restSeconds: null,
+            notes: "",
+            sets: [{ id: "set1", reps: null, weightKg: null, rpe: null }],
+          },
+        ],
+      };
+      // Bypasses the type system on purpose: this is the exact shape an
+      // older release actually wrote — no `durationSeconds` key at all, not
+      // the key set to `null`, which already describes a row that has been
+      // through this code.
+      await store.put(legacy as unknown as Routine);
+
+      await expect(
+        withRepository.getById(routine.id),
+      ).resolves.toMatchObject({
+        exercises: [{ sets: [{ durationSeconds: null }] }],
+      });
+
+      await expect(withRepository.listAll()).resolves.toMatchObject([
+        { exercises: [{ sets: [{ durationSeconds: null }] }] },
+      ]);
+    });
+  });
 });

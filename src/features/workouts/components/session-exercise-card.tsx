@@ -39,6 +39,7 @@ export function SessionExerciseCard({
   onAddSet,
   onNotesChange,
 }: Props) {
+  const isCardio = catalogue?.movementPattern === "cardio";
   const done = exercise.sets.filter((set) => set.isCompleted).length;
   const isComplete = done === exercise.sets.length && exercise.sets.length > 0;
   // The exercise holding the set someone is about to do — never more than one
@@ -90,8 +91,14 @@ export function SessionExerciseCard({
         className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
       >
         <span className="w-6 text-center">#</span>
-        <span className="flex-1 text-center">Reps</span>
-        <span className="flex-1 text-center">Peso</span>
+        {isCardio ? (
+          <span className="flex-[2] text-center">Duração (min)</span>
+        ) : (
+          <>
+            <span className="flex-1 text-center">Reps</span>
+            <span className="flex-1 text-center">Peso</span>
+          </>
+        )}
         <span className="w-16 text-center">RPE</span>
         <span className="w-11 shrink-0" />
         <span className="w-11 shrink-0 sm:w-7" />
@@ -105,6 +112,7 @@ export function SessionExerciseCard({
             index={index}
             exerciseName={exercise.name}
             isNext={set.id === nextSetId}
+            isCardio={isCardio}
             onChange={(changes) => {
               onSetChange(set.id, changes);
             }}
@@ -155,7 +163,12 @@ function formatShortDate(timestamp: number): string {
 function describeSet(set: {
   reps: number | null;
   weightKg: number | null;
+  durationSeconds: number | null;
 }): string {
+  if (set.durationSeconds !== null) {
+    return `${formatDecimal(Math.round((set.durationSeconds / 60) * 10) / 10)} min`;
+  }
+
   const reps = set.reps ?? "—";
   return set.weightKg === null
     ? `${String(reps)}`

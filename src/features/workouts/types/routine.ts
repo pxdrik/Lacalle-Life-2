@@ -10,6 +10,14 @@ export interface PlannedSet {
   readonly weightKg: number | null;
   /** Target effort. Optional — nobody has to plan an RPE to plan a set. */
   readonly rpe: number | null;
+  /**
+   * How long the set should take, for an exercise measured in time rather
+   * than reps — a treadmill, not a squat. Coexists with `reps`/`weightKg`
+   * rather than replacing them: which one the UI shows is a display
+   * decision keyed off the catalogue's `movementPattern`, not a schema
+   * choice, so a set never has to declare up front which kind it is.
+   */
+  readonly durationSeconds: number | null;
 }
 
 /**

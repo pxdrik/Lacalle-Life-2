@@ -8,6 +8,7 @@ import { cn } from "@/design-system/cn";
 
 import type { PerformedSetChanges } from "../services/edit-session";
 import type { PerformedSet } from "../types/session";
+import { DurationField } from "./duration-field";
 import { RpeSelect } from "./rpe-select";
 import { WeightField } from "./weight-field";
 
@@ -17,6 +18,8 @@ interface Props {
   readonly exerciseName: string;
   /** The next set to do. Highlighted and scrolled to, never focus-stolen. */
   readonly isNext: boolean;
+  /** Whether this exercise is measured by time rather than reps × weight. */
+  readonly isCardio: boolean;
   readonly onChange: (changes: PerformedSetChanges) => void;
   readonly onToggleComplete: () => void;
   readonly onRemove: () => void;
@@ -30,6 +33,7 @@ export function PerformedSetRow({
   index,
   exerciseName,
   isNext,
+  isCardio,
   onChange,
   onToggleComplete,
   onRemove,
@@ -74,38 +78,65 @@ export function PerformedSetRow({
 
         {/* What was planned, sitting under the field it refers to — a target you
           have to remember is a target you ignore. */}
-        <div className="flex-1">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={set.reps === null ? "" : String(set.reps)}
-            aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
-            placeholder="—"
-            onChange={(event) => {
-              onChange({ reps: toWholeNumber(event.target.value) });
-            }}
-            className={cn(
-              FIELD,
-              set.isCompleted ? "border-line" : "border-line-strong",
-            )}
-          />
-          <Planned value={set.planned?.reps ?? null} suffix="reps" />
-        </div>
+        {isCardio ? (
+          <div className="flex-[2]">
+            <DurationField
+              value={set.durationSeconds}
+              label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
+              onChange={(durationSeconds) => {
+                onChange({ durationSeconds });
+              }}
+              className={cn(
+                FIELD,
+                set.isCompleted ? "border-line" : "border-line-strong",
+              )}
+            />
+            <Planned
+              value={
+                set.planned?.durationSeconds === undefined ||
+                set.planned.durationSeconds === null
+                  ? null
+                  : set.planned.durationSeconds / 60
+              }
+              suffix="min"
+            />
+          </div>
+        ) : (
+          <>
+            <div className="flex-1">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={set.reps === null ? "" : String(set.reps)}
+                aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
+                placeholder="—"
+                onChange={(event) => {
+                  onChange({ reps: toWholeNumber(event.target.value) });
+                }}
+                className={cn(
+                  FIELD,
+                  set.isCompleted ? "border-line" : "border-line-strong",
+                )}
+              />
+              <Planned value={set.planned?.reps ?? null} suffix="reps" />
+            </div>
 
-        <div className="flex-1">
-          <WeightField
-            value={set.weightKg}
-            label={`Peso da série ${String(number)} de ${exerciseName}`}
-            onChange={(weightKg) => {
-              onChange({ weightKg });
-            }}
-            className={cn(
-              FIELD,
-              set.isCompleted ? "border-line" : "border-line-strong",
-            )}
-          />
-          <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
-        </div>
+            <div className="flex-1">
+              <WeightField
+                value={set.weightKg}
+                label={`Peso da série ${String(number)} de ${exerciseName}`}
+                onChange={(weightKg) => {
+                  onChange({ weightKg });
+                }}
+                className={cn(
+                  FIELD,
+                  set.isCompleted ? "border-line" : "border-line-strong",
+                )}
+              />
+              <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
+            </div>
+          </>
+        )}
 
         <div className="w-16 shrink-0">
           <RpeSelect
@@ -180,7 +211,9 @@ export function PerformedSetRow({
           Putting a stepper on all eight would double the controls on screen to
           serve one row — and this row is already the highlighted, scrolled-to
           one, so the buttons arrive exactly where the thumb already is. */}
-      {isNext && !set.isCompleted && (
+      {/* Cardio has no stepper: a duration is typed, not nudged by a fixed
+          rep or plate increment — there is no equivalent "usual" step. */}
+      {isNext && !set.isCompleted && !isCardio && (
         <div className="mt-1.5 flex items-center gap-1.5 pl-8">
           <Step
             label={`Menos uma repetição na série ${String(number)} de ${exerciseName}`}

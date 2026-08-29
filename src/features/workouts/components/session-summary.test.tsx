@@ -32,6 +32,7 @@ function sessionWith(sets: Partial<Session["exercises"][number]["sets"][number]>
           reps: 10,
           weightKg: 60,
           rpe: null,
+          durationSeconds: null,
           isCompleted: true,
           planned: null,
           ...set,

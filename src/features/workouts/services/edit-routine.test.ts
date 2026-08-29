@@ -82,7 +82,13 @@ describe("createPlannedSet", () => {
   it("copies the previous set", () => {
     // Sets within an exercise are usually the same; retyping 8 × 60 kg three
     // times is work the app can do.
-    const previous = { id: "a", reps: 8, weightKg: 60, rpe: 8 };
+    const previous = {
+      id: "a",
+      reps: 8,
+      weightKg: 60,
+      rpe: 8,
+      durationSeconds: null,
+    };
 
     expect(createPlannedSet(previous)).toMatchObject({
       reps: 8,
@@ -92,7 +98,13 @@ describe("createPlannedSet", () => {
   });
 
   it("still gets its own id", () => {
-    const previous = { id: "a", reps: 8, weightKg: 60, rpe: 8 };
+    const previous = {
+      id: "a",
+      reps: 8,
+      weightKg: 60,
+      rpe: 8,
+      durationSeconds: null,
+    };
 
     expect(createPlannedSet(previous).id).not.toBe("a");
   });

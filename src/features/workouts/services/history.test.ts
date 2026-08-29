@@ -24,6 +24,7 @@ function set(
     reps,
     weightKg,
     rpe: null,
+    durationSeconds: null,
     isCompleted,
     planned: null,
   };

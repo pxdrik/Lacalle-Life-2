@@ -74,7 +74,9 @@ export function removeSet(
   }));
 }
 
-export type SetChanges = Partial<Pick<PlannedSet, "reps" | "weightKg" | "rpe">>;
+export type SetChanges = Partial<
+  Pick<PlannedSet, "reps" | "weightKg" | "rpe" | "durationSeconds">
+>;
 
 export function updateSet(
   routine: Routine,

@@ -118,4 +118,48 @@ describe.each(ADAPTERS)("LocalSessionRepository — $name", ({ create }) => {
       });
     });
   });
+
+  describe("normalize — backfilling durationSeconds", () => {
+    it("defaults a set, and its frozen planned target, written before the field existed", async () => {
+      const store = await create();
+      const withRepository = new LocalSessionRepository(store);
+
+      const session = startSession(createRoutine("Cardio"));
+      const legacy = {
+        ...session,
+        exercises: [
+          {
+            id: "ex1",
+            exerciseId: "esteira",
+            name: "Esteira",
+            restSeconds: null,
+            notes: "",
+            sets: [
+              {
+                id: "set1",
+                reps: null,
+                weightKg: null,
+                rpe: null,
+                isCompleted: false,
+                planned: { reps: null, weightKg: null, rpe: null },
+              },
+            ],
+          },
+        ],
+      };
+      // Same reasoning as `routine-repository.test.ts`'s equivalent case: no
+      // `durationSeconds` key anywhere, exactly what an older release wrote.
+      await store.put(legacy as unknown as Session);
+
+      await expect(
+        withRepository.getById(session.id),
+      ).resolves.toMatchObject({
+        exercises: [
+          {
+            sets: [{ durationSeconds: null, planned: { durationSeconds: null } }],
+          },
+        ],
+      });
+    });
+  });
 });

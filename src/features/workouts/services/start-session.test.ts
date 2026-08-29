@@ -80,6 +80,7 @@ describe("startSession", () => {
         reps: 8,
         weightKg: 60,
         rpe: 8,
+        durationSeconds: null,
       });
     });
   });

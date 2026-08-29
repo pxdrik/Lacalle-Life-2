@@ -2089,6 +2089,43 @@ instalada) antes de propor qualquer coisa.
 
 ---
 
+### J — Duração para exercícios aeróbicos — ENTREGUE 28/08/2026
+
+- **objetivo:** registrar "40 min" de esteira do jeito que a pessoa treina,
+  não forçar reps/peso num exercício que não tem nenhum dos dois.
+- **origem:** feedback direto de uso real (irmã do Pedro testando o app) —
+  "no aeróbico, podia ter a opção de colocar o tempo do exercício".
+- **o que foi implementado:** `durationSeconds: number | null` novo em
+  `PlannedSet` (rotina), `PerformedSet` e `PlannedTarget` (sessão) — mesmo
+  padrão nullable de `reps`/`weightKg`, coexistindo com eles em vez de
+  substituí-los. O card do exercício (`RoutineExerciseCard`,
+  `SessionExerciseCard`) já resolve o catálogo e reconhece
+  `movementPattern === "cardio"` — tag que Esteira, Corrida, Bike,
+  Elíptico, Remo, Pular Corda, Natação e o resto de
+  `data/catalogue/cardio.json` já carregavam antes desta entrega, sem
+  precisar de nova taxonomia. Quando reconhecido, as colunas Reps+Peso
+  viram uma única "Duração (min)" (`DurationField`, mesma técnica de
+  draft/`seen` que `WeightField` já usa para não perder a vírgula
+  digitada); RPE continua disponível nos dois casos. Exercício sem essa
+  tag — força, ou qualquer catálogo não resolvido — fica exatamente igual
+  a antes.
+- **compatibilidade:** campo novo e nullable, mas `LocalRoutineRepository`
+  e `LocalSessionRepository` não tinham `normalize()` nenhum até agora —
+  os dois ganharam um, backfillando `durationSeconds ?? null` (inclusive
+  dentro de `PerformedSet.planned`) em toda leitura, mesmo mecanismo que
+  `refreshExerciseMedia`/`refreshFoodPracticalUnits` já usam para campo
+  ausente em registro antigo.
+- **fora de escopo:** reclassificar exercício nenhum; gráfico de tempo
+  total; exercício que precise de peso **e** duração ao mesmo tempo (fica
+  com o tratamento padrão, reps/peso).
+- **critérios de aceite:** todos atendidos — `npm run verify` verde (1353
+  testes, incluindo os novos de `DurationField`, do backfill nos dois
+  repositórios e da troca condicional de coluna), `npm run build` limpo,
+  fluxo completo (planejar → iniciar treino → duração pré-preenchida na
+  execução) checado ao vivo.
+
+---
+
 ### PRÓXIMAS SPRINTS — sequência validada contra dependências reais
 
 **Sprint 5 — Confiança essencial ✅ entregue em 16/08/2026**

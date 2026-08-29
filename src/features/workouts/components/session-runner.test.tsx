@@ -53,6 +53,7 @@ function sessionWith(completed: number, total: number): Session {
           reps: 10,
           weightKg: 60,
           rpe: null,
+          durationSeconds: null,
           isCompleted: index < completed,
           planned: null,
         })),

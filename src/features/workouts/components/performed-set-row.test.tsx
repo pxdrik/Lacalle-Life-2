@@ -20,13 +20,14 @@ function set(overrides: Partial<PerformedSet> = {}): PerformedSet {
     reps: 10,
     weightKg: 60,
     rpe: null,
+    durationSeconds: null,
     isCompleted: false,
     planned: null,
     ...overrides,
   };
 }
 
-function mount(value: PerformedSet, isNext = true) {
+function mount(value: PerformedSet, isNext = true, isCardio = false) {
   const onChange = vi.fn();
 
   render(
@@ -36,6 +37,7 @@ function mount(value: PerformedSet, isNext = true) {
         index={0}
         exerciseName="Supino"
         isNext={isNext}
+        isCardio={isCardio}
         onChange={onChange}
         onToggleComplete={vi.fn()}
         onRemove={vi.fn()}
@@ -139,7 +141,10 @@ describe("stepping the load", () => {
     // Pressing +2,5 on an empty field for a machine you always load to 60
     // should land near 60, not at 2,5.
     const onChange = mount(
-      set({ weightKg: null, planned: { reps: null, weightKg: 60, rpe: null } }),
+      set({
+        weightKg: null,
+        planned: { reps: null, weightKg: 60, rpe: null, durationSeconds: null },
+      }),
     );
 
     await tap(/^Mais 2,5 kg/);
@@ -180,6 +185,55 @@ describe("where the steppers appear", () => {
 
     expect(
       screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("a cardio exercise", () => {
+  it("shows a duration field instead of reps and weight", () => {
+    mount(set({ reps: null, weightKg: null, durationSeconds: 2400 }), true, true);
+
+    expect(
+      screen.getByLabelText("Duração da série 1 de Supino, em minutos"),
+    ).toHaveValue("40");
+    expect(
+      screen.queryByLabelText("Repetições da série 1 de Supino"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Peso da série 1 de Supino"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("writes the typed minutes to durationSeconds through onChange", async () => {
+    const onChange = mount(set({ durationSeconds: null }), true, true);
+    const field = screen.getByLabelText(
+      "Duração da série 1 de Supino, em minutos",
+    );
+
+    await userEvent.type(field, "40");
+
+    expect(onChange).toHaveBeenLastCalledWith({ durationSeconds: 2400 });
+  });
+
+  it("has no rep/weight steppers, which have no cardio equivalent", () => {
+    mount(set({ durationSeconds: null }), true, true);
+
+    expect(
+      screen.queryByRole("button", { name: /^Mais uma repetição/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a non-cardio exercise still shows reps and weight as before", () => {
+    mount(set(), true, false);
+
+    expect(
+      screen.getByLabelText("Repetições da série 1 de Supino"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Duração da série 1 de Supino, em minutos"),
     ).not.toBeInTheDocument();
   });
 });

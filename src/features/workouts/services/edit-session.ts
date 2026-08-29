@@ -36,7 +36,7 @@ export function uncompleteSet(
 }
 
 export type PerformedSetChanges = Partial<
-  Pick<PerformedSet, "reps" | "weightKg" | "rpe">
+  Pick<PerformedSet, "reps" | "weightKg" | "rpe" | "durationSeconds">
 >;
 
 export function updatePerformedSet(
@@ -68,11 +68,27 @@ export function updatePerformedSet(
  * fabricated number this codebase refuses to show elsewhere.
  */
 function sanitizeSetChanges(changes: PerformedSetChanges): PerformedSetChanges {
-  if (changes.weightKg === undefined || changes.weightKg === null) return changes;
-  if (changes.weightKg >= 0) return changes;
+  let sanitized = changes;
 
-  const { weightKg: _rejected, ...rest } = changes;
-  return rest;
+  if (
+    sanitized.weightKg !== undefined &&
+    sanitized.weightKg !== null &&
+    sanitized.weightKg < 0
+  ) {
+    const { weightKg: _rejected, ...rest } = sanitized;
+    sanitized = rest;
+  }
+
+  if (
+    sanitized.durationSeconds !== undefined &&
+    sanitized.durationSeconds !== null &&
+    sanitized.durationSeconds < 0
+  ) {
+    const { durationSeconds: _rejected, ...rest } = sanitized;
+    sanitized = rest;
+  }
+
+  return sanitized;
 }
 
 /**
@@ -95,6 +111,7 @@ export function addPerformedSet(
           id: createEntityId(),
           reps: last?.reps ?? null,
           weightKg: last?.weightKg ?? null,
+          durationSeconds: last?.durationSeconds ?? null,
           rpe: null,
           isCompleted: false,
           planned: null,

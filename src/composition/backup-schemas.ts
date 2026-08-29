@@ -345,12 +345,21 @@ export const foodLogRecordSchema = z
 // routines
 // ---------------------------------------------------------------------------
 
+/**
+ * `durationSeconds` is `.nullable().optional()`, not just `.nullable()`, like
+ * `dietId` above — a routine/session backed up before this field existed has
+ * no key for it at all, and `LocalRoutineRepository`/`LocalSessionRepository`
+ * already default a missing key to `null` on read (see their `normalize()`).
+ */
 const plannedSetSchema = z
   .object({
     id: z.string().min(1).max(200),
     reps: bounded("reps inválido.", 0, 100_000).nullable(),
     weightKg: bounded("weightKg inválido.", 0, 100_000).nullable(),
     rpe: bounded("rpe inválido.", 0, 10).nullable(),
+    durationSeconds: bounded("durationSeconds inválido.", 0, 100_000)
+      .nullable()
+      .optional(),
   })
   .strict();
 
@@ -383,6 +392,9 @@ const plannedTargetSchema = z
     reps: bounded("reps inválido.", 0, 100_000).nullable(),
     weightKg: bounded("weightKg inválido.", 0, 100_000).nullable(),
     rpe: bounded("rpe inválido.", 0, 10).nullable(),
+    durationSeconds: bounded("durationSeconds inválido.", 0, 100_000)
+      .nullable()
+      .optional(),
   })
   .strict();
 
@@ -392,6 +404,9 @@ const performedSetSchema = z
     reps: bounded("reps inválido.", 0, 100_000).nullable(),
     weightKg: bounded("weightKg inválido.", 0, 100_000).nullable(),
     rpe: bounded("rpe inválido.", 0, 10).nullable(),
+    durationSeconds: bounded("durationSeconds inválido.", 0, 100_000)
+      .nullable()
+      .optional(),
     isCompleted: z.boolean(),
     planned: plannedTargetSchema.nullable(),
   })
