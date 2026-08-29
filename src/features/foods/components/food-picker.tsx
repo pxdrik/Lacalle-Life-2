@@ -147,15 +147,20 @@ export function FoodPicker({ onPick, onCancel }: Props) {
                   // what they are for.
                   setText("");
                 }}
-                className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
+                className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
               >
-                <span className="min-w-0 flex-1 truncate text-sm text-ink">
-                  {food.name}
+                {/* The name used to be a single truncated line, squeezed
+                    between the category and the kcal column — unreadable for
+                    anything longer than a few letters at a phone width. It
+                    wraps now (category moved below it) instead of cutting
+                    off; the row is a real button end to end either way. */}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm text-ink">{food.name}</span>
+                  <span className="mt-0.5 block text-xs text-ink-subtle">
+                    {FOOD_CATEGORY_LABELS[food.category]}
+                  </span>
                 </span>
-                <span className="shrink-0 text-xs text-ink-subtle">
-                  {FOOD_CATEGORY_LABELS[food.category]}
-                </span>
-                <span className="w-16 shrink-0 text-right text-xs tabular-nums text-ink-muted">
+                <span className="shrink-0 text-right text-xs tabular-nums text-ink-muted">
                   {food.per100g.kcal} kcal
                 </span>
               </button>

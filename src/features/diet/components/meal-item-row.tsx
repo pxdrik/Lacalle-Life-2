@@ -36,6 +36,14 @@ interface Props {
  * adjusting a portion is the single most repeated action in building a diet,
  * and the macros beside it move as you type.
  */
+/**
+ * "GRAMAS" / "UNIDADE" acima do campo, do mesmo jeito que a rotina de treino
+ * já rotula suas colunas (`# REPS PESO RPE`) em vez de deixar dois números
+ * lado a lado sem dizer o que cada um é.
+ */
+const QUANTITY_LABEL =
+  "text-[0.625rem] font-medium tracking-wide text-ink-subtle uppercase";
+
 export function MealItemRow({
   item,
   dragHandle,
@@ -75,37 +83,55 @@ export function MealItemRow({
         {item.name}
       </span>
 
-      <div className="flex shrink-0 items-center gap-1">
-        <GramsField
-          grams={item.grams}
-          label={`Quantidade de ${item.name}`}
-          onChange={onGramsChange}
-        />
+      <div className="flex shrink-0 items-end gap-1">
+        {/* "GRAMAS"/"UNIDADE" acima do número, não só a cor, para que a
+            diferença não dependa de enxergar cor nenhuma. `aria-hidden`
+            porque o rótulo de cada campo (abaixo) já diz a mesma coisa por
+            extenso para quem usa leitor de tela — isto é reforço visual, não
+            a única fonte do nome acessível. */}
+        <div className="flex flex-col items-center gap-0.5">
+          <span aria-hidden className={QUANTITY_LABEL}>
+            Gramas
+          </span>
+          <div className="flex items-center gap-1">
+            <GramsField
+              grams={item.grams}
+              label={`Quantidade de ${item.name}`}
+              onChange={onGramsChange}
+            />
+            {/* g e ml só trocam o rótulo: 1 ml ≈ 1 g é a aproximação, não
+                uma segunda grandeza. */}
+            <Select
+              variant="compact"
+              value={item.unit}
+              aria-label={`Unidade de ${item.name}`}
+              onChange={(event) => {
+                onUnitChange(event.target.value === "ml" ? "ml" : "g");
+              }}
+            >
+              <option value="g">g</option>
+              <option value="ml">ml</option>
+            </Select>
+          </div>
+        </div>
+
         {/* Só aparece quando o alimento tem uma medida caseira confiável
-            (TBCA/TACO/USDA FBG) — nem todo alimento tem uma, e onde falta
-            não existe substituto honesto além de gramas/ml. Os dois campos
+            (TBCA/TACO/USDA FBG). Nem todo alimento tem uma, e onde falta não
+            existe substituto honesto além de gramas/ml. Os dois campos
             escrevem no mesmo `grams`: editar um atualiza o outro. */}
         {item.practicalUnit && (
-          <UnitQuantityField
-            grams={item.grams}
-            unit={item.practicalUnit}
-            itemName={item.name}
-            onChange={onGramsChange}
-          />
+          <div className="flex flex-col items-center gap-0.5">
+            <span aria-hidden className={QUANTITY_LABEL}>
+              Unidade
+            </span>
+            <UnitQuantityField
+              grams={item.grams}
+              unit={item.practicalUnit}
+              itemName={item.name}
+              onChange={onGramsChange}
+            />
+          </div>
         )}
-        {/* g e ml só trocam o rótulo — 1 ml ≈ 1 g é a aproximação, não uma
-            segunda grandeza. */}
-        <Select
-          variant="compact"
-          value={item.unit}
-          aria-label={`Unidade de ${item.name}`}
-          onChange={(event) => {
-            onUnitChange(event.target.value === "ml" ? "ml" : "g");
-          }}
-        >
-          <option value="g">g</option>
-          <option value="ml">ml</option>
-        </Select>
       </div>
 
       {/* Forces the wrap here and nowhere else. A zero-height item with a

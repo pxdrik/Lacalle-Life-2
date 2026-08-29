@@ -169,14 +169,18 @@ export function MealCard({
         </div>
       </header>
 
-      {/* Only when it applies: a food with no known practical unit still
-          shows one plain grams field, exactly as before this existed, and
-          the explanation would be about a control that isn't even there. */}
+      {/* Secundária de propósito: "Gramas"/"Unidade" acima de cada campo
+          (`meal-item-row.tsx`) já identificam o número na hora. Isto é só a
+          confirmação por extenso, para quem quiser ler.
+          Só quando se aplica: um alimento sem medida caseira conhecida
+          continua mostrando um campo de grama só, exatamente como antes
+          disto existir, e a explicação seria sobre um controle que nem
+          está na tela. */}
       {meal.items.some((item) => item.practicalUnit !== undefined) && (
         <p className="mt-3 text-xs text-ink-subtle">
-          O primeiro número é sempre o peso, em gramas. O segundo, quando
-          aparece, é quantas medidas do alimento — por exemplo, 2 em
-          &quot;1/2 xícara&quot; — e vira grama sozinho.
+          Gramas é o peso do alimento. Unidade, quando aparece, é quantas
+          medidas dele, por exemplo 2 em &quot;1/2 xícara&quot;, e se
+          converte em grama sozinha.
         </p>
       )}
 

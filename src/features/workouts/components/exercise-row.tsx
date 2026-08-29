@@ -47,7 +47,12 @@ export function ExerciseRow({
         <ExerciseThumbnail exercise={exercise} />
 
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[0.9375rem] text-ink">
+          {/* The name used to truncate to a single line, which cut off
+              anything longer than a handful of characters once the
+              thumbnail and the star/add buttons took their share of a
+              360px row. It wraps now — the muscle/equipment subtitle below
+              it is secondary information, so that one still truncates. */}
+          <span className="block text-[0.9375rem] text-ink">
             {exercise.name}
           </span>
           <span className="mt-0.5 block truncate text-xs text-ink-subtle">

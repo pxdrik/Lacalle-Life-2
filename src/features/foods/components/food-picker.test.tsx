@@ -145,6 +145,34 @@ describe("FoodPicker", () => {
     expect(input).toHaveValue("");
   });
 
+  it("shows a long food name in full, not clipped to one truncated line", async () => {
+    const longName =
+      "Abadejo filé congelado grelhado com farinha de trigo e legumes";
+    mount([food(longName)]);
+    await afterLoad();
+
+    const row = await screen.findByRole("button", {
+      name: new RegExp(longName),
+    });
+    // The old row put the name in a `truncate` span; the whole name has to
+    // be readable now, not clipped behind an ellipsis.
+    const nameSpan = row.querySelector("span > span");
+    expect(nameSpan?.className).not.toContain("truncate");
+    expect(row).toHaveTextContent(longName);
+  });
+
+  it("keeps the whole row as one clickable control, even with a wrapped multi-line name", async () => {
+    const longName = "Abadejo filé congelado grelhado com farinha de trigo";
+    const { onPick } = mount([food(longName)]);
+    await afterLoad();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: new RegExp(longName) }),
+    );
+
+    expect(onPick).toHaveBeenCalledOnce();
+  });
+
   it("shows a not-found message rather than an empty silence", async () => {
     mount([food("Banana")]);
     await afterLoad();

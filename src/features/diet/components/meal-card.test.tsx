@@ -42,7 +42,7 @@ function mount(theMeal: Meal) {
   );
 }
 
-const EXPLANATION = /O primeiro número é sempre o peso/;
+const EXPLANATION = /Gramas é o peso do alimento/;
 
 describe("the grams-vs-unit explanation", () => {
   it("does not show for a meal with no items", () => {

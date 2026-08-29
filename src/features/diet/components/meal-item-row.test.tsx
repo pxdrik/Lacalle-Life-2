@@ -164,6 +164,26 @@ describe("the portion field", () => {
   });
 });
 
+describe("the Gramas/Unidade labels", () => {
+  it("shows Gramas above the grams field even without a practical unit", () => {
+    mount(ITEM);
+
+    expect(screen.getByText("Gramas")).toBeInTheDocument();
+    expect(screen.queryByText("Unidade")).not.toBeInTheDocument();
+  });
+
+  it("shows Unidade too once the food has a practical unit", () => {
+    mount({
+      ...ITEM,
+      grams: 100,
+      practicalUnit: { label: "1/2 unidade média", grams: 100 },
+    });
+
+    expect(screen.getByText("Gramas")).toBeInTheDocument();
+    expect(screen.getByText("Unidade")).toBeInTheDocument();
+  });
+});
+
 describe("the practical unit field", () => {
   const WITH_UNIT: MealItem = {
     ...ITEM,
