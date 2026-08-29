@@ -99,7 +99,7 @@ export function SessionExerciseCard({
             <span className="flex-1 text-center">Peso</span>
           </>
         )}
-        <span className="w-16 text-center">RPE</span>
+        {!isCardio && <span className="w-16 text-center">RPE</span>}
         <span className="w-11 shrink-0" />
         <span className="w-11 shrink-0 sm:w-7" />
       </div>

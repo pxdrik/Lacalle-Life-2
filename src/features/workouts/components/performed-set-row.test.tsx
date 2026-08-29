@@ -215,6 +215,14 @@ describe("a cardio exercise", () => {
     expect(onChange).toHaveBeenLastCalledWith({ durationSeconds: 2400 });
   });
 
+  it("has no RPE selector, which rates effort against a target it has none of", () => {
+    mount(set({ durationSeconds: null }), true, true);
+
+    expect(
+      screen.queryByLabelText("RPE da série 1 de Supino"),
+    ).not.toBeInTheDocument();
+  });
+
   it("has no rep/weight steppers, which have no cardio equivalent", () => {
     mount(set({ durationSeconds: null }), true, true);
 

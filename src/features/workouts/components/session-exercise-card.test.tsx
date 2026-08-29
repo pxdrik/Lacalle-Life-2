@@ -100,7 +100,9 @@ describe("SessionExerciseCard", () => {
       expect(header).toHaveTextContent("Duração (min)");
       expect(header).not.toHaveTextContent("Reps");
       expect(header).not.toHaveTextContent("Peso");
-      expect(header).toHaveTextContent("RPE");
+      // RPE rates effort against a rep/weight target, which a timed exercise
+      // has neither of.
+      expect(header).not.toHaveTextContent("RPE");
     });
   });
 

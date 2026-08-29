@@ -58,19 +58,23 @@ function mount(catalogue: Exercise | undefined) {
 }
 
 describe("the column header", () => {
-  it("shows Reps and Peso for an exercise with no cardio classification", () => {
+  it("shows Reps, Peso and RPE for an exercise with no cardio classification", () => {
     mount(undefined);
 
     expect(screen.getByText("Reps")).toBeInTheDocument();
     expect(screen.getByText("Peso")).toBeInTheDocument();
+    expect(screen.getByText("RPE")).toBeInTheDocument();
     expect(screen.queryByText("Duração (min)")).not.toBeInTheDocument();
   });
 
-  it("swaps to a single Duração column for a cardio exercise", () => {
+  it("swaps to a single Duração column for a cardio exercise, dropping RPE too", () => {
     mount(catalogueEntry({ movementPattern: "cardio" }));
 
     expect(screen.getByText("Duração (min)")).toBeInTheDocument();
     expect(screen.queryByText("Reps")).not.toBeInTheDocument();
     expect(screen.queryByText("Peso")).not.toBeInTheDocument();
+    // RPE rates effort against a rep/weight target, which a timed exercise
+    // has neither of.
+    expect(screen.queryByText("RPE")).not.toBeInTheDocument();
   });
 });

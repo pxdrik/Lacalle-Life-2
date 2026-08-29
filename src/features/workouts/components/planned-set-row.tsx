@@ -71,14 +71,18 @@ export function PlannedSetRow({
         </>
       )}
 
-      <RpeSelect
-        value={set.rpe}
-        label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
-        onChange={(rpe) => {
-          onChange({ rpe });
-        }}
-        className="w-16 shrink-0"
-      />
+      {/* RPE reports effort against a rep/weight target — a treadmill has
+          neither, so there is nothing here for it to rate. */}
+      {!isCardio && (
+        <RpeSelect
+          value={set.rpe}
+          label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
+          onChange={(rpe) => {
+            onChange({ rpe });
+          }}
+          className="w-16 shrink-0"
+        />
+      )}
 
       <button
         type="button"

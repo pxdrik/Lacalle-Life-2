@@ -63,6 +63,14 @@ describe("a cardio exercise", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("has no RPE selector, which rates effort against a target it has none of", () => {
+    mount(set(), true);
+
+    expect(
+      screen.queryByLabelText("RPE alvo da série 1 de Esteira"),
+    ).not.toBeInTheDocument();
+  });
+
   it("converts typed minutes to durationSeconds", async () => {
     const onChange = mount(set({ durationSeconds: null }), true);
 

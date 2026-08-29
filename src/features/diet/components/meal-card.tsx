@@ -169,6 +169,17 @@ export function MealCard({
         </div>
       </header>
 
+      {/* Only when it applies: a food with no known practical unit still
+          shows one plain grams field, exactly as before this existed, and
+          the explanation would be about a control that isn't even there. */}
+      {meal.items.some((item) => item.practicalUnit !== undefined) && (
+        <p className="mt-3 text-xs text-ink-subtle">
+          O primeiro número é sempre o peso, em gramas. O segundo, quando
+          aparece, é quantas medidas do alimento — por exemplo, 2 em
+          &quot;1/2 xícara&quot; — e vira grama sozinho.
+        </p>
+      )}
+
       {meal.items.length > 0 && (
         <SortableList
           ids={meal.items.map((item) => item.id)}

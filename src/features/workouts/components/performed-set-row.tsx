@@ -138,17 +138,21 @@ export function PerformedSetRow({
           </>
         )}
 
-        <div className="w-16 shrink-0">
-          <RpeSelect
-            value={set.rpe}
-            label={`RPE da série ${String(number)} de ${exerciseName}`}
-            onChange={(rpe) => {
-              onChange({ rpe });
-            }}
-            className="h-11 w-full"
-          />
-          <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
-        </div>
+        {/* RPE reports effort against a rep/weight target — a treadmill has
+            neither, so there is nothing here for it to rate. */}
+        {!isCardio && (
+          <div className="w-16 shrink-0">
+            <RpeSelect
+              value={set.rpe}
+              label={`RPE da série ${String(number)} de ${exerciseName}`}
+              onChange={(rpe) => {
+                onChange({ rpe });
+              }}
+              className="h-11 w-full"
+            />
+            <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
+          </div>
+        )}
 
         {/* 44px, the comfortable one-handed target, and the only large button in
           the row — it is the action repeated dozens of times per workout. */}

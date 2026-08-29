@@ -143,7 +143,7 @@ export function RoutineExerciseCard({
             <span className="flex-1 text-center">Peso</span>
           </>
         )}
-        <span className="w-16 text-center">RPE</span>
+        {!isCardio && <span className="w-16 text-center">RPE</span>}
         <span className="w-7" />
       </div>
 
