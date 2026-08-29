@@ -39,6 +39,9 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
         "animate-rise fixed inset-x-0 bottom-(--bottom-nav-h) z-20",
         "border-t border-line bg-canvas/95 backdrop-blur",
         "sm:pb-[env(safe-area-inset-bottom)]",
+        // Same `fixed` + `backdrop-filter` WebKit bug as `bottom-nav.tsx` —
+        // see the comment there for how it was confirmed.
+        "[transform:translateZ(0)]",
       )}
     >
       <div

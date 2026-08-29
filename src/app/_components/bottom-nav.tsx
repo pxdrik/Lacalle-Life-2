@@ -125,6 +125,14 @@ export function BottomNav() {
           "fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line",
           "bg-canvas/95 backdrop-blur md:hidden",
           "h-(--bottom-nav-h) pb-[env(safe-area-inset-bottom)]",
+          // `position: fixed` + `backdrop-filter` is a known WebKit bug on
+          // iOS Safari: the element can vanish or flicker during and after
+          // scroll, confirmed live (29/08/2026) on a real iPhone — the bar
+          // was entirely missing on `/hoje`, both at the top of the page and
+          // scrolled down. Promoting the element to its own GPU layer is the
+          // standard fix; it changes nothing on browsers that never had the
+          // bug.
+          "[transform:translateZ(0)]",
         )}
       >
         {TABS.map(({ href, label, icon: Icon }) => {
