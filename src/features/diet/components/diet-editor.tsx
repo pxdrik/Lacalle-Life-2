@@ -9,6 +9,8 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
 
+import { useState } from "react";
+
 import {
   SortableItem,
   SortableList,
@@ -16,7 +18,9 @@ import {
 import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
+import { useDietRepository } from "../data/diet-repository-context";
 import { useDietEditor } from "../hooks/use-diet-editor";
+import { useDietList } from "../hooks/use-diet-list";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietMacros } from "../services/diet-macros";
 import {
@@ -35,6 +39,7 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
+import { transferItemToDiet } from "../services/transfer-item";
 import { MealCard } from "./meal-card";
 import { InlineText } from "./inline-text";
 import { MacroProgress } from "./macro-progress";
@@ -44,6 +49,9 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
   const { state, saveError, hasConflict, apply, reload } = useDietEditor(dietId);
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
+  const repository = useDietRepository();
+  const { state: dietListState } = useDietList();
+  const [transferError, setTransferError] = useState<string | null>(null);
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -63,6 +71,21 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
 
   const { diet } = state;
   const totals = dietMacros(diet);
+  // Only diets with a meal to receive something — an empty diet would show
+  // up in the picker with nowhere for the food to actually land.
+  const otherDiets =
+    dietListState.status === "ready"
+      ? dietListState.diets
+          .filter((other) => other.id !== dietId && other.meals.length > 0)
+          .map((other) => ({
+            id: other.id,
+            name: other.name,
+            meals: other.meals.map((otherMeal) => ({
+              id: otherMeal.id,
+              name: otherMeal.name,
+            })),
+          }))
+      : [];
 
   return (
     <div>
@@ -114,6 +137,12 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
         </div>
       )}
 
+      {transferError !== null && (
+        <div role="alert" className={cn("mt-4", noticeClasses())}>
+          <p>{transferError}</p>
+        </div>
+      )}
+
       <SortableList
         ids={diet.meals.map((meal) => meal.id)}
         describe={(id) =>
@@ -147,17 +176,48 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                   otherMeals={diet.meals
                     .filter((other) => other.id !== meal.id)
                     .map((other) => ({ id: other.id, name: other.name }))}
-                  onSendItem={(itemId, targetMealId, mode) => {
-                    apply((current) =>
-                      mode === "copy"
-                        ? copyItemToMeal(current, meal.id, itemId, targetMealId)
-                        : moveItemToMeal(
-                            current,
-                            meal.id,
-                            itemId,
-                            targetMealId,
-                          ),
+                  otherDiets={otherDiets}
+                  onSendItem={(itemId, targetMealId, mode, targetDietId) => {
+                    if (targetDietId === undefined) {
+                      apply((current) =>
+                        mode === "copy"
+                          ? copyItemToMeal(current, meal.id, itemId, targetMealId)
+                          : moveItemToMeal(
+                              current,
+                              meal.id,
+                              itemId,
+                              targetMealId,
+                            ),
+                      );
+                      return;
+                    }
+
+                    // A different diet is a different document — see
+                    // `transferItemToDiet`'s own comment for why this is
+                    // async and why the source is only touched afterwards.
+                    const item = meal.items.find(
+                      (candidate) => candidate.id === itemId,
                     );
+                    if (item === undefined) return;
+
+                    setTransferError(null);
+                    void (async () => {
+                      const result = await transferItemToDiet(
+                        await repository,
+                        targetDietId,
+                        targetMealId,
+                        item,
+                      );
+                      if (!result.ok) {
+                        setTransferError(result.message);
+                        return;
+                      }
+                      if (mode === "move") {
+                        apply((current) =>
+                          removeItem(current, meal.id, itemId),
+                        );
+                      }
+                    })();
                   }}
                   onReorderItems={(activeId, overId) => {
                     apply((current) =>

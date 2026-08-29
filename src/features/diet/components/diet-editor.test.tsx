@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
@@ -255,5 +255,95 @@ describe("adding food", () => {
 
     const stored = await diets.getById(diet.id);
     expect(stored?.meals[0]?.items[0]?.per100g.proteinG).toBe(31);
+  });
+});
+
+describe("sending an item to another diet", () => {
+  /** Seeds two diets, so `useDietList` has somewhere else to send food to. */
+  function mountWithTargetDiet() {
+    const diet = createDiet("Cutting");
+    const target = createDiet("Bulking");
+
+    const diets = new LocalDietRepository(new MemoryStore<Diet>(DIETS_STORE));
+    const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
+
+    const ready = Promise.all([
+      diets.save(diet, null),
+      diets.save(target, null),
+      foods.save(CHICKEN, null),
+    ]);
+
+    render(
+      <DietRepositoryProvider repository={ready.then(() => diets)}>
+        <FoodRepositoryProvider repository={ready.then(() => foods)}>
+          <DietEditor dietId={diet.id} />
+        </FoodRepositoryProvider>
+      </DietRepositoryProvider>,
+    );
+
+    return { diet, target, diets };
+  }
+
+  it("copies the item into the target diet's meal, keeping the original", async () => {
+    const { diet, target, diets } = mountWithTargetDiet();
+    await screen.findByLabelText("Nome da dieta");
+    await addChicken();
+
+    // Both diets' default meal is named "Refeição 1", and this diet has no
+    // *other* meal of its own to move within — so the only two options on
+    // screen read the same text, one to move and one to copy. Reached by
+    // value instead of the ambiguous label.
+    const select = await screen.findByLabelText(
+      "Mover ou copiar Peito de frango grelhado para outra refeição",
+    );
+    fireEvent.change(select, {
+      target: { value: `copy:${target.id}:${target.meals[0]!.id}` },
+    });
+
+    await waitFor(async () => {
+      expect((await diets.getById(target.id))?.meals[0]?.items).toHaveLength(
+        1,
+      );
+    });
+    await waitFor(async () => {
+      expect((await diets.getById(diet.id))?.meals[0]?.items).toHaveLength(1);
+    });
+  });
+
+  it("moves the item into the target diet's meal, removing the original", async () => {
+    const { diet, target, diets } = mountWithTargetDiet();
+    await screen.findByLabelText("Nome da dieta");
+    await addChicken();
+
+    const select = await screen.findByLabelText(
+      "Mover ou copiar Peito de frango grelhado para outra refeição",
+    );
+    fireEvent.change(select, { target: { value: `move:${target.id}:${target.meals[0]!.id}` } });
+
+    await waitFor(async () => {
+      expect((await diets.getById(target.id))?.meals[0]?.items).toHaveLength(
+        1,
+      );
+    });
+    await waitFor(async () => {
+      expect((await diets.getById(diet.id))?.meals[0]?.items).toHaveLength(0);
+    });
+  });
+
+  it("groups the target diet's meals under its own name, separate from this diet's", async () => {
+    mountWithTargetDiet();
+    await screen.findByLabelText("Nome da dieta");
+    await addChicken();
+
+    const select = await screen.findByLabelText(
+      "Mover ou copiar Peito de frango grelhado para outra refeição",
+    );
+    // `optgroup`'s `label` is an attribute, not text content, so it has to
+    // be read off the element rather than asserted with `toHaveTextContent`.
+    const labels = [...select.querySelectorAll("optgroup")].map((group) =>
+      group.getAttribute("label"),
+    );
+    expect(labels).toContain("Mover para · Bulking");
+    expect(labels).toContain("Copiar para · Bulking");
   });
 });

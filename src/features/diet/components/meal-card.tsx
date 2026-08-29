@@ -51,10 +51,18 @@ interface Props {
     readonly id: string;
     readonly name: string;
   }[];
+  /** Every other diet's own meals — see the note on the same prop in
+   * `MealItemRow`. */
+  readonly otherDiets: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly meals: readonly { readonly id: string; readonly name: string }[];
+  }[];
   readonly onSendItem: (
     itemId: string,
     targetMealId: string,
     mode: "copy" | "move",
+    targetDietId?: string,
   ) => void;
 }
 
@@ -73,6 +81,7 @@ export function MealCard({
   onRemoveItem,
   onReorderItems,
   otherMeals,
+  otherDiets,
   onSendItem,
 }: Props) {
   const [picking, setPicking] = useState(false);
@@ -200,6 +209,7 @@ export function MealCard({
                     item={item}
                     dragHandle={handle}
                     otherMeals={otherMeals}
+                    otherDiets={otherDiets}
                     onGramsChange={(grams) => {
                       onItemGramsChange(item.id, grams);
                     }}
@@ -209,8 +219,8 @@ export function MealCard({
                     onRemove={() => {
                       onRemoveItem(item.id);
                     }}
-                    onSend={(targetMealId, mode) => {
-                      onSendItem(item.id, targetMealId, mode);
+                    onSend={(targetMealId, mode, targetDietId) => {
+                      onSendItem(item.id, targetMealId, mode, targetDietId);
                     }}
                   />
                 )}
