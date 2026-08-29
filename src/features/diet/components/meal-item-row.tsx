@@ -79,9 +79,15 @@ export function MealItemRow({
         <GripVertical aria-hidden className="size-3.5" />
       </button>
 
-      <span className="min-w-0 flex-1 truncate text-sm text-ink">
-        {item.name}
-      </span>
+      {/* Wraps rather than truncating: sharing a line with the quantity
+          group left almost nothing for the name once "Gramas"/"Unidade"
+          gave that group a caption of its own — "Leite semidesnatado" came
+          out as "Leite s...". The spacer right after this gives the name
+          the whole first line on a phone, so it never has to fight the
+          quantity fields for room. */}
+      <span className="min-w-0 flex-1 text-sm text-ink">{item.name}</span>
+
+      <div aria-hidden className="basis-full sm:hidden" />
 
       <div className="flex shrink-0 items-end gap-1">
         {/* "GRAMAS"/"UNIDADE" acima do número, não só a cor, para que a
@@ -134,10 +140,12 @@ export function MealItemRow({
         )}
       </div>
 
-      {/* Forces the wrap here and nowhere else. A zero-height item with a
-          full-width basis cannot share a line, so everything after it lands on
-          the second row together — the alternative is letting flex choose, and
-          flex breaks wherever the longest name happens to leave off. */}
+      {/* Second forced break: the quantity group gets its own line too,
+          separate from the macro numbers and the move/copy control below —
+          three dense rows share one line worse than three plain ones. A
+          zero-height full-basis item is what makes a break land exactly
+          here and nowhere else; leaving it to flex means it breaks wherever
+          the longest name happens to leave off. */}
       <div aria-hidden className="basis-full sm:hidden" />
 
       {/* `ms-auto` pins the numbers to the right edge of the wrapped line, so
@@ -168,7 +176,7 @@ export function MealItemRow({
           }}
           className="shrink-0"
         >
-          <option value="">⋯</option>
+          <option value="">Mover para</option>
           <optgroup label="Mover para">
             {otherMeals.map((meal) => (
               <option key={`move:${meal.id}`} value={`move:${meal.id}`}>
@@ -263,7 +271,7 @@ function GramsField({
         setDraft(next.text);
         onChange(next.grams);
       }}
-      className="w-14 rounded-md border border-line bg-surface px-2 py-1 text-right text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
+      className="h-8 w-14 rounded-md border border-line bg-surface px-2 text-right text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong"
     />
   );
 }
@@ -357,7 +365,7 @@ function UnitQuantityField({
         setDraft(next.text);
         onChange(clampGrams(next.quantity * unit.grams));
       }}
-      className="w-14 rounded-md border border-line bg-surface px-1.5 py-1 text-right text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong"
+      className="h-8 w-14 rounded-md border border-line bg-surface px-1.5 text-right text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong"
     />
   );
 }

@@ -281,3 +281,59 @@ describe("the unit selector", () => {
     expect(unitField).toHaveValue("ml");
   });
 });
+
+describe("the food name", () => {
+  it("is not clipped to a single truncated line", () => {
+    const longName = "Leite semidesnatado em pó integral fortificado";
+    render(row({ ...ITEM, name: longName }));
+
+    const nameSpan = screen.getByText(longName);
+    expect(nameSpan.className).not.toContain("truncate");
+  });
+});
+
+describe("field heights", () => {
+  it("gives the grams field, its unit and the practical-unit field the same height", () => {
+    mount({
+      ...ITEM,
+      grams: 100,
+      practicalUnit: { label: "1/2 unidade média", grams: 100 },
+    });
+
+    const gramsField = screen.getByLabelText(`Quantidade de ${ITEM.name}`);
+    const unitSelect = screen.getByLabelText(`Unidade de ${ITEM.name}`);
+    const unitField = screen.getByLabelText(
+      `Quantidade de ${ITEM.name} em 1/2 unidade média`,
+    );
+
+    expect(gramsField.className).toContain("h-8");
+    expect(unitSelect.className).toContain("h-8");
+    expect(unitField.className).toContain("h-8");
+  });
+});
+
+describe("moving or copying to another meal", () => {
+  it("labels the control \"Mover para\" instead of an unlabelled ellipsis", () => {
+    render(
+      <ul>
+        <MealItemRow
+          item={ITEM}
+          dragHandle={{
+            attributes: {},
+            listeners: undefined,
+            isDragging: false,
+          }}
+          otherMeals={[{ id: "m2", name: "Refeição 2" }]}
+          onGramsChange={() => undefined}
+          onUnitChange={() => undefined}
+          onRemove={() => undefined}
+          onSend={() => undefined}
+        />
+      </ul>,
+    );
+
+    expect(
+      screen.getByRole("option", { name: "Mover para" }),
+    ).toBeInTheDocument();
+  });
+});
