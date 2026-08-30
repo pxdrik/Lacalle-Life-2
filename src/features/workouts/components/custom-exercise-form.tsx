@@ -155,7 +155,7 @@ function Optional({
   return (
     <div role="group" aria-label={label}>
       <p className="mb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase">
-        {label} <span className="normal-case">— opcional</span>
+        {label} <span className="normal-case">(opcional)</span>
       </p>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>

@@ -19,7 +19,7 @@ interface Props {
 }
 
 const CELL =
-  "w-full rounded-md border border-line bg-surface px-2 py-1 text-center text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
+  "h-8 w-full rounded-md border border-line bg-surface px-2 text-center text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
 
 export function PlannedSetRow({
   set,
@@ -88,7 +88,7 @@ export function PlannedSetRow({
         type="button"
         onClick={onRemove}
         aria-label={`Remover série ${String(number)} de ${exerciseName}`}
-        className="flex size-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+        className="flex size-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:size-7 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
       >
         <X aria-hidden className="size-3.5" />
       </button>

@@ -62,7 +62,7 @@ export function AppNav() {
           aria-haspopup="dialog"
           aria-expanded={drawer}
           aria-label="Abrir navegação"
-          className="-ml-2 hidden size-10 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-(--duration-micro) ease-out hover:bg-muted hover:text-ink md:flex"
+          className="-ml-2 hidden size-11 shrink-0 items-center justify-center rounded-md text-ink-muted transition-colors duration-(--duration-micro) ease-out hover:bg-muted hover:text-ink md:flex"
         >
           <Menu aria-hidden className="size-5" />
         </button>

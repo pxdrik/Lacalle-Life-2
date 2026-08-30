@@ -60,7 +60,7 @@ export default function GlobalError({
             margin: "0.75rem auto 0",
           }}
         >
-          Nada foi perdido — seus dados continuam no aparelho. Tentar de novo
+          Nada foi perdido, seus dados continuam no aparelho. Tentar de novo
           às vezes resolve.
         </p>
         <button

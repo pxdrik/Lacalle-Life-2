@@ -31,8 +31,8 @@ export default function NotFound() {
       </h1>
 
       <p className="mx-auto mt-3 max-w-md text-ink-muted">
-        O endereço pode estar errado, ou o que estava aqui — uma dieta, um
-        treino — pode ter sido apagado. Seus dados continuam no aparelho, como
+        O endereço pode estar errado, ou o que estava aqui (uma dieta, um
+        treino) pode ter sido apagado. Seus dados continuam no aparelho, como
         sempre.
       </p>
 

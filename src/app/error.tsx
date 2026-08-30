@@ -46,7 +46,7 @@ export default function Error({
       </h1>
 
       <p className="mx-auto mt-3 max-w-md text-ink-muted">
-        Nada foi perdido — seus dados continuam no aparelho. Tentar de novo
+        Nada foi perdido, seus dados continuam no aparelho. Tentar de novo
         às vezes resolve; se continuar, o resto do app funciona normalmente.
       </p>
 

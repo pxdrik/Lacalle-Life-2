@@ -89,7 +89,7 @@ export function FoodPicker({ onPick, onCancel }: Props) {
           }}
           className={cn(
             "shrink-0",
-            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary", "sm"),
+            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />
