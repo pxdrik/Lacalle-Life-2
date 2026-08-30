@@ -123,16 +123,22 @@ export function BottomNav() {
         aria-label="Principal"
         className={cn(
           "fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t border-line",
-          "bg-canvas/95 backdrop-blur md:hidden",
+          "md:hidden",
           "h-(--bottom-nav-h) pb-[env(safe-area-inset-bottom)]",
           // `position: fixed` + `backdrop-filter` is a known WebKit bug on
           // iOS Safari: the element can vanish or flicker during and after
-          // scroll, confirmed live (29/08/2026) on a real iPhone — the bar
-          // was entirely missing on `/hoje`, both at the top of the page and
-          // scrolled down. Promoting the element to its own GPU layer is the
-          // standard fix; it changes nothing on browsers that never had the
-          // bug.
-          "[transform:translateZ(0)]",
+          // scroll. Promoting the element to its own GPU layer
+          // (`translateZ(0)`) was the first attempt (29/08/2026) — it looked
+          // fixed in one live test, then the bar went missing again on a
+          // real iPhone the next day, in the same "scrolled down" state. A
+          // layer-promotion hack is not a documented guarantee against this
+          // bug, only a common mitigation; what removes the *combination*
+          // this bug needs is dropping `backdrop-filter` outright — the
+          // background loses its translucency, not its correctness. Solid
+          // `bg-canvas`, not `bg-canvas/95`, for the same reason: partial
+          // opacity with nothing behind it to blur is a wasted alpha blend,
+          // not a visual difference anyone would notice.
+          "bg-canvas [transform:translateZ(0)]",
         )}
       >
         {TABS.map(({ href, label, icon: Icon }) => {

@@ -37,10 +37,11 @@ export function RestTimerBar({ timer }: { readonly timer: RestTimer }) {
       // home indicator twice and leave a gap under the countdown.
       className={cn(
         "animate-rise fixed inset-x-0 bottom-(--bottom-nav-h) z-20",
-        "border-t border-line bg-canvas/95 backdrop-blur",
+        "border-t border-line bg-canvas",
         "sm:pb-[env(safe-area-inset-bottom)]",
         // Same `fixed` + `backdrop-filter` WebKit bug as `bottom-nav.tsx` —
-        // see the comment there for how it was confirmed.
+        // see the comment there for why this is solid `bg-canvas` now,
+        // not `bg-canvas/95 backdrop-blur`.
         "[transform:translateZ(0)]",
       )}
     >
