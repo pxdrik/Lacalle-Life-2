@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -36,7 +36,6 @@ function row(item: MealItem) {
         item={item}
         dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
         otherMeals={[]}
-        otherDiets={[]}
         onGramsChange={() => undefined}
         onUnitChange={() => undefined}
         onRemove={() => undefined}
@@ -56,7 +55,6 @@ function mount(item: MealItem = ITEM) {
         item={item}
         dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
         otherMeals={[]}
-        otherDiets={[]}
         onGramsChange={onGramsChange}
         onUnitChange={onUnitChange}
         onRemove={() => undefined}
@@ -315,18 +313,7 @@ describe("field heights", () => {
 });
 
 describe("moving or copying to another meal", () => {
-  function mountSend({
-    otherMeals = [],
-    otherDiets = [],
-  }: {
-    readonly otherMeals?: readonly { id: string; name: string }[];
-    readonly otherDiets?: readonly {
-      id: string;
-      name: string;
-      meals: readonly { id: string; name: string }[];
-    }[];
-  } = {}) {
-    const onSend = vi.fn();
+  it("labels the control \"Mover para\" instead of an unlabelled ellipsis", () => {
     render(
       <ul>
         <MealItemRow
@@ -336,95 +323,17 @@ describe("moving or copying to another meal", () => {
             listeners: undefined,
             isDragging: false,
           }}
-          otherMeals={otherMeals}
-          otherDiets={otherDiets}
+          otherMeals={[{ id: "m2", name: "Refeição 2" }]}
           onGramsChange={() => undefined}
           onUnitChange={() => undefined}
           onRemove={() => undefined}
-          onSend={onSend}
+          onSend={() => undefined}
         />
       </ul>,
     );
-    return { onSend };
-  }
-
-  it("labels the control \"Mover para\" instead of an unlabelled ellipsis", () => {
-    mountSend({ otherMeals: [{ id: "m2", name: "Refeição 2" }] });
 
     expect(
       screen.getByRole("option", { name: "Mover para" }),
     ).toBeInTheDocument();
-  });
-
-  it("does not render when there is nowhere at all to send the food", () => {
-    mountSend();
-
-    expect(
-      screen.queryByLabelText("Mover ou copiar Abacate para outra refeição"),
-    ).not.toBeInTheDocument();
-  });
-
-  it("renders even with no other meal in this diet, as long as another diet has one", () => {
-    mountSend({
-      otherDiets: [{ id: "d2", name: "Treino de corte", meals: [{ id: "m9", name: "Café" }] }],
-    });
-
-    expect(
-      screen.getByLabelText("Mover ou copiar Abacate para outra refeição"),
-    ).toBeInTheDocument();
-  });
-
-  it("sends without a target diet for a meal in this same diet", async () => {
-    const { onSend } = mountSend({
-      otherMeals: [{ id: "m2", name: "Refeição 2" }],
-    });
-
-    await userEvent.selectOptions(
-      screen.getByLabelText("Mover ou copiar Abacate para outra refeição"),
-      "Refeição 2",
-    );
-
-    expect(onSend).toHaveBeenCalledWith("m2", "move", undefined);
-  });
-
-  it("sends with the target diet's id for a meal in another diet", async () => {
-    const { onSend } = mountSend({
-      otherDiets: [
-        {
-          id: "d2",
-          name: "Treino de corte",
-          meals: [{ id: "m9", name: "Café" }],
-        },
-      ],
-    });
-
-    await userEvent.selectOptions(
-      screen.getByLabelText("Mover ou copiar Abacate para outra refeição"),
-      "Café",
-    );
-
-    expect(onSend).toHaveBeenCalledWith("m9", "move", "d2");
-  });
-
-  it("sends copy mode with the target diet's id when picked from the copy group", async () => {
-    const { onSend } = mountSend({
-      otherDiets: [
-        {
-          id: "d2",
-          name: "Treino de corte",
-          meals: [{ id: "m9", name: "Café" }],
-        },
-      ],
-    });
-
-    // "Café" appears twice — once to move, once to copy — so this option
-    // is reached by its underlying value rather than its ambiguous visible
-    // text.
-    const select = screen.getByLabelText(
-      "Mover ou copiar Abacate para outra refeição",
-    );
-    fireEvent.change(select, { target: { value: "copy:d2:m9" } });
-
-    expect(onSend).toHaveBeenCalledWith("m9", "copy", "d2");
   });
 });

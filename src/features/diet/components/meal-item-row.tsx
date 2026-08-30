@@ -23,23 +23,10 @@ interface Props {
     readonly id: string;
     readonly name: string;
   }[];
-  /** Every other diet's own meals — a second destination, not just a second
-   * meal in this one. Empty when there is nowhere else to send the food. */
-  readonly otherDiets: readonly {
-    readonly id: string;
-    readonly name: string;
-    readonly meals: readonly { readonly id: string; readonly name: string }[];
-  }[];
   readonly onGramsChange: (grams: number) => void;
   readonly onUnitChange: (unit: MealItem["unit"]) => void;
   readonly onRemove: () => void;
-  /** `targetDietId` absent means "this diet" — the meal named by
-   * `targetMealId` already identifies the destination on its own. */
-  readonly onSend: (
-    targetMealId: string,
-    mode: "copy" | "move",
-    targetDietId?: string,
-  ) => void;
+  readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
 }
 
 /**
@@ -61,7 +48,6 @@ export function MealItemRow({
   item,
   dragHandle,
   otherMeals,
-  otherDiets,
   onGramsChange,
   onUnitChange,
   onRemove,
@@ -176,70 +162,35 @@ export function MealItemRow({
 
       {/* A native select rather than a custom menu: it is keyboard operable,
           it opens the OS picker on a phone, and it costs one control instead
-          of two buttons on an already dense row. Hidden when there is
-          nowhere to send the food — no other meal here and no other diet
-          with a meal of its own. Diet id travels in the value as a third
-          segment; empty means "this diet", which is what makes an existing
-          option value like "move:m2" still parse correctly. */}
-      {(otherMeals.length > 0 || otherDiets.length > 0) && (
+          of two buttons on an already dense row. Hidden when there is nowhere
+          to send the food. */}
+      {otherMeals.length > 0 && (
         <Select
           variant="compact"
           value=""
           aria-label={`Mover ou copiar ${item.name} para outra refeição`}
           onChange={(event) => {
-            const [mode, dietId, mealId] = event.target.value.split(":");
+            const [mode, mealId] = event.target.value.split(":");
             if (mode === undefined || mealId === undefined) return;
-            onSend(
-              mealId,
-              mode === "copy" ? "copy" : "move",
-              dietId === "" ? undefined : dietId,
-            );
+            onSend(mealId, mode === "copy" ? "copy" : "move");
           }}
           className="shrink-0"
         >
           <option value="">Mover para</option>
-          {otherMeals.length > 0 && (
-            <>
-              <optgroup label="Mover para">
-                {otherMeals.map((meal) => (
-                  <option key={`move::${meal.id}`} value={`move::${meal.id}`}>
-                    {meal.name}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Copiar para">
-                {otherMeals.map((meal) => (
-                  <option key={`copy::${meal.id}`} value={`copy::${meal.id}`}>
-                    {meal.name}
-                  </option>
-                ))}
-              </optgroup>
-            </>
-          )}
-          {otherDiets.map((diet) => (
-            <optgroup key={`move:${diet.id}`} label={`Mover para · ${diet.name}`}>
-              {diet.meals.map((meal) => (
-                <option
-                  key={`move:${diet.id}:${meal.id}`}
-                  value={`move:${diet.id}:${meal.id}`}
-                >
-                  {meal.name}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-          {otherDiets.map((diet) => (
-            <optgroup key={`copy:${diet.id}`} label={`Copiar para · ${diet.name}`}>
-              {diet.meals.map((meal) => (
-                <option
-                  key={`copy:${diet.id}:${meal.id}`}
-                  value={`copy:${diet.id}:${meal.id}`}
-                >
-                  {meal.name}
-                </option>
-              ))}
-            </optgroup>
-          ))}
+          <optgroup label="Mover para">
+            {otherMeals.map((meal) => (
+              <option key={`move:${meal.id}`} value={`move:${meal.id}`}>
+                {meal.name}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Copiar para">
+            {otherMeals.map((meal) => (
+              <option key={`copy:${meal.id}`} value={`copy:${meal.id}`}>
+                {meal.name}
+              </option>
+            ))}
+          </optgroup>
         </Select>
       )}
 

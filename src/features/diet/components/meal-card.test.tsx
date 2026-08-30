@@ -37,7 +37,6 @@ function mount(theMeal: Meal) {
       onRemoveItem={vi.fn()}
       onReorderItems={vi.fn()}
       otherMeals={[]}
-      otherDiets={[]}
       onSendItem={vi.fn()}
     />,
   );

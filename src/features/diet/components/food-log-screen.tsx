@@ -19,7 +19,6 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
-import { useDietRepository } from "../data/diet-repository-context";
 import { useDietList } from "../hooks/use-diet-list";
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
@@ -41,7 +40,6 @@ import {
   updateMeal,
 } from "../services/edit-diet";
 import { startDayFromDiet } from "../services/start-day";
-import { transferItemToDiet } from "../services/transfer-item";
 import type { Diet } from "../types/diet";
 import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
@@ -84,24 +82,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
   const [picking, setPicking] = useState(false);
-  const repository = useDietRepository();
-  const [transferError, setTransferError] = useState<string | null>(null);
 
   const today = dayKey(new Date());
-
-  // Only diets with a meal to receive something — see the identical note in
-  // `diet-editor.tsx`. No diet to exclude here: a day's log is never itself
-  // one of the diets in this list.
-  const otherDiets =
-    dietList.status === "ready"
-      ? dietList.diets
-          .filter((diet) => diet.meals.length > 0)
-          .map((diet) => ({
-            id: diet.id,
-            name: diet.name,
-            meals: diet.meals.map((meal) => ({ id: meal.id, name: meal.name })),
-          }))
-      : [];
 
   // The diet scheduled for this weekday, if any — `undefined` while diets
   // are still loading, same as "no link" for the empty state's purposes.
@@ -224,12 +206,6 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             </div>
           )}
 
-          {transferError !== null && (
-            <div role="alert" className={cn("mt-4", noticeClasses())}>
-              <p>{transferError}</p>
-            </div>
-          )}
-
           {state.log.meals.length === 0 ? (
             <EmptyDay
               day={day}
@@ -286,51 +262,22 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         otherMeals={state.log.meals
                           .filter((other) => other.id !== meal.id)
                           .map((other) => ({ id: other.id, name: other.name }))}
-                        otherDiets={otherDiets}
-                        onSendItem={(itemId, targetMealId, mode, targetDietId) => {
-                          if (targetDietId === undefined) {
-                            apply((current) =>
-                              mode === "copy"
-                                ? copyItemToMeal(
-                                    current,
-                                    meal.id,
-                                    itemId,
-                                    targetMealId,
-                                  )
-                                : moveItemToMeal(
-                                    current,
-                                    meal.id,
-                                    itemId,
-                                    targetMealId,
-                                  ),
-                            );
-                            return;
-                          }
-
-                          // See the identical comment in `diet-editor.tsx`.
-                          const item = meal.items.find(
-                            (candidate) => candidate.id === itemId,
+                        onSendItem={(itemId, targetMealId, mode) => {
+                          apply((current) =>
+                            mode === "copy"
+                              ? copyItemToMeal(
+                                  current,
+                                  meal.id,
+                                  itemId,
+                                  targetMealId,
+                                )
+                              : moveItemToMeal(
+                                  current,
+                                  meal.id,
+                                  itemId,
+                                  targetMealId,
+                                ),
                           );
-                          if (item === undefined) return;
-
-                          setTransferError(null);
-                          void (async () => {
-                            const result = await transferItemToDiet(
-                              await repository,
-                              targetDietId,
-                              targetMealId,
-                              item,
-                            );
-                            if (!result.ok) {
-                              setTransferError(result.message);
-                              return;
-                            }
-                            if (mode === "move") {
-                              apply((current) =>
-                                removeItem(current, meal.id, itemId),
-                              );
-                            }
-                          })();
                         }}
                         onReorderItems={(activeId, overId) => {
                           apply((current) =>

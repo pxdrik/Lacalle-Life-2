@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -78,7 +78,7 @@ function logWithMeal(): FoodLog {
   };
 }
 
-function mount(seed: FoodLog, seedDiets: readonly Diet[] = []) {
+function mount(seed: FoodLog) {
   const logs = new LocalFoodLogRepository(
     new MemoryStore<FoodLog>(FOOD_LOGS_STORE),
   );
@@ -86,10 +86,7 @@ function mount(seed: FoodLog, seedDiets: readonly Diet[] = []) {
   const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
   const profile = new LocalProfileRepository(new MemoryStore(PROFILE_STORE));
 
-  const ready = Promise.all([
-    logs.save(seed, null),
-    ...seedDiets.map((diet) => diets.save(diet, null)),
-  ]);
+  const ready = logs.save(seed, null);
 
   render(
     <FoodLogRepositoryProvider repository={ready.then(() => logs)}>
@@ -103,12 +100,12 @@ function mount(seed: FoodLog, seedDiets: readonly Diet[] = []) {
     </FoodLogRepositoryProvider>,
   );
 
-  return { logs, diets };
+  return logs;
 }
 
 describe("duplicating a meal in the diary", () => {
   it("copies the food in it, rather than adding an empty meal", async () => {
-    const { logs } = mount(logWithMeal());
+    const logs = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(
@@ -124,7 +121,7 @@ describe("duplicating a meal in the diary", () => {
   });
 
   it("keeps the copy's name, and gives it fresh ids at every depth", async () => {
-    const { logs } = mount(logWithMeal());
+    const logs = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(
@@ -138,39 +135,6 @@ describe("duplicating a meal in the diary", () => {
       expect(copy?.name).toBe("Café da manhã");
       expect(copy?.id).not.toBe(original?.id);
       expect(copy?.items[0]?.id).not.toBe(original?.items[0]?.id);
-    });
-  });
-});
-
-describe("sending an item from the diary to a diet", () => {
-  it("moves the item into the target diet's meal, removing it from today's log", async () => {
-    const target = {
-      id: "diet-1",
-      name: "Bulking",
-      notes: "",
-      weekdays: [],
-      meals: [
-        { id: "dm1", name: "Café da manhã", time: null, notes: "", items: [] },
-      ],
-      createdAt: 1,
-      updatedAt: 1,
-    };
-    const { logs, diets } = mount(logWithMeal(), [target]);
-    await screen.findByDisplayValue("Café da manhã");
-
-    const select = await screen.findByLabelText(
-      "Mover ou copiar Ovo inteiro para outra refeição",
-    );
-    fireEvent.change(select, { target: { value: "move:diet-1:dm1" } });
-
-    await waitFor(async () => {
-      expect((await diets.getById("diet-1"))?.meals[0]?.items).toHaveLength(
-        1,
-      );
-    });
-    await waitFor(async () => {
-      const saved = await logs.getByDay(TODAY);
-      expect(saved?.meals[0]?.items).toHaveLength(0);
     });
   });
 });
