@@ -6,6 +6,7 @@ import { DietRepositoryProvider } from "@/features/diet/data/diet-repository-con
 import type { FoodLogRepository } from "@/features/diet/data/food-log-repository";
 import { FoodLogRepositoryProvider } from "@/features/diet/data/food-log-repository-context";
 import { SyncingFoodLogRepository } from "@/features/diet/data/syncing-food-log-repository";
+import { SyncingDietRepository } from "@/features/diet/data/syncing-diet-repository";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
@@ -122,8 +123,15 @@ export function FoodLogDataProvider({
   );
 }
 
+/**
+ * Decorado com o outbox de sync (`SyncingDietRepository`), mesmo motivo do
+ * `profileRepository`/`foodLogRepository` acima.
+ */
 const dietRepository = once<DietRepository>(async () => {
-  return (await getRepositories()).diets;
+  const local = (await getRepositories()).diets;
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  return new SyncingDietRepository(local, tracker);
 });
 
 /**

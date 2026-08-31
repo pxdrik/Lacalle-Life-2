@@ -2,8 +2,11 @@ import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
 import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
+import { DIETS_STORE } from "@/features/diet/data/diet-store";
+import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
 import { LocalFoodLogRepository } from "@/features/diet/data/local-food-log-repository";
 import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
+import type { Diet } from "@/features/diet/types/diet";
 import type { FoodLog } from "@/features/diet/types/food-log";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
@@ -11,6 +14,12 @@ import type { Profile } from "@/features/profile/types/profile";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
+import { pullAllDiets, pushAllDiets, resolveDietConflict } from "./diet-sync";
+import type {
+  DietConflictResolution,
+  PullDietsResult,
+  PushDietsResult,
+} from "./diet-sync";
 import {
   pullFoodLog,
   pushFoodLog,
@@ -128,4 +137,49 @@ export async function resolveFoodLogConflictAndSync(
   const { tracker, localOnly } = await openFoodLogSyncStores();
   await resolveFoodLogConflict(tracker, localOnly, day, conflicts, resolutions);
   return runFoodLogSync(day);
+}
+
+export interface DietSyncOutcome {
+  readonly push: PushDietsResult;
+  readonly pull: PullDietsResult;
+}
+
+async function openDietSyncStores() {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalDietRepository(new IndexedDbStore<Diet>(db, DIETS_STORE.name));
+  return { tracker, localOnly };
+}
+
+/**
+ * Sincroniza todas as dietas de uma vez — mesmo desenho de
+ * `runProfileSync`/`runFoodLogSync`: push de toda pendência, depois pull de
+ * tudo que o servidor tem. Diferente das outras duas, `push`/`pull` aqui
+ * cobrem um lote de registros, não um só — ver a doc de `pushAllDiets`/
+ * `pullAllDiets` sobre por quê. Abre o `LocalDietRepository` **puro**,
+ * nunca o `SyncingDietRepository` que a UI usa.
+ */
+export async function runDietSync(): Promise<DietSyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const { tracker, localOnly } = await openDietSyncStores();
+
+  const push = await pushAllDiets(supabase, tracker, localOnly);
+  const pull = await pullAllDiets(supabase, tracker, localOnly);
+
+  return { push, pull };
+}
+
+/**
+ * Resolve o conflito de uma dieta e roda o ciclo de novo. `dietId`/`remote`
+ * têm que vir do resultado `"done"` de `runDietSync` que a UI mostrou —
+ * mesma regra de `resolveProfileConflictAndSync`/`resolveFoodLogConflictAndSync`.
+ */
+export async function resolveDietConflictAndSync(
+  dietId: string,
+  resolution: DietConflictResolution,
+  remote: Diet | null,
+): Promise<DietSyncOutcome> {
+  const { tracker, localOnly } = await openDietSyncStores();
+  await resolveDietConflict(tracker, localOnly, dietId, resolution, remote);
+  return runDietSync();
 }

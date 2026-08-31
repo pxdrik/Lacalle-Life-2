@@ -1039,6 +1039,32 @@ trata como seguro e não tenta trocar — só pelo IP. Corrigido para essa
 diretiva só entrar em produção (`src/middleware.ts`); confirmado
 reabrindo pelo IP da rede, `npm run verify` limpo (106/1205).
 
+**Motor de sync estendido para `Diet` (31/08/2026).** Terceira entidade,
+primeira com muitos registros por usuário — `Profile` é um só, `FoodLog`
+é um por dia, `Diet` é quantas o usuário quiser, cada uma sua própria
+linha e seu próprio `SyncTracker`. `pushAllDiets`/`pullAllDiets` em
+`composition/sync/diet-sync.ts`, `SyncingDietRepository`, UI de conflito
+em `/dietas` (`diet-sync-status.tsx`) seguindo o mesmo desenho do
+`FoodLogSyncStatus`: sincroniza sozinho ao abrir a tela, um cartão por
+dieta em conflito, cada uma resolvida independente das outras.
+
+Família de conflito: "visível, documento inteiro", igual `Profile` — uma
+corrida de versão perdida no push vira `"conflict"` na hora, nunca
+`"stale"` como em `FoodLog` (que só pode se dar ao luxo de esperar porque
+tem merge por `Meal.id` capaz de distinguir depois se era um conflito de
+verdade).
+
+Campanha adversarial com dois dispositivos, condição de sempre: atacar
+antes de mexer na implementação. Achado real no cenário 11 (os dois
+dispositivos apagam a mesma dieta sem nunca ter puxado um do outro): o
+push perde a corrida de propósito, corretamente — mas `pullAllDiets`
+reapresentava isso como conflito bloqueado para sempre, mesmo com os dois
+lados já sem nada local para proteger. Corrigido: só é conflito de
+verdade quando ainda existe uma edição local em jogo
+(`currentLocal !== undefined`), nunca só por o tracker ter passado por
+`"conflict"` no meio do caminho. Rerun completo: 13/13 adversariais + 8
+orquestração, `npm run verify` limpo (133 arquivos, 1435 testes).
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

@@ -339,6 +339,21 @@ export const dietRecordSchema = z
   .strict();
 
 /**
+ * O mesmo conteúdo de `dietRecordSchema`, sem o envelope de entidade — o
+ * que `composition/sync/diet-sync.ts` troca com `save_diet`/a coluna
+ * `payload` de `diets`. `id` vem da própria linha (chave primária, fora do
+ * jsonb), e `createdAt`/`updatedAt` são decisão do motor de sync, não do
+ * conteúdo em si — mesmo desenho de `p_payload: profile.nutrition` em
+ * `pushProfile` e de `{meals, dietId}` em `pushFoodLog`. `.omit()` em vez de
+ * reescrever os três campos, para as duas validações nunca divergirem.
+ */
+export const dietPayloadSchema = dietRecordSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+/**
  * `meals` and `dietId` are optional — `LocalFoodLogRepository`'s own
  * `normalize()` defaults exactly these two (`log.meals ?? []`, `log.dietId
  * ?? null`) for a record predating one of them, so a legacy day is exactly

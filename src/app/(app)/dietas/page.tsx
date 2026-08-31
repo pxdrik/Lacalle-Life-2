@@ -6,6 +6,8 @@ import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
 
+import { DietSyncStatus } from "./diet-sync-status";
+
 export const metadata: Metadata = {
   title: "Dietas · LaCalle Life",
 };
@@ -19,7 +21,11 @@ export default function DietsPage() {
         subtitle="Suas refeições e seus totais."
       />
 
-      <div className="mt-8">
+      <div className="mt-4">
+        <DietSyncStatus />
+      </div>
+
+      <div className="mt-4">
         <DietDataProvider>
           <DietList />
         </DietDataProvider>
