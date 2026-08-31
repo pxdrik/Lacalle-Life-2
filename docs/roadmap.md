@@ -1065,6 +1065,29 @@ verdade quando ainda existe uma edição local em jogo
 `"conflict"` no meio do caminho. Rerun completo: 13/13 adversariais + 8
 orquestração, `npm run verify` limpo (133 arquivos, 1435 testes).
 
+**Site URL do Supabase apontava para localhost, achado testando login de
+verdade (31/08/2026).** Pedro tentou logar em produção e o link de e-mail
+(cadastro repetido, depois recuperação de senha) caiu em
+`localhost:3000` — `ERR_CONNECTION_REFUSED`. Causa: `Site URL` do projeto
+real (`rtvscxcfwfsamxatkwit`) estava em `http://localhost:3000` e a lista
+de `Redirect URLs` estava **vazia**. Sem nada na allow-list, o Supabase
+ignora o `redirectTo`/`emailRedirectTo` que o app manda e sempre cai no
+Site URL — não importa o ambiente de quem clicou. Corrigido no painel:
+Site URL para `https://lacalle-life-2.vercel.app`, e
+`https://lacalle-life-2.vercel.app/**` +  `http://localhost:3000/**` na
+allow-list de Redirect URLs (o segundo mantém o fluxo funcionando em dev
+local). Configuração de infraestrutura, não código — nada para commitar
+além deste registro.
+
+Achado à parte, mesma investigação: o log de Auth mostrava
+`user_repeated_signup` para `pedrofunesctt@gmail.com` — não era e-mail
+perdido, era um cadastro repetido numa conta já confirmada (a do teste
+E2E de 25/08/2026), que o Supabase silencia por design (não revela se um
+e-mail já tem conta). E confirmado também: `Rate limit for sending
+emails` do projeto real é **2/hora** (plano free, sem SMTP customizado) —
+mesma limitação já registrada no fechamento da Sprint 1, ainda sem SMTP
+próprio configurado.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026
