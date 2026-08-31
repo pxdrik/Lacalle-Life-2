@@ -8,10 +8,7 @@ import { DensityScript } from "@/design-system/density/density-script";
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
-import { AnonymousDataFoundPrompt } from "./_components/anonymous-data-found-prompt";
-import { AppNav } from "./_components/app-nav";
 import { ServiceWorker } from "./_components/service-worker";
-import { Sidebar } from "./_components/sidebar";
 
 import "./globals.css";
 
@@ -71,11 +68,6 @@ export default async function RootLayout({
 }) {
   const requestHeaders = await headers();
   const nonce = requestHeaders.get("x-nonce") ?? undefined;
-  // A Landing Page pública em `/` é a única rota sem o chrome do app —
-  // sidebar, header, tab bar. Ela tem a própria navegação, do jeito que uma
-  // página voltada para quem ainda não usa o produto deveria. Toda outra
-  // rota, inclusive `(auth)`, continua exatamente como estava.
-  const isLandingPage = requestHeaders.get("x-pathname") === "/";
 
   return (
     /* `suppressHydrationWarning` is required, not a workaround: ThemeScript
@@ -88,23 +80,13 @@ export default async function RootLayout({
         <ThemeProvider>
           <DensityProvider>
             <ToastProvider>
-              {isLandingPage ? (
-                children
-              ) : (
-                <>
-                  {/* Two navigations, one at a time. `Sidebar` owns `lg` and up;
-                      below that it is not rendered and `AppNav` carries the header
-                      and the phone's tab bar. The padding is what keeps content
-                      clear of the fixed column, and it lives here rather than on
-                      each of eleven pages. */}
-                  <Sidebar />
-                  <div className="lg:pl-(--sidebar-w)">
-                    <AppNav />
-                    {children}
-                  </div>
-                  <AnonymousDataFoundPrompt />
-                </>
-              )}
+              {/* O chrome do app — sidebar, header, tab bar — não mora mais
+                  aqui. `(app)/layout.tsx` é quem o possui agora, para toda
+                  rota dentro daquele grupo; a Landing em `/` fica fora dele e
+                  nunca o recebe. Ver o comentário lá para o porquê: decidir
+                  isto por um header de pathname quebrava em navegação
+                  client-side, porque este layout nunca é remontado nela. */}
+              {children}
               <ServiceWorker />
             </ToastProvider>
           </DensityProvider>

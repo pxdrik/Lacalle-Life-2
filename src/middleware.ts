@@ -110,12 +110,6 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", csp);
-  // Lida por `RootLayout` para decidir se a rota atual mostra o chrome do
-  // app (sidebar/header) ou a Landing Page pública sem eles. Mesmo canal que
-  // `x-nonce` já usa: um Server Component não recebe o pathname de outro
-  // jeito, e injetar aqui evita transformar `Sidebar`/`AppNav` em client
-  // components só para ler `usePathname()`.
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);

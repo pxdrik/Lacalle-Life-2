@@ -55,6 +55,11 @@
   "exclude": [
     "node_modules",
     ".next",
-    "out"
+    "out",
+    "_Anteriores",
+    "_docs",
+    "_docs-auditoria",
+    "_drafts",
+    "_dados"
   ]
 }

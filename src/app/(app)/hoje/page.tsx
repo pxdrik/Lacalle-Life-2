@@ -14,7 +14,7 @@ import { ProfileIncompleteNotice } from "@/features/profile/components/profile-i
 import { TodayWorkout } from "@/features/workouts/components/today-workout";
 import { PageShell } from "@/design-system/components/page-shell";
 
-import { markAppEntered } from "../_lib/entered-app";
+import { markAppEntered } from "../../_lib/entered-app";
 
 /**
  * How today is going.
