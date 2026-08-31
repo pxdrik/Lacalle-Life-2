@@ -107,6 +107,9 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             // hover and active opacity, where overriding `secondary` would
             // leave `hover:bg-muted` behind and wash the state out on hover.
             buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
+            // Matches the field beside it: `--control-h` varies with density,
+            // `--input-h` stays fixed at 44px on purpose (input.tsx).
+            "h-(--input-h)",
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />

@@ -90,7 +90,12 @@ export function RoutineList() {
         />
         {/* Same pairing as `/dietas`: the field sets the height, not the
             button. See the note there. */}
-        <Button type="submit" pending={creating} disabled={name.trim() === ""}>
+        <Button
+          type="submit"
+          pending={creating}
+          disabled={name.trim() === ""}
+          className="h-(--input-h)"
+        >
           <Plus aria-hidden className="size-4" />
           Criar
         </Button>
