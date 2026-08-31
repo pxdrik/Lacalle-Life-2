@@ -67,8 +67,8 @@ interface Props {
    * and the button below only renders when this and `onToggleChecked` are
    * both given.
    */
-  readonly checkState?: "unchecked" | "checked" | "edited";
-  readonly onToggleChecked?: () => void;
+  readonly checkState?: "unchecked" | "checked" | "edited" | undefined;
+  readonly onToggleChecked?: (() => void) | undefined;
   /**
    * Where "Ver no Diário" points once `checkState` is `"checked"` or
    * `"edited"` — today's `/diario?dia=...`. `undefined` hides the link,

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { dayKey } from "@/core/format/day";
+import { dayKey, formatDay } from "@/core/format/day";
 import { MemoryStore } from "@/core/storage/memory-store";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
@@ -102,6 +102,54 @@ function mount(seed: FoodLog) {
 
   return logs;
 }
+
+function logWithCheckedMeal(): FoodLog {
+  const log = logWithMeal();
+  return {
+    ...log,
+    meals: [
+      {
+        ...log.meals[0]!,
+        sourceDietId: "dieta-1",
+        sourceMealId: "refeicao-1",
+        plannedSnapshot: log.meals[0]!.items,
+      },
+    ],
+  };
+}
+
+describe("the check button in the diary", () => {
+  it("does not show on a meal built by hand, only on one from a diet", async () => {
+    mount(logWithMeal());
+    await screen.findByDisplayValue("Café da manhã");
+
+    expect(
+      screen.queryByRole("button", { name: /Marcar|Desmarcar/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows checked, and unchecking removes the meal from the diary", async () => {
+    const logs = mount(logWithCheckedMeal());
+    await screen.findByDisplayValue("Café da manhã");
+
+    const button = screen.getByRole("button", {
+      name: "Desmarcar Café da manhã como comida",
+    });
+    expect(button).toHaveAttribute("aria-pressed", "true");
+
+    await userEvent.click(button);
+
+    // The day's only meal is gone, which empties the log entirely —
+    // `useFoodLogDay` deletes a day once it has nothing in it, the same
+    // behaviour the empty-day screenshot below confirms.
+    await waitFor(async () => {
+      expect(await logs.getByDay(TODAY)).toBeUndefined();
+    });
+    expect(
+      await screen.findByText(`Nada registrado em ${formatDay(TODAY)}.`),
+    ).toBeInTheDocument();
+  });
+});
 
 describe("duplicating a meal in the diary", () => {
   it("copies the food in it, rather than adding an empty meal", async () => {

@@ -39,6 +39,7 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
+import { mealCheckState, uncheckMeal } from "../services/meal-execution";
 import { startDayFromDiet } from "../services/start-day";
 import type { Diet } from "../types/diet";
 import { MacroProgress } from "./macro-progress";
@@ -319,6 +320,34 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                             removeItem(current, meal.id, itemId),
                           );
                         }}
+                        // Só aparece numa refeição que veio de um check ou de
+                        // "Começar de X" — uma refeição montada aqui à mão
+                        // não tem `sourceDietId`/`sourceMealId`, então não
+                        // há nada para o check representar. Sempre "checked"
+                        // ou "edited", nunca "unchecked": a refeição já está
+                        // no log, é o que a torna elegível pro botão.
+                        checkState={
+                          meal.sourceDietId !== undefined &&
+                          meal.sourceMealId !== undefined
+                            ? mealCheckState(
+                                state.log,
+                                meal.sourceDietId,
+                                meal.sourceMealId,
+                              )
+                            : undefined
+                        }
+                        onToggleChecked={
+                          meal.sourceDietId !== undefined &&
+                          meal.sourceMealId !== undefined
+                            ? () => {
+                                const dietId = meal.sourceDietId!;
+                                const mealId = meal.sourceMealId!;
+                                apply((current) =>
+                                  uncheckMeal(current, dietId, mealId),
+                                );
+                              }
+                            : undefined
+                        }
                       />
                     )}
                   </SortableItem>
