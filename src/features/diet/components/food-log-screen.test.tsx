@@ -18,6 +18,9 @@ import { FOOD_LOGS_STORE } from "../data/food-log-repository";
 import { FoodLogRepositoryProvider } from "../data/food-log-repository-context";
 import { LocalDietRepository } from "../data/local-diet-repository";
 import { LocalFoodLogRepository } from "../data/local-food-log-repository";
+import { createDiet, createMealItem } from "../services/create-diet";
+import { addItem } from "../services/edit-diet";
+import { assignWeekdays, weekdayOf } from "../services/diet-schedule";
 import type { Diet } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 import { FoodLogScreen } from "./food-log-screen";
@@ -78,7 +81,7 @@ function logWithMeal(): FoodLog {
   };
 }
 
-function mount(seed: FoodLog) {
+function mount(seed: FoodLog, diet?: Diet) {
   const logs = new LocalFoodLogRepository(
     new MemoryStore<FoodLog>(FOOD_LOGS_STORE),
   );
@@ -86,7 +89,10 @@ function mount(seed: FoodLog) {
   const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
   const profile = new LocalProfileRepository(new MemoryStore(PROFILE_STORE));
 
-  const ready = logs.save(seed, null);
+  const ready = Promise.all([
+    logs.save(seed, null),
+    diet === undefined ? Promise.resolve() : diets.save(diet, null),
+  ]);
 
   render(
     <FoodLogRepositoryProvider repository={ready.then(() => logs)}>
@@ -100,7 +106,23 @@ function mount(seed: FoodLog) {
     </FoodLogRepositoryProvider>,
   );
 
-  return logs;
+  return { logs, diets };
+}
+
+/** A diet with one meal, linked to today's weekday. */
+function dietForToday(): Diet {
+  let diet = createDiet("Cutting");
+  diet = addItem(
+    diet,
+    diet.meals[0]!.id,
+    createMealItem({
+      foodId: "frango",
+      name: "Peito de frango",
+      grams: 150,
+      per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 },
+    }),
+  );
+  return assignWeekdays([diet], diet.id, [weekdayOf(new Date())])[0]!;
 }
 
 function logWithCheckedMeal(): FoodLog {
@@ -129,7 +151,7 @@ describe("the check button in the diary", () => {
   });
 
   it("shows checked, and unchecking removes the meal from the diary", async () => {
-    const logs = mount(logWithCheckedMeal());
+    const { logs } = mount(logWithCheckedMeal());
     await screen.findByDisplayValue("Café da manhã");
 
     const button = screen.getByRole("button", {
@@ -151,9 +173,66 @@ describe("the check button in the diary", () => {
   });
 });
 
+describe("planned meals waiting to be checked", () => {
+  it("does not show without a diet linked to today", async () => {
+    mount(emptyLog());
+    await screen.findByText(/Nada registrado em/);
+
+    expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+  });
+
+  it("lists the linked diet's meal, with nothing else about it shown yet", async () => {
+    mount(emptyLog(), dietForToday());
+
+    expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    ).toBeInTheDocument();
+  });
+
+  it("checking a planned meal snapshots it into the diary and drops it from the list", async () => {
+    const { logs } = mount(emptyLog(), dietForToday());
+    const check = await screen.findByRole("button", {
+      name: "Marcar Refeição 1 como comida",
+    });
+
+    await userEvent.click(check);
+
+    await waitFor(async () => {
+      const saved = await logs.getByDay(TODAY);
+      expect(saved?.meals).toHaveLength(1);
+      expect(saved?.meals[0]?.items[0]).toMatchObject({
+        name: "Peito de frango",
+        grams: 150,
+      });
+    });
+    expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+    expect(await screen.findByDisplayValue("Refeição 1")).toBeInTheDocument();
+  });
+
+  it("drops a meal from the planned list once it is already checked", async () => {
+    const diet = dietForToday();
+    const seeded: FoodLog = {
+      ...emptyLog(),
+      meals: [
+        {
+          ...diet.meals[0]!,
+          sourceDietId: diet.id,
+          sourceMealId: diet.meals[0]!.id,
+          plannedSnapshot: diet.meals[0]!.items,
+        },
+      ],
+    };
+    mount(seeded, diet);
+
+    await screen.findByDisplayValue("Refeição 1");
+    expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+  });
+});
+
 describe("duplicating a meal in the diary", () => {
   it("copies the food in it, rather than adding an empty meal", async () => {
-    const logs = mount(logWithMeal());
+    const { logs } = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(
@@ -169,7 +248,7 @@ describe("duplicating a meal in the diary", () => {
   });
 
   it("keeps the copy's name, and gives it fresh ids at every depth", async () => {
-    const logs = mount(logWithMeal());
+    const { logs } = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(

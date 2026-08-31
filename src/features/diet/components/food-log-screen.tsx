@@ -3,7 +3,7 @@
 import { cn } from "@/design-system/cn";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -39,9 +39,10 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
-import { mealCheckState, uncheckMeal } from "../services/meal-execution";
+import { checkMeal, mealCheckState, uncheckMeal } from "../services/meal-execution";
 import { startDayFromDiet } from "../services/start-day";
-import type { Diet } from "../types/diet";
+import type { Diet, Meal } from "../types/diet";
+import type { FoodLog } from "../types/food-log";
 import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 import { MealCard } from "./meal-card";
@@ -205,6 +206,21 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                 </Button>
               )}
             </div>
+          )}
+
+          {/* O check mora aqui, não na tela da Dieta — é o Diário que se
+              usa todo dia, e ir até Dietas só para marcar "comi isto" era
+              o passo extra que sobrava. Mostra só o que falta: uma vez
+              marcada, a refeição sai daqui e aparece na lista abaixo, como
+              qualquer outra do dia. */}
+          {linkedDiet !== undefined && (
+            <PlannedMeals
+              diet={linkedDiet}
+              log={state.log}
+              onCheck={(meal) => {
+                apply((current) => checkMeal(current, linkedDiet, meal));
+              }}
+            />
           )}
 
           {state.log.meals.length === 0 ? (
@@ -486,5 +502,60 @@ function EmptyDay({
         </ul>
       )}
     </Card>
+  );
+}
+
+/**
+ * O que a dieta vinculada a este dia ainda espera — cada uma some daqui
+ * assim que marcada, e passa a aparecer como qualquer outra refeição do
+ * dia, com o `MealCard` completo (editar grama, trocar alimento, tudo).
+ *
+ * Uma lista compacta de propósito: não há nada para editar numa refeição
+ * ainda não comida, só o nome e a decisão de marcar ou não — o `MealCard`
+ * inteiro seria peso sem função aqui.
+ */
+function PlannedMeals({
+  diet,
+  log,
+  onCheck,
+}: {
+  readonly diet: Diet;
+  readonly log: FoodLog;
+  readonly onCheck: (meal: Meal) => void;
+}) {
+  const pending = diet.meals.filter(
+    (meal) => mealCheckState(log, diet.id, meal.id) === "unchecked",
+  );
+
+  if (pending.length === 0) return null;
+
+  return (
+    <div className="mt-4">
+      <h2 className="text-xs font-medium tracking-wide text-ink-subtle uppercase">
+        Planejado para {formatDay(log.day)}
+      </h2>
+      <ul className="mt-2 space-y-1.5">
+        {pending.map((meal) => (
+          <li
+            key={meal.id}
+            className="flex items-center justify-between gap-3 rounded-md border border-line px-3 py-2"
+          >
+            <span className="min-w-0 truncate text-sm text-ink">
+              {meal.name}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                onCheck(meal);
+              }}
+              aria-label={`Marcar ${meal.name} como comida`}
+              className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border border-line-strong text-ink-subtle transition-colors duration-150 ease-out hover:border-accent hover:text-ink"
+            >
+              <Check aria-hidden className="size-4" />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

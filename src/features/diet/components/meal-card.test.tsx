@@ -25,7 +25,6 @@ function mount(
   extra: {
     readonly checkState?: "unchecked" | "checked" | "edited";
     readonly onToggleChecked?: () => void;
-    readonly diaryHref?: string;
   } = {},
 ) {
   render(
@@ -53,7 +52,7 @@ function mount(
 const EXPLANATION = /Gramas é o peso do alimento/;
 
 describe("the check button", () => {
-  it("does not render on the diet's own screen without onToggleChecked", () => {
+  it("does not render without onToggleChecked", () => {
     mount(meal([]));
 
     expect(
@@ -92,28 +91,6 @@ describe("the check button", () => {
     expect(button).toHaveAttribute("title", "Comido, mas diferente do planejado");
   });
 
-  it("hides the link to the Diário while unchecked, even with an href given", () => {
-    mount(meal([]), {
-      checkState: "unchecked",
-      onToggleChecked: vi.fn(),
-      diaryHref: "/diario?dia=2026-08-31",
-    });
-
-    expect(screen.queryByText("Ver no Diário")).not.toBeInTheDocument();
-  });
-
-  it("links to the Diário once something is checked", () => {
-    mount(meal([]), {
-      checkState: "checked",
-      onToggleChecked: vi.fn(),
-      diaryHref: "/diario?dia=2026-08-31",
-    });
-
-    expect(screen.getByRole("link", { name: "Ver no Diário" })).toHaveAttribute(
-      "href",
-      "/diario?dia=2026-08-31",
-    );
-  });
 });
 
 describe("the grams-vs-unit explanation", () => {

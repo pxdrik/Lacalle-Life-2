@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { dayKey } from "@/core/format/day";
 import { MemoryStore } from "@/core/storage/memory-store";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
@@ -11,13 +10,9 @@ import type { Food } from "@/features/foods";
 
 import { DietRepositoryProvider } from "../data/diet-repository-context";
 import { DIETS_STORE } from "../data/diet-store";
-import { FOOD_LOGS_STORE } from "../data/food-log-repository";
-import { FoodLogRepositoryProvider } from "../data/food-log-repository-context";
 import { LocalDietRepository } from "../data/local-diet-repository";
-import { LocalFoodLogRepository } from "../data/local-food-log-repository";
 import { createDiet } from "../services/create-diet";
 import type { Diet } from "../types/diet";
-import type { FoodLog } from "../types/food-log";
 import { DietEditor } from "./diet-editor";
 
 /**
@@ -42,15 +37,11 @@ const CHICKEN: Food = {
 interface Harness {
   readonly diets: LocalDietRepository;
   readonly foods: LocalFoodRepository;
-  readonly foodLogs: LocalFoodLogRepository;
 }
 
 function mount(dietId: string, seed?: Diet): Harness {
   const diets = new LocalDietRepository(new MemoryStore<Diet>(DIETS_STORE));
   const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
-  const foodLogs = new LocalFoodLogRepository(
-    new MemoryStore<FoodLog>(FOOD_LOGS_STORE),
-  );
 
   const ready = Promise.all([
     seed === undefined ? Promise.resolve() : diets.save(seed, null),
@@ -60,14 +51,12 @@ function mount(dietId: string, seed?: Diet): Harness {
   render(
     <DietRepositoryProvider repository={ready.then(() => diets)}>
       <FoodRepositoryProvider repository={ready.then(() => foods)}>
-        <FoodLogRepositoryProvider repository={Promise.resolve(foodLogs)}>
-          <DietEditor dietId={dietId} />
-        </FoodLogRepositoryProvider>
+        <DietEditor dietId={dietId} />
       </FoodRepositoryProvider>
     </DietRepositoryProvider>,
   );
 
-  return { diets, foods, foodLogs };
+  return { diets, foods };
 }
 
 /** Opens the picker and adds the one food the harness knows about. */
@@ -169,56 +158,6 @@ describe("DietEditor", () => {
     await waitFor(async () => {
       expect((await diets.getById(diet.id))?.meals).toHaveLength(0);
     });
-  });
-
-  it('checking a meal ("Comi esta refeição") snapshots it into today\'s food log', async () => {
-    const diet = createDiet("Cutting");
-    const { foodLogs } = mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-    await addChicken();
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
-    );
-
-    await waitFor(async () => {
-      const log = await foodLogs.getByDay(dayKey(new Date()));
-      expect(log?.meals).toHaveLength(1);
-    });
-    const log = await foodLogs.getByDay(dayKey(new Date()));
-    expect(log?.meals[0]).toMatchObject({
-      name: "Refeição 1",
-      sourceDietId: diet.id,
-      sourceMealId: diet.meals[0]!.id,
-    });
-    // A snapshot, not a reference: none of the ids match the diet's own.
-    expect(log?.meals[0]?.id).not.toBe(diet.meals[0]!.id);
-    expect(log?.meals[0]?.items[0]?.id).not.toBe(diet.meals[0]!.items[0]?.id);
-
-    expect(
-      screen.getByRole("button", { name: "Desmarcar Refeição 1 como comida" }),
-    ).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("does not duplicate the log entry on a second click, and unchecking removes it", async () => {
-    const diet = createDiet("Cutting");
-    const { foodLogs } = mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-
-    const check = () =>
-      screen.getByRole("button", { name: /^(Marcar|Desmarcar) Refeição 1/ });
-
-    await userEvent.click(check());
-    await waitFor(async () => {
-      expect((await foodLogs.getByDay(dayKey(new Date())))?.meals).toHaveLength(1);
-    });
-
-    await userEvent.click(check());
-    await waitFor(async () => {
-      // `useFoodLogDay` removes a day once its meals go back to empty.
-      expect(await foodLogs.getByDay(dayKey(new Date()))).toBeUndefined();
-    });
-    expect(check()).toHaveAttribute("aria-pressed", "false");
   });
 
   it("keeps 'no fixed time' distinct from midnight", async () => {

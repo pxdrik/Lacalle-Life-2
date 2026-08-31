@@ -10,7 +10,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -61,22 +60,14 @@ interface Props {
   ) => void;
   /**
    * Whether this meal was already checked as eaten today, and whether what
-   * was checked still matches the plan. `undefined` — not `"unchecked"` —
-   * when the card is not on the diet screen at all: a meal inside a day's
-   * own log (`/diario`) has nothing to check, it already *is* the record,
-   * and the button below only renders when this and `onToggleChecked` are
-   * both given.
+   * was checked still matches the plan. `undefined` when the card has
+   * nothing to do with checking at all — the button below only renders
+   * when this and `onToggleChecked` are both given, which today only
+   * happens for a meal in the Diário that carries `sourceDietId`/
+   * `sourceMealId` (see `food-log-screen.tsx`).
    */
   readonly checkState?: "unchecked" | "checked" | "edited" | undefined;
   readonly onToggleChecked?: (() => void) | undefined;
-  /**
-   * Where "Ver no Diário" points once `checkState` is `"checked"` or
-   * `"edited"` — today's `/diario?dia=...`. `undefined` hides the link,
-   * same as the two props above; it exists to shortcut straight to
-   * adjusting a portion or swapping a food without hunting for the meal in
-   * the Diário by hand.
-   */
-  readonly diaryHref?: string;
 }
 
 export function MealCard({
@@ -97,7 +88,6 @@ export function MealCard({
   onSendItem,
   checkState,
   onToggleChecked,
-  diaryHref,
 }: Props) {
   const [picking, setPicking] = useState(false);
   const macros = mealMacros(meal);
@@ -137,10 +127,10 @@ export function MealCard({
               className="min-w-0 flex-1 text-base font-medium"
             />
 
-            {/* Só existe na tela da dieta — ver o comentário de `checkState`
-                na prop. O mesmo padrão de `performed-set-row.tsx` ("Concluir
-                série"), num tamanho menor: aqui é um toque por refeição, não
-                dezenas por treino. */}
+            {/* Só existe no Diário, numa refeição com proveniência — ver o
+                comentário de `checkState` na prop. O mesmo padrão de
+                `performed-set-row.tsx` ("Concluir série"), num tamanho
+                menor: aqui é um toque por refeição, não dezenas por treino. */}
             {onToggleChecked !== undefined && (
               <button
                 type="button"
@@ -191,15 +181,6 @@ export function MealCard({
               }}
               className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
             />
-
-            {diaryHref !== undefined && checkState !== undefined && checkState !== "unchecked" && (
-              <Link
-                href={diaryHref}
-                className="text-xs text-ink-subtle underline-offset-4 transition-colors duration-150 ease-out hover:text-ink hover:underline"
-              >
-                Ver no Diário
-              </Link>
-            )}
           </div>
         </div>
 
