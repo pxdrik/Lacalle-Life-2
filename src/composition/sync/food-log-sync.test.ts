@@ -29,6 +29,11 @@ function meal(id: string, overrides: Partial<Meal> = {}): Meal {
     time: overrides.time ?? null,
     notes: overrides.notes ?? "",
     items: overrides.items ?? [],
+    ...(overrides.sourceDietId !== undefined && { sourceDietId: overrides.sourceDietId }),
+    ...(overrides.sourceMealId !== undefined && { sourceMealId: overrides.sourceMealId }),
+    ...(overrides.plannedSnapshot !== undefined && {
+      plannedSnapshot: overrides.plannedSnapshot,
+    }),
   };
 }
 
@@ -289,5 +294,42 @@ describe("push/pullFoodLog — orquestração", () => {
     }
     const finalLog = await a.local.getByDay(DAY);
     expect(finalLog?.meals).toHaveLength(1);
+  });
+
+  it("5. uma refeição marcada (\"Comi esta refeição\") sobrevive ao push e ao pull de volta", async () => {
+    // Regressão: `mealSchema` era `.strict()` sem `sourceDietId`/
+    // `sourceMealId`/`plannedSnapshot`, então qualquer dia com uma refeição
+    // marcada virava "invalid-payload" no primeiro pull depois de
+    // sincronizado — em qualquer dispositivo, inclusive o que a marcou.
+    const a = device(server);
+    const item = {
+      id: "i1",
+      foodId: "ovo",
+      name: "Ovo",
+      grams: 100,
+      unit: "g" as const,
+      per100g: { kcal: 143, proteinG: 13, carbsG: 1, fatG: 10 },
+    };
+    await setMeals(a, [
+      meal("meal-checked", {
+        items: [item],
+        sourceDietId: "dieta-1",
+        sourceMealId: "refeicao-1",
+        plannedSnapshot: [item],
+      }),
+    ]);
+
+    expect(await pushFoodLog(a.client, a.tracker, a.local, DAY)).toEqual({
+      status: "pushed",
+    });
+
+    const pull = await pullFoodLog(a.client, a.tracker, a.local, DAY);
+    expect(pull).toEqual({ status: "applied" });
+
+    const log = await a.local.getByDay(DAY);
+    expect(log?.meals[0]).toMatchObject({
+      sourceDietId: "dieta-1",
+      sourceMealId: "refeicao-1",
+    });
   });
 });

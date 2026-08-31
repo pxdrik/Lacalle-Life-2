@@ -59,8 +59,8 @@ export interface Meal {
    * fields travel together and are only ever read together — see
    * `services/meal-execution.ts`.
    */
-  readonly sourceDietId?: EntityId;
-  readonly sourceMealId?: EntityId;
+  readonly sourceDietId?: EntityId | undefined;
+  readonly sourceMealId?: EntityId | undefined;
   /**
    * `items`, frozen the moment this meal was checked or the day was
    * started. Only ever set alongside `sourceDietId`/`sourceMealId`, and
@@ -71,7 +71,7 @@ export interface Meal {
    * two are the same question — does `items` still equal this? — asked at
    * read time. See `mealCheckState` in `services/meal-execution.ts`.
    */
-  readonly plannedSnapshot?: readonly MealItem[];
+  readonly plannedSnapshot?: readonly MealItem[] | undefined;
 }
 
 /**

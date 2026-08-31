@@ -302,6 +302,16 @@ const mealItemSchema = z
  * Exportado para o motor de sync reaproveitar (`composition/sync/food-log-sync.ts`)
  * — o formato de fio de uma refeição estende exatamente isto com
  * `deletedAt`, em vez de duplicar as regras de `MealItem`/`Meal`.
+ *
+ * `sourceDietId`/`sourceMealId`/`plannedSnapshot` ficaram de fora na
+ * primeira versão — `.strict()` sem eles rejeitava toda refeição marcada
+ * ("Comi esta refeição") assim que ela ia e voltava do servidor: o dia
+ * inteiro virava `"invalid-payload"` no próximo pull, em qualquer
+ * dispositivo, inclusive o que acabou de enviar. Achado revisando o schema
+ * antes de estender o sync para `Diet` — nenhuma refeição de uma `Diet` tem
+ * esses três campos (só existem numa refeição dentro de um `FoodLog`), então
+ * `dietRecordSchema` abaixo, que reaproveita este mesmo `mealSchema`,
+ * continua correto sem nenhuma mudança própria.
  */
 export const mealSchema = z
   .object({
@@ -313,6 +323,9 @@ export const mealSchema = z
       .nullable(),
     notes: z.string().max(NOTES_MAX),
     items: z.array(mealItemSchema).max(500),
+    sourceDietId: z.string().min(1).max(200).optional(),
+    sourceMealId: z.string().min(1).max(200).optional(),
+    plannedSnapshot: z.array(mealItemSchema).max(500).optional(),
   })
   .strict();
 
