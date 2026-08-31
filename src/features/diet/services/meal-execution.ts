@@ -16,8 +16,9 @@ import type { FoodLog } from "../types/food-log";
  *
  * Identity is `sourceDietId` + `sourceMealId`, both stamped on the copy and
  * never on a `Diet`'s own meals. That pair is what makes "checked" a
- * question the diet screen can ask of a day's log — `isMealChecked` — and
- * what stops a second click from adding a second copy.
+ * question the diet screen can ask of a day's log — `isMealChecked` and,
+ * once "editado depois de marcado" needed its own state, `mealCheckState`
+ * — and what stops a second click from adding a second copy.
  */
 
 /** Whether `day`'s log already holds a snapshot of this exact meal. */
@@ -41,17 +42,47 @@ export function isMealChecked(
 export function checkMeal(log: FoodLog, diet: Diet, meal: Meal): FoodLog {
   if (isMealChecked(log, diet.id, meal.id)) return log;
 
+  const items = meal.items.map((item) => ({ ...item, id: createEntityId() }));
+
   const snapshot: Meal = {
     id: createEntityId(),
     name: meal.name,
     time: meal.time,
     notes: meal.notes,
-    items: meal.items.map((item) => ({ ...item, id: createEntityId() })),
+    items,
     sourceDietId: diet.id,
     sourceMealId: meal.id,
+    // The same array as `items`, not a second copy of it — see
+    // `mealCheckState` below, which is what this pays for.
+    plannedSnapshot: items,
   };
 
   return revise(log, { meals: [...log.meals, snapshot] });
+}
+
+export type MealCheckState = "unchecked" | "checked" | "edited";
+
+/**
+ * `"unchecked"`, `"checked"`, or `"edited"` — the third state nobody sets on
+ * purpose. Every `edit-diet.ts` operation replaces `items` with a new array
+ * rather than mutating one in place, so a meal whose `items` still *is*
+ * (`===`) the array `checkMeal` stamped as `plannedSnapshot` has not been
+ * touched since; any edit in the Diário — a portion changed, a food swapped
+ * — necessarily produces a different array, and reference equality is
+ * exactly the question "does this still match what was checked".
+ */
+export function mealCheckState(
+  log: FoodLog,
+  dietId: EntityId,
+  mealId: EntityId,
+): MealCheckState {
+  const meal = log.meals.find(
+    (candidate) =>
+      candidate.sourceDietId === dietId && candidate.sourceMealId === mealId,
+  );
+  if (meal === undefined) return "unchecked";
+
+  return meal.items === meal.plannedSnapshot ? "checked" : "edited";
 }
 
 /** Removes the snapshot of this meal, if one is checked. A no-op otherwise. */

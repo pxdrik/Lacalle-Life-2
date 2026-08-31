@@ -61,6 +61,17 @@ export interface Meal {
    */
   readonly sourceDietId?: EntityId;
   readonly sourceMealId?: EntityId;
+  /**
+   * `items`, frozen the moment this meal was checked or the day was
+   * started. Only ever set alongside `sourceDietId`/`sourceMealId`, and
+   * never touched again by anything after that.
+   *
+   * It is what lets the diet screen tell "comido como planejado" apart from
+   * "comido, mas depois editado" without a second flag to keep in sync: the
+   * two are the same question — does `items` still equal this? — asked at
+   * read time. See `mealCheckState` in `services/meal-execution.ts`.
+   */
+  readonly plannedSnapshot?: readonly MealItem[];
 }
 
 /**

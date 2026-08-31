@@ -38,22 +38,27 @@ export function createFoodLog(day: string): FoodLog {
  * the whole day this way is "I ate everything as planned", so every meal in
  * it should already read as checked on the diet screen; without the stamp,
  * checking one of them there would add a second, redundant copy here.
+ * `plannedSnapshot` rides along for the same reason `checkMeal` sets it: a
+ * meal edited afterwards should read as "comido, mas diferente", not as
+ * still exactly the plan.
  */
 export function startDayFromDiet(diet: Diet, day: string): FoodLog {
   const now = entityTimestamp();
 
-  const meals: Meal[] = diet.meals.map((meal) => ({
-    id: createEntityId(),
-    name: meal.name,
-    time: meal.time,
-    notes: meal.notes,
-    items: meal.items.map((item) => ({
-      ...item,
+  const meals: Meal[] = diet.meals.map((meal) => {
+    const items = meal.items.map((item) => ({ ...item, id: createEntityId() }));
+
+    return {
       id: createEntityId(),
-    })),
-    sourceDietId: diet.id,
-    sourceMealId: meal.id,
-  }));
+      name: meal.name,
+      time: meal.time,
+      notes: meal.notes,
+      items,
+      sourceDietId: diet.id,
+      sourceMealId: meal.id,
+      plannedSnapshot: items,
+    };
+  });
 
   return {
     id: day,

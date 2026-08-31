@@ -37,7 +37,7 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
-import { isMealChecked, toggleMealChecked } from "../services/meal-execution";
+import { mealCheckState, toggleMealChecked } from "../services/meal-execution";
 import { MealCard } from "./meal-card";
 import { InlineText } from "./inline-text";
 import { MacroProgress } from "./macro-progress";
@@ -200,15 +200,16 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                   onRemoveItem={(itemId) => {
                     apply((current) => removeItem(current, meal.id, itemId));
                   }}
-                  checked={
+                  checkState={
                     todayLog.state.status === "ready"
-                      ? isMealChecked(todayLog.state.log, diet.id, meal.id)
-                      : false
+                      ? mealCheckState(todayLog.state.log, diet.id, meal.id)
+                      : "unchecked"
                   }
                   onToggleChecked={() => {
                     if (todayLog.state.status !== "ready") return;
                     todayLog.apply((log) => toggleMealChecked(log, diet, meal));
                   }}
+                  diaryHref={`/diario?dia=${today}`}
                 />
               )}
             </SortableItem>

@@ -274,6 +274,25 @@ export function DietDataProvider({
 }
 
 /**
+ * Adherence reads every diet and every food log in the window — nothing
+ * else. Narrower than `FoodLogDataProvider` on purpose: this section adds
+ * no food and compares against no profile target, it only counts.
+ */
+export function DietAdherenceDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <DietRepositoryProvider repository={dietRepository()}>
+      <FoodLogRepositoryProvider repository={foodLogRepository()}>
+        {children}
+      </FoodLogRepositoryProvider>
+    </DietRepositoryProvider>
+  );
+}
+
+/**
  * The home screen reads across the app and writes nothing.
  *
  * Deliberately narrower than the screens it summarises: it needs today's food

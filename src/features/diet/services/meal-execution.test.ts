@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { createDiet, createMealItem } from "./create-diet";
-import { addItem } from "./edit-diet";
-import { checkMeal, isMealChecked, toggleMealChecked, uncheckMeal } from "./meal-execution";
+import { addItem, removeItem, setItemGrams } from "./edit-diet";
+import {
+  checkMeal,
+  isMealChecked,
+  mealCheckState,
+  toggleMealChecked,
+  uncheckMeal,
+} from "./meal-execution";
 import { createFoodLog, startDayFromDiet } from "./start-day";
 import type { Diet } from "../types/diet";
 
@@ -108,6 +114,74 @@ describe("isMealChecked", () => {
     const log = startDayFromDiet(diet, "2026-08-31");
 
     expect(isMealChecked(log, diet.id, diet.meals[0]!.id)).toBe(true);
+  });
+});
+
+describe("mealCheckState", () => {
+  it("is 'unchecked' for a day with nothing logged", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+
+    expect(mealCheckState(createFoodLog("2026-08-31"), diet.id, meal.id)).toBe(
+      "unchecked",
+    );
+  });
+
+  it("is 'checked' right after checking, untouched since", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    expect(mealCheckState(log, diet.id, meal.id)).toBe("checked");
+  });
+
+  it("becomes 'edited' once a portion is changed in the Diário afterwards", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+    const loggedMeal = log.meals[0]!;
+    const loggedItem = loggedMeal.items[0]!;
+
+    const edited = setItemGrams(log, loggedMeal.id, loggedItem.id, 300);
+
+    expect(mealCheckState(edited, diet.id, meal.id)).toBe("edited");
+  });
+
+  it("becomes 'edited' when a food is removed, not only when grams change", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+    const loggedMeal = log.meals[0]!;
+
+    const edited = removeItem(log, loggedMeal.id, loggedMeal.items[0]!.id);
+
+    expect(mealCheckState(edited, diet.id, meal.id)).toBe("edited");
+  });
+
+  it("stays 'checked' when an unrelated meal is edited", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    let log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+    // A meal built by hand, alongside the checked one — its own edits must
+    // not be mistaken for the checked meal's.
+    log = {
+      ...log,
+      meals: [
+        ...log.meals,
+        { id: "m2", name: "Lanche", time: null, notes: "", items: [] },
+      ],
+    };
+
+    const edited = removeItem(log, "m2", "algum-item");
+
+    expect(mealCheckState(edited, diet.id, meal.id)).toBe("checked");
+  });
+
+  it("reports 'checked', not 'edited', right after starting the whole day", () => {
+    const diet = dietWithBreakfast();
+    const log = startDayFromDiet(diet, "2026-08-31");
+
+    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("checked");
   });
 });
 

@@ -6,9 +6,11 @@ import {
   ChevronUp,
   Copy,
   GripVertical,
+  Pencil,
   Plus,
   Trash2,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -58,14 +60,23 @@ interface Props {
     mode: "copy" | "move",
   ) => void;
   /**
-   * Whether this meal was already checked as eaten today. `undefined` — not
-   * `false` — when the card is not on the diet screen at all: a meal inside
-   * a day's own log (`/diario`) has nothing to check, it already *is* the
-   * record, and the button below only renders when this and `onToggleChecked`
-   * are both given.
+   * Whether this meal was already checked as eaten today, and whether what
+   * was checked still matches the plan. `undefined` — not `"unchecked"` —
+   * when the card is not on the diet screen at all: a meal inside a day's
+   * own log (`/diario`) has nothing to check, it already *is* the record,
+   * and the button below only renders when this and `onToggleChecked` are
+   * both given.
    */
-  readonly checked?: boolean;
+  readonly checkState?: "unchecked" | "checked" | "edited";
   readonly onToggleChecked?: () => void;
+  /**
+   * Where "Ver no Diário" points once `checkState` is `"checked"` or
+   * `"edited"` — today's `/diario?dia=...`. `undefined` hides the link,
+   * same as the two props above; it exists to shortcut straight to
+   * adjusting a portion or swapping a food without hunting for the meal in
+   * the Diário by hand.
+   */
+  readonly diaryHref?: string;
 }
 
 export function MealCard({
@@ -84,8 +95,9 @@ export function MealCard({
   onReorderItems,
   otherMeals,
   onSendItem,
-  checked,
+  checkState,
   onToggleChecked,
+  diaryHref,
 }: Props) {
   const [picking, setPicking] = useState(false);
   const macros = mealMacros(meal);
@@ -125,29 +137,45 @@ export function MealCard({
               className="min-w-0 flex-1 text-base font-medium"
             />
 
-            {/* Só existe na tela da dieta — ver o comentário de `checked` na
-                prop. O mesmo padrão de `performed-set-row.tsx` ("Concluir
+            {/* Só existe na tela da dieta — ver o comentário de `checkState`
+                na prop. O mesmo padrão de `performed-set-row.tsx` ("Concluir
                 série"), num tamanho menor: aqui é um toque por refeição, não
                 dezenas por treino. */}
             {onToggleChecked !== undefined && (
               <button
                 type="button"
                 onClick={onToggleChecked}
-                aria-pressed={checked ?? false}
+                aria-pressed={checkState !== "unchecked"}
                 aria-label={
-                  (checked ?? false)
-                    ? `Desmarcar ${meal.name} como comida`
-                    : `Marcar ${meal.name} como comida`
+                  checkState === "unchecked"
+                    ? `Marcar ${meal.name} como comida`
+                    : `Desmarcar ${meal.name} como comida`
+                }
+                title={
+                  checkState === "edited"
+                    ? "Comido, mas diferente do planejado"
+                    : undefined
                 }
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border",
                   "transition-[background-color,border-color,color] duration-150 ease-out",
-                  (checked ?? false)
-                    ? "border-accent bg-accent text-accent-ink"
-                    : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
+                  checkState === "unchecked" &&
+                    "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
+                  checkState === "checked" &&
+                    "border-accent bg-accent text-accent-ink",
+                  // Preenchido de leve, não sólido: a mesma refeição, comida
+                  // diferente do planejado — o check ainda está lá porque
+                  // *alguma coisa* foi registrada, mas sólido apagaria a
+                  // diferença que o próprio ícone existe pra mostrar.
+                  checkState === "edited" &&
+                    "border-accent bg-accent-surface text-accent-text",
                 )}
               >
-                <Check aria-hidden className="size-4" />
+                {checkState === "edited" ? (
+                  <Pencil aria-hidden className="size-3.5" />
+                ) : (
+                  <Check aria-hidden className="size-4" />
+                )}
               </button>
             )}
           </div>
@@ -163,6 +191,15 @@ export function MealCard({
               }}
               className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
             />
+
+            {diaryHref !== undefined && checkState !== undefined && checkState !== "unchecked" && (
+              <Link
+                href={diaryHref}
+                className="text-xs text-ink-subtle underline-offset-4 transition-colors duration-150 ease-out hover:text-ink hover:underline"
+              >
+                Ver no Diário
+              </Link>
+            )}
           </div>
         </div>
 

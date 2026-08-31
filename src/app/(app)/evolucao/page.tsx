@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 
 import {
   BodyDataProvider,
+  DietAdherenceDataProvider,
   WorkoutDataProvider,
 } from "@/composition/data-providers";
 import { BodyScreen } from "@/features/body/components/body-screen";
+import { DietAdherenceSection } from "@/features/diet/components/diet-adherence-section";
 import { EvolutionScreen } from "@/features/workouts/components/evolution-screen";
 import { ErrorBoundary } from "@/design-system/components/error-boundary";
 import { ICONS } from "@/design-system/icons";
@@ -17,15 +19,16 @@ export const metadata: Metadata = {
 };
 
 /**
- * The two halves of "acompanhar evolução", composed at the route.
+ * The three parts of "acompanhar evolução", composed at the route.
  *
  * The body comes first because it is the question people open this page to
  * ask, and because it is the only feedback the diet ever gets: targets are
  * calculated from a weight, and without this section nobody ever finds out
  * whether the weight moved.
  *
- * Composed here rather than by one feature importing the other — neither
- * knows the other exists, which is what keeps them independently removable.
+ * Composed here rather than one feature importing another — none of the
+ * three knows the others exist, which is what keeps them independently
+ * removable.
  */
 export default function EvolutionPage() {
   return (
@@ -33,7 +36,7 @@ export default function EvolutionPage() {
       <PageHeader
         icon={ICONS.progress}
         title="Evolução"
-        subtitle="Seu corpo e seus treinos, ao longo do tempo."
+        subtitle="Seu corpo, seus treinos e sua dieta, ao longo do tempo."
       />
 
       <div className="mt-8">
@@ -59,6 +62,20 @@ export default function EvolutionPage() {
         <WorkoutDataProvider>
           <EvolutionScreen />
         </WorkoutDataProvider>
+      </Section>
+
+      <Section
+        title="Dieta"
+        subtitle="Quanto do plano você realmente segue."
+        divider
+      >
+        {/* Mesmo isolamento do bloco de Peso acima: um bug aqui não deveria
+            levar a página inteira, incluindo Treinos, junto. */}
+        <ErrorBoundary message="Não foi possível exibir sua aderência à dieta. O restante da página continua funcionando.">
+          <DietAdherenceDataProvider>
+            <DietAdherenceSection />
+          </DietAdherenceDataProvider>
+        </ErrorBoundary>
       </Section>
     </PageShell>
   );

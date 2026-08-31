@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createDiet, createMealItem } from "./create-diet";
 import { addItem, setItemGrams } from "./edit-diet";
+import { mealCheckState } from "./meal-execution";
 import { startDayFromDiet, createFoodLog } from "./start-day";
 import { isEmptyLog } from "../types/food-log";
 import type { Diet } from "../types/diet";
@@ -88,6 +89,13 @@ describe("startDayFromDiet", () => {
       sourceDietId: diet.id,
       sourceMealId: diet.meals[0]!.id,
     });
+  });
+
+  it("reports 'checked', not 'edited', for a day just started — plannedSnapshot matches items", () => {
+    const diet = dietWithLunch();
+    const log = startDayFromDiet(diet, "2026-08-07");
+
+    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("checked");
   });
 
   it("records which diet the day came from", () => {

@@ -22,7 +22,11 @@ function meal(items: readonly MealItem[]): Meal {
 
 function mount(
   theMeal: Meal,
-  extra: { readonly checked?: boolean; readonly onToggleChecked?: () => void } = {},
+  extra: {
+    readonly checkState?: "unchecked" | "checked" | "edited";
+    readonly onToggleChecked?: () => void;
+    readonly diaryHref?: string;
+  } = {},
 ) {
   render(
     <MealCard
@@ -59,7 +63,7 @@ describe("the check button", () => {
 
   it("renders unchecked and calls back on click", async () => {
     const onToggleChecked = vi.fn();
-    mount(meal([]), { checked: false, onToggleChecked });
+    mount(meal([]), { checkState: "unchecked", onToggleChecked });
 
     const button = screen.getByRole("button", {
       name: "Marcar Refeição 1 como comida",
@@ -71,11 +75,44 @@ describe("the check button", () => {
   });
 
   it("reads as checked when told to", () => {
-    mount(meal([]), { checked: true, onToggleChecked: vi.fn() });
+    mount(meal([]), { checkState: "checked", onToggleChecked: vi.fn() });
 
     expect(
       screen.getByRole("button", { name: "Desmarcar Refeição 1 como comida" }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("reads as edited, with a different icon, once the log diverges from the plan", () => {
+    mount(meal([]), { checkState: "edited", onToggleChecked: vi.fn() });
+
+    const button = screen.getByRole("button", {
+      name: "Desmarcar Refeição 1 como comida",
+    });
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(button).toHaveAttribute("title", "Comido, mas diferente do planejado");
+  });
+
+  it("hides the link to the Diário while unchecked, even with an href given", () => {
+    mount(meal([]), {
+      checkState: "unchecked",
+      onToggleChecked: vi.fn(),
+      diaryHref: "/diario?dia=2026-08-31",
+    });
+
+    expect(screen.queryByText("Ver no Diário")).not.toBeInTheDocument();
+  });
+
+  it("links to the Diário once something is checked", () => {
+    mount(meal([]), {
+      checkState: "checked",
+      onToggleChecked: vi.fn(),
+      diaryHref: "/diario?dia=2026-08-31",
+    });
+
+    expect(screen.getByRole("link", { name: "Ver no Diário" })).toHaveAttribute(
+      "href",
+      "/diario?dia=2026-08-31",
+    );
   });
 });
 
