@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PageTransition } from "@/design-system/components/page-transition";
+
 import { AccountSection } from "./_components/landing/account-section";
 import { Features } from "./_components/landing/features";
 import { FinalCta } from "./_components/landing/final-cta";
@@ -28,20 +30,29 @@ export const metadata: Metadata = {
  * cliente, e só para tirar quem já entrou (localStorage) ou está autenticado
  * (sessão Supabase) daqui para `/hoje`, sem bloquear o primeiro parágrafo
  * de quem está vendo o produto pela primeira vez.
+ *
+ * `PageTransition` aplicado direto aqui, não por um `template.tsx` — esta
+ * página não tem uma pasta própria para hospedar um, sendo `page.tsx` na
+ * raiz. Sem risco do problema que isso resolveu em `(app)`: nada aqui é
+ * `position: fixed` (o cabeçalho é `sticky`), então o novo *containing
+ * block* que o `translate` da animação cria não tem nada de errado para
+ * capturar.
  */
 export default function LandingPage() {
   return (
     <>
       <LandingRedirect />
-      <LandingHeader />
-      <main>
-        <Hero />
-        <Pillars />
-        <Features />
-        <AccountSection />
-        <FinalCta />
-      </main>
-      <LandingFooter />
+      <PageTransition>
+        <LandingHeader />
+        <main>
+          <Hero />
+          <Pillars />
+          <Features />
+          <AccountSection />
+          <FinalCta />
+        </main>
+        <LandingFooter />
+      </PageTransition>
     </>
   );
 }
