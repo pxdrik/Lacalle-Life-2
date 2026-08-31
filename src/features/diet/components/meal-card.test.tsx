@@ -20,7 +20,10 @@ function meal(items: readonly MealItem[]): Meal {
   return { id: "m1", name: "Refeição 1", time: null, notes: "", items };
 }
 
-function mount(theMeal: Meal) {
+function mount(
+  theMeal: Meal,
+  extra: { readonly checked?: boolean; readonly onToggleChecked?: () => void } = {},
+) {
   render(
     <MealCard
       meal={theMeal}
@@ -38,11 +41,43 @@ function mount(theMeal: Meal) {
       onReorderItems={vi.fn()}
       otherMeals={[]}
       onSendItem={vi.fn()}
+      {...extra}
     />,
   );
 }
 
 const EXPLANATION = /Gramas é o peso do alimento/;
+
+describe("the check button", () => {
+  it("does not render on the diet's own screen without onToggleChecked", () => {
+    mount(meal([]));
+
+    expect(
+      screen.queryByRole("button", { name: /Marcar|Desmarcar/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders unchecked and calls back on click", async () => {
+    const onToggleChecked = vi.fn();
+    mount(meal([]), { checked: false, onToggleChecked });
+
+    const button = screen.getByRole("button", {
+      name: "Marcar Refeição 1 como comida",
+    });
+    expect(button).toHaveAttribute("aria-pressed", "false");
+
+    button.click();
+    expect(onToggleChecked).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads as checked when told to", () => {
+    mount(meal([]), { checked: true, onToggleChecked: vi.fn() });
+
+    expect(
+      screen.getByRole("button", { name: "Desmarcar Refeição 1 como comida" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+});
 
 describe("the grams-vs-unit explanation", () => {
   it("does not show for a meal with no items", () => {

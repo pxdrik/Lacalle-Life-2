@@ -13,10 +13,12 @@ import {
   SortableItem,
   SortableList,
 } from "@/design-system/components/sortable-list";
+import { dayKey } from "@/core/format/day";
 import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useDietEditor } from "../hooks/use-diet-editor";
+import { useFoodLogDay } from "../hooks/use-food-log";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietMacros } from "../services/diet-macros";
 import {
@@ -35,6 +37,7 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
+import { isMealChecked, toggleMealChecked } from "../services/meal-execution";
 import { MealCard } from "./meal-card";
 import { InlineText } from "./inline-text";
 import { MacroProgress } from "./macro-progress";
@@ -44,6 +47,11 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
   const { state, saveError, hasConflict, apply, reload } = useDietEditor(dietId);
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
+
+  // Client-only, same as `/diario` itself (`dayKey(new Date())` there too):
+  // only the browser knows what today is where the reader is standing.
+  const today = dayKey(new Date());
+  const todayLog = useFoodLogDay(today);
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -191,6 +199,15 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                   }}
                   onRemoveItem={(itemId) => {
                     apply((current) => removeItem(current, meal.id, itemId));
+                  }}
+                  checked={
+                    todayLog.state.status === "ready"
+                      ? isMealChecked(todayLog.state.log, diet.id, meal.id)
+                      : false
+                  }
+                  onToggleChecked={() => {
+                    if (todayLog.state.status !== "ready") return;
+                    todayLog.apply((log) => toggleMealChecked(log, diet, meal));
                   }}
                 />
               )}

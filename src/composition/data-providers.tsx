@@ -306,10 +306,11 @@ export function HomeDataProvider({
 }
 
 /**
- * The diet editor picks foods and, when a profile exists, compares its totals
- * against that profile's targets. Composed here rather than nested at the
- * page, so a route never has to know which repositories a screen's components
- * happen to reach for.
+ * The diet editor picks foods, when a profile exists compares its totals
+ * against that profile's targets, and — since "Comi esta refeição" — reads
+ * and writes today's food log to check a meal against it. Composed here
+ * rather than nested at the page, so a route never has to know which
+ * repositories a screen's components happen to reach for.
  */
 export function DietEditorDataProvider({
   children,
@@ -317,10 +318,12 @@ export function DietEditorDataProvider({
   readonly children: React.ReactNode;
 }) {
   return (
-    <DietDataProvider>
-      <FoodDataProvider>
-        <ProfileDataProvider>{children}</ProfileDataProvider>
-      </FoodDataProvider>
-    </DietDataProvider>
+    <FoodLogRepositoryProvider repository={foodLogRepository()}>
+      <DietDataProvider>
+        <FoodDataProvider>
+          <ProfileDataProvider>{children}</ProfileDataProvider>
+        </FoodDataProvider>
+      </DietDataProvider>
+    </FoodLogRepositoryProvider>
   );
 }

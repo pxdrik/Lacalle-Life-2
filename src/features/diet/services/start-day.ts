@@ -32,6 +32,12 @@ export function createFoodLog(day: string): FoodLog {
  * Portions are copied as planned, which makes the common case — eating roughly
  * what was planned — a matter of adjusting a few numbers rather than building
  * the day from nothing.
+ *
+ * Each copied meal is stamped with `sourceDietId`/`sourceMealId` — the same
+ * pair `checkMeal` in `meal-execution.ts` stamps for a single meal. Starting
+ * the whole day this way is "I ate everything as planned", so every meal in
+ * it should already read as checked on the diet screen; without the stamp,
+ * checking one of them there would add a second, redundant copy here.
  */
 export function startDayFromDiet(diet: Diet, day: string): FoodLog {
   const now = entityTimestamp();
@@ -45,6 +51,8 @@ export function startDayFromDiet(diet: Diet, day: string): FoodLog {
       ...item,
       id: createEntityId(),
     })),
+    sourceDietId: diet.id,
+    sourceMealId: meal.id,
   }));
 
   return {

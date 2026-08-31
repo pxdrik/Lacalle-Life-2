@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Check,
   ChevronDown,
   ChevronUp,
   Copy,
@@ -56,6 +57,15 @@ interface Props {
     targetMealId: string,
     mode: "copy" | "move",
   ) => void;
+  /**
+   * Whether this meal was already checked as eaten today. `undefined` — not
+   * `false` — when the card is not on the diet screen at all: a meal inside
+   * a day's own log (`/diario`) has nothing to check, it already *is* the
+   * record, and the button below only renders when this and `onToggleChecked`
+   * are both given.
+   */
+  readonly checked?: boolean;
+  readonly onToggleChecked?: () => void;
 }
 
 export function MealCard({
@@ -74,6 +84,8 @@ export function MealCard({
   onReorderItems,
   otherMeals,
   onSendItem,
+  checked,
+  onToggleChecked,
 }: Props) {
   const [picking, setPicking] = useState(false);
   const macros = mealMacros(meal);
@@ -102,15 +114,43 @@ export function MealCard({
         </button>
 
         <div className="min-w-0 flex-1">
-          <InlineText
-            value={meal.name}
-            onChange={(name) => {
-              onChange({ name });
-            }}
-            label="Nome da refeição"
-            placeholder="Refeição"
-            className="w-full text-base font-medium"
-          />
+          <div className="flex items-center gap-2">
+            <InlineText
+              value={meal.name}
+              onChange={(name) => {
+                onChange({ name });
+              }}
+              label="Nome da refeição"
+              placeholder="Refeição"
+              className="min-w-0 flex-1 text-base font-medium"
+            />
+
+            {/* Só existe na tela da dieta — ver o comentário de `checked` na
+                prop. O mesmo padrão de `performed-set-row.tsx` ("Concluir
+                série"), num tamanho menor: aqui é um toque por refeição, não
+                dezenas por treino. */}
+            {onToggleChecked !== undefined && (
+              <button
+                type="button"
+                onClick={onToggleChecked}
+                aria-pressed={checked ?? false}
+                aria-label={
+                  (checked ?? false)
+                    ? `Desmarcar ${meal.name} como comida`
+                    : `Marcar ${meal.name} como comida`
+                }
+                className={cn(
+                  "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border",
+                  "transition-[background-color,border-color,color] duration-150 ease-out",
+                  (checked ?? false)
+                    ? "border-accent bg-accent text-accent-ink"
+                    : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
+                )}
+              >
+                <Check aria-hidden className="size-4" />
+              </button>
+            )}
+          </div>
 
           <div className="mt-1 flex items-center gap-2">
             <TimeField

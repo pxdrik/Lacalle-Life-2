@@ -78,6 +78,18 @@ describe("startDayFromDiet", () => {
     expect(log.meals[0]?.items[0]?.foodId).toBe("frango");
   });
 
+  it("stamps every copied meal with where it came from", () => {
+    // Same pair `checkMeal` stamps for a single meal — starting the whole day
+    // this way means every meal in it should already read as checked.
+    const diet = dietWithLunch();
+    const log = startDayFromDiet(diet, "2026-08-07");
+
+    expect(log.meals[0]).toMatchObject({
+      sourceDietId: diet.id,
+      sourceMealId: diet.meals[0]!.id,
+    });
+  });
+
   it("records which diet the day came from", () => {
     const diet = dietWithLunch();
 

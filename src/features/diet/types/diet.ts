@@ -48,6 +48,19 @@ export interface Meal {
   readonly time: string | null;
   readonly notes: string;
   readonly items: readonly MealItem[];
+  /**
+   * Which diet, and which meal in it, this one is a snapshot of.
+   *
+   * Only ever set on a meal living inside a `FoodLog` — a `Diet`'s own meals
+   * never carry this. It is what lets "Comi esta refeição" on the diet
+   * screen recognise a meal it already checked today instead of adding a
+   * second copy, and what `startDayFromDiet` stamps on every meal it copies
+   * so starting a whole day shows each of its meals as already checked. Both
+   * fields travel together and are only ever read together — see
+   * `services/meal-execution.ts`.
+   */
+  readonly sourceDietId?: EntityId;
+  readonly sourceMealId?: EntityId;
 }
 
 /**
