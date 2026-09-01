@@ -118,6 +118,28 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
             <span className="tabular-nums">{activeFilterCount}</span>
           )}
         </button>
+
+        {/* Achado real de uso: sem isto, criar exercício só existia depois
+            de buscar — e nem sempre óbvio, porque a busca por um nome que
+            já casa com algo do catálogo esconde a opção dentro da lista de
+            resultados (ver o item "Criar" na `<ul>` abaixo). Quem estava só
+            navegando, sem digitar nada, não tinha como achar o caminho —
+            teve que digitar um nome inexistente de propósito só para o
+            estado vazio aparecer. Fica sempre visível, mas do mesmo peso
+            visual do botão de Filtros ao lado — não um `primary` chamativo
+            sobre 183 exercícios já curados, que convidaria duplicata. */}
+        <button
+          type="button"
+          aria-label="Novo exercício"
+          onClick={() => {
+            setCreating(true);
+          }}
+          disabled={state.status !== "ready"}
+          className={cn(buttonClasses("secondary"), "h-(--input-h)")}
+        >
+          <Plus aria-hidden className="size-4" />
+          <span className="hidden sm:inline">Novo exercício</span>
+        </button>
       </div>
 
       {/* A sheet, not a panel that grows in place.
@@ -245,15 +267,12 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                     hook), so scrolling never outruns it. */}
                 {hasMore && <li ref={sentinelRef} aria-hidden className="h-px" />}
 
-                {/* Creating used to be reachable only from the empty state,
-                    which made it unreachable in the case that actually happens:
-                    searching "supino", getting eight results, and wanting the
-                    variation your gym has that none of them is. You had to
-                    type nonsense to get the option back.
-
-                    Offered while searching and never while browsing — a
-                    standing button over 183 curated exercises invites
-                    duplicates of entries already there. */}
+                {/* Second entry point, kept alongside the always-visible
+                    "Novo exercício" button above: searching "supino",
+                    getting eight results, and wanting the variation your gym
+                    has that none of them is — this row pre-fills the name
+                    you already typed, which the header button doesn't know
+                    about until you retype it. */}
                 {query.text.trim() !== "" && (
                   <li>
                     <button

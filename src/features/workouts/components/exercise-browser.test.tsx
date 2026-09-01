@@ -19,10 +19,12 @@ vi.mock("next/navigation", () => ({
 /**
  * Reaching "create" from the catalogue.
  *
- * It used to live only in the empty state, which meant it was missing in the
- * case that actually happens: searching for "supino", finding eight, and
- * wanting the ninth — the variation your gym has. Getting the option back
- * required typing something deliberately meaningless.
+ * Three entry points, each covering a case the others miss: the header
+ * button (always visible, no search needed — the one that was missing
+ * entirely until a real user had to type a made-up name just to make the
+ * empty state show it), the inline row while searching (pre-fills the term
+ * you already typed, "supino" finding eight and wanting the ninth your gym
+ * has), and the empty-state button (the search found literally nothing).
  */
 
 function exercise(id: string, name: string): Exercise {
@@ -109,14 +111,26 @@ describe("creating from a search that found something", () => {
 });
 
 describe("while browsing without a search", () => {
-  it("offers nothing, so 183 curated entries do not collect duplicates", async () => {
+  it("offers the always-visible header button, but not the inline search row — 183 curated entries should not collect duplicates from a standing prompt over the list itself", async () => {
     mount(CATALOGUE);
     await screen.findByText("Supino Reto com Barra");
 
     expect(createRow()).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Novo exercício" }),
+    ).toBeInTheDocument();
   });
 
-  it("ignores a search of only spaces", async () => {
+  it("the header button opens the form with no name pre-filled — nothing was searched", async () => {
+    mount(CATALOGUE);
+    await screen.findByText("Supino Reto com Barra");
+
+    await userEvent.click(screen.getByRole("button", { name: "Novo exercício" }));
+
+    expect(screen.getByLabelText("Nome do exercício")).toHaveValue("");
+  });
+
+  it("ignores a search of only spaces for the inline row", async () => {
     mount(CATALOGUE);
     await screen.findByText("Supino Reto com Barra");
 
