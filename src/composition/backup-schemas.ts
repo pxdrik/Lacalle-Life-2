@@ -411,6 +411,17 @@ export const routineRecordSchema = z
   })
   .strict();
 
+/**
+ * O mesmo conteúdo de `routineRecordSchema`, sem o envelope de entidade —
+ * mesmo desenho de `dietPayloadSchema` acima, e pelo mesmo motivo: `id` vem
+ * da própria linha, `createdAt`/`updatedAt` são decisão do motor de sync.
+ */
+export const routinePayloadSchema = routineRecordSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // ---------------------------------------------------------------------------
 // sessions
 // ---------------------------------------------------------------------------

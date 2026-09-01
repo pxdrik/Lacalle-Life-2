@@ -1088,6 +1088,31 @@ emails` do projeto real é **2/hora** (plano free, sem SMTP customizado) —
 mesma limitação já registrada no fechamento da Sprint 1, ainda sem SMTP
 próprio configurado.
 
+**Motor de sync estendido para `Routine` (31/08/2026).** Achado pelo
+próprio Pedro testando de verdade: editou um treino no PC, abriu no
+celular e não achou nada — `Routine`/`Treino` nunca tinha ganhado sync
+nenhum, só `Profile`, `Diet` e `FoodLog` tinham até aqui. Quarta
+entidade, mesma família de `Diet` (muitos registros por usuário,
+conflito visível de documento inteiro) — `Routine` tem a mesma forma
+para efeito de sync (`{name, notes/weekdays, exercises/meals}`), e
+`save_routine`/`delete_routine` (migration 0025) já seguem o mesmo
+contrato de `save_diet`/`delete_diet`, então a implementação em
+`composition/sync/routine-sync.ts` é essencialmente um porte de
+`diet-sync.ts` trocando de tabela e payload. `SyncingRoutineRepository`,
+UI de conflito em `/treinos` (`routine-sync-status.tsx`) seguindo o
+mesmo desenho do `DietSyncStatus`.
+
+Campanha adversarial repetiu deliberadamente o ataque que achou o bug
+real em `Diet` (cenário 11, duas exclusões concorrentes sem nunca ter
+puxado uma da outra) para confirmar que a correção portada — só é
+conflito de verdade quando `currentLocal !== undefined`, nunca só por o
+tracker ter passado por `"conflict"` — segura aqui também, em vez de
+presumir que copiar o código copiou a correção. Confirmado: nenhum bug
+novo encontrado, os 13 cenários adversariais + 7 de orquestração
+passaram de primeira. `Session`/`BodyEntry` continuam sem sync — fora do
+escopo desta sprint. `npm run verify` limpo (135 arquivos, 1461 testes),
+`npm run build` limpo.
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

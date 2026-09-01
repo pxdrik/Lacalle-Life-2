@@ -6,6 +6,8 @@ import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
 
+import { RoutineSyncStatus } from "./routine-sync-status";
+
 export const metadata: Metadata = {
   title: "Treinos · LaCalle Life",
 };
@@ -24,7 +26,11 @@ export default function WorkoutsPage() {
     <PageShell padding="tight">
       <PageHeader icon={ICONS.workouts} title="Treinos" />
 
-      <div className="mt-6">
+      <div className="mt-4">
+        <RoutineSyncStatus />
+      </div>
+
+      <div className="mt-4">
         <WorkoutDataProvider>
           <RoutineList />
         </WorkoutDataProvider>

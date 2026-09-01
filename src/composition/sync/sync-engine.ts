@@ -11,6 +11,8 @@ import type { FoodLog } from "@/features/diet/types/food-log";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
+import { LocalRoutineRepository, ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
+import type { Routine } from "@/features/workouts/types/routine";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
@@ -37,6 +39,12 @@ import type {
   PullProfileResult,
   PushProfileResult,
 } from "./profile-sync";
+import { pullAllRoutines, pushAllRoutines, resolveRoutineConflict } from "./routine-sync";
+import type {
+  RoutineConflictResolution,
+  PullRoutinesResult,
+  PushRoutinesResult,
+} from "./routine-sync";
 
 export interface ProfileSyncOutcome {
   readonly push: PushProfileResult;
@@ -182,4 +190,49 @@ export async function resolveDietConflictAndSync(
   const { tracker, localOnly } = await openDietSyncStores();
   await resolveDietConflict(tracker, localOnly, dietId, resolution, remote);
   return runDietSync();
+}
+
+export interface RoutineSyncOutcome {
+  readonly push: PushRoutinesResult;
+  readonly pull: PullRoutinesResult;
+}
+
+async function openRoutineSyncStores() {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalRoutineRepository(
+    new IndexedDbStore<Routine>(db, ROUTINES_STORE.name),
+  );
+  return { tracker, localOnly };
+}
+
+/**
+ * Sincroniza todas as rotinas de uma vez — mesmo desenho de `runDietSync`,
+ * mesma família de "muitos registros por usuário". Abre o
+ * `LocalRoutineRepository` **puro**, nunca o `SyncingRoutineRepository` que
+ * a UI usa.
+ */
+export async function runRoutineSync(): Promise<RoutineSyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const { tracker, localOnly } = await openRoutineSyncStores();
+
+  const push = await pushAllRoutines(supabase, tracker, localOnly);
+  const pull = await pullAllRoutines(supabase, tracker, localOnly);
+
+  return { push, pull };
+}
+
+/**
+ * Resolve o conflito de uma rotina e roda o ciclo de novo. `routineId`/
+ * `remote` têm que vir do resultado `"done"` de `runRoutineSync` que a UI
+ * mostrou — mesma regra de `resolveDietConflictAndSync`.
+ */
+export async function resolveRoutineConflictAndSync(
+  routineId: string,
+  resolution: RoutineConflictResolution,
+  remote: Routine | null,
+): Promise<RoutineSyncOutcome> {
+  const { tracker, localOnly } = await openRoutineSyncStores();
+  await resolveRoutineConflict(tracker, localOnly, routineId, resolution, remote);
+  return runRoutineSync();
 }

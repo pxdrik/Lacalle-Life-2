@@ -20,6 +20,7 @@ import type { ProfileRepository } from "@/features/profile/data/profile-reposito
 import { SyncingProfileRepository } from "@/features/profile/data/syncing-profile-repository";
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
 import { ExerciseRepositoryProvider } from "@/features/workouts/data/exercise-repository-context";
+import { SyncingRoutineRepository } from "@/features/workouts/data/syncing-routine-repository";
 import {
   WorkoutRepositoryProvider,
   type WorkoutRepositories,
@@ -223,9 +224,16 @@ export function ProfileDataProvider({
   );
 }
 
+/**
+ * `routines` decorado com o outbox de sync (`SyncingRoutineRepository`),
+ * mesmo motivo do `dietRepository` acima — `sessions` fica de fora de
+ * propósito, sync de sessão de treino ainda não existe.
+ */
 const workoutRepositories = once<WorkoutRepositories>(async () => {
   const { routines, sessions } = await getRepositories();
-  return { routines, sessions };
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  return { routines: new SyncingRoutineRepository(routines, tracker), sessions };
 });
 
 export function ExerciseDataProvider({
