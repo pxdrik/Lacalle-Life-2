@@ -79,6 +79,45 @@ describe("createSupabaseAuthRepository — repasse do captchaToken", () => {
     );
   });
 
+  it("signUp com sessão presente devolve status signed-in", async () => {
+    signUp.mockResolvedValueOnce({
+      data: { session: { access_token: "t" }, user: { identities: [{ id: "1" }] } },
+      error: null,
+    });
+    const { createSupabaseAuthRepository } = await import("./supabase-auth-repository");
+    const repository = createSupabaseAuthRepository();
+
+    await expect(repository.signUp("a@b.com", "senha12345")).resolves.toEqual({
+      status: "signed-in",
+    });
+  });
+
+  it("signUp sem sessão e com identidade nova devolve status check-email", async () => {
+    signUp.mockResolvedValueOnce({
+      data: { session: null, user: { identities: [{ id: "1" }] } },
+      error: null,
+    });
+    const { createSupabaseAuthRepository } = await import("./supabase-auth-repository");
+    const repository = createSupabaseAuthRepository();
+
+    await expect(repository.signUp("a@b.com", "senha12345")).resolves.toEqual({
+      status: "check-email",
+    });
+  });
+
+  it("signUp sem sessão e identidades vazias (e-mail já cadastrado) devolve status already-registered — achado real: o Pedro tentou entrar de novo numa conta já criada e o app prometeu um e-mail que nunca chegou", async () => {
+    signUp.mockResolvedValueOnce({
+      data: { session: null, user: { identities: [] } },
+      error: null,
+    });
+    const { createSupabaseAuthRepository } = await import("./supabase-auth-repository");
+    const repository = createSupabaseAuthRepository();
+
+    await expect(repository.signUp("a@b.com", "senha12345")).resolves.toEqual({
+      status: "already-registered",
+    });
+  });
+
   it("um token forjado (\"true\", string arbitrária) não é tratado diferente — só repassado, quem recusa é o Supabase", async () => {
     signInWithPassword.mockResolvedValueOnce({
       error: { message: "captcha verification process failed", code: "captcha_failed" },

@@ -28,7 +28,7 @@ afterEach(() => {
 function mount(overrides: Partial<AuthRepository> = {}) {
   const repository: AuthRepository = {
     getUser: vi.fn().mockResolvedValue(null),
-    signUp: vi.fn().mockResolvedValue({ needsEmailConfirmation: true }),
+    signUp: vi.fn().mockResolvedValue({ status: "check-email" }),
     signInWithPassword: vi.fn(),
     signOut: vi.fn(),
     resetPasswordForEmail: vi.fn(),
@@ -89,7 +89,7 @@ describe("SignupForm", () => {
 
   it("shows the confirmation notice instead of redirecting when email confirmation is required", async () => {
     const user = userEvent.setup();
-    mount({ signUp: vi.fn().mockResolvedValue({ needsEmailConfirmation: true }) });
+    mount({ signUp: vi.fn().mockResolvedValue({ status: "check-email" }) });
 
     await fillAndSubmit(user, {
       email: "pedro@example.com",
@@ -98,6 +98,25 @@ describe("SignupForm", () => {
     });
 
     expect(await screen.findByText("Confira seu e-mail")).toBeInTheDocument();
+  });
+
+  it("avisa que a conta já existe em vez de prometer um e-mail que nunca vai chegar", async () => {
+    const user = userEvent.setup();
+    mount({ signUp: vi.fn().mockResolvedValue({ status: "already-registered" }) });
+
+    await fillAndSubmit(user, {
+      email: "pedro@example.com",
+      password: "senha-forte-1",
+      confirm: "senha-forte-1",
+    });
+
+    expect(await screen.findByText("Este e-mail já tem conta")).toBeInTheDocument();
+    expect(screen.queryByText("Confira seu e-mail")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "entrar" })).toHaveAttribute("href", "/entrar");
+    expect(screen.getByRole("link", { name: "recuperar sua senha" })).toHaveAttribute(
+      "href",
+      "/recuperar-senha",
+    );
   });
 });
 

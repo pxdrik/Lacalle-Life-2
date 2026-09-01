@@ -36,9 +36,21 @@ export function createSupabaseAuthRepository(): AuthRepository {
       });
       if (error) throw error;
 
-      // Sessão presente = confirmação de e-mail desligada no projeto;
-      // ausente = a pessoa só entra depois de confirmar.
-      return { needsEmailConfirmation: data.session === null };
+      if (data.session !== null) {
+        return { status: "signed-in" };
+      }
+
+      // `identities` vazio é como o Supabase sinaliza "e-mail já tinha
+      // conta confirmada" sem devolver erro — devolver erro revelaria a
+      // existência da conta por um canal que muda de status HTTP, o que o
+      // projeto evita de propósito (mesma postura de `resetPasswordForEmail`
+      // abaixo). Um cadastro genuinamente novo sempre chega com pelo menos
+      // uma identidade.
+      if (data.user?.identities?.length === 0) {
+        return { status: "already-registered" };
+      }
+
+      return { status: "check-email" };
     },
 
     async signInWithPassword(email, password, captchaToken) {

@@ -15,9 +15,16 @@ export interface AuthRepository {
   getUser(): Promise<AuthUser | null>;
 
   /**
-   * `needsEmailConfirmation` é `true` quando o projeto exige confirmar o
-   * e-mail antes da sessão valer — a UI usa isso para mostrar "confira sua
-   * caixa de entrada" em vez de tratar como login imediato.
+   * `"signed-in"`: sessão criada na hora (confirmação de e-mail desligada
+   * no projeto). `"check-email"`: cadastro novo, e-mail de confirmação
+   * enviado — a UI mostra "confira sua caixa de entrada". `"already-registered"`:
+   * o e-mail já tem conta confirmada; o Supabase responde sucesso (nunca
+   * erro, pra não confirmar por erro que o e-mail existe) mas não manda
+   * e-mail nenhum — sem tratar esse caso à parte, a pessoa cai num "confira
+   * seu e-mail" que nunca chega, exatamente o que aconteceu com o Pedro em
+   * 31/08/2026 tentando entrar de novo numa conta já criada. Detectado via
+   * `data.user.identities` vazio, o mesmo sinal documentado pelo próprio
+   * Supabase para essa distinção client-side.
    *
    * `captchaToken`, quando o CAPTCHA está configurado (ver
    * `TurnstileWidget`), é repassado ao Supabase — é o próprio servidor de
@@ -29,7 +36,7 @@ export interface AuthRepository {
     email: string,
     password: string,
     captchaToken?: string,
-  ): Promise<{ readonly needsEmailConfirmation: boolean }>;
+  ): Promise<{ readonly status: "signed-in" | "check-email" | "already-registered" }>;
 
   signInWithPassword(
     email: string,

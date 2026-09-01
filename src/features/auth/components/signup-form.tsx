@@ -26,6 +26,7 @@ export function SignupForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmationSent, setConfirmationSent] = useState(false);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -50,13 +51,19 @@ export function SignupForm() {
     setPending(true);
 
     try {
-      const { needsEmailConfirmation } = await repository.signUp(
+      const { status } = await repository.signUp(
         email,
         password,
         captcha.token || undefined,
       );
 
-      if (needsEmailConfirmation) {
+      if (status === "already-registered") {
+        setAlreadyRegistered(true);
+        setPending(false);
+        return;
+      }
+
+      if (status === "check-email") {
         setConfirmationSent(true);
         setPending(false);
         return;
@@ -69,6 +76,22 @@ export function SignupForm() {
     } finally {
       captcha.reset();
     }
+  }
+
+  if (alreadyRegistered) {
+    return (
+      <Notice tone="warning" title="Este e-mail já tem conta">
+        {email} já está cadastrado. Você pode{" "}
+        <Link href="/entrar" className="underline">
+          entrar
+        </Link>{" "}
+        ou{" "}
+        <Link href="/recuperar-senha" className="underline">
+          recuperar sua senha
+        </Link>
+        , se não lembra dela.
+      </Notice>
+    );
   }
 
   if (confirmationSent) {
