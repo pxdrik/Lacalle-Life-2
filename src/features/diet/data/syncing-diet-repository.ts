@@ -15,10 +15,22 @@ import type { DietRepository } from "./diet-repository";
 export class SyncingDietRepository implements DietRepository {
   readonly #local: DietRepository;
   readonly #tracker: Store<SyncTracker>;
+  readonly #onPending: (() => void) | undefined;
 
-  constructor(local: DietRepository, tracker: Store<SyncTracker>) {
+  /**
+   * `onPending`, se passado, dispara depois que a pendência é gravada — ver
+   * a doc equivalente em `SyncingProfileRepository` para o motivo completo
+   * (achado ao vivo: dieta editada e nunca enviada porque a tela de Dietas
+   * não foi reaberta antes de trocar de aparelho).
+   */
+  constructor(
+    local: DietRepository,
+    tracker: Store<SyncTracker>,
+    onPending?: () => void,
+  ) {
     this.#local = local;
     this.#tracker = tracker;
+    this.#onPending = onPending;
   }
 
   listAll(): Promise<readonly Diet[]> {
@@ -32,10 +44,12 @@ export class SyncingDietRepository implements DietRepository {
   async save(diet: Diet, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(diet, expectedUpdatedAt);
     await markPending(this.#tracker, "diets", diet.id);
+    this.#onPending?.();
   }
 
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     await markPending(this.#tracker, "diets", id);
+    this.#onPending?.();
   }
 }

@@ -26,15 +26,21 @@ import {
   type WorkoutRepositories,
 } from "@/features/workouts/data/workout-repository-context";
 
+import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
 import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import { exportAll, importAll, previewImport } from "./backup";
+import { debouncedKeyedTrigger, debouncedTrigger } from "./debounce";
 import { forgetDevice as forgetDeviceDetailed } from "./forget-device";
 import { currentDatabaseName } from "./identity";
 import { MIGRATIONS } from "./migrations";
 import { getRepositories } from "./repositories";
+import { pushAllDiets } from "./sync/diet-sync";
+import { pushFoodLog } from "./sync/food-log-sync";
+import { pushProfile } from "./sync/profile-sync";
+import { pushAllRoutines } from "./sync/routine-sync";
 
 /**
  * Supplies each feature with its repository.
@@ -64,6 +70,19 @@ function once<T>(resolve: () => Promise<T>): () => Promise<T> {
   };
 }
 
+/**
+ * Espera uma pausa nas escritas antes de tentar um push — achado ao vivo
+ * contra o Supabase real: sem isto, o push só acontecia quando a tela de
+ * sincronização (re)montava, e quem editava e trocava de aparelho antes de
+ * reabrir aquela tela nunca via a edição chegar no outro lado (ver a doc de
+ * cada `Syncing*Repository`). Curto o bastante para não atrasar quem sai da
+ * tela logo após editar; longo o bastante para uma rajada de campos
+ * salvando um por um (o editor de dieta/rotina não debounça a escrita
+ * local, de propósito — ver a doc de `use-diet-editor.ts`) colapsar num
+ * push só, em vez de um por campo.
+ */
+const PUSH_DEBOUNCE_MS = 1500;
+
 const bodyRepository = once<BodyRepository>(async () => {
   return (await getRepositories()).body;
 });
@@ -92,7 +111,13 @@ const foodLogRepository = once<FoodLogRepository>(async () => {
   const local = (await getRepositories()).foodLogs;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  return new SyncingFoodLogRepository(local, tracker);
+  const pushSoon = debouncedKeyedTrigger((day) => {
+    pushFoodLog(getSupabaseBrowserClient(), tracker, local, day).catch(() => {
+      // Silencioso de propósito — o próximo mount de `/diario` ou o botão
+      // manual tentam de novo e mostram erro de verdade, se houver um.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingFoodLogRepository(local, tracker, pushSoon);
 });
 
 /**
@@ -132,7 +157,12 @@ const dietRepository = once<DietRepository>(async () => {
   const local = (await getRepositories()).diets;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  return new SyncingDietRepository(local, tracker);
+  const pushSoon = debouncedTrigger(() => {
+    pushAllDiets(getSupabaseBrowserClient(), tracker, local).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` acima.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingDietRepository(local, tracker, pushSoon);
 });
 
 /**
@@ -148,7 +178,12 @@ const profileRepository = once<ProfileRepository>(async () => {
   const local = (await getRepositories()).profile;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  return new SyncingProfileRepository(local, tracker);
+  const pushSoon = debouncedTrigger(() => {
+    pushProfile(getSupabaseBrowserClient(), tracker, local).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` acima.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingProfileRepository(local, tracker, pushSoon);
 });
 
 /**
@@ -233,7 +268,12 @@ const workoutRepositories = once<WorkoutRepositories>(async () => {
   const { routines, sessions } = await getRepositories();
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  return { routines: new SyncingRoutineRepository(routines, tracker), sessions };
+  const pushSoon = debouncedTrigger(() => {
+    pushAllRoutines(getSupabaseBrowserClient(), tracker, routines).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` acima.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return { routines: new SyncingRoutineRepository(routines, tracker, pushSoon), sessions };
 });
 
 export function ExerciseDataProvider({

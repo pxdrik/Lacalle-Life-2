@@ -20,10 +20,25 @@ import type { ProfileRepository } from "./profile-repository";
 export class SyncingProfileRepository implements ProfileRepository {
   readonly #local: ProfileRepository;
   readonly #tracker: Store<SyncTracker>;
+  readonly #onPending: (() => void) | undefined;
 
-  constructor(local: ProfileRepository, tracker: Store<SyncTracker>) {
+  /**
+   * `onPending`, se passado, dispara depois que a pendência é gravada — a
+   * ponte para `composition/sync` tentar um push logo em seguida, sem que
+   * esta classe precise saber que sync remoto existe. Sem isto, um push só
+   * acontecia na próxima vez que a tela de sincronização montasse; quem
+   * editava e trocava de aparelho antes de reabrir aquela tela nunca via a
+   * edição chegar no outro lado. Ver `composition/data-providers.tsx` para
+   * quem passa isto e como.
+   */
+  constructor(
+    local: ProfileRepository,
+    tracker: Store<SyncTracker>,
+    onPending?: () => void,
+  ) {
     this.#local = local;
     this.#tracker = tracker;
+    this.#onPending = onPending;
   }
 
   get(): Promise<Profile | undefined> {
@@ -33,10 +48,12 @@ export class SyncingProfileRepository implements ProfileRepository {
   async save(profile: Profile, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(profile, expectedUpdatedAt);
     await markPending(this.#tracker, "profile", PROFILE_ID);
+    this.#onPending?.();
   }
 
   async clear(): Promise<void> {
     await this.#local.clear();
     await markPending(this.#tracker, "profile", PROFILE_ID);
+    this.#onPending?.();
   }
 }

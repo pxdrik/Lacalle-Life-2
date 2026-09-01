@@ -16,10 +16,24 @@ import type { FoodLogRepository } from "./food-log-repository";
 export class SyncingFoodLogRepository implements FoodLogRepository {
   readonly #local: FoodLogRepository;
   readonly #tracker: Store<SyncTracker>;
+  readonly #onPending: ((day: string) => void) | undefined;
 
-  constructor(local: FoodLogRepository, tracker: Store<SyncTracker>) {
+  /**
+   * `onPending`, se passado, dispara com o dia que acabou de ficar pendente
+   * — ver a doc equivalente em `SyncingProfileRepository` para o motivo
+   * completo. Recebe o dia, e não é sem parâmetro como os outros
+   * `Syncing*Repository`, porque `pushFoodLog` (diferente de
+   * `pushProfile`/`pushAllDiets`/`pushAllRoutines`) empurra um dia por vez,
+   * nunca todos de uma vez — não existe um "push de tudo" para FoodLog.
+   */
+  constructor(
+    local: FoodLogRepository,
+    tracker: Store<SyncTracker>,
+    onPending?: (day: string) => void,
+  ) {
     this.#local = local;
     this.#tracker = tracker;
+    this.#onPending = onPending;
   }
 
   listAll(): Promise<readonly FoodLog[]> {
@@ -37,11 +51,13 @@ export class SyncingFoodLogRepository implements FoodLogRepository {
   async save(log: FoodLog, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(log, expectedUpdatedAt);
     await markPending(this.#tracker, "foodLog", log.day);
+    this.#onPending?.(log.day);
   }
 
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     // O id de um FoodLog é o próprio dia — ver FOOD_LOGS_STORE.
     await markPending(this.#tracker, "foodLog", id);
+    this.#onPending?.(id);
   }
 }
