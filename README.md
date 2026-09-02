@@ -18,19 +18,45 @@ dieta ou treino?** O que não responde, não entra.
 | Estilo | Tailwind CSS 4 | Tokens em CSS nativo, zero runtime |
 | Validação | Zod 4 | Um schema serve de tipo e de validação |
 | Persistência | IndexedDB via `idb` | Local-first: leitura em ~1 ms e funcionamento offline integral |
+| Conta e sincronização (opcionais) | Supabase (Auth + Postgres) | Multi-dispositivo para quem cria conta; nada disso é obrigatório para usar o app |
 | Testes | Vitest 4 + `fake-indexeddb` | O adapter real é exercitado, não substituído por mock |
 
 ## Arquitetura
 
-### Local-first
+### Local-first, com conta e sincronização opcionais
 
-O IndexedDB do navegador é a **única** fonte da verdade. Não há backend, conta
-nem sincronização. O servidor Next entrega o shell da aplicação e nada mais —
-ele nunca lê nem escreve dado de usuário.
+O IndexedDB do navegador é sempre a fonte da verdade **para a tela** — toda
+leitura e escrita local passa por ele primeiro, e o app funciona por completo
+offline e sem conta desde a instalação, exatamente como na v1. Isso não
+mudou.
 
-Toda entidade nasce com `id`, `createdAt` e `updatedAt`. O `updatedAt` não tem
-uso hoje: existe para que uma futura camada de sincronização tenha um
-discriminador de last-write-wins sem precisar de migração ou backfill.
+O que existe desde a v2: quem cria uma conta (Supabase Auth) ganha
+sincronização multi-dispositivo para as seis entidades pessoais — Perfil,
+Dieta, Rotina de treino, Sessão de treino, Peso/medidas (Evolução) e Diário.
+Toda escrita continua gravando local primeiro e devolvendo na hora; a
+sincronização acontece depois, em segundo plano (`src/composition/sync/`),
+e só interrompe a tela quando há um conflito real — o mesmo registro editado
+em dois lugares. Nunca escolhe um lado sozinho: o app sempre pergunta. Sem
+conta, ou offline, nada muda — a pendência de envio fica gravada localmente
+e nunca é drenada.
+
+O catálogo de alimentos/exercícios nunca sincroniza por usuário (é dado de
+referência, igual para todo mundo, semeado localmente a partir de um JSON no
+bundle); só favoritos e itens criados pelo usuário são pessoais.
+
+Backup/exportação (`composition/backup.ts`, tela de Perfil) continua
+existindo sem relação com conta — é a rede de segurança de quem não quer
+sincronizar e a forma de portar dados manualmente. Restaurar um backup
+sempre substitui o local (nunca mescla) e, para quem já sincroniza, entra na
+fila de sincronização como qualquer outra escrita local.
+
+Toda entidade nasce com `id`, `createdAt` e `updatedAt`. `updatedAt` é o
+discriminador local de concorrência otimista (`Store.putIfVersionMatches`) —
+resolve duas escritas na mesma aba/dispositivo. Entre dispositivos
+diferentes, quem decide ordem é o `server_updated_at` carimbado pelo
+Postgres, nunca o relógio do cliente. O desenho completo — schema, RLS,
+regra de conflito por entidade, o que nunca sincroniza — está em
+`docs/arquitetura-sincronizacao.md`.
 
 ### A fronteira de persistência
 
@@ -66,9 +92,10 @@ normalizadas: crescem sem limite e precisam de consulta por intervalo de data.
 
 O schema é declarado como **dado**, não como código executado dentro de uma
 transação de upgrade — o lugar menos tolerante a erro do IndexedDB. A lista em
-`src/core/storage/migrations.ts` é append-only: um navegador instalado pode
+`src/composition/migrations.ts` é append-only: um navegador instalado pode
 estar em qualquer versão anterior, e o caminho a partir dela precisa continuar
-funcionando.
+funcionando. O schema do Postgres (`supabase/migrations/`) segue a mesma
+regra — append-only, nunca editar uma entrada já liberada.
 
 ### Dois adapters, um contrato
 
@@ -89,6 +116,14 @@ npm test           # apenas testes
 ```
 
 `npm run verify` é o portão. Nada avança com ele vermelho.
+
+## CI
+
+`.github/workflows/ci.yml` roda `npm ci`, `npm run verify` e `npm run build`
+em todo `pull_request` e em todo push para `main`. **Branch protection
+exigindo esse workflow como status check obrigatório ainda precisa ser
+habilitada manualmente** em Settings → Branches no GitHub — o workflow por
+si só audita, não bloqueia merge sem essa configuração.
 
 ## Convenções
 
