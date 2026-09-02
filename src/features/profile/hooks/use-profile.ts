@@ -11,6 +11,7 @@ import {
 } from "@/core/nutrition";
 
 import { useProfileRepository } from "../data/profile-repository-context";
+import { onProfileChanged } from "../data/profile-changed";
 import { PROFILE_ID, type Profile } from "../types/profile";
 
 export type ProfileState =
@@ -87,6 +88,32 @@ export function useProfile(): ProfileStore {
       active = false;
     };
   }, [repository, reloadToken]);
+
+  // Assina avisos de que o perfil mudou por fora desta tela — hoje, só o
+  // motor de sync depois de um pull bem-sucedido. Ao contrário de `reload`
+  // (chamado pela própria pessoa depois de um conflito), isto nunca passa
+  // por `{status: "loading"}`: uma sincronização em segundo plano trocando o
+  // número na tela sem nenhum piscar é o ponto — ver `profile-changed.ts`.
+  useEffect(() => {
+    let active = true;
+
+    const unsubscribe = onProfileChanged(async () => {
+      try {
+        const profile = await (await repository).get();
+        if (!active) return;
+        setState(profile === undefined ? { status: "empty" } : ready(profile));
+      } catch {
+        // Silencioso de propósito: se a releitura falhar, a tela continua
+        // mostrando o que já tinha, que ainda é um estado válido — não uma
+        // pior surpresa do que a falha silenciosa que essa reescrita já era.
+      }
+    });
+
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [repository]);
 
   const save = useCallback(
     async (nutrition: NutritionProfile): Promise<boolean> => {

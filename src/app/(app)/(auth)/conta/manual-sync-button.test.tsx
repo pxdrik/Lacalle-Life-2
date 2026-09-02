@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { onProfileChanged } from "@/features/profile/data/profile-changed";
+
 import { ManualSyncButton } from "./manual-sync-button";
 
 const runProfileSync = vi.fn();
@@ -162,6 +164,105 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
       await screen.findByRole("button", { name: "Sincronizar dados" }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  /**
+   * Achado do Pedro: a tela de carregamento devia esperar até o número na
+   * tela realmente atualizar, não só até a rede responder — os dois são
+   * passos separados (`notifyProfileChanged`/`useProfile`, ver
+   * `profile-changed.ts`).
+   */
+  it("mantém a tela de carregamento até quem assina notifyProfileChanged terminar de reler", async () => {
+    isSupabaseConfigured.mockReturnValue(true);
+    runProfileSync.mockResolvedValueOnce({
+      push: { status: "nothing-pending" },
+      pull: { status: "applied" },
+    });
+
+    let resolveReread: () => void = () => {};
+    const unsubscribe = onProfileChanged(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveReread = resolve;
+        }),
+    );
+
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    render(<ManualSyncButton />);
+
+    await waitFor(() => {
+      expect(runProfileSync).toHaveBeenCalledTimes(1);
+    });
+
+    runProfileSync.mockResolvedValueOnce({
+      push: { status: "pushed" },
+      pull: { status: "applied" },
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: "Sincronizar dados" }),
+    );
+
+    // A rede já respondeu, mas quem assina o aviso ainda não terminou de
+    // reler — a tela de carregamento continua em pé.
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Sincronizar dados" }),
+    ).not.toBeInTheDocument();
+
+    resolveReread();
+
+    expect(
+      await screen.findByRole("button", { name: "Sincronizar dados" }),
+    ).toBeInTheDocument();
+    unsubscribe();
+  });
+
+  it("o botão Cancelar devolve a tela na hora, mesmo com a sincronização ainda em andamento", async () => {
+    isSupabaseConfigured.mockReturnValue(true);
+    runProfileSync.mockResolvedValueOnce({
+      push: { status: "nothing-pending" },
+      pull: { status: "applied" },
+    });
+
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    render(<ManualSyncButton />);
+
+    await waitFor(() => {
+      expect(runProfileSync).toHaveBeenCalledTimes(1);
+    });
+
+    let resolveClick: (value: {
+      push: { status: string };
+      pull: { status: string };
+    }) => void = () => {};
+    runProfileSync.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveClick = resolve;
+      }),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Sincronizar dados" }),
+    );
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Sincronizar dados" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+    // A chamada abandonada respondendo tarde não deveria fazer nada
+    // reaparecer na tela.
+    resolveClick({ push: { status: "error" }, pull: { status: "error" } });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(
+      screen.queryByText("Não foi possível sincronizar agora. Tente de novo em instantes."),
+    ).not.toBeInTheDocument();
   });
 
   it("mostra uma mensagem de erro legível (não o status técnico) quando o push ou pull falha", async () => {

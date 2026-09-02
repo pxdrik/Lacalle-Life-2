@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { isSupabaseConfigured } from "@/core/auth/env";
 import { formatDecimal } from "@/core/format/decimal";
 import { resolveProfileConflictAndSync, runProfileSync } from "@/composition/sync/sync-engine";
 import type { PullProfileResult } from "@/composition/sync/profile-sync";
+import { notifyProfileChanged } from "@/features/profile/data/profile-changed";
 import { Button } from "@/design-system/components/button";
 import { Notice } from "@/design-system/components/notice";
 import { SyncingOverlay } from "@/design-system/components/syncing-overlay";
@@ -41,14 +42,30 @@ export function ManualSyncButton() {
 
   const FAILURE_MESSAGE = "Não foi possível sincronizar agora. Tente de novo em instantes.";
 
+  // Só o clique manual e a resolução de conflito passam por isto — a
+  // sincronização automática ao montar tem sua própria guarda (`active` no
+  // efeito) e nunca mostra a tela de carregamento, então não há nada para
+  // cancelar nela. `true` quando a própria pessoa pediu "Cancelar": o
+  // resultado da chamada em andamento, quando finalmente chegar, é
+  // descartado (`isActive` em `syncAndReport` cobre isso), e o botão volta
+  // ao normal na hora, sem esperar a rede.
+  const cancelledRef = useRef(false);
+
   // Compartilhada pelo efeito de montagem, pelo clique manual e pela
   // resolução de conflito. Nunca mostra o status técnico do resultado
   // (`push: X · pull: Y`) num sucesso — achado do Pedro: "isso não deveria
   // aparecer pro usuário", e de fato não é informação acionável para quem
   // só quer saber se está sincronizado. Só um conflito real ou um erro de
   // verdade interrompe o silêncio. `isActive`, quando passado, é checado
-  // depois do `await` antes de qualquer `setState` — a mesma guarda que já
-  // existia inline no efeito de montagem, só compartilhada agora.
+  // depois de cada `await` antes de qualquer `setState` — a mesma guarda que
+  // já existia inline no efeito de montagem, só compartilhada agora.
+  //
+  // Achado do Pedro: a tela de carregamento sumia assim que a rede
+  // respondia, antes do número na tela ter realmente trocado — porque puxar
+  // dado novo e a tela mostrar esse dado novo sempre foram dois passos
+  // separados (`useProfile` só lê uma vez, ao montar). `notifyProfileChanged`
+  // é o segundo passo, e `syncAndReport` só solta o `pending` depois que ele
+  // também termina — a tela de carregamento agora cobre os dois.
   async function syncAndReport(
     run: () => Promise<{
       readonly push: { readonly status: string };
@@ -59,12 +76,15 @@ export function ManualSyncButton() {
     try {
       const outcome = await run();
       if (!isActive()) return;
+      const failed =
+        outcome.push.status === "error" || outcome.pull.status === "error";
       setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
-      setResult(
-        outcome.push.status === "error" || outcome.pull.status === "error"
-          ? FAILURE_MESSAGE
-          : null,
-      );
+      setResult(failed ? FAILURE_MESSAGE : null);
+
+      if (!failed && outcome.pull.status !== "conflict") {
+        await notifyProfileChanged();
+        if (!isActive()) return;
+      }
     } catch {
       if (isActive()) setResult(FAILURE_MESSAGE);
     }
@@ -86,17 +106,34 @@ export function ManualSyncButton() {
   }, []);
 
   async function handleSync() {
+    cancelledRef.current = false;
     setPending(true);
     setResult(null);
-    await syncAndReport(runProfileSync);
-    setPending(false);
+    await syncAndReport(runProfileSync, () => !cancelledRef.current);
+    if (!cancelledRef.current) setPending(false);
   }
 
   async function handleResolve(resolution: "keep-local" | "use-server") {
     if (conflict === null) return;
+    cancelledRef.current = false;
     setPending(true);
     setResult(null);
-    await syncAndReport(() => resolveProfileConflictAndSync(resolution, conflict.remote));
+    await syncAndReport(
+      () => resolveProfileConflictAndSync(resolution, conflict.remote),
+      () => !cancelledRef.current,
+    );
+    if (!cancelledRef.current) setPending(false);
+  }
+
+  // Escape para quando a sincronização trava — sem timeout embutido, uma
+  // rede que nunca responde deixaria a tela de carregamento presa para
+  // sempre. Não cancela a chamada de rede em si (não tem como, o fetch
+  // continua correndo em segundo plano); só para de esperar por ela e
+  // devolve o controle. Se aquela chamada eventualmente responder,
+  // `isActive` em `syncAndReport` garante que o resultado tardio é
+  // descartado, não reaparece na tela por baixo do que a pessoa já viu.
+  function handleCancel() {
+    cancelledRef.current = true;
     setPending(false);
   }
 
@@ -106,7 +143,7 @@ export function ManualSyncButton() {
   // exatamente por isso: só aparece quando a própria pessoa pediu a
   // sincronização e está esperando por ela, nunca em segundo plano.
   if (pending) {
-    return <SyncingOverlay />;
+    return <SyncingOverlay onCancel={handleCancel} />;
   }
 
   if (conflict !== null) {
