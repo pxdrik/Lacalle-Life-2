@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { isSupabaseConfigured } from "@/core/auth/env";
 import { formatDecimal } from "@/core/format/decimal";
 import { resolveProfileConflictAndSync, runProfileSync } from "@/composition/sync/sync-engine";
 import type { PullProfileResult } from "@/composition/sync/profile-sync";
@@ -16,9 +17,15 @@ type ConflictResult = Extract<PullProfileResult, { status: "conflict" }>;
  * `features/**` não tem permissão de importar composition (mesma regra do
  * `AGENTS.md` que já vale para o resto do app).
  *
- * Primeira fatia do motor de sync: só `profile`. Botão manual em vez de
- * automático de propósito — provar o mecanismo (outbox, push, pull,
- * conflito) antes de decidir quando disparar sozinho.
+ * Sincroniza sozinho ao montar a tela, mesmo desenho de `DietSyncStatus`/
+ * `FoodLogSyncStatus`/`RoutineSyncStatus` — achado ao vivo contra produção
+ * (02/09/2026): `profile` era a única das quatro entidades que ainda exigia
+ * o clique manual até para *puxar*, não só para empurrar, e um conflito
+ * real (dois pesos diferentes em dois aparelhos) ficou invisível vários
+ * dias só porque ninguém pensou em abrir esta tela e clicar o botão. O
+ * botão continua existindo — um clique explícito depois do automático
+ * silencioso ainda é o único jeito de forçar uma nova tentativa depois de
+ * um erro.
  *
  * **Um conflito nunca se resolve clicando "sincronizar" de novo.** Enquanto
  * `pull.status === "conflict"`, o botão normal some e só a escolha explícita
@@ -30,6 +37,33 @@ export function ManualSyncButton() {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [conflict, setConflict] = useState<ConflictResult | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function autoSync() {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const outcome = await runProfileSync();
+        if (!active) return;
+        // Silencioso no sucesso — mesmo desenho transparente das outras
+        // três telas. Só um conflito real (ou um erro) interrompe o
+        // silêncio, porque só esses dois exigem que a pessoa veja algo.
+        setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
+        if (outcome.push.status === "error" || outcome.pull.status === "error") {
+          setResult(`push: ${outcome.push.status} · pull: ${outcome.pull.status}`);
+        }
+      } catch {
+        // Falha silenciosa de propósito — o botão manual continua
+        // disponível para tentar de novo e mostrar o erro de verdade.
+      }
+    }
+
+    void autoSync();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleSync() {
     setPending(true);
