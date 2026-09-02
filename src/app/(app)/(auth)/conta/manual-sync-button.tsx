@@ -13,6 +13,14 @@ import { SyncingOverlay } from "@/design-system/components/syncing-overlay";
 
 type ConflictResult = Extract<PullProfileResult, { status: "conflict" }>;
 
+// Achado do Pedro: a tela de carregamento estava curta demais — quando a
+// rede responde rápido, ela pisca e some antes de dar tempo de ler. Um
+// clique manual sempre fica pelo menos esse tanto em pé, mesmo que a
+// sincronização em si termine bem antes; "Cancelar" continua imediato e não
+// espera esse mínimo, porque é a própria pessoa desistindo de esperar, não
+// o contrário.
+const MIN_OVERLAY_MS = 3000;
+
 /**
  * Sincronização manual do perfil — vive aqui, dentro de `app/`, e não em
  * `features/auth`, porque chama `@/composition/sync` diretamente e
@@ -105,11 +113,23 @@ export function ManualSyncButton() {
     };
   }, []);
 
+  // Segura o retorno até `MIN_OVERLAY_MS` desde `startedAt`, a menos que a
+  // pessoa já tenha cancelado — cancelar nunca deveria ficar mais lento só
+  // porque o mínimo ainda não passou.
+  async function waitOutMinimum(startedAt: number) {
+    const remaining = MIN_OVERLAY_MS - (Date.now() - startedAt);
+    if (remaining > 0 && !cancelledRef.current) {
+      await new Promise((resolve) => setTimeout(resolve, remaining));
+    }
+  }
+
   async function handleSync() {
     cancelledRef.current = false;
     setPending(true);
     setResult(null);
+    const startedAt = Date.now();
     await syncAndReport(runProfileSync, () => !cancelledRef.current);
+    await waitOutMinimum(startedAt);
     if (!cancelledRef.current) setPending(false);
   }
 
@@ -118,10 +138,12 @@ export function ManualSyncButton() {
     cancelledRef.current = false;
     setPending(true);
     setResult(null);
+    const startedAt = Date.now();
     await syncAndReport(
       () => resolveProfileConflictAndSync(resolution, conflict.remote),
       () => !cancelledRef.current,
     );
+    await waitOutMinimum(startedAt);
     if (!cancelledRef.current) setPending(false);
   }
 

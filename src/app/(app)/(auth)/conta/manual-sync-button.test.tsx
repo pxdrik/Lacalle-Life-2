@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 
 import { onProfileChanged } from "@/features/profile/data/profile-changed";
 
@@ -28,6 +28,15 @@ vi.mock("@/core/auth/env", () => ({
 describe("ManualSyncButton — sincronização automática ao montar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // `shouldAdvanceTime` deixa os `await` reais dos mocks resolverem
+    // normalmente enquanto o `setTimeout` de `MIN_OVERLAY_MS` fica
+    // controlável — `vi.advanceTimersByTime` pula os 3 segundos de verdade
+    // em vez do teste esperar por eles.
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("chama runProfileSync sozinho ao montar, sem esperar clique", async () => {
@@ -98,7 +107,7 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     });
 
     const { default: userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<ManualSyncButton />);
 
     await waitFor(() => {
@@ -111,6 +120,14 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
 
     await waitFor(() => {
       expect(runProfileSync).toHaveBeenCalledTimes(2);
+    });
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Sincronizar dados" }),
+      ).toBeInTheDocument();
     });
     expect(screen.queryByText(/push: nothing-pending/)).not.toBeInTheDocument();
     expect(screen.queryByText(/pull: applied/i)).not.toBeInTheDocument();
@@ -132,7 +149,7 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     });
 
     const { default: userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<ManualSyncButton />);
 
     await waitFor(() => {
@@ -158,7 +175,16 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
       screen.queryByRole("button", { name: "Sincronizar dados" }),
     ).not.toBeInTheDocument();
 
-    resolveClick({ push: { status: "pushed" }, pull: { status: "applied" } });
+    await act(async () => {
+      resolveClick({ push: { status: "pushed" }, pull: { status: "applied" } });
+      // Deixa a resposta resolvida atravessar `syncAndReport`/
+      // `notifyProfileChanged` antes de pular o mínimo de exibição —
+      // senão o `advanceTimersByTime` corre antes do `setTimeout` sequer
+      // existir.
+      await Promise.resolve();
+      await Promise.resolve();
+      vi.advanceTimersByTime(3000);
+    });
 
     expect(
       await screen.findByRole("button", { name: "Sincronizar dados" }),
@@ -188,7 +214,7 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     );
 
     const { default: userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<ManualSyncButton />);
 
     await waitFor(() => {
@@ -211,7 +237,12 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
       screen.queryByRole("button", { name: "Sincronizar dados" }),
     ).not.toBeInTheDocument();
 
-    resolveReread();
+    await act(async () => {
+      resolveReread();
+      await Promise.resolve();
+      await Promise.resolve();
+      vi.advanceTimersByTime(3000);
+    });
 
     expect(
       await screen.findByRole("button", { name: "Sincronizar dados" }),
@@ -227,7 +258,7 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     });
 
     const { default: userEvent } = await import("@testing-library/user-event");
-    const user = userEvent.setup();
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<ManualSyncButton />);
 
     await waitFor(() => {
@@ -258,8 +289,11 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
 
     // A chamada abandonada respondendo tarde não deveria fazer nada
     // reaparecer na tela.
-    resolveClick({ push: { status: "error" }, pull: { status: "error" } });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await act(async () => {
+      resolveClick({ push: { status: "error" }, pull: { status: "error" } });
+      await Promise.resolve();
+      await Promise.resolve();
+    });
     expect(
       screen.queryByText("Não foi possível sincronizar agora. Tente de novo em instantes."),
     ).not.toBeInTheDocument();
