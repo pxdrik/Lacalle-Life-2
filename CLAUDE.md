@@ -11,7 +11,10 @@ antes de dizer "pronto", e os erros que já custaram tempo.
 1. `npm run verify` verde (typecheck, lint, testes).
 2. `npm run build` passando.
 3. **Commit e push.** Toda entrega termina no GitHub, sem precisar ser pedido.
-   Trabalho que existe só na máquina não existe.
+   Trabalho que existe só na máquina não existe. `.github/workflows/ci.yml`
+   roda os mesmos dois comandos acima em todo push/PR — não substitui rodar
+   local antes de empurrar, é a rede de segurança para quando alguém
+   esquecer.
 4. Atualizar `docs/roadmap.md` quando um item sair ou entrar. O documento
    existe para não depender da memória de nenhuma conversa — um roadmap que
    lista como pendente algo já entregue é pior que nenhum.

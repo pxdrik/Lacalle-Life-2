@@ -1,0 +1,41 @@
+name: CI
+
+# P1-03 (auditoria de release, 02/09/2026): antes deste arquivo, nada
+# impedia um `git push` para `main` com typecheck, lint, teste ou build
+# quebrado — o único portão era o social ("npm run verify" documentado em
+# CLAUDE.md, sem imposição técnica nenhuma). Este workflow roda exatamente
+# os mesmos comandos que CLAUDE.md já pede antes de qualquer entrega
+# ("npm run verify" verde, "npm run build" passando), como CI de verdade em
+# vez de disciplina de quem está codando.
+#
+# Não substitui branch protection — só bloqueia merge se o repositório
+# exigir este workflow como "required status check" nas configurações do
+# GitHub (Settings → Branches → Branch protection rules). Ver nota no README.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.9.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify (typecheck + lint + test)
+        run: npm run verify
+
+      - name: Build
+        run: npm run build
