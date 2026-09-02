@@ -29,7 +29,12 @@ import {
 import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
-import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
+import {
+  backfillUntracked,
+  SYNC_TRACKER_STORE,
+  type SyncTracker,
+} from "@/core/sync/sync-tracker";
+import { PROFILE_ID } from "@/features/profile/types/profile";
 
 import { exportAll, importAll, previewImport } from "./backup";
 import { debouncedKeyedTrigger, debouncedTrigger } from "./debounce";
@@ -111,6 +116,11 @@ const foodLogRepository = once<FoodLogRepository>(async () => {
   const local = (await getRepositories()).foodLogs;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  // Pega registros salvos antes deste dispositivo ter sync — ver a doc de
+  // `backfillUntracked`. Roda uma vez por sessão (`once<T>` memoiza esta
+  // fábrica), custo desprezível mesmo com centenas de dias registrados.
+  const existing = await local.listAll();
+  await backfillUntracked(tracker, "foodLog", existing.map((log) => log.id));
   const pushSoon = debouncedKeyedTrigger((day) => {
     pushFoodLog(getSupabaseBrowserClient(), tracker, local, day).catch(() => {
       // Silencioso de propósito — o próximo mount de `/diario` ou o botão
@@ -157,6 +167,8 @@ const dietRepository = once<DietRepository>(async () => {
   const local = (await getRepositories()).diets;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await local.listAll();
+  await backfillUntracked(tracker, "diets", existing.map((diet) => diet.id));
   const pushSoon = debouncedTrigger(() => {
     pushAllDiets(getSupabaseBrowserClient(), tracker, local).catch(() => {
       // Silencioso de propósito — ver `foodLogRepository` acima.
@@ -178,6 +190,10 @@ const profileRepository = once<ProfileRepository>(async () => {
   const local = (await getRepositories()).profile;
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await local.get();
+  if (existing !== undefined) {
+    await backfillUntracked(tracker, "profile", [PROFILE_ID]);
+  }
   const pushSoon = debouncedTrigger(() => {
     pushProfile(getSupabaseBrowserClient(), tracker, local).catch(() => {
       // Silencioso de propósito — ver `foodLogRepository` acima.
@@ -268,6 +284,8 @@ const workoutRepositories = once<WorkoutRepositories>(async () => {
   const { routines, sessions } = await getRepositories();
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await routines.listAll();
+  await backfillUntracked(tracker, "routines", existing.map((routine) => routine.id));
   const pushSoon = debouncedTrigger(() => {
     pushAllRoutines(getSupabaseBrowserClient(), tracker, routines).catch(() => {
       // Silencioso de propósito — ver `foodLogRepository` acima.

@@ -182,6 +182,33 @@ export async function forcePendingAfterResolution(
   );
 }
 
+/**
+ * Marca pendente todo id desta lista que ainda não tem NENHUMA entrada no
+ * tracker — o caso de um registro salvo antes da entidade ganhar
+ * sincronização (ou gravado, por qualquer motivo, sem passar pelo
+ * `Syncing*Repository` decorado). Sem isto o registro é invisível pra
+ * `listPending` para sempre, porque nunca existiu como `"pending"` nem como
+ * qualquer outro status — achado ao vivo contra produção (02/09/2026): uma
+ * rotina criada um dia antes do sync de `Routine` existir nunca foi
+ * pega por nenhuma tentativa de push depois que o recurso chegou.
+ *
+ * Idempotente e seguro de rodar em todo carregamento: só toca em ids sem
+ * entrada nenhuma — um registro já `"clean"`, `"pending"` ou `"conflict"`
+ * nunca é alterado por aqui.
+ */
+export async function backfillUntracked(
+  tracker: Store<SyncTracker>,
+  store: string,
+  recordIds: readonly EntityId[],
+): Promise<void> {
+  for (const recordId of recordIds) {
+    const existing = await tracker.get(trackerId(store, recordId));
+    if (existing === undefined) {
+      await markPending(tracker, store, recordId);
+    }
+  }
+}
+
 /** Todos os registros de uma store com uma mutação pendente de envio (não em conflito). */
 export async function listPending(
   tracker: Store<SyncTracker>,
