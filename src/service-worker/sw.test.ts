@@ -44,7 +44,7 @@ describe("networkFirst never caches a failing response", () => {
 
     expect(result.status).toBe(500);
 
-    const shell = sw.caches.peek("lacalle-shell-v6");
+    const shell = sw.caches.peek("lacalle-shell-v7");
     expect(shell?.size ?? 0).toBe(0);
   });
 
@@ -127,6 +127,33 @@ describe("the RSC payload cache has a ceiling", () => {
   });
 });
 
+describe("install precaches every static tab, including /hoje", () => {
+  it("serves /hoje's own shell offline on the very first visit, never the landing page's", async () => {
+    // Achado ao vivo (celular do Pedro, modo avião): clicar em "Hoje" offline
+    // mostrava a tela de apresentação do site por um instante. Causa raiz:
+    // `/hoje` nunca esteve em `ROUTES`, só `"/"` estava — o fallback de
+    // `networkFirst` em `sw.js` sempre caía em `"/"` para a rota mais
+    // visitada do app, porque a rota em si nunca tinha sido precacheada.
+    const fetchImpl = vi.fn(async (request: FakeRequest) =>
+      fakeResponse(200, request.url.endsWith("/hoje") ? "hoje-shell" : "root-shell"),
+    );
+    const sw = loadServiceWorker(fetchImpl);
+
+    // Instala online — pré-cacheia toda `ROUTES`, incluindo agora `/hoje`.
+    await sw.dispatchLifecycle("install");
+
+    // Passa a falhar toda chamada de rede a partir daqui — genuinamente
+    // offline, e `/hoje` nunca foi navegado nesta sessão além do precache.
+    fetchImpl.mockRejectedValue(new Error("offline"));
+
+    const result = (await sw.dispatchFetch(
+      navigate("https://lacalle.example/hoje"),
+    )) as FakeResponse;
+
+    expect(result.label).toBe("hoje-shell");
+  });
+});
+
 describe("activate", () => {
   it("retires an old version's caches but keeps the current shell, assets and payload caches", async () => {
     const fetchImpl = vi.fn(async () => fakeResponse(200));
@@ -142,7 +169,7 @@ describe("activate", () => {
 
     const remaining = await sw.caches.keys();
     expect(remaining).not.toContain("lacalle-shell-v0");
-    expect(remaining).toContain("lacalle-shell-v6");
+    expect(remaining).toContain("lacalle-shell-v7");
     expect(remaining.some((n) => n.includes("payload"))).toBe(true);
   });
 });

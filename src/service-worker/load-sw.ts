@@ -14,15 +14,18 @@ import path from "node:path";
 export interface FakeResponse {
   readonly ok: boolean;
   readonly status: number;
+  /** Test-only marker to tell two cached responses apart — `sw.js` never reads this. */
+  readonly label?: string;
   clone(): FakeResponse;
 }
 
-export function fakeResponse(status = 200): FakeResponse {
+export function fakeResponse(status = 200, label?: string): FakeResponse {
   return {
     ok: status >= 200 && status < 300,
     status,
+    ...(label === undefined ? {} : { label }),
     clone() {
-      return fakeResponse(status);
+      return fakeResponse(status, label);
     },
   };
 }
@@ -46,6 +49,11 @@ export interface FakeRequest {
 
 class FakeCache {
   private readonly entries = new Map<string, FakeResponse>();
+  private readonly fetchImpl: (request: FakeRequest) => Promise<FakeResponse>;
+
+  constructor(fetchImpl: (request: FakeRequest) => Promise<FakeResponse>) {
+    this.fetchImpl = fetchImpl;
+  }
 
   match(request: FakeRequest | string): FakeResponse | undefined {
     return this.entries.get(keyOf(request));
@@ -53,6 +61,24 @@ class FakeCache {
 
   async put(request: FakeRequest | string, response: FakeResponse) {
     this.entries.set(keyOf(request), response);
+  }
+
+  /**
+   * Mirrors `Cache.add`: fetches the request and stores the response, only
+   * if it's `ok` — same contract the real Cache API has. `sw.js`'s `install`
+   * handler calls this for every route in `ROUTES`; without it here, that
+   * call silently no-ops (swallowed by the `Promise.allSettled` install
+   * wraps it in) and a test asserting a route got precached would pass for
+   * the wrong reason — an empty cache, not a populated one.
+   */
+  async add(request: FakeRequest | string): Promise<void> {
+    const asRequest: FakeRequest =
+      typeof request === "string" ? { url: request, method: "GET" } : request;
+    const response = await this.fetchImpl(asRequest);
+    if (!response.ok) {
+      throw new Error(`add() failed: ${String(response.status)}`);
+    }
+    await this.put(request, response);
   }
 
   async delete(request: FakeRequest | string): Promise<boolean> {
@@ -71,11 +97,16 @@ class FakeCache {
 
 export class FakeCacheStorage {
   private readonly caches = new Map<string, FakeCache>();
+  private readonly fetchImpl: (request: FakeRequest) => Promise<FakeResponse>;
+
+  constructor(fetchImpl: (request: FakeRequest) => Promise<FakeResponse>) {
+    this.fetchImpl = fetchImpl;
+  }
 
   async open(name: string): Promise<FakeCache> {
     let cache = this.caches.get(name);
     if (cache === undefined) {
-      cache = new FakeCache();
+      cache = new FakeCache(this.fetchImpl);
       this.caches.set(name, cache);
     }
     return cache;
@@ -142,7 +173,7 @@ export function loadServiceWorker(
     clients: { claim: async () => undefined },
   };
 
-  const fakeCaches = new FakeCacheStorage();
+  const fakeCaches = new FakeCacheStorage(fetchImpl);
 
   const run = new Function("self", "caches", "fetch", code) as (
     selfArg: unknown,

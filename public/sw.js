@@ -18,7 +18,7 @@
 
 // Bump to retire every previous cache. Old entries are deleted on activate, so
 // a stale shell cannot outlive a deploy.
-const VERSION = "v6";
+const VERSION = "v7";
 const SHELL = `lacalle-shell-${VERSION}`;
 const ASSETS = `lacalle-assets-${VERSION}`;
 const PAYLOADS = `lacalle-payloads-${VERSION}`;
@@ -46,6 +46,7 @@ const MAX_PAYLOAD_ENTRIES = 40;
  */
 const ROUTES = [
   "/",
+  "/hoje",
   "/diario",
   "/treinos",
   "/dietas",
