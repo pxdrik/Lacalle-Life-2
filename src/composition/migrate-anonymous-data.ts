@@ -17,18 +17,27 @@ import { MIGRATIONS } from "./migrations";
  * registro ruim não derruba os outros" são exatamente os mesmos do backup —
  * nenhuma lógica nova de reparo é escrita aqui.
  *
- * `PROFILE`/`foodLog` são as duas únicas entidades com motor de sync
- * (`SyncingProfileRepository`/`SyncingFoodLogRepository` decoram exatamente
- * essas duas). Dietas, Treinos, Sessões, Evolução e exercícios
- * personalizados continuam só locais depois da migração, do jeito que já
- * eram antes desta correção — nenhum mecanismo de sync novo é criado aqui.
+ * **Corrigido pela auditoria P1-02** (`reconcileSyncTrackerAfterImport`,
+ * `backup.ts`): `importAll` já marca "pending" sozinho as seis entidades
+ * sincronizadas — diets, routines, sessions, bodyEntries, além de profile e
+ * foodLog. Antes dessa correção, só profile/foodLog eram marcados
+ * explicitamente aqui (o comentário desta função dizia isso), e uma dieta ou
+ * rotina criada no banco anônimo ficava sem entrada de tracker até o
+ * próximo `backfillUntracked` — o mesmo risco que o P1-02 fechou para
+ * restauração de backup em geral.
+ *
+ * As duas linhas de `markPending` abaixo (profile/foodLog) ficaram
+ * redundantes — `importAll` já cobre as duas — mas inofensivas de manter:
+ * mesma lógica de defesa em profundidade das chamadas de `backfillUntracked`
+ * em `data-providers.tsx`.
  *
  * Marcar "pending" só enfileira o envio; nunca escreve no servidor por
- * conta própria. Quem envia continua sendo `pushProfile`/`pushFoodLog`, com
- * o mesmo OCC de sempre — se a conta já tiver um perfil ou um dia de diário
- * de verdade no servidor, o próximo sync detecta o conflito
- * (`server_updated_at` não bate com `expected: null`) e pede uma escolha
- * explícita, nunca sobrescreve sozinho.
+ * conta própria. Quem envia continua sendo `pushProfile`/`pushFoodLog`/
+ * `pushAllDiets`/etc., com o mesmo OCC de sempre — se a conta já tiver um
+ * perfil, dia de diário, dieta, rotina, sessão ou peso de verdade no
+ * servidor, o próximo sync detecta o conflito (`server_updated_at` não bate
+ * com `expected: null`) e pede uma escolha explícita, nunca sobrescreve
+ * sozinho.
  */
 export async function migrateAnonymousDataToCurrentIdentity(): Promise<ImportResult> {
   const anonymous = await exportAnonymousData();
