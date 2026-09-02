@@ -38,24 +38,43 @@ export function ManualSyncButton() {
   const [result, setResult] = useState<string | null>(null);
   const [conflict, setConflict] = useState<ConflictResult | null>(null);
 
+  const FAILURE_MESSAGE = "Não foi possível sincronizar agora. Tente de novo em instantes.";
+
+  // Compartilhada pelo efeito de montagem, pelo clique manual e pela
+  // resolução de conflito. Nunca mostra o status técnico do resultado
+  // (`push: X · pull: Y`) num sucesso — achado do Pedro: "isso não deveria
+  // aparecer pro usuário", e de fato não é informação acionável para quem
+  // só quer saber se está sincronizado. Só um conflito real ou um erro de
+  // verdade interrompe o silêncio. `isActive`, quando passado, é checado
+  // depois do `await` antes de qualquer `setState` — a mesma guarda que já
+  // existia inline no efeito de montagem, só compartilhada agora.
+  async function syncAndReport(
+    run: () => Promise<{
+      readonly push: { readonly status: string };
+      readonly pull: PullProfileResult;
+    }>,
+    isActive: () => boolean = () => true,
+  ) {
+    try {
+      const outcome = await run();
+      if (!isActive()) return;
+      setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
+      setResult(
+        outcome.push.status === "error" || outcome.pull.status === "error"
+          ? FAILURE_MESSAGE
+          : null,
+      );
+    } catch {
+      if (isActive()) setResult(FAILURE_MESSAGE);
+    }
+  }
+
   useEffect(() => {
     let active = true;
 
     async function autoSync() {
-      if (!isSupabaseConfigured()) return;
-      try {
-        const outcome = await runProfileSync();
-        if (!active) return;
-        // Silencioso no sucesso — mesmo desenho transparente das outras
-        // três telas. Só um conflito real (ou um erro) interrompe o
-        // silêncio, porque só esses dois exigem que a pessoa veja algo.
-        setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
-        if (outcome.push.status === "error" || outcome.pull.status === "error") {
-          setResult(`push: ${outcome.push.status} · pull: ${outcome.pull.status}`);
-        }
-      } catch {
-        // Falha silenciosa de propósito — o botão manual continua
-        // disponível para tentar de novo e mostrar o erro de verdade.
+      if (isSupabaseConfigured()) {
+        await syncAndReport(runProfileSync, () => active);
       }
     }
 
@@ -68,32 +87,16 @@ export function ManualSyncButton() {
   async function handleSync() {
     setPending(true);
     setResult(null);
-
-    try {
-      const outcome = await runProfileSync();
-      setResult(`push: ${outcome.push.status} · pull: ${outcome.pull.status}`);
-      setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
-    } catch (cause) {
-      setResult(cause instanceof Error ? cause.message : "Falha ao sincronizar.");
-    } finally {
-      setPending(false);
-    }
+    await syncAndReport(runProfileSync);
+    setPending(false);
   }
 
   async function handleResolve(resolution: "keep-local" | "use-server") {
     if (conflict === null) return;
     setPending(true);
     setResult(null);
-
-    try {
-      const outcome = await resolveProfileConflictAndSync(resolution, conflict.remote);
-      setResult(`push: ${outcome.push.status} · pull: ${outcome.pull.status}`);
-      setConflict(outcome.pull.status === "conflict" ? outcome.pull : null);
-    } catch (cause) {
-      setResult(cause instanceof Error ? cause.message : "Falha ao resolver o conflito.");
-    } finally {
-      setPending(false);
-    }
+    await syncAndReport(() => resolveProfileConflictAndSync(resolution, conflict.remote));
+    setPending(false);
   }
 
   if (conflict !== null) {
@@ -138,7 +141,7 @@ export function ManualSyncButton() {
   return (
     <div className="space-y-2">
       <Button variant="secondary" pending={pending} onClick={() => void handleSync()}>
-        Sincronizar perfil agora
+        Sincronizar dados
       </Button>
       {result !== null && (
         <Notice tone="info">

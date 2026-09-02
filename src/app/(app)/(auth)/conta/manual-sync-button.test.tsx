@@ -88,7 +88,7 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("um clique manual continua funcionando depois do sync automático", async () => {
+  it("um clique manual continua funcionando depois do sync automático, sem mostrar o status técnico do resultado", async () => {
     isSupabaseConfigured.mockReturnValue(true);
     runProfileSync.mockResolvedValue({
       push: { status: "nothing-pending" },
@@ -104,12 +104,27 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     });
 
     await user.click(
-      screen.getByRole("button", { name: "Sincronizar perfil agora" }),
+      screen.getByRole("button", { name: "Sincronizar dados" }),
     );
 
     await waitFor(() => {
       expect(runProfileSync).toHaveBeenCalledTimes(2);
     });
-    expect(screen.getByText(/push: nothing-pending/)).toBeInTheDocument();
+    expect(screen.queryByText(/push: nothing-pending/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/pull: applied/i)).not.toBeInTheDocument();
+  });
+
+  it("mostra uma mensagem de erro legível (não o status técnico) quando o push ou pull falha", async () => {
+    isSupabaseConfigured.mockReturnValue(true);
+    runProfileSync.mockResolvedValue({
+      push: { status: "error", message: "network down" },
+      pull: { status: "not-authenticated" },
+    });
+
+    render(<ManualSyncButton />);
+
+    expect(
+      await screen.findByText("Não foi possível sincronizar agora. Tente de novo em instantes."),
+    ).toBeInTheDocument();
   });
 });
