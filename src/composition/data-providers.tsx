@@ -89,8 +89,16 @@ function once<T>(resolve: () => Promise<T>): () => Promise<T> {
  * salvando um por um (o editor de dieta/rotina não debounça a escrita
  * local, de propósito — ver a doc de `use-diet-editor.ts`) colapsar num
  * push só, em vez de um por campo.
+ *
+ * Era 1500ms — achado do Pedro (02/09/2026): esperar a tela de carregamento
+ * do outro aparelho não adianta nada se o atraso está aqui, do lado de quem
+ * *enviou*. Trocar de aparelho rápido demais depois de editar significava
+ * que o push nem tinha saído ainda quando o outro lado tentava puxar —
+ * "sincronizar" no segundo aparelho buscava e não achava nada novo porque,
+ * de fato, ainda não havia nada novo lá. Baixado para encolher essa janela
+ * de corrida; ainda alto o bastante para colapsar uma rajada de campos.
  */
-const PUSH_DEBOUNCE_MS = 1500;
+const PUSH_DEBOUNCE_MS = 400;
 
 /**
  * Decorado com o outbox de sync (`SyncingBodyRepository`), mesmo motivo do
