@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { ThemeProvider } from "@/design-system/theme/theme-provider";
 
 import { AuthRepositoryProvider } from "../data/auth-repository-context";
 import type { AuthRepository } from "../data/auth-repository";
@@ -14,6 +16,18 @@ const getTurnstileSiteKey = vi.fn().mockReturnValue(undefined);
 vi.mock("@/core/auth/env", () => ({
   getTurnstileSiteKey: () => getTurnstileSiteKey(),
 }));
+
+// `useTurnstile` agora lê o tema atual para o widget (achado de auditoria de
+// design, 02/09/2026), então `SignupForm` precisa de um `ThemeProvider` por
+// perto — e `ThemeProvider` precisa de um `matchMedia`, que o jsdom não tem.
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (media: string) => ({
+    media,
+    matches: false,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  }));
+});
 
 afterEach(() => {
   getTurnstileSiteKey.mockReturnValue(undefined);
@@ -38,9 +52,11 @@ function mount(overrides: Partial<AuthRepository> = {}) {
   };
 
   render(
-    <AuthRepositoryProvider repository={repository}>
-      <SignupForm />
-    </AuthRepositoryProvider>,
+    <ThemeProvider>
+      <AuthRepositoryProvider repository={repository}>
+        <SignupForm />
+      </AuthRepositoryProvider>
+    </ThemeProvider>,
   );
 
   return repository;

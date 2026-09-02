@@ -155,12 +155,16 @@ export function SessionSyncStatus() {
     );
   }
 
+  // `RoutineSyncStatus`, montado logo acima na mesma tela, já mostra este
+  // aviso — as duas mensagens eram idênticas letra por letra, e apareciam
+  // uma embaixo da outra (achado de auditoria de design, 02/09/2026:
+  // "Dados salvos neste dispositivo..." duas vezes seguidas em `/treinos`).
+  // Sem conta não há nada para sincronizar em nenhuma das duas listas, então
+  // uma frase basta; quando autenticado, o botão abaixo continua próprio
+  // desta lista ("Sincronizar treinos executados"), porque aí a ação é
+  // realmente distinta da de `RoutineSyncStatus`.
   if (auth === "anonymous") {
-    return (
-      <p className="text-xs text-ink-subtle">
-        Dados salvos neste dispositivo. Entre na sua conta para sincronizar.
-      </p>
-    );
+    return null;
   }
 
   return (

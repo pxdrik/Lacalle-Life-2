@@ -39,6 +39,12 @@ interface Props {
  */
 export function ExerciseThumbnail({ exercise }: Props) {
   const [failed, setFailed] = useState(false);
+  // Achado de auditoria de design (02/09/2026): sem isto, a foto substituía
+  // o tile cinza num corte seco assim que a CDN respondia — visível fila
+  // abaixo em uma lista de 183 exercícios carregando aos poucos. `opacity`
+  // porque é a única propriedade barata o bastante para animar 183 vezes ao
+  // mesmo tempo sem disputar layout com o texto ao lado.
+  const [loaded, setLoaded] = useState(false);
   // Truthiness rather than `=== null`: an exercise stored before this field
   // existed has no `media` key, and the type cannot vouch for old rows.
   const url = exercise.media ? mediaUrl(exercise.media) : null;
@@ -57,10 +63,16 @@ export function ExerciseThumbnail({ exercise }: Props) {
           width={WIDTH}
           height={HEIGHT}
           loading="lazy"
+          onLoad={() => {
+            setLoaded(true);
+          }}
           onError={() => {
             setFailed(true);
           }}
-          className="size-full object-cover"
+          className={cn(
+            "size-full object-cover opacity-0 transition-opacity duration-200 ease-out",
+            loaded && "opacity-100",
+          )}
         />
       ) : (
         <div className="flex size-full items-center justify-center">

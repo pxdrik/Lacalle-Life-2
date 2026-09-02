@@ -99,7 +99,14 @@ export function FoodBrowser() {
         <Link
           href="/alimentos/novo"
           className={cn(
-            buttonClasses(),
+            // `secondary`, não o `primary` padrão de `buttonClasses()` —
+            // achado de auditoria de design (02/09/2026): este botão media
+            // verde ao lado do "Novo exercício" cinza do catálogo irmão, sem
+            // motivo próprio para a diferença. `exercise-browser.tsx` já
+            // documenta por que o botão de criar não é `primary` num
+            // catálogo curado — "convidaria duplicata" — e 581 alimentos já
+            // curados são o mesmo caso, só que maior.
+            buttonClasses("secondary"),
             // Same row as the field beside it — see the note on "Filtros" above.
             "h-(--input-h)",
           )}

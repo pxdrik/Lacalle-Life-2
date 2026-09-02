@@ -104,7 +104,14 @@ export function BodyScreen() {
           label={labelOf(metric)}
         />
 
-        {editing === null && (
+        {/* `entries.length > 0`: achado de auditoria de design (02/09/2026)
+            — sem essa condição, o primeiro acesso (nenhum registro ainda)
+            mostrava este botão pequeno *e* o "Registrar peso" grande do
+            `EmptyState` logo abaixo ao mesmo tempo, os dois disparando a
+            mesma ação. O CTA do empty state já é o caminho — este só
+            reaparece depois que existe pelo menos uma medição para editar a
+            partir do cabeçalho, que é a ação que ele de fato serve. */}
+        {editing === null && entries.length > 0 && (
           <Button
             size="sm"
             onClick={() => {

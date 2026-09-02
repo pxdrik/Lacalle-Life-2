@@ -1,14 +1,25 @@
 "use client";
 
-import { Play } from "lucide-react";
+import { Flag, Play } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
+import { describeDataError } from "@/core/domain/describe-data-error";
 import { cn } from "@/design-system/cn";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { cardSurface } from "@/design-system/components/card";
 
+import { useWorkoutRepositories } from "../data/workout-repository-context";
 import { useSessionHistory } from "../hooks/use-session-history";
 import { useTicker } from "../hooks/use-ticker";
-import { formatDuration, sessionProgress } from "../services/session-stats";
+import { finishSession } from "../services/edit-session";
+import {
+  formatDuration,
+  isStaleSession,
+  sessionProgress,
+  staleSessionDays,
+} from "../services/session-stats";
+import type { Session } from "../types/session";
 
 /**
  * The workout left open.
@@ -23,11 +34,29 @@ export function InProgressBanner() {
   // Half a minute is precise enough for "started an hour ago", and reading the
   // clock during render would be impure.
   const now = useTicker(true, 30_000);
+  // Sessão encerrada por este banner some da tela sem esperar um reload —
+  // `useSessionHistory` carrega uma vez só (ver o comentário no hook), então
+  // esta é a única forma de refletir o "Encerrar" imediatamente aqui.
+  const [endedId, setEndedId] = useState<string | null>(null);
 
   if (state.status !== "ready" || state.inProgress === undefined) return null;
+  if (state.inProgress.id === endedId) return null;
 
   const session = state.inProgress;
   const progress = sessionProgress(session);
+
+  if (isStaleSession(session, now)) {
+    return (
+      <StaleSessionBanner
+        session={session}
+        now={now}
+        progress={progress}
+        onEnded={() => {
+          setEndedId(session.id);
+        }}
+      />
+    );
+  }
 
   return (
     <Link
@@ -68,5 +97,95 @@ export function InProgressBanner() {
 
       <span className="shrink-0 text-sm font-medium text-ink">Continuar</span>
     </Link>
+  );
+}
+
+/**
+ * Uma sessão aberta desde um dia de calendário anterior.
+ *
+ * Achado de auditoria de design (02/09/2026): o card comum, com seu
+ * cronômetro cru (`começou há 116:42:45`) e o único botão "Continuar", fazia
+ * essa sessão parecer "em andamento" agora mesmo — e, na lista de treinos
+ * logo abaixo, a mesma rotina aparecia como "nunca executado", porque
+ * `executionTrail` (corretamente) só conta sessões finalizadas. As duas
+ * frases não se contradizem tecnicamente, mas lidas juntas pareciam um bug.
+ *
+ * A correção não é esconder nem apagar nada sozinha — é parar de fingir que
+ * isto é uma sessão comum. Duração vira "iniciado há N dias" em vez de um
+ * relógio, e a única ação implícita ("toque para continuar") vira duas
+ * explícitas: retomar o treino de onde parou, ou encerrá-lo agora com o que
+ * já foi registrado (o mesmo `finishSession` que o botão "Finalizar" da tela
+ * de execução usa — nenhuma série é descartada).
+ */
+function StaleSessionBanner({
+  session,
+  now,
+  progress,
+  onEnded,
+}: {
+  readonly session: Session;
+  readonly now: number;
+  readonly progress: { readonly completed: number; readonly total: number };
+  readonly onEnded: () => void;
+}) {
+  const repositories = useWorkoutRepositories();
+  const [ending, setEnding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const days = staleSessionDays(session, now);
+
+  async function end() {
+    setEnding(true);
+    setError(null);
+    try {
+      const finished = finishSession(session, now);
+      await (await repositories).sessions.save(finished, session.updatedAt);
+      onEnded();
+    } catch (cause) {
+      setError(describeDataError(cause));
+      setEnding(false);
+    }
+  }
+
+  return (
+    <div
+      className={cn(
+        cardSurface("hero"),
+        "animate-rise flex flex-col gap-3 sm:flex-row sm:items-center",
+      )}
+    >
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-accent text-accent-ink">
+        <Play aria-hidden className="size-5" />
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium text-ink">{session.name}</p>
+        <p className="mt-0.5 text-xs text-ink-muted">
+          Treino em andamento
+          <span className="mx-1.5 text-line-strong">·</span>
+          {progress.completed}/{progress.total} séries
+          <span className="mx-1.5 text-line-strong">·</span>
+          iniciado há {days === 1 ? "1 dia" : `${String(days)} dias`}
+        </p>
+        {error !== null && (
+          <p className="mt-1 text-xs text-danger-text">{error}</p>
+        )}
+      </div>
+
+      <div className="flex shrink-0 gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          pending={ending}
+          onClick={() => void end()}
+        >
+          <Flag aria-hidden className="size-4" />
+          Encerrar
+        </Button>
+        <Link href={`/sessao/${session.id}`} className={buttonClasses("primary", "sm")}>
+          Retomar
+        </Link>
+      </div>
+    </div>
   );
 }

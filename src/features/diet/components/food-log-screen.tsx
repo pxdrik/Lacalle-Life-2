@@ -11,6 +11,7 @@ import { useState } from "react";
 import { dayKey, formatDay } from "@/core/format/day";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
+import { DateField } from "@/design-system/components/date-field";
 import {
   SortableItem,
   SortableList,
@@ -124,15 +125,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             continua sendo verdade é que o Diário nunca inventa dado: nada
             é escrito num dia futuro sem alguém clicar "Começar de X" ou
             "Adicionar refeição", exatamente como hoje. */}
-        <input
-          type="date"
+        <DateField
           value={day}
-          aria-label="Dia do registro"
-          onChange={(event) => {
-            const next = event.target.value;
-            if (next !== "") goToDay(next);
-          }}
-          className="h-(--control-h) rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          label="Dia do registro"
+          onChange={goToDay}
+          className="h-(--control-h) rounded-md border border-line bg-surface px-3 text-ink transition-colors duration-150 ease-out hover:border-line-strong"
         />
 
         <DayStep

@@ -1,3 +1,5 @@
+import { dayKey } from "@/core/format/day";
+
 import type { PerformedSet, Session } from "../types/session";
 
 export interface SessionProgress {
@@ -141,6 +143,54 @@ export function timeOfDay(ms: number): string {
   const pad = (value: number) => String(value).padStart(2, "0");
 
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
+ * Whether an open session was started on a calendar day before today.
+ *
+ * A workout is a same-day activity — nobody trains for 30 straight hours.
+ * Once a session that never finished crosses into a new calendar day, it is
+ * far more likely a phone that locked mid-set and was never reopened than
+ * an actual marathon set, and the UI has to say so — see `in-progress-banner`,
+ * where a stale session gets "Iniciado há N dias" and explicit Retomar/Encerrar
+ * actions instead of a stopwatch quietly climbing past `24:00:00`.
+ *
+ * This only changes what a session *looks like*; it never closes, hides or
+ * deletes anything on its own (achado de auditoria de design, 02/09/2026 —
+ * "não implemente simplesmente uma expiração arbitrária de 24 horas").
+ * `finishSession` in `edit-session.ts` is the one thing that ends a session,
+ * and it only runs when a person taps a button.
+ */
+export function isStaleSession(session: Session, now: number): boolean {
+  if (session.finishedAt !== null) return false;
+  return dayKey(new Date(session.startedAt)) !== dayKey(new Date(now));
+}
+
+/**
+ * Calendar days between a stale session's start and now. Always at least 1 —
+ * `isStaleSession` already guarantees the two fall on different days.
+ *
+ * Counted from local midnight to local midnight, not from a 24h/48h/72h
+ * boundary: a session started at 23:50 and still open at 00:10 is one day
+ * old by the calendar, which is what "iniciado ontem" means to a person, even
+ * though only 20 minutes of clock time passed.
+ */
+export function staleSessionDays(session: Session, now: number): number {
+  const start = new Date(session.startedAt);
+  const startMidnight = new Date(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate(),
+  ).getTime();
+
+  const current = new Date(now);
+  const nowMidnight = new Date(
+    current.getFullYear(),
+    current.getMonth(),
+    current.getDate(),
+  ).getTime();
+
+  return Math.max(1, Math.round((nowMidnight - startMidnight) / 86_400_000));
 }
 
 export function formatDuration(ms: number): string {

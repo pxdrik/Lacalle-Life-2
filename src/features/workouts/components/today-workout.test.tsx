@@ -102,7 +102,19 @@ describe("TodayWorkout", () => {
   });
 
   it("shows the running workout instead of claiming nothing happened", async () => {
-    mount([session({ id: "c", name: "Pernas", finishedAt: null })]);
+    // `startedAt` precisa ser o relógio real, não `TODAY` (uma data fixa no
+    // passado): `InProgressBanner` agora compara o início de uma sessão
+    // aberta contra `Date.now()` de verdade para decidir se ela é recente ou
+    // antiga (achado de auditoria de design, 02/09/2026), e `TODAY` deixou
+    // de ser "hoje" há muito tempo.
+    mount([
+      session({
+        id: "c",
+        name: "Pernas",
+        finishedAt: null,
+        startedAt: Date.now(),
+      }),
+    ]);
 
     expect(await screen.findByText("Pernas")).toBeInTheDocument();
     expect(screen.getByText(/Em andamento/)).toBeInTheDocument();

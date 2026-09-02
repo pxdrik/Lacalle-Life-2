@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getTurnstileSiteKey } from "@/core/auth/env";
+import { useTheme } from "@/design-system/theme/theme-provider";
 
 /**
  * O CAPTCHA (Cloudflare Turnstile) de cadastro/login/recuperação de senha —
@@ -22,6 +23,7 @@ interface TurnstileGlobal {
       readonly callback: (token: string) => void;
       readonly "expired-callback"?: () => void;
       readonly "error-callback"?: () => void;
+      readonly theme?: "light" | "dark" | "auto";
     },
   ): string;
   reset(widgetId?: string): void;
@@ -56,6 +58,13 @@ export function useTurnstile(): TurnstileState {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [token, setToken] = useState("");
+  // Achado de auditoria de design (02/09/2026): o widget sempre renderizava
+  // no tema claro padrão da Cloudflare — cinza-claro, com o logotipo laranja
+  // — quebrando a identidade visual exatamente nas telas de Entrar/Criar
+  // conta. `resolved` é o mesmo tema que já pinta o resto da página
+  // (`ThemeToggle` usa a mesma fonte), então o widget passa a segui-lo em vez
+  // de vir com o próprio tema embutido.
+  const { resolved: theme } = useTheme();
 
   useEffect(() => {
     if (siteKey === undefined) return;
@@ -73,6 +82,7 @@ export function useTurnstile(): TurnstileState {
 
       widgetIdRef.current = window.turnstile.render(containerRef.current, {
         sitekey: key,
+        theme,
         callback: setToken,
         "expired-callback": () => {
           setToken("");
@@ -109,9 +119,13 @@ export function useTurnstile(): TurnstileState {
         } catch {
           // Já removido — nada a fazer.
         }
+        // Um widget removido (troca de tema, por exemplo) leva o token dele
+        // junto — reaproveitar um token de um desafio que não existe mais na
+        // tela seria pior que pedir para resolver de novo.
+        setToken("");
       }
     };
-  }, [siteKey]);
+  }, [siteKey, theme]);
 
   const reset = useCallback(() => {
     setToken("");

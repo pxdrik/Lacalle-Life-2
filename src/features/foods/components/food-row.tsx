@@ -30,30 +30,6 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
 
   return (
     <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
-      <button
-        type="button"
-        onClick={() => {
-          onToggleFavorite(food);
-        }}
-        aria-pressed={food.isFavorite}
-        aria-label={
-          food.isFavorite
-            ? `Remover ${food.name} dos favoritos`
-            : `Favoritar ${food.name}`
-        }
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-md",
-          "transition-colors duration-150 ease-out hover:bg-line",
-          food.isFavorite ? "text-ink" : "text-ink-subtle/50",
-        )}
-      >
-        <Star
-          aria-hidden
-          className="size-4"
-          fill={food.isFavorite ? "currentColor" : "none"}
-        />
-      </button>
-
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.9375rem] text-ink">{food.name}</p>
         <p className="mt-0.5 text-xs text-ink-subtle">
@@ -70,6 +46,35 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
           </span>
         ))}
       </div>
+
+      {/* Movida do início da linha para junto das outras ações, mesma
+          posição e mesmo motivo de `ExerciseRow` (achado de auditoria de
+          design, 02/09/2026): favoritar é a ação mais rara que alguém faz
+          numa linha, e era ela que ocupava o lugar onde o olho pousa
+          primeiro — bem na frente do nome do alimento. */}
+      <button
+        type="button"
+        onClick={() => {
+          onToggleFavorite(food);
+        }}
+        aria-pressed={food.isFavorite}
+        aria-label={
+          food.isFavorite
+            ? `Remover ${food.name} dos favoritos`
+            : `Favoritar ${food.name}`
+        }
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md",
+          "transition-colors duration-150 ease-out hover:bg-line",
+          food.isFavorite ? "text-ink" : "text-ink-subtle/50",
+        )}
+      >
+        <Star
+          aria-hidden
+          className="size-4"
+          fill={food.isFavorite ? "currentColor" : "none"}
+        />
+      </button>
 
       {/* Only the user's own foods can be edited or deleted. The catalogue is
           shared ground and stays intact; unwanted entries are handled by
