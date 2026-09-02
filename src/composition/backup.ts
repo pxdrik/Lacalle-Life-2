@@ -1,8 +1,16 @@
+import type { IDBPDatabase } from "idb";
 import { z } from "zod";
 
 import { RECORD_SCHEMAS } from "./backup-schemas";
 import { DataError } from "@/core/domain/data-error";
 import { openDatabase } from "@/core/storage/indexeddb/database";
+import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import {
+  markPending,
+  resetPendingForImport,
+  SYNC_TRACKER_STORE,
+  type SyncTracker,
+} from "@/core/sync/sync-tracker";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import type { BodyEntry } from "@/features/body/types/body-entry";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
@@ -458,12 +466,91 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
       : new DataError("FAILED", "Falha ao restaurar o backup.", { cause });
   }
 
+  // P1-02: uma restauração nunca pode deixar o motor de sync achando que
+  // está tudo em dia quando não está — ver a doc de `reconcileSyncTrackerAfterImport`.
+  await reconcileSyncTrackerAfterImport(db, stores);
+
   return {
     ok: true,
     recordCount: parsed.recordCount,
     sanitizedCount: parsed.sanitizedCount,
     discardedCount: parsed.discardedCount,
   };
+}
+
+/**
+ * Contrato de sincronização para restaurar um backup (P1-02,
+ * docs/arquitetura-sincronizacao.md §17.6): **restaurar é uma escrita local
+ * grande, tratada exatamente como qualquer outra mutação local** — cada
+ * registro reentra na fila de sincronização e tenta subir com a regra de
+ * conflito da sua própria família (documento inteiro para `Profile`/
+ * `Diet`/`Routine`/`BodyEntry`/`Session`, merge por `Meal.id` para
+ * `FoodLog`). Nunca existe um modo especial de "importar para a nuvem", e
+ * nunca uma restauração fica silenciosamente invisível para o sync nem
+ * silenciosamente tratada como já confirmada.
+ *
+ * Roda fora da transação de `importAll` de propósito — `syncTracker` não
+ * está em `STORE_NAMES`/não faz parte do "banco de domínio" que a
+ * transação substitui atomicamente, e misturar as duas coisas obrigaria
+ * `writeStore` (compartilhado com o resto do arquivo) a saber sobre sync.
+ *
+ * Dois casos, por store sincronizada (`bodyEntries`, `foodLog`, `diets`,
+ * `profile`, `routines`, `sessions` — as mesmas seis chaves de
+ * `sync-engine.ts`; `foods`/`exercises` ainda não têm sync na camada de
+ * app, ver auditoria):
+ *
+ * 1. **Todo id presente depois do import** vira `"pending"` com
+ *    `serverUpdatedAt: null` via `resetPendingForImport` — nunca reaproveita
+ *    uma entrada de tracker anterior (`"clean"` ou `"conflict"`), porque o
+ *    conteúdo do arquivo não descende de forma confiável do que este
+ *    dispositivo sabia por último. Ver a doc de `resetPendingForImport` em
+ *    `sync-tracker.ts` para o raciocínio completo.
+ * 2. **Todo id que tinha entrada no tracker antes do import e não
+ *    sobreviveu a ele** (o `.clear()` de `writeStore` removeu um registro
+ *    que o novo arquivo não tem) precisa continuar `"pending"` — é uma
+ *    exclusão local como qualquer outra que o usuário tivesse feito na
+ *    tela, e sem isso a exclusão nunca chegaria ao servidor, revivendo o
+ *    registro no próximo pull de outro dispositivo.
+ *
+ * Sessão em andamento (`finishedAt === null`) é excluída de `sessions` — a
+ * mesma regra de `data-providers.tsx`/`sync-engine.ts` (§8.4/§17.3): nunca
+ * entra no tracker, restaurada ou não.
+ */
+async function reconcileSyncTrackerAfterImport(
+  db: IDBPDatabase,
+  stores: StoresResult,
+): Promise<void> {
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existingEntries = await tracker.getAll();
+
+  const restoredIdsByStore: Record<string, readonly string[]> = {
+    bodyEntries: stores.body.map((entry) => entry.id),
+    foodLog: stores.foodLogs.map((log) => log.id),
+    diets: stores.diets.map((diet) => diet.id),
+    profile: stores.profile.map((profile) => profile.id),
+    routines: stores.routines.map((routine) => routine.id),
+    sessions: stores.sessions
+      .filter((session) => session.finishedAt !== null)
+      .map((session) => session.id),
+  };
+
+  for (const [store, restoredIds] of Object.entries(restoredIdsByStore)) {
+    const restored = new Set(restoredIds);
+
+    for (const id of restored) {
+      await resetPendingForImport(tracker, store, id);
+    }
+
+    const previouslyTracked = existingEntries
+      .filter((entry) => entry.store === store)
+      .map((entry) => entry.recordId);
+
+    for (const id of previouslyTracked) {
+      if (!restored.has(id)) {
+        await markPending(tracker, store, id);
+      }
+    }
+  }
 }
 
 /** Clears the store and writes every record, as part of the caller's transaction. */

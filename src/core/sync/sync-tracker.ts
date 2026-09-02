@@ -183,6 +183,45 @@ export async function forcePendingAfterResolution(
 }
 
 /**
+ * Reset forçado usado só por restauração de backup (P1-02,
+ * `composition/backup.ts`, docs/arquitetura-sincronizacao.md §17.6):
+ * restaurar um backup é uma escrita local grande, tratada como qualquer
+ * outra mutação local — cada registro reentra na fila de sincronização e
+ * tenta subir com a regra de conflito da sua família, nunca um modo
+ * especial de "importar para a nuvem".
+ *
+ * Diferente de `markPending`, **nunca** reaproveita o `serverUpdatedAt` que
+ * uma entrada anterior já tinha, e **sobrescreve mesmo um registro em
+ * `"conflict"`**:
+ *
+ * - Reaproveitar o `serverUpdatedAt` antigo seria assumir que o conteúdo
+ *   importado descende da última versão que este dispositivo conhecia do
+ *   servidor — falso em geral, porque o arquivo pode ser mais antigo (de
+ *   antes da última sincronização), mais novo (de outro dispositivo) ou
+ *   simplesmente de uma sessão anterior deste mesmo aparelho. Preservar
+ *   esse valor arriscaria um push cujo `expected` bate por coincidência com
+ *   o servidor e sobrescreve dado mais novo de lá sem detectar nada — a
+ *   classe exata de bug que backfillUntracked corrige para "nunca visto",
+ *   aqui generalizada para "visto antes, mas não confiável".
+ * - Um registro em `"conflict"` no momento do import tinha uma decisão
+ *   pendente sobre um conteúdo que "substituir, nunca mesclar" acabou de
+ *   apagar — a decisão parada de resolver não descreve mais nada que ainda
+ *   exista localmente, então continuar bloqueado nela não protegeria nada.
+ *
+ * `serverUpdatedAt: null` faz o próximo push tentar uma criação
+ * (`p_expected_server_updated_at: null`); se o servidor já tiver uma linha
+ * viva para este id, a RPC recusa (`applied: false`) e o motor marca
+ * conflito — nunca uma sobrescrita silenciosa.
+ */
+export async function resetPendingForImport(
+  tracker: Store<SyncTracker>,
+  store: string,
+  recordId: EntityId,
+): Promise<void> {
+  await put(tracker, store, recordId, "pending", null, undefined);
+}
+
+/**
  * Marca pendente todo id desta lista que ainda não tem NENHUMA entrada no
  * tracker — o caso de um registro salvo antes da entidade ganhar
  * sincronização (ou gravado, por qualquer motivo, sem passar pelo
