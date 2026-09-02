@@ -1,7 +1,7 @@
 import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
-import { SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
+import { backfillUntracked, SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
 import { LocalFoodLogRepository } from "@/features/diet/data/local-food-log-repository";
@@ -10,7 +10,7 @@ import type { Diet } from "@/features/diet/types/diet";
 import type { FoodLog } from "@/features/diet/types/food-log";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
-import type { Profile } from "@/features/profile/types/profile";
+import { PROFILE_ID, type Profile } from "@/features/profile/types/profile";
 import { LocalRoutineRepository, ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
 import type { Routine } from "@/features/workouts/types/routine";
 import { LocalSessionRepository, SESSIONS_STORE } from "@/features/workouts/data/session-repository";
@@ -68,12 +68,38 @@ export interface ProfileSyncOutcome {
   readonly pull: PullProfileResult;
 }
 
+/**
+ * Garantia estrutural (P1-01, docs/arquitetura-sincronizacao.md §22):
+ * **nenhum `run<Entity>Sync()` pode chamar `push`/`pull` sem que todo
+ * registro local já exista no `syncTracker`** — nem que seja como
+ * `"pending"` recém-criado por `backfillUntracked`. Antes desta função, essa
+ * garantia vivia só nas fábricas de repositório de `composition/data-providers.tsx`,
+ * que rodam de forma assíncrona e sem nenhuma barreira em relação aos
+ * `*-sync-status.tsx`/botão manual que chamam `run<Entity>Sync()` direto —
+ * dois pontos de entrada independentes, sem ordem garantida entre eles. Um
+ * registro local criado antes do sync existir (ou restaurado de um backup,
+ * ver `backup.ts`), sem entrada nenhuma no tracker, podia ter sua leitura de
+ * pull cair no fallthrough de "nunca visto antes" e ser sobrescrito sem
+ * checar se o local divergia do remoto.
+ *
+ * Cada `open<Entity>SyncStores` abaixo faz esse backfill sozinho, toda vez
+ * que é chamado — idempotente (só toca id sem entrada nenhuma) e barato (uma
+ * leitura local por chamada). Isso move a garantia para dentro da própria
+ * camada de sync: ela não depende de `data-providers.tsx` já ter rodado, nem
+ * da ordem de montagem de nenhum componente. As chamadas que já existem em
+ * `data-providers.tsx` continuam — são defesa em profundidade inofensiva
+ * (idempotente), não a proteção real.
+ */
 async function openProfileSyncStores() {
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalProfileRepository(
     new IndexedDbStore<Profile>(db, PROFILE_STORE.name),
   );
+  const existing = await localOnly.get();
+  if (existing !== undefined) {
+    await backfillUntracked(tracker, "profile", [PROFILE_ID]);
+  }
   return { tracker, localOnly };
 }
 
@@ -122,12 +148,16 @@ export interface FoodLogSyncOutcome {
   readonly pull: PullFoodLogResult;
 }
 
-async function openFoodLogSyncStores() {
+async function openFoodLogSyncStores(day: string) {
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalFoodLogRepository(
     new IndexedDbStore<FoodLog>(db, FOOD_LOGS_STORE.name),
   );
+  const existing = await localOnly.getByDay(day);
+  if (existing !== undefined) {
+    await backfillUntracked(tracker, "foodLog", [day]);
+  }
   return { tracker, localOnly };
 }
 
@@ -140,7 +170,7 @@ async function openFoodLogSyncStores() {
  */
 export async function runFoodLogSync(day: string): Promise<FoodLogSyncOutcome> {
   const supabase = getSupabaseBrowserClient();
-  const { tracker, localOnly } = await openFoodLogSyncStores();
+  const { tracker, localOnly } = await openFoodLogSyncStores(day);
 
   const push = await pushFoodLog(supabase, tracker, localOnly, day);
   const pull = await pullFoodLog(supabase, tracker, localOnly, day);
@@ -159,7 +189,7 @@ export async function resolveFoodLogConflictAndSync(
   conflicts: readonly MealConflict[],
   resolutions: ReadonlyMap<string, FoodLogConflictResolution>,
 ): Promise<FoodLogSyncOutcome> {
-  const { tracker, localOnly } = await openFoodLogSyncStores();
+  const { tracker, localOnly } = await openFoodLogSyncStores(day);
   await resolveFoodLogConflict(tracker, localOnly, day, conflicts, resolutions);
   return runFoodLogSync(day);
 }
@@ -173,6 +203,8 @@ async function openDietSyncStores() {
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalDietRepository(new IndexedDbStore<Diet>(db, DIETS_STORE.name));
+  const existing = await localOnly.listAll();
+  await backfillUntracked(tracker, "diets", existing.map((diet) => diet.id));
   return { tracker, localOnly };
 }
 
@@ -220,6 +252,8 @@ async function openRoutineSyncStores() {
   const localOnly = new LocalRoutineRepository(
     new IndexedDbStore<Routine>(db, ROUTINES_STORE.name),
   );
+  const existing = await localOnly.listAll();
+  await backfillUntracked(tracker, "routines", existing.map((routine) => routine.id));
   return { tracker, localOnly };
 }
 
@@ -264,6 +298,15 @@ async function openSessionSyncStores() {
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
   const localOnly = new LocalSessionRepository(
     new IndexedDbStore<Session>(db, SESSIONS_STORE.name),
+  );
+  // Igual à mesma regra em `data-providers.tsx`: sessão em andamento
+  // (`finishedAt === null`) nunca entra no outbox (§8.4), então também não
+  // deve virar "pending" só por nunca ter tido entrada no tracker.
+  const existing = await localOnly.listAll();
+  await backfillUntracked(
+    tracker,
+    "sessions",
+    existing.filter((session) => session.finishedAt !== null).map((session) => session.id),
   );
   return { tracker, localOnly };
 }
@@ -312,6 +355,8 @@ async function openBodyEntrySyncStores() {
   const localOnly = new LocalBodyRepository(
     new IndexedDbStore<BodyEntry>(db, BODY_ENTRIES_STORE.name),
   );
+  const existing = await localOnly.listAll();
+  await backfillUntracked(tracker, "bodyEntries", existing.map((entry) => entry.id));
   return { tracker, localOnly };
 }
 
