@@ -114,6 +114,56 @@ describe("ManualSyncButton — sincronização automática ao montar", () => {
     expect(screen.queryByText(/pull: applied/i)).not.toBeInTheDocument();
   });
 
+  /**
+   * Achado do Pedro: clicar em "Sincronizar dados" e a tela ficar parada
+   * por alguns segundos (o round-trip real contra o Supabase, ao contrário
+   * de uma escrita local que termina num piscar de olhos) lia como "não
+   * aconteceu nada". `SyncingOverlay` é a resposta — só aparece durante um
+   * clique de verdade (`pending`), nunca durante o sync automático em
+   * segundo plano.
+   */
+  it("mostra a tela de carregamento enquanto o clique manual está em andamento, e some quando termina", async () => {
+    isSupabaseConfigured.mockReturnValue(true);
+    runProfileSync.mockResolvedValueOnce({
+      push: { status: "nothing-pending" },
+      pull: { status: "applied" },
+    });
+
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    render(<ManualSyncButton />);
+
+    await waitFor(() => {
+      expect(runProfileSync).toHaveBeenCalledTimes(1);
+    });
+
+    let resolveClick: (value: {
+      push: { status: string };
+      pull: { status: string };
+    }) => void = () => {};
+    runProfileSync.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveClick = resolve;
+      }),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Sincronizar dados" }),
+    );
+
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Sincronizar dados" }),
+    ).not.toBeInTheDocument();
+
+    resolveClick({ push: { status: "pushed" }, pull: { status: "applied" } });
+
+    expect(
+      await screen.findByRole("button", { name: "Sincronizar dados" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("mostra uma mensagem de erro legível (não o status técnico) quando o push ou pull falha", async () => {
     isSupabaseConfigured.mockReturnValue(true);
     runProfileSync.mockResolvedValue({

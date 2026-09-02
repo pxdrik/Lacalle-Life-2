@@ -8,6 +8,7 @@ import { resolveProfileConflictAndSync, runProfileSync } from "@/composition/syn
 import type { PullProfileResult } from "@/composition/sync/profile-sync";
 import { Button } from "@/design-system/components/button";
 import { Notice } from "@/design-system/components/notice";
+import { SyncingOverlay } from "@/design-system/components/syncing-overlay";
 
 type ConflictResult = Extract<PullProfileResult, { status: "conflict" }>;
 
@@ -99,6 +100,15 @@ export function ManualSyncButton() {
     setPending(false);
   }
 
+  // `pending` só fica `true` dentro de `handleSync`/`handleResolve` — a
+  // sincronização automática ao montar nunca toca nele, de propósito (não
+  // deveria interromper quem nem clicou em nada). Cobrir a tela é seguro
+  // exatamente por isso: só aparece quando a própria pessoa pediu a
+  // sincronização e está esperando por ela, nunca em segundo plano.
+  if (pending) {
+    return <SyncingOverlay />;
+  }
+
   if (conflict !== null) {
     return (
       <Notice tone="warning" title="Conflito de dados">
@@ -118,17 +128,17 @@ export function ManualSyncButton() {
           </p>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
+          {/* Nunca ficam em `pending`: enquanto está, o retorno antecipado
+              acima já trocou a tela inteira por `SyncingOverlay`. */}
           <Button
             size="sm"
             variant="secondary"
-            pending={pending}
             onClick={() => void handleResolve("keep-local")}
           >
             Manter {formatDecimal(conflict.local.nutrition.weightKg)} kg
           </Button>
           <Button
             size="sm"
-            pending={pending}
             onClick={() => void handleResolve("use-server")}
           >
             Usar {formatDecimal(conflict.remote.nutrition.weightKg)} kg
@@ -140,14 +150,10 @@ export function ManualSyncButton() {
 
   return (
     <div className="space-y-2">
-      <Button variant="secondary" pending={pending} onClick={() => void handleSync()}>
+      <Button variant="secondary" onClick={() => void handleSync()}>
         Sincronizar dados
       </Button>
-      {result !== null && (
-        <Notice tone="info">
-          <span className="font-mono text-xs">{result}</span>
-        </Notice>
-      )}
+      {result !== null && <Notice tone="danger">{result}</Notice>}
     </div>
   );
 }
