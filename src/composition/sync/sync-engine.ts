@@ -13,6 +13,11 @@ import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
 import { LocalRoutineRepository, ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
 import type { Routine } from "@/features/workouts/types/routine";
+import { LocalSessionRepository, SESSIONS_STORE } from "@/features/workouts/data/session-repository";
+import type { Session } from "@/features/workouts/types/session";
+import { LocalBodyRepository } from "@/features/body/data/local-body-repository";
+import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
+import type { BodyEntry } from "@/features/body/types/body-entry";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
@@ -45,6 +50,18 @@ import type {
   PullRoutinesResult,
   PushRoutinesResult,
 } from "./routine-sync";
+import { pullAllSessions, pushAllSessions, resolveSessionConflict } from "./session-sync";
+import type {
+  SessionConflictResolution,
+  PullSessionsResult,
+  PushSessionsResult,
+} from "./session-sync";
+import { pullAllBodyEntries, pushAllBodyEntries, resolveBodyEntryConflict } from "./body-entry-sync";
+import type {
+  BodyEntryConflictResolution,
+  PullBodyEntriesResult,
+  PushBodyEntriesResult,
+} from "./body-entry-sync";
 
 export interface ProfileSyncOutcome {
   readonly push: PushProfileResult;
@@ -235,4 +252,96 @@ export async function resolveRoutineConflictAndSync(
   const { tracker, localOnly } = await openRoutineSyncStores();
   await resolveRoutineConflict(tracker, localOnly, routineId, resolution, remote);
   return runRoutineSync();
+}
+
+export interface SessionSyncOutcome {
+  readonly push: PushSessionsResult;
+  readonly pull: PullSessionsResult;
+}
+
+async function openSessionSyncStores() {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalSessionRepository(
+    new IndexedDbStore<Session>(db, SESSIONS_STORE.name),
+  );
+  return { tracker, localOnly };
+}
+
+/**
+ * Sincroniza todas as sessões de uma vez — mesmo desenho de
+ * `runRoutineSync`. Sessões em andamento (`finishedAt === null`) nunca
+ * entram no outbox (§8.4), então `push` nunca tenta enviá-las; `pull`
+ * continua trazendo qualquer sessão finalizada em outro dispositivo,
+ * normalmente. Abre o `LocalSessionRepository` **puro**, nunca o
+ * `SyncingSessionRepository` que a UI usa.
+ */
+export async function runSessionSync(): Promise<SessionSyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const { tracker, localOnly } = await openSessionSyncStores();
+
+  const push = await pushAllSessions(supabase, tracker, localOnly);
+  const pull = await pullAllSessions(supabase, tracker, localOnly);
+
+  return { push, pull };
+}
+
+/**
+ * Resolve o conflito de uma sessão e roda o ciclo de novo. `sessionId`/
+ * `remote` têm que vir do resultado `"done"` de `runSessionSync` que a UI
+ * mostrou — mesma regra de `resolveRoutineConflictAndSync`.
+ */
+export async function resolveSessionConflictAndSync(
+  sessionId: string,
+  resolution: SessionConflictResolution,
+  remote: Session | null,
+): Promise<SessionSyncOutcome> {
+  const { tracker, localOnly } = await openSessionSyncStores();
+  await resolveSessionConflict(tracker, localOnly, sessionId, resolution, remote);
+  return runSessionSync();
+}
+
+export interface BodyEntrySyncOutcome {
+  readonly push: PushBodyEntriesResult;
+  readonly pull: PullBodyEntriesResult;
+}
+
+async function openBodyEntrySyncStores() {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalBodyRepository(
+    new IndexedDbStore<BodyEntry>(db, BODY_ENTRIES_STORE.name),
+  );
+  return { tracker, localOnly };
+}
+
+/**
+ * Sincroniza todo o histórico de peso/medidas de uma vez — mesmo desenho de
+ * `runDietSync`/`runRoutineSync`, mesma família de "muitos registros por
+ * usuário". Abre o `LocalBodyRepository` **puro**, nunca o
+ * `SyncingBodyRepository` que a UI usa.
+ */
+export async function runBodyEntrySync(): Promise<BodyEntrySyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const { tracker, localOnly } = await openBodyEntrySyncStores();
+
+  const push = await pushAllBodyEntries(supabase, tracker, localOnly);
+  const pull = await pullAllBodyEntries(supabase, tracker, localOnly);
+
+  return { push, pull };
+}
+
+/**
+ * Resolve o conflito de um dia e roda o ciclo de novo. `day`/`remote` têm
+ * que vir do resultado `"done"` de `runBodyEntrySync` que a UI mostrou —
+ * mesma regra de `resolveDietConflictAndSync`.
+ */
+export async function resolveBodyEntryConflictAndSync(
+  day: string,
+  resolution: BodyEntryConflictResolution,
+  remote: BodyEntry | null,
+): Promise<BodyEntrySyncOutcome> {
+  const { tracker, localOnly } = await openBodyEntrySyncStores();
+  await resolveBodyEntryConflict(tracker, localOnly, day, resolution, remote);
+  return runBodyEntrySync();
 }

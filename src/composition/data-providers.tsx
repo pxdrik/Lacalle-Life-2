@@ -2,6 +2,7 @@
 
 import type { BodyRepository } from "@/features/body/data/body-repository";
 import { BodyRepositoryProvider } from "@/features/body/data/body-repository-context";
+import { SyncingBodyRepository } from "@/features/body/data/syncing-body-repository";
 import { DietRepositoryProvider } from "@/features/diet/data/diet-repository-context";
 import type { FoodLogRepository } from "@/features/diet/data/food-log-repository";
 import { FoodLogRepositoryProvider } from "@/features/diet/data/food-log-repository-context";
@@ -21,6 +22,7 @@ import { SyncingProfileRepository } from "@/features/profile/data/syncing-profil
 import type { ExerciseRepository } from "@/features/workouts/data/exercise-repository";
 import { ExerciseRepositoryProvider } from "@/features/workouts/data/exercise-repository-context";
 import { SyncingRoutineRepository } from "@/features/workouts/data/syncing-routine-repository";
+import { SyncingSessionRepository } from "@/features/workouts/data/syncing-session-repository";
 import {
   WorkoutRepositoryProvider,
   type WorkoutRepositories,
@@ -46,6 +48,8 @@ import { pushAllDiets } from "./sync/diet-sync";
 import { pushFoodLog } from "./sync/food-log-sync";
 import { pushProfile } from "./sync/profile-sync";
 import { pushAllRoutines } from "./sync/routine-sync";
+import { pushAllSessions } from "./sync/session-sync";
+import { pushAllBodyEntries } from "./sync/body-entry-sync";
 
 /**
  * Supplies each feature with its repository.
@@ -88,8 +92,22 @@ function once<T>(resolve: () => Promise<T>): () => Promise<T> {
  */
 const PUSH_DEBOUNCE_MS = 1500;
 
+/**
+ * Decorado com o outbox de sync (`SyncingBodyRepository`), mesmo motivo do
+ * `dietRepository`/`profileRepository` acima.
+ */
 const bodyRepository = once<BodyRepository>(async () => {
-  return (await getRepositories()).body;
+  const local = (await getRepositories()).body;
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await local.listAll();
+  await backfillUntracked(tracker, "bodyEntries", existing.map((entry) => entry.id));
+  const pushSoon = debouncedTrigger(() => {
+    pushAllBodyEntries(getSupabaseBrowserClient(), tracker, local).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` abaixo.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingBodyRepository(local, tracker, pushSoon);
 });
 
 export function BodyDataProvider({
@@ -276,22 +294,42 @@ export function ProfileDataProvider({
 }
 
 /**
- * `routines` decorado com o outbox de sync (`SyncingRoutineRepository`),
- * mesmo motivo do `dietRepository` acima — `sessions` fica de fora de
- * propósito, sync de sessão de treino ainda não existe.
+ * `routines` e `sessions`, os dois decorados com o outbox de sync — mesmo
+ * motivo do `dietRepository` acima. `sessions` tem uma regra a mais
+ * (`SyncingSessionRepository`): só marca pendente uma sessão já finalizada,
+ * então o backfill abaixo também filtra por `finishedAt !== null` — uma
+ * sessão em andamento salva antes deste dispositivo abrir o app não deve
+ * virar pendente só porque nunca tinha entrada no tracker.
  */
 const workoutRepositories = once<WorkoutRepositories>(async () => {
   const { routines, sessions } = await getRepositories();
   const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
   const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
-  const existing = await routines.listAll();
-  await backfillUntracked(tracker, "routines", existing.map((routine) => routine.id));
-  const pushSoon = debouncedTrigger(() => {
+
+  const existingRoutines = await routines.listAll();
+  await backfillUntracked(tracker, "routines", existingRoutines.map((routine) => routine.id));
+  const pushRoutinesSoon = debouncedTrigger(() => {
     pushAllRoutines(getSupabaseBrowserClient(), tracker, routines).catch(() => {
       // Silencioso de propósito — ver `foodLogRepository` acima.
     });
   }, PUSH_DEBOUNCE_MS);
-  return { routines: new SyncingRoutineRepository(routines, tracker, pushSoon), sessions };
+
+  const existingSessions = await sessions.listAll();
+  await backfillUntracked(
+    tracker,
+    "sessions",
+    existingSessions.filter((session) => session.finishedAt !== null).map((session) => session.id),
+  );
+  const pushSessionsSoon = debouncedTrigger(() => {
+    pushAllSessions(getSupabaseBrowserClient(), tracker, sessions).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` acima.
+    });
+  }, PUSH_DEBOUNCE_MS);
+
+  return {
+    routines: new SyncingRoutineRepository(routines, tracker, pushRoutinesSoon),
+    sessions: new SyncingSessionRepository(sessions, tracker, pushSessionsSoon),
+  };
 });
 
 export function ExerciseDataProvider({

@@ -14,6 +14,8 @@ import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
 import { Section } from "@/design-system/components/section";
 
+import { BodyEntrySyncStatus } from "./body-entry-sync-status";
+
 export const metadata: Metadata = {
   title: "Evolução · LaCalle Life",
 };
@@ -41,6 +43,9 @@ export default function EvolutionPage() {
 
       <div className="mt-8">
         <BodyDataProvider>
+          <div className="mb-4">
+            <BodyEntrySyncStatus />
+          </div>
           {/* Isolated from the workout half below: a corrupted body record
               must not take the whole page down with it. See the doc comment
               on `ErrorBoundary` for why this exists. */}

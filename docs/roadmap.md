@@ -1113,6 +1113,83 @@ passaram de primeira. `Session`/`BodyEntry` continuam sem sync — fora do
 escopo desta sprint. `npm run verify` limpo (135 arquivos, 1461 testes),
 `npm run build` limpo.
 
+**Motor de sync estendido para `Session` (02/09/2026).** Quinta entidade
+— o Pedro pediu cobertura completa depois de bater o mesmo problema em
+`Routine`/`Profile`: executou um treino no PC, terminou, e nada chegou
+no celular. Mesma família de `Diet`/`Routine` (documento inteiro,
+conflito visível), com uma regra a mais que nenhuma das outras tem:
+**uma sessão só entra na fila de sincronização quando `finishedAt !==
+null`** (docs/arquitetura-sincronizacao.md §8.4) — um treino em
+andamento é salvo a cada série concluída, e não tem por que existir em
+dois aparelhos ao mesmo tempo, então nunca tenta. `SyncingSessionRepository`
+é o único lugar que decide isso (`save()` só marca pendente com
+`finishedAt !== null`); `pushOneSession` repete a checagem como defesa
+em profundidade, e `save_workout_session` já recusava no banco antes
+disso existir do lado do cliente (`raise exception` se
+`p_finished_at is null`, migration 0026).
+
+Diferença estrutural de `Diet`/`Routine`: a linha de `workout_sessions`
+não guarda tudo dentro de `payload` — `routine_id`/`name`/`started_at`/
+`finished_at` são colunas próprias, só `exercises` vai no jsonb
+(`sessionExercisesPayloadSchema`, novo em `backup-schemas.ts`, não é
+`sessionRecordSchema.omit(...)` porque o formato de fio é mesmo mais
+estreito que o de backup aqui).
+
+Campanha adversarial: 16 cenários, os últimos quatro (13-16) atacando
+especificamente o portão de `finishedAt` — salvar a mesma sessão em
+andamento repetidas vezes, duas sessões em andamento em dois aparelhos
+que nunca deveriam se ver, e até uma pendência marcada "por engano"
+direto no tracker (contornando `SyncingSessionRepository` de propósito)
+para confirmar que `pushOneSession` recusa sozinho, sem depender de mais
+ninguém ter feito certo antes. Nenhum bug novo encontrado — os 25
+cenários (16 adversariais + 9 de orquestração) passaram de primeira.
+UI de conflito em `/treinos`, ao lado de `RoutineSyncStatus`
+(`session-sync-status.tsx`) — não em `/sessao/[id]` nem em `/evolucao`,
+porque uma sessão em andamento nunca tem nada para sincronizar ali.
+`npm run verify` e `npm run build` limpos.
+
+**Motor de sync estendido para `BodyEntry` (02/09/2026).** Sexta e
+última entidade do pedido de cobertura completa do Pedro. Mesma família
+de `Diet`/`Routine` (muitos registros por usuário, documento inteiro,
+conflito visível) — um peso registrado é uma decisão de dois minutos em
+pé no banheiro, sem subestrutura que valha a pena mesclar campo a campo,
+diferente de `FoodLog`. A identidade já é o dia (`BodyEntry.id ===
+BodyEntry.day`, mesma convenção de `FoodLog`), então nada muda na
+camada do tracker — só a forma da RPC.
+
+Diferença real de `Diet`/`Routine`: `save_body_entry`/`delete_body_entry`
+(migration 0029) não recebem um `p_payload` único — `body_entries` é
+chaveada por `(user_id, day)`, sem coluna `payload`, então os campos
+escalares (`p_weight_kg`, `p_body_fat_percent`, `p_measurements`,
+`p_notes`) vão soltos na chamada. `pushOneBodyEntry`/`pullAllBodyEntries`
+em `composition/sync/body-entry-sync.ts` constroem os argumentos/o
+registro diretamente a partir desses campos, sem um schema de "payload"
+único para validar — só `measurements` (o único campo estruturado) passa
+por um schema próprio, tolerando site ausente ou `null` do mesmo jeito
+que `LocalBodyRepository.normalize()` já tolera na leitura local.
+
+Campanha adversarial: 13 cenários + 10 de orquestração, incluindo um caso
+que as outras entidades não tinham motivo de testar — `weightKg`/
+`bodyFatPercent` nulos (só medidas registradas naquele dia) sobrevivendo
+ao round-trip sem virar `0`. O cenário 11 repetiu deliberadamente o
+ataque que achou o bug real em `Diet` (duas exclusões concorrentes sem
+nunca ter puxado uma da outra) em vez de presumir que copiar a correção
+também copiou a garantia — segurou de primeira. Nenhum bug novo
+encontrado na campanha em si; os dois únicos testes que falharam na
+primeira rodada eram erro no próprio fixture de teste (`??` tratando um
+`null` deliberado como "não escolhido", não um bug do motor), corrigidos
+antes deste commit. UI de conflito em `/evolucao`
+(`body-entry-sync-status.tsx`), ao lado de `BodyScreen` — a única tela
+que lê e edita `BodyEntry`. `npm run verify` (146 arquivos, 1536 testes)
+e `npm run build` limpos.
+
+Com `Profile`, `Diet`, `FoodLog`, `Routine`, `Session` e `BodyEntry`
+sincronizados, todo dado pessoal do app agora tem sincronização
+multi-dispositivo — o pedido "tudo tudo tudo" do Pedro está fechado,
+dentro do escopo combinado (sem WebSocket/Realtime — ver a conversa que
+fechou esse escopo: nem o Lacalle Finance, usado como referência de "sync
+que funciona", tem tempo real de verdade).
+
 ---
 
 ## Auditoria de robustez — 13/08/2026

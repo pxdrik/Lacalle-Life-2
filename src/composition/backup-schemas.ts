@@ -473,6 +473,20 @@ export const sessionRecordSchema = z
   })
   .strict();
 
+/**
+ * Diferente de `dietPayloadSchema`/`routinePayloadSchema`: a linha de
+ * `workout_sessions` não guarda o registro inteiro dentro de `payload` —
+ * `routine_id`, `name`, `started_at`, `finished_at` são colunas próprias
+ * (ver migration 0026), então o jsonb só carrega `exercises`. Não é
+ * `sessionRecordSchema.omit(...)`, é um schema à parte pelo mesmo motivo
+ * que o formato de fio já é diferente do formato de backup aqui.
+ */
+export const sessionExercisesPayloadSchema = z
+  .object({
+    exercises: z.array(sessionExerciseSchema).max(200),
+  })
+  .strict();
+
 // ---------------------------------------------------------------------------
 
 /** One schema per store name, keyed exactly as `backup.ts`'s `stores` object is. */
