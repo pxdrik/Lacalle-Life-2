@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { AuthDataProvider } from "@/composition/auth-data-provider";
 import { ProfileScreenDataProvider } from "@/composition/data-providers";
 import { AccountStatus } from "@/features/auth/components/account-status";
+import { ManualSyncButton } from "@/app/(app)/(auth)/conta/manual-sync-button";
 import { ProfileScreen } from "@/features/profile/components/profile-screen";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
@@ -45,6 +46,15 @@ export default function ProfilePage() {
             </AuthDataProvider>
           </div>
         </div>
+
+        {/* Achado ao vivo contra produção (02/09/2026): o único lugar que
+            disparava a sincronização do perfil era `/conta` — quem só abre
+            `/perfil` (que é onde o número de kcal realmente aparece e onde
+            a edição acontece) nunca via a pendência sair nem uma versão
+            nova chegar. Mesmo componente de `/conta`, montado aqui também
+            — dois pontos de entrada legítimos para o mesmo mecanismo, não
+            duas telas competindo por ele. */}
+        <ManualSyncButton />
 
         <ProfileScreenDataProvider>
           <ProfileScreen />
