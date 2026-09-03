@@ -1,4 +1,5 @@
 import { routinePayloadSchema } from "@/composition/backup-schemas";
+import { deepEqual } from "@/core/domain/deep-equal";
 import type { Store } from "@/core/storage/store";
 import {
   getExpectedServerUpdatedAt,
@@ -31,6 +32,18 @@ export interface RoutineConflict {
   readonly routineId: string;
   readonly local: Routine | null;
   readonly remote: Routine | null;
+}
+
+/**
+ * Duas rotinas contam o mesmo treino — mesmo nome, mesma observação, mesmos
+ * exercícios na mesma ordem, com as mesmas séries planejadas — ou não. A
+ * ordem dos exercícios importa (é a ordem da academia), então a comparação é
+ * posicional, não por conjunto. Envelope (`id`, `createdAt`, `updatedAt`)
+ * fora da conta — mesmo raciocínio de `bodyEntriesEqual` (achado de
+ * auditoria de design, 03/09/2026).
+ */
+function routinesEqual(a: Routine, b: Routine): boolean {
+  return a.name === b.name && a.notes === b.notes && deepEqual(a.exercises, b.exercises);
 }
 
 export type PushRoutinesResult =
@@ -235,18 +248,25 @@ export async function pullAllRoutines(
       updatedAt: row.client_updated_at,
     };
 
-    if (entry?.status === "conflict") {
+    // Um conflito de versão só vira pergunta pro usuário quando o treino
+    // também diverge de verdade — ver `bodyEntriesEqual` para o raciocínio
+    // completo.
+    if (
+      entry?.status === "conflict" ||
+      (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
+    ) {
+      if (currentLocal !== undefined && routinesEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
+        continue;
+      }
+
       await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
       conflicts.push({ routineId: row.id, local: currentLocal ?? null, remote });
       continue;
     }
 
     if (entry?.status === "pending") {
-      if (entry.serverUpdatedAt !== row.server_updated_at) {
-        await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
-        conflicts.push({ routineId: row.id, local: currentLocal ?? null, remote });
-        continue;
-      }
       continue;
     }
 

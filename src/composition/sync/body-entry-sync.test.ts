@@ -368,4 +368,62 @@ describe("push/pullAllBodyEntries — orquestração", () => {
     expect(pulled?.measurements.waist).toBe(82.4);
     expect(pulled?.measurements.neck).toBeNull();
   });
+
+  /**
+   * Achado de auditoria de design (03/09/2026): em uso real apareceu um
+   * modal de conflito perguntando "80 kg" contra "80 kg" — as duas
+   * medições eram o mesmo peso, só a versão/timestamp divergia. Reproduz
+   * exatamente o cenário: dois dispositivos que nunca sincronizaram entre
+   * si registram o mesmo peso no mesmo dia.
+   */
+  it("10. BUG: dois dispositivos registram o mesmo peso (80 kg) sem nunca ter sincronizado entre si — zero conflito", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setEntry(a, entry("2026-08-25", { weightKg: 80 }));
+    await sync(a);
+
+    // B nunca puxou o registro de A — grava o mesmo peso por conta própria.
+    await setEntry(b, entry("2026-08-25", { weightKg: 80 }));
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getByDay("2026-08-25"))?.weightKg).toBe(80);
+  });
+
+  it("11. mesmo cenário, mas com peso realmente diferente (80 vs 79) — conflito real, visível", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setEntry(a, entry("2026-08-25", { weightKg: 80 }));
+    await sync(a);
+
+    await setEntry(b, entry("2026-08-25", { weightKg: 79 }));
+    const { pull } = await sync(b);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toHaveLength(1);
+    expect(pull.conflicts[0]?.local?.weightKg).toBe(79);
+    expect(pull.conflicts[0]?.remote?.weightKg).toBe(80);
+  });
+
+  it("12. diferença só em metadata (updatedAt) sem diferença de peso não bloqueia para sempre: um conflito já marcado se autorresolve assim que os dois lados convergem", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setEntry(a, entry("2026-08-25", { weightKg: 80 }));
+    await sync(a);
+    await setEntry(b, entry("2026-08-25", { weightKg: 79 }));
+    await sync(b); // conflito real: 80 (servidor) vs 79 (local de B)
+
+    // B decide manter o próprio valor por enquanto, mas alguém edita B
+    // novamente para bater com o que já está no servidor (80) — sem nunca
+    // ter clicado em "resolver".
+    await setEntry(b, entry("2026-08-25", { weightKg: 80, updatedAt: 5000 }));
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getByDay("2026-08-25"))?.weightKg).toBe(80);
+  });
 });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { deepEqual } from "@/core/domain/deep-equal";
 import { MEASUREMENT_SITES } from "@/features/body/taxonomy/measurement-sites";
 import type { BodyEntry, Measurements } from "@/features/body/types/body-entry";
 import type { BodyRepository } from "@/features/body/data/body-repository";
@@ -40,6 +41,32 @@ export interface BodyEntryConflict {
   readonly day: string;
   readonly local: BodyEntry | null;
   readonly remote: BodyEntry | null;
+}
+
+/**
+ * Duas medições do mesmo dia contam a mesma história de negócio — mesmo
+ * peso, mesma gordura, mesmas medidas, mesma observação — ou não. O
+ * envelope (`id`, `createdAt`, `updatedAt`, e `day`, já garantido igual por
+ * quem chama) nunca entra na conta: dois dispositivos gravando "80 kg" em
+ * momentos diferentes não é uma divergência de negócio, é o mesmo fato
+ * registrado duas vezes (achado de auditoria de design, 03/09/2026 — um
+ * modal de conflito perguntando "80 kg" contra "80 kg").
+ */
+function bodyEntriesEqual(a: BodyEntry, b: BodyEntry): boolean {
+  return deepEqual(
+    {
+      weightKg: a.weightKg,
+      bodyFatPercent: a.bodyFatPercent,
+      measurements: a.measurements,
+      notes: a.notes,
+    },
+    {
+      weightKg: b.weightKg,
+      bodyFatPercent: b.bodyFatPercent,
+      measurements: b.measurements,
+      notes: b.notes,
+    },
+  );
 }
 
 export type PushBodyEntriesResult =
@@ -266,18 +293,28 @@ export async function pullAllBodyEntries(
       updatedAt: row.client_updated_at,
     };
 
-    if (entry?.status === "conflict") {
+    // Um conflito de versão só vira pergunta pro usuário quando o conteúdo
+    // também diverge — duas edições que convergiram para o mesmo peso (ou
+    // uma que nunca mudou nada de negócio) resolvem sozinhas, nos dois
+    // pontos abaixo onde a versão por si só dizia "conflito".
+    if (
+      entry?.status === "conflict" ||
+      (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
+    ) {
+      if (currentLocal !== undefined && bodyEntriesEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.day, row.server_updated_at);
+        continue;
+      }
+
       await markConflict(tracker, STORE_NAME, row.day, row.server_updated_at);
       conflicts.push({ day: row.day, local: currentLocal ?? null, remote });
       continue;
     }
 
     if (entry?.status === "pending") {
-      if (entry.serverUpdatedAt !== row.server_updated_at) {
-        await markConflict(tracker, STORE_NAME, row.day, row.server_updated_at);
-        conflicts.push({ day: row.day, local: currentLocal ?? null, remote });
-        continue;
-      }
+      // `serverUpdatedAt` bate com o que já sabíamos — servidor não mudou,
+      // só falta enviar a edição local.
       continue;
     }
 

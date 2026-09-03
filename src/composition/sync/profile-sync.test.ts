@@ -251,6 +251,65 @@ describe("pullProfile", () => {
     expect((await tracker.get("profile:me"))?.status).toBe("conflict");
   });
 
+  /**
+   * Achado de auditoria de design (03/09/2026): um conflito de versão sem
+   * diferença real de conteúdo não deveria virar pergunta pro usuário. Aqui,
+   * o local pendente e o remoto descrevem exatamente o mesmo perfil (mesmo
+   * peso e o resto), só a versão diverge.
+   */
+  it("BUG: local pendente e remoto descrevem o mesmo perfil (mesmo peso) — aplica em silêncio, sem conflito", async () => {
+    await local.save(profile(80), null);
+    await markPending(tracker, "profile", PROFILE_ID);
+
+    const from = fromReturning([
+      {
+        payload: profile(80).nutrition,
+        client_updated_at: 5000,
+        server_updated_at: "2026-02-01T00:00:00Z",
+        deleted_at: null,
+      },
+    ]);
+    const client = authenticatedClient({ from });
+
+    const result = await pullProfile(client, tracker, local);
+
+    expect(result).toEqual({ status: "applied" });
+    expect((await local.get())?.nutrition.weightKg).toBe(80);
+    expect((await tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
+  it("um conflito já marcado se autorresolve assim que os dois lados convergem para o mesmo perfil", async () => {
+    await local.save(profile(70), null);
+    await markPending(tracker, "profile", PROFILE_ID);
+    const conflictFrom = fromReturning([
+      {
+        payload: profile(90).nutrition,
+        client_updated_at: 5000,
+        server_updated_at: "2026-02-01T00:00:00Z",
+        deleted_at: null,
+      },
+    ]);
+    await pullProfile(authenticatedClient({ from: conflictFrom }), tracker, local);
+    expect((await tracker.get("profile:me"))?.status).toBe("conflict");
+
+    // Alguém edita o local de novo, sem passar por `resolveProfileConflict`,
+    // e chega exatamente ao valor que o servidor já tem.
+    await local.save(profile(90, 6000), 1000);
+
+    const sameFrom = fromReturning([
+      {
+        payload: profile(90).nutrition,
+        client_updated_at: 5000,
+        server_updated_at: "2026-02-01T00:00:00Z",
+        deleted_at: null,
+      },
+    ]);
+    const result = await pullProfile(authenticatedClient({ from: sameFrom }), tracker, local);
+
+    expect(result).toEqual({ status: "applied" });
+    expect((await tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
   it("reports pending-unpushed, not a conflict, when the local edit is pending but the server has not moved", async () => {
     await local.save(profile(70), null);
     await markPending(tracker, "profile", PROFILE_ID);

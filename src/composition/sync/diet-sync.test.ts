@@ -312,4 +312,51 @@ describe("push/pullAllDiets — orquestração", () => {
       status: "nothing-pending",
     });
   });
+
+  /**
+   * Achado de auditoria de design (03/09/2026) — mesmo bug do `BodyEntry`:
+   * um conflito de versão sem diferença real de conteúdo não deveria virar
+   * pergunta pro usuário. Aqui, o mesmo plano.
+   */
+  it("8. BUG: dois dispositivos criam a mesma dieta (mesmos alimentos/quantidades/metas) sem nunca ter sincronizado — zero conflito", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setDiet(a, diet("dieta-1", { name: "Segunda", weekdays: ["mon"] }));
+    await sync(a);
+
+    await setDiet(b, diet("dieta-1", { name: "Segunda", weekdays: ["mon"] }));
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getById("dieta-1"))?.name).toBe("Segunda");
+  });
+
+  it("9. mesmo cenário, mas com um valor realmente diferente — conflito real", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setDiet(a, diet("dieta-1", { name: "Segunda" }));
+    await sync(a);
+
+    await setDiet(b, diet("dieta-1", { name: "Segunda (editada)" }));
+    const { pull } = await sync(b);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toHaveLength(1);
+  });
+
+  it("10. mesmos dias da semana em ordem diferente não é conflito — é o mesmo conjunto", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setDiet(a, diet("dieta-1", { weekdays: ["mon", "wed", "fri"] }));
+    await sync(a);
+
+    await setDiet(b, diet("dieta-1", { weekdays: ["fri", "mon", "wed"] }));
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+  });
 });

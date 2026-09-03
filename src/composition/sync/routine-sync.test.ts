@@ -301,4 +301,34 @@ describe("push/pullAllRoutines — orquestração", () => {
       status: "nothing-pending",
     });
   });
+
+  /** Achado de auditoria de design (03/09/2026) — mesmo bug do `BodyEntry`. */
+  it("8. BUG: dois dispositivos criam a mesma rotina (mesmo treino) sem nunca ter sincronizado — zero conflito", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setRoutine(a, routine("rotina-1", { name: "Treino A", notes: "foco em peito" }));
+    await sync(a);
+
+    await setRoutine(b, routine("rotina-1", { name: "Treino A", notes: "foco em peito" }));
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getById("rotina-1"))?.name).toBe("Treino A");
+  });
+
+  it("9. mesmo cenário, mas com uma alteração real — conflito real", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setRoutine(a, routine("rotina-1", { name: "Treino A" }));
+    await sync(a);
+
+    await setRoutine(b, routine("rotina-1", { name: "Treino A (editado)" }));
+    const { pull } = await sync(b);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toHaveLength(1);
+  });
 });

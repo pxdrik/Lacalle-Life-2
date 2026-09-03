@@ -370,4 +370,39 @@ describe("push/pullAllSessions — orquestração", () => {
       status: "nothing-pending",
     });
   });
+
+  /** Achado de auditoria de design (03/09/2026) — mesmo bug do `BodyEntry`. */
+  it("8. BUG: dois dispositivos registram a mesma sessão finalizada (mesmo estado) sem nunca ter sincronizado — zero conflito", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setSession(
+      a,
+      session("sessao-1", { name: "Peito e tríceps", startedAt: 1000, finishedAt: 2000 }),
+    );
+    await sync(a);
+
+    await setSession(
+      b,
+      session("sessao-1", { name: "Peito e tríceps", startedAt: 1000, finishedAt: 2000 }),
+    );
+    const { pull } = await sync(b);
+
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+  });
+
+  it("9. mesmo cenário, mas com uma alteração real (nome diferente) — conflito real", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setSession(a, session("sessao-1", { name: "Peito e tríceps", finishedAt: 2000 }));
+    await sync(a);
+
+    await setSession(b, session("sessao-1", { name: "Costas", finishedAt: 2000 }));
+    const { pull } = await sync(b);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toHaveLength(1);
+  });
 });

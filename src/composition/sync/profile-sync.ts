@@ -1,3 +1,4 @@
+import { deepEqual } from "@/core/domain/deep-equal";
 import { nutritionProfileSchema } from "@/core/nutrition";
 import type { Store } from "@/core/storage/store";
 import {
@@ -14,6 +15,17 @@ import type { ProfileRepository } from "@/features/profile/data/profile-reposito
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 
 const STORE_NAME = "profile";
+
+/**
+ * Dois perfis contam a mesma pessoa — mesmos dados de entrada para o
+ * cálculo de meta (sexo, idade, altura, peso, atividade, objetivo, etc.).
+ * Envelope (`id`, `createdAt`, `updatedAt`) fora da conta, mesmo raciocínio
+ * de `bodyEntriesEqual` em `body-entry-sync.ts` (achado de auditoria de
+ * design, 03/09/2026).
+ */
+function profilesEqual(a: Profile, b: Profile): boolean {
+  return deepEqual(a.nutrition, b.nutrition);
+}
 
 export type PushProfileResult =
   | { readonly status: "nothing-pending" }
@@ -180,22 +192,29 @@ export async function pullProfile(
   const entry = await tracker.get(trackerId(STORE_NAME, PROFILE_ID));
   const currentLocal = await localOnly.get();
 
-  if (entry?.status === "conflict") {
-    // Já bloqueado — atualiza a versão do servidor conhecida (pode ter
-    // avançado de novo) e devolve os dois valores outra vez.
+  // Um conflito de versão só vira pergunta pro usuário quando o perfil
+  // também diverge de verdade — ver `bodyEntriesEqual` em
+  // `body-entry-sync.ts` para o raciocínio completo. Duas edições que
+  // convergiram para os mesmos dados (ou uma que nunca mudou nada de
+  // negócio) resolvem sozinhas.
+  if (
+    entry?.status === "conflict" ||
+    (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
+  ) {
+    if (currentLocal !== undefined && profilesEqual(currentLocal, remote)) {
+      await localOnly.save(remote, currentLocal.updatedAt);
+      await markClean(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
+      return { status: "applied" };
+    }
+
+    // Já bloqueado (ou acabou de ficar) — atualiza a versão do servidor
+    // conhecida (pode ter avançado de novo) e devolve os dois valores para
+    // a UI decidir. Nunca sobrescreve nenhum dos dois sozinho.
     await markConflict(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
     return { status: "conflict", local: currentLocal ?? remote, remote };
   }
 
   if (entry?.status === "pending") {
-    if (entry.serverUpdatedAt !== row.server_updated_at) {
-      // O servidor mudou desde a última vez que este dispositivo soube —
-      // dois dispositivos editaram o mesmo registro. Nunca sobrescreve
-      // nenhum dos dois sozinho.
-      await markConflict(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
-      return { status: "conflict", local: currentLocal ?? remote, remote };
-    }
-
     // O servidor não mudou — só ainda não enviamos a nossa edição local.
     return { status: "pending-unpushed" };
   }

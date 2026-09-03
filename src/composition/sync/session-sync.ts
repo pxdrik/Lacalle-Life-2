@@ -1,4 +1,5 @@
 import { sessionExercisesPayloadSchema } from "@/composition/backup-schemas";
+import { deepEqual } from "@/core/domain/deep-equal";
 import type { Store } from "@/core/storage/store";
 import {
   getExpectedServerUpdatedAt,
@@ -40,6 +41,28 @@ export interface SessionConflict {
   readonly sessionId: string;
   readonly local: Session | null;
   readonly remote: Session | null;
+}
+
+/**
+ * Duas sessões contam o mesmo treino executado — mesma rotina de origem,
+ * mesmo nome, mesmo início/fim, mesmos exercícios/séries na mesma ordem —
+ * ou não. `startedAt`/`finishedAt` **entram** na comparação (ao contrário do
+ * envelope `id`/`createdAt`/`updatedAt`, que nunca entra): são fatos de
+ * negócio — quando o treino aconteceu — não metadado de sincronização. Uma
+ * sessão finalizada nunca muda de conteúdo depois (só chega aqui com
+ * `finishedAt !== null`, ver a nota no topo do arquivo), então dois
+ * dispositivos discordando só de versão e concordando em tudo isso é o
+ * mesmo raciocínio de `bodyEntriesEqual` (achado de auditoria de design,
+ * 03/09/2026).
+ */
+function sessionsEqual(a: Session, b: Session): boolean {
+  return (
+    a.routineId === b.routineId &&
+    a.name === b.name &&
+    a.startedAt === b.startedAt &&
+    a.finishedAt === b.finishedAt &&
+    deepEqual(a.exercises, b.exercises)
+  );
 }
 
 export type PushSessionsResult =
@@ -256,18 +279,25 @@ export async function pullAllSessions(
       updatedAt: row.client_updated_at,
     };
 
-    if (entry?.status === "conflict") {
+    // Um conflito de versão só vira pergunta pro usuário quando a sessão
+    // também diverge de verdade — ver `bodyEntriesEqual` para o raciocínio
+    // completo.
+    if (
+      entry?.status === "conflict" ||
+      (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
+    ) {
+      if (currentLocal !== undefined && sessionsEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
+        continue;
+      }
+
       await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
       conflicts.push({ sessionId: row.id, local: currentLocal ?? null, remote });
       continue;
     }
 
     if (entry?.status === "pending") {
-      if (entry.serverUpdatedAt !== row.server_updated_at) {
-        await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
-        conflicts.push({ sessionId: row.id, local: currentLocal ?? null, remote });
-        continue;
-      }
       continue;
     }
 

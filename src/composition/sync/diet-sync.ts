@@ -1,4 +1,5 @@
 import { dietPayloadSchema } from "@/composition/backup-schemas";
+import { deepEqual } from "@/core/domain/deep-equal";
 import type { Store } from "@/core/storage/store";
 import {
   getExpectedServerUpdatedAt,
@@ -41,6 +42,23 @@ export interface DietConflict {
   readonly dietId: string;
   readonly local: Diet | null;
   readonly remote: Diet | null;
+}
+
+/**
+ * Duas dietas contam o mesmo plano — mesmo nome, mesmas refeições na mesma
+ * ordem (a ordem é o dia, não é ruído), mesmos dias da semana vinculados —
+ * ou não. `weekdays` é comparado como conjunto, não como lista: dois
+ * dispositivos que marcaram os mesmos dias em ordens diferentes de toque
+ * convergiram para o mesmo plano, não divergiram dele. O envelope (`id`,
+ * `createdAt`, `updatedAt`) nunca entra na conta — ver o mesmo raciocínio em
+ * `bodyEntriesEqual` (achado de auditoria de design, 03/09/2026).
+ */
+function dietsEqual(a: Diet, b: Diet): boolean {
+  return (
+    a.name === b.name &&
+    deepEqual(a.meals, b.meals) &&
+    deepEqual([...a.weekdays].sort(), [...b.weekdays].sort())
+  );
 }
 
 export type PushDietsResult =
@@ -260,18 +278,26 @@ export async function pullAllDiets(
       updatedAt: row.client_updated_at,
     };
 
-    if (entry?.status === "conflict") {
+    // Um conflito de versão só vira pergunta pro usuário quando o plano
+    // também diverge de verdade — a mesma dieta chegando por dois caminhos
+    // (ou nunca tendo mudado de negócio) resolve sozinha, nos dois pontos
+    // abaixo onde a versão por si só dizia "conflito".
+    if (
+      entry?.status === "conflict" ||
+      (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
+    ) {
+      if (currentLocal !== undefined && dietsEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
+        continue;
+      }
+
       await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
       conflicts.push({ dietId: row.id, local: currentLocal ?? null, remote });
       continue;
     }
 
     if (entry?.status === "pending") {
-      if (entry.serverUpdatedAt !== row.server_updated_at) {
-        await markConflict(tracker, STORE_NAME, row.id, row.server_updated_at);
-        conflicts.push({ dietId: row.id, local: currentLocal ?? null, remote });
-        continue;
-      }
       // Servidor não mudou desde a última vez que soubemos — só falta
       // enviar a edição local, o próximo push cuida disso.
       continue;
