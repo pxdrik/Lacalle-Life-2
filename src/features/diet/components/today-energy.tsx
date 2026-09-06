@@ -87,24 +87,21 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   }
 
   return (
-    <Card
-      as="section"
-      tone="hero"
-      className="flex min-w-0 flex-col items-center lg:col-span-2"
-    >
-      <div className="flex w-full flex-1 items-center justify-center py-4">
-        <CalorieRing
-          consumed={totals.kcal}
-          target={targets.kcal}
-          nothingYet={nothingYet}
-        />
-      </div>
+    <Card as="section" tone="hero" className="min-w-0 lg:col-span-2">
+      {/* 06/09/2026 — o anel deixou de ser o centro visual sozinho da tela
+          (ver `CalorieRing`); o hero inteiro encolheu para caber ao lado do
+          registro de entradas, que passou a ser o bloco dominante da Home. */}
+      <CalorieRing
+        consumed={totals.kcal}
+        target={targets.kcal}
+        nothingYet={nothingYet}
+      />
 
       {/* Secondary by construction, not just by convention: smaller size,
           past a rule, read only after the ring resolves. Three columns —
           never `MacroProgress`'s bars — because a bar argues for attention
           the same way the ring does, and this block exists to not do that. */}
-      <div className="mt-2 grid w-full max-w-xs grid-cols-3 gap-2 border-t border-line pt-4">
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-line pt-3">
         {MACRO_CODING.map(({ key, short, text }) => (
           <Metric
             key={key}
@@ -117,7 +114,6 @@ export function TodayEnergy({ day }: { readonly day: string }) {
             label={short}
             size="sm"
             tone={text}
-            align="center"
           />
         ))}
       </div>
@@ -140,23 +136,28 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   );
 }
 
-const RADIUS = 52;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
 /**
- * Calories as one shape.
+ * Half-turn, not a full one — and small enough to sit beside the number
+ * instead of holding the number inside it.
  *
- * The single figure that gets a graphic instead of a bar, because it is the
- * one people check without reading — and because a ring reads as "how much of
- * the day is spent" in a way a horizontal bar does not.
+ * **06/09/2026, decisão de produto (Pedro), depois de comparar em mockup
+ * contra a versão anterior (anel completo, 176px, número dentro).** O anel
+ * cheio é a forma mais reconhecível de qualquer app de saúde — a pág. 48 do
+ * brandbook já listava "anel de progresso circular tipo Apple Watch" como
+ * clichê a evitar por padrão, e esta tela era a única exceção viva a essa
+ * regra. O motivo documentado aqui antes (arco > barra, tamanho grande de
+ * propósito) continua válido como argumento — só perdeu a votação contra o
+ * pedido explícito de reduzir a leitura de "template de fitness genérico".
  *
- * The arc is capped at a full turn while the colour carries the overshoot: a
- * ring that wrapped past its own start would draw 110% and 10% identically.
- *
- * `aria-hidden` on the drawing, with the same facts as real text beside it.
- * The transition is neutralised for `prefers-reduced-motion` by the global
- * rule in `globals.css`, so it needs nothing of its own here.
+ * Um semicírculo com marcações de escala em vez de um giro completo: o
+ * `path` substitui o `circle`, e a leitura passa a ser "instrumento com
+ * régua", não "relógio de bem-estar". O comprimento do arco (πr) faz o
+ * mesmo papel que a circunferência fazia no `strokeDasharray`/`offset`.
  */
+const GAUGE_RADIUS = 50;
+const GAUGE_ARC_LENGTH = Math.PI * GAUGE_RADIUS;
+const GAUGE_PATH = "M10 65 A50 50 0 0 1 110 65";
+
 function CalorieRing({
   consumed,
   target,
@@ -171,87 +172,53 @@ function CalorieRing({
   const remaining = target - consumed;
 
   return (
-    <div className="relative shrink-0">
-      {/* Sized up from 128px flat. This is the figure the screen exists to
-          show — the one people open the app to read and then close it — and at
-          the old size it was merely one of several things in the card. */}
+    <div className="flex shrink-0 items-center gap-4">
+      {/* O degradê continua fora — pág. 46 do brandbook, "gradiente é recurso
+          de superfície, nunca de identidade", e a lista onde ele é proibido
+          nomeia barras de progresso (um arco é uma barra curvada) junto com
+          botões, inputs e séries de gráfico. */}
       <svg
         aria-hidden
-        viewBox="0 0 128 128"
-        className="size-36 -rotate-90 sm:size-44"
+        viewBox="0 0 120 70"
+        className="h-11 w-19 shrink-0"
         role="presentation"
       >
-        {/* **O degradê do anel saiu, e a decisão é do brandbook.**
-
-            Ele era a assinatura desta tela: a rampa da marca correndo ao longo
-            do arco, do stop mais claro onde o progresso começa até o mais fundo
-            conforme avança. A pág. 46 desfaz isso em uma linha — gradiente é
-            "recurso de superfície, nunca de identidade", e a lista de onde ele
-            é proibido nomeia **barras de progresso** junto com botões, inputs e
-            séries de gráfico. Um anel é uma barra de progresso curvada.
-
-            O teste que a mesma página propõe é o que decide: "remova todos os
-            gradientes da peça — se ela deixar de funcionar, o problema não era
-            a falta de gradiente". O anel continua sendo a coisa mais visível da
-            tela pelo tamanho, pela posição e por ser a única forma saturada em
-            vista. Ele não dependia da rampa.
-
-            O que se perde é uma sutileza que quase ninguém via: a rampa
-            espelhava de volta depois dos 50%, porque SVG não tem gradiente
-            cônico e a aproximação linear só acompanha o arco na primeira
-            metade. Era uma limitação assumida; agora é uma limitação que não
-            existe mais. */}
-
-        {/* **One continuous track, in every state.**
-            It used to go dashed on an empty day — the app's own word for
-            absence, applied to the track and never to the progress. The
-            mechanism was right and the reading was not: three independent
-            readers described the result as broken rather than as empty, which
-            is what a dashed ring says when it is the only dashed ring in
-            sight. A solid neutral track still invents no progress — the arc
-            below simply has nothing to draw — and it says "not yet" without
-            saying "faulty".
-
-            `nothingYet` survives in the caption, which is where the empty day
-            is now stated in words. */}
-        <circle
-          cx="64"
-          cy="64"
-          r={RADIUS}
+        {/* Trilho contínuo em todo estado — nunca tracejado num dia vazio.
+            Um dia sem nada registrado não é um dia quebrado; ver o motivo
+            completo na versão anterior deste comentário, preservada no
+            histórico do git. */}
+        <path
+          d={GAUGE_PATH}
           fill="none"
-          strokeWidth="10"
+          strokeWidth="9"
           className="stroke-muted"
         />
-        <circle
-          cx="64"
-          cy="64"
-          r={RADIUS}
+        <path
+          d={GAUGE_PATH}
           fill="none"
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={CIRCUMFERENCE}
+          strokeWidth="9"
+          strokeDasharray={GAUGE_ARC_LENGTH}
           strokeDashoffset={
-            CIRCUMFERENCE * (1 - Math.min(Math.max(ratio, 0), 1))
+            GAUGE_ARC_LENGTH * (1 - Math.min(Math.max(ratio, 0), 1))
           }
-          // Amber past the target, not red: going over is worth noticing and
-          // is not a fault, and red is what this app says when something
-          // actually broke. See the same reasoning in `MacroProgress`.
-          //
-          // 250 ms porque isto é **atualização de valor**, que é o tempo que a
-          // pág. 37 dá a ela. Os 900 ms da mesma tabela são do anel *crescendo
-          // do zero* na chegada à tela, que é outro momento — e um dia inteiro
-          // de registro faz esta transição disparar dezenas de vezes.
           className={cn(
             "transition-[stroke-dashoffset] duration-(--duration-standard) ease-out",
             over ? "stroke-warning" : "stroke-accent",
           )}
         />
+        {/* Marcações de escala — início, meta (50%), fim — o traço que faz o
+            arco ler como instrumento de medição em vez de anel decorativo. */}
+        <g strokeWidth="2" className="stroke-ink-subtle">
+          <line x1="10" y1="65" x2="15.5" y2="56.5" />
+          <line x1="60" y1="15" x2="60" y2="23" />
+          <line x1="110" y1="65" x2="104.5" y2="56.5" />
+        </g>
       </svg>
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+      <div className="min-w-0">
         <p
           className={cn(
-            "text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl",
+            "text-2xl font-semibold tracking-tight tabular-nums",
             over ? "text-warning" : "text-ink",
           )}
         >
@@ -260,7 +227,7 @@ function CalorieRing({
         {/* "Restantes" implies something was eaten. On an empty day nothing
             was, and the same 2.067 is the budget rather than a remainder —
             the honest caption for the same true number. */}
-        <p className="mt-1 max-w-24 text-xs leading-tight text-ink-subtle">
+        <p className="text-xs leading-tight text-ink-subtle">
           {over
             ? "kcal acima da meta"
             : nothingYet

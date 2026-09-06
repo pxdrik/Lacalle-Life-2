@@ -47,7 +47,15 @@ import { markAppEntered } from "../../_lib/entered-app";
  * 4. **Apoio** — `TodayProgress`, a single row with no surface at all, the
  *    quietest thing on the page.
  *
- * `min-w-0` lives on each block rather than here: a grid item defaults to
+ * **06/09/2026 — Alimentação e Treino saíram do grid de duas colunas do
+ * desktop e viraram uma coluna só.** O hero encolheu junto (ver
+ * `CalorieRing`), e as duas colunas lado a lado só faziam sentido quando o
+ * anel grande dava à tela uma razão para respirar na largura. Com o hero
+ * compacto, o grid virava dois registros de tamanho desigual competindo por
+ * espaço — a mesma leitura de "dashboard" que o Sprint 8 já tinha corrigido
+ * uma vez, só que entre Alimentação e Treino em vez de cinco caixas.
+ *
+ * `min-w-0` lives on each block rather than here: a flex/grid item defaults to
  * `min-width: auto` and refuses to shrink below its own min-content, and a
  * long meal name once pushed the track to 331px inside a 318px viewport and
  * scrolled the whole page sideways. Caught at 320px, and still checked there.
@@ -115,11 +123,16 @@ export default function HojePage() {
         <HomeDataProvider>
           <ProfileIncompleteNotice />
 
-          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {/* 06/09/2026 — o hero encolheu (ver `TodayEnergy`/`CalorieRing`) e
+              a divisão em duas colunas saiu: numa tela com um treino em
+              andamento e nenhuma refeição ainda, o grid ficava assimétrico.
+              O registro de hoje agora é uma sequência única, na mesma ordem
+              de leitura de sempre (Alimentação, depois Treino). */}
+          <div className="mt-8">
             <TodayEnergy day={today} />
           </div>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="mt-6 flex flex-col gap-6">
             <TodayMeals day={today} />
             <TodayWorkout day={today} />
           </div>
