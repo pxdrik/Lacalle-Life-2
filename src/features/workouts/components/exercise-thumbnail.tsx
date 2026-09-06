@@ -1,12 +1,12 @@
 "use client";
 
-import { Dumbbell } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 
 import { mediaUrl } from "../taxonomy/media-sources";
+import { MUSCLE_LABELS } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 
 /**
@@ -75,10 +75,20 @@ export function ExerciseThumbnail({ exercise }: Props) {
           )}
         />
       ) : (
-        <div className="flex size-full items-center justify-center">
-          <Dumbbell aria-hidden className="size-4 text-ink-subtle" />
+        // Monograma das duas primeiras letras do grupo muscular principal, no
+        // lugar do ícone genérico de "Dumbbell" — carrega informação (qual
+        // grupo é este exercício) em vez de um símbolo decorativo igual para
+        // qualquer exercício sem foto.
+        <div className="flex size-full items-center justify-center font-mono text-[0.6875rem] font-semibold tracking-wide text-ink-subtle">
+          {monogram(exercise)}
         </div>
       )}
     </div>
   );
+}
+
+function monogram(exercise: Exercise): string {
+  const muscle = exercise.primaryMuscles[0];
+  if (muscle === undefined) return "—";
+  return MUSCLE_LABELS[muscle].slice(0, 2).toUpperCase();
 }

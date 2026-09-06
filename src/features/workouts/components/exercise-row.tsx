@@ -121,7 +121,7 @@ export function ExerciseRow({
 
 function Tag({ children }: { readonly children: React.ReactNode }) {
   return (
-    <span className="rounded-full border border-line px-2 py-0.5 text-[0.6875rem] text-ink-subtle">
+    <span className="border-b border-line pb-px text-[0.6875rem] uppercase tracking-wide text-ink-subtle">
       {children}
     </span>
   );
