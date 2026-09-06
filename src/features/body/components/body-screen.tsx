@@ -166,8 +166,12 @@ export function BodyScreen() {
         />
       ) : (
         <>
+          {/* Texto com régua inferior no item ativo, não pílula preenchida —
+              ajuste de 06/09/2026, mesmo tratamento que a barra de navegação
+              principal e as tags de exercício já usam. Era o último
+              `rounded-full` decorativo do app inteiro. */}
           {available.length > 1 && (
-            <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            <div className="-mx-1 flex gap-4 overflow-x-auto border-b border-line px-1">
               {available.map((candidate) => {
                 const active = keyOf(candidate) === keyOf(metric);
 
@@ -180,10 +184,10 @@ export function BodyScreen() {
                       setMetric(candidate);
                     }}
                     className={cn(
-                      "shrink-0 touch-44 rounded-full border px-3 py-1 text-xs transition-colors duration-150 ease-out",
+                      "shrink-0 touch-44 border-b-2 pb-2 text-xs transition-colors duration-150 ease-out",
                       active
-                        ? "border-accent bg-accent text-accent-ink"
-                        : "border-line text-ink-muted hover:border-line-strong hover:text-ink",
+                        ? "border-accent font-medium text-ink"
+                        : "border-transparent text-ink-muted hover:text-ink",
                     )}
                   >
                     {labelOf(candidate)}
