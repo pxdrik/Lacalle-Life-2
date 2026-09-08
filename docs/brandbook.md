@@ -91,6 +91,47 @@ menor que 16 e joga o layout fora no meio da digitação. A mesa recebe 14.
 
 ---
 
+## Proposta de emenda — Motion System v1 (pendente, sem código)
+
+Não é uma sétima divergência: a aplicação atual não contraria a pág. 40 nem a
+pág. 53 em nada abaixo. É uma lacuna que a pesquisa de motion de 07/09/2026
+encontrou — contra seis fontes externas (60fps.design, React Bits, Uiverse,
+Curated, Motion Sites, GetLayers) — e uma decisão que vale registrar por
+escrito antes que alguém a reabra por conta própria numa sessão futura.
+Relatório completo: https://claude.ai/code/artifact/ff5fc5a5-3f99-477b-9080-c15e90cac5e7
+
+### A lacuna: falta um tier "Data" nomeado
+
+`tokens.css` já tem `--duration-micro` (150), `--duration-standard` (250),
+`--duration-signature` (450) e `--duration-hero` (800). O que anima número,
+gráfico e progresso — count-up, barra — não tem token próprio: o Finance usa
+`520` e `600` soltos no código (`Finance/src/components/ui.jsx`), dois valores
+próximos mas diferentes, nenhum nomeado. **Proposta:** `--duration-data: 550ms`
+nos dois produtos, dentro da mesma faixa que a pág. 40 já tolera para
+progresso contínuo. Não muda nenhum comportamento visível — troca um número
+mágico por um token.
+
+### A decisão: nenhuma física de mola entra como token
+
+60fps.design — a fonte mais forte da pesquisa para o Life — é quase todo
+spring physics nativo (iOS/Android): a interação assenta com um leve
+overshoot **físico**, não com uma curva desenhada. A pág. 53 já certifica
+como item que passou: **"Só as duas curvas oficiais foram usadas"**, com
+linear proibido por regra própria. Um spring de verdade não é uma curva, é
+uma simulação; mesmo uma curva com overshoot desenhado (ex.:
+`cubic-bezier(0.34,1.56,0.64,1)`) já seria uma **terceira** curva, o que a
+mesma página proíbe pelo próprio texto.
+
+**Decisão adotada pela pesquisa, para não ser reaberta por engano:** o peso de
+uma celebração (streak, treino concluído) vem de duração e coreografia
+(escala, opacidade, stagger de 40 ms), nunca de uma curva mais elástica.
+Se um caso concreto algum dia exigir spring de verdade — um gesto de arrastar
+bottom sheet, que só parece natural com física real — isso é candidato a
+emenda formal da V1.2, pelo mesmo processo desta seção, e não uma decisão de
+implementação isolada numa sprint qualquer.
+
+---
+
 ## Conflitos internos do brandbook, e como foram lidos
 
 Nenhum destes é divergência da aplicação: são duas páginas do documento pedindo
