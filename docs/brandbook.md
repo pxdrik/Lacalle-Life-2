@@ -130,6 +130,20 @@ bottom sheet, que só parece natural com física real — isso é candidato a
 emenda formal da V1.2, pelo mesmo processo desta seção, e não uma decisão de
 implementação isolada numa sprint qualquer.
 
+### Restrição: só plano gratuito das seis fontes
+
+Decisão do Pedro em 07/09/2026, verificada e registrada na seção 01b do
+relatório. Nenhuma referência usada acima depende de conteúdo pago — onde a
+fonte tem um plano pago (60fps PRO, React Bits Pro, Curated Pro, GetLayers
+Unlimited/Full Stack), a análise ficou no que o plano gratuito de cada uma
+cobre. Duas ressalvas ficam para quando a implementação começar de verdade:
+
+- **React Bits:** confirmar que Count Up, Carousel e Dock continuam no tier
+  Starter (134 dos 166 componentes) antes de usar como referência.
+- **GetLayers:** o gradiente de hero da landing (Top 15, item 15) precisa vir
+  do conjunto gratuito — templates citados só como exemplo de tom (Wanderlust,
+  Vesper) são pagos e não devem ser copiados sem decisão explícita de assinar.
+
 ---
 
 ## Conflitos internos do brandbook, e como foram lidos

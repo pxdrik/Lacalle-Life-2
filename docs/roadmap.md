@@ -33,6 +33,13 @@ O que sair daqui quando for retomado:
 - **Maior risco técnico identificado:** shared element transition na troca
   de exercício (custo de FLIP) — testar com lista real de 15+ itens antes de
   adotar.
+- **Restrição confirmada, 07/09/2026: só plano gratuito das seis fontes.**
+  Nenhuma recomendação depende de 60fps PRO, React Bits Pro, Curated Pro ou
+  GetLayers Unlimited/Full Stack — checado fonte a fonte na seção 01b do
+  relatório. Duas conferências pendentes na hora de implementar: Count
+  Up/Carousel/Dock do React Bits ainda no tier Starter, e o gradiente de
+  hero do GetLayers vindo do conjunto gratuito (não dos templates pagos
+  citados só como referência de tom).
 
 ## Produção destravada + ajustes finais — 26/08/2026
 
