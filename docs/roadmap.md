@@ -5,6 +5,35 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ⏳ PENDENTE — Motion System v1 (pesquisa entregue, sem código) — 07/09/2026
+
+Pesquisa de motion feita contra seis fontes (60fps.design, React Bits,
+Uiverse, Curated, Motion Sites, GetLayers), lida contra o Brandbook e os
+tokens que já existem em `src/design-system/tokens.css`. Nenhum arquivo foi
+alterado, nenhuma dependência instalada.
+
+**Relatório completo:** https://claude.ai/code/artifact/ff5fc5a5-3f99-477b-9080-c15e90cac5e7
+(mesmo relatório está anotado no roadmap do Finance, é a mesma pesquisa para
+os dois produtos.)
+
+O que sair daqui quando for retomado:
+
+- **Token novo de baixo risco:** `--duration-data` (~550ms), para o nível
+  "Data" (gráficos, contadores, progresso) que hoje não tem token próprio —
+  o Finance usa números soltos (520ms/600ms) para o mesmo papel.
+- **Decisão já tomada, não reabrir:** nada de spring physics (`spring-soft`,
+  `spring-standard`, `spring-bouncy`) nem uma terceira curva de easing. O
+  Brandbook certifica no QA (pág. 53) que só as duas curvas oficiais
+  (`--ease-out`, `--ease-in`) valem — física de mola exigiria emenda ao
+  Brand System, não é decisão de implementação isolada.
+- **Doze padrões priorizados** para virar backlog de produto (streak reveal,
+  check com feedback imediato, bottom sheet, timer de descanso, resumo de
+  treino com stagger, entre outros) — lista completa e com risco anotado no
+  relatório, seção 14.
+- **Maior risco técnico identificado:** shared element transition na troca
+  de exercício (custo de FLIP) — testar com lista real de 15+ itens antes de
+  adotar.
+
 ## Produção destravada + ajustes finais — 26/08/2026
 
 - **Env vars do Supabase configuradas na Vercel, com redeploy.** O
