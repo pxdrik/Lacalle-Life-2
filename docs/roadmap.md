@@ -5,6 +5,47 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ⏳ PENDENTE — Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08/09/2026
+
+Pedido do Pedro depois de usar o app de verdade, com espec completa em
+`docs/melhorias-teste-real-08-09-2026.md` — nada implementado ainda, esta é
+só a entrada de rastreio. Regra do pedido: investigar a arquitetura atual
+antes de mexer, sem refatoração desnecessária, sem quebrar o que já funciona,
+migração segura de dado existente, melhorias cirúrgicas — não uma reescrita.
+
+Treze itens, os mais estruturais:
+
+1. **Criar alimento direto dentro do fluxo da dieta** — hoje exige sair,
+   criar em Alimentos, voltar e procurar de novo. Reusar o mesmo
+   formulário/serviço de criação, sem duplicar lógica.
+2. **Corrigir a mensagem de calorias/fibra** ("a fibra derruba esse número")
+   — e investigar se o cálculo em si (carbo/proteína/gordura/fibra/álcool,
+   fatores energéticos) está correto, não só o texto.
+3. **Trocar exercício direto no slot**, sem precisar apagar e adicionar de
+   novo — mapear antes o que pertence a exercício vs. slot vs. série vs.
+   configuração do treino, para não sobrescrever o que deveria persistir.
+4. **Feedback visual discreto ao adicionar exercício** — motion só para
+   confirmar a ação, no vocabulário já definido na pesquisa de Motion System
+   v1 (item abaixo).
+5. **Placeholder vs. valor real nas unidades** — número da porção em cinza
+   lê como exemplo mesmo sendo valor real; resolver hierarquia visual e
+   interação (digitar substitui o valor anterior), não só cor.
+6. **Investigar duplicidade de alimentos** (achado real: dois "Queijo
+   Mussarela") antes de decidir qualquer deduplicação.
+7. **Evoluir porções/unidades** — grama continua sendo a referência-base; a
+   unidade (1 pão ≈ 50g, 2 fatias ≈ 50g) é usabilidade por cima, nunca peso
+   fixo afirmado da categoria. O item mais importante do pedido.
+8. **Busca de alimentos mais clara** — inspirada na estrutura de informação
+   do app "Macros" (nome, marca/porção, kcal, C/P/G), não na identidade
+   visual dele — isso continua do Brandbook.
+9–13. Investigação prévia do modelo atual (Food, Dieta, Workout), motion
+   consistente com o resto do sistema, suíte de testes sem regressão, oito
+   fluxos de teste manual nomeados (A–H), e relatório final de aceitação
+   (implementado, decisões de arquitetura, testes, riscos).
+
+Espec completa, com os oito fluxos de teste e o texto de cada item na
+íntegra: `docs/melhorias-teste-real-08-09-2026.md`.
+
 ## ⏳ PENDENTE — Motion System v1 (pesquisa entregue, sem código) — 07/09/2026
 
 Pesquisa de motion feita contra seis fontes (60fps.design, React Bits,
