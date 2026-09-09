@@ -41,7 +41,11 @@ export default function EvolutionPage() {
         subtitle="Seu corpo, seus treinos e sua dieta, ao longo do tempo."
       />
 
-      <div className="mt-8">
+      {/* 09/09/2026 — as três partes entram com seu próprio atraso, em vez de
+          subir juntas como uma peça só (o que `PageTransition` já faz por
+          cima, no `template.tsx` da rota) — mesma ideia já aplicada em
+          `/hoje`. */}
+      <div className="mt-8 animate-rise motion-reduce:animate-none">
         <BodyDataProvider>
           <div className="mb-4">
             <BodyEntrySyncStatus />
@@ -59,29 +63,39 @@ export default function EvolutionPage() {
           group with no card around it, written by hand. `Section` (the
           generalised version, now used across the app) replaces it with the
           same visual result — nothing here should look different. */}
-      <Section
-        title="Treinos"
-        subtitle="O que você levantou, e como isso mudou."
-        divider
+      <div
+        className="animate-rise motion-reduce:animate-none"
+        style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
       >
-        <WorkoutDataProvider>
-          <EvolutionScreen />
-        </WorkoutDataProvider>
-      </Section>
+        <Section
+          title="Treinos"
+          subtitle="O que você levantou, e como isso mudou."
+          divider
+        >
+          <WorkoutDataProvider>
+            <EvolutionScreen />
+          </WorkoutDataProvider>
+        </Section>
+      </div>
 
-      <Section
-        title="Dieta"
-        subtitle="Quanto do plano você realmente segue."
-        divider
+      <div
+        className="animate-rise motion-reduce:animate-none"
+        style={{ animationDelay: "calc(var(--duration-stagger) * 4)" }}
       >
-        {/* Mesmo isolamento do bloco de Peso acima: um bug aqui não deveria
-            levar a página inteira, incluindo Treinos, junto. */}
-        <ErrorBoundary message="Não foi possível exibir sua aderência à dieta. O restante da página continua funcionando.">
-          <DietAdherenceDataProvider>
-            <DietAdherenceSection />
-          </DietAdherenceDataProvider>
-        </ErrorBoundary>
-      </Section>
+        <Section
+          title="Dieta"
+          subtitle="Quanto do plano você realmente segue."
+          divider
+        >
+          {/* Mesmo isolamento do bloco de Peso acima: um bug aqui não deveria
+              levar a página inteira, incluindo Treinos, junto. */}
+          <ErrorBoundary message="Não foi possível exibir sua aderência à dieta. O restante da página continua funcionando.">
+            <DietAdherenceDataProvider>
+              <DietAdherenceSection />
+            </DietAdherenceDataProvider>
+          </ErrorBoundary>
+        </Section>
+      </div>
     </PageShell>
   );
 }

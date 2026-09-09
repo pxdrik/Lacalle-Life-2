@@ -123,17 +123,37 @@ export default function HojePage() {
               a divisão em duas colunas saiu: numa tela com um treino em
               andamento e nenhuma refeição ainda, o grid ficava assimétrico.
               O registro de hoje agora é uma sequência única, na mesma ordem
-              de leitura de sempre (Alimentação, depois Treino). */}
-          <div className="mt-8">
+              de leitura de sempre (Alimentação, depois Treino).
+
+              09/09/2026 — cada bloco entra com seu próprio atraso, em vez de
+              subir junto como uma única peça (o que `PageTransition` já faz
+              no `template.tsx` da rota, por cima disto). Mesmo `animate-rise`
+              de sempre, só escalonado — é a mesma ideia do Hero da Landing,
+              e a tela mais aberta do app é onde o pedido de mais intensidade
+              rende mais: acontece toda vez que a tela abre, não só uma vez. */}
+          <div className="mt-8 animate-rise motion-reduce:animate-none">
             <TodayEnergy day={today} />
           </div>
 
           <div className="mt-6 flex flex-col gap-6">
-            <TodayMeals day={today} />
-            <TodayWorkout day={today} />
+            <div
+              className="animate-rise motion-reduce:animate-none"
+              style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
+            >
+              <TodayMeals day={today} />
+            </div>
+            <div
+              className="animate-rise motion-reduce:animate-none"
+              style={{ animationDelay: "calc(var(--duration-stagger) * 4)" }}
+            >
+              <TodayWorkout day={today} />
+            </div>
           </div>
 
-          <div className="mt-6 border-t border-line pt-3">
+          <div
+            className="mt-6 border-t border-line pt-3 animate-rise motion-reduce:animate-none"
+            style={{ animationDelay: "calc(var(--duration-stagger) * 6)" }}
+          >
             <TodayProgress />
           </div>
         </HomeDataProvider>
