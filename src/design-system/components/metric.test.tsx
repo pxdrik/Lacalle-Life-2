@@ -36,3 +36,37 @@ describe("Metric", () => {
     );
   });
 });
+
+describe("Number Update — the value-change animation", () => {
+  it("does not animate on the initial render", () => {
+    render(<Metric value="1.840" label="kcal para hoje" />);
+
+    expect(screen.getByText("1.840")).not.toHaveClass("animate-value-change");
+  });
+
+  it("animates when the value changes on a later render", () => {
+    const { rerender } = render(<Metric value="1.840" label="kcal para hoje" />);
+
+    rerender(<Metric value="1.965" label="kcal para hoje" />);
+
+    expect(screen.getByText("1.965")).toHaveClass("animate-value-change");
+  });
+
+  it("does not animate again on a re-render with the same value", () => {
+    const { rerender } = render(<Metric value="1.840" label="kcal para hoje" />);
+
+    rerender(<Metric value="1.840" label="kcal para hoje" />);
+
+    expect(screen.getByText("1.840")).not.toHaveClass("animate-value-change");
+  });
+
+  it("keeps its own tone after changing — the animation must not freeze the flash colour", () => {
+    const { rerender } = render(
+      <Metric value="60" unit="g" label="Prot" tone="text-protein-text" />,
+    );
+
+    rerender(<Metric value="65" unit="g" label="Prot" tone="text-protein-text" />);
+
+    expect(screen.getByText("65")).toHaveClass("text-protein-text");
+  });
+});

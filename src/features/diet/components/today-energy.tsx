@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { FIBER_REFERENCE_G } from "@/core/nutrition";
@@ -171,6 +172,18 @@ function CalorieRing({
   const over = consumed > target;
   const remaining = target - consumed;
 
+  // "Number Update" — mesma técnica de `Metric`, aplicada aqui à mão
+  // porque este número tem seu próprio tamanho e recorte, não o de
+  // `Metric`. Compara o texto já formatado: 2.067,4 arredondando pra
+  // "2.067" duas vezes seguidas não deve piscar.
+  const displayed = formatDecimal(Math.abs(remaining));
+  const [seen, setSeen] = useState(displayed);
+  const [changes, setChanges] = useState(0);
+  if (displayed !== seen) {
+    setSeen(displayed);
+    setChanges((count) => count + 1);
+  }
+
   return (
     <div className="flex shrink-0 items-center gap-4">
       {/* O degradê continua fora — pág. 46 do brandbook, "gradiente é recurso
@@ -217,12 +230,14 @@ function CalorieRing({
 
       <div className="min-w-0">
         <p
+          key={changes}
           className={cn(
             "text-2xl font-semibold tracking-tight tabular-nums",
             over ? "text-warning" : "text-ink",
+            changes > 0 && "animate-value-change motion-reduce:animate-none",
           )}
         >
-          {formatDecimal(Math.abs(remaining))}
+          {displayed}
         </p>
         {/* "Restantes" implies something was eaten. On an empty day nothing
             was, and the same 2.067 is the budget rather than a remainder —

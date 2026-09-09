@@ -144,6 +144,41 @@ cobre. Duas ressalvas ficam para quando a implementação começar de verdade:
   do conjunto gratuito — templates citados só como exemplo de tom (Wanderlust,
   Vesper) são pagos e não devem ser copiados sem decisão explícita de assinar.
 
+### Number Update — exceção pontual à pág. 48, decidida pelo Pedro em 09/09/2026
+
+Pedido explícito, contra a leitura que a pesquisa original tinha adotado.
+Registrado aqui, e não só no código, porque é uma exceção a uma regra
+identidade — a pág. 48 pede que todo estado comunicado por cor venha
+acompanhado de ícone e texto, para não depender de quem enxerga a cor. O
+"Number Update" (catálogo trazido pelo Pedro em 09/09/2026, seção 02) pisca
+o valor de um `Metric` em `--accent-text` por um instante quando ele muda,
+sem ícone novo ao lado.
+
+**Por que a pág. 48 não se aplica do mesmo jeito aqui, e por que a exceção é
+segura mesmo assim:**
+
+- A regra existe para **estado que persiste** — erro, aviso, sucesso — onde
+  perder a cor é perder a única pista de que algo mudou de categoria. Aqui
+  não há categoria nova: o número já muda por si só, de forma legível sem
+  cor nenhuma (2.759 vira 1.965), e a legenda ao lado (`label` do `Metric`)
+  já diz o que o número significa antes, durante e depois do piscar.
+- O piscar não é "sucesso" nem "erro" — é o mesmo acento único que a pág. 20
+  já usa em toda a interface, só que por 250ms num lugar que normalmente não
+  o carrega. Não introduz uma segunda cor de estado.
+- **Tecnicamente escopado para nunca vazar**: `--animate-value-change` não
+  usa `fill-mode: both`, de propósito — a cor do acento é só o efeito
+  visível *durante* a animação; ao terminar, a propriedade volta pra cascata
+  normal e a `tone` de cada `Metric` (a cor de cada macro, por exemplo)
+  volta a valer sozinha. Testado explicitamente
+  (`metric.test.tsx`, "keeps its own tone after changing").
+
+**O que isto não abre precedente para:** um estado que precisa ser notado
+mesmo se a pessoa não estiver olhando no instante exato (erro de validação,
+aviso de meta estourada) continua exigindo ícone e texto, sem exceção — o
+Number Update é sobre uma mudança que a pessoa já está vendo acontecer
+(acabou de tocar em algo, ou está olhando um número que sabe que muda), não
+sobre avisar de algo nas costas dela.
+
 ---
 
 ## Conflitos internos do brandbook, e como foram lidos

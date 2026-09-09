@@ -860,6 +860,25 @@ textarea {
    * a única forma de a informação chegar.
    */
   --animate-draw-line: draw-line var(--duration-data) var(--ease-out) both;
+
+  /**
+   * "Number Update" — Motion System v1, emenda de 09/09/2026 registrada em
+   * `docs/brandbook.md`: um valor pisca no acento e sobe um instante quando
+   * muda, confirma e volta ao tom de sempre. Cobre `Metric`
+   * (design-system/components/metric.tsx), o único lugar do app que
+   * desenha "número grande com legenda" — toda tela que usa `Metric` ganha
+   * isto de graça.
+   *
+   * **Sem `both`/`forwards` de propósito**, diferente de todo outro
+   * `--animate-*` deste arquivo: `Metric` aceita uma `tone` por instância
+   * (a cor de cada macro, por exemplo), e travar a animação no `color` do
+   * último quadro depois que ela termina prenderia qualquer `Metric`
+   * colorido na cor de acento para sempre, no primeiro valor que mudasse.
+   * Sem fixar o quadro final, a propriedade volta para a cascata normal
+   * assim que a animação acaba — a `tone` de cada instância decide de
+   * novo, como sempre decidiu.
+   */
+  --animate-value-change: value-change var(--duration-standard) var(--ease-out);
 }
 
 @keyframes rise {
@@ -879,6 +898,17 @@ textarea {
   }
   to {
     scale: 1;
+  }
+}
+
+@keyframes value-change {
+  from {
+    color: var(--accent-text);
+    translate: 0 -0.25rem;
+  }
+  to {
+    color: var(--ink);
+    translate: 0 0;
   }
 }
 
