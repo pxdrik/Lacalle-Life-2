@@ -41,7 +41,7 @@ export function Hero() {
           "mx-auto mt-5 max-w-xl text-balance text-lg text-ink-muted",
           RISE,
         )}
-        style={{ animationDelay: "calc(var(--duration-stagger) * 1)" }}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
       >
         Monte sua dieta, registre seus treinos e acompanhe seu progresso num
         só lugar, sem depender de três aplicativos diferentes.
@@ -52,7 +52,7 @@ export function Hero() {
           "mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row",
           RISE,
         )}
-        style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 4)" }}
       >
         <Link href="/cadastro" className={buttonClasses("primary", "lg")}>
           Criar minha conta
@@ -64,7 +64,7 @@ export function Hero() {
 
       <p
         className={cn("mt-6 text-sm text-ink-subtle", RISE)}
-        style={{ animationDelay: "calc(var(--duration-stagger) * 3)" }}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 6)" }}
       >
         Ou{" "}
         <Link

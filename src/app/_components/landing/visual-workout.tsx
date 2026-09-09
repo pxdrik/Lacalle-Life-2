@@ -50,7 +50,7 @@ export function VisualWorkout() {
                     revealed && "animate-pop motion-reduce:animate-none",
                   )}
                   style={{
-                    animationDelay: `calc(var(--duration-stagger) * ${String(index + 1)})`,
+                    animationDelay: `calc(var(--duration-stagger) * ${String((index + 1) * 3)})`,
                   }}
                 >
                   <Check className="size-3" strokeWidth={3} />

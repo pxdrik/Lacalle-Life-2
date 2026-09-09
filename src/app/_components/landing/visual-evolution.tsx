@@ -33,7 +33,7 @@ export function VisualEvolution() {
             className="flex-1 rounded-sm bg-accent/15 transition-[height] duration-(--duration-data) ease-out motion-reduce:transition-none"
             style={{
               height: `${String(revealed ? value : 0)}%`,
-              transitionDelay: `calc(var(--duration-stagger) * ${String(index)})`,
+              transitionDelay: `calc(var(--duration-stagger) * ${String(index * 2)})`,
             }}
           >
             <div
