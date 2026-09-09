@@ -27,6 +27,16 @@ check).
 - ✅ **Entry Insert** — item novo entra com `--animate-rise` ao ser
   adicionado a uma refeição (Diário e Dietas). O próprio catálogo chama isto
   de o padrão mais importante para o conceito de Cronista. Commit `9503185`.
+- ✅ **Number Update (flash de cor + bump)** — tinha sido rejeitado abaixo por
+  contrariar a pág. 48 do Brandbook (cor sempre acompanhada de ícone+texto).
+  O Pedro pediu explicitamente para ignorar essa leitura e implementar mesmo
+  assim, registrando a exceção no próprio `docs/brandbook.md` em vez de só
+  no código — decisão e razão completa na nova seção "Number Update —
+  exceção pontual à pág. 48" desse arquivo. Aplicado em `Metric` (usado nos
+  macros de `TodayEnergy`) e à mão no número de kcal restante do
+  `CalorieRing`. Token `--animate-value-change` deliberadamente sem
+  `fill-mode: both`, para não congelar o `tone` de cada instância — coberto
+  por teste em `metric.test.tsx`. Commit `f826dbb`.
 
 **Rejeitado, com o motivo escrito para não ser reaberto por engano:**
 - **Pulse** (indicador de sincronizando) — `DietSyncStatus`/`FoodLogSyncStatus`
@@ -44,12 +54,6 @@ check).
 - **Swipe (gesto real)** — exigiria uma biblioteca de gesto ou handler de
   toque manual, escopo bem maior que uma transição CSS; nenhuma tela do app
   usa swipe-to-edit/delete hoje (usa botões com revelação por hover/grupo).
-- **Number Update (flash de cor + bump)** — candidato real (ex.: número de
-  kcal restante em `TodayEnergy`, que hoje troca sem nenhuma transição), mas
-  flashear verde sem ícone/texto junto contraria a regra do Brandbook de que
-  todo estado com cor precisa vir acompanhado de ícone e texto (pág. 48) —
-  fica como candidato a uma versão sem cor (só um leve bump), não implementado
-  ainda por precisar dessa decisão.
 - **Delete/Collapse (linha encolhe antes de sumir)** e **Focus Transition**
   — candidatos reais, não implementados nesta rodada: o primeiro exige
   adiar a remoção de verdade até a animação terminar (duas fases, mais
