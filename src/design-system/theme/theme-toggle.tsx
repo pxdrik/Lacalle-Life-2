@@ -1,7 +1,9 @@
 "use client";
 
 import { Moon, Sun } from "lucide-react";
+import { useState } from "react";
 
+import { cn } from "../cn";
 import { useTheme } from "./theme-provider";
 
 /**
@@ -21,20 +23,34 @@ import { useTheme } from "./theme-provider";
 export function ThemeToggle() {
   const { resolved, setPreference } = useTheme();
   const isDark = resolved === "dark";
+  // Mesma técnica de `performed-set-row.tsx`/`meal-card.tsx`: presa ao
+  // toque, nunca ao tema resolvido — que já muda sozinho na primeira
+  // renderização (`resolveTheme`) e faria o ícone pipocar sem ninguém ter
+  // tocado em nada.
+  const [taps, setTaps] = useState(0);
 
   return (
     <button
       type="button"
       onClick={() => {
+        setTaps((count) => count + 1);
         setPreference(isDark ? "light" : "dark");
       }}
       aria-label={isDark ? "Mudar para tema claro" : "Mudar para tema escuro"}
-      className="flex size-(--control-h-sm) items-center justify-center rounded-md border border-line bg-surface text-ink-subtle transition-colors duration-150 ease-out hover:text-ink"
+      className="flex size-(--control-h-sm) items-center justify-center rounded-md border border-line bg-surface text-ink-subtle transition-[background-color,border-color,color,scale] duration-150 ease-out hover:text-ink active:scale-90"
     >
       {isDark ? (
-        <Moon aria-hidden className="size-4" />
+        <Moon
+          key={taps}
+          aria-hidden
+          className={cn("size-4", taps > 0 && "animate-pop motion-reduce:animate-none")}
+        />
       ) : (
-        <Sun aria-hidden className="size-4" />
+        <Sun
+          key={taps}
+          aria-hidden
+          className={cn("size-4", taps > 0 && "animate-pop motion-reduce:animate-none")}
+        />
       )}
     </button>
   );
