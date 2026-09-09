@@ -31,23 +31,31 @@ migração segura de dado existente, melhorias cirúrgicas — não uma reescrit
   importação só comparava por id exato, nunca por nome. Pedro decidiu manter
   a grafia com dois zz; a entrada da TACO foi removida (581→580 alimentos,
   nenhuma referência externa a ela existia). Commit `c7229d6`.
+- ✅ **Item 1** — `FoodPicker` (compartilhado por `MealCard` e
+  `food-log-screen`) ganhou um "Criar alimento" sempre visível, pré-preenchido
+  com o texto já buscado. Reusa `useFoodEditor(null)` + `CustomFoodForm` — o
+  mesmo caminho de `/alimentos/novo` — só muda o que acontece depois de
+  salvar (`onSaved`/`onCancel` novos, opcionais, sem tocar o comportamento da
+  tela standalone). `useFoodEditor.save()` passou a devolver o `Food` salvo,
+  não só um booleano, pra selecionar o alimento recém-criado sem reler o
+  catálogo. Commit `6fc9121`.
+- ✅ **Item 7** — investigado antes de mexer: `PracticalUnit` já cobre os
+  três exemplos do pedido (pão francês, pão de forma, ovo — 554 de 580
+  alimentos já têm medida caseira). O gap real era outro: alimento
+  personalizado nunca teve como declarar uma medida. `CustomFoodForm` ganhou
+  um toggle opcional "Adicionar medida caseira", off por padrão;
+  `practicalUnitSchema` ganhou mensagens em português (nunca tinha, só era
+  usado internamente para o catálogo). Commit `c23cddb`.
 
-**Restam, os três maiores — ainda não iniciados:**
+**Resta o maior item, ainda não iniciado:**
 
-1. **Criar alimento direto dentro do fluxo da dieta** — hoje exige sair,
-   criar em Alimentos, voltar e procurar de novo. Reusar o mesmo
-   formulário/serviço de criação, sem duplicar lógica.
-7. **Evoluir porções/unidades** — o modelo `PracticalUnit` (`label`+`grams`)
-   já existe e já é usado (foi a base do item 5); o gap real, se houver, é
-   de exposição na UI, não de modelo — investigar antes de assumir que falta
-   trabalho de schema.
 8. **Busca de alimentos mais clara** — inspirada na estrutura de informação
    do app "Macros" (nome, marca/porção, kcal, C/P/G), não na identidade
    visual dele — isso continua do Brandbook.
 
 9–13 (investigação prévia, motion consistente, testes, fluxos A–H, relatório
-final) valem para os itens restantes da mesma forma que já valeram para os
-cinco entregues.
+final) valem para o item restante da mesma forma que já valeram para os sete
+entregues.
 
 Espec completa, com os oito fluxos de teste e o texto de cada item na
 íntegra: `docs/melhorias-teste-real-08-09-2026.md`.
