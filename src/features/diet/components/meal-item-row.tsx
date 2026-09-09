@@ -266,6 +266,9 @@ function GramsField({
       value={draft}
       aria-label={label}
       placeholder="0"
+      onFocus={(event) => {
+        event.target.select();
+      }}
       onChange={(event) => {
         const next = readGrams(event.target.value);
         setDraft(next.text);
@@ -360,12 +363,19 @@ function UnitQuantityField({
       aria-label={`Quantidade de ${itemName} em ${unit.label}`}
       title={unit.label}
       placeholder="0"
+      onFocus={(event) => {
+        event.target.select();
+      }}
       onChange={(event) => {
         const next = readQuantity(event.target.value);
         setDraft(next.text);
         onChange(clampGrams(next.quantity * unit.grams));
       }}
-      className="h-8 w-14 rounded-md border border-line bg-surface px-1.5 text-right text-xs tabular-nums text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong"
+      // Era `text-ink-muted`: um valor real (a contagem de medidas caseiras,
+      // ex. "1" em "1 fatia") lido em cinza é indistinguível de um
+      // placeholder — achado num teste manual real. O campo continua menor
+      // que o de gramas (tamanho, não cor, marca que é secundário).
+      className="h-8 w-14 rounded-md border border-line bg-surface px-1.5 text-right text-xs tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
     />
   );
 }
