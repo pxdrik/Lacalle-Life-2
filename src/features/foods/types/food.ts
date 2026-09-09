@@ -54,7 +54,7 @@ export interface Food extends Entity {
 
   /**
    * Marked by the user. Only custom foods can be deleted, but anything can be
-   * favourited — which is how someone makes a 581-row catalogue feel like the
+   * favourited — which is how someone makes a 580-row catalogue feel like the
    * fifteen things they actually eat.
    */
   readonly isFavorite: boolean;

@@ -8053,21 +8053,6 @@
     }
   },
   {
-    "id": "queijo-mozarela",
-    "name": "Queijo mozarela",
-    "category": "dairy",
-    "per100g": {
-      "kcal": 330,
-      "proteinG": 22.6,
-      "carbsG": 3,
-      "fatG": 25.2
-    },
-    "practicalUnit": {
-      "label": "1 fatia média",
-      "grams": 20
-    }
-  },
-  {
     "id": "queijo-pasteurizado",
     "name": "Queijo pasteurizado",
     "category": "dairy",
