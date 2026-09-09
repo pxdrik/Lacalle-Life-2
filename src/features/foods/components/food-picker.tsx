@@ -3,10 +3,13 @@
 import { Plus, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
+import { formatDecimal } from "@/core/format/decimal";
+import { roundMacros, scaleMacros } from "@/core/domain/macros";
 import { cn } from "@/design-system/cn";
 import { buttonClasses } from "@/design-system/components/button";
 import { Input } from "@/design-system/components/input";
 import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
+import { MACRO_CODING } from "@/design-system/macros";
 
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { useFoodEditor } from "../hooks/use-food-editor";
@@ -199,42 +202,84 @@ export function FoodPicker({ onPick, onCancel }: Props) {
 
       {results.length > 0 && (
         <ul className="max-h-72 overflow-y-auto">
-          {visible.map((food) => (
-            <li key={food.id}>
-              <button
-                type="button"
-                onClick={() => {
-                  onPick(food);
-                  // Cleared so the next food can be typed straight away. The
-                  // picker stays open because adding several foods to one meal
-                  // is the normal case. Filters survive the pick on purpose —
-                  // adding several foods from the same category is exactly
-                  // what they are for.
-                  setText("");
-                }}
-                className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
-              >
-                {/* The name used to be a single truncated line, squeezed
-                    between the category and the kcal column — unreadable for
-                    anything longer than a few letters at a phone width. It
-                    wraps now (category moved below it) instead of cutting
-                    off; the row is a real button end to end either way. */}
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm text-ink">{food.name}</span>
-                  <span className="mt-0.5 block text-xs text-ink-subtle">
-                    {FOOD_CATEGORY_LABELS[food.category]}
+          {visible.map((food) => {
+            const portion = referencePortion(food);
+            const macros = roundMacros(scaleMacros(food.per100g, portion.grams));
+
+            return (
+              <li key={food.id}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onPick(food);
+                    // Cleared so the next food can be typed straight away.
+                    // The picker stays open because adding several foods to
+                    // one meal is the normal case. Filters survive the pick
+                    // on purpose — adding several foods from the same
+                    // category is exactly what they are for.
+                    setText("");
+                  }}
+                  className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
+                >
+                  {/* The name used to be a single truncated line, squeezed
+                      between the category and the kcal column — unreadable
+                      for anything longer than a few letters at a phone
+                      width. It wraps now (category moved below it) instead
+                      of cutting off; the row is a real button end to end
+                      either way. */}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm text-ink">{food.name}</span>
+                    <span className="mt-0.5 block text-xs text-ink-subtle">
+                      {FOOD_CATEGORY_LABELS[food.category]}
+                      {" · "}
+                      {portion.label}
+                    </span>
                   </span>
-                </span>
-                <span className="shrink-0 text-right text-xs tabular-nums text-ink-muted">
-                  {food.per100g.kcal} kcal
-                </span>
-              </button>
-            </li>
-          ))}
+
+                  {/* Achado de teste manual real: um número solto de kcal,
+                      sem dizer se é por 100 g ou pela porção, obrigava a
+                      abrir o alimento pra saber o que ele realmente traz — o
+                      mesmo problema que a referência do app Macros resolve
+                      mostrando nome, porção, kcal e os três macros juntos
+                      numa linha só. Os valores aqui já vêm na porção de
+                      referência (a medida caseira, quando existe — senão os
+                      mesmos 100 g do resto do catálogo), e os macros usam a
+                      cor que o app já usa em toda outra tela — nunca uma cor
+                      nova só pra esta lista. */}
+                  <span className="shrink-0 text-right text-xs tabular-nums">
+                    <span className="block text-ink-muted">
+                      {formatDecimal(macros.kcal)} kcal
+                    </span>
+                    <span className="mt-0.5 flex items-baseline justify-end gap-1.5">
+                      {MACRO_CODING.map(({ key, text }) => (
+                        <span key={key} className={text}>
+                          {formatDecimal(macros[key], 1)}
+                        </span>
+                      ))}
+                    </span>
+                  </span>
+                </button>
+              </li>
+            );
+          })}
 
           {hasMore && <li ref={sentinelRef} aria-hidden className="h-px" />}
         </ul>
       )}
     </div>
   );
+}
+
+/**
+ * What the kcal/macro column of a result row is measured against.
+ *
+ * The medida caseira when the food has one — because that is the quantity
+ * someone actually pictures ("1 pão", "1 ovo"), not an abstract 100 g — and
+ * 100 g otherwise, since that is what `per100g` already is and no invented
+ * number would be more honest than the one the catalogue actually carries.
+ */
+function referencePortion(food: Food): { readonly grams: number; readonly label: string } {
+  return food.practicalUnit === undefined
+    ? { grams: 100, label: "100 g" }
+    : { grams: food.practicalUnit.grams, label: food.practicalUnit.label };
 }

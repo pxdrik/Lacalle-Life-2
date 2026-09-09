@@ -195,6 +195,32 @@ describe("FoodPicker", () => {
   });
 });
 
+describe("showing the reference portion and macros", () => {
+  it("scales to the practical unit when the food has one, instead of the raw 100 g", async () => {
+    mount([
+      food("Pão francês", {
+        per100g: { kcal: 300, proteinG: 8, carbsG: 60, fatG: 3 },
+        practicalUnit: { label: "1 unidade", grams: 50 },
+      }),
+    ]);
+    await afterLoad();
+
+    const row = await screen.findByRole("button", { name: /Pão francês/ });
+    // Half of 100 g, since the unit weighs 50 g — 150 kcal, not 300.
+    expect(row).toHaveTextContent("1 unidade");
+    expect(row).toHaveTextContent("150 kcal");
+  });
+
+  it("falls back to 100 g when the food has no practical unit", async () => {
+    mount([food("Peito de frango", { per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 } })]);
+    await afterLoad();
+
+    const row = await screen.findByRole("button", { name: /Peito de frango/ });
+    expect(row).toHaveTextContent("100 g");
+    expect(row).toHaveTextContent("165 kcal");
+  });
+});
+
 describe("creating a food without leaving the picker", () => {
   it("carries the search text into the name field", async () => {
     mount([food("Banana")]);
