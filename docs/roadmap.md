@@ -5,6 +5,35 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Seletor de exercício vira folha, com multi-seleção — 09/09/2026
+
+Pedido do Pedro depois das melhorias acima, com referência visual de um app
+de treino (duas capturas de tela): o painel de "Adicionar exercício" crescia
+inline e empurrava o treino inteiro para baixo pela altura do catálogo — a
+mesma razão que já tinha tirado o filtro de exercícios do fluxo normal (ver
+comentário em `exercise-browser.tsx`).
+
+- **`ExerciseBrowser`** ganhou `selectionMode` (`"immediate"`, o padrão —
+  preserva o fluxo de trocar exercício de um slot só — ou `"multiple"`):
+  tocar num exercício marca no lote (ícone vira check), nada é reportado até
+  apertar "Adicionar" na barra fixa — mesmo padrão que o rodapé do filtro já
+  usava. A contagem sobrevive a uma troca de filtro que não bate com nada,
+  para não perder o que já foi escolhido.
+- `autoFocus` virou prop explícita (off por padrão — `/exercicios` não deve
+  puxar o teclado sozinho ao navegar; ligado só na folha).
+- `routine-editor.tsx`: os dois painéis inline (adicionar e trocar) viraram
+  `Dialog placement="sheet-bottom"` — o mesmo componente que o filtro de
+  exercícios e o drawer do menu já usam, não um terceiro tipo de modal
+  escrito à mão. Trocar continua imediato e um a um, de propósito.
+
+12 testes novos/reescritos em `exercise-browser.test.tsx`. Verificado também
+no navegador: a folha abre por cima de tudo, busca com foco automático,
+barra fixa com contagem e "Adicionar" desabilitado até escolher algo.
+`npm run build` limpo, suíte de workouts inteira (394 testes) verde. Commit
+`eaba5dd`.
+
+---
+
 ## ✅ Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08–09/09/2026
 
 Pedido do Pedro depois de usar o app de verdade, espec completa em
