@@ -28,6 +28,7 @@ import {
   removeSet,
   renameRoutine,
   reorderExercises,
+  replaceExercise,
   updateExercise,
   updateSet,
 } from "../services/edit-routine";
@@ -46,6 +47,12 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   const detail = useExerciseDetail();
   const [picking, setPicking] = useState(false);
   const [starting, setStarting] = useState(false);
+  // Só a ação de adicionar liga isto — nunca um efeito lido de `routine`,
+  // que dispararia de novo em toda remontagem do editor.
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  // Id do slot sendo trocado, ou null. Mutuamente exclusivo com `picking`:
+  // só um painel de seleção de exercício fica aberto por vez.
+  const [swappingId, setSwappingId] = useState<string | null>(null);
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -160,6 +167,10 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
                       duplicateRoutineExercise(current, exercise.id),
                     );
                   }}
+                  onSwap={() => {
+                    setPicking(false);
+                    setSwappingId(exercise.id);
+                  }}
                   onMove={(offset) => {
                     apply((current) =>
                       moveExercise(current, exercise.id, offset),
@@ -176,6 +187,10 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
                       updateSet(current, exercise.id, setId, changes),
                     );
                   }}
+                  justAdded={exercise.id === justAddedId}
+                  onEntranceEnd={() => {
+                    setJustAddedId(null);
+                  }}
                 />
               )}
             </SortableItem>
@@ -184,7 +199,44 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
       </SortableList>
 
       <div className="mt-4">
-        {picking ? (
+        {swappingId !== null ? (
+          <div className="rounded-lg border border-line bg-canvas p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-medium text-ink">
+                Trocar{" "}
+                {routine.exercises.find((item) => item.id === swappingId)
+                  ?.name ?? "exercício"}
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setSwappingId(null);
+                }}
+                className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
+              >
+                Fechar
+              </button>
+            </div>
+
+            {/* Mesmo componente do fluxo de adicionar — trocar não é uma
+                segunda forma de escolher exercício, é a mesma seleção
+                aplicada a `replaceExercise` em vez de `addExercise`. Fecha
+                sozinho ao escolher: diferente de adicionar, não faz sentido
+                trocar o mesmo slot duas vezes seguidas. */}
+            <ExerciseBrowser
+              persistQuery={false}
+              onSelect={(exercise) => {
+                apply((current) =>
+                  replaceExercise(current, swappingId, {
+                    exerciseId: exercise.id,
+                    name: exercise.name,
+                  }),
+                );
+                setSwappingId(null);
+              }}
+            />
+          </div>
+        ) : picking ? (
           <div className="rounded-lg border border-line bg-canvas p-4">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-medium text-ink">
@@ -207,15 +259,12 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
             <ExerciseBrowser
               persistQuery={false}
               onSelect={(exercise) => {
-                apply((current) =>
-                  addExercise(
-                    current,
-                    createRoutineExercise({
-                      exerciseId: exercise.id,
-                      name: exercise.name,
-                    }),
-                  ),
-                );
+                const routineExercise = createRoutineExercise({
+                  exerciseId: exercise.id,
+                  name: exercise.name,
+                });
+                setJustAddedId(routineExercise.id);
+                apply((current) => addExercise(current, routineExercise));
               }}
             />
           </div>
@@ -223,6 +272,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           <button
             type="button"
             onClick={() => {
+              setSwappingId(null);
               setPicking(true);
             }}
             className="inline-flex h-(--control-h-lg) w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"

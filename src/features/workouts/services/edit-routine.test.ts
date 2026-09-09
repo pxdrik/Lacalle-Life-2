@@ -13,6 +13,7 @@ import {
   removeExercise,
   removeSet,
   renameRoutine,
+  replaceExercise,
   updateExercise,
   updateSet,
 } from "./edit-routine";
@@ -130,6 +131,60 @@ describe("exercises", () => {
   });
 });
 
+describe("replaceExercise", () => {
+  it("swaps the catalogue reference and name, keeping the slot id", () => {
+    const { routine, ids } = routineWith("Supino", "Remada");
+
+    const replaced = replaceExercise(routine, ids[0]!, {
+      exerciseId: "id-Supino-Inclinado",
+      name: "Supino Inclinado",
+    });
+
+    expect(replaced.exercises[0]).toMatchObject({
+      id: ids[0],
+      exerciseId: "id-Supino-Inclinado",
+      name: "Supino Inclinado",
+    });
+    expect(replaced.exercises[1]?.name).toBe("Remada");
+  });
+
+  it("preserves sets, rest and notes — only the exercise itself changes", () => {
+    const { routine, ids } = routineWith("Supino");
+    const withConfig = updateExercise(routine, ids[0]!, {
+      restSeconds: 90,
+      notes: "pegada aberta",
+    });
+    const withSet = updateSet(
+      withConfig,
+      ids[0]!,
+      withConfig.exercises[0]!.sets[0]!.id,
+      { reps: 8, weightKg: 60 },
+    );
+
+    const replaced = replaceExercise(withSet, ids[0]!, {
+      exerciseId: "id-Crucifixo",
+      name: "Crucifixo",
+    });
+
+    const exercise = replaced.exercises[0]!;
+    expect(exercise.restSeconds).toBe(90);
+    expect(exercise.notes).toBe("pegada aberta");
+    expect(exercise.sets).toHaveLength(DEFAULT_SET_COUNT);
+    expect(exercise.sets[0]).toMatchObject({ reps: 8, weightKg: 60 });
+  });
+
+  it("ignores an unknown slot", () => {
+    const { routine } = routineWith("Supino");
+
+    expect(
+      replaceExercise(routine, "gone", {
+        exerciseId: "id-Remada",
+        name: "Remada",
+      }),
+    ).toBe(routine);
+  });
+});
+
 describe("sets", () => {
   it("adds one, copying the last", () => {
     const { routine, ids } = routineWith("Supino");
@@ -222,6 +277,9 @@ describe("stale references", () => {
     expect(updateExercise(routine, "gone", { restSeconds: 60 })).toBe(routine);
     expect(addSet(routine, "gone")).toBe(routine);
     expect(moveExercise(routine, "gone", 1)).toBe(routine);
+    expect(
+      replaceExercise(routine, "gone", { exerciseId: "id-x", name: "X" }),
+    ).toBe(routine);
   });
 
   it("ignores an unknown set", () => {

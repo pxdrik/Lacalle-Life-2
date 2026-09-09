@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "../types/exercise";
@@ -38,8 +39,12 @@ function catalogueEntry(overrides: Partial<Exercise> = {}): Exercise {
   };
 }
 
-function mount(catalogue: Exercise | undefined) {
-  render(
+function mount(
+  catalogue: Exercise | undefined,
+  overrides: Partial<React.ComponentProps<typeof RoutineExerciseCard>> = {},
+) {
+  const onSwap = vi.fn();
+  const { container } = render(
     <RoutineExerciseCard
       exercise={EXERCISE}
       catalogue={catalogue}
@@ -49,12 +54,15 @@ function mount(catalogue: Exercise | undefined) {
       onChange={vi.fn()}
       onRemove={vi.fn()}
       onDuplicate={vi.fn()}
+      onSwap={onSwap}
       onMove={vi.fn()}
       onAddSet={vi.fn()}
       onRemoveSet={vi.fn()}
       onSetChange={vi.fn()}
+      {...overrides}
     />,
   );
+  return { onSwap, card: container.querySelector("section") };
 }
 
 describe("the column header", () => {
@@ -76,5 +84,32 @@ describe("the column header", () => {
     // RPE rates effort against a rep/weight target, which a timed exercise
     // has neither of.
     expect(screen.queryByText("RPE")).not.toBeInTheDocument();
+  });
+});
+
+describe("swapping the exercise", () => {
+  it("calls onSwap, naming the exercise being swapped", async () => {
+    const user = userEvent.setup();
+    const { onSwap } = mount(undefined);
+
+    await user.click(
+      screen.getByRole("button", { name: "Trocar Esteira por outro exercício" }),
+    );
+
+    expect(onSwap).toHaveBeenCalledOnce();
+  });
+});
+
+describe("the entrance animation", () => {
+  it("is not present by default", () => {
+    const { card } = mount(undefined);
+
+    expect(card).not.toHaveClass("animate-rise");
+  });
+
+  it("plays only when the card is the one just added", () => {
+    const { card } = mount(undefined, { justAdded: true });
+
+    expect(card).toHaveClass("animate-rise");
   });
 });

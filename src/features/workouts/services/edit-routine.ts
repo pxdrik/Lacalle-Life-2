@@ -56,6 +56,28 @@ export function updateExercise(
   }));
 }
 
+/**
+ * Swaps which catalogue exercise a slot points to, in place.
+ *
+ * `exerciseId` here names the **slot** (`RoutineExercise.id`), not the
+ * catalogue entry — same convention as every other function in this file.
+ * Only `exerciseId` (the catalogue reference) and `name` change; `sets`,
+ * `restSeconds` and `notes` belong to the slot, not to which exercise fills
+ * it, and carry over untouched. That is the difference between this and
+ * removing the slot and adding a new one, which would lose all three.
+ */
+export function replaceExercise(
+  routine: Routine,
+  exerciseId: EntityId,
+  replacement: { readonly exerciseId: EntityId; readonly name: string },
+): Routine {
+  return mapExercise(routine, exerciseId, (exercise) => ({
+    ...exercise,
+    exerciseId: replacement.exerciseId,
+    name: replacement.name,
+  }));
+}
+
 export function addSet(routine: Routine, exerciseId: EntityId): Routine {
   return mapExercise(routine, exerciseId, (exercise) => ({
     ...exercise,

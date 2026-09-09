@@ -6,6 +6,7 @@ import {
   Copy,
   GripVertical,
   Plus,
+  Repeat,
   Trash2,
 } from "lucide-react";
 
@@ -36,10 +37,21 @@ interface Props {
   readonly onChange: (changes: ExerciseChanges) => void;
   readonly onRemove: () => void;
   readonly onDuplicate: () => void;
+  /** Opens the picker to swap which exercise fills this slot. */
+  readonly onSwap: () => void;
   readonly onMove: (offset: number) => void;
   readonly onAddSet: () => void;
   readonly onRemoveSet: (setId: string) => void;
   readonly onSetChange: (setId: string, changes: SetChanges) => void;
+  /**
+   * True for exactly one render: the card just added by the picker below.
+   * Never derived from `exercise` itself — an entrance tied to persisted
+   * state would replay on every remount, the same mistake the set-complete
+   * check avoids by watching the tap instead of `isCompleted`.
+   */
+  readonly justAdded?: boolean;
+  /** Clears `justAdded` once the entrance has actually played. */
+  readonly onEntranceEnd?: () => void;
 }
 
 export function RoutineExerciseCard({
@@ -52,19 +64,24 @@ export function RoutineExerciseCard({
   onChange,
   onRemove,
   onDuplicate,
+  onSwap,
   onMove,
   onAddSet,
   onRemoveSet,
   onSetChange,
+  justAdded = false,
+  onEntranceEnd,
 }: Props) {
   const isCardio = catalogue?.movementPattern === "cardio";
 
   return (
     <Card
       as="section"
+      onAnimationEnd={justAdded ? onEntranceEnd : undefined}
       className={cn(
         "transition-shadow duration-150 ease-out",
         dragHandle?.isDragging === true && "border-accent shadow-modal",
+        justAdded && "animate-rise motion-reduce:animate-none",
       )}
     >
       {/* Wraps on a phone. Grip, thumbnail and four action buttons leave the
@@ -98,6 +115,9 @@ export function RoutineExerciseCard({
             than tapping an arrow, and a handle alone would make reordering a
             pointer-shaped affordance in a screen used one-handed. */}
         <div className="flex w-full shrink-0 items-center justify-end sm:w-auto">
+          <IconButton label={`Trocar ${exercise.name} por outro exercício`} onClick={onSwap}>
+            <Repeat aria-hidden className="size-4" />
+          </IconButton>
           <IconButton label={`Duplicar ${exercise.name}`} onClick={onDuplicate}>
             <Copy aria-hidden className="size-4" />
           </IconButton>
