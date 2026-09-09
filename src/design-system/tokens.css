@@ -846,6 +846,20 @@ textarea {
    * barra e o cronômetro não possam discordar.
    */
   --animate-drain: drain linear both;
+
+  /**
+   * Um traço se desenhando — a ideia que a pág. 36 já registra para o check
+   * de série (comentário de `--animate-pop` acima), aplicada aqui a onde ela
+   * cabe sem mexer no símbolo: a linha de um gráfico, Level 3/Data do Motion
+   * System v1. `stroke-dasharray` fixo em 2000 é maior que qualquer polyline
+   * real desenhada nas telas do app — não precisa de `getTotalLength()` em
+   * JavaScript, e o componente que usa isto continua um Server Component.
+   *
+   * Só roda com `motion-safe`, nunca como o estado inicial: sem ele, a linha
+   * já nasce com `stroke-dashoffset: 0`, inteira e visível — o traço nunca é
+   * a única forma de a informação chegar.
+   */
+  --animate-draw-line: draw-line var(--duration-data) var(--ease-out) both;
 }
 
 @keyframes rise {
@@ -874,6 +888,15 @@ textarea {
   }
   to {
     scale: 0 1;
+  }
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 2000;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 

@@ -61,6 +61,13 @@ export function TrendChart({ points, average, unit, label }: Props) {
         preserveAspectRatio="none"
         className="h-40 w-full overflow-visible"
       >
+        {/* As duas linhas se desenham da esquerda para a direita ao montar —
+            `--animate-draw-line`, Level 3/Data do Motion System v1. A média
+            desenha primeiro; a linha real, por cima, começa um instante
+            depois, como se estivesse traçando por cima do que a suavizada já
+            mostrou. `strokeDasharray` fixo em 2000 é maior que qualquer
+            polyline real aqui — sem `getTotalLength()`, o componente continua
+            sem `"use client"`. Sem `motion-safe`, a linha já nasce inteira. */}
         {average.length > 1 && (
           <polyline
             points={smooth.join(" ")}
@@ -71,6 +78,9 @@ export function TrendChart({ points, average, unit, label }: Props) {
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
+            strokeDasharray={2000}
+            strokeDashoffset={0}
+            className="motion-safe:animate-draw-line"
           />
         )}
 
@@ -82,6 +92,10 @@ export function TrendChart({ points, average, unit, label }: Props) {
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
+          strokeDasharray={2000}
+          strokeDashoffset={0}
+          className="motion-safe:animate-draw-line"
+          style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
         />
 
         {points.map((point, index) => (
