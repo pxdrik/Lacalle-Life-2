@@ -105,3 +105,57 @@ describe("clearing a validation message", () => {
     expect(screen.queryByText(/somam mais de 100 g/)).not.toBeInTheDocument();
   });
 });
+
+describe("the practical unit toggle", () => {
+  it("hides the unit fields until the toggle is switched on", () => {
+    mountForm();
+
+    expect(screen.queryByLabelText("Nome da medida")).not.toBeInTheDocument();
+  });
+
+  it("reveals the fields on toggle, and sends the unit on save", async () => {
+    const save = vi.fn(async () => SAVED);
+    render(
+      <CustomFoodForm initial={null} save={save} pending={false} error={null} />,
+    );
+
+    await userEvent.type(nameField(), "Pão caseiro");
+    await userEvent.type(screen.getByLabelText("Calorias"), "250");
+    await userEvent.type(screen.getByLabelText("Proteína"), "8");
+    await userEvent.type(screen.getByLabelText("Carboidrato"), "45");
+    await userEvent.type(screen.getByLabelText("Gordura"), "3");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar medida caseira" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nome da medida"), "1 fatia");
+    await userEvent.type(screen.getByLabelText("Peso dessa medida"), "50");
+    await userEvent.click(submit());
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        practicalUnit: { label: "1 fatia", grams: 50 },
+      }),
+    );
+  });
+
+  it("requires the weight once the toggle is on, but not before", async () => {
+    mountForm();
+
+    await userEvent.type(nameField(), "Pão caseiro");
+    await userEvent.type(screen.getByLabelText("Calorias"), "250");
+    await userEvent.type(screen.getByLabelText("Proteína"), "8");
+    await userEvent.type(screen.getByLabelText("Carboidrato"), "45");
+    await userEvent.type(screen.getByLabelText("Gordura"), "3");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar medida caseira" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nome da medida"), "1 fatia");
+    // Weight left blank on purpose.
+    await userEvent.click(submit());
+
+    expect(
+      await screen.findByText("Preencha quantos gramas essa medida tem."),
+    ).toBeInTheDocument();
+  });
+});

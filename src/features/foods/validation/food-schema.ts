@@ -43,10 +43,17 @@ const per100gSchema = macrosSchema.refine(
 );
 
 const practicalUnitSchema = z.object({
-  label: z.string().min(1).max(120),
+  label: z
+    .string()
+    .trim()
+    .min(1, "Dê um nome à medida, como \"1 fatia\".")
+    .max(120, "Nome da medida muito longo."),
   // Physical, not a bound on the app's own MAX_GRAMS: no household measure
   // approaches that ceiling, and this schema should not have to know about it.
-  grams: z.number().positive().max(10_000),
+  grams: z
+    .number({ error: "Preencha quantos gramas essa medida tem." })
+    .positive("O peso da medida precisa ser maior que zero.")
+    .max(10_000, "Medida: no máximo 10.000 g."),
 });
 
 export const catalogueEntrySchema = z.object({
@@ -71,6 +78,10 @@ export const customFoodSchema = z.object({
     .max(120, "Nome muito longo."),
   category: z.enum(FOOD_CATEGORIES),
   per100g: per100gSchema,
+  // Opcional, como no catálogo curado (`Food.practicalUnit`): nem todo
+  // alimento tem uma porção de referência confiável, e quem cria o próprio
+  // alimento pode não saber uma agora e voltar depois para editar.
+  practicalUnit: practicalUnitSchema.optional(),
 });
 
 export type CustomFoodInput = z.infer<typeof customFoodSchema>;

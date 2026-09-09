@@ -44,6 +44,19 @@ describe("createCustomFood", () => {
 
     expect(food.name).toBe("Whey");
   });
+
+  it("carries a practical unit when one is given", () => {
+    const food = createCustomFood({
+      ...VALID,
+      practicalUnit: { label: "1 scoop", grams: 30 },
+    });
+
+    expect(food.practicalUnit).toEqual({ label: "1 scoop", grams: 30 });
+  });
+
+  it("has no practical unit when none is given — most custom foods", () => {
+    expect(createCustomFood(VALID).practicalUnit).toBeUndefined();
+  });
 });
 
 describe("updateCustomFood", () => {
@@ -83,6 +96,26 @@ describe("updateCustomFood", () => {
 
   it("moves updatedAt forward", () => {
     expect(updateCustomFood(stored, VALID).updatedAt).toBeGreaterThan(1000);
+  });
+
+  it("adds a practical unit that did not exist before", () => {
+    const updated = updateCustomFood(stored, {
+      ...VALID,
+      practicalUnit: { label: "1 colher", grams: 15 },
+    });
+
+    expect(updated.practicalUnit).toEqual({ label: "1 colher", grams: 15 });
+  });
+
+  it("clears a practical unit the food used to have", () => {
+    // The form's toggle can be switched off during an edit; the food has to
+    // actually lose the unit, not keep whatever was there before this edit.
+    const withUnit: Food = {
+      ...stored,
+      practicalUnit: { label: "1 scoop", grams: 30 },
+    };
+
+    expect(updateCustomFood(withUnit, VALID).practicalUnit).toBeUndefined();
   });
 });
 
@@ -170,6 +203,37 @@ describe("customFoodSchema", () => {
     const result = customFoodSchema.safeParse({
       ...VALID,
       per100g: { kcal: 100, proteinG: -5, carbsG: 10, fatG: 10 },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a food with no practical unit — the common case", () => {
+    expect(customFoodSchema.safeParse(VALID).success).toBe(true);
+  });
+
+  it("accepts a valid practical unit", () => {
+    const result = customFoodSchema.safeParse({
+      ...VALID,
+      practicalUnit: { label: "1 scoop", grams: 30 },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a practical unit with no label", () => {
+    const result = customFoodSchema.safeParse({
+      ...VALID,
+      practicalUnit: { label: "", grams: 30 },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a practical unit that weighs nothing", () => {
+    const result = customFoodSchema.safeParse({
+      ...VALID,
+      practicalUnit: { label: "1 unidade", grams: 0 },
     });
 
     expect(result.success).toBe(false);

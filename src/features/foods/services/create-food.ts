@@ -18,6 +18,7 @@ export function createCustomFood(input: CustomFoodInput): Food {
     name: input.name.trim(),
     category: input.category,
     per100g: input.per100g,
+    practicalUnit: input.practicalUnit,
     isCustom: true,
     isFavorite: false,
     createdAt: now,
@@ -44,6 +45,7 @@ export function updateCustomFood(food: Food, input: CustomFoodInput): Food {
     name: input.name.trim(),
     category: input.category,
     per100g: input.per100g,
+    practicalUnit: input.practicalUnit,
   });
 }
 

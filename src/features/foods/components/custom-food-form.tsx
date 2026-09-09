@@ -27,7 +27,7 @@ import {
 // place in the app where the three were not colour-coded.
 
 type NumericKey = "kcal" | "proteinG" | "carbsG" | "fatG";
-type Draft = Record<"name" | NumericKey, string> & {
+type Draft = Record<"name" | NumericKey | "unitLabel" | "unitGrams", string> & {
   category: (typeof FOOD_CATEGORIES)[number];
 };
 
@@ -38,6 +38,8 @@ const EMPTY: Draft = {
   proteinG: "",
   carbsG: "",
   fatG: "",
+  unitLabel: "",
+  unitGrams: "",
 };
 
 /** Numbers reach the field the way a Brazilian types them, with a comma. */
@@ -53,6 +55,8 @@ function draftFrom(food: Food | null): Draft {
     proteinG: text(food.per100g.proteinG),
     carbsG: text(food.per100g.carbsG),
     fatG: text(food.per100g.fatG),
+    unitLabel: food.practicalUnit?.label ?? "",
+    unitGrams: food.practicalUnit !== undefined ? text(food.practicalUnit.grams) : "",
   };
 }
 
@@ -98,6 +102,15 @@ export function CustomFoodForm({
       : null),
   }));
   const [issues, setIssues] = useState<Readonly<Record<string, string>>>({});
+  // Off by default: most people creating a food just want it searchable, and
+  // an empty pair of fields nobody asked for would look like a required step.
+  const [hasUnit, setHasUnit] = useState(initial?.practicalUnit !== undefined);
+
+  const MACRO_KEYS: readonly NumericKey[] = ["kcal", "proteinG", "carbsG", "fatG"];
+  const UNIT_FIELD: Partial<Record<keyof Draft, string>> = {
+    unitLabel: "practicalUnit.label",
+    unitGrams: "practicalUnit.grams",
+  };
 
   function update(key: keyof Draft, value: string) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -107,8 +120,10 @@ export function CustomFoodForm({
     // name the person already shortened — the app contradicting what is on
     // screen, at the exact moment it asked for a correction.
     setIssues((current) => {
-      const numeric = key !== "name" && key !== "category";
-      const field = numeric ? `per100g.${key}` : key;
+      const numeric = MACRO_KEYS.includes(key as NumericKey);
+      const field = numeric
+        ? `per100g.${key}`
+        : (UNIT_FIELD[key] ?? key);
       // `per100g` holds the cross-field rule (the macros summing past 100 g),
       // which any numeric edit can be the one that resolves.
       const clearsSum = numeric && current["per100g"] !== undefined;
@@ -145,6 +160,14 @@ export function CustomFoodForm({
         carbsG: carbsG ?? Number.NaN,
         fatG: fatG ?? Number.NaN,
       },
+      // Ausente quando a pessoa não marcou o toggle — não `NaN`: sem medida
+      // caseira não é um erro a apontar, é a maioria dos casos.
+      practicalUnit: hasUnit
+        ? {
+            label: draft.unitLabel.trim(),
+            grams: parseDecimal(draft.unitGrams) ?? Number.NaN,
+          }
+        : undefined,
     });
 
     if (!parsed.success) {
@@ -275,6 +298,74 @@ export function CustomFoodForm({
             />
           )}
         </Field>
+      </fieldset>
+
+      <fieldset className="space-y-3">
+        <legend className="mb-1 text-sm font-medium text-ink">
+          Medida caseira{" "}
+          <span className="text-ink-subtle">(opcional)</span>
+        </legend>
+
+        <button
+          type="button"
+          aria-pressed={hasUnit}
+          onClick={() => {
+            setHasUnit((current) => !current);
+          }}
+          className={cn(
+            "h-8 touch-44 rounded-full border px-3.5 text-sm transition-colors duration-150 ease-out",
+            hasUnit
+              ? "border-accent bg-accent text-accent-ink"
+              : "border-line bg-surface text-ink-muted hover:border-line-strong hover:text-ink",
+          )}
+        >
+          {hasUnit ? "Tem medida caseira" : "Adicionar medida caseira"}
+        </button>
+
+        {hasUnit && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Nome da medida"
+              id="unitLabel"
+              error={issues["practicalUnit.label"]}
+            >
+              {({ id, describedBy, invalid }) => (
+                <Input
+                  id={id}
+                  aria-describedby={describedBy}
+                  aria-invalid={invalid || undefined}
+                  value={draft.unitLabel}
+                  onChange={(event) => {
+                    update("unitLabel", event.target.value);
+                  }}
+                  placeholder="1 fatia"
+                  autoComplete="off"
+                />
+              )}
+            </Field>
+
+            <Field
+              label="Peso dessa medida"
+              id="unitGrams"
+              error={issues["practicalUnit.grams"]}
+              hint="Uma referência, não um peso fixo — cada unidade real varia."
+            >
+              {({ id, describedBy, invalid }) => (
+                <Input
+                  id={id}
+                  aria-describedby={describedBy}
+                  aria-invalid={invalid || undefined}
+                  inputMode="decimal"
+                  value={draft.unitGrams}
+                  onChange={(event) => {
+                    update("unitGrams", event.target.value);
+                  }}
+                  placeholder="0"
+                />
+              )}
+            </Field>
+          </div>
+        )}
       </fieldset>
 
       {error !== null && (
