@@ -90,6 +90,11 @@ export function MealCard({
   onToggleChecked,
 }: Props) {
   const [picking, setPicking] = useState(false);
+  // Mesma técnica de `performed-set-row.tsx` ("Concluir série"): a animação
+  // é presa ao toque, nunca ao estado — `checkState` sozinho dispararia de
+  // novo em toda remontagem do Diário, marcando de volta uma refeição que só
+  // foi lida do banco já concluída.
+  const [taps, setTaps] = useState(0);
   const macros = mealMacros(meal);
 
   return (
@@ -134,7 +139,10 @@ export function MealCard({
             {onToggleChecked !== undefined && (
               <button
                 type="button"
-                onClick={onToggleChecked}
+                onClick={() => {
+                  setTaps((count) => count + 1);
+                  onToggleChecked();
+                }}
                 aria-pressed={checkState !== "unchecked"}
                 aria-label={
                   checkState === "unchecked"
@@ -148,7 +156,7 @@ export function MealCard({
                 }
                 className={cn(
                   "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border",
-                  "transition-[background-color,border-color,color] duration-150 ease-out",
+                  "transition-[background-color,border-color,color,scale] duration-150 ease-out active:scale-90",
                   checkState === "unchecked" &&
                     "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
                   checkState === "checked" &&
@@ -164,7 +172,16 @@ export function MealCard({
                 {checkState === "edited" ? (
                   <Pencil aria-hidden className="size-3.5" />
                 ) : (
-                  <Check aria-hidden className="size-4" />
+                  <Check
+                    key={taps}
+                    aria-hidden
+                    className={cn(
+                      "size-4",
+                      taps > 0 &&
+                        checkState !== "unchecked" &&
+                        "animate-pop motion-reduce:animate-none",
+                    )}
+                  />
                 )}
               </button>
             )}
