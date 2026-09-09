@@ -5,6 +5,38 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Mais intensidade de motion — Landing e abas do app — 09/09/2026
+
+Pedido do Pedro depois da primeira entrega de motion na Landing: mais peso
+ali, e o mesmo cuidado espalhado pelas abas do app de verdade.
+
+**Landing (commit `03c1e4d`):** `Reveal` subiu de Level 2 (`--duration-standard`,
+250ms) para Level 3 (`--duration-signature`, 450ms) com escala além de
+opacidade/translação; distância dobrada; estágio entre irmãos dobrado. Hero
+com cascata de 0/80/160/240ms em vez de 0/40/80/120ms. Ainda as duas curvas
+oficiais, ainda sem física de mola — mais peso vem de distância/escala/
+duração, nunca de curva nova. A cerca do Hero (nada de gradiente/blob atrás
+do texto, pág. 20 do brand system) continua de pé.
+
+**Abas do app — três lacunas reais encontradas, não decoração nova:**
+
+- ✅ **`/evolucao`** — o gráfico de tendência (peso/gordura/medidas) não
+  tinha nenhuma entrada; a linha aparecia pronta. `--animate-draw-line`
+  (token novo): a linha se desenha com `stroke-dashoffset`, sem
+  `getTotalLength()`, continua Server Component. Commit `5178ca5`.
+- ✅ **Diário** — o check de "comer uma refeição" só trocava de cor; o
+  Treino já tinha `--animate-pop` no check de série equivalente e o Diário
+  não. Mesma técnica exata (contador de toques + `key` + `active:scale-90`),
+  copiada de propósito. Commit `2a70627`.
+- ✅ **Perfil** — o botão de tema claro/escuro trocava de ícone sem nenhum
+  toque. Mesma técnica de novo. Commit `433aec9`.
+
+Nas três, a animação está presa ao toque, nunca ao estado lido do banco —
+reabrir a tela nunca deve disparar a animação sozinha, mesmo cuidado que já
+valia para o check de série original.
+
+---
+
 ## ✅ Landing Page (`/`) sempre visível, com motion — 09/09/2026
 
 Pedido do Pedro: parar de pular `/` direto pra `/hoje` pra quem já usa o
