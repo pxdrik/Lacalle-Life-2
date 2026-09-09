@@ -5,43 +5,49 @@ depender da memória de nenhuma conversa.
 
 ---
 
-## ⏳ PENDENTE — Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08/09/2026
+## 🔧 EM ANDAMENTO — Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08/09/2026, retomado 09/09/2026
 
-Pedido do Pedro depois de usar o app de verdade, com espec completa em
-`docs/melhorias-teste-real-08-09-2026.md` — nada implementado ainda, esta é
-só a entrada de rastreio. Regra do pedido: investigar a arquitetura atual
-antes de mexer, sem refatoração desnecessária, sem quebrar o que já funciona,
+Pedido do Pedro depois de usar o app de verdade, espec completa em
+`docs/melhorias-teste-real-08-09-2026.md`. Regra do pedido: investigar antes
+de mexer, sem refatoração desnecessária, sem quebrar o que já funciona,
 migração segura de dado existente, melhorias cirúrgicas — não uma reescrita.
 
-Treze itens, os mais estruturais:
+**Entregue em 09/09/2026** (`npm run verify` verde depois de cada item):
+
+- ✅ **Item 2** — mensagem de calorias/fibra simplificada; cálculo (Atwater
+  4/4/9) confirmado correto como estimativa, só o texto mudou. Commit `a310f15`.
+- ✅ **Item 5** — o número da unidade caseira ("1 fatia") usava
+  `text-ink-muted`, lendo como placeholder mesmo sendo valor real. Corrigido
+  para `text-ink`, e os dois campos de quantidade agora selecionam o valor
+  inteiro ao focar, para que digitar substitua em vez de concatenar. Commit `fc93658`.
+- ✅ **Itens 3 e 4** — `replaceExercise()` troca o exercício de um slot
+  preservando id/sets/restSeconds/notes (reusa o mesmo `ExerciseBrowser` do
+  fluxo de adicionar); o card recém-adicionado toca `--animate-rise` uma
+  vez, disparado pela ação de selecionar — nunca por estado persistido da
+  rotina. Commit `a0bb55f`.
+- ✅ **Item 6** — investigado e resolvido: duas entradas reais para
+  mussarela, uma do catálogo original (`queijo-mozzarella`, 280kcal) e uma
+  da importação TACO (`queijo-mozarela`, 330kcal) — dedup daquela
+  importação só comparava por id exato, nunca por nome. Pedro decidiu manter
+  a grafia com dois zz; a entrada da TACO foi removida (581→580 alimentos,
+  nenhuma referência externa a ela existia). Commit `c7229d6`.
+
+**Restam, os três maiores — ainda não iniciados:**
 
 1. **Criar alimento direto dentro do fluxo da dieta** — hoje exige sair,
    criar em Alimentos, voltar e procurar de novo. Reusar o mesmo
    formulário/serviço de criação, sem duplicar lógica.
-2. **Corrigir a mensagem de calorias/fibra** ("a fibra derruba esse número")
-   — e investigar se o cálculo em si (carbo/proteína/gordura/fibra/álcool,
-   fatores energéticos) está correto, não só o texto.
-3. **Trocar exercício direto no slot**, sem precisar apagar e adicionar de
-   novo — mapear antes o que pertence a exercício vs. slot vs. série vs.
-   configuração do treino, para não sobrescrever o que deveria persistir.
-4. **Feedback visual discreto ao adicionar exercício** — motion só para
-   confirmar a ação, no vocabulário já definido na pesquisa de Motion System
-   v1 (item abaixo).
-5. **Placeholder vs. valor real nas unidades** — número da porção em cinza
-   lê como exemplo mesmo sendo valor real; resolver hierarquia visual e
-   interação (digitar substitui o valor anterior), não só cor.
-6. **Investigar duplicidade de alimentos** (achado real: dois "Queijo
-   Mussarela") antes de decidir qualquer deduplicação.
-7. **Evoluir porções/unidades** — grama continua sendo a referência-base; a
-   unidade (1 pão ≈ 50g, 2 fatias ≈ 50g) é usabilidade por cima, nunca peso
-   fixo afirmado da categoria. O item mais importante do pedido.
+7. **Evoluir porções/unidades** — o modelo `PracticalUnit` (`label`+`grams`)
+   já existe e já é usado (foi a base do item 5); o gap real, se houver, é
+   de exposição na UI, não de modelo — investigar antes de assumir que falta
+   trabalho de schema.
 8. **Busca de alimentos mais clara** — inspirada na estrutura de informação
    do app "Macros" (nome, marca/porção, kcal, C/P/G), não na identidade
    visual dele — isso continua do Brandbook.
-9–13. Investigação prévia do modelo atual (Food, Dieta, Workout), motion
-   consistente com o resto do sistema, suíte de testes sem regressão, oito
-   fluxos de teste manual nomeados (A–H), e relatório final de aceitação
-   (implementado, decisões de arquitetura, testes, riscos).
+
+9–13 (investigação prévia, motion consistente, testes, fluxos A–H, relatório
+final) valem para os itens restantes da mesma forma que já valeram para os
+cinco entregues.
 
 Espec completa, com os oito fluxos de teste e o texto de cada item na
 íntegra: `docs/melhorias-teste-real-08-09-2026.md`.
