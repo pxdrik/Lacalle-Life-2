@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
 
@@ -83,6 +83,24 @@ async function mount(session: Session) {
  * (recente e antigo) e a ação que efetivamente resolve uma sessão antiga.
  */
 describe("InProgressBanner", () => {
+  // `useTicker` reads `Date.now()`, and every fixture below is an absolute
+  // calendar date — without freezing the clock, "started today" silently
+  // becomes "started N days ago" the moment the real date moves past
+  // 2026-09-02, which is exactly what broke this suite. Frozen to the same
+  // afternoon `inProgressSession`'s default `startedAt` (10h that morning)
+  // already assumes.
+  beforeEach(() => {
+    // `shouldAdvanceTime` lets `waitFor` below keep polling on real elapsed
+    // time — only `Date.now()`/`new Date()` are pinned, the same convention
+    // `manual-sync-button.test.tsx` and `toast.test.tsx` already use.
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(at("2026-09-02", 14));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("keeps the ticking-clock treatment for a session started today", async () => {
     await mount(
       inProgressSession({
