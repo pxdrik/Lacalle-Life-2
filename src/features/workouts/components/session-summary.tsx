@@ -68,17 +68,27 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
 
       {/* What the session was, in three numbers — the reason this screen is
           opened, with the per-exercise breakdown below for when it is not
-          enough. */}
+          enough. Entra em stagger porque este é exatamente o momento de
+          celebração da pág. 36 (Level 4): três números fixos, nunca uma
+          lista sem teto — o mesmo cuidado que trava o resumo do treino aqui
+          e evita animar as dezenas de séries abaixo, que não são o mesmo
+          tipo de momento. */}
       <Card as="dl" tone="hero" className="mt-6 grid grid-cols-3 gap-4">
         <Figure
+          index={0}
           label="Duração"
           value={formatDuration(sessionDurationMs(session) ?? 0)}
         />
         <Figure
+          index={1}
           label="Séries"
           value={`${String(progress.completed)}/${String(progress.total)}`}
         />
-        <Figure label="Volume" value={`${formatDecimal(volume.kg)} kg`} />
+        <Figure
+          index={2}
+          label="Volume"
+          value={`${formatDecimal(volume.kg)} kg`}
+        />
       </Card>
 
       {/* BUG-017 (auditoria externa, 14/08): esta é a versão permanente do
@@ -177,14 +187,19 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
 }
 
 function Figure({
+  index,
   label,
   value,
 }: {
+  readonly index: number;
   readonly label: string;
   readonly value: string;
 }) {
   return (
-    <div>
+    <div
+      className="animate-rise motion-reduce:animate-none"
+      style={{ animationDelay: `calc(var(--duration-stagger) * ${String(index)})` }}
+    >
       <dd className="text-xl tabular-nums text-ink">{value}</dd>
       <dt className="mt-0.5 text-xs text-ink-subtle">{label}</dt>
     </div>
