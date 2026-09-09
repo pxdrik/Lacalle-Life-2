@@ -35,8 +35,28 @@ interface Props {
    *
    * This is the seam that lets the workout builder mount the same screen
    * instead of growing a second, divergent exercise list.
+   *
+   * Ignored when `selectionMode` is `"multiple"` — `onConfirmSelection` is
+   * the callback that mode reports through instead, since one tap there
+   * means "add this to the batch", not "done, close the picker".
    */
   readonly onSelect?: (exercise: Exercise) => void;
+
+  /**
+   * `"immediate"` (the default): tapping a row's `+` calls `onSelect` right
+   * away, once, for that one exercise — swapping what fills a slot is
+   * exactly this, there is nothing to batch.
+   *
+   * `"multiple"`: tapping toggles the row into a running selection instead,
+   * shown with a check instead of a `+`, and nothing is reported until the
+   * sticky "Adicionar" bar is pressed — building a routine from scratch is
+   * usually several exercises at once, and closing/reopening the picker
+   * between each one is the exact complaint this mode exists to fix.
+   */
+  readonly selectionMode?: "immediate" | "multiple";
+
+  /** Required when `selectionMode` is `"multiple"`; see there. */
+  readonly onConfirmSelection?: (exercises: readonly Exercise[]) => void;
 
   /**
    * Whether the search and filters are mirrored into the URL.
@@ -46,9 +66,23 @@ interface Props {
    * bury the routine's own URL under `?m=chest&e=barbell`.
    */
   readonly persistQuery?: boolean;
+
+  /**
+   * Off by default — a full-page navigation stealing the keyboard on every
+   * visit is not the same courtesy as focus following an explicit tap. On
+   * for a picker mounted inside a sheet that just opened because someone
+   * asked for it.
+   */
+  readonly autoFocus?: boolean;
 }
 
-export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
+export function ExerciseBrowser({
+  onSelect,
+  selectionMode = "immediate",
+  onConfirmSelection,
+  persistQuery = true,
+  autoFocus = false,
+}: Props) {
   const { state, writeError, toggleFavorite, createExercise } =
     useExerciseCatalogue();
   const { query, activeFilterCount, setText, setFilters, clear } =
@@ -57,6 +91,28 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
+  // Multi-select's running batch, keyed by exercise id rather than storing
+  // the objects themselves — a favourite toggled mid-pick must not desync a
+  // second copy of the exercise sitting in this set.
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
+
+  const multiple = selectionMode === "multiple";
+
+  function handleRowSelect(exercise: Exercise) {
+    if (!multiple) {
+      onSelect?.(exercise);
+      return;
+    }
+
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(exercise.id)) next.delete(exercise.id);
+      else next.add(exercise.id);
+      return next;
+    });
+  }
 
   // Search then filter, both on every render. The catalogue is a few hundred
   // rows over a prepared index, so this costs microseconds — and derived state
@@ -79,6 +135,9 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
     <div className="space-y-4">
       <div className="flex gap-2">
         <Input
+          // Only for a picker opened by an explicit tap — see the prop's own
+          // comment. `/exercicios`, a plain navigation, never sets this.
+          autoFocus={autoFocus}
           type="search"
           value={query.text}
           onChange={(event) => {
@@ -209,9 +268,10 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
               // Clearing the search is what makes the new exercise visible:
               // it rarely matches the term that failed to find anything.
               setText("");
-              // In selection mode it goes straight into the routine, so
-              // "not in the catalogue" costs one detour and not two.
-              onSelect?.(created);
+              // In selection mode it goes straight into the routine (or
+              // straight into the batch, in multi-select) — "not in the
+              // catalogue" costs one detour and not two.
+              handleRowSelect(created);
             });
           }}
         />
@@ -255,7 +315,12 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
                     key={exercise.id}
                     exercise={exercise}
                     onToggleFavorite={(item) => void toggleFavorite(item)}
-                    onSelect={onSelect}
+                    onSelect={
+                      onSelect !== undefined || multiple
+                        ? handleRowSelect
+                        : undefined
+                    }
+                    selected={multiple ? selectedIds.has(exercise.id) : undefined}
                     onOpenDetail={detail.show}
                   />
                 ))}
@@ -300,6 +365,40 @@ export function ExerciseBrowser({ onSelect, persistQuery = true }: Props) {
           {/* Credit is owed where the work is shown, and only there — so it
               is derived from the rows on screen, not from a fixed list. */}
           <MediaAttribution media={visible.map((exercise) => exercise.media)} />
+
+          {/* Same sticky treatment as the Filters sheet above, and the same
+              reason: this picker lives inside a `Dialog`, which already
+              covers the routine being built, so the running count is the
+              only feedback there is until "Adicionar" closes it. Kept even
+              with zero results on screen — filtering to look for one more
+              exercise must not lose track of the ones already picked. */}
+          {multiple && (
+            <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
+              <p aria-live="polite" className="text-sm text-ink-muted">
+                <span className="tabular-nums text-ink">
+                  {selectedIds.size}
+                </span>{" "}
+                {selectedIds.size === 1
+                  ? "exercício selecionado"
+                  : "exercícios selecionados"}
+              </p>
+
+              <Button
+                size="sm"
+                disabled={selectedIds.size === 0}
+                onClick={() => {
+                  if (state.status !== "ready") return;
+
+                  const chosen = state.exercises.filter((exercise) =>
+                    selectedIds.has(exercise.id),
+                  );
+                  onConfirmSelection?.(chosen);
+                }}
+              >
+                Adicionar
+              </Button>
+            </div>
+          )}
 
           <ExerciseDetailDialog control={detail} />
         </>

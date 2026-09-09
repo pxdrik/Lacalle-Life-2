@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
+import { Dialog } from "@/design-system/components/dialog";
 import {
   SortableItem,
   SortableList,
@@ -48,10 +49,13 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   const [picking, setPicking] = useState(false);
   const [starting, setStarting] = useState(false);
   // Só a ação de adicionar liga isto — nunca um efeito lido de `routine`,
-  // que dispararia de novo em toda remontagem do editor.
-  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  // que dispararia de novo em toda remontagem do editor. Um conjunto, não um
+  // id só, porque o seletor agora confirma vários exercícios de uma vez.
+  const [justAddedIds, setJustAddedIds] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
   // Id do slot sendo trocado, ou null. Mutuamente exclusivo com `picking`:
-  // só um painel de seleção de exercício fica aberto por vez.
+  // só uma folha de seleção de exercício fica aberta por vez.
   const [swappingId, setSwappingId] = useState<string | null>(null);
 
   if (state.status === "loading") return <EditorSkeleton />;
@@ -187,9 +191,14 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
                       updateSet(current, exercise.id, setId, changes),
                     );
                   }}
-                  justAdded={exercise.id === justAddedId}
+                  justAdded={justAddedIds.has(exercise.id)}
                   onEntranceEnd={() => {
-                    setJustAddedId(null);
+                    setJustAddedIds((current) => {
+                      if (!current.has(exercise.id)) return current;
+                      const next = new Set(current);
+                      next.delete(exercise.id);
+                      return next;
+                    });
                   }}
                 />
               )}
@@ -199,89 +208,92 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
       </SortableList>
 
       <div className="mt-4">
-        {swappingId !== null ? (
-          <div className="rounded-lg border border-line bg-canvas p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink">
-                Trocar{" "}
-                {routine.exercises.find((item) => item.id === swappingId)
-                  ?.name ?? "exercício"}
-              </h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setSwappingId(null);
-                }}
-                className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
-              >
-                Fechar
-              </button>
-            </div>
+        <button
+          type="button"
+          onClick={() => {
+            setPicking(true);
+          }}
+          className="inline-flex h-(--control-h-lg) w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          <Plus aria-hidden className="size-4" />
+          Adicionar exercício
+        </button>
+      </div>
 
-            {/* Mesmo componente do fluxo de adicionar — trocar não é uma
-                segunda forma de escolher exercício, é a mesma seleção
-                aplicada a `replaceExercise` em vez de `addExercise`. Fecha
-                sozinho ao escolher: diferente de adicionar, não faz sentido
-                trocar o mesmo slot duas vezes seguidas. */}
-            <ExerciseBrowser
-              persistQuery={false}
-              onSelect={(exercise) => {
-                apply((current) =>
-                  replaceExercise(current, swappingId, {
-                    exerciseId: exercise.id,
-                    name: exercise.name,
-                  }),
-                );
-                setSwappingId(null);
-              }}
-            />
-          </div>
-        ) : picking ? (
-          <div className="rounded-lg border border-line bg-canvas p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-ink">
-                Adicionar exercício
-              </h2>
-              <button
-                type="button"
-                onClick={() => {
-                  setPicking(false);
-                }}
-                className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
-              >
-                Fechar
-              </button>
-            </div>
-
-            {/* The same component the catalogue page mounts. `persistQuery`
-                is off because a picker's filters are scratch state and would
-                otherwise bury this routine's URL. */}
-            <ExerciseBrowser
-              persistQuery={false}
-              onSelect={(exercise) => {
-                const routineExercise = createRoutineExercise({
+      {/* Achado de teste manual real (item de UX pedido depois das melhorias
+          de dieta/alimentos/treino): um painel que crescia inline empurrava
+          o treino inteiro para baixo pela altura do catálogo inteiro — a
+          mesma razão que já tinha tirado o filtro de exercícios do fluxo
+          normal (comentário em `exercise-browser.tsx`). Uma folha por cima
+          de tudo, não uma terceira forma de painel: reusa exatamente o
+          `Dialog` que o filtro e toda outra consulta do app já usam. */}
+      {picking && (
+        <Dialog
+          open
+          title="Adicionar exercício"
+          onClose={() => {
+            setPicking(false);
+          }}
+          placement="sheet-bottom"
+        >
+          {/* Múltiplo, não imediato: montar um treino do zero é
+              normalmente vários exercícios seguidos, e fechar e reabrir a
+              folha a cada um era exatamente o trabalho extra reclamado. */}
+          <ExerciseBrowser
+            persistQuery={false}
+            autoFocus
+            selectionMode="multiple"
+            onConfirmSelection={(exercises) => {
+              const created = exercises.map((exercise) =>
+                createRoutineExercise({
                   exerciseId: exercise.id,
                   name: exercise.name,
-                });
-                setJustAddedId(routineExercise.id);
-                apply((current) => addExercise(current, routineExercise));
-              }}
-            />
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setSwappingId(null);
-              setPicking(true);
+                }),
+              );
+              setJustAddedIds(new Set(created.map((exercise) => exercise.id)));
+              apply((current) =>
+                created.reduce(
+                  (routine, exercise) => addExercise(routine, exercise),
+                  current,
+                ),
+              );
+              setPicking(false);
             }}
-            className="inline-flex h-(--control-h-lg) w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
-          >
-            <Plus aria-hidden className="size-4" />
-            Adicionar exercício
-          </button>
-        )}
-      </div>
+          />
+        </Dialog>
+      )}
+
+      {/* Trocar continua imediato e um-a-um: diferente de montar o treino do
+          zero, substituir o exercício de um slot é uma escolha só — reusa o
+          mesmo componente do fluxo de adicionar, `replaceExercise` em vez de
+          `addExercise`, sem ligar o modo múltiplo. */}
+      {swappingId !== null && (
+        <Dialog
+          open
+          title={`Trocar ${
+            routine.exercises.find((item) => item.id === swappingId)?.name ??
+            "exercício"
+          }`}
+          onClose={() => {
+            setSwappingId(null);
+          }}
+          placement="sheet-bottom"
+        >
+          <ExerciseBrowser
+            persistQuery={false}
+            autoFocus
+            onSelect={(exercise) => {
+              apply((current) =>
+                replaceExercise(current, swappingId, {
+                  exerciseId: exercise.id,
+                  name: exercise.name,
+                }),
+              );
+              setSwappingId(null);
+            }}
+          />
+        </Dialog>
+      )}
 
       <ExerciseDetailDialog control={detail} />
     </div>

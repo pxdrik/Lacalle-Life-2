@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Star } from "lucide-react";
+import { Check, Plus, Star } from "lucide-react";
 
 import { cn } from "@/design-system/cn";
 
@@ -16,6 +16,13 @@ interface Props {
   /** Present in selection mode — the row gains an add button. */
   readonly onSelect?: ((exercise: Exercise) => void) | undefined;
   readonly onOpenDetail: (exercise: Exercise) => void;
+  /**
+   * Multi-select mode: this row is already in the batch waiting to be
+   * confirmed. `undefined` (not just `false`) is what keeps the button
+   * reading as an immediate add — the same `+` it always was — everywhere
+   * that never turned multi-select on in the first place.
+   */
+  readonly selected?: boolean | undefined;
 }
 
 export function ExerciseRow({
@@ -23,6 +30,7 @@ export function ExerciseRow({
   onToggleFavorite,
   onSelect,
   onOpenDetail,
+  selected,
 }: Props) {
   const muscles = exercise.primaryMuscles
     .map((m) => MUSCLE_LABELS[m])
@@ -109,10 +117,24 @@ export function ExerciseRow({
           onClick={() => {
             onSelect(exercise);
           }}
-          aria-label={`Adicionar ${exercise.name}`}
-          className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md bg-accent text-accent-ink transition-opacity duration-150 ease-out hover:opacity-90"
+          aria-pressed={selected}
+          aria-label={
+            selected === true
+              ? `Remover ${exercise.name} da seleção`
+              : `Adicionar ${exercise.name}`
+          }
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md transition-colors duration-150 ease-out",
+            selected === true
+              ? "bg-accent-surface text-accent-text"
+              : "bg-accent text-accent-ink hover:opacity-90",
+          )}
         >
-          <Plus aria-hidden className="size-4" />
+          {selected === true ? (
+            <Check aria-hidden className="size-4" />
+          ) : (
+            <Plus aria-hidden className="size-4" />
+          )}
         </button>
       )}
     </li>

@@ -50,7 +50,10 @@ function exercise(id: string, name: string): Exercise {
   };
 }
 
-function mount(catalogue: readonly Exercise[]) {
+function mount(
+  catalogue: readonly Exercise[],
+  props: Partial<React.ComponentProps<typeof ExerciseBrowser>> = {},
+) {
   const repository = new LocalExerciseRepository(
     new MemoryStore<Exercise>(EXERCISES_STORE),
   );
@@ -60,7 +63,7 @@ function mount(catalogue: readonly Exercise[]) {
 
   render(
     <ExerciseRepositoryProvider repository={ready.then(() => repository)}>
-      <ExerciseBrowser persistQuery={false} />
+      <ExerciseBrowser persistQuery={false} {...props} />
     </ExerciseRepositoryProvider>,
   );
 }
@@ -73,6 +76,20 @@ const CATALOGUE = [
 
 const search = () => screen.getByLabelText("Buscar exercício");
 const createRow = () => screen.queryByRole("button", { name: /^Criar/ });
+
+/**
+ * The running count reads "1 exercício selecionado", but the number is its
+ * own `<span>` for the tabular digits — `getByText` only matches a single
+ * node's own text, not text assembled from a child element plus a sibling
+ * text node, so an exact string never finds it.
+ */
+function selectedCount(): HTMLElement | null {
+  return screen.queryByText(
+    (_, element) =>
+      element?.tagName === "P" &&
+      /selecionad/.test(element.textContent ?? ""),
+  );
+}
 
 describe("creating from a search that found something", () => {
   it("offers to create the term anyway", async () => {
@@ -137,5 +154,110 @@ describe("while browsing without a search", () => {
     await userEvent.type(search(), "   ");
 
     expect(createRow()).not.toBeInTheDocument();
+  });
+});
+
+describe("immediate selection (single exercise, swapping a slot)", () => {
+  it("reports the exercise as soon as its row is tapped, once", async () => {
+    const onSelect = vi.fn();
+    mount(CATALOGUE, { onSelect });
+    await screen.findByText("Supino Reto com Barra");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar Supino Reto com Barra" }),
+    );
+
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ id: "supino-reto" }),
+    );
+  });
+});
+
+describe("multiple selection (building a routine)", () => {
+  it("toggles a row into the batch instead of reporting it immediately", async () => {
+    const onConfirmSelection = vi.fn();
+    mount(CATALOGUE, { selectionMode: "multiple", onConfirmSelection });
+    await screen.findByText("Supino Reto com Barra");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar Supino Reto com Barra" }),
+    );
+
+    expect(onConfirmSelection).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", {
+        name: "Remover Supino Reto com Barra da seleção",
+      }),
+    ).toBeInTheDocument();
+    expect(selectedCount()?.textContent).toBe("1 exercício selecionado");
+  });
+
+  it("un-selects on a second tap of the same row", async () => {
+    mount(CATALOGUE, { selectionMode: "multiple" });
+    await screen.findByText("Supino Reto com Barra");
+
+    // The button's own accessible name changes with selection state, so a
+    // fixed reference to it would stop resolving after the first click —
+    // look it up fresh each time, by the row's fixed identity instead.
+    const row = () =>
+      screen.getByRole("button", {
+        name: /^(Adicionar|Remover) Supino Reto com Barra/,
+      });
+    await userEvent.click(row());
+    await userEvent.click(row());
+
+    expect(
+      screen.getByRole("button", { name: "Adicionar Supino Reto com Barra" }),
+    ).toBeInTheDocument();
+    expect(selectedCount()?.textContent).toBe("0 exercícios selecionados");
+  });
+
+  it("confirms every selected exercise at once, in the plural, on 'Adicionar'", async () => {
+    const onConfirmSelection = vi.fn();
+    mount(CATALOGUE, { selectionMode: "multiple", onConfirmSelection });
+    await screen.findByText("Supino Reto com Barra");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar Supino Reto com Barra" }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "Adicionar Agachamento Livre com Barra",
+      }),
+    );
+
+    expect(selectedCount()?.textContent).toBe("2 exercícios selecionados");
+
+    await userEvent.click(screen.getByRole("button", { name: "Adicionar" }));
+
+    // Order not asserted: `listAll()` makes no promise about it, only the
+    // repository's write order does, and the fixture saves concurrently.
+    expect(onConfirmSelection).toHaveBeenCalledOnce();
+    const confirmed = onConfirmSelection.mock.calls[0]?.[0] as
+      | readonly { id: string }[]
+      | undefined;
+    expect(confirmed?.map((exercise) => exercise.id).sort()).toEqual([
+      "agachamento",
+      "supino-reto",
+    ]);
+  });
+
+  it("keeps the running count even when a filter hides every match", async () => {
+    mount(CATALOGUE, { selectionMode: "multiple" });
+    await screen.findByText("Supino Reto com Barra");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Adicionar Supino Reto com Barra" }),
+    );
+    await userEvent.type(search(), "zzzz");
+
+    expect(selectedCount()?.textContent).toBe("1 exercício selecionado");
+  });
+
+  it("disables 'Adicionar' with nothing selected yet", async () => {
+    mount(CATALOGUE, { selectionMode: "multiple" });
+    await screen.findByText("Supino Reto com Barra");
+
+    expect(screen.getByRole("button", { name: "Adicionar" })).toBeDisabled();
   });
 });
