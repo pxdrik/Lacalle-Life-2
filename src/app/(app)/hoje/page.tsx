@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 import { HomeDataProvider } from "@/composition/data-providers";
 import { dayKey, formatLongDay } from "@/core/format/day";
@@ -13,8 +13,6 @@ import { TodayMeals } from "@/features/diet/components/today-meals";
 import { ProfileIncompleteNotice } from "@/features/profile/components/profile-incomplete-notice";
 import { TodayWorkout } from "@/features/workouts/components/today-workout";
 import { PageShell } from "@/design-system/components/page-shell";
-
-import { markAppEntered } from "../../_lib/entered-app";
 
 /**
  * How today is going.
@@ -79,10 +77,12 @@ import { markAppEntered } from "../../_lib/entered-app";
  * **28/08/2026 — moved here from `/`.** `/` is now the public Landing Page a
  * visitor sees before creating an account or choosing "Experimentar sem
  * conta"; this is the screen "Hoje" in the sidebar actually opens, and the
- * one every internal link that used to say `href="/"` now says `/hoje`. The
- * one effect below marks that this browser has been here before, so the
- * Landing Page does not show itself again on a later visit — see
- * `app/_lib/entered-app.ts`.
+ * one every internal link that used to say `href="/"` now says `/hoje`.
+ *
+ * **09/09/2026 — a Landing Page sempre aparece.** Pedido do Pedro: mostrar
+ * `/` sempre, mesmo para quem já usou o app ou já tem sessão — sem pular
+ * direto para cá. `markAppEntered`/`hasEnteredAppBefore` e o componente
+ * `LandingRedirect` que os lia foram removidos, não só desligados.
  */
 function getToday(): string | null {
   return dayKey(new Date());
@@ -101,10 +101,6 @@ function subscribeToNothing() {
 
 export default function HojePage() {
   const today = useSyncExternalStore(subscribeToNothing, getToday, getServerToday);
-
-  useEffect(() => {
-    markAppEntered();
-  }, []);
 
   return (
     <PageShell padding="tight">

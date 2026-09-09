@@ -8,7 +8,6 @@ import { FinalCta } from "./_components/landing/final-cta";
 import { Hero } from "./_components/landing/hero";
 import { LandingFooter } from "./_components/landing/landing-footer";
 import { LandingHeader } from "./_components/landing/landing-header";
-import { LandingRedirect } from "./_components/landing/landing-redirect";
 import { Pillars } from "./_components/landing/pillars";
 
 export const metadata: Metadata = {
@@ -26,10 +25,14 @@ export const metadata: Metadata = {
 
 /**
  * A Landing Page pública em `/`. Server Component por padrão, para o
- * primeiro conteúdo chegar já renderizado: só `LandingRedirect` roda no
- * cliente, e só para tirar quem já entrou (localStorage) ou está autenticado
- * (sessão Supabase) daqui para `/hoje`, sem bloquear o primeiro parágrafo
- * de quem está vendo o produto pela primeira vez.
+ * primeiro conteúdo chegar já renderizado.
+ *
+ * **09/09/2026 — sempre aparece, para todo mundo.** Pedido do Pedro: nada de
+ * pular direto para `/hoje` para quem já usou o app ou já tem sessão. Havia
+ * um `LandingRedirect` que fazia exatamente isso, lendo uma marca em
+ * `localStorage` (`app/_lib/entered-app.ts`) e a sessão do Supabase —
+ * removido, não só desligado, porque a decisão é o oposto: esta é agora a
+ * porta de entrada de sempre, não só da primeira visita.
  *
  * `PageTransition` aplicado direto aqui, não por um `template.tsx` — esta
  * página não tem uma pasta própria para hospedar um, sendo `page.tsx` na
@@ -40,19 +43,16 @@ export const metadata: Metadata = {
  */
 export default function LandingPage() {
   return (
-    <>
-      <LandingRedirect />
-      <PageTransition>
-        <LandingHeader />
-        <main>
-          <Hero />
-          <Pillars />
-          <Features />
-          <AccountSection />
-          <FinalCta />
-        </main>
-        <LandingFooter />
-      </PageTransition>
-    </>
+    <PageTransition>
+      <LandingHeader />
+      <main>
+        <Hero />
+        <Pillars />
+        <Features />
+        <AccountSection />
+        <FinalCta />
+      </main>
+      <LandingFooter />
+    </PageTransition>
   );
 }

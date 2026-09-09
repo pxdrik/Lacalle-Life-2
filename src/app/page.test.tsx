@@ -1,15 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import LandingPage from "./page";
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn() }),
-}));
-
-vi.mock("@/core/auth/env", () => ({
-  isSupabaseConfigured: () => false,
-}));
 
 /**
  * Fumaça da Landing Page pública: as seções obrigatórias existem, e os três

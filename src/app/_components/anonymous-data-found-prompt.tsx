@@ -41,9 +41,8 @@ function markOffered(uid: string): void {
  * próprios neste aparelho, e o banco anônimo (`lacalle-life`) tem algo que
  * uma pessoa realmente registrou.
  *
- * Montado perto da raiz do app (`RootLayout`, ramo autenticado), mesmo
- * lugar que `LandingRedirect` ocupa na Landing Page — não bloqueia a
- * primeira renderização, só decide depois de montado.
+ * Montado perto da raiz do app (`RootLayout`, ramo autenticado) — não
+ * bloqueia a primeira renderização, só decide depois de montado.
  */
 export function AnonymousDataFoundPrompt() {
   const [uid, setUid] = useState<string | null>(null);
