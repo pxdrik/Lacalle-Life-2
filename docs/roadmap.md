@@ -5,6 +5,60 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Catálogo de motion do ChatGPT — triado, não copiado — 09/09/2026
+
+O Pedro trouxe um HTML gerado pelo ChatGPT (`preview.html`, "LaCalle Motion
+Catalog") com ~28 padrões de transição e pediu para adicionar todos. Em vez
+de colar, cada um foi comparado contra o que já existe e contra as decisões
+já fechadas na pesquisa de Motion System v1 — o próprio catálogo já vinha com
+`--duration-fast/normal/slow` (180/280/450ms) e uma seção "07. Padrões
+avançados" com o aviso "devem ser usados com muito mais critério", ou seja,
+mesmo a fonte pedia triagem.
+
+**Já existia, sob outro nome — nada a fazer:** Fade/Reveal-on-scroll (Reveal
+da Landing), Stagger (Hoje, Evolução, Landing, rotina de treino), Success
+State (`--animate-pop`), Toast (`useToast`), Progress Fill/Chart Enter
+(`--duration-data`, inclusive o gráfico de evolução que já se desenha),
+Bottom Sheet (`Dialog placement="sheet-bottom"`), Shimmer (`Skeleton` já usa
+`--animate-pulse-soft`), Press (`active:scale-90` já padrão nos botões de
+check).
+
+**Implementado agora, achado real com lugar certo:**
+- ✅ **Entry Insert** — item novo entra com `--animate-rise` ao ser
+  adicionado a uma refeição (Diário e Dietas). O próprio catálogo chama isto
+  de o padrão mais importante para o conceito de Cronista. Commit `9503185`.
+
+**Rejeitado, com o motivo escrito para não ser reaberto por engano:**
+- **Pulse** (indicador de sincronizando) — `DietSyncStatus`/`FoodLogSyncStatus`
+  são **deliberadamente sem spinner** ("transparente", comentário no próprio
+  código) — adicionar um pulso contradiria uma decisão de produto já tomada.
+- **Morph, Flip 3D, Long Press, Sequence, Slide genérico** — nenhum tem uma
+  tela real no LaCalle Life que precise deles hoje; adicionar seria inventar
+  UI só para ter o que animar, o efeito-sem-função que a Regra de Ouro do
+  Motion System já rejeita por princípio.
+- **Parallax** — Level 5/Cinematic, já decidido só para landing/marketing, e
+  mesmo lá com moderação (pesquisa de 07/09).
+- **Shared Element** — já identificado como "maior risco técnico, testar
+  antes de adotar" na pesquisa original; continua não implementado, de
+  propósito.
+- **Swipe (gesto real)** — exigiria uma biblioteca de gesto ou handler de
+  toque manual, escopo bem maior que uma transição CSS; nenhuma tela do app
+  usa swipe-to-edit/delete hoje (usa botões com revelação por hover/grupo).
+- **Number Update (flash de cor + bump)** — candidato real (ex.: número de
+  kcal restante em `TodayEnergy`, que hoje troca sem nenhuma transição), mas
+  flashear verde sem ícone/texto junto contraria a regra do Brandbook de que
+  todo estado com cor precisa vir acompanhado de ícone e texto (pág. 48) —
+  fica como candidato a uma versão sem cor (só um leve bump), não implementado
+  ainda por precisar dessa decisão.
+- **Delete/Collapse (linha encolhe antes de sumir)** e **Focus Transition**
+  — candidatos reais, não implementados nesta rodada: o primeiro exige
+  adiar a remoção de verdade até a animação terminar (duas fases, mais
+  arquitetura que os outros itens desta lista), o segundo precisa de um
+  lugar concreto (ex.: destacar a próxima série em `session-runner.tsx`) que
+  ainda não foi decidido.
+
+---
+
 ## ✅ Mais intensidade de motion — Landing e abas do app — 09/09/2026
 
 Pedido do Pedro depois da primeira entrega de motion na Landing: mais peso
