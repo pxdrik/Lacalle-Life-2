@@ -5,14 +5,70 @@ depender da memória de nenhuma conversa.
 
 ---
 
-## 🔧 EM ANDAMENTO — Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08/09/2026, retomado 09/09/2026
+## ✅ Melhorias de teste manual real: Dietas, Alimentos, Treinos — 08–09/09/2026
 
 Pedido do Pedro depois de usar o app de verdade, espec completa em
 `docs/melhorias-teste-real-08-09-2026.md`. Regra do pedido: investigar antes
 de mexer, sem refatoração desnecessária, sem quebrar o que já funciona,
 migração segura de dado existente, melhorias cirúrgicas — não uma reescrita.
+**Os oito itens estruturais foram entregues em 09/09/2026.**
 
-**Entregue em 09/09/2026** (`npm run verify` verde depois de cada item):
+### Relatório de aceitação
+
+**Implementado**, um commit por item, todos com `npm run verify` (typecheck +
+lint + testes) verde antes do commit:
+
+1. Criar alimento sem sair do fluxo da dieta/diário (`6fc9121`)
+2. Mensagem de calorias/fibra simplificada (`a310f15`)
+3. e 4. Trocar exercício no slot + feedback ao adicionar (`a0bb55f`)
+5. Hierarquia visual da unidade caseira (`fc93658`)
+6. Deduplicação de alimento (mussarela) (`c7229d6`)
+7. Medida caseira em alimento personalizado (`c23cddb`)
+8. Porção, kcal e macros na busca de alimento (`75aef42`)
+
+**Decisões de arquitetura:**
+
+- **Unidade/porção**: o modelo `PracticalUnit` (`label` + `grams`) já
+  existia e já cobria os exemplos do pedido — o trabalho real foi de
+  exposição (itens 5, 7, 8), nunca de schema novo no catálogo.
+- **Gramas**: continuam a única unidade nutricional de verdade; toda medida
+  caseira é convertida para grama no momento de entrada (`grams = quantidade
+  × unit.grams`), nunca armazenada como uma segunda grandeza.
+- **Calorias**: `kcal` continua um valor digitado (do rótulo), nunca
+  derivado — a estimativa por Atwater (4/4/9) é só uma sugestão, com a
+  ressalva de fibra correta desde sempre, só a explicação no texto mudou.
+- **Alimentos personalizados**: ganharam paridade com o catálogo curado —
+  podem ter medida caseira (item 7) e podem ser criados sem sair da dieta
+  (item 1), os dois pela mesma `useFoodEditor`/`CustomFoodForm` que
+  `/alimentos/novo` sempre usou, sem duplicar validação nem serviço.
+- **Troca de exercício**: `replaceExercise()` distingue exercício (o que
+  preenche o slot) de slot (id, sets, restSeconds, notes) — só o primeiro
+  muda numa troca.
+
+**Testes**: suíte inteira rodada como verificação final — **1618 de 1619
+passando**, `npm run build` limpo. O único teste que falhou
+(`in-progress-banner.test.tsx`, "começou há" vs. o texto real "iniciado
+há") é **pré-existente e não relacionado** a nenhum dos oito itens — o
+arquivo não foi tocado em nenhum commit desta entrega, confirmado por
+`git diff`. Registrado abaixo, não corrigido agora (fora do escopo pedido).
+Testes novos adicionados para: criação de alimento pela dieta, cálculo de
+calorias, medida caseira (schema + formulário + create/update), troca de
+exercício, porção/macros na busca.
+
+**Riscos conhecidos, não alterados de propósito:**
+
+- **Duplicidade de alimentos**: só a mussarela foi confirmada e resolvida.
+  Uma varredura fuzzy no catálogo inteiro (581 alimentos, todas categorias)
+  não achou outro caso real — os ~20 pares parecidos que apareceram são
+  alimentos genuinamente diferentes ("com gordura" vs. "sem gordura", "tipo
+  1" vs. "tipo 2"). Não é garantia formal contra o futuro, é o que a
+  varredura atual mostrou.
+- **Shared element / FLIP na troca de exercício**: cogitado na pesquisa de
+  Motion System, não implementado — o card troca de conteúdo no lugar, sem
+  animação de "voo" entre posições. Decisão de manter simples até haver
+  sinal de que faz falta.
+
+### Detalhe por item
 
 - ✅ **Item 2** — mensagem de calorias/fibra simplificada; cálculo (Atwater
   4/4/9) confirmado correto como estimativa, só o texto mudou. Commit `a310f15`.
@@ -46,16 +102,12 @@ migração segura de dado existente, melhorias cirúrgicas — não uma reescrit
   um toggle opcional "Adicionar medida caseira", off por padrão;
   `practicalUnitSchema` ganhou mensagens em português (nunca tinha, só era
   usado internamente para o catálogo). Commit `c23cddb`.
-
-**Resta o maior item, ainda não iniciado:**
-
-8. **Busca de alimentos mais clara** — inspirada na estrutura de informação
-   do app "Macros" (nome, marca/porção, kcal, C/P/G), não na identidade
-   visual dele — isso continua do Brandbook.
-
-9–13 (investigação prévia, motion consistente, testes, fluxos A–H, relatório
-final) valem para o item restante da mesma forma que já valeram para os sete
-entregues.
+- ✅ **Item 8** — cada linha do `FoodPicker` passou a mostrar categoria +
+  porção de referência (medida caseira quando existe, senão 100 g) junto com
+  kcal e os três macros escalados pra essa porção, usando a cor que
+  `MACRO_CODING` já define em todo o resto do app. Estrutura inspirada no
+  app Macros, identidade visual do Brandbook. Sem marca/fonte porque `Food`
+  não tem esse campo — inventar seria pior que omitir. Commit `75aef42`.
 
 Espec completa, com os oito fluxos de teste e o texto de cada item na
 íntegra: `docs/melhorias-teste-real-08-09-2026.md`.
