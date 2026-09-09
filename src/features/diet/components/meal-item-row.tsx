@@ -27,6 +27,15 @@ interface Props {
   readonly onUnitChange: (unit: MealItem["unit"]) => void;
   readonly onRemove: () => void;
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
+  /**
+   * True for exactly one render: o item que acabou de ser adicionado à
+   * refeição. Nunca derivado da lista em si — presa à ação de adicionar em
+   * `meal-card.tsx`, mesma regra do card recém-adicionado da rotina de
+   * treino, para não repetir a entrada ao só reabrir a dieta.
+   */
+  readonly justAdded?: boolean | undefined;
+  /** Limpa `justAdded` quando a entrada realmente terminou de tocar. */
+  readonly onEntranceEnd?: (() => void) | undefined;
 }
 
 /**
@@ -52,11 +61,14 @@ export function MealItemRow({
   onUnitChange,
   onRemove,
   onSend,
+  justAdded = false,
+  onEntranceEnd,
 }: Props) {
   const macros = itemMacros(item);
 
   return (
     <li
+      onAnimationEnd={justAdded ? onEntranceEnd : undefined}
       className={cn(
         // Wraps on a phone: seven controls in one line need ~290px and a
         // 360px screen leaves the row about 250, so it used to run off the
@@ -64,6 +76,7 @@ export function MealItemRow({
         // take a second line.
         "group flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 sm:flex-nowrap sm:gap-2",
         dragHandle.isDragging && "rounded-sm bg-muted",
+        justAdded && "animate-rise motion-reduce:animate-none",
       )}
     >
       {/* Only within a meal, and only by dragging: the order of foods inside a

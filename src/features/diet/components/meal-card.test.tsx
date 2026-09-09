@@ -27,7 +27,7 @@ function mount(
     readonly onToggleChecked?: () => void;
   } = {},
 ) {
-  render(
+  const card = (theMeal: Meal) => (
     <MealCard
       meal={theMeal}
       position={0}
@@ -45,8 +45,17 @@ function mount(
       otherMeals={[]}
       onSendItem={vi.fn()}
       {...extra}
-    />,
+    />
   );
+
+  const { rerender } = render(card(theMeal));
+
+  return {
+    /** Re-renders with a different meal — same other props. */
+    update: (nextMeal: Meal) => {
+      rerender(card(nextMeal));
+    },
+  };
 }
 
 const EXPLANATION = /Gramas é o peso do alimento/;
@@ -114,5 +123,27 @@ describe("the grams-vs-unit explanation", () => {
     );
 
     expect(screen.getByText(EXPLANATION)).toBeInTheDocument();
+  });
+});
+
+describe("the newly added item's entrance", () => {
+  it("does not animate on the initial render — nothing was just added", () => {
+    mount(meal([item({ id: "i1" })]));
+
+    const row = screen.getByText("Abacate").closest("li");
+    expect(row).not.toHaveClass("animate-rise");
+  });
+
+  it("animates only the item that was appended", () => {
+    const { update } = mount(meal([item({ id: "i1" })]));
+
+    update(
+      meal([item({ id: "i1" }), item({ id: "i2", name: "Banana" })]),
+    );
+
+    const existing = screen.getByText("Abacate").closest("li");
+    const added = screen.getByText("Banana").closest("li");
+    expect(existing).not.toHaveClass("animate-rise");
+    expect(added).toHaveClass("animate-rise");
   });
 });

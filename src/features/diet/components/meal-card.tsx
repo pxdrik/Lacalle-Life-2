@@ -97,6 +97,21 @@ export function MealCard({
   const [taps, setTaps] = useState(0);
   const macros = mealMacros(meal);
 
+  // O item mais novo entra com --animate-rise — o "Entry Insert" que dá
+  // continuidade ao registro, não um efeito por si. Mesma técnica de
+  // `GramsField` (`meal-item-row.tsx`): ajustar o estado durante a
+  // renderização, comparando contra o último tamanho visto, em vez de um
+  // efeito — só dispara quando um item é de fato adicionado, nunca ao
+  // reabrir a dieta com os itens que já existiam.
+  const [seenItemCount, setSeenItemCount] = useState(meal.items.length);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  if (meal.items.length !== seenItemCount) {
+    if (meal.items.length > seenItemCount) {
+      setJustAddedId(meal.items.at(-1)?.id ?? null);
+    }
+    setSeenItemCount(meal.items.length);
+  }
+
   return (
     <Card
       as="section"
@@ -286,6 +301,12 @@ export function MealCard({
                     }}
                     onSend={(targetMealId, mode) => {
                       onSendItem(item.id, targetMealId, mode);
+                    }}
+                    justAdded={item.id === justAddedId}
+                    onEntranceEnd={() => {
+                      setJustAddedId((current) =>
+                        current === item.id ? null : current,
+                      );
                     }}
                   />
                 )}
