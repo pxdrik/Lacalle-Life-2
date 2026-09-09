@@ -5,6 +5,53 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Landing Page (`/`) sempre visível, com motion — 09/09/2026
+
+Pedido do Pedro: parar de pular `/` direto pra `/hoje` pra quem já usa o
+app, e usar a pesquisa das seis fontes de motion o máximo possível na
+página que fica pública.
+
+- **`LandingRedirect` removido de vez** (não só desligado) — junto com
+  `hasEnteredAppBefore`/`markAppEntered`/`entered-app.ts`, que só existiam
+  pra alimentar esse redirecionamento. Commit `239e335`.
+- **Entrada em stagger na página inteira**: Hero anima ao carregar
+  (`--animate-rise`, não `IntersectionObserver` — é a primeira coisa que
+  a visita vê); Pilares, as três seções de funcionalidade e os cards
+  Sem conta/Com conta revelam ao rolar, via `use-reveal.ts` +
+  `reveal.tsx` (hook e wrapper próprios, sem biblioteca). Os dois
+  mockups que já imitavam a interface real (`VisualWorkout`,
+  `VisualEvolution`) ganharam motion de verdade: o gráfico de volume
+  cresce com `--duration-data` (mesma transição do gráfico real em
+  `volume-chart.tsx`), os checks de série assentam com `--animate-pop`
+  (mesma microinteração de `performed-set-row.tsx`). Commit `1337684`.
+
+**Onde parei antes do "máximo possível", de propósito:**
+
+- **Nada de gradiente ou blob de fundo no Hero.** A pág. 20 do Brand
+  System já proíbe isso por auditoria anterior à V1 ("sem gradiente
+  sobre o texto, sem sombra difusa, sem blob de fundo") — é exatamente
+  o estilo GetLayers que a pesquisa de motion também já tinha isolado
+  como "só landing, com moderação". Aqui a landing É o contexto, e
+  mesmo assim a regra explícita do Brandbook vale mais.
+- **Nada de física de mola.** Mesma decisão da pesquisa de Motion
+  System v1 (`docs/brandbook.md`) — as duas curvas oficiais, sem
+  exceção, dentro ou fora do produto.
+- Se quiser ir além disso (um gradiente WebGL numa área sem texto, por
+  exemplo, ou algo mais próximo do 60fps.design em intensidade), isso é
+  uma decisão de imagem de marca que passa pelo Pedro antes — não uma
+  omissão técnica.
+
+**Achado real, só apareceu no navegador:** `VisualWorkout`/`VisualEvolution`
+chamavam `useReveal` (hook client-side) sem `"use client"` — quebrava a
+página inteira (Server Component chamando hook de Client Component), e nem
+o typecheck nem o build pegaram, só abrir a tela de verdade. Corrigido junto
+com um mismatch de hidratação real em `use-reveal.ts` (o estado inicial
+dependia de `typeof window`, servidor e cliente discordavam sobre o valor
+— reescrito para nascer sempre `false` dos dois lados; `prefers-reduced-motion`
+virou responsabilidade só do CSS, nunca do estado inicial).
+
+---
+
 ## 🔧 EM ANDAMENTO — Motion System v1 chega no código — 09/09/2026
 
 Implementação do que a pesquisa de motion (07/09) e a emenda do
