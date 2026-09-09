@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { cn } from "@/design-system/cn";
 import { buttonClasses } from "@/design-system/components/button";
 
 /**
@@ -14,20 +15,45 @@ import { buttonClasses } from "@/design-system/components/button";
  * incentivar a conta, porque é ela que sincroniza, sem nunca dizer que a
  * conta é obrigatória.
  */
+/**
+ * Entrada em stagger no carregamento, não no scroll — é a primeira coisa que
+ * a visita vê, então usa `--animate-rise` direto (o mesmo "algo chegando" do
+ * resto do app) em vez do `Reveal` acionado por `IntersectionObserver`, que
+ * exige o elemento já estar fora da viewport para disparar.
+ */
+const RISE = "animate-rise motion-reduce:animate-none";
+
 export function Hero() {
   return (
     <section className="mx-auto max-w-(--content-max) px-4 pt-16 pb-14 text-center md:px-6 md:pt-24 md:pb-20 lg:px-12">
-      <h1 className="mx-auto max-w-3xl text-h1 font-bold text-balance text-ink md:text-display">
+      <h1
+        className={cn(
+          "mx-auto max-w-3xl text-h1 font-bold text-balance text-ink md:text-display",
+          RISE,
+        )}
+      >
         Seu treino. Sua alimentação.{" "}
         <span className="text-accent-text">Sua evolução.</span>
       </h1>
 
-      <p className="mx-auto mt-5 max-w-xl text-balance text-lg text-ink-muted">
+      <p
+        className={cn(
+          "mx-auto mt-5 max-w-xl text-balance text-lg text-ink-muted",
+          RISE,
+        )}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 1)" }}
+      >
         Monte sua dieta, registre seus treinos e acompanhe seu progresso num
         só lugar, sem depender de três aplicativos diferentes.
       </p>
 
-      <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+      <div
+        className={cn(
+          "mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row",
+          RISE,
+        )}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 2)" }}
+      >
         <Link href="/cadastro" className={buttonClasses("primary", "lg")}>
           Criar minha conta
         </Link>
@@ -36,7 +62,10 @@ export function Hero() {
         </Link>
       </div>
 
-      <p className="mt-6 text-sm text-ink-subtle">
+      <p
+        className={cn("mt-6 text-sm text-ink-subtle", RISE)}
+        style={{ animationDelay: "calc(var(--duration-stagger) * 3)" }}
+      >
         Ou{" "}
         <Link
           href="/hoje"

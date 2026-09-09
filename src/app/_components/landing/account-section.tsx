@@ -2,6 +2,8 @@ import { Laptop, Smartphone } from "lucide-react";
 
 import { cardSurface } from "@/design-system/components/card";
 
+import { Reveal } from "./reveal";
+
 /**
  * A seção mais importante da página, por pedido explícito: a diferença entre
  * usar sem conta e usar com conta, sem dizer que a conta é obrigatória e sem
@@ -23,16 +25,16 @@ export function AccountSection() {
         </div>
 
         <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className={cardSurface("default")}>
+          <Reveal index={0} className={cardSurface("default")}>
             <Smartphone aria-hidden className="size-6 text-ink-subtle" />
             <h3 className="mt-3 font-semibold text-ink">Sem conta</h3>
             <p className="mt-1.5 text-sm text-ink-muted">
               Seus dados ficam salvos neste dispositivo. Você pode usar o app
               inteiro assim, sem nunca criar uma conta.
             </p>
-          </div>
+          </Reveal>
 
-          <div className={cardSurface("hero")}>
+          <Reveal index={1} className={cardSurface("hero")}>
             <Laptop aria-hidden className="size-6 text-accent-text" />
             <h3 className="mt-3 font-semibold text-ink">Com conta</h3>
             <p className="mt-1.5 text-sm text-ink-muted">
@@ -40,7 +42,7 @@ export function AccountSection() {
               dispositivos, quando você quiser entrar na sua conta em outro
               aparelho.
             </p>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

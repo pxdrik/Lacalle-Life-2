@@ -2,6 +2,8 @@ import type { LucideIcon } from "lucide-react";
 
 import { cn } from "@/design-system/cn";
 
+import { Reveal } from "./reveal";
+
 interface Props {
   readonly icon: LucideIcon;
   readonly title: string;
@@ -29,7 +31,7 @@ export function FeatureRow({ icon: Icon, title, text, bullets, visual, reverse =
         reverse && "lg:[&>:first-child]:order-2",
       )}
     >
-      <div>
+      <Reveal index={0}>
         <span className="flex size-11 items-center justify-center rounded-lg bg-accent-surface text-accent-text">
           <Icon aria-hidden className="size-5" />
         </span>
@@ -47,9 +49,9 @@ export function FeatureRow({ icon: Icon, title, text, bullets, visual, reverse =
             </li>
           ))}
         </ul>
-      </div>
+      </Reveal>
 
-      <div>{visual}</div>
+      <Reveal index={1}>{visual}</Reveal>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import { ICONS } from "@/design-system/icons";
 
+import { Reveal } from "./reveal";
+
 const PILLARS = [
   {
     icon: ICONS.diary,
@@ -33,14 +35,14 @@ export function Pillars() {
         </p>
 
         <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
-          {PILLARS.map(({ icon: Icon, title, text }) => (
-            <div key={title} className="text-center">
+          {PILLARS.map(({ icon: Icon, title, text }, index) => (
+            <Reveal key={title} index={index} className="text-center">
               <span className="mx-auto flex size-11 items-center justify-center rounded-lg bg-accent-surface text-accent-text">
                 <Icon aria-hidden className="size-5" />
               </span>
               <h2 className="mt-4 font-semibold text-ink">{title}</h2>
               <p className="mt-1.5 text-sm text-ink-muted">{text}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
