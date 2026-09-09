@@ -202,7 +202,7 @@ function CalorieRing({
             GAUGE_ARC_LENGTH * (1 - Math.min(Math.max(ratio, 0), 1))
           }
           className={cn(
-            "transition-[stroke-dashoffset] duration-(--duration-standard) ease-out",
+            "transition-[stroke-dashoffset] duration-(--duration-data) ease-out",
             over ? "stroke-warning" : "stroke-accent",
           )}
         />

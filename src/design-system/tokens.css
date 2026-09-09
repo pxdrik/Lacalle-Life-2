@@ -787,6 +787,17 @@ textarea {
   --duration-stagger: 40ms;
 
   /**
+   * Um quinto tier, não os quatro da pág. 38 — proposta de emenda registrada
+   * em `docs/brandbook.md` ("Proposta de emenda — Motion System v1"), ainda
+   * não ratificada no PDF. Cobre o que os quatro tiers originais não nomeiam:
+   * número, gráfico e progresso (count-up, barra, anel) — antes dois valores
+   * soltos e próximos, `520` e `600`, escritos à mão só no Finance
+   * (`Finance/src/components/ui.jsx`). Dentro da mesma faixa de 300–700ms que
+   * a pesquisa de Motion System v1 já validou para esse papel.
+   */
+  --duration-data: 550ms;
+
+  /**
    * A origem do LaCalle Reveal — Sprint 8, Fase 3.6.
    *
    * `50% 50%` é o padrão declarado aqui, não em cada call site: a máscara

@@ -99,7 +99,7 @@ export function AdherenceChart({ points, format }: Props) {
                   className={
                     point.plannedMeals === 0
                       ? "min-h-0.5 rounded-t-full bg-line-strong"
-                      : "min-h-1 rounded-t-full bg-accent transition-[height] duration-(--duration-standard) ease-out"
+                      : "min-h-1 rounded-t-full bg-accent transition-[height] duration-(--duration-data) ease-out"
                   }
                   style={{ height: `${String(Math.max(percent, 1))}%` }}
                 />
