@@ -5,6 +5,45 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## 🔧 EM ANDAMENTO — Motion System v1 chega no código — 09/09/2026
+
+Implementação do que a pesquisa de motion (07/09) e a emenda do
+`docs/brandbook.md` já tinham decidido — não é pesquisa nova, é aplicar o
+que já foi aprovado.
+
+**Entregue:**
+
+- ✅ `--duration-data: 550ms` formalizado em `tokens.css` (o quinto tier,
+  proposto e ainda não ratificado no PDF — ver a emenda). Commit `4f48b3b`.
+- ✅ Migradas as 5 animações reais de progresso/dado que usavam
+  `--duration-standard` por engano — anel de calorias, barra de macro,
+  gráfico de aderência da dieta, gráfico de volume de treino, barra de
+  séries do treino em andamento. Mesmo commit.
+- ✅ Resumo de treino ("treino concluído") ganhou entrada em stagger nos
+  três números (Duração/Séries/Volume) — Level 4/Celebration do mapa, não
+  tinha nenhuma animação de entrada até agora. Só os três números fixos,
+  nunca a lista de exercícios sem teto abaixo. Commit `5f0d79f`.
+
+**Ainda no mapa, por prioridade** (`docs/melhorias-teste-real-08-09-2026.md`
+não cobre isto — ver a pesquisa de Motion System v1, seção 14, para a lista
+completa com nível/duração/fonte):
+
+- Streak — **não implementável ainda**: não existe conceito de streak no
+  modelo de dados hoje. Seria feature nova, não motion; fora de escopo até
+  virar pedido de produto.
+- Bottom sheet para ações rápidas — parcialmente feito: o seletor de
+  exercício já é sheet (item acima). Falta o Finance (parcelas, metas).
+- Timer de descanso, empty states, loading — já existiam antes desta
+  rodada, conferidos contra o mapa e certos.
+- Toast de confirmação, cross-fade de filtro, count-up — só existem no
+  Finance ainda, repositório separado.
+
+Life e Finance são repositórios diferentes — o que falta no Finance
+(toast, filtro, `--duration-data` lá também) precisa ser retomado
+naquele repositório.
+
+---
+
 ## ✅ Seletor de exercício vira folha, com multi-seleção — 09/09/2026
 
 Pedido do Pedro depois das melhorias acima, com referência visual de um app
