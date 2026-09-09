@@ -45,15 +45,21 @@ lint + testes) verde antes do commit:
   preenche o slot) de slot (id, sets, restSeconds, notes) — só o primeiro
   muda numa troca.
 
-**Testes**: suíte inteira rodada como verificação final — **1618 de 1619
-passando**, `npm run build` limpo. O único teste que falhou
-(`in-progress-banner.test.tsx`, "começou há" vs. o texto real "iniciado
-há") é **pré-existente e não relacionado** a nenhum dos oito itens — o
-arquivo não foi tocado em nenhum commit desta entrega, confirmado por
-`git diff`. Registrado abaixo, não corrigido agora (fora do escopo pedido).
-Testes novos adicionados para: criação de alimento pela dieta, cálculo de
-calorias, medida caseira (schema + formulário + create/update), troca de
-exercício, porção/macros na busca.
+**Testes**: suíte inteira rodada como verificação final — 1618 de 1619
+passando, `npm run build` limpo. O único que falhou
+(`in-progress-banner.test.tsx`) era pré-existente e não relacionado a
+nenhum dos oito itens — o arquivo não tinha sido tocado em nenhum commit
+desta entrega, confirmado por `git diff`. **Corrigido à parte, a pedido do
+Pedro** (commit `8007bc1`): causa raiz real, não um teste "flaky" — o teste
+comparava uma sessão com data absoluta (`2026-09-02`) contra `Date.now()`
+de verdade, então a partir de 2026-09-03 a sessão "de hoje" virou "de dias
+atrás" pelo calendário, e o banner passou a mostrar "iniciado há N dias"
+em vez de "começou há". `vi.useFakeTimers({ shouldAdvanceTime: true })` +
+`setSystemTime` (mesma convenção de `manual-sync-button.test.tsx` e
+`toast.test.tsx`) fixam o relógio, sem tocar fixture nem componente. Suíte
+inteira agora: **1619 de 1619**. Testes novos adicionados para: criação de
+alimento pela dieta, cálculo de calorias, medida caseira (schema +
+formulário + create/update), troca de exercício, porção/macros na busca.
 
 **Riscos conhecidos, não alterados de propósito:**
 
