@@ -222,7 +222,7 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
           hint={
             suggestion === null
               ? "Copie do rótulo."
-              : `Pelos macros daria ~${suggestion} kcal, mas fibra derruba esse número. O rótulo tem prioridade.`
+              : `Estimativa pelos macros: ~${suggestion} kcal. Prefira o valor do rótulo, se tiver.`
           }
         >
           {({ id, describedBy, invalid }) => (
