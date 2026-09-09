@@ -59,15 +59,44 @@ function draftFrom(food: Food | null): Draft {
 interface Props {
   /** The food being corrected, or `null` when creating a new one. */
   readonly initial: Food | null;
-  readonly save: (input: CustomFoodInput) => Promise<boolean>;
+  readonly save: (input: CustomFoodInput) => Promise<Food | null>;
   readonly pending: boolean;
   readonly error: string | null;
+  /**
+   * Where to go after a successful save. Defaults to the standalone
+   * behaviour — the create/edit screen navigating back to `/alimentos`.
+   *
+   * Given when this form is mounted inline elsewhere (adding a food to a
+   * meal that does not exist yet, from the diet flow): the caller decides
+   * what "done" means there — selecting the new food and returning to its
+   * own picker — instead of a navigation that would leave the diet being
+   * edited. The validation, the schema and `save` itself stay identical
+   * either way; only this one consequence changes.
+   */
+  readonly onSaved?: (food: Food) => void;
+  /** Initial name, so a search that came up empty does not have to be retyped. */
+  readonly initialName?: string;
+  /** Where "Cancelar" goes. Defaults to the same `/alimentos` navigation. */
+  readonly onCancel?: () => void;
 }
 
-export function CustomFoodForm({ initial, save, pending, error }: Props) {
+export function CustomFoodForm({
+  initial,
+  save,
+  pending,
+  error,
+  onSaved,
+  initialName,
+  onCancel,
+}: Props) {
   const router = useRouter();
   const toast = useToast();
-  const [draft, setDraft] = useState<Draft>(() => draftFrom(initial));
+  const [draft, setDraft] = useState<Draft>(() => ({
+    ...draftFrom(initial),
+    ...(initialName !== undefined && initial === null
+      ? { name: initialName }
+      : null),
+  }));
   const [issues, setIssues] = useState<Readonly<Record<string, string>>>({});
 
   function update(key: keyof Draft, value: string) {
@@ -124,7 +153,8 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
     }
 
     setIssues({});
-    if (!(await save(parsed.data))) return;
+    const food = await save(parsed.data);
+    if (food === null) return;
 
     // Said out loud, because navigating away is the only other signal and a
     // navigation looks the same whether it followed a save or a cancel.
@@ -133,6 +163,12 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
         ? `${parsed.data.name} foi criado.`
         : `${parsed.data.name} foi salvo.`,
     );
+
+    if (onSaved !== undefined) {
+      onSaved(food);
+      return;
+    }
+
     router.push("/alimentos");
   }
 
@@ -256,6 +292,10 @@ export function CustomFoodForm({ initial, save, pending, error }: Props) {
           variant="ghost"
           size="lg"
           onClick={() => {
+            if (onCancel !== undefined) {
+              onCancel();
+              return;
+            }
             router.push("/alimentos");
           }}
         >

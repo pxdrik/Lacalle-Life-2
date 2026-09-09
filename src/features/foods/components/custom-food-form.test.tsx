@@ -2,11 +2,23 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import type { Food } from "../types/food";
 import { CustomFoodForm } from "./custom-food-form";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
 }));
+
+const SAVED: Food = {
+  id: "saved-1",
+  name: "Barra proteica",
+  category: "protein",
+  per100g: { kcal: 100, proteinG: 10, carbsG: 10, fatG: 1 },
+  isCustom: true,
+  isFavorite: false,
+  createdAt: 1,
+  updatedAt: 1,
+};
 
 /**
  * Validation runs on submit, which is the right moment to *raise* an error and
@@ -19,7 +31,7 @@ function mountForm() {
   render(
     <CustomFoodForm
       initial={null}
-      save={vi.fn(async () => true)}
+      save={vi.fn(async () => SAVED)}
       pending={false}
       error={null}
     />,

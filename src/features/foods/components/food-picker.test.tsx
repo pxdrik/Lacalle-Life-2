@@ -7,6 +7,13 @@ import type { FoodRepository } from "../data/food-repository";
 import type { Food } from "../types/food";
 import { FoodPicker } from "./food-picker";
 
+// `CustomFoodForm` calls `useRouter()` unconditionally (it is also the
+// standalone /alimentos screen) even though the "create inline" path below
+// never lets it navigate — same mock `custom-food-form.test.tsx` uses.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+}));
+
 function food(name: string, overrides: Partial<Food> = {}): Food {
   return {
     id: name.toLowerCase().replace(/\s+/g, "-"),
@@ -184,6 +191,63 @@ describe("FoodPicker", () => {
 
     expect(
       await screen.findByText("Nenhum alimento encontrado."),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("creating a food without leaving the picker", () => {
+  it("carries the search text into the name field", async () => {
+    mount([food("Banana")]);
+    await afterLoad();
+
+    await userEvent.type(
+      screen.getByLabelText("Buscar alimento para adicionar"),
+      "Whey caseiro",
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: 'Criar "Whey caseiro"' }),
+    );
+
+    expect(screen.getByLabelText("Nome")).toHaveValue("Whey caseiro");
+  });
+
+  it("saves through the same service as /alimentos, then picks the new food and returns to search", async () => {
+    const { onPick } = mount([food("Banana")]);
+    await afterLoad();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Criar alimento" }),
+    );
+    await userEvent.type(screen.getByLabelText("Nome"), "Barra proteica");
+    await userEvent.type(screen.getByLabelText("Calorias"), "100");
+    await userEvent.type(screen.getByLabelText("Proteína"), "10");
+    await userEvent.type(screen.getByLabelText("Carboidrato"), "10");
+    await userEvent.type(screen.getByLabelText("Gordura"), "1");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Salvar alimento" }),
+    );
+
+    await waitFor(() => {
+      expect(onPick).toHaveBeenCalledOnce();
+    });
+    expect(onPick.mock.calls[0]?.[0]).toMatchObject({ name: "Barra proteica" });
+    // Back to the search UI, not left on the form.
+    expect(
+      screen.getByLabelText("Buscar alimento para adicionar"),
+    ).toBeInTheDocument();
+  });
+
+  it("goes back to search on cancel, without saving anything", async () => {
+    mount([food("Banana")]);
+    await afterLoad();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Criar alimento" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+
+    expect(
+      screen.getByLabelText("Buscar alimento para adicionar"),
     ).toBeInTheDocument();
   });
 });

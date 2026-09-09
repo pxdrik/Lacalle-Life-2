@@ -1,6 +1,6 @@
 "use client";
 
-import { SlidersHorizontal, X } from "lucide-react";
+import { Plus, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -9,9 +9,11 @@ import { Input } from "@/design-system/components/input";
 import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
 
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
+import { useFoodEditor } from "../hooks/use-food-editor";
 import { searchFoods } from "../services/search-foods";
 import type { Food, FoodCategory } from "../types/food";
 import { FOOD_CATEGORY_LABELS } from "../types/food";
+import { CustomFoodForm } from "./custom-food-form";
 import { FoodFilters } from "./food-filters";
 
 interface Props {
@@ -48,17 +50,59 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   const [showFilters, setShowFilters] = useState(false);
   const activeFilterCount = (category === null ? 0 : 1) + (favoritesOnly ? 1 : 0);
 
+  // The same create/edit machinery `/alimentos/novo` uses — `id: null` means
+  // creating. Reusing it here, instead of a second write path, is the whole
+  // point: this picker never has its own idea of what a valid food is.
+  const [creating, setCreating] = useState(false);
+  const editor = useFoodEditor(null);
+
   const results =
     state.status === "ready"
       ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
 
+  // Called unconditionally, above the `creating` branch below — hooks can't
+  // follow an early return, even one that never needs this value.
   const { count, hasMore, sentinelRef } = useIncrementalReveal(
     `${text}|${category ?? ""}|${String(favoritesOnly)}`,
     results.length,
     RESULT_PAGE_SIZE,
   );
   const visible = results.slice(0, count);
+
+  if (creating) {
+    return (
+      <div className="space-y-3 rounded-lg border border-line bg-canvas p-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-ink">Criar alimento</h2>
+          <button
+            type="button"
+            onClick={() => {
+              setCreating(false);
+            }}
+            className="text-sm text-ink-muted underline underline-offset-4 hover:text-ink"
+          >
+            Voltar à busca
+          </button>
+        </div>
+
+        <CustomFoodForm
+          initial={null}
+          save={editor.save}
+          pending={editor.pending}
+          error={editor.error}
+          initialName={text}
+          onCancel={() => {
+            setCreating(false);
+          }}
+          onSaved={(food) => {
+            setCreating(false);
+            onPick(food);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2 rounded-lg border border-line bg-canvas p-2">
@@ -127,6 +171,24 @@ export function FoodPicker({ onPick, onCancel }: Props) {
         <p role="alert" className="px-2 py-3 text-sm text-ink-muted">
           {state.message}
         </p>
+      )}
+
+      {state.status === "ready" && (
+        <button
+          type="button"
+          onClick={() => {
+            setCreating(true);
+          }}
+          className="flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+        >
+          <Plus aria-hidden className="size-4" />
+          {/* Não é só para quando a busca falha: às vezes o alimento que
+              existe não é o que a pessoa quer registrar (marca diferente,
+              preparo diferente), e a ação precisa estar à mão o tempo
+              todo — não só aparecer depois de "nenhum alimento
+              encontrado". */}
+          {text.trim() === "" ? "Criar alimento" : `Criar "${text.trim()}"`}
+        </button>
       )}
 
       {state.status === "ready" && results.length === 0 && (

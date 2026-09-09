@@ -19,7 +19,9 @@ export type FoodEditorState =
 
 export interface FoodEditor {
   readonly state: FoodEditorState;
-  readonly save: (input: CustomFoodInput) => Promise<boolean>;
+  /** The saved food on success, so a caller that needs it (the food just
+   * created) does not have to re-fetch it — `null` only on failure. */
+  readonly save: (input: CustomFoodInput) => Promise<Food | null>;
   readonly pending: boolean;
   readonly error: string | null;
 }
@@ -80,25 +82,22 @@ export function useFoodEditor(id: EntityId | null): FoodEditor {
   }, [repository, id]);
 
   const save = useCallback(
-    async (input: CustomFoodInput): Promise<boolean> => {
+    async (input: CustomFoodInput): Promise<Food | null> => {
       setPending(true);
       setError(null);
 
       try {
         const existing = state.status === "ready" ? state.food : null;
-
-        await (
-          await repository
-        ).save(
+        const food =
           existing === null
             ? createCustomFood(input)
-            : updateCustomFood(existing, input),
-          existing === null ? null : existing.updatedAt,
-        );
-        return true;
+            : updateCustomFood(existing, input);
+
+        await (await repository).save(food, existing?.updatedAt ?? null);
+        return food;
       } catch (cause) {
         setError(describeDataError(cause));
-        return false;
+        return null;
       } finally {
         setPending(false);
       }
