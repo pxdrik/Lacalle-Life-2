@@ -181,6 +181,86 @@ sobre avisar de algo nas costas dela.
 
 ---
 
+## Auditoria visual externa — duas referências, 09/09/2026
+
+Pedro trouxe duas referências de design para comparar com o sistema: um
+redesign de produto do próprio Life (Home consolidada, telas de componente,
+motion BKLit + GSAP) e uma landing/marketing institucional (hero, "como
+funciona", tela anotada com linhas de chamada). Nenhuma das duas foi copiada;
+o objetivo era achar princípio, não pele. Três entram, três não entram, e uma
+lacuna do próprio brandbook ficou confirmada por essa comparação.
+
+### O que entra
+
+**Home como narrativa de um dia, não uma grade de módulos independentes.** A
+referência abre mão de telas soltas (calorias / treino / refeições / evolução
+como blocos paralelos) e conta a Home como sequência: saudação → progresso →
+treino do dia → refeições → evolução. O brandbook nunca definiu ordem — só
+anatomia de card — e é essa ausência que faz a Home atual "parecer um
+conjunto de telas" mesmo com cada card individualmente correto. **Emenda
+proposta:** a pág. 32 (ou uma nova subseção dela) deveria fixar a ordem
+narrativa da Home como regra, não como acidente de implementação. Nenhum
+token muda; é uma regra de composição.
+
+**Anel de progresso e macros compactados no mesmo card.** Hoje calorias e
+macros já dividem espaço no card do "Hoje"; a referência mostra que dá pra
+ficar mais denso sem perder legibilidade, desde que a hierarquia tipográfica
+já resolva o problema — que é o caso, com `--text-metric` versus o resto da
+escala. Não é uma mudança de token, é uma diretriz de composição para quando
+o card de calorias for revisado.
+
+**Um componente formal de "comparação temporal"** (`-360 kcal vs. ontem`,
+cor + ícone + texto) — a gramática que a pág. 48 já exige para todo estado,
+aplicada a um caso que hoje cada tela resolveria à própria maneira. **Emenda
+proposta:** nomear esse componente na V1.2, ao lado de stat card e list card
+na pág. 24/37 — outra composição que o brandbook descreve, mas o app ainda
+não tem construída.
+
+### O que fica pendente de diretriz própria (adaptar, não incorporar direto)
+
+**Fotografia de refeição como parte do dado** (a confirmação de registro
+mostrando o prato). Legítimo — é a primeira vez que uma feature do Life
+pediria fotografia que não seja a de exercício (licenciada, CC BY-SA, "não
+uma direção de marca" — ver _Lacunas conhecidas_ abaixo). Antes de construir
+essa tela, a pág. 45 precisa de uma diretriz própria de tratamento (crop,
+proporção, o que fazer quando não há foto) — copiar o estilo da referência
+sem essa diretriz decidiria a fotografia de marca por acidente.
+
+**Navegação por pílula segmentada.** Útil como sub-navegação dentro de uma
+seção (ex.: os períodos 7/30/90 dias de "Evolução"), nunca como substituto da
+tab bar de 5 ícones — que já passou nos três testes de identidade da pág. 52
+e não tem motivo para ser trocada.
+
+**Formato de tela anotada com linhas de chamada.** Não é um padrão de
+interface — é um formato de documentação. Vale adotar como ferramenta interna
+(handoff, QA visual), nunca renderizado no produto.
+
+### O que não entra, e por quê
+
+- **Tema escuro com halo/glow verde e glassmorphism decorativo** — rompe a
+  proporção 70/20/10 pela própria construção (medida hoje em 0,71% da área
+  do "Hoje") e contraria a proibição de "sombras difusas" da pág. 24. É
+  também o clichê visual mais reciclado da categoria fitness/saúde agora —
+  o oposto de identidade própria.
+- **Confetti como celebração cotidiana** — contradiz a proibição literal da
+  pág. 36: "sem bounce, sem overshoot, sem elástico". O precedente do Number
+  Update (acima) mostra como uma exceção de identidade precisa ser estreita e
+  testada; confetti generalizado é o oposto disso.
+- **Landing institucional com criação de conta** — o Life é local-first, sem
+  conta e sem login (ver _Lacunas conhecidas_). Construir essa superfície
+  agora seria desenhar para um produto que ainda não existe. Se a
+  sincronização multi-dispositivo avançar, isto deixa de ser rejeição e vira
+  pauta de uma seção nova — não uma exceção pontual.
+- **Copy publicitário genérico** ("sua vida em movimento, com mais
+  clareza") — a voz direta e funcional que o Life já usa ("Refeições de
+  hoje", "3 de 5 registradas") é mais distintiva do que qualquer tom de
+  landing de SaaS.
+
+Nenhum destes quatro é revogação de uma regra existente — a auditoria não
+achou nada no brandbook que tenha deixado de fazer sentido.
+
+---
+
 ## Conflitos internos do brandbook, e como foram lidos
 
 Nenhum destes é divergência da aplicação: são duas páginas do documento pedindo
@@ -328,3 +408,6 @@ pendência.
   não uma direção de marca.
 - **Stat card, list card e steppers** (pág. 24 e 37): o app não tem essas
   composições. Quando tiver, a anatomia está na página.
+- **Componente de comparação temporal** (cor + ícone + texto, ex. "−360 kcal
+  vs. ontem"): proposto na auditoria de 09/09/2026 acima. Ainda não construído
+  em nenhuma tela do Life.
