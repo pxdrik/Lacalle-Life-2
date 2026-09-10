@@ -35,8 +35,8 @@ interface Props {
  * O tracking era normal, e o comentário que o defendia dizia que tracking
  * apertado "é a convenção de uma neo-grotesca como a Geist, e o oposto do
  * wordmark, cujas letras são largas e quase circulares". As duas premissas
- * caíram: a tipografia não é mais Geist, é Inter, e o wordmark da pág. 10 é
- * Inter Bold com tracking de **−3%**. Apertar o título aproxima os dois em vez
+ * caíram: a tipografia não é mais Geist (hoje é IBM Plex Sans, Brand System
+ * V2), e o wordmark da pág. 10 é Bold com tracking de **−3%**. Apertar o título aproxima os dois em vez
  * de afastá-los. O peso volta a 700 pelo mesmo motivo.
  *
  * E ele voltou a **crescer** na mesa em vez de encolher. Encolher era uma

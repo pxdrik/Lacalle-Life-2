@@ -37,8 +37,8 @@ import { refreshSupabaseSession } from "@/core/auth/supabase-middleware";
  * included — is proxied same-origin through `/_next/image` (see
  * `images.remotePatterns` in `next.config.ts`), so `img-src` needs nothing
  * beyond `'self'`. The same is true for fonts: `next/font/google` bakes
- * Inter into the build and serves it from this origin, never from Google's
- * CDN at runtime.
+ * IBM Plex Sans into the build and serves it from this origin, never from
+ * Google's CDN at runtime.
  *
  * **Known trade-off, evaluated and accepted, not overlooked.** `RootLayout`
  * calling `headers()` to read the nonce this file sets is a Next.js

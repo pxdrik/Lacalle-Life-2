@@ -728,15 +728,21 @@ textarea {
   --shadow-modal: var(--elevation-modal);
 
   /**
-   * **Inter é a única tipografia institucional da LaCalle** — pág. 16, "em
-   * marca, produto, apresentação e documento". Substitui a Geist, que era uma
-   * escolha do app e não da marca.
+   * **IBM Plex Sans é a única tipografia institucional da LaCalle** — Brand
+   * System V2, 10/09/2026. Substitui o Inter (que por sua vez tinha
+   * substituído a Geist, escolha do app, não da marca): Inter aparece citada,
+   * de forma independente, como parte do "kit reconhecível" de produto
+   * genérico/gerado por IA, e nenhum dos 14 produtos financeiros reais
+   * pesquisados usa IBM Plex — a escolha ganha identidade pelo uso
+   * disciplinado, sem atalho de precedente de mercado.
    *
-   * O fallback é o técnico que a pág. 16 especifica. `tabular-nums` continua
-   * ligado globalmente em `globals.css`: este app é uma coluna de números, e a
-   * pág. 16 pede a mesma coisa para números em finanças.
+   * `tabular-nums` continua ligado globalmente em `globals.css`: este app é
+   * uma coluna de números, e a marca pede a mesma coisa para números em
+   * finanças. IBM Plex Mono (a segunda metade do par tipográfico da marca)
+   * não entra aqui — este app resolve alinhamento numérico com tabular
+   * figures na própria Sans, não com uma família separada.
    */
-  --font-sans: var(--font-inter);
+  --font-sans: var(--font-plex-sans);
 
   /* Os cinco raios da pág. 23, todos mapeados. `xl` e `2xl` eram deixados de
      fora de propósito, para que um uso solto caísse no default do Tailwind e

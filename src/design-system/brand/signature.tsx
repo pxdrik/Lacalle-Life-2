@@ -54,11 +54,13 @@ export function Mark({
  *
  * - espaço símbolo → texto: **0,5x**
  * - altura de caixa alta do wordmark: **0,62x**
- * - tipografia: **Inter Bold 700, tracking −3%**
+ * - tipografia: **IBM Plex Sans Bold 700, tracking −3%**
  *
  * A altura de caixa alta vira tamanho de fonte dividindo pelo cap height da
- * Inter, que é 1490/2048 = 0,7275 em. Escrever `0.62 / 0.7275` em vez do
- * resultado é o que deixa a conta conferível contra a página.
+ * IBM Plex Sans, que é 698/1000 = 0,698 em (medido no arquivo real da fonte,
+ * tabela OS/2, `sCapHeight`/`unitsPerEm` — não é um valor de catálogo).
+ * Escrever `0.62 / 0.698` em vez do resultado é o que deixa a conta
+ * conferível contra a página.
  *
  * O tamanho vem de um token e não de uma prop porque ele muda com a tela — 18
  * px no celular, 22 no cabeçalho e na sidebar (pág. 14) — e um componente que
@@ -91,7 +93,7 @@ export function Signature({
       <span
         className="font-bold leading-none"
         style={{
-          fontSize: "calc(var(--signature-h) * 0.62 / 0.7275)",
+          fontSize: "calc(var(--signature-h) * 0.62 / 0.698)",
           letterSpacing: "-0.03em",
         }}
       >

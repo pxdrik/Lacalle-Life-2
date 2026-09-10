@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Sans } from "next/font/google";
 
 import { ToastProvider } from "@/design-system/components/toast";
 import { DensityProvider } from "@/design-system/density/density-provider";
@@ -13,21 +13,27 @@ import { ServiceWorker } from "./_components/service-worker";
 import "./globals.css";
 
 /**
- * Inter, and it is not a preference — page 16 of the brand system makes it the
- * single institutional typeface of LaCalle, "em marca, produto, apresentação e
- * documento". It replaces Geist, which was this app's own choice.
+ * IBM Plex Sans, and it is not a preference — the Brand System V2 (10/09/2026)
+ * makes it the single institutional typeface of the LaCalle family, replacing
+ * Inter (which itself had replaced Geist, this app's own original choice).
+ * Reason for the move away from Inter, straight from the brandbook: Inter
+ * shows up, independently, as part of the "recognizable kit" of AI-generated/
+ * generic product design — and none of the 14 real fintech/fitness products
+ * researched for V2 uses IBM Plex, so the choice earns identity through
+ * disciplined use rather than borrowing market precedent.
  *
- * Variable rather than a fixed set of weights: the type scale on page 17 uses
- * 400, 500, 600, 700 and 900, and shipping five static files to honour a rule
- * that also says "máximo de três pesos por tela" would be paying for the whole
- * range at every request.
+ * Only the four weights actually used in the app (400/500/600/700 — see
+ * `font-medium`/`font-semibold`/`font-bold` usage) are requested: IBM Plex
+ * Sans is not shipped as a variable font on Google Fonts, so `next/font`
+ * needs the static cut list instead of a single variable-weight file.
  *
  * `latin` alone is enough for pt-BR — accented characters live there, not in
  * `latin-ext`.
  */
-const inter = Inter({
+const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-plex-sans",
   display: "swap",
 });
 
@@ -73,7 +79,7 @@ export default async function RootLayout({
     /* `suppressHydrationWarning` is required, not a workaround: ThemeScript
        intentionally sets `data-theme` on this element before React hydrates,
        so the server markup and the live DOM differ by design. */
-    <html lang="pt-BR" className={inter.variable} suppressHydrationWarning>
+    <html lang="pt-BR" className={ibmPlexSans.variable} suppressHydrationWarning>
       <body>
         <ThemeScript nonce={nonce} />
         <DensityScript nonce={nonce} />
