@@ -97,7 +97,7 @@ export function EvolutionScreen() {
             setChartMetric("volume");
           }}
           className={cn(
-            "rounded-[5px] px-3 py-1.5 font-medium transition-colors",
+            "rounded-sm px-3 py-1.5 font-medium transition-colors",
             !isDuration ? "bg-muted text-ink" : "text-ink-subtle",
           )}
         >
@@ -110,7 +110,7 @@ export function EvolutionScreen() {
             setChartMetric("duration");
           }}
           className={cn(
-            "rounded-[5px] px-3 py-1.5 font-medium transition-colors",
+            "rounded-sm px-3 py-1.5 font-medium transition-colors",
             isDuration ? "bg-muted text-ink" : "text-ink-subtle",
           )}
         >
