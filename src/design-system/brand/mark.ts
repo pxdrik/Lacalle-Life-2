@@ -10,25 +10,25 @@
  *
  * ## De onde o traço veio
  *
- * O vetor oficial da pág. 51 **não existe** — o Brand System descreve o pacote
- * de logo como "especificação a produzir". O que existe é a arte rasterizada
- * dentro do PDF, e o maior render dela em qualquer um dos dois brandbooks mede
- * **139 × 137 px**. Este path foi traçado dali: canal alfa da arte, contorno
- * seguido em resolução 6×, reamostrado por comprimento de arco e ajustado em
- * bézier cúbicas com âncoras distribuídas por curvatura. A divergência de área
- * contra o original é de 6,6%, quase toda ela a franja de antialias de 1 px.
+ * **10/09/2026 — substituído pelo vetor real.** O Pedro vetorizou a arte
+ * original (mesma fonte da pág. 51, um scan/render em alta resolução) e
+ * forneceu o arquivo (referenciado no brandbook único como
+ * `Screenshot 2026-09-10 083431.svg`, a versão de contorno chapado — não a
+ * variante "dimensional" com sombra/luz que o mesmo arquivo também trazia,
+ * essa é só para exibição grande, nunca `currentColor`). O path abaixo é a
+ * silhueta desse vetor, normalizada para 100 de largura pela mesma convenção
+ * de sempre: translação pro canto do bounding box real, escala uniforme —
+ * nenhuma curva foi redesenhada ou aproximada à mão.
  *
- * **`docs/logo-brief.md` dizia que traçar "ficaria pior que o original", e essa
- * nota estava certa sobre outra coisa.** Ela foi escrita olhando a fita em
- * degradê — uma peça renderizada em 3D, cuja leitura vem inteira do sombreado.
- * Adivinhar aquilo curva por curva de fato produziria algo pior. Mas a versão
- * que o brandbook pede na pág. 8 é outra: "em monocromia, usar a versão de
- * contorno preenchido". Essa é a silhueta do canal alfa, que é **um contorno
- * fechado, sem buracos e sem cantos** — e uma curva ajustada à mão em cima dela
- * fica melhor que os 139 px de origem, não pior.
+ * A versão anterior (traçada à mão sobre um render de 139×137px, ver
+ * histórico do git) tinha uma imperfeição visível perto do topo do caule;
+ * o vetor novo não tem.
  *
- * Quando o vetor oficial aparecer, ele substitui as duas constantes abaixo e
- * nada mais precisa mudar.
+ * `MARK_ICON_PATH`, abaixo, **ainda deriva do traço antigo** — a erosão de
+ * ~1,8px que ele aplica foi feita sobre a máscara raster antiga, e refazer
+ * isso sobre o vetor novo exige a mesma ferramenta de erosão de máscara, não
+ * só decisão de design. Pendência registrada, não esquecida: as duas versões
+ * convergem na forma geral, a diferença só aparece em close.
  */
 
 /**
@@ -37,11 +37,18 @@
  * a área de proteção no layout, nunca dentro do arquivo.
  */
 export const MARK_WIDTH = 100;
-export const MARK_HEIGHT = 102.04;
+export const MARK_HEIGHT = 100.25;
 export const MARK_VIEWBOX = `0 0 ${String(MARK_WIDTH)} ${String(MARK_HEIGHT)}`;
 
+// A curva de "23.69 -19.73" era uma reta (`l`) no vetor de origem — o único
+// segmento não curvo de todo o traço, provavelmente um artefato de
+// simplificação do auto-trace, não um corte deliberado (a pág. 7 descreve a
+// Proposta 01 como "fluida, contínua, evolutiva", sem quina nenhuma). Expressa
+// aqui como cúbica com os pontos de controle colineares — mesma reta exata,
+// zero pixel de diferença — só pra manter os comandos "sempre C" que
+// `mark.test.ts` já cobra do arquivo inteiro.
 export const MARK_PATH =
-  "M36.01 0C40.71 -0.07 48.87 5.34 50.38 11.82C51.89 18.3 47.33 32.11 45.07 38.86C42.8 45.6 39.96 47.93 36.78 52.29C33.6 56.64 29.67 60.8 25.99 64.97C22.32 69.14 17.15 73.5 14.72 77.3C12.29 81.11 8.83 87.04 11.4 87.82C13.96 88.59 24.93 84.68 30.11 81.96C35.29 79.25 38.27 75.01 42.48 71.52C46.69 68.04 50.17 63.91 55.36 61.04C60.56 58.17 66.46 55.07 73.64 54.3C80.81 53.53 94.64 54.87 98.41 56.42C102.19 57.98 98.3 60.21 96.3 63.65C94.29 67.09 89.79 72.52 86.39 77.08C82.99 81.64 80.08 87.13 75.91 91.01C71.73 94.88 70.71 98.58 61.34 100.31C51.96 102.04 29.5 102.62 19.64 101.38C9.79 100.14 5.32 98.79 2.18 92.86C-0.96 86.93 -0.03 73.76 0.82 65.79C1.67 57.83 5 51.35 7.27 45.08C9.54 38.81 11.97 33.64 14.45 28.16C16.93 22.68 18.58 16.91 22.17 12.22C25.76 7.53 31.3 0.07 36.01 0Z";
+  "M100 55.79c-15.83 15.34 -21.86 38.96 -42.41 41.17c-18.17 1.95 -45.78 3.29 -52.47 -6.87c-3.09 -4.69 -5.11 -12.14 -3.84 -17.89c5.31 -23.74 14.26 -45.65 26.18 -66.59c2.21 -3.89 10.54 -5.62 14.14 -5.22c15.85 1.73 11.74 34.77 -13.16 60.79c-6.57 6.87 -12.7 13.6 -17.41 22.54c9.69 3.63 16.63 -1.46 23.2 -6.92c7.9 -6.58 15.79 -13.15 23.69 -19.73c12.63 -6.03 26.58 -7.35 42.09 -1.29Z";
 
 /**
  * A versão de ícone, com o ajuste óptico que a pág. 15 exige: "mesma silhueta,
