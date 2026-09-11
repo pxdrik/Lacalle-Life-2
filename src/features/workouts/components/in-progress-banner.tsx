@@ -106,9 +106,14 @@ export function InProgressBanner() {
  * Achado de auditoria de design (02/09/2026): o card comum, com seu
  * cronômetro cru (`começou há 116:42:45`) e o único botão "Continuar", fazia
  * essa sessão parecer "em andamento" agora mesmo — e, na lista de treinos
- * logo abaixo, a mesma rotina aparecia como "nunca executado", porque
- * `executionTrail` (corretamente) só conta sessões finalizadas. As duas
- * frases não se contradizem tecnicamente, mas lidas juntas pareciam um bug.
+ * logo abaixo, a mesma rotina aparecia como "nunca executado" (a lista só
+ * contava sessões finalizadas, corretamente). As duas frases não se
+ * contradizem tecnicamente, mas lidas juntas pareciam um bug.
+ *
+ * Nota de 10/09/2026: a trilha visual que mostrava "nunca executado" foi
+ * removida da lista de treinos (nunca validada como algo que alguém de fato
+ * olhava — ver brandbook, seção 21). O achado documentado aqui continua
+ * válido como histórico da decisão abaixo, mesmo sem a trilha existir mais.
  *
  * A correção não é esconder nem apagar nada sozinha — é parar de fingir que
  * isto é uma sessão comum. Duração vira "iniciado há N dias" em vez de um
