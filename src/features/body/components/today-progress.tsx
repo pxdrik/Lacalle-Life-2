@@ -1,9 +1,9 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
+import { Comparison } from "@/design-system/components/comparison";
 import { ICONS } from "@/design-system/icons";
 
 import {
@@ -59,43 +59,13 @@ export function TodayProgress() {
             Registre de novo em alguns dias
           </span>
         ) : (
-          <span className="flex items-center gap-1 text-xs text-ink-subtle">
-            <Direction changeKg={changeKg} />
-            {changeKg === 0
-              ? "sem mudança"
-              : `${formatDecimal(Math.abs(changeKg), 1)} kg`}{" "}
-            em {PROGRESS_WINDOW_DAYS}d
-          </span>
+          <Comparison
+            delta={changeKg}
+            formatMagnitude={(magnitude) => `${formatDecimal(magnitude, 1)} kg`}
+            label={`em ${PROGRESS_WINDOW_DAYS}d`}
+          />
         )}
       </span>
     </Link>
-  );
-}
-
-/**
- * The arrow, and the words behind it.
- *
- * The icon is `aria-hidden` and the sentence it belongs to reads "1,2 kg nos
- * últimos 30 dias" — which is direction-free — so the label carries the part
- * the arrow was drawing. Without it a screen reader is told a magnitude with no
- * sign, which is worse than saying nothing.
- */
-function Direction({ changeKg }: { readonly changeKg: number }) {
-  if (changeKg === 0) {
-    return (
-      <>
-        <Minus aria-hidden className="size-3.5 shrink-0 text-ink-subtle" />
-        <span className="sr-only">estável:</span>
-      </>
-    );
-  }
-
-  const Icon = changeKg > 0 ? ArrowUp : ArrowDown;
-
-  return (
-    <>
-      <Icon aria-hidden className="size-3.5 shrink-0 text-ink-subtle" />
-      <span className="sr-only">{changeKg > 0 ? "subiu" : "desceu"}</span>
-    </>
   );
 }
