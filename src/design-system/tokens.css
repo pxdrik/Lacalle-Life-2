@@ -1,62 +1,77 @@
 /**
  * Design tokens.
  *
- * **A fonte é o LaCalle Brand System V1.1**, e a página 49 dele é literalmente
- * o contrato entre design e desenvolvimento: "todo valor deste brandbook existe
- * aqui como token — nenhum valor solto deve entrar no código". Este arquivo é o
- * lado do código desse contrato. Quando ele e uma tela existente discordarem, o
- * brandbook prevalece; é o que a própria página 2 determina.
+ * **A fonte é o LaCalle Brandbook V2** (reconstrução completa de 09-10/09/2026,
+ * https://claude.ai/code/artifact/b3a688f0-171b-414a-8ec3-d9fbbe3bee38),
+ * substituindo o Brand System V1.1 (PDF) que este arquivo seguia até
+ * 10/09/2026. A seção 08 ("Cor") é o contrato entre design e desenvolvimento
+ * aqui: cada passo da escala é nomeado, e um revisor confere este arquivo
+ * contra o documento, passo a passo, sem converter nada.
  *
- * **Os valores são hexadecimais, e isso mudou.** Eram OKLCH, e a razão de serem
- * era boa: a paleta vinha de oito swatches e os passos intermediários precisavam
- * ser interpolados por matemática perceptual em vez de a olho. Essa razão
- * acabou. O brandbook nomeia **cada** passo — os cinco do acento, os oito
- * neutros, os seis do escuro — então não há nada a derivar, e o hexadecimal tem
- * a propriedade que importa agora: um revisor confere este arquivo contra o PDF
- * linha a linha, sem converter nada.
+ * **11/09/2026 — migração de identidade: emerald (V1.1) → Verdant (V2).**
+ * `--accent` era literalmente o emerald do Tailwind (#10B981/#059669/#065F46),
+ * herdado do V1.1 sem que ninguém tivesse percebido — tipografia, raio e as
+ * curvas de motion já tinham migrado pro V2 em 10/09, mas a cor de identidade
+ * ficou pra trás. Verdant (#2A9162) é a cor real; a escala de 5 passos abaixo
+ * (100/300/500/700/900) é a da seção 08, com contraste recalculado contra as
+ * superfícies REAIS deste arquivo (Ink #111111, Canvas #F8FAFC, Surface
+ * #FFFFFF) — os números do brandbook usam Ink/Paper genéricos (#16151A/
+ * #FAF9F7), que não são os mesmos valores, então a medição não podia ser só
+ * copiada.
  *
- * **O que veio do brandbook sem alteração:** a paleta neutra da pág. 18 (Ink
- * #111111 e a escala Gray, que substitui o slate da versão anterior), os cinco
- * tokens do LaCalle Life da pág. 19, as cores semânticas e de dado da pág. 27,
- * a escala dark própria da pág. 33, os raios da pág. 23, o espaçamento base 4
- * da pág. 22 e as duas curvas e quatro tiers da pág. 38.
+ * **Os valores são hexadecimais.** O brandbook nomeia cada passo — os cinco do
+ * acento, os neutros, os seis do escuro — então não há nada a derivar por
+ * matemática perceptual (motivo pelo qual este arquivo não usa mais OKLCH).
  *
- * ## As quatro divergências, e por que cada uma existe
+ * **O que já vinha do V2 sem alteração, confirmado nesta auditoria:**
+ * tipografia (IBM Plex Sans), raio (8/12/16/20/24) e as duas curvas de motion
+ * (`cubic-bezier(.22,1,.36,1)` / `(.64,0,.78,0)`). As cores de estado
+ * (Sucesso/Aviso/Erro/Informativo, escuro) também já batiam — convergência
+ * independente com o Finance, ver seção 08 "Cores complementares".
  *
- * Estão registradas aqui e em `docs/brandbook.md` como emenda proposta para a
- * V1.2. A pág. 53 é explícita sobre isto: "divergências não viram exceção
- * informal: ou o Brand System é atualizado e versionado, ou a peça é
- * corrigida". Nenhuma delas é preferência.
+ * ## As cinco divergências, e por que cada uma existe
  *
- * **1. A tinta sobre o acento é Ink, não branco.** A pág. 25 especifica
- * "Primary texto #FFFFFF". Medido, branco sobre o emerald-600 dá **3,77:1** e
- * sobre o 500 dá 2,54 — os dois reprovam os 4,5:1 que a própria pág. 48 exige
- * de texto abaixo de 18 px. Ink sobre os mesmos dois mede 5,01 e 7,44. O
- * brandbook contradiz a si mesmo aqui, e das duas regras a de acessibilidade é
- * a que não admite exceção. A V1 deste app caiu nessa armadilha com o próprio
- * botão primário.
+ * A pág. 53 do V1.1 já era explícita sobre isto, e o princípio sobrevive à
+ * troca de documento: "divergências não viram exceção informal: ou o
+ * brandbook é atualizado e versionado, ou a peça é corrigida". Nenhuma delas
+ * é preferência.
+ *
+ * **1. A tinta sobre o acento é Ink, não branco — e continua sendo depois da
+ * migração.** Branco sobre Verdant 500 (#2A9162) mede 3,94:1 contra `surface`,
+ * abaixo dos 4,5:1 que texto exige. Ink mede 4,79:1. A mesma regra que já
+ * valia pro emerald vale pro Verdant, pela mesma medição.
  *
  * **2. Estados e dados ganham um par de texto.** `--warning` (#D97706) mede
  * 3,04:1 na página, `--danger` (#DC2626) mede 4,41 sobre a própria superfície
- * de erro, e as duas cores de dado medem 3,60. Como *ícone, borda e
- * preenchimento* todas cumprem os 3:1 de um elemento gráfico e ficam exatamente
- * como o brandbook as define; como **texto** entram os pares `-text`, um passo
- * mais escuros na mesma família. Isto não inventa uma regra: é a mesma
- * instrução da pág. 48 para o acento — "para texto no acento, use a variação
- * 600 ou 800 da escala" — aplicada às famílias que o brandbook não escalou. E
- * não é hipotético: o stat card da pág. 24 imprime o delta em 12 px.
+ * de erro. Como *ícone, borda e preenchimento* cumprem os 3:1 de um elemento
+ * gráfico; como **texto** entram os pares `-text`, um passo mais escuros.
  *
- * **3. `--data-positive` é o 600, não o 500 que a pág. 27 nomeia.** #10B981
- * mede 2,42:1 sobre a página e não chega aos 3:1 de um gráfico. A pág. 48 já
- * registra esse teto para o acento; a pág. 27 não o herda. É a mesma
- * substituição, pelo mesmo motivo, que `--accent` faz.
+ * **3. `--data-positive` e `--data-positive-text` apontam para `--success`, não
+ * para a escala do acento.** Antes da migração os dois coincidiam por
+ * acidente (o emerald do acento e o emerald do Sucesso eram vizinhos); a
+ * seção 08 do brandbook agora separa as duas explicitamente ("Sucesso" nunca
+ * compete por significado com a cor de produto). Aliasar direto pro acento
+ * teria feito um saldo positivo mudar de matiz sozinho no dia em que o acento
+ * virou Verdant — o valor numérico não muda (ainda `#059669`/`#065f46`
+ * claro), só a origem, agora desacoplada.
  *
- * **4. O tema escuro precisa de três valores que o brandbook não dá.** Ele
- * nomeia seis; o app tem mais papéis que isso. Os três interpolados estão
- * marcados um a um mais abaixo, e nenhum deles é uma cor nova: são passos
- * dentro da rampa que já está lá.
+ * **4. O hover do acento claro é um valor computado, não um passo nomeado.**
+ * A pág. 19 do V1.1 tinha um "600" pra isso; a escala V2 (100/300/500/700/900)
+ * não tem nada entre Base e Strong. Verdant 700 quebra a tinta (Ink mede
+ * 3,12:1), e 300 é claro demais pra ler como "hover" de um botão sólido —
+ * salto visual maior que qualquer emerald já usou aqui. `#298E60` é o ponto
+ * mais escuro na reta entre 500 e 700 que ainda mede ≥4,5:1 com Ink (4,62,
+ * calculado com margem, não no limite exato). Não é um passo oficial da marca;
+ * é o mesmo tipo de interpolação que os tokens escuros já faziam antes desta
+ * migração — resolve uma necessidade real que a escala nomeada não cobre.
  *
- * ## O que a pág. 20 pede, e este arquivo sozinho não garante
+ * **5. O tema escuro precisa de valores que o brandbook não nomeia.** O
+ * `--accent-surface` escuro é o acento a 14% já composto sobre `surface`
+ * (pág. 33 do V1.1, "acentos coloridos a 12–16% de opacidade" — a mesma faixa
+ * que já valia, agora recomposta com o Verdant escuro). Recalculado, não uma
+ * cor nova.
+ *
+ * ## O que a pág. 20 (V1.1) pede, e este arquivo sozinho não garante
  *
  * A proporção 70/20/10 é de composição, não de token. O que os tokens fazem é
  * tornar o acento **escasso por construção**: existe um `--accent`, uma
@@ -65,7 +80,8 @@
  * tokens daqui.
  *
  * Todo par frente/fundo é aferido em `tokens.test.ts`, que lê deste arquivo.
- * Editar um valor sem cumprir os mínimos da pág. 48 quebra o build.
+ * Editar um valor sem cumprir os mínimos de contraste (WCAG 1.4.3/1.4.11)
+ * quebra o build.
  */
 
 :root {
@@ -121,56 +137,57 @@
   --line-strong: #d1d5db;
 
   /**
-   * O acento do LaCalle Life — pág. 19. Cinco tokens, e o 500 é a cor oficial.
+   * O acento do LaCalle Life — Verdant, brandbook seção 08/seção "Life · Cor".
+   * Cinco passos (100/300/500/700/900), e o 500 (#2A9162) é a cor oficial.
    *
-   * `--accent` é o **600 (#059669)** e não o 500 no tema claro. A pág. 19
-   * atribui os papéis: 500 é a cor oficial, 600 é hover, 800 é texto sobre
-   * claro. Mas a pág. 48 avisa que o 500 não sustenta contraste sobre branco, e
-   * medido ele dá 2,31:1 como elemento gráfico, abaixo dos 3:1 obrigatórios. O
-   * 600 dá 3,60 sobre a página. Escolher o passo que cumpre a pág. 48 é o que a
-   * pág. 48 manda fazer; nenhum verde foi inventado.
+   * **`--accent` é o 500 direto, sem precisar subir de passo.** Diferença real
+   * do emerald que este arquivo usava até 10/09/2026: lá o 500 media 2,31:1
+   * como elemento gráfico e falhava os 3:1, forçando o acento a usar o 600.
+   * Verdant 500 mede **3,94:1** contra `surface` e **3,77:1** contra `canvas`
+   * — passa os 3:1 na própria base, sem precisar de um passo mais escuro só
+   * pra existir.
    */
-  --accent-50: #ecfdf5;
-  --accent-300: #6ee7b7;
-  --accent-500: #10b981;
-  --accent-600: #059669;
-  --accent-800: #065f46;
+  --accent-100: #f2f7f5;
+  --accent-300: #e4f1ea;
+  --accent-500: #2a9162;
+  --accent-700: #1f7049;
+  --accent-900: #135334;
 
-  --accent: var(--accent-600);
+  --accent: var(--accent-500);
   /**
-   * O hover do controle primário, e ele sobe a escala em vez de descer.
-   *
-   * A pág. 19 atribui ao 600 o papel de hover do 500. Aqui o 600 já é a base,
-   * porque a pág. 48 não deixa o 500 preencher um controle sobre branco — então
-   * o passo de hover teria de ser o 800, e **o 800 quebra a tinta**: Ink sobre
-   * #065F46 mede 2,46:1. Subir para o 500 é o mesmo tipo de passo, na mesma
-   * escala oficial, e move o contraste da tinta de 5,01 para 7,44 em vez de
-   * derrubá-lo.
-   *
-   * Isto substitui um `hover:opacity-90`, que clareava o verde contra a página
-   * e reduzia o contraste do rótulo por um caminho que nenhum teste vê.
+   * O hover é um valor computado, não um passo nomeado — divergência 4 no
+   * topo do arquivo. Ink sobre o 500 já mede 4,79:1, deixando pouca margem
+   * antes de cair dos 4,5:1 mínimos: o 700 (#1F7049) já quebra a tinta
+   * (3,12:1), e não existe passo oficial entre Base e Strong nesta escala.
+   * `#298E60` é o ponto mais escuro entre 500 e 700 que ainda mede ≥4,5:1
+   * com Ink (4,62, com margem de segurança, não no limite exato).
    */
-  --accent-hover: var(--accent-500);
-  /* Ver a divergência 1 no topo. Ink mede 5,01:1 aqui; branco mede 3,77. */
+  --accent-hover: #298e60;
+  /* Ver a divergência 1 no topo. Ink mede 4,79:1 aqui; branco mede 3,94. */
   --accent-ink: #111111;
-  /* O acento como texto pede 4,5:1 onde um gráfico pede 3:1, então cai para o
-     800 — 7,68 sobre branco. É a instrução literal da pág. 48. */
-  --accent-text: var(--accent-800);
-  /* O fundo do item de navegação ativo e dos chips do acento — pág. 31. */
-  --accent-surface: var(--accent-50);
+  /* O acento como texto pede 4,5:1; o 700 já cumpre com folga (5,78:1 contra
+     `canvas`, 6,05 contra `surface`) sem precisar do passo mais escuro da
+     escala — esse fica reservado pro "salta aos olhos" que a seção 08 define
+     pro 900, não usado por nenhum componente hoje. */
+  --accent-text: var(--accent-700);
+  /* O fundo do item de navegação ativo e dos chips do acento — mesmo papel
+     de antes, agora com o tint de Verdant. */
+  --accent-surface: var(--accent-100);
 
   /**
-   * Cores semânticas de UI — pág. 27. Iguais em todos os produtos LaCalle.
-   *
-   * **Atenção do brandbook, e vale repetir aqui:** no Life o acento (#10B981)
-   * coincide com o Positive e é vizinho do Success (#059669). Por isso, **no
-   * Life o acento não confirma ações** — confirmação usa sempre ícone + texto
-   * além da cor.
+   * Cores semânticas de UI — seção 08 do brandbook ("Cores complementares"),
+   * iguais em todos os produtos LaCalle. Deliberadamente independentes da
+   * cor de identidade (Verdant): antes da migração de 11/09/2026 o acento e
+   * o Sucesso coincidiam por acidente (os dois vinham do mesmo emerald), e
+   * "no Life o acento não confirma ações" — confirmação usa sempre ícone +
+   * texto além da cor — era a regra que existia pra não depender dessa
+   * coincidência. Agora as duas famílias nem compartilham mais o pigmento.
    *
    * Os pares `-text` são a divergência 2. Base para ícone, borda e
    * preenchimento; `-text` para o que é lido como letra.
    */
   --success: #059669;
+  --success-text: #065f46;
   --success-surface: #ecfdf5;
   --warning: #d97706;
   --warning-text: #b45309;
@@ -196,9 +213,11 @@
    * da pág. 48 ("3:1 contra fundo **e** elemento") passam.
    *
    * O azul que estava aqui media 1,32:1 contra o botão verde: pior no exato
-   * caso que ele existia para resolver.
+   * caso que ele existia para resolver. Verdant 500 mede 3,77:1 contra a
+   * página e 3,94 contra o botão — os dois lados passam, igual valia com o
+   * emerald antes da migração de 11/09/2026.
    */
-  --focus: var(--accent-600);
+  --focus: var(--accent-500);
 
   /**
    * Product data colors — pág. 27.
@@ -208,19 +227,20 @@
    * não é uma confirmação. Os tokens são separados dos semânticos mesmo quando
    * o valor coincide, porque é o significado que precisa continuar separado.
    *
-   * **`--data-positive` é o 600, não o #10B981 que a pág. 27 nomeia** — a mesma
-   * substituição, pela mesma medição, que `--accent` faz. O 500 mede 2,42:1
-   * sobre a página, abaixo dos 3:1 que a pág. 48 exige de um elemento gráfico
-   * portador de significado. A pág. 48 registra esse limite do #10B981; a pág.
-   * 27 não o herda, e é a pág. 48 que manda.
+   * **`--data-positive` aponta para `--success`, não para o acento** —
+   * divergência 3 no topo do arquivo. Antes da migração de 11/09/2026 os dois
+   * eram o mesmo emerald por coincidência; apontar direto pro acento teria
+   * feito um saldo positivo mudar de matiz sozinho no dia em que o acento
+   * virou Verdant, quando o que essa cor representa (uma tendência favorável)
+   * nunca teve relação com identidade de produto.
    *
    * O par `-text` é a divergência 2 outra vez, e aqui ela não é hipotética: o
-   * stat card da pág. 24 imprime o delta em **12 px**, que é a faixa de 4,5:1.
-   * O verde de gráfico mede 3,60 e o vermelho 3,60 — os dois corretos como
-   * seta ou barra, os dois insuficientes como dígito.
+   * stat card da pág. 24 (V1.1) imprime o delta em **12 px**, que é a faixa
+   * de 4,5:1. O verde de gráfico mede 3,60 e o vermelho 3,60 — os dois
+   * corretos como seta ou barra, os dois insuficientes como dígito.
    */
-  --data-positive: var(--accent-600);
-  --data-positive-text: var(--accent-800);
+  --data-positive: var(--success);
+  --data-positive-text: var(--success-text);
   --data-negative: #ef4444;
   --data-negative-text: #b91c1c;
   --data-neutral: #6b7280;
@@ -320,38 +340,39 @@
   --line-strong: #363c44;
 
   /**
-   * O acento sobe um passo de luminosidade no escuro — pág. 33, "os acentos
-   * sobem um passo para manter contraste ≥ 4,5:1". Life claro #10B981 → escuro
-   * **#34D399**, que mede 10,13:1 contra o fundo.
-   *
-   * A escala 50–800 continua a mesma: ela é a identidade do produto e não muda
-   * de tema. O que muda é qual passo `--accent` aponta.
+   * O acento sobe um passo de luminosidade no escuro — Verdant claro #2A9162
+   * → escuro **#4FBE86**, que mede 8,38:1 contra o fundo (era #34D399/10,13:1
+   * com o emerald antes da migração de 11/09/2026; a folga muda, a lógica
+   * não). A escala inteira (100/300/500/700/900) é a identidade do produto e
+   * não muda de tema — o que muda é qual passo cada token semântico aponta.
    */
-  --accent-50: #ecfdf5;
-  --accent-300: #6ee7b7;
-  --accent-500: #10b981;
-  --accent-600: #059669;
-  --accent-800: #065f46;
+  --accent-100: #0e1d16;
+  --accent-300: #173325;
+  --accent-500: #4fbe86;
+  --accent-700: #6ed0a0;
+  --accent-900: #95dab8;
 
-  --accent: #34d399;
-  /* Mesma lógica do tema claro, um passo acima: o 300 é mais claro que a base,
-     que é a direção em que o contraste cresce sobre fundo escuro. */
-  --accent-hover: var(--accent-300);
+  --accent: var(--accent-500);
+  /* No escuro sobra folga de sobra (8,38:1 na base), então o hover pode ser um
+     passo oficial de verdade: o 700, mais claro que a base — mesma direção
+     de antes ("sobe" em vez de "desce"), só que agora dentro da própria
+     escala escura, sem precisar pegar emprestado um tom do tema claro. */
+  --accent-hover: var(--accent-700);
   --accent-ink: #0b0d0f;
   /* No escuro o acento já cumpre 4,5:1 como texto sobre todas as superfícies
-     (8,42 no pior caso, sobre `elevated`), então aqui ele **sobe** em vez de
-     descer — o oposto do que o tema claro faz, e pela mesma razão. */
-  --accent-text: #34d399;
-  /* Superfícies coloridas usam o acento a 12–16% de opacidade — pág. 33. Este é
-     o acento a 14% já composto sobre `surface`, que é o fundo em que ele
-     aparece (item de navegação ativo, chips). Composto e não `color-mix` para
-     que o valor seja aferível pelo teste como qualquer outro. */
-  --accent-surface: #1a332e;
+     (6,97 no pior caso, sobre `elevated`), então aqui ele é a própria base —
+     o mesmo valor que preenche o botão. */
+  --accent-text: var(--accent-500);
+  /* Superfícies coloridas usam o acento a 12–16% de opacidade — mesma faixa
+     de sempre, recomposta com o Verdant escuro: 14% de #4FBE86 sobre
+     `surface`. Composto e não `color-mix` para que o valor seja aferível pelo
+     teste como qualquer outro. */
+  --accent-surface: #1e302c;
 
   /**
-   * Os estados, lidos na tabela de ajuste da pág. 33. Success continua sendo o
-   * acento, e a mesma ressalva do tema claro vale: no Life, confirmação nunca é
-   * comunicada só pela cor.
+   * Os estados. No Life, confirmação nunca é comunicada só pela cor — a
+   * mesma ressalva do tema claro vale aqui, independente de qual verde é o
+   * acento do momento.
    *
    * No escuro os três já cumprem 4,5:1 como texto, então `-text` aponta para a
    * própria base. Os tokens existem em ambos os temas mesmo assim: um token que
@@ -359,6 +380,7 @@
    * escurecer esta escala.
    */
   --success: #34d399;
+  --success-text: #34d399;
   --success-surface: #1a332e;
   --warning: #fbbf24;
   --warning-text: #fbbf24;
@@ -370,16 +392,19 @@
   --info: #9aa3ae;
   --info-surface: #282c31;
 
-  --focus: #34d399;
+  --focus: var(--accent-500);
 
-  /* Data colors, subidas junto com os acentos. No escuro as três já cumprem
-     4,5:1 como texto, então `-text` aponta para a própria base — o oposto do
-     tema claro, e pela mesma razão de sempre.
+  /* Data colors. `--data-positive` aponta pra `--success`, não pro acento —
+     mesmo motivo do tema claro (divergência 3 no topo): as duas famílias já
+     eram o mesmo valor aqui por coincidência antes da migração, e continuam
+     sendo, mas agora a origem é explícita em vez de acidental. No escuro as
+     três já cumprem 4,5:1 como texto, então `-text` aponta para a própria
+     base — o oposto do tema claro, e pela mesma razão de sempre.
 
      `comparison` é o Gray 500 da paleta clara, o cinza mais claro que ainda
      cumpre os 3:1 sobre este fundo (4,03) — nenhum valor novo. */
-  --data-positive: #34d399;
-  --data-positive-text: #34d399;
+  --data-positive: var(--success);
+  --data-positive-text: var(--success-text);
   --data-negative: #f87171;
   --data-negative-text: #f87171;
   --data-neutral: #9aa3ae;
@@ -687,13 +712,14 @@ textarea {
   --color-accent-ink: var(--accent-ink);
   --color-accent-text: var(--accent-text);
   --color-accent-surface: var(--accent-surface);
-  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
   --color-accent-300: var(--accent-300);
   --color-accent-500: var(--accent-500);
-  --color-accent-600: var(--accent-600);
-  --color-accent-800: var(--accent-800);
+  --color-accent-700: var(--accent-700);
+  --color-accent-900: var(--accent-900);
 
   --color-success: var(--success);
+  --color-success-text: var(--success-text);
   --color-success-surface: var(--success-surface);
   --color-warning: var(--warning);
   --color-warning-text: var(--warning-text);

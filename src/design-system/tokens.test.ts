@@ -55,8 +55,8 @@ function contrast(a: Rgb, b: Rgb): number {
 /**
  * Reads the opaque colour tokens from one selector block.
  *
- * A token may be written as a literal (`#059669`) or as a reference to another
- * token in the same block (`var(--accent-600)`), and both have to resolve —
+ * A token may be written as a literal (`#2a9162`) or as a reference to another
+ * token in the same block (`var(--accent-500)`), and both have to resolve —
  * `--accent` is a reference, and it is the one every button label is measured
  * against. References are followed after the literals are collected, so
  * declaration order does not matter.
@@ -127,14 +127,19 @@ const PAIRS = [
   ["ink-muted", "muted", 4.5, "the colour a subtle row swaps to on hover"],
 
   ["accent-ink", "accent", 4.5, "primary button label"],
-  ["accent", "canvas", 3, "the emerald as a chart line or filled control"],
-  ["accent", "surface", 3, "the emerald as a filled control on a card"],
-  ["accent-text", "canvas", 4.5, "the emerald used as text on the page"],
-  ["accent-text", "surface", 4.5, "the emerald used as text on a card"],
-  ["accent-text", "elevated", 4.5, "the emerald as text on a raised surface"],
+  // The hover fill keeps the same label colour as the resting button — Button
+  // never swaps text colour on `:hover` — so the label has to clear 4.5:1
+  // against both fills, not just the resting one.
+  ["accent-ink", "accent-hover", 4.5, "primary button label, hovered"],
+  ["accent", "canvas", 3, "Verdant as a chart line or filled control"],
+  ["accent", "surface", 3, "Verdant as a filled control on a card"],
+  ["accent-text", "canvas", 4.5, "Verdant used as text on the page"],
+  ["accent-text", "surface", 4.5, "Verdant used as text on a card"],
+  ["accent-text", "elevated", 4.5, "Verdant as text on a raised surface"],
   // The page header's icon chip: a saturated glyph on the recessed surface.
-  ["accent-text", "muted", 4.5, "the emerald on a chip"],
-  // The active navigation item: accent 50 behind accent text — page 31.
+  ["accent-text", "muted", 4.5, "Verdant on a chip"],
+  // The active navigation item: accent tint behind accent text — brandbook,
+  // seção 08.
   ["accent-text", "accent-surface", 4.5, "the active sidebar item"],
   ["ink", "accent-surface", 4.5, "body text on the active item's fill"],
 
@@ -157,6 +162,8 @@ const PAIRS = [
   ["warning-text", "elevated", 4.5, "calories past the target"],
   ["warning-text", "warning-surface", 4.5, "a warning on its own tint"],
   ["success", "canvas", 3, "a success tick"],
+  ["success-text", "canvas", 4.5, "a success value, printed"],
+  ["success-text", "surface", 4.5, "a success value on a card"],
   ["info", "canvas", 4.5, "an informational note"],
   ["info", "surface", 4.5, "an informational note inside a card"],
 
@@ -165,8 +172,9 @@ const PAIRS = [
 
   /**
    * Data colours — page 27. These say what a value *is*, not what the system
-   * did, so they are asserted separately from the state colours even where a
-   * value happens to coincide.
+   * did, so they are asserted separately from the state colours even though
+   * `--data-positive` is now explicitly `--success` under another name (see
+   * tokens.css, divergence 3) rather than the accent scale it used to alias.
    */
   ["data-positive", "canvas", 3, "a favourable change, as an arrow or a bar"],
   ["data-negative", "canvas", 3, "an unfavourable change, as an arrow or a bar"],
@@ -222,18 +230,19 @@ describe("token parity", () => {
 });
 
 /**
- * The values the brand system names, asserted literally.
+ * The values the brandbook names, asserted literally.
  *
  * Contrast alone would not catch these: a slightly different grey passes every
- * ratio above and is still the wrong grey. Page 49 calls the token file the
- * contract between design and development, and a contract nobody checks is a
+ * ratio above and is still the wrong grey. The token file is the contract
+ * between design and development, and a contract nobody checks is a
  * suggestion — so the numbers that came from the document are pinned to the
- * document, page by page.
+ * document.
  *
- * Only values quoted verbatim in the brand system are here. The three
- * interpolated dark tokens, the two `-text` states and the macro triad are
- * deliberately absent: they are this file's documented divergences, and pinning
- * them here would dress up a local decision as a brand rule.
+ * Only values quoted verbatim in the brandbook are here. The interpolated
+ * tokens (the three dark ones, the accent hover computed for the 11/09/2026
+ * Verdant migration), the `-text` states and the macro triad are deliberately
+ * absent: they are this file's documented divergences, and pinning them here
+ * would dress up a local decision as a brand rule.
  */
 describe("brand system values", () => {
   const hex = (theme: (typeof THEMES)[number], name: string) => {
@@ -265,12 +274,12 @@ describe("brand system values", () => {
     ["ink-subtle", "#6b7280"],
     ["line", "#e5e7eb"],
     ["line-strong", "#d1d5db"],
-    // Page 19 — the five LaCalle Life tokens.
-    ["accent-50", "#ecfdf5"],
-    ["accent-300", "#6ee7b7"],
-    ["accent-500", "#10b981"],
-    ["accent-600", "#059669"],
-    ["accent-800", "#065f46"],
+    // Brandbook, seção "Life · Cor" — Verdant, os cinco passos (11/09/2026).
+    ["accent-100", "#f2f7f5"],
+    ["accent-300", "#e4f1ea"],
+    ["accent-500", "#2a9162"],
+    ["accent-700", "#1f7049"],
+    ["accent-900", "#135334"],
     // Page 27 — UI states and product data colours.
     ["success", "#059669"],
     ["warning", "#d97706"],
@@ -291,42 +300,57 @@ describe("brand system values", () => {
     ["line", "#262b31"],
     ["ink", "#f3f4f6"],
     ["ink-muted", "#9aa3ae"],
-    ["accent", "#34d399"],
+    // Verdant escuro 500 (11/09/2026) — era #34d399 (emerald) antes da migração.
+    ["accent", "#4fbe86"],
     ["warning", "#fbbf24"],
     ["danger", "#f87171"],
   ])("dark --%s is %s", (name, expected) => {
     expect(hex(dark!, name)).toBe(expected);
   });
 
-  it("resolves --accent to the 600 step on light and 500's dark pair", () => {
-    // Page 19 makes 500 the official colour and 600 the hover step; page 48
-    // is why the light theme fills with 600 anyway. Asserted here so the
-    // reasoning in tokens.css cannot drift away from what ships.
-    expect(hex(light!, "accent")).toBe("#059669");
-    expect(hex(light!, "accent-text")).toBe("#065f46");
-    expect(hex(dark!, "accent-text")).toBe("#34d399");
+  it("resolves --accent to the 500 step on both themes — Verdant passes 3:1 at its own base", () => {
+    // The brandbook's 5-step table makes 500 the official colour on both
+    // themes. Unlike the emerald this replaced (11/09/2026 migration), 500
+    // clears 3:1 as a graphic on its own (3.77:1 light, 8.38:1 dark), so
+    // neither theme needs to reach for a darker step just to fill a button.
+    // Asserted here so the reasoning in tokens.css cannot drift from what ships.
+    expect(hex(light!, "accent")).toBe("#2a9162");
+    expect(hex(light!, "accent-text")).toBe("#1f7049");
+    expect(hex(dark!, "accent")).toBe("#4fbe86");
+    expect(hex(dark!, "accent-text")).toBe("#4fbe86");
   });
 
   it("keeps ink, not white, on the accent", () => {
-    // The first documented divergence. White on #059669 measures 3.77:1 and
-    // fails page 48; this is the assertion that stops it coming back.
+    // The first documented divergence, and it survives the Verdant migration
+    // unchanged: white on #2a9162 measures 3.94:1 and still fails 4.5:1.
     expect(hex(light!, "accent-ink")).toBe("#111111");
     expect(hex(dark!, "accent-ink")).toBe("#0b0d0f");
   });
 
-  it("takes the 600 step for a positive value on a light ground", () => {
+  it("computes the light accent-hover between 500 and 700, not at a named step", () => {
     /**
-     * Page 27 names Positive as #10B981, and on the light canvas that measures
-     * **2.42:1** — under the 3:1 page 48 requires of a graphic that carries
-     * meaning. Page 48 already records this ceiling for the accent; page 27
-     * does not inherit it, and between the two the accessibility page wins.
-     *
-     * Pinned rather than left to the ratio assertions because 3:1 admits a
-     * range and only one value in it is the brand's.
+     * The fourth documented divergence: nothing named in the 5-step scale
+     * sits between Base and Strong, and Strong (#1f7049) drops Ink to
+     * 3.12:1. #298e60 is pinned rather than left to the ratio assertion
+     * because the ratio alone would admit a much darker value too — the
+     * point is specifically that this is the darkest one that still clears
+     * 4.5:1 with margin, not just any value in range.
+     */
+    expect(hex(light!, "accent-hover")).toBe("#298e60");
+    // Dark has enough headroom (8.38:1 at the base) to use a named step outright.
+    expect(hex(dark!, "accent-hover")).toBe("#6ed0a0");
+  });
+
+  it("keeps --data-positive on --success, decoupled from the identity accent", () => {
+    /**
+     * The third documented divergence. Both values are unchanged by the
+     * 11/09/2026 Verdant migration precisely because they no longer come
+     * from the accent scale that moved — before this fix they were
+     * `var(--accent-600)`/`var(--accent-800)`, which would have turned a
+     * favourable balance Verdant-green the day the identity colour changed.
      */
     expect(hex(light!, "data-positive")).toBe("#059669");
     expect(hex(light!, "data-positive-text")).toBe("#065f46");
-    // Untouched on the dark ground, where the brand system's own step reads.
     expect(hex(dark!, "data-positive")).toBe("#34d399");
   });
 });
