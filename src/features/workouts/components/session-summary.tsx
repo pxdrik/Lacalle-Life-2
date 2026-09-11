@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { Button, buttonClasses } from "@/design-system/components/button";
+import { Comparison } from "@/design-system/components/comparison";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Notice } from "@/design-system/components/notice";
 
@@ -153,14 +154,12 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
 
                     {/* Shown only when it differs — a delta of zero is noise. */}
                     {rpeDelta !== null && rpeDelta !== 0 && (
-                      <span
-                        className={
-                          rpeDelta > 0 ? "text-danger" : "text-ink-subtle"
-                        }
-                      >
-                        {rpeDelta > 0 ? "+" : ""}
-                        {rpeDelta} vs plano
-                      </span>
+                      <Comparison
+                        delta={rpeDelta}
+                        formatMagnitude={(magnitude) => String(magnitude)}
+                        label="vs plano"
+                        tone={rpeDelta > 0 ? "negative" : "neutral"}
+                      />
                     )}
                   </li>
                 );

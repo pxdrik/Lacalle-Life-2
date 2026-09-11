@@ -9,6 +9,8 @@ import { useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
+import { Comparison } from "@/design-system/components/comparison";
+import { EmptyState } from "@/design-system/components/empty-state";
 import { cn } from "@/design-system/cn";
 
 import { useBodyLog } from "../hooks/use-body-log";
@@ -160,8 +162,15 @@ export function BodyScreen() {
 
       {entries.length === 0 ? (
         <EmptyState
-          onStart={() => {
-            setEditing(dayKey(new Date()));
+          icon={Scale}
+          title="Nenhuma medição ainda."
+          caption="Um peso por semana já mostra a tendência. As medidas são opcionais e podem entrar quando você quiser."
+          action={{
+            label: "Registrar peso",
+            icon: Plus,
+            onClick: () => {
+              setEditing(dayKey(new Date()));
+            },
           }}
         />
       ) : (
@@ -260,44 +269,20 @@ function Headline({
         <span className="ml-1 text-sm text-ink-subtle">{unit}</span>
       </p>
       {change.delta !== null && (
-        <p className="mt-0.5 text-xs tabular-nums text-ink-muted">
-          {change.delta > 0 ? "+" : ""}
-          {/* Rounded before formatting rather than capped by `Intl`: the delta
-              is a subtraction of two stored weights, so it arrives carrying
-              float noise like 0.8000000000000007. `formatDecimal`'s own
-              `fractionDigits` pads as well as caps, which would turn 0,8 into
-              0,80 — a precision the scale never claimed. */}
-          {formatDecimal(Math.round(change.delta * 100) / 100)}{" "}
-          {unit} desde a medição anterior
-        </p>
+        <Comparison
+          // Rounded before formatting rather than capped by `Intl`: the delta
+          // is a subtraction of two stored weights, so it arrives carrying
+          // float noise like 0.8000000000000007. `formatDecimal`'s own
+          // `fractionDigits` pads as well as caps, which would turn 0,8 into
+          // 0,80 — a precision the scale never claimed.
+          delta={Math.round(change.delta * 100) / 100}
+          formatMagnitude={(magnitude) => `${formatDecimal(magnitude)} ${unit}`}
+          label="desde a medição anterior"
+          tone="neutral"
+          className="mt-0.5 tabular-nums"
+        />
       )}
     </div>
-  );
-}
-
-/**
- * Icon, sentence, way out — the shape every empty state in the app uses.
- *
- * The way out used to be missing here. The "Registrar" button existed, but
- * above the box and beside a heading reading "Peso —", so the one screen whose
- * empty state is guaranteed to be the first thing a new person sees explained
- * what to do without offering to do it. The button being somewhere on the page
- * is not the same as it being where the sentence leaves you.
- */
-function EmptyState({ onStart }: { readonly onStart: () => void }) {
-  return (
-    <Card tone="quiet" className="text-center">
-      <Scale aria-hidden className="mx-auto size-8 text-ink-subtle" />
-      <p className="mt-3 text-ink">Nenhuma medição ainda.</p>
-      <p className="mx-auto mt-1.5 max-w-sm text-sm text-ink-subtle">
-        Um peso por semana já mostra a tendência. As medidas são opcionais e
-        podem entrar quando você quiser.
-      </p>
-      <Button className="mt-5" onClick={onStart}>
-        <Plus aria-hidden className="size-4" />
-        Registrar peso
-      </Button>
-    </Card>
   );
 }
 

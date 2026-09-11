@@ -1,4 +1,5 @@
-import { Card } from "@/design-system/components/card";
+import { Tabela } from "@/design-system/components/tabela";
+import { MACRO_CODING } from "@/design-system/macros";
 
 import type { Food } from "../types/food";
 import { FoodRow } from "./food-row";
@@ -13,41 +14,23 @@ interface Props {
 }
 
 /**
- * The column header carries the units once so the rows do not repeat them.
- * Hidden from screen readers because it labels a list, not a table — each row
- * already reads out as a sentence.
+ * O espaço que sobra pro `flex-1`, entre a coluna "100 g" e as quatro
+ * colunas de macro, é estreito de verdade num iPhone real — uns 30-40px.
+ * `MACRO_CODING` já traz o rótulo curto certo (`short`); só a largura de
+ * cada coluna é propriedade da lista, porque é ela que precisa bater com a
+ * largura que `FoodRow` usa pro mesmo valor.
  */
-function ColumnHeader() {
-  return (
-    <div
-      aria-hidden
-      className="flex items-center gap-3 border-b border-line px-3 pb-2 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
-    >
-      <span className="w-8 shrink-0" />
-      {/* O espaço que sobra pro `flex-1`, entre os espaçadores fixos e as
-          quatro colunas de macro, é estreito de verdade num iPhone real —
-          uns 30-40px. "Por 100 g" nesse espaço quebrava em três linhas
-          (POR / 100 / G) enquanto kcal/Prot/Carb/Gord ficavam numa só,
-          torcendo a linha inteira do cabeçalho — print do Pedro,
-          26/08/2026. "100 g" é curto o bastante pra caber numa linha só
-          nesse espaço; `truncate` é a rede de segurança para uma tela
-          ainda mais estreita, não a correção em si. */}
-      <span className="flex-1 truncate">100 g</span>
-      <span className="flex shrink-0 gap-3 sm:gap-4">
-        <span className="w-11 text-right">kcal</span>
-        <span className="w-9 text-right">Prot</span>
-        <span className="w-9 text-right">Carb</span>
-        <span className="w-9 text-right">Gord</span>
-      </span>
-      {/* w-16, não w-8: tem que bater com o espaço reservado em `FoodRow`
-          para editar/excluir (§achado 25/08/2026) — só um alimento
-          personalizado usa esse espaço, mas toda linha o reserva, e um
-          cabeçalho mais estreito desalinhava as colunas de macros em 32px
-          de todas as linhas, sempre, não só nas personalizadas. */}
-      <span className="w-16 shrink-0" />
-    </div>
-  );
-}
+const COLUMNS = [
+  { key: "kcal", label: "kcal", width: "w-11" },
+  ...MACRO_CODING.map(({ key, short }) => ({
+    key,
+    label: short,
+    width: "w-9",
+  })),
+];
+
+/** A estrela de favorito (`size-8`), depois a área de editar/excluir (`w-16`) — nessa ordem, a mesma que `FoodRow` desenha. */
+const TRAILING_SPACERS = ["w-8", "w-16"];
 
 export function FoodList({
   foods,
@@ -57,37 +40,21 @@ export function FoodList({
   onRemove,
 }: Props) {
   return (
-    <Card padded={false} className="overflow-hidden">
-      {/* Print real do Pedro num iPhone (26/08/2026): a soma das colunas
-          fixas (estrela, kcal, Prot, Carb, Gord, espaço de editar/excluir)
-          já passa da largura da tela, e o que sobrava pro nome do alimento
-          e pro rótulo "100 g" ia a zero — não só quebrava, sumia por
-          completo. Encurtar texto não resolve quando o espaço disponível
-          já é zero. `overflow-x-auto` com um piso de largura deixa a
-          tabela rolar de lado numa tela estreita, em vez de espremer
-          colunas até ficarem ilegíveis ou invisíveis. */}
-      <div className="overflow-x-auto">
-        <div className="min-w-[26rem] pt-3">
-          <ColumnHeader />
-        </div>
+    <Tabela primaryLabel="100 g" columns={COLUMNS} trailingSpacers={TRAILING_SPACERS}>
+      {foods.map((food) => (
+        <FoodRow
+          key={food.id}
+          food={food}
+          onToggleFavorite={onToggleFavorite}
+          onRemove={onRemove}
+        />
+      ))}
 
-        <ul className="min-w-[26rem] divide-y divide-line">
-          {foods.map((food) => (
-            <FoodRow
-              key={food.id}
-              food={food}
-              onToggleFavorite={onToggleFavorite}
-              onRemove={onRemove}
-            />
-          ))}
-
-          {/* Unrendered rows below this point exist in the catalogue, not in
-              the DOM yet — see `useIncrementalReveal`. */}
-          {hasMore && sentinelRef !== undefined && (
-            <li ref={sentinelRef} aria-hidden className="h-px" />
-          )}
-        </ul>
-      </div>
-    </Card>
+      {/* Unrendered rows below this point exist in the catalogue, not in
+          the DOM yet — see `useIncrementalReveal`. */}
+      {hasMore && sentinelRef !== undefined && (
+        <li ref={sentinelRef} aria-hidden className="h-px" />
+      )}
+    </Tabela>
   );
 }

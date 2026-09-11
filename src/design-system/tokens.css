@@ -885,6 +885,14 @@ textarea {
    * novo, como sempre decidiu.
    */
   --animate-value-change: value-change var(--duration-standard) var(--ease-out);
+
+  /**
+   * A aba ganha o sublinhado, não o inverso: entra com `scale` horizontal em
+   * vez de aparecer pronta, a mesma curva `--ease-out` de tudo o mais.
+   * Especificada em cima do `.nav-tab-underline`/`indicatorIn` que o Finance
+   * já tinha só em CSS solto (`LacalleFinance.jsx`) — seção 43, "Tabs".
+   */
+  --animate-tab-indicator: tab-indicator var(--duration-standard) var(--ease-out) both;
 }
 
 @keyframes rise {
@@ -943,5 +951,16 @@ textarea {
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+@keyframes tab-indicator {
+  from {
+    opacity: 0;
+    scale: 0.2 1;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
   }
 }
