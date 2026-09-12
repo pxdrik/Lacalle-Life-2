@@ -830,6 +830,16 @@ textarea {
   --duration-data: 550ms;
 
   /**
+   * A sixth tier, same reasoning as `--duration-data` above: the brandbook's
+   * Motion section names Bottom Sheet as its own pattern with its own
+   * timing — a directional slide from the edge it rises from, not the
+   * centered modal's scale+fade — rather than folding it into `standard`.
+   * Used only by `dialog[data-placement="sheet-bottom"|"sheet-left"]` in
+   * `globals.css`.
+   */
+  --duration-sheet: 350ms;
+
+  /**
    * A origem do LaCalle Reveal — Sprint 8, Fase 3.6.
    *
    * `50% 50%` é o padrão declarado aqui, não em cada call site: a máscara

@@ -147,6 +147,54 @@
     }
   }
 
+  /* Bottom Sheet / drawer — the brandbook's Motion section gives this its
+     own pattern, not the centered modal's scale+fade: a directional slide
+     from the edge the sheet rises from. `data-placement` is stamped by
+     `Dialog` itself; the higher specificity of the attribute selector is
+     what lets this override the bare `dialog` rule above rather than merge
+     with it — a sheet never scales, only translates. */
+  dialog[data-placement="sheet-bottom"] {
+    scale: 1;
+    translate: 0 100%;
+    transition:
+      opacity var(--duration-sheet) var(--ease-out),
+      translate var(--duration-sheet) var(--ease-out),
+      overlay var(--duration-sheet) var(--ease-out) allow-discrete,
+      display var(--duration-sheet) var(--ease-out) allow-discrete;
+  }
+
+  dialog[data-placement="sheet-bottom"][open] {
+    translate: 0 0;
+  }
+
+  @starting-style {
+    dialog[data-placement="sheet-bottom"][open] {
+      opacity: 0;
+      translate: 0 100%;
+    }
+  }
+
+  dialog[data-placement="sheet-left"] {
+    scale: 1;
+    translate: -100% 0;
+    transition:
+      opacity var(--duration-sheet) var(--ease-out),
+      translate var(--duration-sheet) var(--ease-out),
+      overlay var(--duration-sheet) var(--ease-out) allow-discrete,
+      display var(--duration-sheet) var(--ease-out) allow-discrete;
+  }
+
+  dialog[data-placement="sheet-left"][open] {
+    translate: 0 0;
+  }
+
+  @starting-style {
+    dialog[data-placement="sheet-left"][open] {
+      opacity: 0;
+      translate: -100% 0;
+    }
+  }
+
   dialog::backdrop {
     /* The token, not a hand-written black: page 31 sets the overlay at Ink 40%
        and the dark theme darkens it. A literal here is how the drawer and the

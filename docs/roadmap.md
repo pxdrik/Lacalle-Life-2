@@ -5,6 +5,65 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Auditoria do Motion System no código + Bottom Sheet ganha slide direcional — 12/09/2026
+
+Pedido do Pedro: "eu queria colocar todas as animações dentro do lacalle
+life, as animações estao no brandbook". Antes de mexer em qualquer coisa,
+uma fork leu a seção de Motion do brandbook único (24 padrões documentados,
+6 deles atribuídos explicitamente ao Life) e cruzou cada um contra o código
+real — `tokens.css`, `globals.css`, uso de `animate-*` pelo app inteiro —
+em vez de presumir a partir do que o roadmap já registrava.
+
+**Resultado: quase tudo já estava implementado e correto.** Entry Insert,
+Number Update, Progress Fill, Chart Enter, Success State, Press, Stagger,
+Fade/Toast — os oito primeiros conferidos linha a linha contra o componente
+real, não só por nome de classe. Morph/Flip/Parallax/Swipe/Shared
+Element/Sequence continuam de fora por decisão já tomada e registrada na
+entrada "Catálogo de motion do ChatGPT" (09/09/2026) — relitigar teria sido
+retrabalho, não achado novo.
+
+**Duas lacunas reais, e só uma foi mexida agora:**
+
+- ✅ **Bottom Sheet ganhou o slide direcional próprio** que o brandbook
+  documenta (translateY de baixo pra cima, translateX da esquerda pra
+  dentro) em vez do scale+fade do modal centralizado — as duas folhas
+  (`sheet-bottom`, `sheet-left`) usavam a mesma regra CSS genérica de
+  `dialog`, tratando um drawer como se fosse um modal. `Dialog` agora
+  carimba `data-placement` no próprio elemento `<dialog>` (único jeito
+  estável de selecionar por variante em CSS, já que a combinação de
+  classes utilitárias muda por breakpoint); `globals.css` ganhou duas
+  regras espelhando exatamente a técnica que já existia para o modal
+  (`@starting-style` + `allow-discrete`), só trocando `scale` por
+  `translate`. Tier de duração novo, `--duration-sheet: 350ms` — mesma
+  lógica do `--duration-data` já existente: o brandbook nomeia Bottom
+  Sheet como padrão próprio, com timing próprio, não um caso do tier
+  `standard`. Confirmado no navegador via `getComputedStyle` (não só
+  visual): `transitionProperty` inclui `translate`, `0.35s`,
+  `data-placement="sheet-bottom"` presente.
+- ⏳ **Delete/Collapse** (um item sendo removido encolhe antes de sumir, em
+  vez de cortar na hora) segue sem implementar — já era candidato
+  registrado em 09/09/2026, e o motivo continua o mesmo: exige adiar a
+  remoção de verdade até a animação terminar, arquitetura de duas fases
+  espalhada por vários pontos de remoção (refeição, exercício, série,
+  alimento), não uma classe CSS a aplicar. Fica pra uma rodada própria.
+
+**Duas coisas fora do meu critério, esperando o Pedro:**
+
+- **Focus Transition** não tem gatilho concreto decidido — o candidato mais
+  óbvio é destacar a próxima série em `session-runner.tsx`, mas isso é
+  decisão de produto, não uma classe a aplicar.
+- **Shimmer vs. Pulse**: o `Skeleton` do app usa `animate-pulse-soft`
+  (opacidade pulsando) pra loading; o brandbook nomeia "Shimmer" como um
+  padrão de gradiente varrendo a superfície, especificamente pra não
+  parecer "spinner genérico", e "Pulse" como um padrão bem menor pra
+  sincronização em segundo plano. Os nomes/mecânicas não batem 1:1 — não é
+  bug, é uma pergunta de nomenclatura/spec que vale uma decisão explícita
+  antes de mexer.
+
+`npm run verify` e `npm run build` limpos.
+
+---
+
 ## ✅ Diário sempre mostra o dia inteiro; o check só marca "comi" — 12/09/2026
 
 Pedido do Pedro: "eu queria que todas as refeições estivessem na aba Diário,

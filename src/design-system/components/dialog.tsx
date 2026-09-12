@@ -200,6 +200,11 @@ export function Dialog({
       // Native light-dismiss: clicking the backdrop closes. The effect above
       // covers browsers that do not support it yet.
       closedby="any"
+      // Purely a CSS hook — `globals.css` reads this to give a sheet its own
+      // directional slide instead of the centered modal's scale+fade, since
+      // no combination of the utility classes below is stable enough to
+      // select on.
+      data-placement={placement}
       aria-labelledby={titleId}
       className={cn(
         // `flex-col` so a drawer's body can take the height the header leaves.
