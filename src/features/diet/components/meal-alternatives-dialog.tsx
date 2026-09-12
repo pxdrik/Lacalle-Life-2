@@ -58,7 +58,7 @@ export function MealAlternativesDialog({
         {alternatives.length === 0 ? (
           <p className="text-sm text-ink-subtle">
             Nenhuma sugestão salva ainda. Monte a refeição do jeito que você
-            vai comer e salve abaixo — da próxima vez é só escolher, sem
+            vai comer e salve abaixo: da próxima vez é só escolher, sem
             editar alimento por alimento.
           </p>
         ) : (
