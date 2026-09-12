@@ -74,6 +74,21 @@ export interface Meal {
    */
   readonly alternatives?: readonly MealAlternative[] | undefined;
   /**
+   * Whether this meal has actually been eaten. Only ever meaningful on a
+   * meal living inside a `FoodLog` that also carries `sourceDietId`/
+   * `sourceMealId` — see there.
+   *
+   * `false`, never absence, is what marks a meal *not* eaten yet: every
+   * meal a `FoodLog` predating this field carries was, by the rule that
+   * came before it, already eaten (presence in `meals` used to be the only
+   * signal). Reading `undefined` as eaten keeps every already-recorded day
+   * reading exactly as it did before this field existed — see
+   * `isMealEaten` in `services/meal-execution.ts`, the one place allowed to
+   * read this field directly instead of everyone re-deriving the same
+   * "undefined means legacy-true" rule.
+   */
+  readonly eaten?: boolean | undefined;
+  /**
    * Which diet, and which meal in it, this one is a snapshot of.
    *
    * Only ever set on a meal living inside a `FoodLog` — a `Diet`'s own meals

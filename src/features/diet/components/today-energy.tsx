@@ -13,7 +13,7 @@ import { MACRO_CODING } from "@/design-system/macros";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
-import { dietMacros } from "../services/diet-macros";
+import { eatenMacros } from "../services/meal-execution";
 import { MacroSummary } from "./macro-summary";
 
 /**
@@ -55,7 +55,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
     );
   }
 
-  const totals = dietMacros(state.log);
+  const totals = eatenMacros(state.log);
   const nothingYet = totals.kcal === 0;
 
   if (targets === null) {

@@ -34,13 +34,14 @@ export function createFoodLog(day: string): FoodLog {
  * the day from nothing.
  *
  * Each copied meal is stamped with `sourceDietId`/`sourceMealId` — the same
- * pair `checkMeal` in `meal-execution.ts` stamps for a single meal. Starting
- * the whole day this way is "I ate everything as planned", so every meal in
- * it should already read as checked on the diet screen; without the stamp,
- * checking one of them there would add a second, redundant copy here.
- * `plannedSnapshot` rides along for the same reason `checkMeal` sets it: a
- * meal edited afterwards should read as "comido, mas diferente", not as
- * still exactly the plan.
+ * pair `checkMeal` in `meal-execution.ts` stamps for a single meal, and is
+ * what lets every meal show up in the Diário the moment the day starts,
+ * whether or not it has been eaten yet. **Seeded unchecked** (`eaten:
+ * false`) — starting the day is "here is today's plan", not "I already ate
+ * all of it"; checking each one off as it actually happens is the whole
+ * point of the check button. `plannedSnapshot` rides along for the same
+ * reason `checkMeal` sets it: a meal edited afterwards should read as
+ * "comido, mas diferente", not as still exactly the plan.
  */
 export function startDayFromDiet(diet: Diet, day: string): FoodLog {
   const now = entityTimestamp();
@@ -57,6 +58,7 @@ export function startDayFromDiet(diet: Diet, day: string): FoodLog {
       sourceDietId: diet.id,
       sourceMealId: meal.id,
       plannedSnapshot: items,
+      eaten: false,
     };
   });
 

@@ -4,8 +4,10 @@ import { createDiet, createMealItem } from "./create-diet";
 import { addItem, removeItem, setItemGrams } from "./edit-diet";
 import {
   checkMeal,
-  isMealChecked,
+  isMealEaten,
+  isMealLogged,
   mealCheckState,
+  toggleLoggedMeal,
   toggleMealChecked,
   uncheckMeal,
 } from "./meal-execution";
@@ -43,6 +45,7 @@ describe("checkMeal", () => {
       name: meal.name,
       sourceDietId: diet.id,
       sourceMealId: meal.id,
+      eaten: true,
     });
     expect(log.meals[0]?.items[0]).toMatchObject({
       name: "Ovo",
@@ -73,6 +76,22 @@ describe("checkMeal", () => {
     expect(twice.meals).toHaveLength(1);
   });
 
+  it("marks an already-logged, unchecked meal eaten in place — no new copy", () => {
+    // The case `startDayFromDiet` created: the meal is already in the log,
+    // seeded unchecked, and checking it must flip the flag on that same
+    // entry rather than add a second one.
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const seeded = startDayFromDiet(diet, "2026-08-31");
+    const seededId = seeded.meals[0]!.id;
+
+    const checked = checkMeal(seeded, diet, meal);
+
+    expect(checked.meals).toHaveLength(1);
+    expect(checked.meals[0]?.id).toBe(seededId);
+    expect(checked.meals[0]?.eaten).toBe(true);
+  });
+
   it("leaves the diet itself untouched", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;
@@ -82,12 +101,31 @@ describe("checkMeal", () => {
   });
 });
 
-describe("isMealChecked", () => {
+describe("isMealLogged", () => {
   it("is false for a day with nothing logged", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;
 
-    expect(isMealChecked(createFoodLog("2026-08-31"), diet.id, meal.id)).toBe(
+    expect(isMealLogged(createFoodLog("2026-08-31"), diet.id, meal.id)).toBe(
+      false,
+    );
+  });
+
+  it("is true once a copy exists, eaten or not", () => {
+    const diet = dietWithBreakfast();
+    const log = startDayFromDiet(diet, "2026-08-31");
+
+    expect(isMealLogged(log, diet.id, diet.meals[0]!.id)).toBe(true);
+    expect(isMealEaten(log, diet.id, diet.meals[0]!.id)).toBe(false);
+  });
+});
+
+describe("isMealEaten", () => {
+  it("is false for a day with nothing logged", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+
+    expect(isMealEaten(createFoodLog("2026-08-31"), diet.id, meal.id)).toBe(
       false,
     );
   });
@@ -97,23 +135,21 @@ describe("isMealChecked", () => {
     const meal = diet.meals[0]!;
     const log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
 
-    expect(isMealChecked(log, diet.id, meal.id)).toBe(true);
+    expect(isMealEaten(log, diet.id, meal.id)).toBe(true);
   });
 
   it("does not confuse a different meal id, even from the same diet", () => {
     const diet = dietWithBreakfast();
     const log = checkMeal(createFoodLog("2026-08-31"), diet, diet.meals[0]!);
 
-    expect(isMealChecked(log, diet.id, "outra-refeicao")).toBe(false);
+    expect(isMealEaten(log, diet.id, "outra-refeicao")).toBe(false);
   });
 
-  it("reports every meal as checked once the whole day was started from that diet", () => {
-    // The bonus consistency `startDayFromDiet` was given: starting the whole
-    // day is "I ate everything as planned".
+  it("is false for every meal right after starting the whole day — a plan, not a record of already having eaten", () => {
     const diet = dietWithBreakfast();
     const log = startDayFromDiet(diet, "2026-08-31");
 
-    expect(isMealChecked(log, diet.id, diet.meals[0]!.id)).toBe(true);
+    expect(isMealEaten(log, diet.id, diet.meals[0]!.id)).toBe(false);
   });
 });
 
@@ -177,29 +213,40 @@ describe("mealCheckState", () => {
     expect(mealCheckState(edited, diet.id, meal.id)).toBe("checked");
   });
 
-  it("reports 'checked', not 'edited', right after starting the whole day", () => {
+  it("is 'unchecked' for every meal right after starting the whole day", () => {
     const diet = dietWithBreakfast();
     const log = startDayFromDiet(diet, "2026-08-31");
 
-    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("checked");
+    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("unchecked");
   });
 });
 
 describe("uncheckMeal", () => {
-  it("removes the matching snapshot", () => {
+  it("keeps the meal in the log, just marks it not eaten", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;
     const checked = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+    const checkedId = checked.meals[0]!.id;
 
     const unchecked = uncheckMeal(checked, diet.id, meal.id);
 
-    expect(unchecked.meals).toHaveLength(0);
+    expect(unchecked.meals).toHaveLength(1);
+    expect(unchecked.meals[0]?.id).toBe(checkedId);
+    expect(unchecked.meals[0]?.eaten).toBe(false);
+    expect(mealCheckState(unchecked, diet.id, meal.id)).toBe("unchecked");
   });
 
   it("is a no-op when nothing matches", () => {
     const log = createFoodLog("2026-08-31");
 
     expect(uncheckMeal(log, "algum-dieta", "alguma-refeicao")).toBe(log);
+  });
+
+  it("is a no-op when the meal is logged but already unchecked", () => {
+    const diet = dietWithBreakfast();
+    const log = startDayFromDiet(diet, "2026-08-31");
+
+    expect(uncheckMeal(log, diet.id, diet.meals[0]!.id)).toBe(log);
   });
 
   it("leaves a day built by hand alone", () => {
@@ -219,15 +266,37 @@ describe("uncheckMeal", () => {
 });
 
 describe("toggleMealChecked", () => {
-  it("checks an unchecked meal and unchecks a checked one", () => {
+  it("checks an unchecked meal and unchecks a checked one, keeping it logged either way", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;
 
     const checked = toggleMealChecked(createFoodLog("2026-08-31"), diet, meal);
-    expect(isMealChecked(checked, diet.id, meal.id)).toBe(true);
+    expect(isMealEaten(checked, diet.id, meal.id)).toBe(true);
 
     const unchecked = toggleMealChecked(checked, diet, meal);
-    expect(isMealChecked(unchecked, diet.id, meal.id)).toBe(false);
-    expect(unchecked.meals).toHaveLength(0);
+    expect(isMealEaten(unchecked, diet.id, meal.id)).toBe(false);
+    expect(unchecked.meals).toHaveLength(1);
+  });
+});
+
+describe("toggleLoggedMeal", () => {
+  it("toggles a meal already in the log, by id pair alone", () => {
+    const diet = dietWithBreakfast();
+    const log = startDayFromDiet(diet, "2026-08-31");
+    const mealId = diet.meals[0]!.id;
+
+    const checked = toggleLoggedMeal(log, diet.id, mealId);
+    expect(isMealEaten(checked, diet.id, mealId)).toBe(true);
+    expect(checked.meals).toHaveLength(1);
+
+    const unchecked = toggleLoggedMeal(checked, diet.id, mealId);
+    expect(isMealEaten(unchecked, diet.id, mealId)).toBe(false);
+    expect(unchecked.meals).toHaveLength(1);
+  });
+
+  it("is a no-op when the pair was never logged at all", () => {
+    const log = createFoodLog("2026-08-31");
+
+    expect(toggleLoggedMeal(log, "algum-dieta", "alguma-refeicao")).toBe(log);
   });
 });

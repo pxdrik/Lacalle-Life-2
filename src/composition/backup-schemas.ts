@@ -338,6 +338,7 @@ export const mealSchema = z
     // opcional desde o primeiro dia, para uma refeição de backup anterior a
     // este campo continuar validando.
     alternatives: z.array(mealAlternativeSchema).max(50).optional(),
+    eaten: z.boolean().optional(),
   })
   .strict();
 

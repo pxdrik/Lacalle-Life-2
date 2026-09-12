@@ -1,6 +1,7 @@
 import { dayKey } from "@/core/format/day";
 
 import { dietForWeekday, weekdayOf } from "./diet-schedule";
+import { isMealEaten } from "./meal-execution";
 import type { Diet } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 
@@ -49,9 +50,12 @@ export interface AdherencePoint {
  * faithful to, which is why `daysWithPlan` exists — a week can legitimately
  * have nothing to measure, and that is different from measuring 0%.
  *
- * "Checked" counts a meal whose `sourceDietId` matches, checked or edited
- * alike — `mealCheckState`'s distinction is about *what* was eaten, not
- * *whether* the plan was followed at all.
+ * "Checked" counts a meal actually eaten, checked or edited alike —
+ * `mealCheckState`'s distinction is about *what* was eaten, not *whether*
+ * the plan was followed at all. A meal merely logged (seeded unchecked by
+ * `startDayFromDiet`, still sitting there undone) does not count — that is
+ * exactly what adherence exists to catch, and counting mere presence would
+ * read every started day as 100% followed regardless of what happened in it.
  *
  * Every week in the window is seeded, even ones with no plan whatsoever, so
  * a gap in the schedule itself is visible rather than absent — the same
@@ -94,7 +98,8 @@ export function adherenceByWeek(
     const checked =
       log === undefined
         ? 0
-        : log.meals.filter((meal) => meal.sourceDietId === diet.id).length;
+        : diet.meals.filter((meal) => isMealEaten(log, diet.id, meal.id))
+            .length;
 
     bucket.checkedMeals += Math.min(checked, diet.meals.length);
     bucket.plannedMeals += diet.meals.length;

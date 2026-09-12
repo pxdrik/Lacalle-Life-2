@@ -12,6 +12,7 @@ import { ICONS } from "@/design-system/icons";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { mealMacros } from "../services/diet-macros";
+import { eatenMeals } from "../services/meal-execution";
 
 /**
  * What was eaten today, meal by meal.
@@ -25,9 +26,11 @@ import { mealMacros } from "../services/diet-macros";
  * a summary down — would have them drift the first time one of them learned to
  * filter something out.
  *
- * Meals with no items are skipped. A diet template contributes five named
- * meals to a day the moment it is started, and listing "Café da manhã — 0 kcal"
- * four times over reports a plan as though it were a record.
+ * Only meals actually eaten, same as `TodayEnergy`'s totals — a diet
+ * template now seeds every meal into the day unchecked the moment it is
+ * started, and listing "Café da manhã — 0 kcal" for something not yet
+ * touched would report a plan as though it were a record. Meals with no
+ * items are skipped too, same reason.
  *
  * **`Section` for the heading, `Card` for the body.** Second in the reading
  * order the Sprint 8 direction sets for Hoje — after the hero, before Treino.
@@ -48,7 +51,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
   // reads as two failures.
   if (state.status === "error") return null;
 
-  const eaten = state.log.meals.filter((meal) => meal.items.length > 0);
+  const eaten = eatenMeals(state.log).filter((meal) => meal.items.length > 0);
 
   return (
     <Section

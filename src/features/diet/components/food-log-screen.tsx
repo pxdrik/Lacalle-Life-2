@@ -24,7 +24,6 @@ import { useDietList } from "../hooks/use-diet-list";
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
-import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
   addMeal,
@@ -40,7 +39,13 @@ import {
   setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
-import { checkMeal, mealCheckState, uncheckMeal } from "../services/meal-execution";
+import {
+  checkMeal,
+  eatenMacros,
+  isMealLogged,
+  mealCheckState,
+  toggleLoggedMeal,
+} from "../services/meal-execution";
 import { startDayFromDiet } from "../services/start-day";
 import type { Diet, Meal } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
@@ -183,9 +188,12 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             )}
           >
             {targets === null ? (
-              <MacroSummary macros={dietMacros(state.log)} size="lg" />
+              <MacroSummary macros={eatenMacros(state.log)} size="lg" />
             ) : (
-              <MacroProgress totals={dietMacros(state.log)} targets={targets} />
+              <MacroProgress
+                totals={eatenMacros(state.log)}
+                targets={targets}
+              />
             )}
           </div>
 
@@ -333,12 +341,13 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                             removeItem(current, meal.id, itemId),
                           );
                         }}
-                        // Só aparece numa refeição que veio de um check ou de
-                        // "Começar de X" — uma refeição montada aqui à mão
-                        // não tem `sourceDietId`/`sourceMealId`, então não
-                        // há nada para o check representar. Sempre "checked"
-                        // ou "edited", nunca "unchecked": a refeição já está
-                        // no log, é o que a torna elegível pro botão.
+                        // Só aparece numa refeição que veio da dieta — de um
+                        // check individual ou de "Começar de X" — uma
+                        // refeição montada aqui à mão não tem
+                        // `sourceDietId`/`sourceMealId`, então não há nada
+                        // para o check representar. Pode ser "unchecked"
+                        // sim: "Começar de X" entra com todas as refeições
+                        // do dia já visíveis, mas ainda por comer.
                         checkState={
                           meal.sourceDietId !== undefined &&
                           meal.sourceMealId !== undefined
@@ -356,7 +365,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                                 const dietId = meal.sourceDietId!;
                                 const mealId = meal.sourceMealId!;
                                 apply((current) =>
-                                  uncheckMeal(current, dietId, mealId),
+                                  toggleLoggedMeal(current, dietId, mealId),
                                 );
                               }
                             : undefined
@@ -503,13 +512,20 @@ function EmptyDay({
 }
 
 /**
- * O que a dieta vinculada a este dia ainda espera — cada uma some daqui
- * assim que marcada, e passa a aparecer como qualquer outra refeição do
- * dia, com o `MealCard` completo (editar grama, trocar alimento, tudo).
+ * The linked diet's meals that have never been pulled into today's log at
+ * all — not "unchecked", which since `startDayFromDiet` stopped
+ * pre-checking everything is also true of most of a freshly started day's
+ * meals, already shown in full below. This list is only for the gap before
+ * that: a day with nothing (or only a hand-made meal) yet, where checking
+ * one off here is the lighter alternative to "Começar de X" for logging
+ * just one meal. Checking here moves the meal out of this compact list and
+ * into the full one below, same as ever — it just no longer disappears
+ * again if unchecked afterwards, which is the whole point of `isMealLogged`
+ * (once-in, stays-in) instead of `mealCheckState` here.
  *
- * Uma lista compacta de propósito: não há nada para editar numa refeição
- * ainda não comida, só o nome e a decisão de marcar ou não — o `MealCard`
- * inteiro seria peso sem função aqui.
+ * A compact list on purpose: there is nothing to edit on a meal not yet
+ * pulled in, only its name and the decision to log it — the full `MealCard`
+ * would be weight with no function here.
  */
 function PlannedMeals({
   diet,
@@ -521,7 +537,7 @@ function PlannedMeals({
   readonly onCheck: (meal: Meal) => void;
 }) {
   const pending = diet.meals.filter(
-    (meal) => mealCheckState(log, diet.id, meal.id) === "unchecked",
+    (meal) => !isMealLogged(log, diet.id, meal.id),
   );
 
   if (pending.length === 0) return null;

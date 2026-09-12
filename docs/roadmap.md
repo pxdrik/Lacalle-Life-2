@@ -5,6 +5,55 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário sempre mostra o dia inteiro; o check só marca "comi" — 12/09/2026
+
+Pedido do Pedro: "eu queria que todas as refeições estivessem na aba Diário,
+e eu usar o check para aprovar que eu comi. Hoje quando eu tiro o check ele
+some da aba diário, e aí fica ruim do usuário ver o que ele precisa fazer no
+dia."
+
+**Causa raiz:** `log.meals` usava a própria presença no array como sinal de
+"comido" — `checkMeal` adicionava, `uncheckMeal` removia. Isso significava
+duas coisas ruins: (1) desmarcar uma refeição já registrada a apagava do
+Diário de verdade, não só do estado "comido"; (2) `startDayFromDiet`
+("Começar de X") carimbava toda refeição copiada como já comida
+("Starting the whole day this way is 'I ate everything as planned'", dizia
+o comentário antigo) — então o dia inteiro entrava marcado, e desmarcar uma
+única refeição era a única forma de dizer "isto eu não comi ainda", o que
+tirava ela da tela.
+
+**Mudança:** `Meal` ganhou `eaten?: boolean` (opcional, `false` só quando
+alguém desmarca de propósito — ausência do campo, em dado antigo, continua
+lendo como comido, então nenhum dia já registrado muda de leitura).
+`startDayFromDiet` agora carimba `eaten: false` em cada refeição copiada:
+começar o dia é "aqui está o plano", não "já comi tudo". `checkMeal`/
+`uncheckMeal` viraram troca de flag, nunca mais adicionar/remover do array —
+a refeição fica visível e editável no Diário o dia inteiro, comida ou não.
+
+Duas funções novas em `meal-execution.ts`: `isMealLogged` (existe uma cópia
+no dia, comida ou não — o que a lista compacta "Planejado para X" agora usa
+pra decidir o que ainda nem foi puxado pro dia) e `isMealEaten` (comida de
+verdade). `eatenMeals`/`eatenMacros` — só o que foi realmente comido conta
+nos totais de calorias/macros do Diário e do "Hoje" (`TodayEnergy`,
+`TodayMeals`); sem isso, o anel de calorias contaria comida ainda não
+comida, o oposto do que um diário alimentar existe pra fazer.
+`diet-adherence.ts` também precisou trocar de "presença no log" para
+"`isMealEaten`" — senão todo dia que alguém começasse de uma dieta contaria
+100% de aderência mesmo sem tocar em nada.
+
+`mealSchema` em `backup-schemas.ts` ganhou `eaten` como opcional, mesma
+razão de sempre (não quebrar backup/sync de dado anterior a este campo).
+
+`npm run verify` limpo (1670 testes, incluindo os reescritos em
+`meal-execution.test.ts`/`start-day.test.ts`/`food-log-screen.test.tsx` para
+a nova semântica) e `npm run build` limpo. Verificado no navegador: vincular
+"Cutting" ao dia da semana de hoje, "Começar de 'Cutting'" mostra a refeição
+inteira e editável já na tela, desmarcada (total do dia em 0 kcal); marcar
+soma ao total; desmarcar de novo mantém a refeição visível, com todos os
+itens, e volta o total a 0 — nunca mais some.
+
+---
+
 ## ✅ Nome do exercício sobrepondo as etiquetas na folha de seleção — 12/09/2026
 
 Achado real de uso, com captura de tela do Pedro: "Agachamento Búlgaro"

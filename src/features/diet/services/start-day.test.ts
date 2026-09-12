@@ -80,8 +80,8 @@ describe("startDayFromDiet", () => {
   });
 
   it("stamps every copied meal with where it came from", () => {
-    // Same pair `checkMeal` stamps for a single meal — starting the whole day
-    // this way means every meal in it should already read as checked.
+    // Same pair `checkMeal` stamps for a single meal — it is what lets the
+    // meal be found and checked off later without adding a second copy.
     const diet = dietWithLunch();
     const log = startDayFromDiet(diet, "2026-08-07");
 
@@ -91,11 +91,12 @@ describe("startDayFromDiet", () => {
     });
   });
 
-  it("reports 'checked', not 'edited', for a day just started — plannedSnapshot matches items", () => {
+  it("seeds every meal unchecked — starting the day is the plan, not a record of already having eaten", () => {
     const diet = dietWithLunch();
     const log = startDayFromDiet(diet, "2026-08-07");
 
-    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("checked");
+    expect(log.meals[0]?.eaten).toBe(false);
+    expect(mealCheckState(log, diet.id, diet.meals[0]!.id)).toBe("unchecked");
   });
 
   it("records which diet the day came from", () => {

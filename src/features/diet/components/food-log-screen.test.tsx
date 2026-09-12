@@ -150,7 +150,10 @@ describe("the check button in the diary", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows checked, and unchecking removes the meal from the diary", async () => {
+  it("shows checked, and unchecking keeps the meal in the diary — just marked not eaten", async () => {
+    // The bug this replaced: unchecking used to delete the meal outright,
+    // which emptied the whole day the instant it was the only one — leaving
+    // no trace of what was still left to do today.
     const { logs } = mount(logWithCheckedMeal());
     await screen.findByDisplayValue("Café da manhã");
 
@@ -161,15 +164,40 @@ describe("the check button in the diary", () => {
 
     await userEvent.click(button);
 
-    // The day's only meal is gone, which empties the log entirely —
-    // `useFoodLogDay` deletes a day once it has nothing in it, the same
-    // behaviour the empty-day screenshot below confirms.
-    await waitFor(async () => {
-      expect(await logs.getByDay(TODAY)).toBeUndefined();
+    const uncheckedButton = await screen.findByRole("button", {
+      name: "Marcar Café da manhã como comida",
     });
+    expect(uncheckedButton).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByDisplayValue("Café da manhã")).toBeInTheDocument();
     expect(
-      await screen.findByText(`Nada registrado em ${formatDay(TODAY)}.`),
-    ).toBeInTheDocument();
+      screen.queryByText(`Nada registrado em ${formatDay(TODAY)}.`),
+    ).not.toBeInTheDocument();
+    await waitFor(async () => {
+      expect((await logs.getByDay(TODAY))?.meals).toHaveLength(1);
+    });
+  });
+
+  it("re-checking an unchecked-but-logged meal flips it back, still the same entry", async () => {
+    const { logs } = mount(logWithCheckedMeal());
+    await screen.findByDisplayValue("Café da manhã");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Desmarcar Café da manhã como comida" }),
+    );
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Marcar Café da manhã como comida",
+      }),
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Desmarcar Café da manhã como comida",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await waitFor(async () => {
+      expect((await logs.getByDay(TODAY))?.meals).toHaveLength(1);
+    });
   });
 });
 
@@ -227,6 +255,59 @@ describe("planned meals waiting to be checked", () => {
 
     await screen.findByDisplayValue("Refeição 1");
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+  });
+});
+
+describe("a day already started from a diet", () => {
+  // What `startDayFromDiet` seeds: every meal already logged, unchecked —
+  // the point being that all of it stays visible and editable in the
+  // Diário right away, not hidden behind a check.
+  function seededUnchecked(diet: Diet): FoodLog {
+    return {
+      ...emptyLog(),
+      dietId: diet.id,
+      meals: [
+        {
+          ...diet.meals[0]!,
+          sourceDietId: diet.id,
+          sourceMealId: diet.meals[0]!.id,
+          plannedSnapshot: diet.meals[0]!.items,
+          eaten: false,
+        },
+      ],
+    };
+  }
+
+  it("shows the whole meal, unchecked, instead of the compact planned list", async () => {
+    const diet = dietForToday();
+    mount(seededUnchecked(diet), diet);
+
+    expect(await screen.findByDisplayValue("Refeição 1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    ).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+  });
+
+  it("checking it in place keeps it as the same entry, now marked eaten", async () => {
+    const diet = dietForToday();
+    const { logs } = mount(seededUnchecked(diet), diet);
+    await screen.findByDisplayValue("Refeição 1");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    );
+
+    expect(
+      await screen.findByRole("button", {
+        name: "Desmarcar Refeição 1 como comida",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await waitFor(async () => {
+      const saved = await logs.getByDay(TODAY);
+      expect(saved?.meals).toHaveLength(1);
+      expect(saved?.meals[0]?.eaten).toBe(true);
+    });
   });
 });
 
