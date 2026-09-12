@@ -47,6 +47,21 @@ interface Props {
   readonly children: React.ReactNode;
   readonly placement?: Placement;
   readonly className?: string | undefined;
+  /**
+   * Gate on every dismissal path — Escape, backdrop click, and the X button —
+   * called right before the dialog would actually close. Returning `false`
+   * keeps it open; anything else (including omitting the prop) lets the close
+   * proceed. Synchronous on purpose: Escape and backdrop light-dismiss close
+   * the native element immediately unless something inside the same event
+   * turn calls `preventDefault`, so an async confirmation would always lose
+   * that race.
+   *
+   * For the picker this exists for: a multi-select exercise sheet closed by
+   * backdrop click mid-selection used to discard every checked exercise with
+   * no way back, which is exactly the "closed it by accident" report this
+   * was added for.
+   */
+  readonly confirmClose?: () => boolean;
 }
 
 /**
@@ -87,9 +102,16 @@ export function Dialog({
   children,
   placement = "center",
   className,
+  confirmClose,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  // Read from the native-event listeners below, which are attached once and
+  // must always see the latest gate rather than the one from mount time.
+  const confirmCloseRef = useRef(confirmClose);
+  useEffect(() => {
+    confirmCloseRef.current = confirmClose;
+  });
 
   useEffect(() => {
     const dialog = ref.current;
@@ -114,6 +136,24 @@ export function Dialog({
       dialog.removeEventListener("close", onClose);
     };
   }, [onClose]);
+
+  useEffect(() => {
+    const dialog = ref.current;
+    if (dialog === null) return;
+
+    // Fires for Escape, and for backdrop light-dismiss wherever `closedby`
+    // is supported — both close the native element synchronously right
+    // after, unless this prevents that default here. The `close` listener
+    // above still runs normally on every dismissal this lets through.
+    function handleCancel(event: Event) {
+      if (confirmCloseRef.current?.() === false) event.preventDefault();
+    }
+
+    dialog.addEventListener("cancel", handleCancel);
+    return () => {
+      dialog.removeEventListener("cancel", handleCancel);
+    };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -145,7 +185,7 @@ export function Dialog({
         event.clientY >= box.top &&
         event.clientY <= box.bottom;
 
-      if (!inside) dialog.close();
+      if (!inside && confirmCloseRef.current?.() !== false) dialog.close();
     }
 
     dialog.addEventListener("click", handleClick);
@@ -178,7 +218,10 @@ export function Dialog({
         </h2>
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            if (confirmClose?.() === false) return;
+            onClose();
+          }}
           aria-label="Fechar"
           className="-m-1 flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
         >

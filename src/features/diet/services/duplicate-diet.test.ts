@@ -7,6 +7,7 @@ import {
   duplicateMeal,
   copyItemToMeal,
   moveItemToMeal,
+  saveMealAsAlternative,
   setItemGrams,
   updateMeal,
 } from "./edit-diet";
@@ -145,6 +146,19 @@ describe("duplicateMeal", () => {
     const { diet } = fullDiet();
 
     expect(duplicateMeal(diet, "gone")).toBe(diet);
+  });
+
+  it("copies saved alternatives with fresh ids at every depth", () => {
+    const { diet, almoco } = fullDiet();
+    const withAlternative = saveMealAsAlternative(diet, almoco, "Sem arroz");
+    const after = duplicateMeal(withAlternative, almoco);
+
+    const original = after.meals[0]!.alternatives![0]!;
+    const copy = after.meals[1]!.alternatives![0]!;
+
+    expect(copy.name).toBe("Sem arroz");
+    expect(copy.id).not.toBe(original.id);
+    expect(copy.items[0]?.id).not.toBe(original.items[0]?.id);
   });
 
   it("doubles the diet's totals when the only meal is duplicated", () => {

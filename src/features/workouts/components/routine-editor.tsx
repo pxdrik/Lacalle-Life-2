@@ -7,7 +7,7 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Play, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
@@ -57,6 +57,23 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   // Id do slot sendo trocado, ou null. Mutuamente exclusivo com `picking`:
   // só uma folha de seleção de exercício fica aberta por vez.
   const [swappingId, setSwappingId] = useState<string | null>(null);
+  // Tamanho do lote ainda não confirmado no seletor múltiplo. Existe só para
+  // guardar a folha contra fechar sem querer — ver `confirmClose` abaixo e
+  // o comentário em `ExerciseBrowser.onSelectionChange`.
+  const [pendingSelection, setPendingSelection] = useState(0);
+
+  useEffect(() => {
+    if (pendingSelection === 0) return;
+
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+    }
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [pendingSelection]);
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -233,7 +250,19 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           title="Adicionar exercício"
           onClose={() => {
             setPicking(false);
+            setPendingSelection(0);
           }}
+          // Fechar com exercícios já marcados e ainda não confirmados perdia
+          // o lote inteiro num clique fora ou num Esc sem querer — achado
+          // real relatado depois de acontecer duas vezes seguidas.
+          confirmClose={() =>
+            pendingSelection === 0 ||
+            window.confirm(
+              pendingSelection === 1
+                ? "Descartar o exercício selecionado?"
+                : `Descartar os ${pendingSelection} exercícios selecionados?`,
+            )
+          }
           placement="sheet-bottom"
         >
           {/* Múltiplo, não imediato: montar um treino do zero é
@@ -243,6 +272,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
             persistQuery={false}
             autoFocus
             selectionMode="multiple"
+            onSelectionChange={setPendingSelection}
             onConfirmSelection={(exercises) => {
               const created = exercises.map((exercise) =>
                 createRoutineExercise({
@@ -257,6 +287,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
                   current,
                 ),
               );
+              setPendingSelection(0);
               setPicking(false);
             }}
           />

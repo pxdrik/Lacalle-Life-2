@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Meal, MealItem } from "../types/diet";
@@ -25,6 +26,10 @@ function mount(
   extra: {
     readonly checkState?: "unchecked" | "checked" | "edited";
     readonly onToggleChecked?: () => void;
+    readonly onSaveAlternative?: (name: string) => void;
+    readonly onApplyAlternative?: (alternativeId: string) => void;
+    readonly onRenameAlternative?: (alternativeId: string, name: string) => void;
+    readonly onRemoveAlternative?: (alternativeId: string) => void;
   } = {},
 ) {
   const card = (theMeal: Meal) => (
@@ -100,6 +105,71 @@ describe("the check button", () => {
     expect(button).toHaveAttribute("title", "Comido, mas diferente do planejado");
   });
 
+});
+
+describe("other suggestions", () => {
+  it("does not render without onApplyAlternative — a checked day has nothing to suggest", () => {
+    mount(meal([]));
+
+    expect(
+      screen.queryByRole("button", { name: /Outras sugestões/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("opens to an empty state when nothing was saved yet", async () => {
+    const user = userEvent.setup();
+    mount(meal([item()]), { onApplyAlternative: vi.fn() });
+
+    await user.click(screen.getByRole("button", { name: /Outras sugestões/ }));
+
+    expect(
+      screen.getByText(/Nenhuma sugestão salva ainda/),
+    ).toBeInTheDocument();
+  });
+
+  it("saves the current foods under the typed name", async () => {
+    const user = userEvent.setup();
+    const onSaveAlternative = vi.fn();
+    mount(meal([item()]), {
+      onApplyAlternative: vi.fn(),
+      onSaveAlternative,
+    });
+
+    await user.click(screen.getByRole("button", { name: /Outras sugestões/ }));
+    await user.type(
+      screen.getByLabelText("Nome da nova sugestão"),
+      "Marmita de arroz",
+    );
+    await user.click(screen.getByRole("button", { name: "Salvar atual" }));
+
+    expect(onSaveAlternative).toHaveBeenCalledExactlyOnceWith(
+      "Marmita de arroz",
+    );
+  });
+
+  it("lists a saved suggestion and applies it on 'Usar'", async () => {
+    const user = userEvent.setup();
+    const onApplyAlternative = vi.fn();
+    const withAlternative: Meal = {
+      ...meal([item()]),
+      alternatives: [
+        {
+          id: "alt-1",
+          name: "Marmita de macarrão",
+          items: [item({ id: "i2", name: "Macarrão" })],
+        },
+      ],
+    };
+    mount(withAlternative, { onApplyAlternative });
+
+    await user.click(screen.getByRole("button", { name: /Outras sugestões/ }));
+
+    expect(screen.getByDisplayValue("Marmita de macarrão")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Usar" }));
+
+    expect(onApplyAlternative).toHaveBeenCalledExactlyOnceWith("alt-1");
+  });
 });
 
 describe("the grams-vs-unit explanation", () => {

@@ -41,6 +41,24 @@ export interface MealItem {
   readonly practicalUnit?: PracticalUnit | undefined;
 }
 
+/**
+ * One other way to eat a meal — a marmita's rice version beside its pasta
+ * version, saved so switching between them is a pick instead of re-adding
+ * every food by hand.
+ *
+ * Deliberately not kept in sync with the meal's live `items`: saving one is
+ * an explicit act (`saveMealAsAlternative`), same as everything else in this
+ * file that could instead have tried to be clever about it. Editing a
+ * portion on the meal never rewrites a saved alternative nobody asked to
+ * change, for the same reason `MealItem.per100g` is a copy rather than a
+ * lookup.
+ */
+export interface MealAlternative {
+  readonly id: EntityId;
+  readonly name: string;
+  readonly items: readonly MealItem[];
+}
+
 export interface Meal {
   readonly id: EntityId;
   readonly name: string;
@@ -48,6 +66,13 @@ export interface Meal {
   readonly time: string | null;
   readonly notes: string;
   readonly items: readonly MealItem[];
+  /**
+   * Other suggestions for this meal, not counting whichever is currently
+   * live in `items` above. `undefined` — never `[]` — until the first one is
+   * saved, same convention as `sourceDietId`/`plannedSnapshot` below: a
+   * meal that predates this field has no key for it at all.
+   */
+  readonly alternatives?: readonly MealAlternative[] | undefined;
   /**
    * Which diet, and which meal in it, this one is a snapshot of.
    *

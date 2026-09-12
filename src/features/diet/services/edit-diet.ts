@@ -6,7 +6,13 @@ import {
   type EntityId,
 } from "@/core/domain/entity";
 
-import type { Diet, Meal, MealItem, MealOwner } from "../types/diet";
+import type {
+  Diet,
+  Meal,
+  MealAlternative,
+  MealItem,
+  MealOwner,
+} from "../types/diet";
 import { copyMeal, createMeal } from "./create-diet";
 
 /**
@@ -219,6 +225,106 @@ export function setItemUnit<T extends MealOwner>(
     ...meal,
     items: meal.items.map((item) =>
       item.id === itemId ? { ...item, unit } : item,
+    ),
+  }));
+}
+
+/**
+ * Snapshots the meal's current foods as a new named suggestion.
+ *
+ * The only way `alternatives` ever gains an entry — nothing here tries to
+ * infer one automatically. Fresh ids on the copy, same reason `copyMeal`
+ * mints them: this snapshot must not move if the live meal is edited
+ * afterwards.
+ */
+export function saveMealAsAlternative<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  name: string,
+): T {
+  const trimmed = name.trim();
+  if (trimmed === "") return diet;
+
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    alternatives: [
+      ...(meal.alternatives ?? []),
+      {
+        id: createEntityId(),
+        name: trimmed,
+        items: meal.items.map((item) => ({ ...item, id: createEntityId() })),
+      },
+    ],
+  }));
+}
+
+/**
+ * Swaps in a saved suggestion as the meal's live foods.
+ *
+ * The previous `items` are simply replaced, not folded back into
+ * `alternatives` — swapping to "Marmita de arroz" without having saved
+ * whatever was live before must not invent a name for it. Anyone who wants
+ * that back saves it first, the same one way anything ever lands here.
+ */
+export function applyMealAlternative<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  alternativeId: EntityId,
+): T {
+  const alternative = findAlternative(diet, mealId, alternativeId);
+  if (alternative === undefined) return diet;
+
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    items: alternative.items.map((item) => ({
+      ...item,
+      id: createEntityId(),
+    })),
+  }));
+}
+
+export function renameMealAlternative<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  alternativeId: EntityId,
+  name: string,
+): T {
+  const trimmed = name.trim();
+  if (trimmed === "" || findAlternative(diet, mealId, alternativeId) === undefined) {
+    return diet;
+  }
+
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    alternatives: meal.alternatives?.map((alternative) =>
+      alternative.id === alternativeId
+        ? { ...alternative, name: trimmed }
+        : alternative,
+    ),
+  }));
+}
+
+function findAlternative<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  alternativeId: EntityId,
+): MealAlternative | undefined {
+  return diet.meals
+    .find((meal) => meal.id === mealId)
+    ?.alternatives?.find((alternative) => alternative.id === alternativeId);
+}
+
+export function removeMealAlternative<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  alternativeId: EntityId,
+): T {
+  if (findAlternative(diet, mealId, alternativeId) === undefined) return diet;
+
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    alternatives: meal.alternatives?.filter(
+      (alternative) => alternative.id !== alternativeId,
     ),
   }));
 }

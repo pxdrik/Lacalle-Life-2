@@ -22,15 +22,19 @@ import { dietMacros } from "../services/diet-macros";
 import {
   addItem,
   addMeal,
+  applyMealAlternative,
   copyItemToMeal,
   duplicateMeal,
   moveItemToMeal,
   moveMeal,
   removeItem,
   removeMeal,
+  removeMealAlternative,
   renameDiet,
+  renameMealAlternative,
   reorderMealItems,
   reorderMeals,
+  saveMealAsAlternative,
   setItemGrams,
   setItemUnit,
   updateMeal,
@@ -191,6 +195,31 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                   }}
                   onRemoveItem={(itemId) => {
                     apply((current) => removeItem(current, meal.id, itemId));
+                  }}
+                  onSaveAlternative={(name) => {
+                    apply((current) =>
+                      saveMealAsAlternative(current, meal.id, name),
+                    );
+                  }}
+                  onApplyAlternative={(alternativeId) => {
+                    apply((current) =>
+                      applyMealAlternative(current, meal.id, alternativeId),
+                    );
+                  }}
+                  onRenameAlternative={(alternativeId, name) => {
+                    apply((current) =>
+                      renameMealAlternative(
+                        current,
+                        meal.id,
+                        alternativeId,
+                        name,
+                      ),
+                    );
+                  }}
+                  onRemoveAlternative={(alternativeId) => {
+                    apply((current) =>
+                      removeMealAlternative(current, meal.id, alternativeId),
+                    );
                   }}
                 />
               )}

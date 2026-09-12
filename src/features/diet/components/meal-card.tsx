@@ -8,6 +8,7 @@ import {
   GripVertical,
   Pencil,
   Plus,
+  Shuffle,
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
@@ -25,6 +26,7 @@ import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
 import { InlineText } from "./inline-text";
 import { MacroSummary } from "./macro-summary";
+import { MealAlternativesDialog } from "./meal-alternatives-dialog";
 import { MealItemRow } from "./meal-item-row";
 import { Card } from "@/design-system/components/card";
 
@@ -68,6 +70,17 @@ interface Props {
    */
   readonly checkState?: "unchecked" | "checked" | "edited" | undefined;
   readonly onToggleChecked?: (() => void) | undefined;
+  /**
+   * The "Outras sugestões" button and its sheet only exist when this is
+   * given — today only from `DietEditor`. A day already eaten (`FoodLogScreen`)
+   * has nothing to suggest: what happened, happened.
+   */
+  readonly onSaveAlternative?: ((name: string) => void) | undefined;
+  readonly onApplyAlternative?: ((alternativeId: string) => void) | undefined;
+  readonly onRenameAlternative?:
+    | ((alternativeId: string, name: string) => void)
+    | undefined;
+  readonly onRemoveAlternative?: ((alternativeId: string) => void) | undefined;
 }
 
 export function MealCard({
@@ -88,8 +101,13 @@ export function MealCard({
   onSendItem,
   checkState,
   onToggleChecked,
+  onSaveAlternative,
+  onApplyAlternative,
+  onRenameAlternative,
+  onRemoveAlternative,
 }: Props) {
   const [picking, setPicking] = useState(false);
+  const [showingAlternatives, setShowingAlternatives] = useState(false);
   // Mesma técnica de `performed-set-row.tsx` ("Concluir série"): a animação
   // é presa ao toque, nunca ao estado — `checkState` sozinho dispararia de
   // novo em toda remontagem do Diário, marcando de volta uma refeição que só
@@ -325,18 +343,66 @@ export function MealCard({
             }}
           />
         ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setPicking(true);
-            }}
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-          >
-            <Plus aria-hidden className="size-4" />
-            Adicionar alimento
-          </button>
+          <div className="flex flex-wrap items-center gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setPicking(true);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
+              <Plus aria-hidden className="size-4" />
+              Adicionar alimento
+            </button>
+
+            {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
+                na prop) — pedido real: "vai que ele pede marmita, ele vai
+                ter a marmita de macarrão e de arroz", pra trocar sem editar
+                alimento por alimento toda vez. */}
+            {onApplyAlternative !== undefined && (
+              <button
+                type="button"
+                onClick={() => {
+                  setShowingAlternatives(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              >
+                <Shuffle aria-hidden className="size-4" />
+                Outras sugestões
+                {meal.alternatives !== undefined &&
+                  meal.alternatives.length > 0 && (
+                    <span className="tabular-nums text-ink-subtle">
+                      {meal.alternatives.length}
+                    </span>
+                  )}
+              </button>
+            )}
+          </div>
         )}
       </div>
+
+      {onApplyAlternative !== undefined && (
+        <MealAlternativesDialog
+          meal={meal}
+          open={showingAlternatives}
+          onClose={() => {
+            setShowingAlternatives(false);
+          }}
+          onApply={(alternativeId) => {
+            onApplyAlternative(alternativeId);
+            setShowingAlternatives(false);
+          }}
+          onSave={(name) => {
+            onSaveAlternative?.(name);
+          }}
+          onRename={(alternativeId, name) => {
+            onRenameAlternative?.(alternativeId, name);
+          }}
+          onRemove={(alternativeId) => {
+            onRemoveAlternative?.(alternativeId);
+          }}
+        />
+      )}
 
       <div className="mt-3">
         <InlineText

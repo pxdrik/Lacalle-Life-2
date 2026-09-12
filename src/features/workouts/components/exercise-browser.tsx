@@ -3,7 +3,7 @@
 import { noticeClasses } from "@/design-system/components/notice";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { Button, buttonClasses } from "@/design-system/components/button";
@@ -59,6 +59,15 @@ interface Props {
   readonly onConfirmSelection?: (exercises: readonly Exercise[]) => void;
 
   /**
+   * Reports the running batch's size on every change, while `selectionMode`
+   * is `"multiple"`. Exists so a container hosting this inside a `Dialog`
+   * can gate `confirmClose` on it — losing a batch of checked exercises to
+   * an accidental backdrop click or Escape is the exact complaint that led
+   * to that prop.
+   */
+  readonly onSelectionChange?: (count: number) => void;
+
+  /**
    * Whether the search and filters are mirrored into the URL.
    *
    * True on the catalogue page, where a filtered view is worth bookmarking.
@@ -80,6 +89,7 @@ export function ExerciseBrowser({
   onSelect,
   selectionMode = "immediate",
   onConfirmSelection,
+  onSelectionChange,
   persistQuery = true,
   autoFocus = false,
 }: Props) {
@@ -93,12 +103,17 @@ export function ExerciseBrowser({
   const [saving, setSaving] = useState(false);
   // Multi-select's running batch, keyed by exercise id rather than storing
   // the objects themselves — a favourite toggled mid-pick must not desync a
-  // second copy of the exercise sitting in this set.
-  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
-    new Set(),
-  );
+  // second copy of the exercise sitting in this set. An array, not a `Set`:
+  // order here is pick order, and `state.exercises` (the catalogue) is
+  // always alphabetical, so confirming through it would silently resort
+  // the routine into the wrong order.
+  const [selectedIds, setSelectedIds] = useState<readonly string[]>([]);
 
   const multiple = selectionMode === "multiple";
+
+  useEffect(() => {
+    if (multiple) onSelectionChange?.(selectedIds.length);
+  }, [multiple, selectedIds, onSelectionChange]);
 
   function handleRowSelect(exercise: Exercise) {
     if (!multiple) {
@@ -106,12 +121,11 @@ export function ExerciseBrowser({
       return;
     }
 
-    setSelectedIds((current) => {
-      const next = new Set(current);
-      if (next.has(exercise.id)) next.delete(exercise.id);
-      else next.add(exercise.id);
-      return next;
-    });
+    setSelectedIds((current) =>
+      current.includes(exercise.id)
+        ? current.filter((id) => id !== exercise.id)
+        : [...current, exercise.id],
+    );
   }
 
   // Search then filter, both on every render. The catalogue is a few hundred
@@ -320,7 +334,9 @@ export function ExerciseBrowser({
                         ? handleRowSelect
                         : undefined
                     }
-                    selected={multiple ? selectedIds.has(exercise.id) : undefined}
+                    selected={
+                      multiple ? selectedIds.includes(exercise.id) : undefined
+                    }
                     onOpenDetail={detail.show}
                   />
                 ))}
@@ -376,22 +392,28 @@ export function ExerciseBrowser({
             <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
               <p aria-live="polite" className="text-sm text-ink-muted">
                 <span className="tabular-nums text-ink">
-                  {selectedIds.size}
+                  {selectedIds.length}
                 </span>{" "}
-                {selectedIds.size === 1
+                {selectedIds.length === 1
                   ? "exercício selecionado"
                   : "exercícios selecionados"}
               </p>
 
               <Button
                 size="sm"
-                disabled={selectedIds.size === 0}
+                disabled={selectedIds.length === 0}
                 onClick={() => {
                   if (state.status !== "ready") return;
 
-                  const chosen = state.exercises.filter((exercise) =>
-                    selectedIds.has(exercise.id),
+                  // Reported in pick order, not `state.exercises`' order —
+                  // that list is always alphabetical (`use-exercise-catalogue`),
+                  // which is not the order the routine should end up in.
+                  const byId = new Map(
+                    state.exercises.map((exercise) => [exercise.id, exercise]),
                   );
+                  const chosen = selectedIds
+                    .map((id) => byId.get(id))
+                    .filter((exercise): exercise is Exercise => exercise !== undefined);
                   onConfirmSelection?.(chosen);
                 }}
               >

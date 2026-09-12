@@ -230,15 +230,17 @@ describe("multiple selection (building a routine)", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Adicionar" }));
 
-    // Order not asserted: `listAll()` makes no promise about it, only the
-    // repository's write order does, and the fixture saves concurrently.
     expect(onConfirmSelection).toHaveBeenCalledOnce();
     const confirmed = onConfirmSelection.mock.calls[0]?.[0] as
       | readonly { id: string }[]
       | undefined;
-    expect(confirmed?.map((exercise) => exercise.id).sort()).toEqual([
-      "agachamento",
+    // Pick order, not the catalogue's alphabetical order: `state.exercises`
+    // (the catalogue) always lists Agachamento before Supino, and confirming
+    // used to filter through that list instead of through the batch itself —
+    // this exact click sequence used to come back reordered to match it.
+    expect(confirmed?.map((exercise) => exercise.id)).toEqual([
       "supino-reto",
+      "agachamento",
     ]);
   });
 

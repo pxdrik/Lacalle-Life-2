@@ -313,6 +313,14 @@ const mealItemSchema = z
  * `dietRecordSchema` abaixo, que reaproveita este mesmo `mealSchema`,
  * continua correto sem nenhuma mudança própria.
  */
+const mealAlternativeSchema = z
+  .object({
+    id: z.string().min(1).max(200),
+    name: z.string().min(1).max(NAME_MAX),
+    items: z.array(mealItemSchema).max(500),
+  })
+  .strict();
+
 export const mealSchema = z
   .object({
     id: z.string().min(1).max(200),
@@ -326,6 +334,10 @@ export const mealSchema = z
     sourceDietId: z.string().min(1).max(200).optional(),
     sourceMealId: z.string().min(1).max(200).optional(),
     plannedSnapshot: z.array(mealItemSchema).max(500).optional(),
+    // Mesma lição do comentário acima, aplicada antes de ela custar de novo:
+    // opcional desde o primeiro dia, para uma refeição de backup anterior a
+    // este campo continuar validando.
+    alternatives: z.array(mealAlternativeSchema).max(50).optional(),
   })
   .strict();
 

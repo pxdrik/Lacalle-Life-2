@@ -88,6 +88,14 @@ export function copyMeal(meal: Meal): Meal {
     ...meal,
     id: createEntityId(),
     items: meal.items.map((item) => ({ ...item, id: createEntityId() })),
+    alternatives: meal.alternatives?.map((alternative) => ({
+      ...alternative,
+      id: createEntityId(),
+      items: alternative.items.map((item) => ({
+        ...item,
+        id: createEntityId(),
+      })),
+    })),
   };
 }
 

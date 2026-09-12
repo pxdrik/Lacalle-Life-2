@@ -4,9 +4,13 @@ import { createDiet, createMealItem } from "./create-diet";
 import {
   addItem,
   addMeal,
+  applyMealAlternative,
   removeItem,
   removeMeal,
+  removeMealAlternative,
   renameDiet,
+  renameMealAlternative,
+  saveMealAsAlternative,
   setItemGrams,
   updateMeal,
 } from "./edit-diet";
@@ -108,6 +112,153 @@ describe("items", () => {
     const { diet, mealId, itemId } = dietWithFood();
 
     expect(removeItem(diet, mealId, itemId).meals[0]?.items).toHaveLength(0);
+  });
+});
+
+describe("meal alternatives", () => {
+  const RICE = { kcal: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3 };
+
+  function dietWithAlternative() {
+    const { diet, mealId } = dietWithFood();
+    const withAlternative = saveMealAsAlternative(
+      diet,
+      mealId,
+      "Marmita de frango",
+    );
+    const alternativeId = withAlternative.meals[0]!.alternatives![0]!.id;
+
+    return { diet: withAlternative, mealId, alternativeId };
+  }
+
+  it("has no alternatives until one is saved", () => {
+    const { diet } = dietWithFood();
+
+    expect(diet.meals[0]?.alternatives).toBeUndefined();
+  });
+
+  it("saves the current foods under a name, with fresh ids", () => {
+    const { diet, mealId, itemId } = dietWithFood();
+    const saved = saveMealAsAlternative(diet, mealId, "Marmita de frango");
+
+    const alternative = saved.meals[0]!.alternatives![0]!;
+    expect(alternative.name).toBe("Marmita de frango");
+    expect(alternative.items.map((item) => item.name)).toEqual([
+      "Peito de frango grelhado",
+    ]);
+    expect(alternative.items[0]?.id).not.toBe(itemId);
+  });
+
+  it("trims the name and refuses an empty one", () => {
+    const { diet, mealId } = dietWithFood();
+
+    expect(saveMealAsAlternative(diet, mealId, "  Arroz  ").meals[0]
+      ?.alternatives?.[0]?.name).toBe("Arroz");
+    expect(saveMealAsAlternative(diet, mealId, "   ")).toBe(diet);
+  });
+
+  it("appends rather than replacing an earlier suggestion", () => {
+    const { diet, mealId } = dietWithAlternative();
+    const withSecond = saveMealAsAlternative(diet, mealId, "Marmita de arroz");
+
+    expect(withSecond.meals[0]?.alternatives?.map((a) => a.name)).toEqual([
+      "Marmita de frango",
+      "Marmita de arroz",
+    ]);
+  });
+
+  it("does not touch the live items when saving", () => {
+    const { diet, mealId, itemId } = dietWithFood();
+    const saved = saveMealAsAlternative(diet, mealId, "Marmita de frango");
+
+    expect(saved.meals[0]?.items[0]?.id).toBe(itemId);
+  });
+
+  it("swaps the live foods for the saved suggestion", () => {
+    let diet = createDiet("Cutting");
+    const mealId = diet.meals[0]!.id;
+    diet = addItem(
+      diet,
+      mealId,
+      createMealItem({
+        foodId: "frango",
+        name: "Frango",
+        grams: 150,
+        per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 },
+      }),
+    );
+    const withAlternative = saveMealAsAlternative(diet, mealId, "Frango");
+    diet = addItem(
+      withAlternative,
+      mealId,
+      createMealItem({
+        foodId: "arroz",
+        name: "Arroz",
+        grams: 100,
+        per100g: RICE,
+      }),
+    );
+    const alternativeId = diet.meals[0]!.alternatives![0]!.id;
+
+    const swapped = applyMealAlternative(diet, mealId, alternativeId);
+
+    expect(swapped.meals[0]?.items.map((item) => item.name)).toEqual([
+      "Frango",
+    ]);
+  });
+
+  it("gives swapped-in items fresh ids", () => {
+    const { diet, mealId, alternativeId } = dietWithAlternative();
+    const savedItemId = diet.meals[0]!.alternatives![0]!.items[0]!.id;
+
+    const swapped = applyMealAlternative(diet, mealId, alternativeId);
+
+    expect(swapped.meals[0]?.items[0]?.id).not.toBe(savedItemId);
+  });
+
+  it("leaves the saved suggestion alone after swapping and re-editing", () => {
+    const { diet, mealId, alternativeId } = dietWithAlternative();
+    const swapped = applyMealAlternative(diet, mealId, alternativeId);
+    const edited = setItemGrams(
+      swapped,
+      mealId,
+      swapped.meals[0]!.items[0]!.id,
+      999,
+    );
+
+    expect(edited.meals[0]?.alternatives?.[0]?.items[0]?.grams).toBe(150);
+  });
+
+  it("renames a saved suggestion", () => {
+    const { diet, mealId, alternativeId } = dietWithAlternative();
+    const renamed = renameMealAlternative(
+      diet,
+      mealId,
+      alternativeId,
+      "Marmita de frango grelhado",
+    );
+
+    expect(renamed.meals[0]?.alternatives?.[0]?.name).toBe(
+      "Marmita de frango grelhado",
+    );
+  });
+
+  it("removes a saved suggestion", () => {
+    const { diet, mealId, alternativeId } = dietWithAlternative();
+
+    expect(
+      removeMealAlternative(diet, mealId, alternativeId).meals[0]
+        ?.alternatives,
+    ).toHaveLength(0);
+  });
+
+  it("ignores an unknown meal or suggestion", () => {
+    const { diet, mealId, alternativeId } = dietWithAlternative();
+
+    expect(saveMealAsAlternative(diet, "gone", "X")).toBe(diet);
+    expect(applyMealAlternative(diet, mealId, "gone")).toBe(diet);
+    expect(applyMealAlternative(diet, "gone", alternativeId)).toBe(diet);
+    expect(renameMealAlternative(diet, mealId, "gone", "X")).toBe(diet);
+    expect(removeMealAlternative(diet, mealId, "gone")).toBe(diet);
   });
 });
 

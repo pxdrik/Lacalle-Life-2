@@ -5,6 +5,51 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Ordem do multi-seletor, folha protegida contra fechar sem querer, sugestões de refeição — 12/09/2026
+
+Três pedidos do Pedro, achados reais de uso.
+
+**Exercícios entravam em ordem alfabética, não na ordem que foram
+adicionados.** A causa: `ExerciseBrowser` guardava a seleção múltipla como
+`Set<string>` e, ao confirmar, filtrava `state.exercises` (o catálogo
+inteiro, sempre ordenado alfabeticamente por `use-exercise-catalogue.ts`) em
+vez do lote escolhido — então a ordem de exibição vencia a ordem de clique.
+Virou um array que preserva a ordem de seleção, e a confirmação mapeia os
+ids nessa ordem de volta para os exercícios. Regressão coberta em
+`exercise-browser.test.tsx` (o teste antigo até evitava afirmar a ordem, com
+comentário próprio dizendo que ela não importava — importava, só que o bug
+escondia isso).
+
+**Fechar a folha "Adicionar exercício" com exercícios já marcados e ainda
+não confirmados perdia o lote inteiro** — relatado depois de acontecer duas
+vezes seguidas com clique fora sem querer. `Dialog` ganhou um prop
+`confirmClose` opcional, chamado antes de qualquer uma das três formas de
+fechar (X, Escape, clique fora) — devolver `false` cancela o fechamento. A
+folha de exercícios usa isso com `window.confirm` quando há seleção
+pendente. Coberto em `dialog.test.tsx` (X, evento `cancel` nativo e o
+fallback de clique de fundo para navegadores sem `closedby`).
+
+**"Outras sugestões" na Dieta** — pedido para não ter que reeditar alimento
+por alimento toda vez que muda o que vai comer numa refeição (o exemplo do
+Pedro: marmita de arroz ou de macarrão). `Meal` ganhou `alternatives?`, uma
+lista de sugestões nomeadas independentes dos itens ao vivo — salvar não
+sincroniza de volta, e trocar não perde a sugestão anterior a menos que ela
+já tivesse sido salva. Botão "Outras sugestões" ao lado de "Adicionar
+alimento" em `MealCard`, só quando `DietEditor` passa os callbacks (o
+Diário/`FoodLogScreen` não ganhou o botão — um dia já comido não tem o que
+sugerir). Novas funções em `edit-diet.ts`
+(`saveMealAsAlternative`/`applyMealAlternative`/`renameMealAlternative`/
+`removeMealAlternative`), todas seguindo a convenção de retornar a mesma
+referência num id desconhecido. `mealSchema` em `backup-schemas.ts` ganhou
+o campo opcional — mesma lição documentada ali sobre `sourceDietId`: sem
+isso, backup/sync de uma refeição com sugestão viraria `"invalid-payload"`.
+
+Verificado no navegador nos três fluxos (ordem de seleção, swap de
+sugestão persistindo entre reload, contagem no botão). `npm run verify`
+(typecheck + lint + 1661 testes) e `npm run build` limpos.
+
+---
+
 ## ✅ Catálogo de motion do ChatGPT — triado, não copiado — 09/09/2026
 
 O Pedro trouxe um HTML gerado pelo ChatGPT (`preview.html`, "LaCalle Motion
