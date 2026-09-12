@@ -5,7 +5,6 @@ import { Check, Plus, Star } from "lucide-react";
 import { cn } from "@/design-system/cn";
 
 import { EQUIPMENT_LABELS } from "../taxonomy/equipment";
-import { TECHNICAL_DIFFICULTY_LABELS } from "../taxonomy/movement";
 import { MUSCLE_LABELS } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 import { ExerciseThumbnail } from "./exercise-thumbnail";
@@ -72,14 +71,6 @@ export function ExerciseRow({
         </span>
       </button>
 
-      <div className="hidden shrink-0 items-center gap-2 sm:flex">
-        {exercise.isCompound === true && <Tag>Composto</Tag>}
-        {exercise.isUnilateral === true && <Tag>Unilateral</Tag>}
-        {exercise.technicalDifficulty !== null && (
-          <Tag>{TECHNICAL_DIFFICULTY_LABELS[exercise.technicalDifficulty]}</Tag>
-        )}
-      </div>
-
       {/*
         The star sits with the other actions rather than in the first column.
         Favouriting is the rarest thing anyone does to a row, and it was
@@ -138,13 +129,5 @@ export function ExerciseRow({
         </button>
       )}
     </li>
-  );
-}
-
-function Tag({ children }: { readonly children: React.ReactNode }) {
-  return (
-    <span className="border-b border-line pb-px text-[0.6875rem] uppercase tracking-wide text-ink-subtle">
-      {children}
-    </span>
   );
 }

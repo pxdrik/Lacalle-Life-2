@@ -5,6 +5,32 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Nome do exercício sobrepondo as etiquetas na folha de seleção — 12/09/2026
+
+Achado real de uso, com captura de tela do Pedro: "Agachamento Búlgaro"
+(e a maioria dos nomes de dois termos) quebrava linha e a segunda linha
+ficava por cima do texto de "COMPOSTO UNILATERAL INTERMEDIÁRIO" à direita —
+literalmente sobreposto, não só apertado.
+
+Causa: `ExerciseRow` reservava uma coluna de largura fixa (`shrink-0`) pras
+três etiquetas, ao lado do nome (`flex-1 min-w-0`). Numa folha de ~470px
+úteis, thumbnail + etiquetas + favorito + adicionar sobravam menos de 20px
+pro nome — qualquer palavra que não coubesse nesse resto ultrapassava a
+própria caixa, por cima da coluna vizinha.
+
+Removidas as três etiquetas (Composto/Unilateral/dificuldade técnica) da
+linha da lista — pedido explícito do Pedro: só o nome completo do
+exercício, com espaço pra não quebrar na maioria dos casos. A informação
+não desaparece: já existe na ficha de detalhe que a mesma linha abre ao
+tocar (`exercise-detail.tsx`), mesma convenção que o resto da tela já usa
+("linha é o essencial, detalhe é tudo"). `npm run verify` limpo (uma falha
+isolada em `identity-isolation.test.ts` por máquina saturada, mesmo padrão
+já visto antes nesta sessão — confirmada por rodar sozinha em 3,5s).
+Verificado no navegador buscando "aga": os 12 resultados agora cabem numa
+linha só, sem sobreposição.
+
+---
+
 ## ✅ Ordem do multi-seletor, folha protegida contra fechar sem querer, sugestões de refeição — 12/09/2026
 
 Três pedidos do Pedro, achados reais de uso.
