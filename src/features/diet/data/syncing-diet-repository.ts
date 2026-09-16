@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import type { Diet } from "../types/diet";
@@ -44,12 +45,14 @@ export class SyncingDietRepository implements DietRepository {
   async save(diet: Diet, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(diet, expectedUpdatedAt);
     await markPending(this.#tracker, "diets", diet.id);
+    notifyStoreChanged("diets");
     this.#onPending?.();
   }
 
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     await markPending(this.#tracker, "diets", id);
+    notifyStoreChanged("diets");
     this.#onPending?.();
   }
 }

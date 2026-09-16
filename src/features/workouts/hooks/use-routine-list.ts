@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
+import { onStoreChanged } from "@/core/storage/store-events";
 
 import { useWorkoutRepositories } from "../data/workout-repository-context";
 import { createRoutine, duplicateRoutine } from "../services/create-routine";
@@ -42,9 +43,13 @@ export function useRoutineList(): RoutineList {
     }
 
     void load();
+    const unsubscribe = onStoreChanged("routines", () => {
+      void load();
+    });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [repositories]);
 

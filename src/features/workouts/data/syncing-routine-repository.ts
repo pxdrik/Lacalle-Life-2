@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import type { Routine } from "../types/routine";
@@ -44,12 +45,14 @@ export class SyncingRoutineRepository implements RoutineRepository {
   async save(routine: Routine, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(routine, expectedUpdatedAt);
     await markPending(this.#tracker, "routines", routine.id);
+    notifyStoreChanged("routines");
     this.#onPending?.();
   }
 
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     await markPending(this.#tracker, "routines", id);
+    notifyStoreChanged("routines");
     this.#onPending?.();
   }
 }

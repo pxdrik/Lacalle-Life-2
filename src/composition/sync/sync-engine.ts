@@ -1,6 +1,7 @@
 import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { backfillUntracked, SYNC_TRACKER_STORE, type SyncTracker } from "@/core/sync/sync-tracker";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
@@ -122,6 +123,11 @@ export async function runProfileSync(): Promise<ProfileSyncOutcome> {
 
   const push = await pushProfile(supabase, tracker, localOnly);
   const pull = await pullProfile(supabase, tracker, localOnly);
+  // Sem condição: um pull que aplicou algo novo (de outro dispositivo, ou
+  // resolvido automaticamente pela regra de A.1) é exatamente o caso que
+  // uma tela já aberta não tinha como descobrir sozinha antes de existir
+  // este sinal — ver `core/storage/store-events.ts`.
+  notifyStoreChanged("profile");
 
   return { push, pull };
 }
@@ -174,6 +180,7 @@ export async function runFoodLogSync(day: string): Promise<FoodLogSyncOutcome> {
 
   const push = await pushFoodLog(supabase, tracker, localOnly, day);
   const pull = await pullFoodLog(supabase, tracker, localOnly, day);
+  notifyStoreChanged("foodLog");
 
   return { push, pull };
 }
@@ -222,6 +229,7 @@ export async function runDietSync(): Promise<DietSyncOutcome> {
 
   const push = await pushAllDiets(supabase, tracker, localOnly);
   const pull = await pullAllDiets(supabase, tracker, localOnly);
+  notifyStoreChanged("diets");
 
   return { push, pull };
 }
@@ -269,6 +277,7 @@ export async function runRoutineSync(): Promise<RoutineSyncOutcome> {
 
   const push = await pushAllRoutines(supabase, tracker, localOnly);
   const pull = await pullAllRoutines(supabase, tracker, localOnly);
+  notifyStoreChanged("routines");
 
   return { push, pull };
 }
@@ -325,6 +334,7 @@ export async function runSessionSync(): Promise<SessionSyncOutcome> {
 
   const push = await pushAllSessions(supabase, tracker, localOnly);
   const pull = await pullAllSessions(supabase, tracker, localOnly);
+  notifyStoreChanged("sessions");
 
   return { push, pull };
 }
@@ -372,6 +382,7 @@ export async function runBodyEntrySync(): Promise<BodyEntrySyncOutcome> {
 
   const push = await pushAllBodyEntries(supabase, tracker, localOnly);
   const pull = await pullAllBodyEntries(supabase, tracker, localOnly);
+  notifyStoreChanged("bodyEntries");
 
   return { push, pull };
 }

@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import type { BodyEntry } from "../types/body-entry";
@@ -48,12 +49,14 @@ export class SyncingBodyRepository implements BodyRepository {
   async save(entry: BodyEntry, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(entry, expectedUpdatedAt);
     await markPending(this.#tracker, "bodyEntries", entry.id);
+    notifyStoreChanged("bodyEntries");
     this.#onPending?.();
   }
 
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     await markPending(this.#tracker, "bodyEntries", id);
+    notifyStoreChanged("bodyEntries");
     this.#onPending?.();
   }
 }

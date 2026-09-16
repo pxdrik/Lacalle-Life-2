@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
+import { onStoreChanged } from "@/core/storage/store-events";
 
 import { useWorkoutRepositories } from "../data/workout-repository-context";
 import type { Session } from "../types/session";
@@ -55,9 +56,13 @@ export function useSessionHistory(): SessionHistoryState {
     }
 
     void load();
+    const unsubscribe = onStoreChanged("sessions", () => {
+      void load();
+    });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [repositories]);
 

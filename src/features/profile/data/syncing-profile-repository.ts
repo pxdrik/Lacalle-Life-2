@@ -1,4 +1,5 @@
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import { PROFILE_ID, type Profile } from "../types/profile";
@@ -48,12 +49,14 @@ export class SyncingProfileRepository implements ProfileRepository {
   async save(profile: Profile, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(profile, expectedUpdatedAt);
     await markPending(this.#tracker, "profile", PROFILE_ID);
+    notifyStoreChanged("profile");
     this.#onPending?.();
   }
 
   async clear(): Promise<void> {
     await this.#local.clear();
     await markPending(this.#tracker, "profile", PROFILE_ID);
+    notifyStoreChanged("profile");
     this.#onPending?.();
   }
 }

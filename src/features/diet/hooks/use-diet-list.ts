@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
+import { onStoreChanged } from "@/core/storage/store-events";
 
 import { useDietRepository } from "../data/diet-repository-context";
 import { createDiet, duplicateDiet } from "../services/create-diet";
@@ -46,9 +47,16 @@ export function useDietList(): DietList {
     }
 
     void load();
+    // Recarrega quando outra tela (ou um pull de sincronização em segundo
+    // plano) escreve em "diets" — achado real, 17/09/2026: uma dieta criada
+    // no Diário não aparecia aqui sem recarregar a página manualmente.
+    const unsubscribe = onStoreChanged("diets", () => {
+      void load();
+    });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [repository]);
 

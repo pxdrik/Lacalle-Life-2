@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import type { FoodLog } from "../types/food-log";
@@ -51,6 +52,7 @@ export class SyncingFoodLogRepository implements FoodLogRepository {
   async save(log: FoodLog, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(log, expectedUpdatedAt);
     await markPending(this.#tracker, "foodLog", log.day);
+    notifyStoreChanged("foodLog");
     this.#onPending?.(log.day);
   }
 
@@ -58,6 +60,7 @@ export class SyncingFoodLogRepository implements FoodLogRepository {
     await this.#local.remove(id);
     // O id de um FoodLog é o próprio dia — ver FOOD_LOGS_STORE.
     await markPending(this.#tracker, "foodLog", id);
+    notifyStoreChanged("foodLog");
     this.#onPending?.(id);
   }
 }

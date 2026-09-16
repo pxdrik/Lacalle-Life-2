@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { describeDataError } from "@/core/domain/describe-data-error";
 import { revise } from "@/core/domain/entity";
+import { onStoreChanged } from "@/core/storage/store-events";
 
 import { useBodyRepository } from "../data/body-repository-context";
 import { createBodyEntry } from "../services/body-log";
@@ -79,9 +80,13 @@ export function useBodyLog(): BodyLog {
     }
 
     void load();
+    const unsubscribe = onStoreChanged("bodyEntries", () => {
+      void load();
+    });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [repository]);
 

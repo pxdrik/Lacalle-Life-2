@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { DataError } from "@/core/domain/data-error";
 import { describeDataError } from "@/core/domain/describe-data-error";
+import { onStoreChanged } from "@/core/storage/store-events";
 
 import { useFoodLogRepository } from "../data/food-log-repository-context";
 import { createFoodLog } from "../services/start-day";
@@ -144,9 +145,17 @@ export function useFoodLogDay(day: string): FoodLogDay {
     }
 
     void load();
+    // Recarrega em silêncio (sem passar por "loading") quando outra tela —
+    // ou um pull de sincronização em segundo plano — escreve em "foodLog".
+    // Granularidade é a store inteira, não só este dia: mais simples, e o
+    // custo (recarregar um dia que não mudou) é uma leitura local barata.
+    const unsubscribe = onStoreChanged("foodLog", () => {
+      void load();
+    });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [repository, day, reloadToken]);
 

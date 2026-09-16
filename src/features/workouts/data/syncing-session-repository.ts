@@ -1,5 +1,6 @@
 import type { EntityId } from "@/core/domain/entity";
 import type { Store } from "@/core/storage/store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import { markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 
 import type { Session } from "../types/session";
@@ -44,6 +45,11 @@ export class SyncingSessionRepository implements SessionRepository {
 
   async save(session: Session, expectedUpdatedAt: number | null): Promise<void> {
     await this.#local.save(session, expectedUpdatedAt);
+    // Notifica sempre, mesmo em andamento — outras telas (o banner de
+    // treino em progresso, por exemplo) leem este store sem se importar
+    // com sincronização; só marcar pendente/empurrar é que fica preso a
+    // `finishedAt !== null` (§8.4).
+    notifyStoreChanged("sessions");
     if (session.finishedAt !== null) {
       await markPending(this.#tracker, "sessions", session.id);
       this.#onPending?.();
@@ -61,6 +67,7 @@ export class SyncingSessionRepository implements SessionRepository {
   async remove(id: EntityId): Promise<void> {
     await this.#local.remove(id);
     await markPending(this.#tracker, "sessions", id);
+    notifyStoreChanged("sessions");
     this.#onPending?.();
   }
 }
