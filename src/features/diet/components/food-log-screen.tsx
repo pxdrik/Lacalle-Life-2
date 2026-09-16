@@ -42,6 +42,7 @@ import {
   eatenMacros,
   isMealLogged,
   mealCheckState,
+  openMeal,
   toggleLoggedMeal,
 } from "../services/meal-execution";
 import { startDayFromDiet } from "../services/start-day";
@@ -223,6 +224,9 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
               log={state.log}
               onCheck={(meal) => {
                 apply((current) => checkMeal(current, linkedDiet, meal));
+              }}
+              onOpen={(meal) => {
+                apply((current) => openMeal(current, linkedDiet, meal));
               }}
             />
           )}
@@ -515,22 +519,31 @@ function EmptyDay({
  * again if unchecked afterwards, which is the whole point of `isMealLogged`
  * (once-in, stays-in) instead of `mealCheckState` here.
  *
- * A compact list on purpose: there is nothing to edit on a meal not yet
- * pulled in, only what it holds and the decision to log it — the full
- * `MealCard` would be weight with no function here. The food names sit on
- * their own line (17/09/2026: before this, only the meal's name showed, and
- * deciding whether to log "Almoço" meant opening the full diet to remember
- * what was actually in it) — one truncated line, the same shape
- * `MealAlternativesDialog` already uses for a saved suggestion's contents.
+ * The food names sit on their own line (17/09/2026: before this, only the
+ * meal's name showed, and deciding whether to log "Almoço" meant opening the
+ * full diet to remember what was actually in it) — one truncated line, the
+ * same shape `MealAlternativesDialog` already uses for a saved suggestion's
+ * contents.
+ *
+ * Two ways in, both landing on the same full `MealCard` below (17/09/2026):
+ * tapping the check pulls the meal in **eaten** — the one-tap path for "yes,
+ * exactly this" — while tapping the row itself calls `onOpen` and pulls it
+ * in **unchecked**, the same state `startDayFromDiet` already seeds a whole
+ * day in. That is what makes looking at or adjusting a planned meal not
+ * require first claiming it was eaten — the row used to be a dead end with
+ * only the check as a way out, and opening it meant answering a question
+ * ("did you eat this?") the person was not ready to answer yet.
  */
 function PlannedMeals({
   diet,
   log,
   onCheck,
+  onOpen,
 }: {
   readonly diet: Diet;
   readonly log: FoodLog;
   readonly onCheck: (meal: Meal) => void;
+  readonly onOpen: (meal: Meal) => void;
 }) {
   const pending = diet.meals.filter(
     (meal) => !isMealLogged(log, diet.id, meal.id),
@@ -549,14 +562,21 @@ function PlannedMeals({
             key={meal.id}
             className="flex items-center justify-between gap-3 rounded-md border border-line px-3 py-2"
           >
-            <div className="min-w-0">
+            <button
+              type="button"
+              onClick={() => {
+                onOpen(meal);
+              }}
+              aria-label={`Abrir ${meal.name}`}
+              className="min-w-0 flex-1 text-left"
+            >
               <p className="truncate text-sm text-ink">{meal.name}</p>
               {meal.items.length > 0 && (
                 <p className="mt-0.5 truncate text-xs text-ink-subtle">
                   {meal.items.map((item) => item.name).join(", ")}
                 </p>
               )}
-            </div>
+            </button>
             <button
               type="button"
               onClick={() => {

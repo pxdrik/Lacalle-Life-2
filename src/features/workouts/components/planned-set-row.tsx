@@ -47,7 +47,19 @@ export function PlannedSetRow({
           className={`${CELL} flex-[2]`}
         />
       ) : (
+        // Peso primeiro, Repetição em segundo (17/09/2026, pedido do Pedro)
+        // — mesma ordem em `performed-set-row.tsx`, `session-exercise-card.tsx`
+        // e `routine-exercise-card.tsx`.
         <>
+          <WeightField
+            value={set.weightKg}
+            label={`Peso da série ${String(number)} de ${exerciseName}`}
+            onChange={(weightKg) => {
+              onChange({ weightKg });
+            }}
+            className={`${CELL} flex-1`}
+          />
+
           <input
             type="text"
             inputMode="numeric"
@@ -56,15 +68,6 @@ export function PlannedSetRow({
             placeholder="—"
             onChange={(event) => {
               onChange({ reps: toWholeNumber(event.target.value) });
-            }}
-            className={`${CELL} flex-1`}
-          />
-
-          <WeightField
-            value={set.weightKg}
-            label={`Peso da série ${String(number)} de ${exerciseName}`}
-            onChange={(weightKg) => {
-              onChange({ weightKg });
             }}
             className={`${CELL} flex-1`}
           />

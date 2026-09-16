@@ -95,8 +95,8 @@ export function SessionExerciseCard({
           <span className="w-24 text-center">Duração (min)</span>
         ) : (
           <>
-            <span className="w-14 text-center">Reps</span>
             <span className="w-16 text-center">Peso</span>
+            <span className="w-14 text-center">Reps</span>
           </>
         )}
         {!isCardio && <span className="w-14 text-center">RPE</span>}

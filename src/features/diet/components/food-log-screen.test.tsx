@@ -258,6 +258,31 @@ describe("planned meals waiting to be checked", () => {
     expect(await screen.findByDisplayValue("Refeição 1")).toBeInTheDocument();
   });
 
+  it("tapping the row opens the meal unchecked, without claiming it was eaten", async () => {
+    // Achado real, 17/09/2026: a única forma de ver ou editar uma refeição
+    // planejada era marcá-la como comida primeiro — o check era o único jeito
+    // de sair da linha compacta. Tocar a linha (fora do check) agora abre o
+    // card cheio sem responder "comi isto" no lugar da pessoa.
+    const { logs } = mount(emptyLog(), dietForToday());
+    const row = await screen.findByRole("button", {
+      name: "Abrir Refeição 1",
+    });
+
+    await userEvent.click(row);
+
+    await waitFor(async () => {
+      const saved = await logs.getByDay(TODAY);
+      expect(saved?.meals).toHaveLength(1);
+      expect(saved?.meals[0]?.eaten).toBe(false);
+    });
+    expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", {
+        name: "Marcar Refeição 1 como comida",
+      }),
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
   it("drops a meal from the planned list once it is already checked", async () => {
     const diet = dietForToday();
     const seeded: FoodLog = {

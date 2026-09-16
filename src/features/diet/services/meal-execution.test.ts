@@ -7,6 +7,7 @@ import {
   isMealEaten,
   isMealLogged,
   mealCheckState,
+  openMeal,
   toggleLoggedMeal,
   toggleMealChecked,
   uncheckMeal,
@@ -96,6 +97,76 @@ describe("checkMeal", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;
     checkMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    expect(diet.meals[0]?.sourceDietId).toBeUndefined();
+  });
+});
+
+describe("openMeal", () => {
+  it("adds an unchecked snapshot of the meal to the log", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    expect(log.meals).toHaveLength(1);
+    expect(log.meals[0]).toMatchObject({
+      name: meal.name,
+      sourceDietId: diet.id,
+      sourceMealId: meal.id,
+      eaten: false,
+    });
+    expect(log.meals[0]?.items[0]).toMatchObject({
+      name: "Ovo",
+      grams: 150,
+      per100g: PER_100G,
+    });
+  });
+
+  it("mints fresh ids at every depth, same as checkMeal", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    expect(log.meals[0]?.id).not.toBe(meal.id);
+    expect(log.meals[0]?.items[0]?.id).not.toBe(meal.items[0]?.id);
+  });
+
+  it("never marks the meal eaten — opening it is not logging it", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const log = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    expect(isMealEaten(log, diet.id, meal.id)).toBe(false);
+    expect(mealCheckState(log, diet.id, meal.id)).toBe("unchecked");
+  });
+
+  it("is a no-op once the meal is already logged, checked or not", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const alreadyChecked = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    const result = openMeal(alreadyChecked, diet, meal);
+
+    expect(result).toBe(alreadyChecked);
+    expect(result.meals).toHaveLength(1);
+    // Never demotes an eaten meal back to unchecked.
+    expect(isMealEaten(result, diet.id, meal.id)).toBe(true);
+  });
+
+  it("is a no-op when the meal was already opened, unchecked", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const opened = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    const result = openMeal(opened, diet, meal);
+
+    expect(result).toBe(opened);
+  });
+
+  it("leaves the diet itself untouched", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    openMeal(createFoodLog("2026-08-31"), diet, meal);
 
     expect(diet.meals[0]?.sourceDietId).toBeUndefined();
   });

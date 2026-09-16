@@ -159,8 +159,8 @@ export function RoutineExerciseCard({
           <span className="flex-[2] text-center">Duração (min)</span>
         ) : (
           <>
-            <span className="flex-1 text-center">Reps</span>
             <span className="flex-1 text-center">Peso</span>
+            <span className="flex-1 text-center">Reps</span>
           </>
         )}
         {!isCardio && <span className="w-16 text-center">RPE</span>}

@@ -68,6 +68,30 @@ export function isMealEaten(
 }
 
 /**
+ * One snapshot of a diet meal, minted fresh at every depth — the same
+ * independence `startDayFromDiet` documents at the top of this file, shared
+ * here because `checkMeal` and `openMeal` are the same copy with a different
+ * `eaten`.
+ */
+function snapshotMeal(diet: Diet, meal: Meal, eaten: boolean): Meal {
+  const items = meal.items.map((item) => ({ ...item, id: createEntityId() }));
+
+  return {
+    id: createEntityId(),
+    name: meal.name,
+    time: meal.time,
+    notes: meal.notes,
+    items,
+    sourceDietId: diet.id,
+    sourceMealId: meal.id,
+    // The same array as `items`, not a second copy of it — see
+    // `mealCheckState` below, which is what this pays for.
+    plannedSnapshot: items,
+    eaten,
+  };
+}
+
+/**
  * Marks a diet meal eaten.
  *
  * If the day never had a copy of this meal at all — checking one straight
@@ -89,23 +113,31 @@ export function checkMeal(log: FoodLog, diet: Diet, meal: Meal): FoodLog {
     });
   }
 
-  const items = meal.items.map((item) => ({ ...item, id: createEntityId() }));
+  return revise(log, { meals: [...log.meals, snapshotMeal(diet, meal, true)] });
+}
 
-  const snapshot: Meal = {
-    id: createEntityId(),
-    name: meal.name,
-    time: meal.time,
-    notes: meal.notes,
-    items,
-    sourceDietId: diet.id,
-    sourceMealId: meal.id,
-    // The same array as `items`, not a second copy of it — see
-    // `mealCheckState` below, which is what this pays for.
-    plannedSnapshot: items,
-    eaten: true,
-  };
+/**
+ * Pulls a planned meal into today's log to look at or adjust, without
+ * claiming it was eaten — tapping the compact row in `PlannedMeals`, not its
+ * check button.
+ *
+ * Achado real, 17/09/2026: o único jeito de ver ou editar uma refeição
+ * planejada era marcá-la como comida primeiro, o que descrevia uma refeição
+ * ainda não feita como já concluída. A mesma foto que `checkMeal` tira
+ * quando a refeição ainda não está no dia, só que `eaten: false` — o mesmo
+ * estado que `startDayFromDiet` já deixa toda refeição de um dia recém
+ * começado, editável e visível sem exigir um check antes.
+ *
+ * A no-op, same reference, once the meal is already logged either way —
+ * opening something already open does nothing, and never demotes an
+ * already-eaten meal back to unchecked.
+ */
+export function openMeal(log: FoodLog, diet: Diet, meal: Meal): FoodLog {
+  if (isMealLogged(log, diet.id, meal.id)) return log;
 
-  return revise(log, { meals: [...log.meals, snapshot] });
+  return revise(log, {
+    meals: [...log.meals, snapshotMeal(diet, meal, false)],
+  });
 }
 
 export type MealCheckState = "unchecked" | "checked" | "edited";

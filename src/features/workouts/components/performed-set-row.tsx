@@ -91,8 +91,15 @@ export function PerformedSetRow({
         set.isCompleted && "border-line bg-muted",
       )}
     >
-      <div className="flex items-center justify-between gap-px">
-        <span className="w-4 shrink-0 text-center text-sm tabular-nums text-ink-subtle">
+      {/* `items-start`, não `items-center`: os campos carregam uma legenda
+          "planejado" abaixo (`<Planned>`), então o bloco deles é mais alto
+          que o botão de concluir/remover — centralizar pela altura total
+          empurrava o campo pra cima do centro do botão, visivelmente
+          desalinhado (achado real, 17/09/2026). Alinhando pelo topo, campo e
+          botão começam na mesma linha; só o número da série (sem legenda)
+          pede `self-center` de volta pra não subir junto. */}
+      <div className="flex items-start justify-between gap-px">
+        <span className="w-4 shrink-0 self-center text-center text-sm tabular-nums text-ink-subtle">
           {number}
         </span>
 
@@ -124,6 +131,27 @@ export function PerformedSetRow({
           </div>
         ) : (
           <>
+            {/* Peso primeiro, Repetição em segundo (17/09/2026, pedido do
+                Pedro) — mesma ordem em `session-exercise-card.tsx`,
+                `planned-set-row.tsx` e `routine-exercise-card.tsx`, pra
+                planejar e executar o treino não discordarem sobre qual
+                coluna vem primeiro. */}
+            <div className="shrink-0">
+              <WeightField
+                value={set.weightKg}
+                label={`Peso da série ${String(number)} de ${exerciseName}`}
+                onChange={(weightKg) => {
+                  onChange({ weightKg });
+                }}
+                className={cn(
+                  FIELD,
+                  "w-16",
+                  set.isCompleted ? "border-line" : "border-line-strong",
+                )}
+              />
+              <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
+            </div>
+
             <div className="shrink-0">
               <input
                 type="text"
@@ -141,22 +169,6 @@ export function PerformedSetRow({
                 )}
               />
               <Planned value={set.planned?.reps ?? null} suffix="reps" />
-            </div>
-
-            <div className="shrink-0">
-              <WeightField
-                value={set.weightKg}
-                label={`Peso da série ${String(number)} de ${exerciseName}`}
-                onChange={(weightKg) => {
-                  onChange({ weightKg });
-                }}
-                className={cn(
-                  FIELD,
-                  "w-16",
-                  set.isCompleted ? "border-line" : "border-line-strong",
-                )}
-              />
-              <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
             </div>
           </>
         )}

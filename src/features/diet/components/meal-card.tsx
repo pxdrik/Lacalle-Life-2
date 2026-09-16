@@ -26,9 +26,9 @@ import { TimeField } from "@/design-system/components/time-field";
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
 import { InlineText } from "./inline-text";
+import { MacroSummary } from "./macro-summary";
 import { MealAlternativesDialog } from "./meal-alternatives-dialog";
 import { MealItemRow } from "./meal-item-row";
-import { MealMacroBar } from "./meal-macro-bar";
 import { Card } from "@/design-system/components/card";
 
 interface Props {
@@ -243,8 +243,13 @@ export function MealCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1 max-sm:order-last max-sm:w-full max-sm:justify-between">
-          <MealMacroBar macros={macros} />
+        <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:justify-between">
+          {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
+              escondia os números atrás de uma cor — Pedro queria ver os
+              números mesmo, não "esse graficozinho". De volta ao
+              `MacroSummary` de sempre, já compacto o bastante pra caber
+              aqui ao lado do ⋮. */}
+          <MacroSummary macros={macros} />
 
           <button
             type="button"

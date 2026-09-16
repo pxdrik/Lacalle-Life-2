@@ -25,6 +25,23 @@ describe("RpeSelect", () => {
     );
   });
 
+  it("o mostrador (meio círculo com ponteiro) não desenha ponteiro sem valor", () => {
+    mount(null);
+
+    const button = screen.getByRole("button", { name: LABEL });
+    expect(button.querySelector("line")).not.toBeInTheDocument();
+    // O trilho continua desenhado — um mostrador vazio, não ausente.
+    expect(button.querySelector("path")).toBeInTheDocument();
+  });
+
+  it("o ponteiro aponta pra esquerda no mínimo da escala e pra direita no máximo", () => {
+    mount(6);
+    const min = screen
+      .getByRole("button", { name: LABEL })
+      .querySelector("line");
+    expect(min).toHaveAttribute("transform", expect.stringContaining("-90"));
+  });
+
   it("abre a folha com todos os valores ao tocar o gatilho", async () => {
     mount(null);
 
