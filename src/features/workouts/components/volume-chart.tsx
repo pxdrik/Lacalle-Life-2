@@ -92,10 +92,7 @@ export function VolumeChart({
           precisa de um zero visível para ser uma leitura. */}
       <ul className="flex h-40 items-end gap-1.5 border-b border-line">
         {chronological.map((point, index) => (
-          <li
-            key={point.startsAt}
-            className="flex h-full flex-1 flex-col justify-end"
-          >
+          <li key={point.startsAt} className="relative h-full flex-1">
             <button
               type="button"
               onClick={() => {
@@ -107,25 +104,34 @@ export function VolumeChart({
               // A coluna inteira, não só o traço visível: um período quase sem
               // volume desenha `min-h-1` (4px), e o alvo de toque não pode
               // ficar do tamanho do desenho — é o mesmo erro do BUG-006, numa
-              // superfície nova.
-              className="flex h-full w-full flex-col justify-end rounded-sm transition-colors duration-(--duration-micro) ease-out hover:bg-muted focus-visible:bg-muted"
-            >
-              {/* Uma cor de acento no gráfico inteiro, e cinza onde não houve
-                  dado — pág. 29. O período sem treino fica em Gray 300, que é
-                  a cor que a mesma página reserva ao que não é o dado
-                  principal. */}
-              <span
-                aria-hidden
-                className={
-                  value(point) === 0
-                    ? "min-h-0.5 rounded-t-full bg-line-strong"
-                    : "min-h-1 rounded-t-full bg-accent transition-[height] duration-(--duration-data) ease-out"
-                }
-                style={{
-                  height: `${String(Math.max((value(point) / peak) * 100, 1))}%`,
-                }}
-              />
-            </button>
+              // superfície nova. `absolute inset-0` em vez de esticar por
+              // flexbox: um `<button>` como container flex de um filho com
+              // altura em `%` é um ponto conhecido de inconsistência entre
+              // motores (Safari/WebKit em especial) — achado ao investigar um
+              // relato real de gráfico vazio no celular (17/09/2026). A barra
+              // agora é uma irmã posicionada, não uma filha, e resolve a
+              // altura contra o `<li>`, que é um `div` comum.
+              className="absolute inset-0 rounded-sm transition-colors duration-(--duration-micro) ease-out hover:bg-muted focus-visible:bg-muted"
+            />
+
+            {/* Uma cor de acento no gráfico inteiro, e cinza onde não houve
+                dado — pág. 29. O período sem treino fica em Gray 300, que é
+                a cor que a mesma página reserva ao que não é o dado
+                principal. `pointer-events-none` porque o toque é do botão
+                atrás dela, não dela — sem isso a barra rouba o hover/clique
+                do próprio botão que ela cobre. */}
+            <span
+              aria-hidden
+              className={cn(
+                "pointer-events-none absolute inset-x-0 bottom-0 rounded-t-full",
+                value(point) === 0
+                  ? "min-h-0.5 bg-line-strong"
+                  : "min-h-1 bg-accent transition-[height] duration-(--duration-data) ease-out",
+              )}
+              style={{
+                height: `${String(Math.max((value(point) / peak) * 100, 1))}%`,
+              }}
+            />
           </li>
         ))}
       </ul>
