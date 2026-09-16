@@ -285,7 +285,7 @@ export function MealCard({
           disto existir, e a explicação seria sobre um controle que nem
           está na tela. */}
       {meal.items.some((item) => item.practicalUnit !== undefined) && (
-        <p className="mt-3 text-xs text-ink-subtle">
+        <p className="mt-2 text-xs text-ink-subtle">
           Gramas é o peso do alimento. Unidade, quando aparece, é quantas
           medidas dele, por exemplo 2 em &quot;1/2 xícara&quot;, e se
           converte em grama sozinha.
@@ -300,7 +300,7 @@ export function MealCard({
           }
           onReorder={onReorderItems}
         >
-          <ul className="mt-3 divide-y divide-line border-t border-line pt-1">
+          <ul className="mt-2 divide-y divide-line border-t border-line pt-1">
             {meal.items.map((item: MealItem) => (
               <SortableItem key={item.id} id={item.id}>
                 {(handle) => (
@@ -334,15 +334,21 @@ export function MealCard({
         </SortableList>
       )}
 
-      <div className="mt-3">
-        {picking ? (
+      {picking ? (
+        <div className="mt-2">
           <FoodPicker
             onPick={onAddFood}
             onCancel={() => {
               setPicking(false);
             }}
           />
-        ) : (
+        </div>
+      ) : (
+        // Adicionar alimento e Observações na mesma linha — dividir em duas
+        // era espaço parado embaixo de toda refeição, a maior parte das
+        // vezes vazio. `InlineText` já é discreto (borda transparente até
+        // foco/hover), então não briga por atenção com o botão ao lado.
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <div className="flex flex-wrap items-center gap-1">
             <button
               type="button"
@@ -378,8 +384,18 @@ export function MealCard({
               </button>
             )}
           </div>
-        )}
-      </div>
+
+          <InlineText
+            value={meal.notes}
+            onChange={(notes) => {
+              onChange({ notes });
+            }}
+            label={`Observações de ${meal.name}`}
+            placeholder="Observações"
+            className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
+          />
+        </div>
+      )}
 
       {onApplyAlternative !== undefined && (
         <MealAlternativesDialog
@@ -403,18 +419,6 @@ export function MealCard({
           }}
         />
       )}
-
-      <div className="mt-3">
-        <InlineText
-          value={meal.notes}
-          onChange={(notes) => {
-            onChange({ notes });
-          }}
-          label={`Observações de ${meal.name}`}
-          placeholder="Observações"
-          className="w-full text-sm text-ink-muted"
-        />
-      </div>
     </Card>
   );
 }
