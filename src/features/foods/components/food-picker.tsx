@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { roundMacros, scaleMacros } from "@/core/domain/macros";
@@ -73,9 +73,30 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   );
   const visible = results.slice(0, count);
 
+  // The picker opens inline, inside the meal it belongs to — no navigation,
+  // no scroll of its own. Found real (17/09/2026): on a meal card already
+  // low on the page, the results rendered partly behind the fixed bottom
+  // nav, and a tap on the hidden part hit the nav instead of the food.
+  // `scroll-mb-(--bottom-nav-h)` below is what makes this scroll leave the
+  // bar clear rather than tucking the picker right up against it.
+  //
+  // Keyed on `state.status`, not run once on mount: the catalogue loads
+  // async, so on mount the picker is still just the search bar — a scroll
+  // then fits *that*, and the results list (the tall part, the reason this
+  // exists) grows in underneath a moment later with nothing re-checking.
+  const pickerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (state.status === "ready") {
+      pickerRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, [state.status]);
+
   if (creating) {
     return (
-      <div className="space-y-3 rounded-lg border border-line bg-canvas p-3">
+      <div
+        ref={pickerRef}
+        className="scroll-mb-(--bottom-nav-h) space-y-3 rounded-lg border border-line bg-canvas p-3"
+      >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-ink">Criar alimento</h2>
           <button
@@ -108,7 +129,10 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   }
 
   return (
-    <div className="space-y-2 rounded-lg border border-line bg-canvas p-2">
+    <div
+      ref={pickerRef}
+      className="scroll-mb-(--bottom-nav-h) space-y-2 rounded-lg border border-line bg-canvas p-2"
+    >
       <div className="flex gap-2">
         <Input
           // The picker only opens on an explicit click, so taking focus is
