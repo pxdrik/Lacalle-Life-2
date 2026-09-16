@@ -121,14 +121,30 @@ describe("RpeSelect", () => {
     expect(onChange).toHaveBeenLastCalledWith(10);
   });
 
-  it("soltar o arrasto fecha a folha", async () => {
+  it("soltar o arrasto não fecha a folha sozinho — só o botão Confirmar fecha", async () => {
+    // Revertido a pedido do Pedro, mesmo dia: "deixe um botão para
+    // confirmar o RPE" — soltar o dedo só marca o fim do arrasto agora,
+    // não é mais o mesmo gesto que fecha a folha.
     mount(null);
     await userEvent.click(screen.getByRole("button", { name: LABEL }));
 
     fireEvent.pointerDown(slider(), { pointerId: 1, ...STRAIGHT_UP });
     fireEvent.pointerUp(slider(), { pointerId: 1, ...STRAIGHT_UP });
 
+    expect(screen.getByRole("slider")).toBeInTheDocument();
+  });
+
+  it("Confirmar fecha a folha sem mudar o valor por conta própria", async () => {
+    const onChange = mount(null);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+    fireEvent.pointerDown(slider(), { pointerId: 1, ...RIGHT_EDGE });
+    fireEvent.pointerUp(slider(), { pointerId: 1, ...RIGHT_EDGE });
+    onChange.mockClear();
+
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar" }));
+
     expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("nunca escolhe um valor fora da escala, mesmo arrastando além da ponta", async () => {

@@ -79,7 +79,7 @@ interface Props {
   readonly checkState?: "unchecked" | "checked" | "edited" | undefined;
   readonly onToggleChecked?: (() => void) | undefined;
   /**
-   * "Fechar" no menu ⋮ — devolve a refeição pra lista compacta de
+   * O botão ao lado do check — devolve a refeição pra lista compacta de
    * "Planejado", desfazendo o que `onOpen`/o check abriram. Só existe
    * quando faz sentido: uma refeição vinda da dieta, ainda não comida.
    * `undefined` em qualquer outro caso (comida, ou montada à mão), a mesma
@@ -237,6 +237,23 @@ export function MealCard({
                 )}
               </button>
             )}
+
+            {/* Ao lado do check, não atrás do ⋮ (Pedro, 17/09/2026): "pode
+                estar do lado do check, e aí pode deixar apenas o símbolo,
+                não precisa de escrita". Só o ícone — o rótulo acessível
+                continua completo pra quem usa leitor de tela, só não
+                aparece como texto na tela. */}
+            {onClose !== undefined && (
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Fechar refeição"
+                title="Fechar refeição"
+                className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              >
+                <ChevronsUp aria-hidden className="size-4" />
+              </button>
+            )}
           </div>
 
           <div className="mt-1 flex items-center gap-2">
@@ -319,24 +336,6 @@ export function MealCard({
           >
             <ChevronDown aria-hidden className="size-4" />
           </MenuRow>
-          {/* Só quando faz sentido: uma refeição vinda da dieta, ainda não
-              comida — ver a doc de `onClose` na prop. Devolve pra lista
-              compacta de "Planejado" sem apagar nada da dieta. */}
-          {onClose !== undefined && (
-            <MenuRow
-              // "Fechar refeição", não só "Fechar": o `X` de fechar a
-              // própria folha (`Dialog`) já usa o rótulo acessível "Fechar"
-              // — colidir os dois deixaria "Fechar" ambíguo entre duas
-              // ações bem diferentes.
-              label="Fechar refeição"
-              onClick={() => {
-                onClose();
-                setShowingActions(false);
-              }}
-            >
-              <ChevronsUp aria-hidden className="size-4" />
-            </MenuRow>
-          )}
           <ConfirmButton
             onConfirm={() => {
               setShowingActions(false);

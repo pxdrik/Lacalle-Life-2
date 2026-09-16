@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 
 import { cn } from "@/design-system/cn";
+import { Button } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
 
 import { RPE_SCALE, describeRpe, formatRpe } from "../taxonomy/rpe";
@@ -65,12 +66,20 @@ function arcPath(cx: number, cy: number, r: number): string {
  * **The picker is the same dial, grown up and draggable (second round,
  * 17/09/2026: "quero arrastar a barrinha pra selecionar, não aquela
  * tabela").** The grid of eight buttons is gone — dragging a finger along
- * the arc updates the value live, and lifting it confirms and closes,
- * one gesture instead of one tap. "Sem RPE" cannot live *on* the arc — the
+ * the arc updates the value live. "Sem RPE" cannot live *on* the arc — the
  * scale has no natural "blank" angle — so it stays a plain button beside
  * it, same as it sat first in the grid it replaced. Keyboard reaches the
  * same picker through `role="slider"` and the arrow keys, one scale step at
  * a time.
+ *
+ * **Releasing the drag used to close the sheet on its own — third round,
+ * same day: "deixe um botão para confirmar o RPE."** A release-to-close
+ * gesture does not leave room to see the number land, reconsider, and drag
+ * again before the sheet is gone; a live preview that only *some* releases
+ * happen to commit is worse than one that always waits for an explicit
+ * "Confirmar". Dragging still updates `value` (and everything reading it)
+ * live, same as before — only the close moved from the pointer's own
+ * `pointerup` to this button.
  */
 export function RpeSelect({ value, onChange, label, className }: Props) {
   const [open, setOpen] = useState(false);
@@ -101,30 +110,34 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
         }}
         placement="sheet-bottom"
       >
-        <RpeDialPicker
-          value={value}
-          label={label}
-          onChange={onChange}
-          onCommit={() => {
-            setOpen(false);
-          }}
-        />
+        <RpeDialPicker value={value} label={label} onChange={onChange} />
 
-        <button
-          type="button"
-          onClick={() => {
-            onChange(null);
-            setOpen(false);
-          }}
-          className={cn(
-            "mt-4 flex h-11 w-full items-center justify-center rounded-md border text-sm transition-colors duration-150 ease-out",
-            value === null
-              ? "border-accent bg-accent/10 text-ink"
-              : "border-line-strong text-ink-muted hover:border-ink-subtle hover:bg-muted",
-          )}
-        >
-          Sem RPE
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              onChange(null);
+              setOpen(false);
+            }}
+            className={cn(
+              "flex h-11 flex-1 items-center justify-center rounded-md border text-sm transition-colors duration-150 ease-out",
+              value === null
+                ? "border-accent bg-accent/10 text-ink"
+                : "border-line-strong text-ink-muted hover:border-ink-subtle hover:bg-muted",
+            )}
+          >
+            Sem RPE
+          </button>
+          <Button
+            size="lg"
+            className="flex-1"
+            onClick={() => {
+              setOpen(false);
+            }}
+          >
+            Confirmar
+          </Button>
+        </div>
       </Dialog>
     </>
   );
@@ -143,12 +156,10 @@ function RpeDialPicker({
   value,
   label,
   onChange,
-  onCommit,
 }: {
   readonly value: number | null;
   readonly label: string;
   readonly onChange: (value: number) => void;
-  readonly onCommit: () => void;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
   const draggingRef = useRef(false);
@@ -203,7 +214,6 @@ function RpeDialPicker({
         if (!draggingRef.current) return;
         draggingRef.current = false;
         event.currentTarget.releasePointerCapture(event.pointerId);
-        onCommit();
       }}
       onKeyDown={(event) => {
         const index = RPE_SCALE.findIndex((step) => step.value === value);

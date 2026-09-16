@@ -283,9 +283,11 @@ describe("planned meals waiting to be checked", () => {
     ).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("'Fechar' in the ⋮ undoes an open, back to the compact planned row", async () => {
-    // Pedro, 17/09/2026, olhando uma refeição recém-aberta: "vamos fazer
-    // uma funcionalidade para voltar a 'fechar' o card do diário."
+  it("'Fechar refeição', ao lado do check, undoes an open, back to the compact planned row", async () => {
+    // Pedro, 17/09/2026: "vamos fazer uma funcionalidade para voltar a
+    // 'fechar' o card do diário" — e depois, no mesmo dia: "pode estar do
+    // lado do check, e aí pode deixar apenas o símbolo" — não mais atrás
+    // do ⋮.
     const { logs } = mount(emptyLog(), dietForToday());
     await userEvent.click(
       await screen.findByRole("button", { name: "Abrir Refeição 1" }),
@@ -293,9 +295,8 @@ describe("planned meals waiting to be checked", () => {
     await screen.findByDisplayValue("Refeição 1");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+      screen.getByRole("button", { name: "Fechar refeição" }),
     );
-    await userEvent.click(screen.getByRole("button", { name: "Fechar refeição" }));
 
     expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
     expect(
@@ -309,7 +310,7 @@ describe("planned meals waiting to be checked", () => {
     });
   });
 
-  it("never offers 'Fechar' once the meal is checked — closing would erase a real record", async () => {
+  it("never offers 'Fechar refeição' once the meal is checked — closing would erase a real record", async () => {
     const { logs } = mount(emptyLog(), dietForToday());
     await userEvent.click(
       await screen.findByRole("button", {
@@ -319,10 +320,6 @@ describe("planned meals waiting to be checked", () => {
     await waitFor(async () => {
       expect((await logs.getByDay(TODAY))?.meals[0]?.eaten).toBe(true);
     });
-
-    await userEvent.click(
-      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
-    );
 
     expect(
       screen.queryByRole("button", { name: "Fechar refeição" }),
