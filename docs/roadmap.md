@@ -5,7 +5,7 @@ depender da memória de nenhuma conversa.
 
 ---
 
-## 🔧 EM ANDAMENTO — Sincronização vira "mais recente vence" automático + 4 telas — 17/09/2026
+## ✅ Sincronização vira "mais recente vence" automático + 4 telas — 17/09/2026
 
 Pedro relatou perda de dado real: editou dieta/refeições/treino no celular,
 abriu o PC depois, e o app manteve a versão mais antiga do PC por cima da
@@ -50,15 +50,41 @@ virar cópia visual deles. Detalhe completo da decisão e do que mudou em
   `use-diet-list.test.tsx` provando que uma dieta criada em outro lugar
   aparece sem F5. `npm run verify` (typecheck + lint + 1687 testes) verde.
 
-**Parte B — 4 telas, ainda não iniciada:**
+**Parte B — 4 telas, entregue e testada:**
 
-- ⏳ Diário: prévia dos alimentos de cada refeição em "Planejado para".
-- ⏳ Dieta: cards mais compactos (cabeçalho + barra de macro fina + menu de
-  ações), com o Macros como referência direta de densidade.
-- ⏳ Dieta: "Adicionar alimento" vira página dedicada, não dropdown inline.
-- ⏳ Treino: remover os steppers −1/+1/−2,5/+2,5, manter edição por digitação.
-- ⏳ Treino: RPE vira bottom sheet (reaproveitando `Dialog
-  placement="sheet-bottom"`, já existente), não `<select>` nativo.
+- ✅ **Treino: steppers removidos.** Os botões −1/+1/−2,5/+2,5 abaixo de
+  reps/peso saíram de `performed-set-row.tsx`, com `stepped()`/`Step`
+  (só existiam para eles). Digitação direta continua igual. Commit `ce377dd`.
+- ✅ **Treino: RPE vira bottom sheet.** `RpeSelect` deixou de ser um
+  `<select>` nativo — agora é um botão compacto que abre `Dialog
+  placement="sheet-bottom"` (reaproveitado, não um componente novo) com os
+  8 valores como grade de botões, estilo Hevy mas com o Brand System da
+  própria LaCalle Life. Mesmo commit.
+- ✅ **Diário: prévia dos alimentos.** "Planejado para [data]" mostra os
+  nomes dos alimentos de cada refeição numa linha compacta abaixo do nome —
+  mesmo padrão de `MealAlternativesDialog`. Commit `3da0f2a`.
+- ✅ **Dieta: cards mais compactos.** `MealCard` reorganizado com o Macros
+  como régua: "kcal/Prot/Carb/Gord" por extenso virou um número de kcal +
+  uma barra fina colorida (`MealMacroBar`, novo, mesma paleta de
+  `MacroProgress`); os 4 botões de ação (duplicar/mover/excluir) viraram um
+  ⋮ que abre o mesmo `Dialog` em bottom-sheet. Mesmo commit.
+- ✅ **Dieta/Diário: "Adicionar alimento" vira página.** `/alimentos/selecionar`
+  substitui o dropdown inline — reaproveita o conteúdo do `FoodPicker`
+  (busca, filtros, criar alimento) com um `chrome={false}` que troca só o
+  container, e acrescenta o passo que faltava: confirmar a quantidade em
+  gramas antes de voltar pra refeição, como o Macros. A escolha viaja de
+  volta pela URL (`addFoodId`/`addMealId`/`addGrams`), lida por
+  `useApplyPickedFood` (novo, compartilhado por Dieta e Diário). Bug real
+  achado e corrigido no caminho: sem uma trava por instrução, o alimento
+  podia ser adicionado duas vezes (o `router` do teste — e, em tese, de
+  qualquer client router — não garante ser a mesma referência entre
+  renders). Commit `3535515`.
+
+`npm run verify` (typecheck + lint + 1707 testes) e `npm run build` verdes
+depois de cada parte; principais fluxos confirmados ao vivo no navegador
+(servidor de dev local): sheet do RPE, kebab da dieta, e o fluxo completo de
+adicionar alimento pela nova página, do clique em "Adicionar alimento" até o
+item aparecer na refeição certa com a quantidade certa.
 
 ---
 
