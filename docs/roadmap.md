@@ -5,6 +5,76 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Três bugs visuais mobile achados em uso real: campos do Treino, gráfico da Evolução, densidade do Diário — 16/09/2026
+
+Pedro testou o app no celular esta semana e trouxe 3 problemas concretos,
+com capturas de tela, comparando contra Hevy e MacroFactor como referência
+de densidade. Dois dos três eram bugs de CSS reais, não só estética —
+confirmados ao vivo (Chrome DevTools MCP, viewport mobile, `next dev`
+local) antes de mexer em qualquer coisa.
+
+- ✅ **Treino: campo de reps/peso minúsculo, texto some ao preencher, RPE
+  com tamanho diferente dos outros dois.** Causa raiz real: `tokens.css`
+  contrazooma `input, select, textarea` para manter o texto em 16px reais
+  (evita o zoom do Safari iOS no foco — decisão correta, não mexida). Um
+  campo dentro de uma coluna `flex-1` com `width:100%` resolve a
+  porcentagem errado quando o próprio campo tem `zoom` — medido ao vivo:
+  21,86px de largura renderizada onde deveriam caber ~58px, menor que o
+  próprio padding do campo. `RpeSelect` nunca teve esse bug porque seu
+  wrapper já era uma largura **fixa** (`w-16`), não uma calculada por
+  flex-grow — e é por isso que RPE também parecia "de outro tamanho".
+  Corrigido em `performed-set-row.tsx`: os três campos (reps, peso, RPE)
+  agora têm largura fixa e autorada (`w-14`/`w-16`), o mesmo padrão que já
+  funcionava, replicado. `session-exercise-card.tsx` ganhou o mesmo ajuste
+  no cabeçalho de colunas. `planned-set-row.tsx` (editor de rotina) já
+  usava `flex-1` direto no campo, sem o wrapper problemático — conferido
+  ao vivo, não precisou de mudança.
+- ✅ **Evolução: gráfico de volume, reestruturado por robustez, não por bug
+  confirmado.** Não consegui reproduzir "gráfico totalmente vazio" com
+  dado real no Chrome desktop emulando mobile — a barra desenhou certo.
+  Mas o padrão de código (altura em `%` numa `<span>` filha de um
+  `<button>` flexível) é um ponto conhecido de inconsistência entre
+  motores, principalmente Safari/WebKit, e o app já tinha duas outras
+  instâncias da mesma família de bug (o zoom acima; o autofill do Finance
+  que pintava campo escuro de branco por cima). `volume-chart.tsx`
+  reestruturado: a barra virou uma `<span>` irmã posicionada
+  (`position:absolute`) dentro do `<li>` (uma div comum), e o `<button>`
+  virou um overlay `inset-0` só para o toque — resolve a altura contra um
+  elemento sem esse histórico de inconsistência. Visualmente idêntico
+  quando funciona; testes de `volume-chart.test.tsx` continuam passando.
+  **Pedro, confira de novo no celular depois do deploy** — não dá pra
+  confirmar 100% que essa era a causa exata sem o aparelho real.
+- ✅ **Diário: cards de refeição ocupando espaço demais.** Não era bug —
+  cada peça (nome, macros, itens, "Adicionar alimento", observações) já
+  existia, só o espaçamento entre elas era generoso demais e "Adicionar
+  alimento"/"Observações" tinham cada um sua própria linha mesmo numa
+  refeição vazia. `meal-card.tsx`: `mt-3` → `mt-2` entre seções, e as duas
+  ações da última linha (adicionar alimento + observações) dividem a
+  mesma linha agora, numa refeição que não está com o buscador aberto.
+
+**Achado à parte, fora de escopo, registrado para não esquecer:** a lista
+de resultados do buscador de alimentos (`FoodPicker`, aberto de dentro de
+uma refeição) tem itens que renderizam parcialmente atrás da barra de
+navegação inferior fixa — cliques nesses itens acabam ativando a aba
+"Treinos" por baixo, em vez do item. Achado testando o fix do Diário, não
+mexido: é um problema do picker, não desta entrega.
+
+**Trabalho não commitado encontrado nos mesmos arquivos antes de começar:**
+a animação Delete/Collapse (item ⏳ registrado em 12/09/2026, acima) tinha
+uma tentativa em andamento — `meal-card.tsx`, `meal-item-row.tsx`,
+`planned-set-row.tsx`, `routine-editor.tsx`, `routine-exercise-card.tsx`,
+`diet-editor.tsx`, `food-log-screen.tsx`, `meal-alternatives-dialog.tsx`,
+`tokens.css` — mas **`npm run verify` não passava**: 4 testes falhando,
+incluindo um `src/scratch-animationend.test.tsx` (não rastreado) que é uma
+investigação aberta de um bug real do jsdom (`fireEvent.animationEnd` não
+dispara `onAnimationEnd` do jeito que o novo código espera). A pedido do
+Pedro, isso ficou de lado — `git stash` (mensagem "WIP: animação
+Delete/Collapse (testes quebrando, retomar depois)"), não commitado, não
+descartado. Retomar exige primeiro entender por que o jsdom não dispara o
+evento como o componente espera.
+
+---
+
 ## ✅ Auditoria do Motion System no código + Bottom Sheet ganha slide direcional — 12/09/2026
 
 Pedido do Pedro: "eu queria colocar todas as animações dentro do lacalle
