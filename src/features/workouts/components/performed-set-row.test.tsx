@@ -5,15 +5,6 @@ import { describe, expect, it, vi } from "vitest";
 import type { PerformedSet } from "../types/session";
 import { PerformedSetRow } from "./performed-set-row";
 
-/**
- * The quick steppers on the set being done.
- *
- * Typing a load one-handed, standing, between sets is the slowest interaction
- * in the app, and the one performed in the worst conditions. These buttons
- * exist so the common case — same movement, one plate more — never opens a
- * keyboard.
- */
-
 function set(overrides: Partial<PerformedSet> = {}): PerformedSet {
   return {
     id: "s1",
@@ -110,82 +101,54 @@ describe("Iniciativa D — a finished set reads at a glance", () => {
   });
 });
 
-describe("stepping the load", () => {
-  it("adds a pair of the smallest plates", async () => {
-    const onChange = mount(set({ weightKg: 60 }));
+/**
+ * Os steppers −1/+1/−2,5/+2,5 saíram do produto (pedido do Pedro,
+ * 17/09/2026) — o campo continua editável por digitação, só o controle
+ * extra some. Estes testes provam as duas coisas: nenhum stepper renderiza
+ * em nenhum estado da linha, e digitar direto no campo ainda funciona.
+ */
+describe("sem steppers, só digitação direta", () => {
+  it("nunca renderiza os botões de incremento/decremento de peso ou reps", () => {
+    mount(set(), true);
 
-    await tap(/^Mais 2,5 kg/);
-
-    expect(onChange).toHaveBeenCalledWith({ weightKg: 62.5 });
+    expect(
+      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Menos 2,5 kg/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Mais uma repetição/ }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Menos uma repetição/ }),
+    ).not.toBeInTheDocument();
   });
 
-  it("does not drift into binary floating point", async () => {
-    // 62.5 + 2.5 is exact, but the general case is not, and a field reading
-    // 62.50000000000001 is how people stop trusting the number.
-    const onChange = mount(set({ weightKg: 0.1 }));
+  it("digitar no campo de reps ainda chama onChange", async () => {
+    // O input de reps não tem estado próprio de rascunho (ao contrário do
+    // de peso, ver `WeightField`) — é controlado direto pelo prop `set`, que
+    // este mount não atualiza a cada tecla. Uma tecla é o bastante para
+    // provar que a digitação continua chamando `onChange`.
+    const onChange = mount(set({ reps: null }));
 
-    await tap(/^Mais 2,5 kg/);
-
-    expect(onChange).toHaveBeenCalledWith({ weightKg: 2.6 });
-  });
-
-  it("never goes negative, because a load cannot", async () => {
-    const onChange = mount(set({ weightKg: 1 }));
-
-    await tap(/^Menos 2,5 kg/);
-
-    expect(onChange).toHaveBeenCalledWith({ weightKg: 0 });
-  });
-
-  it("starts from what was planned when the field is empty", async () => {
-    // Pressing +2,5 on an empty field for a machine you always load to 60
-    // should land near 60, not at 2,5.
-    const onChange = mount(
-      set({
-        weightKg: null,
-        planned: { reps: null, weightKg: 60, rpe: null, durationSeconds: null },
-      }),
+    await userEvent.type(
+      screen.getByLabelText("Repetições da série 1 de Supino"),
+      "5",
     );
 
-    await tap(/^Mais 2,5 kg/);
-
-    expect(onChange).toHaveBeenCalledWith({ weightKg: 62.5 });
-  });
-});
-
-describe("stepping the repetitions", () => {
-  it("moves one at a time", async () => {
-    const onChange = mount(set({ reps: 10 }));
-
-    await tap(/^Mais uma repetição/);
-
-    expect(onChange).toHaveBeenCalledWith({ reps: 11 });
+    expect(onChange).toHaveBeenLastCalledWith({ reps: 5 });
   });
 
-  it("stops at zero", async () => {
-    const onChange = mount(set({ reps: 0 }));
+  it("digitar no campo de peso ainda chama onChange", async () => {
+    const onChange = mount(set({ weightKg: null }));
 
-    await tap(/^Menos uma repetição/);
+    await userEvent.type(
+      screen.getByLabelText("Peso da série 1 de Supino"),
+      "62,5",
+    );
 
-    expect(onChange).toHaveBeenCalledWith({ reps: 0 });
-  });
-});
-
-describe("where the steppers appear", () => {
-  it("only on the set being done", async () => {
-    mount(set(), false);
-
-    expect(
-      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("not on a set already finished, which nobody is adjusting", async () => {
-    mount(set({ isCompleted: true }), true);
-
-    expect(
-      screen.queryByRole("button", { name: /^Mais 2,5 kg/ }),
-    ).not.toBeInTheDocument();
+    expect(onChange).toHaveBeenLastCalledWith({ weightKg: 62.5 });
   });
 });
 

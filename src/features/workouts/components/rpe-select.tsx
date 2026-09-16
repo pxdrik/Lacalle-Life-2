@@ -1,9 +1,11 @@
 "use client";
 
-import { cn } from "@/design-system/cn";
-import { Select } from "@/design-system/components/select";
+import { useState } from "react";
 
-import { RPE_SCALE, describeRpe } from "../taxonomy/rpe";
+import { cn } from "@/design-system/cn";
+import { Dialog } from "@/design-system/components/dialog";
+
+import { RPE_SCALE, describeRpe, formatRpe } from "../taxonomy/rpe";
 
 interface Props {
   readonly value: number | null;
@@ -13,38 +15,113 @@ interface Props {
 }
 
 /**
- * RPE as a native `<select>`.
+ * RPE as a bottom sheet of buttons, Hevy-style.
  *
- * The scale has eight steps with meanings that need explaining, and a native
- * select gets that right on every platform for free: it is keyboard operable,
- * it announces the description with the option, and on a phone it opens the
- * OS picker instead of a custom sheet that has to be built and then debugged.
+ * A native `<select>` used to do this job — right for a short list, wrong for
+ * eight options that each need a sentence of explanation: the OS popup gives
+ * one line per row, so the description was only ever reachable by opening the
+ * list and reading each option in turn, one-handed, mid-set. A grid of
+ * buttons shows every value and its meaning at once, and a tap both answers
+ * and closes — no separate "confirm" step for a choice that is already final
+ * the moment it is made.
  *
- * The blank option is first and is the default. RPE is never required, so the
- * field has to make "I did not rate this" as easy as any other answer.
+ * The blank option ("Sem RPE") sits first in the grid, same as it sat first
+ * in the old select: RPE is never required, so skipping it has to be exactly
+ * as easy as any other answer.
  */
 export function RpeSelect({ value, onChange, label, className }: Props) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Select
-      variant="compact"
-      value={value === null ? "" : String(value)}
-      aria-label={label}
-      title={value === null ? "Sem RPE" : (describeRpe(value) ?? undefined)}
-      onChange={(event) => {
-        onChange(event.target.value === "" ? null : Number(event.target.value));
-      }}
-      className={cn(
-        "text-center tabular-nums",
-        value === null && "text-ink-subtle",
-        className,
-      )}
-    >
-      <option value="">—</option>
-      {RPE_SCALE.map((step) => (
-        <option key={step.value} value={step.value}>
-          {step.label} · {step.description}
-        </option>
-      ))}
-    </Select>
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setOpen(true);
+        }}
+        aria-label={label}
+        title={value === null ? "Sem RPE" : (describeRpe(value) ?? undefined)}
+        className={cn(
+          "rounded-md border border-line-strong bg-surface text-center text-sm tabular-nums transition-colors duration-150 ease-out",
+          "hover:border-ink-subtle focus:border-accent",
+          value === null && "text-ink-subtle",
+          className,
+        )}
+      >
+        {value === null ? "—" : formatRpe(value)}
+      </button>
+
+      <Dialog
+        open={open}
+        title={label}
+        onClose={() => {
+          setOpen(false);
+        }}
+        placement="sheet-bottom"
+      >
+        <div role="radiogroup" aria-label={label} className="grid grid-cols-3 gap-2">
+          <RpeOption
+            label="Sem RPE"
+            selected={value === null}
+            onSelect={() => {
+              onChange(null);
+              setOpen(false);
+            }}
+          >
+            <span className="text-base font-semibold">—</span>
+            <span className="text-xs text-ink-subtle">Sem RPE</span>
+          </RpeOption>
+
+          {RPE_SCALE.map((step) => (
+            <RpeOption
+              key={step.value}
+              label={`${step.label} — ${step.description}`}
+              selected={value === step.value}
+              onSelect={() => {
+                onChange(step.value);
+                setOpen(false);
+              }}
+            >
+              <span className="text-base font-semibold tabular-nums">
+                {step.label}
+              </span>
+              <span className="text-xs text-ink-subtle">{step.description}</span>
+            </RpeOption>
+          ))}
+        </div>
+      </Dialog>
+    </>
   );
 }
+
+function RpeOption({
+  label,
+  selected,
+  onSelect,
+  children,
+}: {
+  readonly label: string;
+  readonly selected: boolean;
+  readonly onSelect: () => void;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-label={label}
+      aria-checked={selected}
+      onClick={onSelect}
+      className={cn(
+        "flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-md border px-1.5 py-2 text-center",
+        "transition-[background-color,border-color,color] duration-150 ease-out",
+        selected
+          ? "border-accent bg-accent/10 text-ink"
+          : "border-line-strong text-ink hover:border-ink-subtle hover:bg-muted",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+

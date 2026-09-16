@@ -39,10 +39,13 @@ interface Props extends React.ComponentPropsWithRef<"select"> {
  * border colour and the focus ring.
  *
  * **Still a real `<select>`, not a custom listbox.** The popup itself stays
- * out of reach on purpose — `RpeSelect` already made this case: a native
- * select is keyboard operable and opens the OS picker on a phone for free,
- * which a hand-built dropdown would have to earn back one bug at a time.
- * This component only ever restyles the closed trigger.
+ * out of reach on purpose: a native select is keyboard operable and opens
+ * the OS picker on a phone for free, which a hand-built dropdown would have
+ * to earn back one bug at a time. This component only ever restyles the
+ * closed trigger — right for a short, unlabelled list like the unit beside a
+ * portion. `RpeSelect` used to be built on this and moved to a bottom sheet
+ * instead (17/09/2026): eight options each needing a sentence of
+ * explanation do not fit a native popup's one line per row.
  */
 export function Select({ variant = "default", className, ...props }: Props) {
   return (
