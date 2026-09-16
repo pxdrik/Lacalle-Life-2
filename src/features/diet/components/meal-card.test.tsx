@@ -24,6 +24,11 @@ function meal(items: readonly MealItem[]): Meal {
 function mount(
   theMeal: Meal,
   extra: {
+    readonly position?: number;
+    readonly total?: number;
+    readonly onRemove?: () => void;
+    readonly onDuplicate?: () => void;
+    readonly onMove?: (offset: number) => void;
     readonly checkState?: "unchecked" | "checked" | "edited";
     readonly onToggleChecked?: () => void;
     readonly onSaveAlternative?: (name: string) => void;
@@ -169,6 +174,73 @@ describe("other suggestions", () => {
     await user.click(screen.getByRole("button", { name: "Usar" }));
 
     expect(onApplyAlternative).toHaveBeenCalledExactlyOnceWith("alt-1");
+  });
+});
+
+describe("the actions menu (⋮)", () => {
+  // Regressão real que este bloco existe pra pegar de novo (comentário do
+  // topo do arquivo): "Duplicar" já esteve ligado em `addMeal` por engano,
+  // produzindo uma refeição vazia em vez de uma cópia — silenciosamente, na
+  // tela onde a pessoa registra o que de fato comeu. Reorganizar os quatro
+  // botões atrás do ⋮ (17/09/2026) é exatamente o tipo de mudança que
+  // reintroduziria esse bug se um dos quatro ficasse ligado à ação errada.
+  async function openMenu() {
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+    return user;
+  }
+
+  it("duplicar chama onDuplicate, e só onDuplicate", async () => {
+    const onDuplicate = vi.fn();
+    mount(meal([]), { onDuplicate });
+    const user = await openMenu();
+
+    await user.click(screen.getByRole("button", { name: "Duplicar" }));
+
+    expect(onDuplicate).toHaveBeenCalledTimes(1);
+  });
+
+  it("mover para cima chama onMove(-1)", async () => {
+    const onMove = vi.fn();
+    mount(meal([]), { onMove, position: 1, total: 2 });
+    const user = await openMenu();
+
+    await user.click(screen.getByRole("button", { name: "Mover para cima" }));
+
+    expect(onMove).toHaveBeenCalledExactlyOnceWith(-1);
+  });
+
+  it("mover para baixo chama onMove(1)", async () => {
+    const onMove = vi.fn();
+    mount(meal([]), { onMove, position: 0, total: 2 });
+    const user = await openMenu();
+
+    await user.click(screen.getByRole("button", { name: "Mover para baixo" }));
+
+    expect(onMove).toHaveBeenCalledExactlyOnceWith(1);
+  });
+
+  it("desabilita mover para cima na primeira posição, e para baixo na última", async () => {
+    mount(meal([]), { position: 0, total: 1 });
+    await openMenu();
+
+    expect(screen.getByRole("button", { name: "Mover para cima" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Mover para baixo" })).toBeDisabled();
+  });
+
+  it("excluir pede confirmação antes de chamar onRemove", async () => {
+    const onRemove = vi.fn();
+    mount(meal([]), { onRemove });
+    const user = await openMenu();
+
+    const remove = screen.getByRole("button", { name: "Excluir Refeição 1" });
+    await user.click(remove);
+    expect(onRemove).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }));
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
 

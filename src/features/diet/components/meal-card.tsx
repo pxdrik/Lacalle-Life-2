@@ -6,6 +6,7 @@ import {
   ChevronUp,
   Copy,
   GripVertical,
+  MoreVertical,
   Pencil,
   Plus,
   Shuffle,
@@ -15,6 +16,7 @@ import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { Dialog } from "@/design-system/components/dialog";
 import {
   SortableItem,
   SortableList,
@@ -25,9 +27,9 @@ import { FoodPicker, type Food } from "@/features/foods";
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
 import { InlineText } from "./inline-text";
-import { MacroSummary } from "./macro-summary";
 import { MealAlternativesDialog } from "./meal-alternatives-dialog";
 import { MealItemRow } from "./meal-item-row";
+import { MealMacroBar } from "./meal-macro-bar";
 import { Card } from "@/design-system/components/card";
 
 interface Props {
@@ -108,6 +110,7 @@ export function MealCard({
 }: Props) {
   const [picking, setPicking] = useState(false);
   const [showingAlternatives, setShowingAlternatives] = useState(false);
+  const [showingActions, setShowingActions] = useState(false);
   // Mesma técnica de `performed-set-row.tsx` ("Concluir série"): a animação
   // é presa ao toque, nunca ao estado — `checkState` sozinho dispararia de
   // novo em toda remontagem do Diário, marcando de volta uma refeição que só
@@ -138,10 +141,12 @@ export function MealCard({
         dragHandle.isDragging && "border-accent shadow-modal",
       )}
     >
-      {/* Wraps on a phone. The macro summary and four buttons are `shrink-0`
-          and together need more room than a 390px screen has, so without this
-          the whole page scrolled sideways — on the one screen that exists to
-          be used on a phone. */}
+      {/* Wraps on a phone: name + check on one line, the macro bar and the
+          ⋮ trigger (both `shrink-0`) drop to their own line below rather
+          than forcing the row past a 390px screen. Lighter risk than it
+          used to be — the header carries one compact bar and one button now,
+          not four action buttons plus a four-figure macro line — but the
+          wrap costs nothing to keep. */}
       <header className="flex flex-wrap items-start gap-2">
         <button
           type="button"
@@ -234,48 +239,81 @@ export function MealCard({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:flex-wrap max-sm:justify-between max-sm:gap-y-1">
-          <MacroSummary macros={macros} />
+        <div className="flex shrink-0 items-center gap-1 max-sm:order-last max-sm:w-full max-sm:justify-between">
+          <MealMacroBar macros={macros} />
 
-          {/* Arrows alongside the handle, for the same reason as in a routine:
-              dragging is an accelerator, not the only path. */}
-          <div className="flex items-center">
-            <MoveButton
-              label={`Duplicar ${meal.name}`}
-              disabled={false}
-              onClick={onDuplicate}
-            >
-              <Copy aria-hidden className="size-4" />
-            </MoveButton>
-            <MoveButton
-              label={`Mover ${meal.name} para cima`}
-              disabled={position === 0}
-              onClick={() => {
-                onMove(-1);
-              }}
-            >
-              <ChevronUp aria-hidden className="size-4" />
-            </MoveButton>
-            <MoveButton
-              label={`Mover ${meal.name} para baixo`}
-              disabled={position === total - 1}
-              onClick={() => {
-                onMove(1);
-              }}
-            >
-              <ChevronDown aria-hidden className="size-4" />
-            </MoveButton>
-            <ConfirmButton
-              onConfirm={onRemove}
-              label={`Excluir ${meal.name}`}
-              confirmLabel="Excluir?"
-              className="h-8 min-w-8"
-            >
-              <Trash2 aria-hidden className="size-4" />
-            </ConfirmButton>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowingActions(true);
+            }}
+            aria-label={`Mais ações para ${meal.name}`}
+            className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          >
+            <MoreVertical aria-hidden className="size-4" />
+          </button>
         </div>
       </header>
+
+      {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de
+          densidade, 17/09/2026: eram quatro alvos de toque (duplicar, mover
+          duas direções, excluir) competindo por espaço com o resumo de
+          macros em toda refeição da dieta, a maior parte do tempo sem
+          nenhum motivo pra estarem visíveis. `Dialog placement="sheet-bottom"`
+          reaproveitado, mesmo componente do RPE e das sugestões de refeição —
+          nenhuma folha nova. */}
+      <Dialog
+        open={showingActions}
+        title={meal.name}
+        onClose={() => {
+          setShowingActions(false);
+        }}
+        placement="sheet-bottom"
+      >
+        <div className="-my-1 space-y-0.5">
+          <MenuRow
+            label="Duplicar"
+            onClick={() => {
+              onDuplicate();
+              setShowingActions(false);
+            }}
+          >
+            <Copy aria-hidden className="size-4" />
+          </MenuRow>
+          <MenuRow
+            label="Mover para cima"
+            disabled={position === 0}
+            onClick={() => {
+              onMove(-1);
+              setShowingActions(false);
+            }}
+          >
+            <ChevronUp aria-hidden className="size-4" />
+          </MenuRow>
+          <MenuRow
+            label="Mover para baixo"
+            disabled={position === total - 1}
+            onClick={() => {
+              onMove(1);
+              setShowingActions(false);
+            }}
+          >
+            <ChevronDown aria-hidden className="size-4" />
+          </MenuRow>
+          <ConfirmButton
+            onConfirm={() => {
+              setShowingActions(false);
+              onRemove();
+            }}
+            label={`Excluir ${meal.name}`}
+            confirmLabel="Excluir?"
+            className="h-11 w-full justify-start gap-3 px-3 text-sm text-danger hover:bg-danger/10"
+          >
+            <Trash2 aria-hidden className="size-4" />
+            Excluir
+          </ConfirmButton>
+        </div>
+      </Dialog>
 
       {/* Secundária de propósito: "Gramas"/"Unidade" acima de cada campo
           (`meal-item-row.tsx`) já identificam o número na hora. Isto é só a
@@ -423,15 +461,16 @@ export function MealCard({
   );
 }
 
-function MoveButton({
+/** One row of the actions sheet: an icon, a label, disableable like any of them. */
+function MenuRow({
   label,
   onClick,
-  disabled,
+  disabled = false,
   children,
 }: {
   readonly label: string;
   readonly onClick: () => void;
-  readonly disabled: boolean;
+  readonly disabled?: boolean;
   readonly children: React.ReactNode;
 }) {
   return (
@@ -439,10 +478,10 @@ function MoveButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      aria-label={label}
-      className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink disabled:opacity-30"
+      className="flex h-11 w-full items-center gap-3 rounded-md px-3 text-sm text-ink transition-colors duration-150 ease-out hover:bg-muted disabled:pointer-events-none disabled:text-ink-subtle disabled:opacity-40"
     >
       {children}
+      {label}
     </button>
   );
 }

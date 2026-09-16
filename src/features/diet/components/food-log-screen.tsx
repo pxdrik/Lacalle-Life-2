@@ -524,8 +524,12 @@ function EmptyDay({
  * (once-in, stays-in) instead of `mealCheckState` here.
  *
  * A compact list on purpose: there is nothing to edit on a meal not yet
- * pulled in, only its name and the decision to log it — the full `MealCard`
- * would be weight with no function here.
+ * pulled in, only what it holds and the decision to log it — the full
+ * `MealCard` would be weight with no function here. The food names sit on
+ * their own line (17/09/2026: before this, only the meal's name showed, and
+ * deciding whether to log "Almoço" meant opening the full diet to remember
+ * what was actually in it) — one truncated line, the same shape
+ * `MealAlternativesDialog` already uses for a saved suggestion's contents.
  */
 function PlannedMeals({
   diet,
@@ -553,9 +557,14 @@ function PlannedMeals({
             key={meal.id}
             className="flex items-center justify-between gap-3 rounded-md border border-line px-3 py-2"
           >
-            <span className="min-w-0 truncate text-sm text-ink">
-              {meal.name}
-            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm text-ink">{meal.name}</p>
+              {meal.items.length > 0 && (
+                <p className="mt-0.5 truncate text-xs text-ink-subtle">
+                  {meal.items.map((item) => item.name).join(", ")}
+                </p>
+              )}
+            </div>
             <button
               type="button"
               onClick={() => {

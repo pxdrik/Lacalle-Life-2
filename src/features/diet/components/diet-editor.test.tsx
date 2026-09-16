@@ -136,6 +136,9 @@ describe("DietEditor", () => {
     await screen.findByLabelText("Nome da dieta");
 
     await userEvent.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+    await userEvent.click(
       screen.getByRole("button", { name: "Excluir Refeição 1" }),
     );
 
@@ -147,6 +150,9 @@ describe("DietEditor", () => {
     const { diets } = mount(diet.id, diet);
     await screen.findByLabelText("Nome da dieta");
 
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
     await userEvent.click(
       screen.getByRole("button", { name: "Excluir Refeição 1" }),
     );

@@ -209,12 +209,30 @@ describe("planned meals waiting to be checked", () => {
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
   });
 
-  it("lists the linked diet's meal, with nothing else about it shown yet", async () => {
+  it("lists the linked diet's meal, with a preview of what it holds", async () => {
+    // Achado real, 17/09/2026: antes desta prévia, decidir se marcar "Refeição
+    // 1" como comida exigia abrir a dieta inteira para lembrar o que ela
+    // tinha — só o nome da refeição não dizia nada sobre o conteúdo.
     mount(emptyLog(), dietForToday());
 
     expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
+    expect(screen.getByText("Peito de frango")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows nothing extra for a planned meal that still has no food in it", async () => {
+    const diet = createDiet("Vazia");
+    const dietToday = assignWeekdays([diet], diet.id, [
+      weekdayOf(new Date()),
+    ])[0]!;
+    mount(emptyLog(), dietToday);
+
+    await screen.findByText(/^Planejado para/);
+
+    expect(
+      screen.getByRole("button", { name: `Marcar ${dietToday.meals[0]!.name} como comida` }),
     ).toBeInTheDocument();
   });
 
@@ -312,13 +330,18 @@ describe("a day already started from a diet", () => {
 });
 
 describe("duplicating a meal in the diary", () => {
+  async function duplicate() {
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mais ações para Café da manhã" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Duplicar" }));
+  }
+
   it("copies the food in it, rather than adding an empty meal", async () => {
     const { logs } = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Duplicar Café da manhã" }),
-    );
+    await duplicate();
 
     await waitFor(async () => {
       const saved = await logs.getByDay(TODAY);
@@ -332,9 +355,7 @@ describe("duplicating a meal in the diary", () => {
     const { logs } = mount(logWithMeal());
     await screen.findByDisplayValue("Café da manhã");
 
-    await userEvent.click(
-      screen.getByRole("button", { name: "Duplicar Café da manhã" }),
-    );
+    await duplicate();
 
     await waitFor(async () => {
       const saved = await logs.getByDay(TODAY);
