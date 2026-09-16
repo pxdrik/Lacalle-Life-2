@@ -307,6 +307,14 @@ concorrência hoje:
 
 ### 8.1 Famílias de entidade e a regra recomendada para cada uma
 
+> **Revertido em 17/09/2026 — ver §26.** A tabela abaixo e a recomendação de
+> §8.2 documentam a decisão original ("conflito visível sempre"), fechada em
+> §17.1. Depois de um incidente real de perda de dado percebida, o Pedro
+> escolheu trocar por "mais recente vence" automático quando o conteúdo
+> diverge de verdade — §26 tem o motivo, o que mudou e o risco aceito. Esta
+> seção fica como registro histórico da decisão anterior, não como
+> comportamento atual.
+
 | Entidade | Cenário real de conflito | Regra recomendada |
 |---|---|---|
 | `Profile` | dois dispositivos editam peso/altura/objetivo offline | **Conflito visível.** É a mesma tela que já existe hoje entre abas — só troca "outra aba" por "outro dispositivo" na mensagem. Perfil é editado raramente; interromper e perguntar é barato e correto. |
@@ -535,6 +543,7 @@ nunca removido, catálogo fora da sincronização por usuário). O schema em
 documento inteiro, nunca last-write-wins silencioso — inclusive peso, pelo
 motivo já registrado em §8.2: uma única regra sem exceção por "isso é só um
 número" é mais fácil de manter correta do que uma tabela de casos especiais.
+**Revertido em 17/09/2026 — ver §26.**
 
 **2. Merge por `Meal.id` — confirmado, só para `FoodLog`.** `Diet` e
 `Routine` continuam documento inteiro. Nenhuma outra entidade ganha merge
@@ -2067,3 +2076,75 @@ desenho do §19.5/§23. Nenhum conflito falso apareceu no fluxo normal.
 O ataque adversarial com dois dispositivos de verdade em `/diario` (não
 só via `execute_sql` simulando um lado) fica para a próxima sessão,
 como o Pedro já anunciou que faria manualmente.
+
+---
+
+## 26. Reversão da regra de conflito — LWW automático (17/09/2026)
+
+**A regra fechada em §17.1 ("conflito visível sempre, inclusive peso") foi
+revertida.** Motivo: incidente real relatado pelo Pedro — editou dieta,
+refeições e treino no celular, abriu o app no PC depois, e o app manteve a
+versão mais antiga do PC por cima da edição mais recente do celular. A
+investigação desta sprint (releitura completa deste documento + do código em
+`src/composition/sync/*`) confirmou que o motor **não é** "último dispositivo
+que sincronizou vence" — já era conflito visível, exatamente como §17.1
+especificava. O incidente foi, na prática, essa mesma tela de conflito sendo
+interpretada como "o app escolheu errado" no momento em que apareceu.
+
+Perguntado se mantinha conflito visível (mais seguro, pede uma escolha
+ocasional) ou trocava por "mais recente vence" automático mesmo quando o
+conteúdo diverge de verdade (mais parecido com o pedido original, mas pode
+descartar uma edição real sem perguntar), **o Pedro escolheu o automático,
+sabendo do risco.** Essa escolha é o que este documento passa a refletir —
+não uma correção técnica, uma decisão de produto nova por cima da anterior.
+
+**O que muda, e o que não muda:**
+
+- `Profile`, `Diet`, `Routine`, `BodyEntry`, `Session` (finalizada) e `FoodLog`
+  (no nível de `Meal`, não do dia inteiro — §8.3 continua valendo como está)
+  passam a resolver divergência real comparando `updatedAt` de cada lado
+  (`client_updated_at`), não mais entrando em `CONFLICT`. Lado mais novo
+  aplica; lado mais antigo permanece pendente e vence no próximo push, porque
+  o `expected` que ele carrega bate com o `server_updated_at` recém-aprendido
+  nesse pull — nunca um `UPDATE` direto, sempre pela mesma escrita condicional
+  (`save_*`/RPC) de antes.
+- **Empate exato de timestamp continua em conflito visível.** Não existe uma
+  terceira regra para um caso que praticamente não acontece na prática — as
+  telas `*ConflictCard` continuam no código, servindo de rede de segurança
+  só para esse caso, não removidas.
+- **O risco documentado em §8.5 (relógio do cliente não é confiável entre
+  dispositivos) continua existindo e agora é aceito, não evitado.**
+  `client_updated_at` — não `server_updated_at` — é o que decide quem ganha
+  quando os dois lados divergem de verdade, porque é a única informação
+  disponível sobre "quando a edição aconteceu de verdade" nos dois lados: o
+  `server_updated_at` de um lado pendente só existe depois que a escrita
+  chega ao servidor, então comparar só por ele reduziria a regra a "quem
+  sincronizou primeiro vence" — exatamente o antipadrão que o Pedro pediu
+  para evitar desde o início. Dois relógios de sistema desincronizados por
+  minutos ainda podem, em teoria, fazer o timestamp errado parecer mais novo;
+  é o preço explícito da troca.
+- `§9` (tombstone) não muda: apagar não carrega um `updatedAt` de "quando foi
+  apagado" comparável a uma edição, então apagar-de-um-lado-e-editar-do-outro
+  continua em conflito visível em todo lugar — é o único caminho de conflito
+  que sobrou depois da reversão.
+
+**Bug real encontrado e corrigido durante a implementação, fora do escopo
+original desta mudança de política:** `pullFoodLog` carimbava
+`updatedAt: Date.now()` incondicionalmente em toda leitura, contaminando o
+próprio timestamp que a nova regra de LWW compara. Corrigido para
+`Math.max(currentLocal?.updatedAt ?? 0, row.client_updated_at)` — o maior dos
+dois `updatedAt` reais, nunca o relógio de quando o pull aconteceu.
+
+**Refeito:** os cinco `*.adversarial.test.ts` (Profile, Diet, Routine,
+Session, BodyEntry) mais `food-log-sync.adversarial.test.ts` e
+`sync-engine.test.ts` — os cenários "dois dispositivos editam a mesma
+entidade" que esperavam `status: "conflict"` passaram a esperar resolução
+automática pelo lado mais novo, com um par de testes por entidade cobrindo
+as duas direções (PC velho + celular novo, e o inverso) mais o caso de
+empate exato como único conflito restante.
+
+**Novo nesta sprint, sem relação com a mudança de política acima:**
+`core/storage/store-events.ts` — nenhuma tela sabia que outra tela (ou um
+pull de sync em segundo plano) tinha escrito no mesmo store; corrigido de
+forma central para todo o app, não só o Diário. Detalhe em
+`docs/roadmap.md`.

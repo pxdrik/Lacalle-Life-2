@@ -5,6 +5,63 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## 🔧 EM ANDAMENTO — Sincronização vira "mais recente vence" automático + 4 telas — 17/09/2026
+
+Pedro relatou perda de dado real: editou dieta/refeições/treino no celular,
+abriu o PC depois, e o app manteve a versão mais antiga do PC por cima da
+edição mais recente do celular. Pedido: corrigir a sincronização pro app
+inteiro (prioridade 1, nunca apagar dado mais novo), e mais 6 ajustes de UI
+em Treino/Dieta/Diário com Macros/Hevy como referência de densidade — sem
+virar cópia visual deles. Detalhe completo da decisão e do que mudou em
+`docs/arquitetura-sincronizacao.md` §26.
+
+**Parte A — Sincronização, entregue e testada:**
+
+- ✅ **Investigação primeiro.** O motor **não era** "último dispositivo que
+  sincronizou vence" — já existia conflito visível com controle de
+  concorrência otimista contra `server_updated_at` (carimbado pelo Postgres,
+  nunca pelo relógio do cliente). O incidente relatado era essa mesma tela
+  de conflito. Perguntado se mantinha conflito visível (mais seguro) ou
+  trocava por "mais recente vence" automático mesmo quando o conteúdo
+  diverge de verdade (risco de descartar uma edição real sem perguntar),
+  **o Pedro escolheu o automático, sabendo do risco.**
+- ✅ **LWW automático por `updatedAt`** em `Profile`, `Diet`, `Routine`,
+  `BodyEntry`, `Session` e `FoodLog` (por `Meal.id`) — lado mais novo aplica,
+  lado mais antigo permanece pendente e vence no próximo push pela mesma
+  escrita condicional de sempre (`save_*`/RPC), nunca um `UPDATE` direto.
+  Empate exato de timestamp continua em conflito visível — único caso que
+  sobrou. Commit `6fcda84`.
+- ✅ **Bug real encontrado e corrigido:** `pullFoodLog` carimbava
+  `updatedAt: Date.now()` em toda leitura, contaminando o timestamp que a
+  nova regra compara. Corrigido para o maior dos dois `updatedAt` reais.
+  Mesmo commit.
+- ✅ **Causa do "preciso dar refresh manual":** nenhuma tela sabia que outra
+  tela (ou um pull de sync em segundo plano) tinha escrito no mesmo store.
+  `core/storage/store-events.ts` novo, central para todo o app — toda
+  escrita local e todo pull avisam, os hooks de leitura (`useDietList`,
+  `useFoodLogDay`, `useRoutineList`, `useSessionHistory`, `useBodyLog`)
+  assinam e recarregam sozinhos. `useProfile` ficou de fora de propósito —
+  já tem mecanismo próprio (`onProfileChanged`), usado pela tela de loading
+  do botão de sincronizar manual. Commit `299da9d`.
+- ✅ **Testes:** os 6 `*.adversarial.test.ts` (um por entidade) reescritos
+  para a nova regra, cobrindo as duas direções (PC velho + celular novo, e o
+  inverso), entidades diferentes sobrevivendo em paralelo, edição offline
+  vencendo depois de sincronizar, idempotência de sync repetido, e o novo
+  `use-diet-list.test.tsx` provando que uma dieta criada em outro lugar
+  aparece sem F5. `npm run verify` (typecheck + lint + 1687 testes) verde.
+
+**Parte B — 4 telas, ainda não iniciada:**
+
+- ⏳ Diário: prévia dos alimentos de cada refeição em "Planejado para".
+- ⏳ Dieta: cards mais compactos (cabeçalho + barra de macro fina + menu de
+  ações), com o Macros como referência direta de densidade.
+- ⏳ Dieta: "Adicionar alimento" vira página dedicada, não dropdown inline.
+- ⏳ Treino: remover os steppers −1/+1/−2,5/+2,5, manter edição por digitação.
+- ⏳ Treino: RPE vira bottom sheet (reaproveitando `Dialog
+  placement="sheet-bottom"`, já existente), não `<select>` nativo.
+
+---
+
 ## ✅ Três bugs visuais mobile achados em uso real: campos do Treino, gráfico da Evolução, densidade do Diário — 16/09/2026
 
 Pedro testou o app no celular esta semana e trouxe 3 problemas concretos,
