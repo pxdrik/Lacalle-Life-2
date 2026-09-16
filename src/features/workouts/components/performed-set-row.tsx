@@ -25,8 +25,28 @@ interface Props {
   readonly onRemove: () => void;
 }
 
+/**
+ * Fixed width, not `w-full` inside a `flex-1` column.
+ *
+ * **Measured live (17/09/2026): `w-full` here rendered at 21.86px** — under
+ * its own left+right padding combined — instead of the ~58px its `flex-1`
+ * column actually had available. The field is counter-zoomed against the
+ * page's `--ui-scale` (see `tokens.css`, `input, select, textarea { zoom:
+ * calc(1 / var(--ui-scale)) }`, kept for the real reason: a field's text has
+ * to render at true 16px or iOS Safari zooms the viewport on focus) — and a
+ * percentage width resolved against a *flex-grow-computed* parent width,
+ * on an element with its own `zoom`, does not resolve correctly. `RpeSelect`
+ * never hit this: its wrapper is a plain `w-16`, an **authored** fixed width,
+ * not one flex-grow hands it — and percentage-against-fixed resolved fine.
+ * That mismatch is also why RPE read as a different size than reps/peso.
+ *
+ * The fix follows the same working pattern: an authored fixed width instead
+ * of a percentage of a computed one. It is also, separately, closer to the
+ * reference apps Pedro pointed at (Hevy, MacroFactor) — a set row of a few
+ * fixed pills, not fields stretched to fill whatever space is left.
+ */
 const FIELD =
-  "h-11 w-full rounded-md border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
+  "h-11 rounded-md border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -71,15 +91,15 @@ export function PerformedSetRow({
         set.isCompleted && "border-line bg-muted",
       )}
     >
-      <div className="flex items-center gap-2">
-        <span className="w-6 shrink-0 text-center text-sm tabular-nums text-ink-subtle">
+      <div className="flex items-center justify-between gap-px">
+        <span className="w-4 shrink-0 text-center text-sm tabular-nums text-ink-subtle">
           {number}
         </span>
 
         {/* What was planned, sitting under the field it refers to — a target you
           have to remember is a target you ignore. */}
         {isCardio ? (
-          <div className="flex-[2]">
+          <div className="shrink-0">
             <DurationField
               value={set.durationSeconds}
               label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
@@ -88,6 +108,7 @@ export function PerformedSetRow({
               }}
               className={cn(
                 FIELD,
+                "w-24",
                 set.isCompleted ? "border-line" : "border-line-strong",
               )}
             />
@@ -103,7 +124,7 @@ export function PerformedSetRow({
           </div>
         ) : (
           <>
-            <div className="flex-1">
+            <div className="shrink-0">
               <input
                 type="text"
                 inputMode="numeric"
@@ -115,13 +136,14 @@ export function PerformedSetRow({
                 }}
                 className={cn(
                   FIELD,
+                  "w-14",
                   set.isCompleted ? "border-line" : "border-line-strong",
                 )}
               />
               <Planned value={set.planned?.reps ?? null} suffix="reps" />
             </div>
 
-            <div className="flex-1">
+            <div className="shrink-0">
               <WeightField
                 value={set.weightKg}
                 label={`Peso da série ${String(number)} de ${exerciseName}`}
@@ -130,6 +152,7 @@ export function PerformedSetRow({
                 }}
                 className={cn(
                   FIELD,
+                  "w-16",
                   set.isCompleted ? "border-line" : "border-line-strong",
                 )}
               />
@@ -141,14 +164,14 @@ export function PerformedSetRow({
         {/* RPE reports effort against a rep/weight target — a treadmill has
             neither, so there is nothing here for it to rate. */}
         {!isCardio && (
-          <div className="w-16 shrink-0">
+          <div className="shrink-0">
             <RpeSelect
               value={set.rpe}
               label={`RPE da série ${String(number)} de ${exerciseName}`}
               onChange={(rpe) => {
                 onChange({ rpe });
               }}
-              className="h-11 w-full"
+              className="h-11 w-14"
             />
             <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
           </div>
@@ -218,7 +241,7 @@ export function PerformedSetRow({
       {/* Cardio has no stepper: a duration is typed, not nudged by a fixed
           rep or plate increment — there is no equivalent "usual" step. */}
       {isNext && !set.isCompleted && !isCardio && (
-        <div className="mt-1.5 flex items-center gap-1.5 pl-8">
+        <div className="mt-1.5 flex items-center gap-1.5 pl-5">
           <Step
             label={`Menos uma repetição na série ${String(number)} de ${exerciseName}`}
             onClick={() => {

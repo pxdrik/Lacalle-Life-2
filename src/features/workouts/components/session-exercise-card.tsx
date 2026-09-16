@@ -88,18 +88,18 @@ export function SessionExerciseCard({
           being done. */}
       <div
         aria-hidden
-        className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
+        className="mt-3 flex items-center justify-between gap-0.5 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
       >
-        <span className="w-6 text-center">#</span>
+        <span className="w-4 text-center">#</span>
         {isCardio ? (
-          <span className="flex-[2] text-center">Duração (min)</span>
+          <span className="w-24 text-center">Duração (min)</span>
         ) : (
           <>
-            <span className="flex-1 text-center">Reps</span>
-            <span className="flex-1 text-center">Peso</span>
+            <span className="w-14 text-center">Reps</span>
+            <span className="w-16 text-center">Peso</span>
           </>
         )}
-        {!isCardio && <span className="w-16 text-center">RPE</span>}
+        {!isCardio && <span className="w-14 text-center">RPE</span>}
         <span className="w-11 shrink-0" />
         <span className="w-11 shrink-0 sm:w-7" />
       </div>
