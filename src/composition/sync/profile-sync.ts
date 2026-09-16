@@ -5,6 +5,7 @@ import {
   getExpectedServerUpdatedAt,
   markClean,
   markConflict,
+  markPendingWithSnapshot,
   forcePendingAfterResolution,
   trackerId,
   type SyncTracker,
@@ -202,6 +203,28 @@ export async function pullProfile(
     (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
   ) {
     if (currentLocal !== undefined && profilesEqual(currentLocal, remote)) {
+      await localOnly.save(remote, currentLocal.updatedAt);
+      await markClean(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
+      return { status: "applied" };
+    }
+
+    // "Mais recente vence" automático por `updatedAt` — mesma decisão e
+    // mesmo raciocínio completo de `pullAllDiets` em `diet-sync.ts`.
+    if (currentLocal !== undefined && currentLocal.updatedAt >= remote.updatedAt) {
+      // Local mais novo: mantém como está, só atualiza a versão do servidor
+      // conhecida — o estado resultante é exatamente "pendente, ainda não
+      // enviado", que é o que o próximo push já resolve sozinho.
+      await markPendingWithSnapshot(
+        tracker,
+        STORE_NAME,
+        PROFILE_ID,
+        row.server_updated_at,
+        undefined,
+      );
+      return { status: "pending-unpushed" };
+    }
+
+    if (currentLocal !== undefined) {
       await localOnly.save(remote, currentLocal.updatedAt);
       await markClean(tracker, STORE_NAME, PROFILE_ID, row.server_updated_at);
       return { status: "applied" };

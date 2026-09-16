@@ -6,7 +6,7 @@ import { LocalDietRepository } from "@/features/diet/data/local-diet-repository"
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import type { Diet } from "@/features/diet/types/diet";
 
-import { pullAllDiets, pushAllDiets, resolveDietConflict } from "./diet-sync";
+import { pullAllDiets, pushAllDiets } from "./diet-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 import { chainableEqLazy } from "./sync-query-builder.test-helper";
 
@@ -158,9 +158,17 @@ function device(server: FakeServer) {
 
 type Device = ReturnType<typeof device>;
 
-async function editLocally(dev: Device, id: string, name: string) {
+async function editLocally(
+  dev: Device,
+  id: string,
+  name: string,
+  updatedAt?: number,
+) {
   const current = await dev.local.getById(id);
-  await dev.local.save(diet(id, { name }), current?.updatedAt ?? null);
+  await dev.local.save(
+    diet(id, { name, ...(updatedAt !== undefined && { updatedAt }) }),
+    current?.updatedAt ?? null,
+  );
   await markPending(dev.tracker, "diets", id);
 }
 
@@ -243,31 +251,64 @@ describe("motor de sync de Diet — ataque adversarial", () => {
     });
   });
 
-  it("5. A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita", async () => {
+  it("5a. B mais recente vence automaticamente: A recebe a edição de B via pull, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await editLocally(b, "dieta-1", "De B");
+    await editLocally(b, "dieta-1", "De B", 2000);
     await sync(b);
 
-    await editLocally(a, "dieta-1", "De A, sem saber de B");
+    await editLocally(a, "dieta-1", "De A, sem saber de B", 1000);
     const { pull } = await sync(a);
 
     expect(pull.status).toBe("done");
     if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toEqual([
-      { dietId: "dieta-1", local: expect.objectContaining({ name: "De A, sem saber de B" }), remote: expect.objectContaining({ name: "De B" }) },
-    ]);
-    expect((await a.local.getById("dieta-1"))?.name).toBe("De A, sem saber de B");
-    expect((await a.tracker.get("diets:dieta-1"))?.status).toBe("conflict");
+    // Decisão do Pedro (17/09/2026): "mais recente vence" automático — B
+    // (2000) é mais novo que A (1000), então o pull aplica B sem perguntar.
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("dieta-1"))?.name).toBe("De B");
+    expect((await a.tracker.get("diets:dieta-1"))?.status).toBe("clean");
+  });
 
-    // Resolução "manter local": destrava e o próximo push sobrescreve B.
-    await resolveDietConflict(a.tracker, a.local, "dieta-1", "keep-local", pull.conflicts[0]?.remote ?? null);
+  it("5b. A mais recente vence automaticamente: a edição local de A sobrevive ao pull e é o que chega ao servidor no próximo push", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, "dieta-1", "De B", 1000);
+    await sync(b);
+
+    await editLocally(a, "dieta-1", "De A, mais nova", 2000);
+    const { pull } = await sync(a);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toEqual([]);
+    // A edição local não foi tocada — continua pendente, esperando o
+    // próximo push (que agora tem a versão do servidor certa para o OCC).
+    expect((await a.local.getById("dieta-1"))?.name).toBe("De A, mais nova");
     expect((await a.tracker.get("diets:dieta-1"))?.status).toBe("pending");
+
     expect(await pushAllDiets(a.client, a.tracker, a.local)).toMatchObject({
       pushed: ["dieta-1"],
     });
-    expect(server.row("dieta-1")?.payload.name).toBe("De A, sem saber de B");
+    expect(server.row("dieta-1")?.payload.name).toBe("De A, mais nova");
+  });
+
+  it("5c. empate exato de updatedAt desempata a favor do local, sem conflito e sem perder a edição de ninguém", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, "dieta-1", "De B", 1500);
+    await sync(b);
+
+    await editLocally(a, "dieta-1", "De A, mesmo instante", 1500);
+    const { pull } = await sync(a);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("dieta-1"))?.name).toBe("De A, mesmo instante");
+    expect((await a.tracker.get("diets:dieta-1"))?.status).toBe("pending");
   });
 
   it("6. queda de rede durante o push: a pendência local sobrevive intacta, retry funciona", async () => {
@@ -362,8 +403,10 @@ describe("motor de sync de Diet — ataque adversarial", () => {
     await sync(a);
     await sync(b);
 
-    // A edita as duas; B edita só a que vai conflitar.
-    await editLocally(a, "dieta-conflito", "Editada por A");
+    // A apaga a que vai conflitar (edição-vs-edição não bloqueia mais desde
+    // a decisão do Pedro de 17/09/2026 — só apagar-vs-editar ainda produz
+    // conflito visível, ver o teste 12a/12b) e edita a outra.
+    await deleteLocally(a, "dieta-conflito");
     await editLocally(a, "dieta-tranquila", "Também editada por A");
     await sync(a);
 

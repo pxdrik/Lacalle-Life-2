@@ -124,9 +124,10 @@ function device(server: FakeServer) {
 async function setMeals(
   device: { local: LocalFoodLogRepository; tracker: MemoryStore<SyncTracker> },
   meals: readonly Meal[],
+  updatedAt?: number,
 ) {
   const current = await device.local.getByDay(DAY);
-  const now = Date.now();
+  const now = updatedAt ?? Date.now();
   await device.local.save(
     {
       id: DAY,
@@ -172,18 +173,67 @@ describe("push/pullFoodLog — orquestração", () => {
     expect(aLog?.meals.map((m) => m.id).sort()).toEqual(["meal-A", "meal-B"]);
   });
 
-  it("2. mesmo Meal.id editado nos dois dispositivos: pull bloqueia o dia inteiro até resolução", async () => {
+  it("2a. mesmo Meal.id editado nos dois dispositivos: dia mais recente vence automaticamente, sem bloquear (decisão do Pedro, 17/09/2026)", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [meal("meal-A", { name: "Original" })]);
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
     await pushFoodLog(a.client, a.tracker, a.local, DAY);
     await pullFoodLog(b.client, b.tracker, b.local, DAY); // B agora conhece meal-A, snapshot em dia.
 
-    await setMeals(a, [meal("meal-A", { name: "Editado por A" })]);
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 2000);
     await pushFoodLog(a.client, a.tracker, a.local, DAY);
 
-    await setMeals(b, [meal("meal-A", { name: "Editado por B" })]);
+    // B editou depois de A (dia inteiro mais recente) — vence automático.
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 3000);
+    const pull = await pullFoodLog(b.client, b.tracker, b.local, DAY);
+
+    expect(pull.status).toBe("pending-unpushed");
+    const bLog = await b.local.getByDay(DAY);
+    expect(bLog?.meals.find((m) => m.id === "meal-A")?.name).toBe("Editado por B");
+
+    expect(await pushFoodLog(b.client, b.tracker, b.local, DAY)).toEqual({ status: "pushed" });
+    expect(server.currentRow()?.payload.meals.find((m) => m.id === "meal-A")?.name).toBe(
+      "Editado por B",
+    );
+  });
+
+  it("2b. mesmo Meal.id editado nos dois dispositivos: A é mais recente, sua edição sobrevive ao pull em vez de ser sobrescrita", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
+    await pushFoodLog(a.client, a.tracker, a.local, DAY);
+    await pullFoodLog(b.client, b.tracker, b.local, DAY);
+
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 2000);
+    await pushFoodLog(b.client, b.tracker, b.local, DAY);
+
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 3000);
+    const pull = await pullFoodLog(a.client, a.tracker, a.local, DAY);
+
+    expect(pull.status).toBe("pending-unpushed");
+    const aLog = await a.local.getByDay(DAY);
+    expect(aLog?.meals.find((m) => m.id === "meal-A")?.name).toBe("Editado por A");
+
+    expect(await pushFoodLog(a.client, a.tracker, a.local, DAY)).toEqual({ status: "pushed" });
+    expect(server.currentRow()?.payload.meals.find((m) => m.id === "meal-A")?.name).toBe(
+      "Editado por A",
+    );
+  });
+
+  it("2c. empate exato de updatedAt do dia ainda é conflito visível — o único caso restante, resolução manual continua funcionando", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
+    await pushFoodLog(a.client, a.tracker, a.local, DAY);
+    await pullFoodLog(b.client, b.tracker, b.local, DAY); // B agora conhece meal-A, snapshot em dia.
+
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 2000);
+    await pushFoodLog(a.client, a.tracker, a.local, DAY);
+
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 2000);
     const pull = await pullFoodLog(b.client, b.tracker, b.local, DAY);
 
     expect(pull.status).toBe("conflict");
@@ -214,18 +264,18 @@ describe("push/pullFoodLog — orquestração", () => {
     );
   });
 
-  it("2b. resolução 'usar servidor' aplica o valor remoto em vez do local", async () => {
+  it("2d. empate exato: resolução 'usar servidor' aplica o valor remoto em vez do local", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [meal("meal-A", { name: "Original" })]);
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
     await pushFoodLog(a.client, a.tracker, a.local, DAY);
     await pullFoodLog(b.client, b.tracker, b.local, DAY);
 
-    await setMeals(a, [meal("meal-A", { name: "Editado por A" })]);
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 2000);
     await pushFoodLog(a.client, a.tracker, a.local, DAY);
 
-    await setMeals(b, [meal("meal-A", { name: "Editado por B" })]);
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 2000);
     const pull = await pullFoodLog(b.client, b.tracker, b.local, DAY);
     if (pull.status !== "conflict") throw new Error("unreachable");
 

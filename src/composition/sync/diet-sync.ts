@@ -6,6 +6,7 @@ import {
   listPending,
   markClean,
   markConflict,
+  markPendingWithSnapshot,
   forcePendingAfterResolution,
   trackerId,
   type SyncTracker,
@@ -287,6 +288,44 @@ export async function pullAllDiets(
       (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
     ) {
       if (currentLocal !== undefined && dietsEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
+        continue;
+      }
+
+      // Conteúdo diverge de verdade. Decisão do Pedro (17/09/2026): "mais
+      // recente vence" automático, comparando o `updatedAt` que cada lado
+      // já carrega desde a própria edição — nunca o relógio deste
+      // dispositivo contra si mesmo, nunca "quem sincronizou primeiro".
+      // Risco aceito conscientemente: dois relógios de sistema
+      // desincronizados entre PC e celular ainda podem fazer o lado
+      // "errado" parecer mais novo — docs/arquitetura-sincronizacao.md §8.5
+      // registrava exatamente esse risco como motivo para nunca fazer
+      // isto; a decisão foi revertida agora, de olhos abertos (ver §8.1).
+      //
+      // Só cobre edição-vs-edição (`currentLocal !== undefined`): uma
+      // exclusão local não carrega timestamp próprio nenhum hoje (o
+      // tracker não grava "quando foi apagado"), então não há o que
+      // comparar — apagar-vs-editar continua conflito visível, não um
+      // palpite.
+      if (currentLocal !== undefined && currentLocal.updatedAt >= remote.updatedAt) {
+        // Local mais novo (empate desempata a favor de quem já está aqui,
+        // para nunca descartar a única edição real por coincidência de
+        // milissegundo). Mantém o local como está — só atualiza a versão
+        // do servidor conhecida, para o próximo push não bater conflito à
+        // toa contra um `expected` desatualizado.
+        await markPendingWithSnapshot(
+          tracker,
+          STORE_NAME,
+          row.id,
+          row.server_updated_at,
+          undefined,
+        );
+        continue;
+      }
+
+      if (currentLocal !== undefined) {
+        // Remoto mais novo: aplica por cima da edição local pendente.
         await localOnly.save(remote, currentLocal.updatedAt);
         await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
         continue;

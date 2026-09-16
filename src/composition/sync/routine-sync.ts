@@ -6,6 +6,7 @@ import {
   listPending,
   markClean,
   markConflict,
+  markPendingWithSnapshot,
   forcePendingAfterResolution,
   trackerId,
   type SyncTracker,
@@ -256,6 +257,25 @@ export async function pullAllRoutines(
       (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
     ) {
       if (currentLocal !== undefined && routinesEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
+        continue;
+      }
+
+      // "Mais recente vence" automático por `updatedAt` — mesma decisão e
+      // mesmo raciocínio completo de `pullAllDiets` em `diet-sync.ts`.
+      if (currentLocal !== undefined && currentLocal.updatedAt >= remote.updatedAt) {
+        await markPendingWithSnapshot(
+          tracker,
+          STORE_NAME,
+          row.id,
+          row.server_updated_at,
+          undefined,
+        );
+        continue;
+      }
+
+      if (currentLocal !== undefined) {
         await localOnly.save(remote, currentLocal.updatedAt);
         await markClean(tracker, STORE_NAME, row.id, row.server_updated_at);
         continue;

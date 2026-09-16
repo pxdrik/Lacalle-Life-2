@@ -100,7 +100,17 @@ export async function pushFoodLog(
   const log = await localOnly.getByDay(day);
   const snapshot = snapshotFrom(entry);
   const localMeals = log?.meals ?? [];
-  const asWire = mergeFoodLogMeals(localMeals, snapshot ?? [], snapshot).wireMeals;
+  // Mescla contra o próprio snapshot — nunca há um segundo lado real aqui
+  // (remoto === snapshot), então os timestamps de desempate nunca chegam a
+  // ser comparados; o valor exato não importa.
+  const selfUpdatedAt = log?.updatedAt ?? Date.now();
+  const asWire = mergeFoodLogMeals(
+    localMeals,
+    snapshot ?? [],
+    snapshot,
+    selfUpdatedAt,
+    selfUpdatedAt,
+  ).wireMeals;
   const expected = getExpectedServerUpdatedAt(entry);
 
   const { data, error } = await client.rpc<{
@@ -190,7 +200,16 @@ export async function pullFoodLog(
   const currentLocal = await localOnly.getByDay(day);
   const localMeals = currentLocal?.meals ?? [];
 
-  const merge = mergeFoodLogMeals(localMeals, parsed.data.meals, snapshot);
+  // "Mais recente vence" por `updatedAt` do dia inteiro (decisão do Pedro,
+  // 17/09/2026) — granularidade de refeição não existe, `Meal` não carrega
+  // timestamp próprio. Ver o raciocínio completo em `food-log-merge.ts`.
+  const merge = mergeFoodLogMeals(
+    localMeals,
+    parsed.data.meals,
+    snapshot,
+    currentLocal?.updatedAt ?? 0,
+    row.client_updated_at,
+  );
 
   if (merge.conflicts.length > 0) {
     await markConflict(tracker, STORE_NAME, day, row.server_updated_at, merge.wireMeals);
@@ -198,13 +217,22 @@ export async function pullFoodLog(
   }
 
   const now = Date.now();
+  // Nunca `Date.now()` aqui — carimbar "agora" a cada pull contaminaria o
+  // `updatedAt` com o momento da última tentativa de sincronizar, não da
+  // última edição de verdade, e é exatamente o timestamp que a regra
+  // "mais recente vence" (A.1) compara entre dispositivos. O maior dos dois
+  // lados que entraram no merge preserva a semântica de "quando alguém
+  // editou de verdade" — igual ao que `pullAllDiets`/etc já fazem ao
+  // gravar `remote.updatedAt` (o `client_updated_at` original) em vez de
+  // recarimbar. `now` só serve de `createdAt` para um dia nunca visto local.
+  const nextUpdatedAt = Math.max(currentLocal?.updatedAt ?? 0, row.client_updated_at);
   const nextLog: FoodLog = {
     id: day,
     day,
     meals: merge.liveMeals,
     dietId: currentLocal?.dietId ?? parsed.data.dietId,
     createdAt: currentLocal?.createdAt ?? now,
-    updatedAt: now,
+    updatedAt: nextUpdatedAt,
   };
   await localOnly.save(nextLog, currentLocal?.updatedAt ?? null);
 

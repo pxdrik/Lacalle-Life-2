@@ -126,9 +126,9 @@ function device(server: FakeServer) {
 
 type Device = ReturnType<typeof device>;
 
-async function setMeals(dev: Device, meals: readonly Meal[]) {
+async function setMeals(dev: Device, meals: readonly Meal[], updatedAt?: number) {
   const current = await dev.local.getByDay(DAY);
-  const now = Date.now();
+  const now = updatedAt ?? Date.now();
   await dev.local.save(
     {
       id: DAY,
@@ -180,21 +180,50 @@ describe("FoodLog — campanha adversarial com dois dispositivos", () => {
     expect(bLog?.meals.map((m) => m.id).sort()).toEqual(["meal-A", "meal-B"]);
   });
 
-  it("2. mesmo Meal.id editado nos dois dispositivos vira conflito visível, bloqueando o dia", async () => {
+  it("2a. mesmo Meal.id editado nos dois dispositivos: o dia mais recente vence automaticamente, sem bloquear o outro (decisão do Pedro, 17/09/2026)", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [meal("meal-A", { name: "Original" })]);
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
     await sync(a);
     await sync(b); // B fica sabendo de meal-A.
 
-    await setMeals(a, [meal("meal-A", { name: "Editado por A" })]);
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 2000);
     await sync(a);
 
-    await setMeals(b, [meal("meal-A", { name: "Editado por B" })]);
+    // B editou depois de A (dia inteiro mais recente) — vence automático.
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 3000);
     const { pull } = await sync(b);
 
-    expect(pull.status).toBe("conflict");
+    expect(pull.status).toBe("pending-unpushed");
+    expect((await b.local.getByDay(DAY))?.meals[0]?.name).toBe("Editado por B");
+
+    await sync(b);
+    expect(server.currentRow()?.payload.meals[0]?.name).toBe("Editado por B");
+
+    await sync(a);
+    expect((await a.local.getByDay(DAY))?.meals[0]?.name).toBe("Editado por B");
+  });
+
+  it("2b. mesmo Meal.id editado nos dois dispositivos: A é mais recente, sua edição sobrevive ao pull de B em vez de ser sobrescrita", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
+    await sync(a);
+    await sync(b);
+
+    // A edita por último (dia mais recente), mas B sincroniza primeiro.
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 2000);
+    await setMeals(a, [meal("meal-A", { name: "Editado por A" })], 3000);
+    await sync(b);
+
+    const { pull } = await sync(a);
+    expect(pull.status).toBe("pending-unpushed");
+    expect((await a.local.getByDay(DAY))?.meals[0]?.name).toBe("Editado por A");
+
+    await sync(a);
+    expect(server.currentRow()?.payload.meals[0]?.name).toBe("Editado por A");
   });
 
   it("3. A exclui Meal A, B ainda tem a cópia antiga sem editar: exclusão não é ressuscitada", async () => {
@@ -214,38 +243,46 @@ describe("FoodLog — campanha adversarial com dois dispositivos", () => {
     expect(bLog?.meals.find((m) => m.id === "meal-A")).toBeUndefined();
   });
 
-  it("4a. exclusão + edição concorrente, A sincroniza primeiro: resultado é conflito", async () => {
+  it("4a. exclusão + edição concorrente, A sincroniza primeiro: a edição de B (mais recente) vence automaticamente, independente da ordem de sincronização", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [meal("meal-A", { name: "Original" })]);
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
     await sync(a);
     await sync(b);
 
-    await setMeals(a, []); // A apaga.
-    await setMeals(b, [meal("meal-A", { name: "Editado por B" })]); // B edita.
+    await setMeals(a, [], 2000); // A apaga.
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 3000); // B edita depois.
 
     await sync(a);
     const { pull } = await sync(b);
 
-    expect(pull.status).toBe("conflict");
+    expect(pull.status).toBe("pending-unpushed");
+    expect((await b.local.getByDay(DAY))?.meals.map((m) => m.id)).toEqual(["meal-A"]);
   });
 
-  it("4b. exclusão + edição concorrente, B sincroniza primeiro: mesmo resultado do 4a (determinístico)", async () => {
+  it("4b. exclusão + edição concorrente, B sincroniza primeiro: mesmo resultado do 4a — a ordem de sincronização não decide, o `updatedAt` real decide", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [meal("meal-A", { name: "Original" })]);
+    await setMeals(a, [meal("meal-A", { name: "Original" })], 1000);
     await sync(a);
     await sync(b);
 
-    await setMeals(a, []);
-    await setMeals(b, [meal("meal-A", { name: "Editado por B" })]);
+    await setMeals(a, [], 2000);
+    await setMeals(b, [meal("meal-A", { name: "Editado por B" })], 3000);
 
     await sync(b); // Ordem invertida em relação ao 4a.
     const { pull } = await sync(a);
 
-    expect(pull.status).toBe("conflict");
+    // Mesmo conteúdo final do 4a (meal-A sobrevive com a edição de B), mas
+    // o status é diferente por um motivo real, não uma inconsistência: em
+    // 4a é B quem "ganha" com o próprio conteúdo local, então falta um
+    // push para o servidor saber; aqui é A quem adota o conteúdo vindo do
+    // outro lado, que já é exatamente o que o servidor já tem — nada para
+    // enviar.
+    expect(pull.status).toBe("applied");
+    expect((await a.local.getByDay(DAY))?.meals.map((m) => m.id)).toEqual(["meal-A"]);
   });
 
   it("5. offline: cria, edita e apaga várias refeições antes de reconectar; sync não duplica nada", async () => {
@@ -410,25 +447,35 @@ describe("FoodLog — campanha adversarial com dois dispositivos", () => {
     const a = device(server);
     const b = device(server);
 
-    await setMeals(a, [
-      meal("meal-A", { name: "Café" }),
-      meal("meal-B", { name: "Almoço" }),
-    ]);
+    await setMeals(
+      a,
+      [meal("meal-A", { name: "Café" }), meal("meal-B", { name: "Almoço" })],
+      1000,
+    );
     await sync(a);
     await sync(b);
 
-    // A edita meal-C (nova) e meal-B (conflito) ao mesmo tempo.
-    await setMeals(a, [
-      meal("meal-A", { name: "Café" }),
-      meal("meal-B", { name: "Almoço - editado por A" }),
-    ]);
+    // A edita meal-B, no mesmo instante (day-level `updatedAt` empatado) em
+    // que B edita meal-B e cria meal-C — o único cenário que ainda produz
+    // conflito visível desde a decisão de "mais recente vence"
+    // (17/09/2026): sem isso, qualquer divergência real se resolveria
+    // sozinha e este ataque de granularidade não teria mais como acontecer.
+    await setMeals(
+      a,
+      [meal("meal-A", { name: "Café" }), meal("meal-B", { name: "Almoço - editado por A" })],
+      2000,
+    );
     await sync(a);
 
-    await setMeals(b, [
-      meal("meal-A", { name: "Café" }),
-      meal("meal-B", { name: "Almoço - editado por B" }),
-      meal("meal-C", { name: "Jantar novo, sem conflito" }),
-    ]);
+    await setMeals(
+      b,
+      [
+        meal("meal-A", { name: "Café" }),
+        meal("meal-B", { name: "Almoço - editado por B" }),
+        meal("meal-C", { name: "Jantar novo, sem conflito" }),
+      ],
+      2000,
+    );
     const { pull } = await sync(b);
 
     expect(pull.status).toBe("conflict");

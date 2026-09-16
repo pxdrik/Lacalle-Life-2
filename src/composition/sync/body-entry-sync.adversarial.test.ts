@@ -7,7 +7,7 @@ import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { EMPTY_MEASUREMENTS } from "@/features/body/services/body-log";
 import type { BodyEntry } from "@/features/body/types/body-entry";
 
-import { pullAllBodyEntries, pushAllBodyEntries, resolveBodyEntryConflict } from "./body-entry-sync";
+import { pullAllBodyEntries, pushAllBodyEntries } from "./body-entry-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 import { chainableEqLazy } from "./sync-query-builder.test-helper";
 
@@ -186,9 +186,17 @@ function device(server: FakeServer) {
 
 type Device = ReturnType<typeof device>;
 
-async function editLocally(dev: Device, day: string, weightKg: number) {
+async function editLocally(
+  dev: Device,
+  day: string,
+  weightKg: number,
+  updatedAt?: number,
+) {
   const current = await dev.local.getByDay(day);
-  await dev.local.save(entry(day, weightKg), current?.updatedAt ?? null);
+  await dev.local.save(
+    entry(day, weightKg, updatedAt !== undefined ? { updatedAt } : {}),
+    current?.updatedAt ?? null,
+  );
   await markPending(dev.tracker, "bodyEntries", day);
 }
 
@@ -269,36 +277,39 @@ describe("motor de sync de BodyEntry — ataque adversarial", () => {
     ).toEqual({ status: "nothing-pending" });
   });
 
-  it("5. A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita", async () => {
+  it("5a. B mais recente vence automaticamente — é o caso 80 vs. 82 do Pedro: nunca ambíguo, resolvido pelo `updatedAt` real de cada edição", async () => {
     const a = device(server);
     const b = device(server);
 
-    await editLocally(b, "2026-08-25", 81);
+    await editLocally(b, "2026-08-25", 81, 2000);
     await sync(b);
 
-    await editLocally(a, "2026-08-25", 80);
+    await editLocally(a, "2026-08-25", 80, 1000);
     const { pull } = await sync(a);
 
     expect(pull.status).toBe("done");
     if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toEqual([
-      {
-        day: "2026-08-25",
-        local: expect.objectContaining({ weightKg: 80 }),
-        remote: expect.objectContaining({ weightKg: 81 }),
-      },
-    ]);
-    expect((await a.local.getByDay("2026-08-25"))?.weightKg).toBe(80);
-    expect((await a.tracker.get("bodyEntries:2026-08-25"))?.status).toBe("conflict");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getByDay("2026-08-25"))?.weightKg).toBe(81);
+    expect((await a.tracker.get("bodyEntries:2026-08-25"))?.status).toBe("clean");
+  });
 
-    await resolveBodyEntryConflict(
-      a.tracker,
-      a.local,
-      "2026-08-25",
-      "keep-local",
-      pull.conflicts[0]?.remote ?? null,
-    );
+  it("5b. A mais recente vence automaticamente: a edição local sobrevive ao pull e chega ao servidor no próximo push", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, "2026-08-25", 81, 1000);
+    await sync(b);
+
+    await editLocally(a, "2026-08-25", 80, 2000);
+    const { pull } = await sync(a);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getByDay("2026-08-25"))?.weightKg).toBe(80);
     expect((await a.tracker.get("bodyEntries:2026-08-25"))?.status).toBe("pending");
+
     expect(await pushAllBodyEntries(a.client, a.tracker, a.local)).toMatchObject({
       pushed: ["2026-08-25"],
     });
@@ -397,7 +408,10 @@ describe("motor de sync de BodyEntry — ataque adversarial", () => {
     await sync(a);
     await sync(b);
 
-    await editLocally(a, "2026-08-24", 80.5);
+    // A apaga o dia que vai conflitar (edição-vs-edição não bloqueia mais
+    // desde a decisão do Pedro de 17/09/2026 — só apagar-vs-editar ainda
+    // produz conflito visível) e edita o outro.
+    await deleteLocally(a, "2026-08-24");
     await editLocally(a, "2026-08-25", 79.5);
     await sync(a);
 

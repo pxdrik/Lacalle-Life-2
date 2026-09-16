@@ -5,7 +5,7 @@ import { SYNC_TRACKER_STORE, markPending, type SyncTracker } from "@/core/sync/s
 import { LocalRoutineRepository, ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
 import type { Routine } from "@/features/workouts/types/routine";
 
-import { pullAllRoutines, pushAllRoutines, resolveRoutineConflict } from "./routine-sync";
+import { pullAllRoutines, pushAllRoutines } from "./routine-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 import { chainableEqLazy } from "./sync-query-builder.test-helper";
 
@@ -153,9 +153,17 @@ function device(server: FakeServer) {
 
 type Device = ReturnType<typeof device>;
 
-async function editLocally(dev: Device, id: string, name: string) {
+async function editLocally(
+  dev: Device,
+  id: string,
+  name: string,
+  updatedAt?: number,
+) {
   const current = await dev.local.getById(id);
-  await dev.local.save(routine(id, { name }), current?.updatedAt ?? null);
+  await dev.local.save(
+    routine(id, { name, ...(updatedAt !== undefined && { updatedAt }) }),
+    current?.updatedAt ?? null,
+  );
   await markPending(dev.tracker, "routines", id);
 }
 
@@ -236,34 +244,43 @@ describe("motor de sync de Routine — ataque adversarial", () => {
     });
   });
 
-  it("5. A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita", async () => {
+  it("5a. B mais recente vence automaticamente, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await editLocally(b, "rotina-1", "De B");
+    await editLocally(b, "rotina-1", "De B", 2000);
     await sync(b);
 
-    await editLocally(a, "rotina-1", "De A, sem saber de B");
+    await editLocally(a, "rotina-1", "De A, sem saber de B", 1000);
     const { pull } = await sync(a);
 
     expect(pull.status).toBe("done");
     if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toEqual([
-      {
-        routineId: "rotina-1",
-        local: expect.objectContaining({ name: "De A, sem saber de B" }),
-        remote: expect.objectContaining({ name: "De B" }),
-      },
-    ]);
-    expect((await a.local.getById("rotina-1"))?.name).toBe("De A, sem saber de B");
-    expect((await a.tracker.get("routines:rotina-1"))?.status).toBe("conflict");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("rotina-1"))?.name).toBe("De B");
+    expect((await a.tracker.get("routines:rotina-1"))?.status).toBe("clean");
+  });
 
-    await resolveRoutineConflict(a.tracker, a.local, "rotina-1", "keep-local", pull.conflicts[0]?.remote ?? null);
+  it("5b. A mais recente vence automaticamente: a edição local sobrevive ao pull e chega ao servidor no próximo push", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, "rotina-1", "De B", 1000);
+    await sync(b);
+
+    await editLocally(a, "rotina-1", "De A, mais nova", 2000);
+    const { pull } = await sync(a);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("rotina-1"))?.name).toBe("De A, mais nova");
     expect((await a.tracker.get("routines:rotina-1"))?.status).toBe("pending");
+
     expect(await pushAllRoutines(a.client, a.tracker, a.local)).toMatchObject({
       pushed: ["rotina-1"],
     });
-    expect(server.row("rotina-1")?.payload.name).toBe("De A, sem saber de B");
+    expect(server.row("rotina-1")?.payload.name).toBe("De A, mais nova");
   });
 
   it("6. queda de rede durante o push: a pendência local sobrevive intacta, retry funciona", async () => {
@@ -357,7 +374,10 @@ describe("motor de sync de Routine — ataque adversarial", () => {
     await sync(a);
     await sync(b);
 
-    await editLocally(a, "rotina-conflito", "Editada por A");
+    // A apaga a que vai conflitar (edição-vs-edição não bloqueia mais desde
+    // a decisão do Pedro de 17/09/2026 — só apagar-vs-editar ainda produz
+    // conflito visível, ver o teste 12a/12b) e edita a outra.
+    await deleteLocally(a, "rotina-conflito");
     await editLocally(a, "rotina-tranquila", "Também editada por A");
     await sync(a);
 

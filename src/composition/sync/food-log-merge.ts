@@ -44,17 +44,26 @@ export interface FoodLogMergeResult {
  * 3. Dos dois lados, os dois apagados → apagado vence; desempate
  *    determinístico por `deletedAt` mais recente, para os dois dispositivos
  *    convergirem no mesmo payload byte a byte.
- * 4. Dos dois lados, um apagado e o outro vivo → se o lado vivo não mudou
- *    nada desde `lastSynced` (só não apagou), a exclusão vence sem
- *    conflito. Se o lado vivo tem uma edição real, é conflito — nunca
- *    aplica a exclusão nem a edição sozinha.
- * 5. Dos dois lados vivos, conteúdo diferente → conflito, o caso já
- *    documentado desde a primeira versão de §19.5.
+ * 4. Dos dois lados, um apagado e o outro vivo, e o lado vivo tem uma
+ *    edição real (mudou desde `lastSynced`) → "mais recente vence" pelo
+ *    `updatedAt` do dia inteiro (`localUpdatedAt`/`remoteUpdatedAt`) —
+ *    decisão do Pedro, 17/09/2026, mesmo raciocínio de `diet-sync.ts`. É a
+ *    granularidade disponível: `Meal` não carrega `updatedAt` próprio (só
+ *    o dia inteiro tem), então o desempate entre "apaguei" e "editei" usa o
+ *    momento em que cada dispositivo tocou o dia por último, não a
+ *    refeição. Se o lado vivo não mudou nada desde `lastSynced` (só não
+ *    apagou), a exclusão vence de qualquer jeito, sem comparar nada.
+ * 5. Dos dois lados vivos, conteúdo diferente → mesma regra de "mais
+ *    recente vence" por `updatedAt` do dia. Empate exato entre os dois
+ *    timestamps (praticamente nunca) é o único caso que ainda vira
+ *    conflito visível.
  */
 export function mergeFoodLogMeals(
   local: readonly Meal[],
   remote: readonly WireMeal[],
   lastSynced: readonly WireMeal[] | null,
+  localUpdatedAt = 0,
+  remoteUpdatedAt = 0,
 ): FoodLogMergeResult {
   const base = lastSynced ?? [];
   const baseById = new Map(base.map((meal) => [meal.id, meal]));
@@ -117,11 +126,20 @@ export function mergeFoodLogMeals(
         baseEntry === undefined || !liveContentEqual(liveEntry, baseEntry);
 
       if (liveChangedSinceBase) {
-        conflicts.push({ mealId: id, local: l, remote: r });
-        merged.set(id, l);
+        if (localUpdatedAt !== remoteUpdatedAt) {
+          merged.set(id, localUpdatedAt > remoteUpdatedAt ? l : r);
+        } else {
+          conflicts.push({ mealId: id, local: l, remote: r });
+          merged.set(id, l);
+        }
       } else {
         merged.set(id, tombstoneEntry);
       }
+      continue;
+    }
+
+    if (localUpdatedAt !== remoteUpdatedAt) {
+      merged.set(id, localUpdatedAt > remoteUpdatedAt ? l : r);
       continue;
     }
 

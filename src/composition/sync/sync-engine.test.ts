@@ -257,10 +257,14 @@ function deviceClient(server: FakeServer): SyncSupabaseClient {
 }
 
 /** Grava um `Profile` local diretamente, sem passar por `markPending` — simula um registro criado antes do sync existir. */
-async function writeUntrackedProfile(dbName: string, weightKg: number): Promise<void> {
+async function writeUntrackedProfile(
+  dbName: string,
+  weightKg: number,
+  updatedAt?: number,
+): Promise<void> {
   const db = await openDatabase(dbName, MIGRATIONS);
   const local = new LocalProfileRepository(new IndexedDbStore<Profile>(db, PROFILE_STORE.name));
-  const now = Date.now();
+  const now = updatedAt ?? Date.now();
   await local.save(
     {
       id: PROFILE_ID,
@@ -325,34 +329,44 @@ describe("sync-engine — garantia estrutural contra overwrite silencioso (P1-01
     expect(server.row("profiles", PROFILE_ID)?.payload).toMatchObject({ weightKg: 80 });
   });
 
-  it("Caso 2 — registro local sem tracker E servidor já tem outro valor: nunca sobrescreve silenciosamente, sempre conflito/pendência explícita", async () => {
+  it("Caso 2 — registro local sem tracker E servidor já tem outro valor: nunca sobrescreve silenciosamente — o mais recente vence, nunca escolhido por ordem de chegada", async () => {
     // "Outro dispositivo" já sincronizou um perfil antes de este dispositivo
     // sequer ter uma entrada no tracker (upgrade de versão antiga, ou
-    // simplesmente nunca ter rodado sync neste device até agora).
+    // simplesmente nunca ter rodado sync neste device até agora). B editou
+    // mais cedo (updatedAt menor).
     state.dbName = "device-b";
-    await writeUntrackedProfile("device-b", 90);
+    await writeUntrackedProfile("device-b", 90, 1000);
     await runProfileSync();
     expect(server.row("profiles", PROFILE_ID)?.payload).toMatchObject({ weightKg: 90 });
 
-    // Device A tem um valor local diferente, também sem tracker.
+    // Device A tem um valor local diferente, também sem tracker, editado
+    // depois de B (updatedAt maior).
     state.dbName = "device-a";
-    await writeUntrackedProfile("device-a", 82);
+    await writeUntrackedProfile("device-a", 82, 2000);
     expect(await readTrackerEntry("device-a", "profile", PROFILE_ID)).toBeUndefined();
 
     const outcome = await runProfileSync();
 
-    // ANTES da correção: o push (expected=null) já bateria em "applied:
-    // false" contra o valor de B — mas se por algum caminho o pull rodasse
-    // primeiro contra um `entry === undefined`, o valor local de A (82)
-    // seria substituído por 90 em silêncio, sem o usuário nunca saber que
-    // um valor real (82) existiu. Com a correção: o backfill garante que A
-    // já está "pending" antes de qualquer push/pull, então o servidor
-    // recusa o push (não é uma criação — já existe uma linha viva) e o
-    // motor marca conflito em vez de escolher um lado sozinho.
+    // ANTES da correção original (P1-01): sem o backfill, o pull rodando
+    // contra um `entry === undefined` substituiria o valor local de A (82)
+    // por 90 em silêncio. Isso continua impossível. O que muda com a
+    // decisão de "mais recente vence" (17/09/2026): o backfill marca A
+    // como "pending"; o push (expected=null) é recusado pelo servidor (já
+    // existe uma linha viva, não é criação) e vira "conflict" — mas o pull
+    // que roda em seguida, na mesma chamada, compara os `updatedAt` reais
+    // dos dois lados e destrava sozinho a favor de A (2000 > 1000), sem
+    // pedir nada ao usuário. O valor local de A nunca é tocado, e o
+    // resultado final é "pending" (pronto pra subir), não "conflict" preso
+    // pra sempre por causa de uma corrida de ordem de chegada.
     expect(outcome.push.status).toBe("conflict");
-    expect((await readTrackerEntry("device-a", "profile", PROFILE_ID))?.status).toBe("conflict");
+    expect((await readTrackerEntry("device-a", "profile", PROFILE_ID))?.status).toBe("pending");
     // O valor local de A nunca foi tocado.
     expect((await readLocalProfile("device-a"))?.nutrition.weightKg).toBe(82);
+
+    // E o próximo push aplica A por cima do valor mais antigo de B.
+    const resolved = await runProfileSync();
+    expect(resolved.push.status).toBe("pushed");
+    expect(server.row("profiles", PROFILE_ID)?.payload).toMatchObject({ weightKg: 82 });
   });
 
   it("Caso 3 — dois pontos de entrada de sync rodando ao mesmo tempo (Promise.all): nenhuma perda silenciosa, resultado idempotente", async () => {
@@ -460,10 +474,16 @@ describe("sync-engine — a mesma garantia vale para entidades em lote e por dia
 
     const outcome = await runDietSync();
 
+    // O push (backfillado como "pending", expected=null) é recusado pelo
+    // servidor — já existe uma linha viva, não é criação. O pull que roda
+    // em seguida, na mesma chamada, compara `updatedAt`: local (1000) é
+    // mais recente que o do servidor (500) — "mais recente vence"
+    // (17/09/2026) destrava sozinho a favor do local, sem sobrescrever
+    // nada e sem pedir resolução manual.
     expect(outcome.push).toMatchObject({ status: "done", conflicts: ["dieta-1"] });
     // A dieta local nunca foi trocada pela do servidor.
     expect((await local.getById("dieta-1"))?.name).toBe("Cutting local, nunca sincronizada");
-    expect((await readTrackerEntry("device-a", "diets", "dieta-1"))?.status).toBe("conflict");
+    expect((await readTrackerEntry("device-a", "diets", "dieta-1"))?.status).toBe("pending");
   });
 
   it("BodyEntry (dia): peso local sem tracker nunca é sobrescrito por um pull do mesmo dia vindo de outro dispositivo", async () => {
@@ -494,12 +514,14 @@ describe("sync-engine — a mesma garantia vale para entidades em lote e por dia
 
     const outcome = await runBodyEntrySync();
 
+    // Mesmo raciocínio do teste de Diet acima: local (1000) é mais recente
+    // que o servidor (500) — destrava sozinho a favor do local.
     expect(outcome.push).toMatchObject({ status: "done", conflicts: ["2026-09-05"] });
     // 82kg (o valor real que a pessoa registrou neste aparelho) não vira 81
     // silenciosamente — o exato cenário do "peso 80/81/82" do
     // arquitetura-sincronizacao.md §8.2, agora também coberto para um
     // registro que nunca teve entrada no tracker.
     expect((await local.getByDay("2026-09-05"))?.weightKg).toBe(82);
-    expect((await readTrackerEntry("device-a", "bodyEntries", "2026-09-05"))?.status).toBe("conflict");
+    expect((await readTrackerEntry("device-a", "bodyEntries", "2026-09-05"))?.status).toBe("pending");
   });
 });

@@ -391,21 +391,18 @@ describe("push/pullAllBodyEntries — orquestração", () => {
     expect((await b.local.getByDay("2026-08-25"))?.weightKg).toBe(80);
   });
 
-  it("11. mesmo cenário, mas com peso realmente diferente (80 vs 79) — conflito real, visível", async () => {
+  it("11. mesmo cenário, mas com peso realmente diferente (80 vs 79) — 'mais recente vence' automático, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setEntry(a, entry("2026-08-25", { weightKg: 80 }));
+    await setEntry(a, entry("2026-08-25", { weightKg: 80, updatedAt: 1000 }));
     await sync(a);
 
-    await setEntry(b, entry("2026-08-25", { weightKg: 79 }));
+    await setEntry(b, entry("2026-08-25", { weightKg: 79, updatedAt: 2000 }));
     const { pull } = await sync(b);
 
-    expect(pull.status).toBe("done");
-    if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toHaveLength(1);
-    expect(pull.conflicts[0]?.local?.weightKg).toBe(79);
-    expect(pull.conflicts[0]?.remote?.weightKg).toBe(80);
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getByDay("2026-08-25"))?.weightKg).toBe(79);
   });
 
   it("12. diferença só em metadata (updatedAt) sem diferença de peso não bloqueia para sempre: um conflito já marcado se autorresolve assim que os dois lados convergem", async () => {

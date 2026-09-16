@@ -254,38 +254,39 @@ describe("motor de sync do Profile — ataque adversarial", () => {
     expect(server.currentRow()?.payload).toMatchObject({ weightKg: 100 });
   });
 
-  it("6. dispositivo A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita, nunca sobrescreve sozinho", async () => {
+  it("6a. B mais recente vence automaticamente: A recebe a edição de B via pull, sem conflito visível — é o caso 80 vs. 82 do Pedro", async () => {
     const a = device(server);
     const b = device(server);
 
-    // B edita e sincroniza primeiro.
-    await editLocally(b, 95, 1000);
+    // B edita (mais tarde, updatedAt maior) e sincroniza primeiro.
+    await editLocally(b, 95, 2000);
     expect(await pushProfile(b.client, b.tracker, b.local)).toEqual({ status: "pushed" });
 
-    // A, sem saber de B, edita localmente por conta própria.
+    // A, sem saber de B, tinha editado mais cedo (updatedAt menor).
     await editLocally(a, 60, 1000);
 
     const pull = await pullProfile(a.client, a.tracker, a.local);
-    expect(pull).toEqual({
-      status: "conflict",
-      local: profile(60, 1000),
-      remote: profile(95, 1000),
-    });
-    // A edição local de A sobrevive — o pull não a apagou.
+    // Decisão do Pedro (17/09/2026): "mais recente vence" automático — B é
+    // mais novo, o pull aplica sem perguntar, sem tela de conflito.
+    expect(pull).toEqual({ status: "applied" });
+    expect((await a.local.get())?.nutrition.weightKg).toBe(95);
+    expect((await a.tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
+  it("6b. A mais recente vence automaticamente: a edição local sobrevive ao pull e chega ao servidor no próximo push", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, 95, 1000);
+    expect(await pushProfile(b.client, b.tracker, b.local)).toEqual({ status: "pushed" });
+
+    // A editou depois de B (updatedAt maior).
+    await editLocally(a, 60, 2000);
+
+    const pull = await pullProfile(a.client, a.tracker, a.local);
+    expect(pull).toEqual({ status: "pending-unpushed" });
+    // A edição local de A nunca foi tocada — nem pelo pull, nem descartada.
     expect((await a.local.get())?.nutrition.weightKg).toBe(60);
-    expect((await a.tracker.get("profile:me"))?.status).toBe("conflict");
-
-    // CORRIGIDO: diferente da primeira rodada, tentar sincronizar de novo
-    // sem resolver não faz nada — nunca sobrescreve B sozinho.
-    const blockedRetry = await pushProfile(a.client, a.tracker, a.local);
-    expect(blockedRetry).toEqual({ status: "conflict" });
-    expect(server.currentRow()?.payload).toMatchObject({ weightKg: 95 });
-
-    // Resolução explícita "manter local": destrava, e o push seguinte usa a
-    // versão do servidor mais recente conhecida como base — uma
-    // sobrescrita explícita, escolhida pelo usuário, não automática.
-    if (pull.status !== "conflict") throw new Error("unreachable");
-    await resolveProfileConflict(a.tracker, a.local, "keep-local", pull.remote);
     expect((await a.tracker.get("profile:me"))?.status).toBe("pending");
 
     const resolvedPush = await pushProfile(a.client, a.tracker, a.local);
@@ -294,27 +295,35 @@ describe("motor de sync do Profile — ataque adversarial", () => {
     expect((await a.tracker.get("profile:me"))?.status).toBe("clean");
   });
 
-  it("6b. resolução 'usar servidor' descarta o rascunho local em vez de reenviá-lo", async () => {
+  it("6c. único caso que ainda é conflito visível: A apagou o perfil localmente, B editou o remoto — apagar-vs-editar não tem timestamp de exclusão para comparar, então continua pedindo resolução", async () => {
     const a = device(server);
     const b = device(server);
 
-    await editLocally(b, 95, 1000);
-    await pushProfile(b.client, b.tracker, b.local);
-    await editLocally(a, 60, 1000);
+    // B cria o perfil primeiro; A puxa e fica em dia com ele.
+    await editLocally(b, 50, 500);
+    expect(await pushProfile(b.client, b.tracker, b.local)).toEqual({ status: "pushed" });
+    expect(await pullProfile(a.client, a.tracker, a.local)).toEqual({ status: "applied" });
+
+    // A apaga o perfil localmente, sem saber que B vai editar de novo.
+    await a.local.clear();
+    await markPending(a.tracker, "profile", PROFILE_ID);
+
+    await editLocally(b, 95, 2000);
+    expect(await pushProfile(b.client, b.tracker, b.local)).toEqual({ status: "pushed" });
 
     const pull = await pullProfile(a.client, a.tracker, a.local);
+    expect(pull).toEqual({
+      status: "conflict",
+      local: profile(95, 2000),
+      remote: profile(95, 2000),
+    });
+    expect(await a.local.get()).toBeUndefined();
+    expect((await a.tracker.get("profile:me"))?.status).toBe("conflict");
+
     if (pull.status !== "conflict") throw new Error("unreachable");
-
     await resolveProfileConflict(a.tracker, a.local, "use-server", pull.remote);
-
     expect((await a.local.get())?.nutrition.weightKg).toBe(95);
     expect((await a.tracker.get("profile:me"))?.status).toBe("clean");
-
-    // Nada pendente — o rascunho local (60) foi descartado de propósito.
-    expect(await pushProfile(a.client, a.tracker, a.local)).toEqual({
-      status: "nothing-pending",
-    });
-    expect(server.currentRow()?.payload).toMatchObject({ weightKg: 95 });
   });
 
   it("7/10. perde conexão durante o push: a edição local pendente não é perdida nem corrompida", async () => {

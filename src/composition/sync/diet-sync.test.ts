@@ -332,19 +332,22 @@ describe("push/pullAllDiets — orquestração", () => {
     expect((await b.local.getById("dieta-1"))?.name).toBe("Segunda");
   });
 
-  it("9. mesmo cenário, mas com um valor realmente diferente — conflito real", async () => {
+  it("9. mesmo cenário, mas com um valor realmente diferente — 'mais recente vence' automático, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setDiet(a, diet("dieta-1", { name: "Segunda" }));
+    await setDiet(a, diet("dieta-1", { name: "Segunda", updatedAt: 1000 }));
     await sync(a);
 
-    await setDiet(b, diet("dieta-1", { name: "Segunda (editada)" }));
+    // B é mais recente (2000 > 1000) — decisão do Pedro (17/09/2026): o
+    // pull aplica B automaticamente, sem perguntar. Nada sobrescrito às
+    // cegas: a comparação usa o `updatedAt` que cada lado já carrega, nunca
+    // "quem sincronizou primeiro".
+    await setDiet(b, diet("dieta-1", { name: "Segunda (editada)", updatedAt: 2000 }));
     const { pull } = await sync(b);
 
-    expect(pull.status).toBe("done");
-    if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toHaveLength(1);
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getById("dieta-1"))?.name).toBe("Segunda (editada)");
   });
 
   it("10. mesmos dias da semana em ordem diferente não é conflito — é o mesmo conjunto", async () => {

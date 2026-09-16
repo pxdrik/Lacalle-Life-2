@@ -317,18 +317,17 @@ describe("push/pullAllRoutines — orquestração", () => {
     expect((await b.local.getById("rotina-1"))?.name).toBe("Treino A");
   });
 
-  it("9. mesmo cenário, mas com uma alteração real — conflito real", async () => {
+  it("9. mesmo cenário, mas com uma alteração real — 'mais recente vence' automático, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await setRoutine(a, routine("rotina-1", { name: "Treino A" }));
+    await setRoutine(a, routine("rotina-1", { name: "Treino A", updatedAt: 1000 }));
     await sync(a);
 
-    await setRoutine(b, routine("rotina-1", { name: "Treino A (editado)" }));
+    await setRoutine(b, routine("rotina-1", { name: "Treino A (editado)", updatedAt: 2000 }));
     const { pull } = await sync(b);
 
-    expect(pull.status).toBe("done");
-    if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toHaveLength(1);
+    expect(pull).toEqual({ status: "done", conflicts: [], invalid: [] });
+    expect((await b.local.getById("rotina-1"))?.name).toBe("Treino A (editado)");
   });
 });

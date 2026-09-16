@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
-import { SYNC_TRACKER_STORE, markPending, type SyncTracker } from "@/core/sync/sync-tracker";
+import { SYNC_TRACKER_STORE, markConflict, markPending, type SyncTracker } from "@/core/sync/sync-tracker";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import { PROFILE_ID, type Profile } from "@/features/profile/types/profile";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
@@ -222,7 +222,7 @@ describe("pullProfile", () => {
     expect(saved?.nutrition.weightKg).toBe(90);
   });
 
-  it("flags a real conflict instead of overwriting when a local edit is pending and the server moved", async () => {
+  it("aplica o remoto automaticamente quando ele é mais novo, mesmo com uma edição local pendente — 'mais recente vence' (decisão do Pedro, 17/09/2026)", async () => {
     await local.save(profile(70), null);
     await markPending(tracker, "profile", PROFILE_ID);
 
@@ -238,17 +238,32 @@ describe("pullProfile", () => {
 
     const result = await pullProfile(client, tracker, local);
 
-    // `remote` reflete o mapeamento real de `pullProfile` (createdAt ==
-    // updatedAt == client_updated_at) — não a convenção do helper `profile`
-    // local, que fixa createdAt em 1000 de propósito para os outros testes.
-    expect(result).toEqual({
-      status: "conflict",
-      local: profile(70),
-      remote: { ...profile(90, 5000), createdAt: 5000 },
-    });
+    expect(result).toEqual({ status: "applied" });
+    const stillLocal = await local.get();
+    expect(stillLocal?.nutrition.weightKg).toBe(90);
+    expect((await tracker.get("profile:me"))?.status).toBe("clean");
+  });
+
+  it("mantém a edição local pendente quando ela é mais nova que o remoto, em vez de aplicar o remoto por cima", async () => {
+    await local.save(profile(70, 9000), null);
+    await markPending(tracker, "profile", PROFILE_ID);
+
+    const from = fromReturning([
+      {
+        payload: profile(90).nutrition,
+        client_updated_at: 5000,
+        server_updated_at: "2026-02-01T00:00:00Z",
+        deleted_at: null,
+      },
+    ]);
+    const client = authenticatedClient({ from });
+
+    const result = await pullProfile(client, tracker, local);
+
+    expect(result).toEqual({ status: "pending-unpushed" });
     const stillLocal = await local.get();
     expect(stillLocal?.nutrition.weightKg).toBe(70);
-    expect((await tracker.get("profile:me"))?.status).toBe("conflict");
+    expect((await tracker.get("profile:me"))?.status).toBe("pending");
   });
 
   /**
@@ -279,17 +294,14 @@ describe("pullProfile", () => {
   });
 
   it("um conflito já marcado se autorresolve assim que os dois lados convergem para o mesmo perfil", async () => {
+    // Semeia o estado "conflito" direto pelo tracker — desde a decisão de
+    // "mais recente vence" (17/09/2026), um conflito de verdade só surge de
+    // apagar-vs-editar (sem timestamp de exclusão para comparar), não de
+    // uma divergência de conteúdo comum. O que este teste prova é
+    // independente de como se chegou lá: uma vez em conflito, os dois lados
+    // convergindo para o mesmo perfil se autorresolve.
     await local.save(profile(70), null);
-    await markPending(tracker, "profile", PROFILE_ID);
-    const conflictFrom = fromReturning([
-      {
-        payload: profile(90).nutrition,
-        client_updated_at: 5000,
-        server_updated_at: "2026-02-01T00:00:00Z",
-        deleted_at: null,
-      },
-    ]);
-    await pullProfile(authenticatedClient({ from: conflictFrom }), tracker, local);
+    await markConflict(tracker, "profile", PROFILE_ID, "2026-02-01T00:00:00Z");
     expect((await tracker.get("profile:me"))?.status).toBe("conflict");
 
     // Alguém edita o local de novo, sem passar por `resolveProfileConflict`,

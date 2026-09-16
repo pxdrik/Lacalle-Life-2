@@ -5,7 +5,7 @@ import { SYNC_TRACKER_STORE, markPending, type SyncTracker } from "@/core/sync/s
 import { LocalSessionRepository, SESSIONS_STORE } from "@/features/workouts/data/session-repository";
 import type { Session } from "@/features/workouts/types/session";
 
-import { pullAllSessions, pushAllSessions, resolveSessionConflict } from "./session-sync";
+import { pullAllSessions, pushAllSessions } from "./session-sync";
 import type { SyncSupabaseClient } from "./sync-supabase-client";
 import { chainableEqLazy } from "./sync-query-builder.test-helper";
 
@@ -277,31 +277,43 @@ describe("motor de sync de Session — ataque adversarial", () => {
     expect(server.row("sessao-1")?.name).toBe("Do PC");
   });
 
-  it("5. A tem edição local pendente e recebe uma edição de B via pull — bloqueia até resolução explícita", async () => {
+  it("5a. B mais recente vence automaticamente, sem conflito visível", async () => {
     const a = device(server);
     const b = device(server);
 
-    await editLocally(b, "sessao-1", { name: "De B", finishedAt: 2000 });
+    await editLocally(b, "sessao-1", { name: "De B", finishedAt: 2000, updatedAt: 3000 });
     await sync(b);
 
-    await editLocally(a, "sessao-1", { name: "De A, sem saber de B", finishedAt: 2000 });
+    await editLocally(a, "sessao-1", { name: "De A, sem saber de B", finishedAt: 2000, updatedAt: 2000 });
     const { pull } = await sync(a);
 
     expect(pull.status).toBe("done");
     if (pull.status !== "done") throw new Error("unreachable");
-    expect(pull.conflicts).toEqual([
-      {
-        sessionId: "sessao-1",
-        local: expect.objectContaining({ name: "De A, sem saber de B" }),
-        remote: expect.objectContaining({ name: "De B" }),
-      },
-    ]);
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("sessao-1"))?.name).toBe("De B");
+    expect((await a.tracker.get("sessions:sessao-1"))?.status).toBe("clean");
+  });
 
-    await resolveSessionConflict(a.tracker, a.local, "sessao-1", "keep-local", pull.conflicts[0]?.remote ?? null);
+  it("5b. A mais recente vence automaticamente: a edição local sobrevive ao pull e chega ao servidor no próximo push", async () => {
+    const a = device(server);
+    const b = device(server);
+
+    await editLocally(b, "sessao-1", { name: "De B", finishedAt: 2000, updatedAt: 2000 });
+    await sync(b);
+
+    await editLocally(a, "sessao-1", { name: "De A, mais nova", finishedAt: 2000, updatedAt: 3000 });
+    const { pull } = await sync(a);
+
+    expect(pull.status).toBe("done");
+    if (pull.status !== "done") throw new Error("unreachable");
+    expect(pull.conflicts).toEqual([]);
+    expect((await a.local.getById("sessao-1"))?.name).toBe("De A, mais nova");
+    expect((await a.tracker.get("sessions:sessao-1"))?.status).toBe("pending");
+
     expect(await pushAllSessions(a.client, a.tracker, a.local)).toMatchObject({
       pushed: ["sessao-1"],
     });
-    expect(server.row("sessao-1")?.name).toBe("De A, sem saber de B");
+    expect(server.row("sessao-1")?.name).toBe("De A, mais nova");
   });
 
   it("6. queda de rede durante o push: a pendência local sobrevive intacta, retry funciona", async () => {

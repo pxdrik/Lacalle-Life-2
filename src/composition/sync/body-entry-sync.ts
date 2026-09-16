@@ -10,6 +10,7 @@ import {
   listPending,
   markClean,
   markConflict,
+  markPendingWithSnapshot,
   forcePendingAfterResolution,
   trackerId,
   type SyncTracker,
@@ -302,6 +303,27 @@ export async function pullAllBodyEntries(
       (entry?.status === "pending" && entry.serverUpdatedAt !== row.server_updated_at)
     ) {
       if (currentLocal !== undefined && bodyEntriesEqual(currentLocal, remote)) {
+        await localOnly.save(remote, currentLocal.updatedAt);
+        await markClean(tracker, STORE_NAME, row.day, row.server_updated_at);
+        continue;
+      }
+
+      // "Mais recente vence" automático por `updatedAt` — mesma decisão e
+      // mesmo raciocínio completo de `pullAllDiets` em `diet-sync.ts`. É
+      // exatamente o caso 80 kg vs. 82 kg do §8.2 original — decisão do
+      // Pedro (17/09/2026) substitui a recomendação (B) de lá.
+      if (currentLocal !== undefined && currentLocal.updatedAt >= remote.updatedAt) {
+        await markPendingWithSnapshot(
+          tracker,
+          STORE_NAME,
+          row.day,
+          row.server_updated_at,
+          undefined,
+        );
+        continue;
+      }
+
+      if (currentLocal !== undefined) {
         await localOnly.save(remote, currentLocal.updatedAt);
         await markClean(tracker, STORE_NAME, row.day, row.server_updated_at);
         continue;
