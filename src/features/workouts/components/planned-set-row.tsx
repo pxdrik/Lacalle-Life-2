@@ -77,13 +77,17 @@ export function PlannedSetRow({
       {/* RPE reports effort against a rep/weight target — a treadmill has
           neither, so there is nothing here for it to rate. */}
       {!isCardio && (
+        // `size-8`, não só `w-16`: sem altura própria o mostrador herdava a
+        // altura da linha e achatava — um meio círculo pede espaço igual
+        // dos dois lados (Pedro, 17/09/2026: "mais quadradinho e não tão
+        // retangular"). `size-8` casa com a altura de `CELL` nesta tela.
         <RpeSelect
           value={set.rpe}
           label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
           onChange={(rpe) => {
             onChange({ rpe });
           }}
-          className="w-16 shrink-0"
+          className="size-8 shrink-0"
         />
       )}
 

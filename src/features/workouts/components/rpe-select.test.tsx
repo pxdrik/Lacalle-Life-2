@@ -1,16 +1,62 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RpeSelect } from "./rpe-select";
 
 const LABEL = "RPE da série 1 de Supino";
+
+/**
+ * jsdom does not lay out SVG — `getBoundingClientRect` returns all zeros and
+ * `viewBox.baseVal` is not implemented at all — so a drag test has to hand
+ * the picker a fake box before it can compute an angle from a pointer
+ * position. `280×150` matches the real viewBox exactly, so a `clientX`/
+ * `clientY` in these tests means the same SVG-unit position production code
+ * would compute from an on-screen drag.
+ */
+beforeEach(() => {
+  Object.defineProperty(SVGSVGElement.prototype, "getBoundingClientRect", {
+    configurable: true,
+    value: () => ({
+      left: 0,
+      top: 0,
+      width: 280,
+      height: 150,
+      right: 280,
+      bottom: 150,
+      x: 0,
+      y: 0,
+      toJSON: () => "",
+    }),
+  });
+  Object.defineProperty(SVGSVGElement.prototype, "viewBox", {
+    configurable: true,
+    value: { baseVal: { width: 280, height: 150 } },
+  });
+  // jsdom implements neither — same gap `Dialog`'s own test file documents
+  // for `showModal`/`close`, a fact about the environment rather than this
+  // component. The picker only calls them to keep a drag tracking a finger
+  // that leaves the SVG's bounds, which no assertion here depends on.
+  Element.prototype.setPointerCapture = vi.fn();
+  Element.prototype.releasePointerCapture = vi.fn();
+});
 
 function mount(value: number | null) {
   const onChange = vi.fn();
   render(<RpeSelect value={value} onChange={onChange} label={LABEL} />);
   return onChange;
 }
+
+function slider() {
+  return screen.getByRole("slider", { name: LABEL });
+}
+
+/** `(140, 18)` is straight up from the picker's own centre `(140, 128)` —
+ * the middle of the scale, RPE 8. `(250, 128)` is the right edge — RPE 10,
+ * the maximum. */
+const STRAIGHT_UP = { clientX: 140, clientY: 18 };
+const RIGHT_EDGE = { clientX: 250, clientY: 128 };
+const LEFT_EDGE = { clientX: 30, clientY: 128 };
 
 describe("RpeSelect", () => {
   it("mostra — quando não há RPE", () => {
@@ -42,52 +88,115 @@ describe("RpeSelect", () => {
     expect(min).toHaveAttribute("transform", expect.stringContaining("-90"));
   });
 
-  it("abre a folha com todos os valores ao tocar o gatilho", async () => {
+  it("abre a folha com o mostrador grande em vez da grade de botões", async () => {
     mount(null);
 
     await userEvent.click(screen.getByRole("button", { name: LABEL }));
 
-    expect(screen.getByRole("radiogroup", { name: LABEL })).toBeInTheDocument();
-    for (const label of ["6", "7", "7,5", "8", "8,5", "9", "9,5", "10"]) {
-      // O nome acessível do botão junta os dois `<span>` (valor + descrição),
-      // então a busca casa só o início — "9" não pode casar "9,5" por engano.
-      expect(
-        screen.getByRole("radio", { name: new RegExp(`^${label} `) }),
-      ).toBeInTheDocument();
-    }
-  });
-
-  it("escolher um valor chama onChange e fecha a folha", async () => {
-    const onChange = mount(null);
-
-    await userEvent.click(screen.getByRole("button", { name: LABEL }));
-    await userEvent.click(screen.getByRole("radio", { name: /^9 / }));
-
-    expect(onChange).toHaveBeenCalledWith(9);
+    expect(slider()).toBeInTheDocument();
     expect(screen.queryByRole("radiogroup")).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
   });
 
-  it("escolher 'Sem RPE' limpa o valor", async () => {
-    const onChange = mount(8);
-
+  it("anuncia min, max e o valor atual pra quem usa leitor de tela", async () => {
+    mount(7.5);
     await userEvent.click(screen.getByRole("button", { name: LABEL }));
-    await userEvent.click(screen.getByRole("radio", { name: /Sem RPE/ }));
+
+    const el = slider();
+    expect(el).toHaveAttribute("aria-valuemin", "6");
+    expect(el).toHaveAttribute("aria-valuemax", "10");
+    expect(el).toHaveAttribute("aria-valuenow", "7.5");
+    expect(el).toHaveAttribute("aria-valuetext", "7,5");
+  });
+
+  it("arrastar até o meio do arco escolhe 8 e arrastar até a ponta direita escolhe 10", async () => {
+    const onChange = mount(null);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+    const el = slider();
+
+    fireEvent.pointerDown(el, { pointerId: 1, ...STRAIGHT_UP });
+    fireEvent.pointerMove(el, { pointerId: 1, ...RIGHT_EDGE });
+    fireEvent.pointerUp(el, { pointerId: 1, ...RIGHT_EDGE });
+
+    expect(onChange).toHaveBeenLastCalledWith(10);
+  });
+
+  it("soltar o arrasto fecha a folha", async () => {
+    mount(null);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    fireEvent.pointerDown(slider(), { pointerId: 1, ...STRAIGHT_UP });
+    fireEvent.pointerUp(slider(), { pointerId: 1, ...STRAIGHT_UP });
+
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
+  });
+
+  it("nunca escolhe um valor fora da escala, mesmo arrastando além da ponta", async () => {
+    const onChange = mount(null);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    // Bem além da borda direita real do arco.
+    fireEvent.pointerDown(slider(), {
+      pointerId: 1,
+      clientX: 1000,
+      clientY: 128,
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith(10);
+  });
+
+  it("seta pra direita avança um degrau da escala", async () => {
+    const onChange = mount(8);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    fireEvent.keyDown(slider(), { key: "ArrowRight" });
+
+    expect(onChange).toHaveBeenLastCalledWith(8.5);
+  });
+
+  it("seta pra esquerda volta um degrau da escala", async () => {
+    const onChange = mount(8);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    fireEvent.keyDown(slider(), { key: "ArrowLeft" });
+
+    expect(onChange).toHaveBeenLastCalledWith(7.5);
+  });
+
+  it("End vai direto pro máximo da escala", async () => {
+    const onChange = mount(6);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    fireEvent.keyDown(slider(), { key: "End" });
+
+    expect(onChange).toHaveBeenLastCalledWith(10);
+  });
+
+  it("Home vai direto pro mínimo da escala", async () => {
+    const onChange = mount(10);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    fireEvent.keyDown(slider(), { key: "Home" });
+
+    expect(onChange).toHaveBeenLastCalledWith(6);
+  });
+
+  it("'Sem RPE' limpa o valor e fecha a folha", async () => {
+    const onChange = mount(8);
+    await userEvent.click(screen.getByRole("button", { name: LABEL }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Sem RPE" }));
 
     expect(onChange).toHaveBeenCalledWith(null);
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
   });
 
-  it("marca o valor atual como selecionado", async () => {
-    mount(7.5);
-
+  it("arrastar até a ponta esquerda escolhe o mínimo da escala, não 'Sem RPE'", async () => {
+    const onChange = mount(null);
     await userEvent.click(screen.getByRole("button", { name: LABEL }));
 
-    expect(screen.getByRole("radio", { name: /^7,5 / })).toHaveAttribute(
-      "aria-checked",
-      "true",
-    );
-    expect(screen.getByRole("radio", { name: /^9 / })).toHaveAttribute(
-      "aria-checked",
-      "false",
-    );
+    fireEvent.pointerDown(slider(), { pointerId: 1, ...LEFT_EDGE });
+
+    expect(onChange).toHaveBeenLastCalledWith(6);
   });
 });

@@ -3,6 +3,7 @@
 import {
   Check,
   ChevronDown,
+  ChevronsUp,
   ChevronUp,
   Copy,
   GripVertical,
@@ -78,6 +79,14 @@ interface Props {
   readonly checkState?: "unchecked" | "checked" | "edited" | undefined;
   readonly onToggleChecked?: (() => void) | undefined;
   /**
+   * "Fechar" no menu ⋮ — devolve a refeição pra lista compacta de
+   * "Planejado", desfazendo o que `onOpen`/o check abriram. Só existe
+   * quando faz sentido: uma refeição vinda da dieta, ainda não comida.
+   * `undefined` em qualquer outro caso (comida, ou montada à mão), a mesma
+   * regra de `checkState`/`onToggleChecked` — ver `food-log-screen.tsx`.
+   */
+  readonly onClose?: (() => void) | undefined;
+  /**
    * The "Outras sugestões" button and its sheet only exist when this is
    * given — today only from `DietEditor`. A day already eaten (`FoodLogScreen`)
    * has nothing to suggest: what happened, happened.
@@ -108,6 +117,7 @@ export function MealCard({
   onSendItem,
   checkState,
   onToggleChecked,
+  onClose,
   onSaveAlternative,
   onApplyAlternative,
   onRenameAlternative,
@@ -309,6 +319,24 @@ export function MealCard({
           >
             <ChevronDown aria-hidden className="size-4" />
           </MenuRow>
+          {/* Só quando faz sentido: uma refeição vinda da dieta, ainda não
+              comida — ver a doc de `onClose` na prop. Devolve pra lista
+              compacta de "Planejado" sem apagar nada da dieta. */}
+          {onClose !== undefined && (
+            <MenuRow
+              // "Fechar refeição", não só "Fechar": o `X` de fechar a
+              // própria folha (`Dialog`) já usa o rótulo acessível "Fechar"
+              // — colidir os dois deixaria "Fechar" ambíguo entre duas
+              // ações bem diferentes.
+              label="Fechar refeição"
+              onClick={() => {
+                onClose();
+                setShowingActions(false);
+              }}
+            >
+              <ChevronsUp aria-hidden className="size-4" />
+            </MenuRow>
+          )}
           <ConfirmButton
             onConfirm={() => {
               setShowingActions(false);

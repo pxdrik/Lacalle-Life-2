@@ -140,6 +140,32 @@ export function openMeal(log: FoodLog, diet: Diet, meal: Meal): FoodLog {
   });
 }
 
+/**
+ * `openMeal`'s undo — drops the snapshot, returning the meal to the compact
+ * "Planejado" row instead of the full card.
+ *
+ * Pedro, 17/09/2026, olhando uma refeição que `openMeal` tinha acabado de
+ * trazer pra tela: "vamos fazer uma funcionalidade para voltar a 'fechar' o
+ * card do diário." Só faz sentido pra uma refeição ainda não comida — a
+ * cópia existe exatamente pra ler ou ajustar antes de decidir, e fechar sem
+ * ter decidido nada não deveria custar nada. Fechar uma já comida apagaria
+ * um registro real, então isto é um no-op nesse caso (mesma regra de
+ * `uncheckMeal`: nunca reverte "comido" sozinho) — a pessoa usa o check pra
+ * desmarcar primeiro se for isso que quer.
+ */
+export function closeMeal(
+  log: FoodLog,
+  dietId: EntityId,
+  mealId: EntityId,
+): FoodLog {
+  const existing = findLoggedMeal(log, dietId, mealId);
+  if (existing === undefined || isEaten(existing)) return log;
+
+  return revise(log, {
+    meals: log.meals.filter((candidate) => candidate !== existing),
+  });
+}
+
 export type MealCheckState = "unchecked" | "checked" | "edited";
 
 /**

@@ -272,7 +272,10 @@ describe("the newly added item's entrance", () => {
   it("does not animate on the initial render — nothing was just added", () => {
     mount(meal([item({ id: "i1" })]));
 
-    const row = screen.getByText("Abacate").closest("li");
+    // `getAllByText`, não `getByText`: o mesmo nome também é o título do
+    // `Dialog` de ações do item (sempre no DOM, só fechado) — o primeiro
+    // elemento é o `<span>` da linha.
+    const row = screen.getAllByText("Abacate")[0]?.closest("li");
     expect(row).not.toHaveClass("animate-rise");
   });
 
@@ -283,8 +286,8 @@ describe("the newly added item's entrance", () => {
       meal([item({ id: "i1" }), item({ id: "i2", name: "Banana" })]),
     );
 
-    const existing = screen.getByText("Abacate").closest("li");
-    const added = screen.getByText("Banana").closest("li");
+    const existing = screen.getAllByText("Abacate")[0]?.closest("li");
+    const added = screen.getAllByText("Banana")[0]?.closest("li");
     expect(existing).not.toHaveClass("animate-rise");
     expect(added).toHaveClass("animate-rise");
   });

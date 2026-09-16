@@ -164,26 +164,6 @@ describe("the portion field", () => {
   });
 });
 
-describe("the Gramas/Unidade labels", () => {
-  it("shows Gramas above the grams field even without a practical unit", () => {
-    mount(ITEM);
-
-    expect(screen.getByText("Gramas")).toBeInTheDocument();
-    expect(screen.queryByText("Unidade")).not.toBeInTheDocument();
-  });
-
-  it("shows Unidade too once the food has a practical unit", () => {
-    mount({
-      ...ITEM,
-      grams: 100,
-      practicalUnit: { label: "1/2 unidade média", grams: 100 },
-    });
-
-    expect(screen.getByText("Gramas")).toBeInTheDocument();
-    expect(screen.getByText("Unidade")).toBeInTheDocument();
-  });
-});
-
 describe("the practical unit field", () => {
   const WITH_UNIT: MealItem = {
     ...ITEM,
@@ -283,12 +263,22 @@ describe("the unit selector", () => {
 });
 
 describe("the food name", () => {
-  it("is not clipped to a single truncated line", () => {
+  // Reversão deliberada, 17/09/2026: a linha do item agora compartilha
+  // espaço com o kcal e o ⋮ (pedido do Pedro, comparando com o Macros —
+  // "a distribuição dos macros tá muito ruim, ocupa muito espaço"), então
+  // truncar é o preço certo pra caber em duas linhas fixas em vez de três
+  // variáveis. Diferente do `FoodPicker`: ali o nome inteiro decide *qual*
+  // alimento escolher entre vários parecidos; aqui o alimento já foi
+  // escolhido, e o nome só precisa ser reconhecível, não soletrado.
+  it("truncates a long name to keep the row to two lines", () => {
+    // `getAllByText`, não `getByText`: o mesmo nome também é o título do
+    // `Dialog` do ⋮ (sempre no DOM, só fechado) — o `<span>` da linha é o
+    // primeiro elemento, o `<h2>` do título é o segundo.
     const longName = "Leite semidesnatado em pó integral fortificado";
     render(row({ ...ITEM, name: longName }));
 
-    const nameSpan = screen.getByText(longName);
-    expect(nameSpan.className).not.toContain("truncate");
+    const [nameSpan] = screen.getAllByText(longName);
+    expect(nameSpan?.className).toContain("truncate");
   });
 });
 
@@ -312,8 +302,17 @@ describe("field heights", () => {
   });
 });
 
-describe("moving or copying to another meal", () => {
-  it("labels the control \"Mover para\" instead of an unlabelled ellipsis", () => {
+describe("the actions menu (⋮)", () => {
+  function mountWithMenu(
+    otherMeals: readonly { readonly id: string; readonly name: string }[] = [],
+    extra: {
+      readonly onSend?: (targetMealId: string, mode: "copy" | "move") => void;
+      readonly onRemove?: () => void;
+    } = {},
+  ) {
+    const onSend = extra.onSend ?? vi.fn();
+    const onRemove = extra.onRemove ?? vi.fn();
+
     render(
       <ul>
         <MealItemRow
@@ -323,17 +322,77 @@ describe("moving or copying to another meal", () => {
             listeners: undefined,
             isDragging: false,
           }}
-          otherMeals={[{ id: "m2", name: "Refeição 2" }]}
+          otherMeals={otherMeals}
           onGramsChange={() => undefined}
           onUnitChange={() => undefined}
-          onRemove={() => undefined}
-          onSend={() => undefined}
+          onRemove={onRemove}
+          onSend={onSend}
         />
       </ul>,
     );
 
+    return { onSend, onRemove };
+  }
+
+  async function openMenu() {
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "Mais ações para Abacate" }),
+    );
+    return user;
+  }
+
+  it("lists every other meal under Mover para and Copiar para", async () => {
+    mountWithMenu([{ id: "m2", name: "Refeição 2" }]);
+    await openMenu();
+
+    expect(screen.getByText("Mover para")).toBeInTheDocument();
+    expect(screen.getByText("Copiar para")).toBeInTheDocument();
     expect(
-      screen.getByRole("option", { name: "Mover para" }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("button", { name: "Refeição 2" }),
+    ).toHaveLength(2);
+  });
+
+  it("moving calls onSend with mode 'move' and closes the sheet", async () => {
+    const { onSend } = mountWithMenu([{ id: "m2", name: "Refeição 2" }]);
+    const user = await openMenu();
+
+    await user.click(screen.getAllByRole("button", { name: "Refeição 2" })[0]!);
+
+    expect(onSend).toHaveBeenCalledExactlyOnceWith("m2", "move");
+    expect(
+      screen.queryByRole("button", { name: "Refeição 2" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("copying calls onSend with mode 'copy'", async () => {
+    const { onSend } = mountWithMenu([{ id: "m2", name: "Refeição 2" }]);
+    const user = await openMenu();
+
+    await user.click(screen.getAllByRole("button", { name: "Refeição 2" })[1]!);
+
+    expect(onSend).toHaveBeenCalledExactlyOnceWith("m2", "copy");
+  });
+
+  it("has no Mover/Copiar section when there is nowhere to send the food", async () => {
+    mountWithMenu([]);
+    await openMenu();
+
+    expect(screen.queryByText("Mover para")).not.toBeInTheDocument();
+    expect(screen.queryByText("Copiar para")).not.toBeInTheDocument();
+  });
+
+  it("removing requires confirmation before calling onRemove", async () => {
+    const { onRemove } = mountWithMenu();
+    const user = await openMenu();
+
+    const remove = screen.getByRole("button", { name: "Remover Abacate" });
+    await user.click(remove);
+    expect(onRemove).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole("button", { name: "Remover?: Remover Abacate" }),
+    );
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });

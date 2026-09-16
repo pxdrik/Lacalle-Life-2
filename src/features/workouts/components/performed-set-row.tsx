@@ -177,13 +177,16 @@ export function PerformedSetRow({
             neither, so there is nothing here for it to rate. */}
         {!isCardio && (
           <div className="shrink-0">
+            {/* `size-11`, não `h-11 w-14`: o mostrador é um meio círculo, e
+                largo-e-baixo achatava o arco. Quadrado é a forma que sobra
+                espaço igual dos dois lados pro arco respirar. */}
             <RpeSelect
               value={set.rpe}
               label={`RPE da série ${String(number)} de ${exerciseName}`}
               onChange={(rpe) => {
                 onChange({ rpe });
               }}
-              className="h-11 w-14"
+              className="size-11"
             />
             <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
           </div>

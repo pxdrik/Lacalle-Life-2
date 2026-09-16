@@ -283,6 +283,52 @@ describe("planned meals waiting to be checked", () => {
     ).toHaveAttribute("aria-pressed", "false");
   });
 
+  it("'Fechar' in the ⋮ undoes an open, back to the compact planned row", async () => {
+    // Pedro, 17/09/2026, olhando uma refeição recém-aberta: "vamos fazer
+    // uma funcionalidade para voltar a 'fechar' o card do diário."
+    const { logs } = mount(emptyLog(), dietForToday());
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Abrir Refeição 1" }),
+    );
+    await screen.findByDisplayValue("Refeição 1");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Fechar refeição" }));
+
+    expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
+    expect(
+      screen.queryByDisplayValue("Refeição 1"),
+    ).not.toBeInTheDocument();
+    // Sem refeições, o dia inteiro é apagado do armazenamento em vez de
+    // salvo vazio — a mesma regra de sempre (`isEmptyLog`), não algo novo
+    // que "Fechar" precisou ensinar.
+    await waitFor(async () => {
+      expect(await logs.getByDay(TODAY)).toBeUndefined();
+    });
+  });
+
+  it("never offers 'Fechar' once the meal is checked — closing would erase a real record", async () => {
+    const { logs } = mount(emptyLog(), dietForToday());
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Marcar Refeição 1 como comida",
+      }),
+    );
+    await waitFor(async () => {
+      expect((await logs.getByDay(TODAY))?.meals[0]?.eaten).toBe(true);
+    });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Fechar refeição" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("drops a meal from the planned list once it is already checked", async () => {
     const diet = dietForToday();
     const seeded: FoodLog = {

@@ -4,6 +4,7 @@ import { createDiet, createMealItem } from "./create-diet";
 import { addItem, removeItem, setItemGrams } from "./edit-diet";
 import {
   checkMeal,
+  closeMeal,
   isMealEaten,
   isMealLogged,
   mealCheckState,
@@ -169,6 +170,47 @@ describe("openMeal", () => {
     openMeal(createFoodLog("2026-08-31"), diet, meal);
 
     expect(diet.meals[0]?.sourceDietId).toBeUndefined();
+  });
+});
+
+describe("closeMeal", () => {
+  it("drops an unchecked meal, back to the compact planned list", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const opened = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    const closed = closeMeal(opened, diet.id, meal.id);
+
+    expect(closed.meals).toHaveLength(0);
+    expect(isMealLogged(closed, diet.id, meal.id)).toBe(false);
+  });
+
+  it("never removes an already-eaten meal — closing is not unchecking", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const checked = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    const result = closeMeal(checked, diet.id, meal.id);
+
+    expect(result).toBe(checked);
+    expect(result.meals).toHaveLength(1);
+  });
+
+  it("is a no-op when the meal was never logged at all", () => {
+    const log = createFoodLog("2026-08-31");
+
+    expect(closeMeal(log, "alguma-dieta", "alguma-refeicao")).toBe(log);
+  });
+
+  it("leaves an unrelated meal in the log alone", () => {
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    const opened = openMeal(createFoodLog("2026-08-31"), diet, meal);
+
+    const result = closeMeal(opened, "outra-dieta", "outra-refeicao");
+
+    expect(result).toBe(opened);
+    expect(result.meals).toHaveLength(1);
   });
 });
 

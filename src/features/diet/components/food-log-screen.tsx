@@ -39,6 +39,7 @@ import {
 } from "../services/edit-diet";
 import {
   checkMeal,
+  closeMeal,
   eatenMacros,
   isMealLogged,
   mealCheckState,
@@ -260,7 +261,21 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
               }}
             >
               <div className="mt-5 space-y-3">
-                {state.log.meals.map((meal, index) => (
+                {state.log.meals.map((meal, index) => {
+                  // Calculado uma vez, reaproveitado pelo check e pelo
+                  // "Fechar" no ⋮ abaixo — os dois só existem numa refeição
+                  // vinda da dieta (`sourceDietId`/`sourceMealId`), e
+                  // `checkState` já é a forma certa de perguntar "está
+                  // comida?" sem ler `meal.eaten` direto aqui (ver a nota em
+                  // `meal-execution.ts`: só aquele arquivo lê o campo cru).
+                  const sourceDietId = meal.sourceDietId;
+                  const sourceMealId = meal.sourceMealId;
+                  const checkState =
+                    sourceDietId !== undefined && sourceMealId !== undefined
+                      ? mealCheckState(state.log, sourceDietId, sourceMealId)
+                      : undefined;
+
+                  return (
                   <SortableItem key={meal.id} id={meal.id}>
                     {(dragHandle) => (
                       <MealCard
@@ -344,24 +359,37 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         // para o check representar. Pode ser "unchecked"
                         // sim: "Começar de X" entra com todas as refeições
                         // do dia já visíveis, mas ainda por comer.
-                        checkState={
-                          meal.sourceDietId !== undefined &&
-                          meal.sourceMealId !== undefined
-                            ? mealCheckState(
-                                state.log,
-                                meal.sourceDietId,
-                                meal.sourceMealId,
-                              )
+                        checkState={checkState}
+                        onToggleChecked={
+                          sourceDietId !== undefined &&
+                          sourceMealId !== undefined
+                            ? () => {
+                                apply((current) =>
+                                  toggleLoggedMeal(
+                                    current,
+                                    sourceDietId,
+                                    sourceMealId,
+                                  ),
+                                );
+                              }
                             : undefined
                         }
-                        onToggleChecked={
-                          meal.sourceDietId !== undefined &&
-                          meal.sourceMealId !== undefined
+                        // "Fechar" no ⋮ — mesma proveniência do check acima,
+                        // mas só quando ainda não comida: fechar uma
+                        // refeição já registrada apagaria um registro real,
+                        // e `closeMeal` já se recusa a fazer isso sozinho —
+                        // aqui a checagem evita nem oferecer a opção.
+                        onClose={
+                          sourceDietId !== undefined &&
+                          sourceMealId !== undefined &&
+                          checkState === "unchecked"
                             ? () => {
-                                const dietId = meal.sourceDietId!;
-                                const mealId = meal.sourceMealId!;
                                 apply((current) =>
-                                  toggleLoggedMeal(current, dietId, mealId),
+                                  closeMeal(
+                                    current,
+                                    sourceDietId,
+                                    sourceMealId,
+                                  ),
                                 );
                               }
                             : undefined
@@ -369,7 +397,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                       />
                     )}
                   </SortableItem>
-                ))}
+                  );
+                })}
               </div>
             </SortableList>
           )}

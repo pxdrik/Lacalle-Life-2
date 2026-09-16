@@ -1,11 +1,13 @@
 "use client";
 
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, MoreVertical } from "lucide-react";
 import { useState } from "react";
 
 import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { Dialog } from "@/design-system/components/dialog";
 import { Select } from "@/design-system/components/select";
 
 import { itemMacros } from "../services/diet-macros";
@@ -39,20 +41,25 @@ interface Props {
 }
 
 /**
- * One food inside a meal.
+ * One food inside a meal, two lines — name and its actions, then the
+ * quantity and its macros.
  *
  * Grams are a live input rather than something behind an edit affordance —
  * adjusting a portion is the single most repeated action in building a diet,
  * and the macros beside it move as you type.
+ *
+ * **Rewritten 17/09/2026 (Pedro, comparando com o Macros): "a distribuição
+ * dos macros tá muito ruim, ocupa muito espaço" e "o X de apagar também
+ * faz o card crescer."** A linha antiga quebrava em até três — nome,
+ * gramas/unidade, macros+mover+remover — porque sete controles não cabem
+ * em ~310px de card num telefone, e o botão de remover sempre visível
+ * (`sm:opacity-0` só existia a partir do breakpoint que o celular nunca
+ * atinge) empurrava tudo pra uma quarta linha sozinho. Duas linhas fixas
+ * agora, nunca três: nome + kcal + ⋮ em cima, quantidade + macros embaixo —
+ * exatamente o par de linhas que o Macros usa por alimento. "Mover para" e
+ * "Remover" saíram do fluxo inteiramente, atrás do ⋮ — a mesma ideia do
+ * kebab do cabeçalho da refeição (`meal-card.tsx`), agora por alimento.
  */
-/**
- * "GRAMAS" / "UNIDADE" acima do campo, do mesmo jeito que a rotina de treino
- * já rotula suas colunas (`# REPS PESO RPE`) em vez de deixar dois números
- * lado a lado sem dizer o que cada um é.
- */
-const QUANTITY_LABEL =
-  "text-[0.625rem] font-medium tracking-wide text-ink-subtle uppercase";
-
 export function MealItemRow({
   item,
   dragHandle,
@@ -65,16 +72,13 @@ export function MealItemRow({
   onEntranceEnd,
 }: Props) {
   const macros = itemMacros(item);
+  const [showingActions, setShowingActions] = useState(false);
 
   return (
     <li
       onAnimationEnd={justAdded ? onEntranceEnd : undefined}
       className={cn(
-        // Wraps on a phone: seven controls in one line need ~290px and a
-        // 360px screen leaves the row about 250, so it used to run off the
-        // card. Below `sm` the portion stays with the name and the numbers
-        // take a second line.
-        "group flex flex-wrap items-center gap-x-2 gap-y-1 py-1.5 sm:flex-nowrap sm:gap-2",
+        "flex items-start gap-2 py-1.5",
         dragHandle.isDragging && "rounded-sm bg-muted",
         justAdded && "animate-rise motion-reduce:animate-none",
       )}
@@ -87,31 +91,32 @@ export function MealItemRow({
         aria-label={`Reordenar ${item.name}`}
         {...dragHandle.attributes}
         {...dragHandle.listeners}
-        className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+        className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
       >
         <GripVertical aria-hidden className="size-3.5" />
       </button>
 
-      {/* Wraps rather than truncating: sharing a line with the quantity
-          group left almost nothing for the name once "Gramas"/"Unidade"
-          gave that group a caption of its own — "Leite semidesnatado" came
-          out as "Leite s...". The spacer right after this gives the name
-          the whole first line on a phone, so it never has to fight the
-          quantity fields for room. */}
-      <span className="min-w-0 flex-1 text-sm text-ink">{item.name}</span>
-
-      <div aria-hidden className="basis-full sm:hidden" />
-
-      <div className="flex shrink-0 items-end gap-1">
-        {/* "GRAMAS"/"UNIDADE" acima do número, não só a cor, para que a
-            diferença não dependa de enxergar cor nenhuma. `aria-hidden`
-            porque o rótulo de cada campo (abaixo) já diz a mesma coisa por
-            extenso para quem usa leitor de tela — isto é reforço visual, não
-            a única fonte do nome acessível. */}
-        <div className="flex flex-col items-center gap-0.5">
-          <span aria-hidden className={QUANTITY_LABEL}>
-            Gramas
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-2">
+          <span className="min-w-0 flex-1 truncate text-sm text-ink">
+            {item.name}
           </span>
+          <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
+            {formatDecimal(macros.kcal)}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setShowingActions(true);
+            }}
+            aria-label={`Mais ações para ${item.name}`}
+            className="-my-1 -me-1 flex size-7 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          >
+            <MoreVertical aria-hidden className="size-3.5" />
+          </button>
+        </div>
+
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
           <div className="flex items-center gap-1">
             <GramsField
               grams={item.grams}
@@ -131,91 +136,107 @@ export function MealItemRow({
               <option value="g">g</option>
               <option value="ml">ml</option>
             </Select>
+
+            {/* Só aparece quando o alimento tem uma medida caseira confiável
+                (TBCA/TACO/USDA FBG). Nem todo alimento tem uma, e onde falta
+                não existe substituto honesto além de gramas/ml. Os dois
+                campos escrevem no mesmo `grams`: editar um atualiza o
+                outro. */}
+            {item.practicalUnit && (
+              <UnitQuantityField
+                grams={item.grams}
+                unit={item.practicalUnit}
+                itemName={item.name}
+                onChange={onGramsChange}
+              />
+            )}
           </div>
+
+          <p className="flex items-baseline gap-2 text-xs tabular-nums">
+            {MACRO_CODING.map(({ key, short, text }) => (
+              <span key={key} className={text}>
+                {short[0]}: {formatDecimal(macros[key])}
+              </span>
+            ))}
+          </p>
         </div>
-
-        {/* Só aparece quando o alimento tem uma medida caseira confiável
-            (TBCA/TACO/USDA FBG). Nem todo alimento tem uma, e onde falta não
-            existe substituto honesto além de gramas/ml. Os dois campos
-            escrevem no mesmo `grams`: editar um atualiza o outro. */}
-        {item.practicalUnit && (
-          <div className="flex flex-col items-center gap-0.5">
-            <span aria-hidden className={QUANTITY_LABEL}>
-              Unidade
-            </span>
-            <UnitQuantityField
-              grams={item.grams}
-              unit={item.practicalUnit}
-              itemName={item.name}
-              onChange={onGramsChange}
-            />
-          </div>
-        )}
       </div>
 
-      {/* Second forced break: the quantity group gets its own line too,
-          separate from the macro numbers and the move/copy control below —
-          three dense rows share one line worse than three plain ones. A
-          zero-height full-basis item is what makes a break land exactly
-          here and nowhere else; leaving it to flex means it breaks wherever
-          the longest name happens to leave off. */}
-      <div aria-hidden className="basis-full sm:hidden" />
-
-      {/* `ms-auto` pins the numbers to the right edge of the wrapped line, so
-          they stay in a column across items instead of drifting with the
-          width of each name. */}
-      <div className="ms-auto flex w-40 shrink-0 items-baseline justify-end gap-3 text-xs tabular-nums sm:w-48 sm:gap-4">
-        <span className="text-ink-muted">{formatDecimal(macros.kcal)}</span>
-        {MACRO_CODING.map(({ key, text }) => (
-          <span key={key} className={text}>
-            {formatDecimal(macros[key])}
-          </span>
-        ))}
-      </div>
-
-      {/* A native select rather than a custom menu: it is keyboard operable,
-          it opens the OS picker on a phone, and it costs one control instead
-          of two buttons on an already dense row. Hidden when there is nowhere
-          to send the food. */}
-      {otherMeals.length > 0 && (
-        <Select
-          variant="compact"
-          value=""
-          aria-label={`Mover ou copiar ${item.name} para outra refeição`}
-          onChange={(event) => {
-            const [mode, mealId] = event.target.value.split(":");
-            if (mode === undefined || mealId === undefined) return;
-            onSend(mealId, mode === "copy" ? "copy" : "move");
-          }}
-          className="shrink-0"
-        >
-          <option value="">Mover para</option>
-          <optgroup label="Mover para">
-            {otherMeals.map((meal) => (
-              <option key={`move:${meal.id}`} value={`move:${meal.id}`}>
-                {meal.name}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Copiar para">
-            {otherMeals.map((meal) => (
-              <option key={`copy:${meal.id}`} value={`copy:${meal.id}`}>
-                {meal.name}
-              </option>
-            ))}
-          </optgroup>
-        </Select>
-      )}
-
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Remover ${item.name}`}
-        className="flex size-7 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+      <Dialog
+        open={showingActions}
+        title={item.name}
+        onClose={() => {
+          setShowingActions(false);
+        }}
+        placement="sheet-bottom"
       >
-        <X aria-hidden className="size-3.5" />
-      </button>
+        <div className="-my-1 space-y-0.5">
+          {otherMeals.length > 0 && (
+            <>
+              <p className="px-3 pt-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
+                Mover para
+              </p>
+              {otherMeals.map((meal) => (
+                <ItemMenuRow
+                  key={`move:${meal.id}`}
+                  onClick={() => {
+                    onSend(meal.id, "move");
+                    setShowingActions(false);
+                  }}
+                >
+                  {meal.name}
+                </ItemMenuRow>
+              ))}
+
+              <p className="px-3 pt-2 text-xs font-medium tracking-wide text-ink-subtle uppercase">
+                Copiar para
+              </p>
+              {otherMeals.map((meal) => (
+                <ItemMenuRow
+                  key={`copy:${meal.id}`}
+                  onClick={() => {
+                    onSend(meal.id, "copy");
+                    setShowingActions(false);
+                  }}
+                >
+                  {meal.name}
+                </ItemMenuRow>
+              ))}
+            </>
+          )}
+
+          <ConfirmButton
+            onConfirm={() => {
+              setShowingActions(false);
+              onRemove();
+            }}
+            label={`Remover ${item.name}`}
+            confirmLabel="Remover?"
+            className="mt-1 h-11 w-full justify-start px-3 text-sm text-danger hover:bg-danger/10"
+          >
+            Remover
+          </ConfirmButton>
+        </div>
+      </Dialog>
     </li>
+  );
+}
+
+function ItemMenuRow({
+  onClick,
+  children,
+}: {
+  readonly onClick: () => void;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-11 w-full items-center rounded-md px-3 text-sm text-ink transition-colors duration-150 ease-out hover:bg-muted"
+    >
+      {children}
+    </button>
   );
 }
 

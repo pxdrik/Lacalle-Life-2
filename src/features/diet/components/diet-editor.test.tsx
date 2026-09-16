@@ -251,7 +251,15 @@ describe("adding food", () => {
 
     await userEvent.click(
       await screen.findByRole("button", {
-        name: "Remover Peito de frango grelhado",
+        name: "Mais ações para Peito de frango grelhado",
+      }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remover Peito de frango grelhado" }),
+    );
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "Remover?: Remover Peito de frango grelhado",
       }),
     );
 
