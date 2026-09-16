@@ -5,6 +5,32 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Ajustes de Dieta/Diário/Treino depois do teste real — 17/09/2026
+
+Pedro usou a entrega anterior (item abaixo) e voltou com 5 pontos:
+
+- ✅ **Dieta:** a barra fina colorida saiu do cabeçalho do card — "mostra os
+  números mesmo, não esse graficozinho". Voltou `MacroSummary` (kcal +
+  Prot/Carb/Gord por extenso).
+- ✅ **Diário:** uma refeição planejada só saía da lista compacta marcando-a
+  como comida. `openMeal` (novo) pulled a refeição pro dia sem marcar
+  comida — tocar a linha abre, tocar o check continua marcando direto.
+- ✅ **Treino:** o check não alinhava com os campos de peso/reps/RPE — a
+  legenda "planejado" embaixo de cada campo tornava aquele bloco mais alto,
+  `items-center` centralizava pela altura errada. `items-start` resolve.
+- ✅ **Treino:** Peso e Repetição trocaram de posição (Peso primeiro) nas 4
+  telas que mostram as duas colunas — execução e planejamento não discordam
+  mais sobre a ordem.
+- ✅ **Treino:** RPE virou um mostrador de meio círculo com ponteiro —
+  "gostei bastante da ideia". Mesma técnica de arco que `CalorieRing`
+  (`TodayEnergy`) já usa. A grade de botões da folha de seleção não mudou,
+  só o gatilho fechado.
+
+`npm run verify` (1713 testes) e `npm run build` verdes; confirmado ao vivo
+no navegador. Commit `e3af48b`.
+
+---
+
 ## ✅ Sincronização vira "mais recente vence" automático + 4 telas — 17/09/2026
 
 Pedro relatou perda de dado real: editou dieta/refeições/treino no celular,
