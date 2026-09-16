@@ -17,15 +17,13 @@ import {
   SortableList,
 } from "@/design-system/components/sortable-list";
 import { Skeleton } from "@/design-system/components/skeleton";
-import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
+import { useApplyPickedFood } from "../hooks/use-apply-picked-food";
 import { useDietList } from "../hooks/use-diet-list";
 import { useFoodLogDay } from "../hooks/use-food-log";
-import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
 import {
-  addItem,
   addMeal,
   copyItemToMeal,
   duplicateMeal,
@@ -90,6 +88,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
   const [picking, setPicking] = useState(false);
+  useApplyPickedFood(apply);
 
   const today = dayKey(new Date());
 
@@ -311,19 +310,12 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                             ),
                           );
                         }}
-                        onAddFood={(food: Food) => {
-                          apply((current) =>
-                            addItem(
-                              current,
-                              meal.id,
-                              createMealItem({
-                                foodId: food.id,
-                                name: food.name,
-                                grams: DEFAULT_GRAMS,
-                                per100g: food.per100g,
-                                practicalUnit: food.practicalUnit,
-                              }),
-                            ),
+                        onAddFoodClick={() => {
+                          const returnTo = encodeURIComponent(
+                            day === today ? "/diario" : `/diario?dia=${day}`,
+                          );
+                          router.push(
+                            `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
                           );
                         }}
                         onItemGramsChange={(itemId, grams) => {

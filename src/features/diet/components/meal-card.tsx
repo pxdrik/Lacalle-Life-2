@@ -22,7 +22,6 @@ import {
   SortableList,
 } from "@/design-system/components/sortable-list";
 import { TimeField } from "@/design-system/components/time-field";
-import { FoodPicker, type Food } from "@/features/foods";
 
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
@@ -47,7 +46,13 @@ interface Props {
   readonly onRemove: () => void;
   readonly onDuplicate: () => void;
   readonly onMove: (offset: number) => void;
-  readonly onAddFood: (food: Food) => void;
+  /**
+   * "Adicionar alimento" navigates to `/alimentos/selecionar` (17/09/2026)
+   * instead of opening `FoodPicker` inline — the parent owns the URL
+   * (`returnTo`/`mealId`) because it, not this card, knows which screen and
+   * which day it is.
+   */
+  readonly onAddFoodClick: () => void;
   readonly onItemGramsChange: (itemId: string, grams: number) => void;
   readonly onItemUnitChange: (itemId: string, unit: MealItem["unit"]) => void;
   readonly onRemoveItem: (itemId: string) => void;
@@ -94,7 +99,7 @@ export function MealCard({
   onRemove,
   onDuplicate,
   onMove,
-  onAddFood,
+  onAddFoodClick,
   onItemGramsChange,
   onItemUnitChange,
   onRemoveItem,
@@ -108,7 +113,6 @@ export function MealCard({
   onRenameAlternative,
   onRemoveAlternative,
 }: Props) {
-  const [picking, setPicking] = useState(false);
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
   // Mesma técnica de `performed-set-row.tsx` ("Concluir série"): a animação
@@ -372,68 +376,55 @@ export function MealCard({
         </SortableList>
       )}
 
-      {picking ? (
-        <div className="mt-2">
-          <FoodPicker
-            onPick={onAddFood}
-            onCancel={() => {
-              setPicking(false);
-            }}
-          />
-        </div>
-      ) : (
-        // Adicionar alimento e Observações na mesma linha — dividir em duas
-        // era espaço parado embaixo de toda refeição, a maior parte das
-        // vezes vazio. `InlineText` já é discreto (borda transparente até
-        // foco/hover), então não briga por atenção com o botão ao lado.
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <div className="flex flex-wrap items-center gap-1">
+      {/* Adicionar alimento e Observações na mesma linha — dividir em duas
+          era espaço parado embaixo de toda refeição, a maior parte das
+          vezes vazio. `InlineText` já é discreto (borda transparente até
+          foco/hover), então não briga por atenção com o botão ao lado. */}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            type="button"
+            onClick={onAddFoodClick}
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          >
+            <Plus aria-hidden className="size-4" />
+            Adicionar alimento
+          </button>
+
+          {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
+              na prop) — pedido real: "vai que ele pede marmita, ele vai
+              ter a marmita de macarrão e de arroz", pra trocar sem editar
+              alimento por alimento toda vez. */}
+          {onApplyAlternative !== undefined && (
             <button
               type="button"
               onClick={() => {
-                setPicking(true);
+                setShowingAlternatives(true);
               }}
               className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
             >
-              <Plus aria-hidden className="size-4" />
-              Adicionar alimento
+              <Shuffle aria-hidden className="size-4" />
+              Outras sugestões
+              {meal.alternatives !== undefined &&
+                meal.alternatives.length > 0 && (
+                  <span className="tabular-nums text-ink-subtle">
+                    {meal.alternatives.length}
+                  </span>
+                )}
             </button>
-
-            {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
-                na prop) — pedido real: "vai que ele pede marmita, ele vai
-                ter a marmita de macarrão e de arroz", pra trocar sem editar
-                alimento por alimento toda vez. */}
-            {onApplyAlternative !== undefined && (
-              <button
-                type="button"
-                onClick={() => {
-                  setShowingAlternatives(true);
-                }}
-                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-              >
-                <Shuffle aria-hidden className="size-4" />
-                Outras sugestões
-                {meal.alternatives !== undefined &&
-                  meal.alternatives.length > 0 && (
-                    <span className="tabular-nums text-ink-subtle">
-                      {meal.alternatives.length}
-                    </span>
-                  )}
-              </button>
-            )}
-          </div>
-
-          <InlineText
-            value={meal.notes}
-            onChange={(notes) => {
-              onChange({ notes });
-            }}
-            label={`Observações de ${meal.name}`}
-            placeholder="Observações"
-            className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
-          />
+          )}
         </div>
-      )}
+
+        <InlineText
+          value={meal.notes}
+          onChange={(notes) => {
+            onChange({ notes });
+          }}
+          label={`Observações de ${meal.name}`}
+          placeholder="Observações"
+          className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
+        />
+      </div>
 
       {onApplyAlternative !== undefined && (
         <MealAlternativesDialog

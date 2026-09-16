@@ -6,6 +6,7 @@
  * not an accident.
  */
 export { FoodPicker } from "./components/food-picker";
+export { useFoodCatalogue } from "./hooks/use-food-catalogue";
 export {
   FOOD_CATEGORY_LABELS,
   type Food,

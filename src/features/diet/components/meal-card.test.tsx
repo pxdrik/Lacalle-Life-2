@@ -47,7 +47,7 @@ function mount(
       onRemove={vi.fn()}
       onDuplicate={vi.fn()}
       onMove={vi.fn()}
-      onAddFood={vi.fn()}
+      onAddFoodClick={vi.fn()}
       onItemGramsChange={vi.fn()}
       onItemUnitChange={vi.fn()}
       onRemoveItem={vi.fn()}

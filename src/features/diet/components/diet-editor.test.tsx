@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
@@ -14,6 +14,23 @@ import { LocalDietRepository } from "../data/local-diet-repository";
 import { createDiet } from "../services/create-diet";
 import type { Diet } from "../types/diet";
 import { DietEditor } from "./diet-editor";
+
+// "Adicionar alimento" agora navega para `/alimentos/selecionar` (17/09/2026)
+// em vez de abrir um painel inline — `useSearchParams` precisa de um mock
+// controlável por teste porque `useApplyPickedFood` é o que consome
+// `addFoodId`/`addMealId`/`addGrams` de volta, o mesmo jeito que a tela real
+// receberia depois de voltar da nova página.
+const mockSearchParams = vi.fn(() => new URLSearchParams());
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => mockSearchParams(),
+  usePathname: () => "/dietas/test",
+}));
+
+beforeEach(() => {
+  mockSearchParams.mockReturnValue(new URLSearchParams());
+});
 
 /**
  * The whole vertical slice, against in-memory repositories.
@@ -59,17 +76,19 @@ function mount(dietId: string, seed?: Diet): Harness {
   return { diets, foods };
 }
 
-/** Opens the picker and adds the one food the harness knows about. */
-async function addChicken() {
-  await userEvent.click(
-    screen.getByRole("button", { name: "Adicionar alimento" }),
-  );
-  await userEvent.type(
-    screen.getByLabelText("Buscar alimento para adicionar"),
-    "frango",
-  );
-  await userEvent.click(
-    await screen.findByRole("button", { name: /Peito de frango/ }),
+/**
+ * Simulates arriving back from `/alimentos/selecionar` with the chicken
+ * picked at 100 g — set before `mount()`, matching the real navigation: the
+ * params are already on the URL the moment `DietEditor` mounts, not added to
+ * an already-open screen.
+ */
+function returningWithChicken(mealId: string) {
+  mockSearchParams.mockReturnValue(
+    new URLSearchParams({
+      addFoodId: CHICKEN.id,
+      addMealId: mealId,
+      addGrams: "100",
+    }),
   );
 }
 
@@ -185,13 +204,11 @@ describe("DietEditor", () => {
 describe("adding food", () => {
   it("adds at 100 g, the unit the catalogue is stated in", async () => {
     const diet = createDiet("Cutting");
+    returningWithChicken(diet.meals[0]!.id);
     const { diets } = mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-
-    await addChicken();
 
     expect(
-      screen.getByLabelText("Quantidade de Peito de frango grelhado"),
+      await screen.findByLabelText("Quantidade de Peito de frango grelhado"),
     ).toHaveValue("100");
     await waitFor(async () => {
       expect((await diets.getById(diet.id))?.meals[0]?.items).toHaveLength(1);
@@ -200,10 +217,8 @@ describe("adding food", () => {
 
   it("shows the portion's contribution", async () => {
     const diet = createDiet("Cutting");
+    returningWithChicken(diet.meals[0]!.id);
     mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-
-    await addChicken();
 
     // 100 g of chicken is 165 kcal, in the meal header and in the page total.
     await waitFor(() => {
@@ -213,11 +228,12 @@ describe("adding food", () => {
 
   it("recomputes when the portion changes", async () => {
     const diet = createDiet("Cutting");
+    returningWithChicken(diet.meals[0]!.id);
     mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-    await addChicken();
 
-    const grams = screen.getByLabelText("Quantidade de Peito de frango grelhado");
+    const grams = await screen.findByLabelText(
+      "Quantidade de Peito de frango grelhado",
+    );
     await userEvent.clear(grams);
     await userEvent.type(grams, "200");
 
@@ -230,12 +246,13 @@ describe("adding food", () => {
 
   it("removes an item", async () => {
     const diet = createDiet("Cutting");
+    returningWithChicken(diet.meals[0]!.id);
     const { diets } = mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-    await addChicken();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Remover Peito de frango grelhado" }),
+      await screen.findByRole("button", {
+        name: "Remover Peito de frango grelhado",
+      }),
     );
 
     await waitFor(async () => {
@@ -245,9 +262,8 @@ describe("adding food", () => {
 
   it("copies the food's values, so correcting the catalogue cannot rewrite the diet", async () => {
     const diet = createDiet("Cutting");
+    returningWithChicken(diet.meals[0]!.id);
     const { diets, foods } = mount(diet.id, diet);
-    await screen.findByLabelText("Nome da dieta");
-    await addChicken();
 
     await waitFor(async () => {
       expect((await diets.getById(diet.id))?.meals[0]?.items).toHaveLength(1);

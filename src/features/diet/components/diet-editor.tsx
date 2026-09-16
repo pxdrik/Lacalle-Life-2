@@ -8,19 +8,18 @@ import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   SortableItem,
   SortableList,
 } from "@/design-system/components/sortable-list";
-import type { Food } from "@/features/foods";
 import { useNutritionTargets } from "@/features/profile";
 
+import { useApplyPickedFood } from "../hooks/use-apply-picked-food";
 import { useDietEditor } from "../hooks/use-diet-editor";
-import { createMealItem, DEFAULT_GRAMS } from "../services/create-diet";
 import { dietMacros } from "../services/diet-macros";
 import {
-  addItem,
   addMeal,
   applyMealAlternative,
   copyItemToMeal,
@@ -48,6 +47,8 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
   const { state, saveError, hasConflict, apply, reload } = useDietEditor(dietId);
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
+  const router = useRouter();
+  useApplyPickedFood(apply);
 
   if (state.status === "loading") return <EditorSkeleton />;
 
@@ -168,19 +169,10 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                       reorderMealItems(current, meal.id, activeId, overId),
                     );
                   }}
-                  onAddFood={(food: Food) => {
-                    apply((current) =>
-                      addItem(
-                        current,
-                        meal.id,
-                        createMealItem({
-                          foodId: food.id,
-                          name: food.name,
-                          grams: DEFAULT_GRAMS,
-                          per100g: food.per100g,
-                          practicalUnit: food.practicalUnit,
-                        }),
-                      ),
+                  onAddFoodClick={() => {
+                    const returnTo = encodeURIComponent(`/dietas/${dietId}`);
+                    router.push(
+                      `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
                     );
                   }}
                   onItemGramsChange={(itemId, grams) => {

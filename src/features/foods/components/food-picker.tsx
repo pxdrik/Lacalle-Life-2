@@ -22,14 +22,33 @@ import { FoodFilters } from "./food-filters";
 interface Props {
   readonly onPick: (food: Food) => void;
   readonly onCancel: () => void;
+  /**
+   * `true` (default): the inline panel that opens inside a meal card — its
+   * own bordered surface, scrolled into view above the bottom nav, results
+   * capped to a short internal scrollbox so the meal below stays reachable.
+   *
+   * `false`: this *is* the page (`/alimentos/selecionar`, 17/09/2026) —
+   * there is no meal beside it to keep in view and no surface to draw
+   * around content that already fills the screen, so the panel styling and
+   * the scroll-into-view effect are skipped, and results flow with the
+   * page's own scroll instead of a capped box.
+   *
+   * Every other prop, and everything below this line, is identical between
+   * the two — search, filters, incremental reveal, create-inline. Only the
+   * container changes; the content this picks from and how it picks stays
+   * one implementation.
+   */
+  readonly chrome?: boolean;
 }
 
 /**
- * Pick a food, inline.
+ * Pick a food — inline inside the meal it is adding to (`chrome`, default),
+ * or as the page a meal's "Adicionar alimento" navigates to (`chrome=false`).
  *
- * Not a dialog: this opens inside the meal it is adding to, so the meal stays
- * visible and there is no focus trap, scroll lock or escape handling to get
- * subtly wrong. One keystroke to filter, one click to add.
+ * Never a dialog either way: inline, the meal stays visible with no focus
+ * trap, scroll lock or escape handling to get subtly wrong; as a page,
+ * the same is true of the browser's own back button. One keystroke to
+ * filter, one click to pick.
  *
  * Results used to be capped at 8 — "rendering all 216 makes the first
  * keystroke slower for everyone". That comment was right about the risk and
@@ -38,14 +57,11 @@ interface Props {
  * had anywhere to go here. `useIncrementalReveal` (BUG-011, Sprint 6) caps
  * how many rows *mount*, not how many can exist — the same fix the full
  * catalogues already use — so the list can be complete without the
- * first-keystroke cost coming back. The results pane keeps its own scroll
- * rather than growing into the meal below it, which is the one way this
- * picker differs from a full-page browser: it lives inside an editing flow
- * that should not be pushed around by how many rows matched.
+ * first-keystroke cost coming back.
  */
 const RESULT_PAGE_SIZE = 20;
 
-export function FoodPicker({ onPick, onCancel }: Props) {
+export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
   const { state } = useFoodCatalogue();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
@@ -73,12 +89,14 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   );
   const visible = results.slice(0, count);
 
-  // The picker opens inline, inside the meal it belongs to — no navigation,
+  // The inline panel opens inside the meal it belongs to — no navigation,
   // no scroll of its own. Found real (17/09/2026): on a meal card already
   // low on the page, the results rendered partly behind the fixed bottom
   // nav, and a tap on the hidden part hit the nav instead of the food.
   // `scroll-mb-(--bottom-nav-h)` below is what makes this scroll leave the
-  // bar clear rather than tucking the picker right up against it.
+  // bar clear rather than tucking the picker right up against it. As a full
+  // page (`chrome=false`) there is nothing to scroll into view — the picker
+  // already fills the screen the moment it mounts.
   //
   // Keyed on `state.status`, not run once on mount: the catalogue loads
   // async, so on mount the picker is still just the search bar — a scroll
@@ -86,16 +104,20 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   // exists) grows in underneath a moment later with nothing re-checking.
   const pickerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (state.status === "ready") {
+    if (chrome && state.status === "ready") {
       pickerRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
-  }, [state.status]);
+  }, [chrome, state.status]);
 
   if (creating) {
     return (
       <div
         ref={pickerRef}
-        className="scroll-mb-(--bottom-nav-h) space-y-3 rounded-lg border border-line bg-canvas p-3"
+        className={cn(
+          "space-y-3",
+          chrome &&
+            "scroll-mb-(--bottom-nav-h) rounded-lg border border-line bg-canvas p-3",
+        )}
       >
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-ink">Criar alimento</h2>
@@ -131,7 +153,11 @@ export function FoodPicker({ onPick, onCancel }: Props) {
   return (
     <div
       ref={pickerRef}
-      className="scroll-mb-(--bottom-nav-h) space-y-2 rounded-lg border border-line bg-canvas p-2"
+      className={cn(
+        "space-y-2",
+        chrome &&
+          "scroll-mb-(--bottom-nav-h) rounded-lg border border-line bg-canvas p-2",
+      )}
     >
       <div className="flex gap-2">
         <Input
@@ -225,7 +251,7 @@ export function FoodPicker({ onPick, onCancel }: Props) {
       )}
 
       {results.length > 0 && (
-        <ul className="max-h-72 overflow-y-auto">
+        <ul className={chrome ? "max-h-72 overflow-y-auto" : undefined}>
           {visible.map((food) => {
             const portion = referencePortion(food);
             const macros = roundMacros(scaleMacros(food.per100g, portion.grams));
@@ -302,7 +328,7 @@ export function FoodPicker({ onPick, onCancel }: Props) {
  * 100 g otherwise, since that is what `per100g` already is and no invented
  * number would be more honest than the one the catalogue actually carries.
  */
-function referencePortion(food: Food): { readonly grams: number; readonly label: string } {
+export function referencePortion(food: Food): { readonly grams: number; readonly label: string } {
   return food.practicalUnit === undefined
     ? { grams: 100, label: "100 g" }
     : { grams: food.practicalUnit.grams, label: food.practicalUnit.label };
