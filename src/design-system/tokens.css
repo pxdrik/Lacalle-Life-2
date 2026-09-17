@@ -871,10 +871,20 @@ textarea {
   --reveal-x: 50%;
   --reveal-y: 50%;
 
-  /* Algo chegando: um cronômetro, um aviso, um painel. Sobe uma distância curta
-     porque movimento vindo de baixo lê como "isto veio até você", enquanto uma
-     queda lê como "isto caiu em você". 6 px, que é o deslocamento da entrada de
-     conteúdo da pág. 35 — a pág. 36 limita a faixa a 4–12 px. */
+  /**
+   * Algo chegando: um cronômetro, um aviso, um painel. Sobe uma distância
+   * curta porque movimento vindo de baixo lê como "isto veio até você",
+   * enquanto uma queda lê como "isto caiu em você".
+   *
+   * **12 px, não mais 6** — o teto da faixa de 4–12 px que a pág. 36
+   * permite, não um valor novo inventado. Achado real, 17/09/2026: com
+   * `prefers-reduced-motion` confirmadamente desligado, o Pedro ainda lia
+   * o app como "sem animação" — 6 px em 250 ms é rápido e pequeno demais
+   * para registrar num olhar casual, mesmo funcionando exatamente como
+   * desenhado. Dobrar a distância (mesma resposta que a Landing já tinha
+   * recebido em "Mais intensidade de motion", 09/09/2026) sem tocar a
+   * curva nem inventar uma física de mola.
+   */
   --animate-rise: rise var(--duration-standard) var(--ease-out) both;
 
   /**
@@ -912,6 +922,11 @@ textarea {
    * o brandbook prevê no lugar é outra e melhor — o traço do check sendo
    * *desenhado* em vez de aparecer pronto, seguindo a mesma curvatura do
    * símbolo. Aqui fica a escala, que é o que o elemento pode fazer sozinho.
+   *
+   * **0,8, não mais 0,9** — achado real, 17/09/2026: 10% de crescimento em
+   * 150ms lia como nada, mesmo com `prefers-reduced-motion` desligado. Só
+   * aumenta a queda de partida (nunca passa de 1, nunca volta — continua
+   * sem overshoot), não muda a curva nem a duração.
    *
    * Disparada pelo *toque*, nunca pelo estado concluído: presa a um contador
    * que o clique incrementa, para que abrir um treino terminado não dispare
@@ -975,7 +990,7 @@ textarea {
 @keyframes rise {
   from {
     opacity: 0;
-    translate: 0 0.375rem;
+    translate: 0 0.75rem;
   }
   to {
     opacity: 1;
@@ -985,7 +1000,7 @@ textarea {
 
 @keyframes pop {
   from {
-    scale: 0.9;
+    scale: 0.8;
   }
   to {
     scale: 1;

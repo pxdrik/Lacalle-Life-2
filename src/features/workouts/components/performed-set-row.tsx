@@ -100,7 +100,13 @@ export function PerformedSetRow({
         <div
           className={cn(
             "group rounded-sm border border-l-[3px] border-transparent px-1 py-1.5",
-            "transition-[background-color,border-color] duration-(--duration-micro) ease-out",
+            // `--duration-standard`, não `--duration-micro` — achado real,
+            // 17/09/2026: a barra de foco chegando em 150ms lia como "sem
+            // animação" mesmo com `prefers-reduced-motion` confirmadamente
+            // desligado. `--duration-micro` continua certo pra hover/toggle
+            // comum (pág. 38); atenção migrando de série pra série pede o
+            // tier de baixo, o mesmo que cards/modais já usam.
+            "transition-[background-color,border-color] duration-(--duration-standard) ease-out",
             isNext && "border-l-accent bg-muted",
             // Surface and border, not colour and not opacity. `opacity-60` used
             // to be the *only* effect of a finished set — which faded the check

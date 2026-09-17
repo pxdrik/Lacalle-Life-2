@@ -5,6 +5,43 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Amplitude/duração maiores em três primitivas de motion — 17/09/2026
+
+Pedro testou de novo com "reduzir movimento" **confirmadamente desligado**
+e ainda leu o app como sem animação: "acho que podemos deixar elas mais
+fortes e talvez um pouco mais lenta". Não era mais o `prefers-reduced-motion`
+(entrada anterior, mesmo dia) — as animações rodavam exatamente como
+desenhadas, só que pequenas e rápidas demais pra registrar num olhar
+casual. `tokens.test.ts` não trava nenhum valor de motion (só contraste de
+cor), então os três abaixo tinham espaço pra mudar sem contrariar teste
+nem os quatro tiers oficiais da pág. 38, que não foram tocados:
+
+- **`--animate-rise`**: distância de 6px para 12px — o teto da faixa de
+  4–12px que a pág. 36 já permite, mesma resposta que a Landing recebeu
+  em "Mais intensidade de motion" (09/09/2026). Efeito amplo de propósito:
+  é o token de entrada usado em quase toda tela (transição de página,
+  toast, item novo em lista, stagger).
+- **`--animate-pop`** (check de série): escala de partida de 0,9 para
+  0,8 — queda maior, ainda sem overshoot (nunca passa de 1, nunca volta).
+- **Barra de foco na próxima série** (`performed-set-row.tsx`): saiu de
+  `--duration-micro` (150ms) para `--duration-standard` (250ms) — o
+  próprio "mais lenta" do pedido, aplicado à interação mais repetida do
+  app.
+
+Nenhum dos três muda o valor final (opacidade 1, escala 1, cor de
+descanso) — só o quadro de partida e/ou a duração, então não há como
+isto ter quebrado layout: `translate`/`scale` de keyframe não reservam
+espaço. `npm run verify` (1748 testes) e `npm run build` limpos;
+verificado ao vivo que completar/desmarcar série e navegar entre telas
+continuam corretos.
+
+**Se ainda ficar sutil demais:** o próximo degrau é subir o *tier*
+inteiro de uma superfície (o que a Landing já fez, standard→signature),
+não inflar as quatro durações oficiais em si — mudar o que "micro"
+significa quebraria a consistência que os tiers existem para dar.
+
+---
+
 ## ✅ Delete/Collapse chega a todo ponto de remoção do app — 17/09/2026
 
 Pedro testou a entrega anterior (Motion System, mesmo dia): criou um
