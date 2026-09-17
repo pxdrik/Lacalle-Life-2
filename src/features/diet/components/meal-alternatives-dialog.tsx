@@ -9,6 +9,7 @@ import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { itemMacros } from "../services/diet-macros";
 import type { Meal, MealAlternative } from "../types/diet";
@@ -125,41 +126,48 @@ function AlternativeRow({
   readonly onRemove: () => void;
 }) {
   const macros = sumMacros(alternative.items.map(itemMacros));
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
   return (
-    <Card as="li" padded className="space-y-1.5">
-      <div className="flex items-start justify-between gap-2">
-        <InlineText
-          value={alternative.name}
-          onChange={onRename}
-          label={`Nome da sugestão ${alternative.name}`}
-          className="min-w-0 flex-1 font-medium"
-        />
-        <div className="flex shrink-0 items-center gap-1">
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={onApply}
-          >
-            <Check aria-hidden className="size-4" />
-            Usar
-          </Button>
-          <ConfirmButton
-            onConfirm={onRemove}
-            label={`Excluir sugestão ${alternative.name}`}
-            confirmLabel="Excluir?"
-            className="h-8 min-w-8"
-          >
-            <Trash2 aria-hidden className="size-4" />
-          </ConfirmButton>
-        </div>
+    // Delete/Collapse: the li is only the shrinking grid track
+    // (`useCollapsibleRemove`) — `Card`'s own padding/surface moves one
+    // level down, unaffected by the collapse transition above it.
+    <li
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
+    >
+      <div className="overflow-hidden">
+        <Card padded className="space-y-1.5">
+          <div className="flex items-start justify-between gap-2">
+            <InlineText
+              value={alternative.name}
+              onChange={onRename}
+              label={`Nome da sugestão ${alternative.name}`}
+              className="min-w-0 flex-1 font-medium"
+            />
+            <div className="flex shrink-0 items-center gap-1">
+              <Button size="sm" variant="secondary" onClick={onApply}>
+                <Check aria-hidden className="size-4" />
+                Usar
+              </Button>
+              <ConfirmButton
+                onConfirm={requestRemove}
+                label={`Excluir sugestão ${alternative.name}`}
+                confirmLabel="Excluir?"
+                className="h-8 min-w-8"
+              >
+                <Trash2 aria-hidden className="size-4" />
+              </ConfirmButton>
+            </div>
+          </div>
+
+          <p className="truncate text-xs text-ink-subtle">
+            {alternative.items.map((item) => item.name).join(", ")}
+          </p>
+
+          <MacroSummary macros={macros} />
+        </Card>
       </div>
-
-      <p className="truncate text-xs text-ink-subtle">
-        {alternative.items.map((item) => item.name).join(", ")}
-      </p>
-
-      <MacroSummary macros={macros} />
-    </Card>
+    </li>
   );
 }

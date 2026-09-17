@@ -4,6 +4,7 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { formatDay } from "@/core/format/day";
@@ -34,55 +35,84 @@ export function BodyHistory({ entries, onEdit, onRemove }: Props) {
     <Card padded={false} className="overflow-hidden">
       <ul className="divide-y divide-line">
         {newestFirst.map((entry) => (
-          <li key={entry.id} className="flex items-start gap-3 px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm tabular-nums text-ink">
-                {formatDay(entry.day)}
-                {entry.weightKg !== null && (
-                  <span className="ml-3 text-ink-muted">
-                    {formatDecimal(entry.weightKg)} kg
-                  </span>
-                )}
-                {entry.bodyFatPercent !== null && (
-                  <span className="ml-3 text-ink-muted">
-                    {formatDecimal(entry.bodyFatPercent)}%
-                  </span>
-                )}
-              </p>
-
-              <Sites entry={entry} />
-
-              {entry.notes !== "" && (
-                <p className="mt-1 truncate text-xs text-ink-subtle">
-                  {entry.notes}
-                </p>
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                onEdit(entry.day);
-              }}
-              aria-label={`Editar ${formatDay(entry.day)}`}
-              className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-            >
-              <Pencil aria-hidden className="size-4" />
-            </button>
-
-            <ConfirmButton
-              label={`Excluir a medição de ${formatDay(entry.day)}`}
-              confirmLabel="Excluir?"
-              onConfirm={() => {
-                onRemove(entry.day);
-              }}
-            >
-              <Trash2 aria-hidden className="size-4" />
-            </ConfirmButton>
-          </li>
+          <EntryRow
+            key={entry.id}
+            entry={entry}
+            onEdit={() => {
+              onEdit(entry.day);
+            }}
+            onRemove={() => {
+              onRemove(entry.day);
+            }}
+          />
         ))}
       </ul>
     </Card>
+  );
+}
+
+function EntryRow({
+  entry,
+  onEdit,
+  onRemove,
+}: {
+  readonly entry: BodyEntry;
+  readonly onEdit: () => void;
+  readonly onRemove: () => void;
+}) {
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
+
+  return (
+    // Delete/Collapse: the li is only the shrinking grid track
+    // (`useCollapsibleRemove`) — the row's own padding/layout moves one
+    // level down, unclipped by the collapse transition above it.
+    <li
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
+    >
+      <div className="flex items-start gap-3 overflow-hidden px-4 py-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm tabular-nums text-ink">
+            {formatDay(entry.day)}
+            {entry.weightKg !== null && (
+              <span className="ml-3 text-ink-muted">
+                {formatDecimal(entry.weightKg)} kg
+              </span>
+            )}
+            {entry.bodyFatPercent !== null && (
+              <span className="ml-3 text-ink-muted">
+                {formatDecimal(entry.bodyFatPercent)}%
+              </span>
+            )}
+          </p>
+
+          <Sites entry={entry} />
+
+          {entry.notes !== "" && (
+            <p className="mt-1 truncate text-xs text-ink-subtle">
+              {entry.notes}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label={`Editar ${formatDay(entry.day)}`}
+          className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+        >
+          <Pencil aria-hidden className="size-4" />
+        </button>
+
+        <ConfirmButton
+          label={`Excluir a medição de ${formatDay(entry.day)}`}
+          confirmLabel="Excluir?"
+          onConfirm={requestRemove}
+        >
+          <Trash2 aria-hidden className="size-4" />
+        </ConfirmButton>
+      </div>
+    </li>
   );
 }
 

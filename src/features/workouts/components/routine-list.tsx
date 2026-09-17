@@ -12,6 +12,7 @@ import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { useRoutineList } from "../hooks/use-routine-list";
 import type { Routine } from "../types/routine";
@@ -136,52 +137,63 @@ function RoutineRow({
 }) {
   const exercises = routine.exercises.length;
   const sets = routine.exercises.reduce((sum, e) => sum + e.sets.length, 0);
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
   return (
-    <Card
-      as="li"
-      padded={false}
-      className="group transition-colors duration-150 ease-out hover:border-line-strong"
+    // Delete/Collapse: the li is only the shrinking grid track
+    // (`useCollapsibleRemove`) — `Card` keeps `as="li"`'s old job of being
+    // the positioned ancestor for the absolute-positioned action buttons,
+    // just one level down now.
+    <li
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
     >
-      <Link
-        href={`/treinos/${routine.id}`}
-        className="flex items-center gap-4 p-4"
-      >
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-ink">
-            {routine.name === "" ? "Treino sem nome" : routine.name}
-          </p>
-          <p className="mt-0.5 text-xs text-ink-subtle">
-            {exercises === 0
-              ? "Nenhum exercício ainda"
-              : `${exercises} ${exercises === 1 ? "exercício" : "exercícios"} · ${sets} ${sets === 1 ? "série" : "séries"}`}
-          </p>
-        </div>
-        <span className="w-16 shrink-0" />
-      </Link>
-
-      {/* Outside the link: buttons nested in an anchor are invalid and eat the
-          click on the row. */}
-      <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
-        <button
-          type="button"
-          onClick={onDuplicate}
-          aria-label={`Duplicar ${routine.name}`}
-          className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+      <div className="overflow-hidden">
+        <Card
+          padded={false}
+          className="group transition-colors duration-150 ease-out hover:border-line-strong"
         >
-          <Copy aria-hidden className="size-4" />
-        </button>
+          <Link
+            href={`/treinos/${routine.id}`}
+            className="flex items-center gap-4 p-4"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-ink">
+                {routine.name === "" ? "Treino sem nome" : routine.name}
+              </p>
+              <p className="mt-0.5 text-xs text-ink-subtle">
+                {exercises === 0
+                  ? "Nenhum exercício ainda"
+                  : `${exercises} ${exercises === 1 ? "exercício" : "exercícios"} · ${sets} ${sets === 1 ? "série" : "séries"}`}
+              </p>
+            </div>
+            <span className="w-16 shrink-0" />
+          </Link>
 
-        <ConfirmButton
-          onConfirm={onRemove}
-          label={`Excluir ${routine.name}`}
-          confirmLabel="Excluir?"
-          className="h-8 min-w-8"
-        >
-          <Trash2 aria-hidden className="size-4" />
-        </ConfirmButton>
+          {/* Outside the link: buttons nested in an anchor are invalid and eat the
+              click on the row. */}
+          <div className="absolute top-1/2 right-4 flex -translate-y-1/2 items-center">
+            <button
+              type="button"
+              onClick={onDuplicate}
+              aria-label={`Duplicar ${routine.name}`}
+              className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
+              <Copy aria-hidden className="size-4" />
+            </button>
+
+            <ConfirmButton
+              onConfirm={requestRemove}
+              label={`Excluir ${routine.name}`}
+              confirmLabel="Excluir?"
+              className="h-8 min-w-8"
+            >
+              <Trash2 aria-hidden className="size-4" />
+            </ConfirmButton>
+          </div>
+        </Card>
       </div>
-    </Card>
+    </li>
   );
 }
 

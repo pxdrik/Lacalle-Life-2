@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 import { MACRO_CODING } from "@/design-system/macros";
 
 import type { Food } from "../types/food";
@@ -27,90 +28,100 @@ interface Props {
  */
 export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
   const { kcal } = food.per100g;
+  const { requestRemove, collapseProps } = useCollapsibleRemove(() => {
+    onRemove(food);
+  });
 
   return (
-    <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[0.9375rem] text-ink">{food.name}</p>
-        <p className="mt-0.5 text-xs text-ink-subtle">
-          {FOOD_CATEGORY_LABELS[food.category]}
-          {food.isCustom && " · seu alimento"}
-        </p>
-      </div>
+    // Delete/Collapse: only food.isCustom rows ever call requestRemove —
+    // the confirm button below is the only remover, and it is itself
+    // conditional on isCustom — so a catalogue row that can't be deleted
+    // simply never collapses.
+    <li
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
+    >
+      <div className="group flex items-center gap-3 overflow-hidden px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[0.9375rem] text-ink">{food.name}</p>
+          <p className="mt-0.5 text-xs text-ink-subtle">
+            {FOOD_CATEGORY_LABELS[food.category]}
+            {food.isCustom && " · seu alimento"}
+          </p>
+        </div>
 
-      <div className="flex shrink-0 items-baseline gap-3 text-sm tabular-nums sm:gap-4">
-        <span className="w-11 text-right text-ink">{format(kcal)}</span>
-        {MACRO_CODING.map(({ key, text }) => (
-          <span key={key} className={`w-9 text-right ${text}`}>
-            {format(food.per100g[key])}
-          </span>
-        ))}
-      </div>
+        <div className="flex shrink-0 items-baseline gap-3 text-sm tabular-nums sm:gap-4">
+          <span className="w-11 text-right text-ink">{format(kcal)}</span>
+          {MACRO_CODING.map(({ key, text }) => (
+            <span key={key} className={`w-9 text-right ${text}`}>
+              {format(food.per100g[key])}
+            </span>
+          ))}
+        </div>
 
-      {/* Movida do início da linha para junto das outras ações, mesma
-          posição e mesmo motivo de `ExerciseRow` (achado de auditoria de
-          design, 02/09/2026): favoritar é a ação mais rara que alguém faz
-          numa linha, e era ela que ocupava o lugar onde o olho pousa
-          primeiro — bem na frente do nome do alimento. */}
-      <button
-        type="button"
-        onClick={() => {
-          onToggleFavorite(food);
-        }}
-        aria-pressed={food.isFavorite}
-        aria-label={
-          food.isFavorite
-            ? `Remover ${food.name} dos favoritos`
-            : `Favoritar ${food.name}`
-        }
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md",
-          "transition-colors duration-150 ease-out hover:bg-line",
-          food.isFavorite ? "text-ink" : "text-ink-subtle/50",
-        )}
-      >
-        <Star
-          aria-hidden
-          className="size-4"
-          fill={food.isFavorite ? "currentColor" : "none"}
-        />
-      </button>
+        {/* Movida do início da linha para junto das outras ações, mesma
+            posição e mesmo motivo de `ExerciseRow` (achado de auditoria de
+            design, 02/09/2026): favoritar é a ação mais rara que alguém faz
+            numa linha, e era ela que ocupava o lugar onde o olho pousa
+            primeiro — bem na frente do nome do alimento. */}
+        <button
+          type="button"
+          onClick={() => {
+            onToggleFavorite(food);
+          }}
+          aria-pressed={food.isFavorite}
+          aria-label={
+            food.isFavorite
+              ? `Remover ${food.name} dos favoritos`
+              : `Favoritar ${food.name}`
+          }
+          className={cn(
+            "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md",
+            "transition-colors duration-150 ease-out hover:bg-line",
+            food.isFavorite ? "text-ink" : "text-ink-subtle/50",
+          )}
+        >
+          <Star
+            aria-hidden
+            className="size-4"
+            fill={food.isFavorite ? "currentColor" : "none"}
+          />
+        </button>
 
-      {/* Only the user's own foods can be edited or deleted. The catalogue is
-          shared ground and stays intact; unwanted entries are handled by
-          search. */}
-      <div className="flex w-16 shrink-0 justify-end">
-        {food.isCustom && (
-          <Link
-            href={`/alimentos/${food.id}/editar`}
-            aria-label={`Editar ${food.name}`}
-            className={cn(
-              "flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle",
-              "transition-colors duration-150 ease-out hover:bg-muted hover:text-ink",
-              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
-            )}
-          >
-            <Pencil aria-hidden className="size-4" />
-          </Link>
-        )}
+        {/* Only the user's own foods can be edited or deleted. The catalogue is
+            shared ground and stays intact; unwanted entries are handled by
+            search. */}
+        <div className="flex w-16 shrink-0 justify-end">
+          {food.isCustom && (
+            <Link
+              href={`/alimentos/${food.id}/editar`}
+              aria-label={`Editar ${food.name}`}
+              className={cn(
+                "flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle",
+                "transition-colors duration-150 ease-out hover:bg-muted hover:text-ink",
+                "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
+              )}
+            >
+              <Pencil aria-hidden className="size-4" />
+            </Link>
+          )}
 
-        {food.isCustom && (
-          <ConfirmButton
-            onConfirm={() => {
-              onRemove(food);
-            }}
-            label={`Excluir ${food.name}`}
-            confirmLabel="Excluir?"
-            className={cn(
-              "h-8 min-w-8",
-              // Revealed on hover for pointers, but always present for keyboard
-              // and touch — hiding it behind hover would strand both.
-              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
-            )}
-          >
-            <Trash2 aria-hidden className="size-4" />
-          </ConfirmButton>
-        )}
+          {food.isCustom && (
+            <ConfirmButton
+              onConfirm={requestRemove}
+              label={`Excluir ${food.name}`}
+              confirmLabel="Excluir?"
+              className={cn(
+                "h-8 min-w-8",
+                // Revealed on hover for pointers, but always present for keyboard
+                // and touch — hiding it behind hover would strand both.
+                "opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100",
+              )}
+            >
+              <Trash2 aria-hidden className="size-4" />
+            </ConfirmButton>
+          )}
+        </div>
       </div>
     </li>
   );

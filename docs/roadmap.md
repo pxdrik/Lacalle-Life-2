@@ -5,6 +5,42 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Delete/Collapse chega a todo ponto de remoção do app — 17/09/2026
+
+Pedro testou a entrega anterior (Motion System, mesmo dia): criou um
+treino de teste e apagou, sem ver nenhuma animação. Achado real — o
+Delete/Collapse só tinha entrado nos quatro pontos que a auditoria de
+12/09 nomeou (série, exercício, refeição, alimento), nunca em "apagar o
+treino inteiro da lista", que é um componente diferente
+(`routine-list.tsx`). Pedro: "Todas as animações devem estar em todos os
+lugares que sejam possíveis" — mapeados todos os `onRemove` do app que
+sobravam e fechados os cinco que faziam sentido, reusando o mesmo
+`useCollapsibleRemove`:
+
+- ✅ **Treino inteiro** (`routine-list.tsx`, lista `/treinos`) — o caso
+  exato que o Pedro testou.
+- ✅ **Dieta inteira** (`diet-list.tsx`, lista `/dietas`) — mesmo padrão,
+  mesmo `Card as="li"` virando `Card` dentro de um `<li>` de colapso.
+- ✅ **Sugestão de refeição salva** (`meal-alternatives-dialog.tsx`,
+  folha "Outras sugestões").
+- ✅ **Alimento do catálogo** (`food-row.tsx`, `/alimentos`) — só
+  alimentos próprios (`isCustom`) têm o que colapsar; o catálogo curado
+  nunca teve botão de excluir.
+- ✅ **Medição de peso/medida** (`body-history.tsx`, Evolução).
+
+`routine-list.tsx` e `diet-list.tsx` foram os dois únicos sem teste
+próprio nenhum antes desta entrega (nem de remoção, nem de mais nada) —
+os outros três ganharam teste novo (`food-row.test.tsx`,
+`body-history.test.tsx`, `meal-alternatives-dialog.test.tsx`).
+`routine-list`/`diet-list` ficaram sem teste automatizado por causa do
+custo de montar os repositórios múltiplos que `useRoutineList`/
+`useDietList` exigem — verificados ao vivo no navegador em vez disso:
+criei um treino e uma dieta de teste, apaguei os dois, os dois
+encolheram e sumiram sem cortar, sem deixar buraco. `npm run verify`
+(1748 testes) e `npm run build` limpos.
+
+---
+
 ## ✅ Fecha os três pontos pendentes do Motion System — 17/09/2026
 
 Pedro perguntou de novo se as animações do brandbook estavam no Life

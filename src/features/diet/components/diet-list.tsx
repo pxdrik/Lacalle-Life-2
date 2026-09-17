@@ -11,6 +11,7 @@ import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { useDietList } from "../hooks/use-diet-list";
 import { dietMacros } from "../services/diet-macros";
@@ -152,70 +153,84 @@ function DietRow({
 }) {
   const macros = dietMacros(diet);
   const meals = diet.meals.length;
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
   return (
-    <Card
-      as="li"
-      padded={false}
-      className="group transition-colors duration-150 ease-out hover:border-line-strong"
+    // Delete/Collapse: the li is only the shrinking grid track
+    // (`useCollapsibleRemove`) — `Card` keeps `as="li"`'s old job of being
+    // the positioned ancestor for the absolute-positioned action buttons,
+    // just one level down now.
+    <li
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
     >
-      <Link href={`/dietas/${diet.id}`} className="flex items-center gap-4 p-4 pb-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium text-ink">
-            {diet.name === "" ? "Dieta sem nome" : diet.name}
-          </p>
-          <p className="mt-0.5 text-xs text-ink-subtle">
-            {meals} {meals === 1 ? "refeição" : "refeições"}
-          </p>
-        </div>
-        <div className="hidden shrink-0 sm:block">
-          <MacroSummary macros={macros} />
-        </div>
-        <span className="w-16 shrink-0" />
-      </Link>
-
-      {/* Sempre visível, nunca só um ícone — o ícone sozinho ao lado de
-          duplicar/excluir era fácil de nunca notar, e no celular não tem
-          hover pra revelar o rótulo. Fora do `Link`: um botão dentro de uma
-          âncora é inválido e engole o clique da linha inteira. */}
-      <button
-        type="button"
-        onClick={onOpenSchedule}
-        className="mx-4 mb-4 flex items-center gap-1.5 text-xs text-ink-subtle underline-offset-4 transition-colors duration-150 ease-out hover:text-ink hover:underline"
-      >
-        <CalendarDays aria-hidden className="size-3.5 shrink-0" />
-        {diet.weekdays.length > 0
-          ? diet.weekdays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")
-          : "Vincular a dias da semana"}
-      </button>
-
-      <div className="absolute top-4 right-4 flex items-center">
-        <button
-          type="button"
-          onClick={onDuplicate}
-          aria-label={`Duplicar ${diet.name}`}
-          className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+      <div className="overflow-hidden">
+        <Card
+          padded={false}
+          className="group transition-colors duration-150 ease-out hover:border-line-strong"
         >
-          <Copy aria-hidden className="size-4" />
-        </button>
+          <Link
+            href={`/dietas/${diet.id}`}
+            className="flex items-center gap-4 p-4 pb-3"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-medium text-ink">
+                {diet.name === "" ? "Dieta sem nome" : diet.name}
+              </p>
+              <p className="mt-0.5 text-xs text-ink-subtle">
+                {meals} {meals === 1 ? "refeição" : "refeições"}
+              </p>
+            </div>
+            <div className="hidden shrink-0 sm:block">
+              <MacroSummary macros={macros} />
+            </div>
+            <span className="w-16 shrink-0" />
+          </Link>
 
-        <ConfirmButton
-          onConfirm={onRemove}
-          label={`Excluir ${diet.name}`}
-          // Apagar a dieta apaga o vínculo com todo dia que ela ocupa — o
-          // pedido do Pedro foi que isso ficasse explícito bem aqui, e não
-          // só na tela do Diário no dia em que o efeito aparece.
-          confirmLabel={
-            diet.weekdays.length > 0
-              ? `Excluir e desvincular ${String(diet.weekdays.length)} ${diet.weekdays.length === 1 ? "dia" : "dias"}?`
-              : "Excluir?"
-          }
-          className="h-8 min-w-8"
-        >
-          <Trash2 aria-hidden className="size-4" />
-        </ConfirmButton>
+          {/* Sempre visível, nunca só um ícone — o ícone sozinho ao lado de
+              duplicar/excluir era fácil de nunca notar, e no celular não tem
+              hover pra revelar o rótulo. Fora do `Link`: um botão dentro de uma
+              âncora é inválido e engole o clique da linha inteira. */}
+          <button
+            type="button"
+            onClick={onOpenSchedule}
+            className="mx-4 mb-4 flex items-center gap-1.5 text-xs text-ink-subtle underline-offset-4 transition-colors duration-150 ease-out hover:text-ink hover:underline"
+          >
+            <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+            {diet.weekdays.length > 0
+              ? diet.weekdays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")
+              : "Vincular a dias da semana"}
+          </button>
+
+          <div className="absolute top-4 right-4 flex items-center">
+            <button
+              type="button"
+              onClick={onDuplicate}
+              aria-label={`Duplicar ${diet.name}`}
+              className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
+              <Copy aria-hidden className="size-4" />
+            </button>
+
+            <ConfirmButton
+              onConfirm={requestRemove}
+              label={`Excluir ${diet.name}`}
+              // Apagar a dieta apaga o vínculo com todo dia que ela ocupa — o
+              // pedido do Pedro foi que isso ficasse explícito bem aqui, e não
+              // só na tela do Diário no dia em que o efeito aparece.
+              confirmLabel={
+                diet.weekdays.length > 0
+                  ? `Excluir e desvincular ${String(diet.weekdays.length)} ${diet.weekdays.length === 1 ? "dia" : "dias"}?`
+                  : "Excluir?"
+              }
+              className="h-8 min-w-8"
+            >
+              <Trash2 aria-hidden className="size-4" />
+            </ConfirmButton>
+          </div>
+        </Card>
       </div>
-    </Card>
+    </li>
   );
 }
 
