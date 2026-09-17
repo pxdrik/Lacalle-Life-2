@@ -72,36 +72,39 @@ export function SessionEditor({ session, apply, onDone }: Props) {
           before: it only ever stamped "now", so a Saturday session logged on
           Sunday landed in the wrong week — and volume-per-week and "última
           vez" both read from this. */}
-      <label className="mt-4 flex items-center gap-3">
-        <span className="text-xs text-ink-subtle">Data do treino</span>
-        <input
-          type="date"
-          value={dayKey(new Date(session.startedAt))}
-          max={dayKey(new Date())}
-          onChange={(event) => {
-            const day = event.target.value;
-            if (day === "" || isFutureDay(day)) return;
+      <div className="mt-4 flex flex-col gap-3">
+        <label className="flex items-center gap-3">
+          <span className="w-28 shrink-0 text-xs text-ink-subtle">
+            Data do treino
+          </span>
+          <input
+            type="date"
+            value={dayKey(new Date(session.startedAt))}
+            max={dayKey(new Date())}
+            onChange={(event) => {
+              const day = event.target.value;
+              if (day === "" || isFutureDay(day)) return;
 
-            apply((current) => moveSessionToDay(current, day));
-          }}
-          className="h-(--control-h) rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
-        />
-        <span className="text-xs text-ink-subtle">
-          A duração não muda, só o dia.
-        </span>
-      </label>
+              apply((current) => moveSessionToDay(current, day));
+            }}
+            className="h-(--control-h) w-36 rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          />
+        </label>
 
-      <label className="mt-3 flex items-center gap-3">
-        <span className="text-xs text-ink-subtle">Duração (min)</span>
-        <DurationField
-          value={durationMs === null ? null : Math.round(durationMs / 1000)}
-          label="Duração do treino, em minutos"
-          onChange={(durationSeconds) => {
-            apply((current) => setSessionDuration(current, durationSeconds));
-          }}
-          className="h-(--control-h) w-24 rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
-        />
-      </label>
+        <label className="flex items-center gap-3">
+          <span className="w-28 shrink-0 text-xs text-ink-subtle">
+            Duração (min)
+          </span>
+          <DurationField
+            value={durationMs === null ? null : Math.round(durationMs / 1000)}
+            label="Duração do treino, em minutos"
+            onChange={(durationSeconds) => {
+              apply((current) => setSessionDuration(current, durationSeconds));
+            }}
+            className="h-(--control-h) w-36 rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+          />
+        </label>
+      </div>
 
       <div
         className={cn(

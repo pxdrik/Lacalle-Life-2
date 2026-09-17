@@ -63,6 +63,11 @@ export function VolumeChart({
   const value = (point: VolumePoint) => metric(point);
   const peak = Math.max(...chronological.map(value), 1);
 
+  // 6 rótulos é o que o mensal (6 pontos) já mostra sem cortar nada — o
+  // mesmo piso vira o teto de quantos o semanal (12 pontos) tenta encaixar.
+  const labelStep =
+    chronological.length > 6 ? Math.ceil(chronological.length / 6) : 1;
+
   // `null` até alguém tocar numa barra, o que mantém o resumo seguindo o
   // período mais recente mesmo que `points` seja recarregado — um índice fixo
   // ficaria apontando para o período errado se a lista mudasse de tamanho.
@@ -138,20 +143,28 @@ export function VolumeChart({
 
       {/* 12 px, não 10. A pág. 48 fixa 12 como piso de texto e a pág. 32 lista
           "reduzir a fonte abaixo de 12 px para caber" entre os não fazer — que
-          era exatamente o motivo do 10. O rótulo trunca quando não cabe, e o
-          valor inteiro está na linha de resumo acima e no nome acessível do
-          botão. O período ativo fica em `ink`, os outros em `ink-subtle` — é
-          o que liga a linha de resumo à barra que ela descreve. */}
+          era exatamente o motivo do 10. Com 12 colunas numa tela de celular
+          cada fatia mal passa de 20px, estreita demais para "29/06" mesmo a
+          12px — truncar ali não sobra "29/0…", sobra um caractere solto
+          seguido de reticências, ilegível (achado real, 17/09/2026). A saída
+          não é encolher a fonte (proibido acima) nem truncar (sobra lixo): é
+          rotular só um ponto a cada `labelStep`, sem cortar o texto do que
+          fica visível — o vizinho vazio dá o espaço que a fatia sozinha não
+          tem. Com 6 pontos ou menos (o mensal) `labelStep` é 1 e nada muda. O
+          período ativo sempre aparece, mesmo fora do passo, porque é o que a
+          linha de resumo acima está descrevendo. */}
       <ul aria-hidden className="mt-2 flex gap-1.5">
         {chronological.map((point, index) => (
           <li
             key={point.startsAt}
             className={cn(
-              "flex-1 truncate text-center text-xs tabular-nums",
+              "flex-1 text-center text-xs tabular-nums",
               index === activeIndex ? "font-medium text-ink" : "text-ink-subtle",
             )}
           >
-            {format(point)}
+            {(index % labelStep === 0 || index === activeIndex) && (
+              <span className="whitespace-nowrap">{format(point)}</span>
+            )}
           </li>
         ))}
       </ul>
