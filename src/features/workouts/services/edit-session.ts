@@ -219,6 +219,34 @@ export function setSessionStartedAt(
  * discarded — "I planned four and did three" is information, and deleting the
  * fourth would erase it.
  */
+/**
+ * Corrects how long a finished workout actually took.
+ *
+ * `sessionDurationMs` reads the gap between `startedAt` and `finishedAt`, so
+ * this moves only `finishedAt` — the day and time of day stay exactly where
+ * `moveSessionToDay` and `setSessionStartedAt` left them. Same split of
+ * responsibility as those two: one field, one editor.
+ *
+ * A blank field mid-edit arrives as `null` and is left alone rather than
+ * turned into a zero nobody typed — the same no-op contract every other
+ * stale edit in this file already has.
+ */
+export function setSessionDuration(
+  session: Session,
+  durationSeconds: number | null,
+): Session {
+  if (session.finishedAt === null) return session;
+  if (durationSeconds === null || !Number.isFinite(durationSeconds)) {
+    return session;
+  }
+  if (durationSeconds < 0) return session;
+
+  const finishedAt = session.startedAt + durationSeconds * 1000;
+  if (finishedAt === session.finishedAt) return session;
+
+  return revise(session, { finishedAt });
+}
+
 export function finishSession(
   session: Session,
   finishedAt = Date.now(),

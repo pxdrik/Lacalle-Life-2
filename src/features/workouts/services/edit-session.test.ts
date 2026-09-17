@@ -9,6 +9,7 @@ import {
   moveSessionToDay,
   removePerformedSet,
   reopenSession,
+  setSessionDuration,
   setSessionExerciseNotes,
   setSessionStartedAt,
   uncompleteSet,
@@ -499,5 +500,44 @@ describe("setSessionStartedAt", () => {
     const { session } = runningSession();
 
     expect(setSessionStartedAt(session, session.startedAt)).toBe(session);
+  });
+});
+
+describe("setSessionDuration", () => {
+  it("corrects how long a finished workout took, moving only finishedAt", () => {
+    const { session } = runningSession();
+    const finished = finishSession(session, session.startedAt + 60_000);
+
+    const after = setSessionDuration(finished, 45 * 60);
+
+    expect(after.startedAt).toBe(finished.startedAt);
+    expect(sessionDurationMs(after)).toBe(45 * 60_000);
+  });
+
+  it("never touches a session still running", () => {
+    const { session } = runningSession();
+
+    expect(setSessionDuration(session, 60)).toBe(session);
+  });
+
+  it("leaves the duration alone for a blank field instead of writing zero", () => {
+    const { session } = runningSession();
+    const finished = finishSession(session, session.startedAt + 60_000);
+
+    expect(setSessionDuration(finished, null)).toBe(finished);
+  });
+
+  it("rejects a negative duration", () => {
+    const { session } = runningSession();
+    const finished = finishSession(session, session.startedAt + 60_000);
+
+    expect(setSessionDuration(finished, -30)).toBe(finished);
+  });
+
+  it("returns the same session when nothing changed", () => {
+    const { session } = runningSession();
+    const finished = finishSession(session, session.startedAt + 60_000);
+
+    expect(setSessionDuration(finished, 60)).toBe(finished);
   });
 });

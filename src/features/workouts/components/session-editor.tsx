@@ -14,12 +14,15 @@ import {
   moveSessionToDay,
   removePerformedSet,
   renameSession,
+  setSessionDuration,
   setSessionExerciseNotes,
   uncompleteSet,
   updatePerformedSet,
 } from "../services/edit-session";
 import { useExerciseLookup } from "../hooks/use-exercise-lookup";
+import { sessionDurationMs } from "../services/session-stats";
 import type { Session } from "../types/session";
+import { DurationField } from "./duration-field";
 import {
   ExerciseDetailDialog,
   useExerciseDetail,
@@ -48,6 +51,7 @@ interface Props {
 export function SessionEditor({ session, apply, onDone }: Props) {
   const catalogue = useExerciseLookup();
   const detail = useExerciseDetail();
+  const durationMs = sessionDurationMs(session);
 
   return (
     <div>
@@ -85,6 +89,18 @@ export function SessionEditor({ session, apply, onDone }: Props) {
         <span className="text-xs text-ink-subtle">
           A duração não muda, só o dia.
         </span>
+      </label>
+
+      <label className="mt-3 flex items-center gap-3">
+        <span className="text-xs text-ink-subtle">Duração (min)</span>
+        <DurationField
+          value={durationMs === null ? null : Math.round(durationMs / 1000)}
+          label="Duração do treino, em minutos"
+          onChange={(durationSeconds) => {
+            apply((current) => setSessionDuration(current, durationSeconds));
+          }}
+          className="h-(--control-h) w-24 rounded-md border border-line bg-surface px-3 tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
+        />
       </label>
 
       <div
@@ -139,8 +155,9 @@ export function SessionEditor({ session, apply, onDone }: Props) {
       </div>
 
       <p className="mt-4 text-xs text-ink-subtle">
-        A data e a duração do treino não mudam. Elas registram quando ele
-        aconteceu, não quando foi corrigido.
+        Editar as séries abaixo não muda a data nem a duração — os campos
+        acima registram quando o treino aconteceu, e são os únicos que
+        corrigem isso.
       </p>
 
       <ExerciseDetailDialog control={detail} />

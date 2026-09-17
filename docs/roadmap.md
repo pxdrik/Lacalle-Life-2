@@ -1974,6 +1974,13 @@ o relato.
       12/08** — mas a ausência de limite é do produto, e quem dorme com o treino
       aberto produz o mesmo lixo. Decisão de produto pendente: encerrar
       automaticamente, marcar como suspeita, ou só limitar o que é gravado.
+      **Mitigação manual em 17/09/2026:** `SessionEditor` ganhou um campo
+      "Duração (min)" (`setSessionDuration` em `edit-session.ts`, mesma técnica
+      minutos-na-tela/segundos-guardados do `DurationField` de cardio) —
+      reproduzido ao vivo nesta sessão: encerrar um treino esquecido gravou
+      19:33:11, e o campo novo corrigiu para o valor real sem tocar em
+      `startedAt`. Corrige o registro depois do fato; não evita a captura
+      errada nem decide entre as três opções acima, que seguem em aberto.
 - [x] **Quantidade de alimento aceita até 100 kg.** `Math.min(Number(digits),
       100_000)` em `meal-item-row`. O teto existe para conter número colado, não
       para sanidade nutricional — e agora diz isso, como `MAX_GRAMS`. Continua
