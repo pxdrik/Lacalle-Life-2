@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -45,6 +45,33 @@ describe("a strength exercise", () => {
     expect(
       screen.getByLabelText("Peso da série 1 de Esteira"),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Delete/Collapse — removing a set shrinks before it goes", () => {
+  it("does not remove on the tap itself — only once the row finishes shrinking", async () => {
+    const onRemove = vi.fn();
+    render(
+      <ul>
+        <PlannedSetRow
+          set={set()}
+          index={0}
+          exerciseName="Esteira"
+          isCardio={false}
+          onChange={vi.fn()}
+          onRemove={onRemove}
+        />
+      </ul>,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remover série 1 de Esteira" }),
+    );
+    expect(onRemove).not.toHaveBeenCalled();
+
+    const li = screen.getByText("1").closest("li")!;
+    fireEvent.transitionEnd(li, { propertyName: "grid-template-rows" });
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
 

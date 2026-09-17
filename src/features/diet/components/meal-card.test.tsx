@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -237,6 +237,16 @@ describe("the actions menu (⋮)", () => {
     expect(onRemove).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }));
+    expect(onRemove).not.toHaveBeenCalled();
+
+    // Delete/Collapse: confirming only starts the shrink; `onRemove` fires
+    // once the card's own collapse transition actually ends.
+    fireEvent.transitionEnd(
+      screen
+        .getByRole("button", { name: "Mais ações para Refeição 1" })
+        .closest(".grid")!,
+      { propertyName: "grid-template-rows" },
+    );
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
@@ -247,8 +257,11 @@ describe("the newly added item's entrance", () => {
 
     // `getAllByText`, não `getByText`: o mesmo nome também é o título do
     // `Dialog` de ações do item (sempre no DOM, só fechado) — o primeiro
-    // elemento é o `<span>` da linha.
-    const row = screen.getAllByText("Abacate")[0]?.closest("li");
+    // elemento é o `<span>` da linha. `.overflow-hidden`, não `li`: o `li`
+    // virou só a trilha de grid do Delete/Collapse
+    // (`useCollapsibleRemove`), e a entrada continua no div visual por
+    // baixo dele.
+    const row = screen.getAllByText("Abacate")[0]?.closest(".overflow-hidden");
     expect(row).not.toHaveClass("animate-rise");
   });
 
@@ -259,8 +272,12 @@ describe("the newly added item's entrance", () => {
       meal([item({ id: "i1" }), item({ id: "i2", name: "Banana" })]),
     );
 
-    const existing = screen.getAllByText("Abacate")[0]?.closest("li");
-    const added = screen.getAllByText("Banana")[0]?.closest("li");
+    const existing = screen
+      .getAllByText("Abacate")[0]
+      ?.closest(".overflow-hidden");
+    const added = screen
+      .getAllByText("Banana")[0]
+      ?.closest(".overflow-hidden");
     expect(existing).not.toHaveClass("animate-rise");
     expect(added).toHaveClass("animate-rise");
   });

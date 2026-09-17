@@ -23,6 +23,7 @@ import {
   SortableList,
 } from "@/design-system/components/sortable-list";
 import { TimeField } from "@/design-system/components/time-field";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
@@ -145,322 +146,334 @@ export function MealCard({
     setSeenItemCount(meal.items.length);
   }
 
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
+
   return (
-    <Card
-      as="section"
-      className={cn(
-        "transition-shadow duration-150 ease-out",
-        dragHandle.isDragging && "border-accent shadow-modal",
-      )}
+    // Delete/Collapse: this wrapper is only the shrinking grid track
+    // (`useCollapsibleRemove`) — `Card` itself keeps its own shadow
+    // transition, unaffected and unclipped by this one.
+    <div
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
     >
-      {/* Wraps on a phone: name + check on one line, the macro bar and the
-          ⋮ trigger (both `shrink-0`) drop to their own line below rather
-          than forcing the row past a 390px screen. Lighter risk than it
-          used to be — the header carries one compact bar and one button now,
-          not four action buttons plus a four-figure macro line — but the
-          wrap costs nothing to keep. */}
-      <header className="flex flex-wrap items-start gap-2">
-        <button
-          type="button"
-          aria-label={`Reordenar ${meal.name}`}
-          {...dragHandle.attributes}
-          {...dragHandle.listeners}
-          className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
+      <div className="overflow-hidden">
+        <Card
+          as="section"
+          className={cn(
+            "transition-shadow duration-150 ease-out",
+            dragHandle.isDragging && "border-accent shadow-modal",
+          )}
         >
-          <GripVertical aria-hidden className="size-4" />
-        </button>
+          {/* Wraps on a phone: name + check on one line, the macro bar and the
+              ⋮ trigger (both `shrink-0`) drop to their own line below rather
+              than forcing the row past a 390px screen. Lighter risk than it
+              used to be — the header carries one compact bar and one button now,
+              not four action buttons plus a four-figure macro line — but the
+              wrap costs nothing to keep. */}
+          <header className="flex flex-wrap items-start gap-2">
+            <button
+              type="button"
+              aria-label={`Reordenar ${meal.name}`}
+              {...dragHandle.attributes}
+              {...dragHandle.listeners}
+              className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
+            >
+              <GripVertical aria-hidden className="size-4" />
+            </button>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <InlineText
-              value={meal.name}
-              onChange={(name) => {
-                onChange({ name });
-              }}
-              label="Nome da refeição"
-              placeholder="Refeição"
-              className="min-w-0 flex-1 text-base font-medium"
-            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <InlineText
+                  value={meal.name}
+                  onChange={(name) => {
+                    onChange({ name });
+                  }}
+                  label="Nome da refeição"
+                  placeholder="Refeição"
+                  className="min-w-0 flex-1 text-base font-medium"
+                />
 
-            {/* Só existe no Diário, numa refeição com proveniência — ver o
-                comentário de `checkState` na prop. O mesmo padrão de
-                `performed-set-row.tsx` ("Concluir série"), num tamanho
-                menor: aqui é um toque por refeição, não dezenas por treino. */}
-            {onToggleChecked !== undefined && (
+                {/* Só existe no Diário, numa refeição com proveniência — ver o
+                    comentário de `checkState` na prop. O mesmo padrão de
+                    `performed-set-row.tsx` ("Concluir série"), num tamanho
+                    menor: aqui é um toque por refeição, não dezenas por treino. */}
+                {onToggleChecked !== undefined && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTaps((count) => count + 1);
+                      onToggleChecked();
+                    }}
+                    aria-pressed={checkState !== "unchecked"}
+                    aria-label={
+                      checkState === "unchecked"
+                        ? `Marcar ${meal.name} como comida`
+                        : `Desmarcar ${meal.name} como comida`
+                    }
+                    title={
+                      checkState === "edited"
+                        ? "Comido, mas diferente do planejado"
+                        : undefined
+                    }
+                    className={cn(
+                      "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border",
+                      "transition-[background-color,border-color,color,scale] duration-150 ease-out active:scale-90",
+                      checkState === "unchecked" &&
+                        "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
+                      checkState === "checked" &&
+                        "border-accent bg-accent text-accent-ink",
+                      // Preenchido de leve, não sólido: a mesma refeição, comida
+                      // diferente do planejado — o check ainda está lá porque
+                      // *alguma coisa* foi registrada, mas sólido apagaria a
+                      // diferença que o próprio ícone existe pra mostrar.
+                      checkState === "edited" &&
+                        "border-accent bg-accent-surface text-accent-text",
+                    )}
+                  >
+                    {checkState === "edited" ? (
+                      <Pencil aria-hidden className="size-3.5" />
+                    ) : (
+                      <Check
+                        key={taps}
+                        aria-hidden
+                        className={cn(
+                          "size-4",
+                          taps > 0 &&
+                            checkState !== "unchecked" &&
+                            "animate-pop motion-reduce:animate-none",
+                        )}
+                      />
+                    )}
+                  </button>
+                )}
+
+                {/* Ao lado do check, não atrás do ⋮ (Pedro, 17/09/2026): "pode
+                    estar do lado do check, e aí pode deixar apenas o símbolo,
+                    não precisa de escrita". Só o ícone — o rótulo acessível
+                    continua completo pra quem usa leitor de tela, só não
+                    aparece como texto na tela. */}
+                {onClose !== undefined && (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    aria-label="Fechar refeição"
+                    title="Fechar refeição"
+                    className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+                  >
+                    <ChevronsUp aria-hidden className="size-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-1 flex items-center gap-2">
+                <TimeField
+                  value={meal.time}
+                  label={`Horário de ${meal.name}`}
+                  onChange={(time) => {
+                    // `null` means "no fixed time", which is different from
+                    // midnight.
+                    onChange({ time });
+                  }}
+                  className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+                />
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:justify-between">
+              {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
+                  escondia os números atrás de uma cor — Pedro queria ver os
+                  números mesmo, não "esse graficozinho". De volta ao
+                  `MacroSummary` de sempre, já compacto o bastante pra caber
+                  aqui ao lado do ⋮. */}
+              <MacroSummary macros={macros} />
+
               <button
                 type="button"
                 onClick={() => {
-                  setTaps((count) => count + 1);
-                  onToggleChecked();
+                  setShowingActions(true);
                 }}
-                aria-pressed={checkState !== "unchecked"}
-                aria-label={
-                  checkState === "unchecked"
-                    ? `Marcar ${meal.name} como comida`
-                    : `Desmarcar ${meal.name} como comida`
-                }
-                title={
-                  checkState === "edited"
-                    ? "Comido, mas diferente do planejado"
-                    : undefined
-                }
-                className={cn(
-                  "flex size-8 shrink-0 items-center justify-center touch-44 rounded-md border",
-                  "transition-[background-color,border-color,color,scale] duration-150 ease-out active:scale-90",
-                  checkState === "unchecked" &&
-                    "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
-                  checkState === "checked" &&
-                    "border-accent bg-accent text-accent-ink",
-                  // Preenchido de leve, não sólido: a mesma refeição, comida
-                  // diferente do planejado — o check ainda está lá porque
-                  // *alguma coisa* foi registrada, mas sólido apagaria a
-                  // diferença que o próprio ícone existe pra mostrar.
-                  checkState === "edited" &&
-                    "border-accent bg-accent-surface text-accent-text",
-                )}
-              >
-                {checkState === "edited" ? (
-                  <Pencil aria-hidden className="size-3.5" />
-                ) : (
-                  <Check
-                    key={taps}
-                    aria-hidden
-                    className={cn(
-                      "size-4",
-                      taps > 0 &&
-                        checkState !== "unchecked" &&
-                        "animate-pop motion-reduce:animate-none",
-                    )}
-                  />
-                )}
-              </button>
-            )}
-
-            {/* Ao lado do check, não atrás do ⋮ (Pedro, 17/09/2026): "pode
-                estar do lado do check, e aí pode deixar apenas o símbolo,
-                não precisa de escrita". Só o ícone — o rótulo acessível
-                continua completo pra quem usa leitor de tela, só não
-                aparece como texto na tela. */}
-            {onClose !== undefined && (
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Fechar refeição"
-                title="Fechar refeição"
+                aria-label={`Mais ações para ${meal.name}`}
                 className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
               >
-                <ChevronsUp aria-hidden className="size-4" />
+                <MoreVertical aria-hidden className="size-4" />
               </button>
-            )}
-          </div>
+            </div>
+          </header>
 
-          <div className="mt-1 flex items-center gap-2">
-            <TimeField
-              value={meal.time}
-              label={`Horário de ${meal.name}`}
-              onChange={(time) => {
-                // `null` means "no fixed time", which is different from
-                // midnight.
-                onChange({ time });
+          {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de
+              densidade, 17/09/2026: eram quatro alvos de toque (duplicar, mover
+              duas direções, excluir) competindo por espaço com o resumo de
+              macros em toda refeição da dieta, a maior parte do tempo sem
+              nenhum motivo pra estarem visíveis. `Dialog placement="sheet-bottom"`
+              reaproveitado, mesmo componente do RPE e das sugestões de refeição —
+              nenhuma folha nova. */}
+          <Dialog
+            open={showingActions}
+            title={meal.name}
+            onClose={() => {
+              setShowingActions(false);
+            }}
+            placement="sheet-bottom"
+          >
+            <div className="-my-1 space-y-0.5">
+              <MenuRow
+                label="Duplicar"
+                onClick={() => {
+                  onDuplicate();
+                  setShowingActions(false);
+                }}
+              >
+                <Copy aria-hidden className="size-4" />
+              </MenuRow>
+              <MenuRow
+                label="Mover para cima"
+                disabled={position === 0}
+                onClick={() => {
+                  onMove(-1);
+                  setShowingActions(false);
+                }}
+              >
+                <ChevronUp aria-hidden className="size-4" />
+              </MenuRow>
+              <MenuRow
+                label="Mover para baixo"
+                disabled={position === total - 1}
+                onClick={() => {
+                  onMove(1);
+                  setShowingActions(false);
+                }}
+              >
+                <ChevronDown aria-hidden className="size-4" />
+              </MenuRow>
+              <ConfirmButton
+                onConfirm={() => {
+                  setShowingActions(false);
+                  requestRemove();
+                }}
+                label={`Excluir ${meal.name}`}
+                confirmLabel="Excluir?"
+                className="h-11 w-full justify-start gap-3 px-3 text-sm text-danger hover:bg-danger/10"
+              >
+                <Trash2 aria-hidden className="size-4" />
+                Excluir
+              </ConfirmButton>
+            </div>
+          </Dialog>
+
+          {meal.items.length > 0 && (
+            <SortableList
+              ids={meal.items.map((item) => item.id)}
+              describe={(id) =>
+                meal.items.find((item) => item.id === id)?.name ?? "alimento"
+              }
+              onReorder={onReorderItems}
+            >
+              <ul className="mt-2 divide-y divide-line border-t border-line pt-1">
+                {meal.items.map((item: MealItem) => (
+                  <SortableItem key={item.id} id={item.id}>
+                    {(handle) => (
+                      <MealItemRow
+                        item={item}
+                        dragHandle={handle}
+                        otherMeals={otherMeals}
+                        onGramsChange={(grams) => {
+                          onItemGramsChange(item.id, grams);
+                        }}
+                        onRemove={() => {
+                          onRemoveItem(item.id);
+                        }}
+                        onSend={(targetMealId, mode) => {
+                          onSendItem(item.id, targetMealId, mode);
+                        }}
+                        justAdded={item.id === justAddedId}
+                        onEntranceEnd={() => {
+                          setJustAddedId((current) =>
+                            current === item.id ? null : current,
+                          );
+                        }}
+                      />
+                    )}
+                  </SortableItem>
+                ))}
+              </ul>
+            </SortableList>
+          )}
+
+          {/* Adicionar alimento e Observações na mesma linha — dividir em duas
+              era espaço parado embaixo de toda refeição, a maior parte das
+              vezes vazio. `InlineText` já é discreto (borda transparente até
+              foco/hover), então não briga por atenção com o botão ao lado. */}
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-1">
+              <button
+                type="button"
+                onClick={onAddFoodClick}
+                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              >
+                <Plus aria-hidden className="size-4" />
+                Adicionar alimento
+              </button>
+
+              {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
+                  na prop) — pedido real: "vai que ele pede marmita, ele vai
+                  ter a marmita de macarrão e de arroz", pra trocar sem editar
+                  alimento por alimento toda vez. */}
+              {onApplyAlternative !== undefined && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowingAlternatives(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+                >
+                  <Shuffle aria-hidden className="size-4" />
+                  Outras sugestões
+                  {meal.alternatives !== undefined &&
+                    meal.alternatives.length > 0 && (
+                      <span className="tabular-nums text-ink-subtle">
+                        {meal.alternatives.length}
+                      </span>
+                    )}
+                </button>
+              )}
+            </div>
+
+            <InlineText
+              value={meal.notes}
+              onChange={(notes) => {
+                onChange({ notes });
               }}
-              className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
+              label={`Observações de ${meal.name}`}
+              placeholder="Observações"
+              className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
             />
           </div>
-        </div>
 
-        <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:justify-between">
-          {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
-              escondia os números atrás de uma cor — Pedro queria ver os
-              números mesmo, não "esse graficozinho". De volta ao
-              `MacroSummary` de sempre, já compacto o bastante pra caber
-              aqui ao lado do ⋮. */}
-          <MacroSummary macros={macros} />
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowingActions(true);
-            }}
-            aria-label={`Mais ações para ${meal.name}`}
-            className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-          >
-            <MoreVertical aria-hidden className="size-4" />
-          </button>
-        </div>
-      </header>
-
-      {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de
-          densidade, 17/09/2026: eram quatro alvos de toque (duplicar, mover
-          duas direções, excluir) competindo por espaço com o resumo de
-          macros em toda refeição da dieta, a maior parte do tempo sem
-          nenhum motivo pra estarem visíveis. `Dialog placement="sheet-bottom"`
-          reaproveitado, mesmo componente do RPE e das sugestões de refeição —
-          nenhuma folha nova. */}
-      <Dialog
-        open={showingActions}
-        title={meal.name}
-        onClose={() => {
-          setShowingActions(false);
-        }}
-        placement="sheet-bottom"
-      >
-        <div className="-my-1 space-y-0.5">
-          <MenuRow
-            label="Duplicar"
-            onClick={() => {
-              onDuplicate();
-              setShowingActions(false);
-            }}
-          >
-            <Copy aria-hidden className="size-4" />
-          </MenuRow>
-          <MenuRow
-            label="Mover para cima"
-            disabled={position === 0}
-            onClick={() => {
-              onMove(-1);
-              setShowingActions(false);
-            }}
-          >
-            <ChevronUp aria-hidden className="size-4" />
-          </MenuRow>
-          <MenuRow
-            label="Mover para baixo"
-            disabled={position === total - 1}
-            onClick={() => {
-              onMove(1);
-              setShowingActions(false);
-            }}
-          >
-            <ChevronDown aria-hidden className="size-4" />
-          </MenuRow>
-          <ConfirmButton
-            onConfirm={() => {
-              setShowingActions(false);
-              onRemove();
-            }}
-            label={`Excluir ${meal.name}`}
-            confirmLabel="Excluir?"
-            className="h-11 w-full justify-start gap-3 px-3 text-sm text-danger hover:bg-danger/10"
-          >
-            <Trash2 aria-hidden className="size-4" />
-            Excluir
-          </ConfirmButton>
-        </div>
-      </Dialog>
-
-      {meal.items.length > 0 && (
-        <SortableList
-          ids={meal.items.map((item) => item.id)}
-          describe={(id) =>
-            meal.items.find((item) => item.id === id)?.name ?? "alimento"
-          }
-          onReorder={onReorderItems}
-        >
-          <ul className="mt-2 divide-y divide-line border-t border-line pt-1">
-            {meal.items.map((item: MealItem) => (
-              <SortableItem key={item.id} id={item.id}>
-                {(handle) => (
-                  <MealItemRow
-                    item={item}
-                    dragHandle={handle}
-                    otherMeals={otherMeals}
-                    onGramsChange={(grams) => {
-                      onItemGramsChange(item.id, grams);
-                    }}
-                    onRemove={() => {
-                      onRemoveItem(item.id);
-                    }}
-                    onSend={(targetMealId, mode) => {
-                      onSendItem(item.id, targetMealId, mode);
-                    }}
-                    justAdded={item.id === justAddedId}
-                    onEntranceEnd={() => {
-                      setJustAddedId((current) =>
-                        current === item.id ? null : current,
-                      );
-                    }}
-                  />
-                )}
-              </SortableItem>
-            ))}
-          </ul>
-        </SortableList>
-      )}
-
-      {/* Adicionar alimento e Observações na mesma linha — dividir em duas
-          era espaço parado embaixo de toda refeição, a maior parte das
-          vezes vazio. `InlineText` já é discreto (borda transparente até
-          foco/hover), então não briga por atenção com o botão ao lado. */}
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-        <div className="flex flex-wrap items-center gap-1">
-          <button
-            type="button"
-            onClick={onAddFoodClick}
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-          >
-            <Plus aria-hidden className="size-4" />
-            Adicionar alimento
-          </button>
-
-          {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
-              na prop) — pedido real: "vai que ele pede marmita, ele vai
-              ter a marmita de macarrão e de arroz", pra trocar sem editar
-              alimento por alimento toda vez. */}
           {onApplyAlternative !== undefined && (
-            <button
-              type="button"
-              onClick={() => {
-                setShowingAlternatives(true);
+            <MealAlternativesDialog
+              meal={meal}
+              open={showingAlternatives}
+              onClose={() => {
+                setShowingAlternatives(false);
               }}
-              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-            >
-              <Shuffle aria-hidden className="size-4" />
-              Outras sugestões
-              {meal.alternatives !== undefined &&
-                meal.alternatives.length > 0 && (
-                  <span className="tabular-nums text-ink-subtle">
-                    {meal.alternatives.length}
-                  </span>
-                )}
-            </button>
+              onApply={(alternativeId) => {
+                onApplyAlternative(alternativeId);
+                setShowingAlternatives(false);
+              }}
+              onSave={(name) => {
+                onSaveAlternative?.(name);
+              }}
+              onRename={(alternativeId, name) => {
+                onRenameAlternative?.(alternativeId, name);
+              }}
+              onRemove={(alternativeId) => {
+                onRemoveAlternative?.(alternativeId);
+              }}
+            />
           )}
-        </div>
-
-        <InlineText
-          value={meal.notes}
-          onChange={(notes) => {
-            onChange({ notes });
-          }}
-          label={`Observações de ${meal.name}`}
-          placeholder="Observações"
-          className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
-        />
+        </Card>
       </div>
-
-      {onApplyAlternative !== undefined && (
-        <MealAlternativesDialog
-          meal={meal}
-          open={showingAlternatives}
-          onClose={() => {
-            setShowingAlternatives(false);
-          }}
-          onApply={(alternativeId) => {
-            onApplyAlternative(alternativeId);
-            setShowingAlternatives(false);
-          }}
-          onSave={(name) => {
-            onSaveAlternative?.(name);
-          }}
-          onRename={(alternativeId, name) => {
-            onRenameAlternative?.(alternativeId, name);
-          }}
-          onRemove={(alternativeId) => {
-            onRemoveAlternative?.(alternativeId);
-          }}
-        />
-      )}
-    </Card>
+    </div>
   );
 }
 

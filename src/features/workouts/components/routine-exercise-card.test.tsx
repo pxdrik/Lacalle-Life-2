@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -97,6 +97,25 @@ describe("swapping the exercise", () => {
     );
 
     expect(onSwap).toHaveBeenCalledOnce();
+  });
+});
+
+describe("Delete/Collapse — removing an exercise shrinks before it goes", () => {
+  it("does not remove on confirmation alone — only once the card finishes shrinking", async () => {
+    const onRemove = vi.fn();
+    const user = userEvent.setup();
+    const { card } = mount(undefined, { onRemove });
+
+    await user.click(screen.getByRole("button", { name: "Remover Esteira" }));
+    await user.click(
+      screen.getByRole("button", { name: "Remover?: Remover Esteira" }),
+    );
+    expect(onRemove).not.toHaveBeenCalled();
+
+    fireEvent.transitionEnd(card!.closest(".grid")!, {
+      propertyName: "grid-template-rows",
+    });
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
 

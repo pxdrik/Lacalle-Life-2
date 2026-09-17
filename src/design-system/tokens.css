@@ -109,6 +109,16 @@
   --muted: #f3f4f6;
 
   /**
+   * A faixa de brilho do Shimmer (`--animate-shimmer`) precisa de um tom
+   * mais claro que `muted` por baixo dela, e o mais claro que existe no
+   * claro é o próprio branco de superfície — daí `var(--elevated)`. No
+   * escuro o mesmo raciocínio aponta pra outro token (ver o bloco de lá):
+   * a divergência é por isso que isto é uma variável própria, não
+   * `--elevated` direto no gradiente.
+   */
+  --shimmer-highlight: var(--elevated);
+
+  /**
    * Texto — pág. 18.
    *
    * Ink para corpo, Gray 700 para o secundário de leitura, Gray 500 para
@@ -338,6 +348,14 @@
      precisa de um passo acima da borda padrão. */
   --line: #262b31;
   --line-strong: #363c44;
+
+  /**
+   * `--shimmer-highlight` no escuro não pode reusar `var(--elevated)` como
+   * o claro faz: `elevated` (#1D2126) é *mais escuro* que `muted`
+   * (#22272C) neste tema — elevação aqui sobe a partir do canvas, não a
+   * partir do muted. O passo que sobe a partir do muted é `line-strong`.
+   */
+  --shimmer-highlight: var(--line-strong);
 
   /**
    * O acento sobe um passo de luminosidade no escuro — Verdant claro #2A9162
@@ -859,9 +877,32 @@ textarea {
      conteúdo da pág. 35 — a pág. 36 limita a faixa a 4–12 px. */
   --animate-rise: rise var(--duration-standard) var(--ease-out) both;
 
-  /* Carregamento. Mais lento e mais raso que o pulse comum — um esqueleto que
-     pisca compete com o conteúdo que ele está substituindo. */
+  /**
+   * "Pulse" — sincronização em segundo plano, nunca carregamento de
+   * conteúdo. A marca de `SyncingOverlay` respira enquanto uma escrita de
+   * rede está em voo; um elemento pequeno, não uma tela inteira de
+   * placeholder.
+   *
+   * Até 12/09/2026 `Skeleton` também usava este token — o roadmap achou a
+   * lacuna na auditoria de Motion System daquele dia e registrou como
+   * pergunta de nomenclatura, não bug: o brandbook nomeia "Shimmer" como o
+   * padrão de carregamento (ver `--animate-shimmer` abaixo), reservando
+   * "Pulse" pra este papel, menor e mais raro.
+   */
   --animate-pulse-soft: pulse-soft 1.9s var(--ease-in-out) infinite;
+
+  /**
+   * "Shimmer" — o padrão de carregamento que o brandbook nomeia, um brilho
+   * varrendo a superfície do placeholder em vez de uma opacidade piscando.
+   * A pág. 32 chama isto de intencional contra "spinner genérico": o
+   * brilho lê como "isto está prestes a virar conteúdo", não como "algo
+   * quebrou e está piscando".
+   *
+   * Mesma duração do Pulse (1.9s) por continuidade de ritmo entre os dois
+   * papéis de carregamento, mas é `background-position`, não `opacity` —
+   * ver `skeleton-shimmer` em `globals.css` pela composição do gradiente.
+   */
+  --animate-shimmer: shimmer 1.9s var(--ease-in-out) infinite;
 
   /**
    * Uma marca aterrissando: o check da série que você acabou de terminar.
@@ -987,6 +1028,23 @@ textarea {
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+/**
+ * `background-position` varre de fora pra dentro e sai pelo outro lado. O
+ * repouso (declarado em `skeleton-shimmer`, fora do keyframe) já é `200% 0`
+ * — o mesmo valor do `from` — então sob `prefers-reduced-motion`, que capa
+ * a uma iteração sem `fill-mode`, o brilho passa uma vez rápido e volta a
+ * pousar fora da vista: sobra só o bloco `bg-muted` liso, a mesma garantia
+ * que o Pulse já dava ao Skeleton antes desta troca.
+ */
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
   }
 }
 

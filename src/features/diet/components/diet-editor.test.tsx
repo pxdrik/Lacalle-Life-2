@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -180,6 +180,15 @@ describe("DietEditor", () => {
       screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }),
     );
 
+    // Delete/Collapse: confirming only starts the shrink; the name field
+    // stays until the card's own collapse transition ends.
+    fireEvent.transitionEnd(
+      screen
+        .getByRole("button", { name: "Mais ações para Refeição 1" })
+        .closest(".grid")!,
+      { propertyName: "grid-template-rows" },
+    );
+
     expect(screen.queryByLabelText("Nome da refeição")).not.toBeInTheDocument();
     await waitFor(async () => {
       expect((await diets.getById(diet.id))?.meals).toHaveLength(0);
@@ -262,6 +271,15 @@ describe("adding food", () => {
       screen.getByRole("button", {
         name: "Remover?: Remover Peito de frango grelhado",
       }),
+    );
+
+    // Delete/Collapse: confirming only starts the shrink; the store write
+    // waits for the row's own collapse transition to finish.
+    fireEvent.transitionEnd(
+      screen
+        .getByRole("button", { name: "Mais ações para Peito de frango grelhado" })
+        .closest("li")!,
+      { propertyName: "grid-template-rows" },
     );
 
     await waitFor(async () => {

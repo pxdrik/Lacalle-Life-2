@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -75,10 +75,12 @@ describe("marking a set as done", () => {
 
 describe("Iniciativa D — a finished set reads at a glance", () => {
   function row() {
-    // The `<li>` itself carries the surface/border — walk up from a stable
-    // child rather than relying on a container query that could match the
-    // wrong element.
-    return screen.getByText("1").closest("li");
+    // The inner `.group` div carries the surface/border — the `<li>` above
+    // it is only the collapse-on-remove grid track (`useCollapsibleRemove`)
+    // and never gets these classes itself. Walk up from a stable child
+    // rather than relying on a container query that could match the wrong
+    // element.
+    return screen.getByText("1").closest(".group");
   }
 
   it("gives a finished set a filled, bordered surface", () => {
@@ -98,6 +100,56 @@ describe("Iniciativa D — a finished set reads at a glance", () => {
 
     expect(row()).not.toHaveClass("bg-muted");
     expect(row()).not.toHaveClass("border-line");
+  });
+});
+
+describe("Focus Transition — the next set to do", () => {
+  function row() {
+    return screen.getByText("1").closest(".group");
+  }
+
+  it("gets the accent bar and a highlighted surface", () => {
+    mount(set({ isCompleted: false }), true);
+
+    expect(row()).toHaveClass("border-l-accent", "bg-muted");
+  });
+
+  it("reserves the bar's width even when not next, so it never shifts layout", () => {
+    mount(set({ isCompleted: false }), false);
+
+    // Transparent, not absent: `border-l-[3px]` stays in the class list either
+    // way — only the colour utility (`border-l-accent`) is conditional.
+    expect(row()).toHaveClass("border-l-[3px]");
+    expect(row()).not.toHaveClass("border-l-accent");
+  });
+});
+
+describe("Delete/Collapse — removing a set shrinks before it goes", () => {
+  it("does not remove on the tap itself — only once the row finishes shrinking", async () => {
+    const onRemove = vi.fn();
+    render(
+      <ul>
+        <PerformedSetRow
+          set={set()}
+          index={0}
+          exerciseName="Supino"
+          isNext={false}
+          isCardio={false}
+          onChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemove={onRemove}
+        />
+      </ul>,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Remover série 1 de Supino" }),
+    );
+    expect(onRemove).not.toHaveBeenCalled();
+
+    const li = screen.getByText("1").closest("li")!;
+    fireEvent.transitionEnd(li, { propertyName: "grid-template-rows" });
+    expect(onRemove).toHaveBeenCalledTimes(1);
   });
 });
 

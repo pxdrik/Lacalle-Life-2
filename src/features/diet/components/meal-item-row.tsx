@@ -8,6 +8,7 @@ import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
+import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
@@ -75,139 +76,148 @@ export function MealItemRow({
 }: Props) {
   const macros = itemMacros(item);
   const [showingActions, setShowingActions] = useState(false);
+  const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
   return (
+    // Delete/Collapse: the li is only the shrinking grid track
+    // (`useCollapsibleRemove`) — the drag/entrance styling below lives on
+    // the div underneath, unclipped by the collapse's own transition.
     <li
-      onAnimationEnd={justAdded ? onEntranceEnd : undefined}
-      className={cn(
-        "flex items-start gap-2 py-1.5",
-        dragHandle.isDragging && "rounded-sm bg-muted",
-        justAdded && "animate-rise motion-reduce:animate-none",
-      )}
+      className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
+      {...collapseProps}
     >
-      {/* Only within a meal, and only by dragging: the order of foods inside a
-          meal is cosmetic, and two arrow buttons per row would cost more than
-          the reordering is worth. The keyboard sensor still covers it. */}
-      <button
-        type="button"
-        aria-label={`Reordenar ${item.name}`}
-        {...dragHandle.attributes}
-        {...dragHandle.listeners}
-        className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+      <div
+        onAnimationEnd={justAdded ? onEntranceEnd : undefined}
+        className={cn(
+          "flex items-start gap-2 overflow-hidden py-1.5",
+          dragHandle.isDragging && "rounded-sm bg-muted",
+          justAdded && "animate-rise motion-reduce:animate-none",
+        )}
       >
-        <GripVertical aria-hidden className="size-3.5" />
-      </button>
+        {/* Only within a meal, and only by dragging: the order of foods inside a
+            meal is cosmetic, and two arrow buttons per row would cost more than
+            the reordering is worth. The keyboard sensor still covers it. */}
+        <button
+          type="button"
+          aria-label={`Reordenar ${item.name}`}
+          {...dragHandle.attributes}
+          {...dragHandle.listeners}
+          className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+        >
+          <GripVertical aria-hidden className="size-3.5" />
+        </button>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-baseline gap-2">
-          <span className="min-w-0 flex-1 truncate text-sm text-ink">
-            {item.name}
-          </span>
-          <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
-            {formatDecimal(macros.kcal)}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setShowingActions(true);
-            }}
-            aria-label={`Mais ações para ${item.name}`}
-            className="-my-1 -me-1 flex size-7 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-          >
-            <MoreVertical aria-hidden className="size-3.5" />
-          </button>
-        </div>
-
-        <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <div className="flex items-center gap-1.5">
-            <GramsField
-              grams={item.grams}
-              label={`Quantidade de ${item.name}`}
-              onChange={onGramsChange}
-            />
-            {/* Nunca um controle — o alimento já diz se é grama ou mililitro
-                (`Food.unit`), e a gramatura é a única coisa editável aqui. */}
-            <span aria-hidden className="text-xs text-ink-subtle">
-              {item.unit}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-2">
+            <span className="min-w-0 flex-1 truncate text-sm text-ink">
+              {item.name}
             </span>
-
-            {/* Referência, não um controle (Pedro, 17/09/2026: "não precisa
-                de botar adicionar 1 porção") — só aparece quando o alimento
-                tem uma medida caseira confiável (TBCA/TACO/USDA FBG). */}
-            {item.practicalUnit && (
-              <span className="text-xs text-ink-subtle">
-                {item.practicalUnit.label} ={" "}
-                {formatDecimal(item.practicalUnit.grams)} {item.unit}
-              </span>
-            )}
+            <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
+              {formatDecimal(macros.kcal)}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setShowingActions(true);
+              }}
+              aria-label={`Mais ações para ${item.name}`}
+              className="-my-1 -me-1 flex size-7 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
+              <MoreVertical aria-hidden className="size-3.5" />
+            </button>
           </div>
 
-          <p className="flex items-baseline gap-2 text-xs tabular-nums">
-            {MACRO_CODING.map(({ key, short, text }) => (
-              <span key={key} className={text}>
-                {short[0]}: {formatDecimal(macros[key])}
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <div className="flex items-center gap-1.5">
+              <GramsField
+                grams={item.grams}
+                label={`Quantidade de ${item.name}`}
+                onChange={onGramsChange}
+              />
+              {/* Nunca um controle — o alimento já diz se é grama ou mililitro
+                  (`Food.unit`), e a gramatura é a única coisa editável aqui. */}
+              <span aria-hidden className="text-xs text-ink-subtle">
+                {item.unit}
               </span>
-            ))}
-          </p>
+
+              {/* Referência, não um controle (Pedro, 17/09/2026: "não precisa
+                  de botar adicionar 1 porção") — só aparece quando o alimento
+                  tem uma medida caseira confiável (TBCA/TACO/USDA FBG). */}
+              {item.practicalUnit && (
+                <span className="text-xs text-ink-subtle">
+                  {item.practicalUnit.label} ={" "}
+                  {formatDecimal(item.practicalUnit.grams)} {item.unit}
+                </span>
+              )}
+            </div>
+
+            <p className="flex items-baseline gap-2 text-xs tabular-nums">
+              {MACRO_CODING.map(({ key, short, text }) => (
+                <span key={key} className={text}>
+                  {short[0]}: {formatDecimal(macros[key])}
+                </span>
+              ))}
+            </p>
+          </div>
         </div>
+
+        <Dialog
+          open={showingActions}
+          title={item.name}
+          onClose={() => {
+            setShowingActions(false);
+          }}
+          placement="sheet-bottom"
+        >
+          <div className="-my-1 space-y-0.5">
+            {otherMeals.length > 0 && (
+              <>
+                <p className="px-3 pt-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
+                  Mover para
+                </p>
+                {otherMeals.map((meal) => (
+                  <ItemMenuRow
+                    key={`move:${meal.id}`}
+                    onClick={() => {
+                      onSend(meal.id, "move");
+                      setShowingActions(false);
+                    }}
+                  >
+                    {meal.name}
+                  </ItemMenuRow>
+                ))}
+
+                <p className="px-3 pt-2 text-xs font-medium tracking-wide text-ink-subtle uppercase">
+                  Copiar para
+                </p>
+                {otherMeals.map((meal) => (
+                  <ItemMenuRow
+                    key={`copy:${meal.id}`}
+                    onClick={() => {
+                      onSend(meal.id, "copy");
+                      setShowingActions(false);
+                    }}
+                  >
+                    {meal.name}
+                  </ItemMenuRow>
+                ))}
+              </>
+            )}
+
+            <ConfirmButton
+              onConfirm={() => {
+                setShowingActions(false);
+                requestRemove();
+              }}
+              label={`Remover ${item.name}`}
+              confirmLabel="Remover?"
+              className="mt-1 h-11 w-full justify-start px-3 text-sm text-danger hover:bg-danger/10"
+            >
+              Remover
+            </ConfirmButton>
+          </div>
+        </Dialog>
       </div>
-
-      <Dialog
-        open={showingActions}
-        title={item.name}
-        onClose={() => {
-          setShowingActions(false);
-        }}
-        placement="sheet-bottom"
-      >
-        <div className="-my-1 space-y-0.5">
-          {otherMeals.length > 0 && (
-            <>
-              <p className="px-3 pt-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
-                Mover para
-              </p>
-              {otherMeals.map((meal) => (
-                <ItemMenuRow
-                  key={`move:${meal.id}`}
-                  onClick={() => {
-                    onSend(meal.id, "move");
-                    setShowingActions(false);
-                  }}
-                >
-                  {meal.name}
-                </ItemMenuRow>
-              ))}
-
-              <p className="px-3 pt-2 text-xs font-medium tracking-wide text-ink-subtle uppercase">
-                Copiar para
-              </p>
-              {otherMeals.map((meal) => (
-                <ItemMenuRow
-                  key={`copy:${meal.id}`}
-                  onClick={() => {
-                    onSend(meal.id, "copy");
-                    setShowingActions(false);
-                  }}
-                >
-                  {meal.name}
-                </ItemMenuRow>
-              ))}
-            </>
-          )}
-
-          <ConfirmButton
-            onConfirm={() => {
-              setShowingActions(false);
-              onRemove();
-            }}
-            label={`Remover ${item.name}`}
-            confirmLabel="Remover?"
-            className="mt-1 h-11 w-full justify-start px-3 text-sm text-danger hover:bg-danger/10"
-          >
-            Remover
-          </ConfirmButton>
-        </div>
-      </Dialog>
     </li>
   );
 }
@@ -343,4 +353,3 @@ function readGrams(input: string): {
 function text(grams: number): string {
   return grams === 0 ? "" : String(grams).replace(".", ",");
 }
-

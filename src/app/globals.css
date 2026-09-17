@@ -43,6 +43,31 @@
   }
 }
 
+/**
+ * A faixa de brilho do `Skeleton` — ver `--animate-shimmer`/
+ * `--shimmer-highlight` em `tokens.css` pelo porquê do token e da
+ * duração. `transparent` nas duas pontas do gradiente em vez de uma
+ * segunda cor: a cor de base continua sendo `bg-muted`, do jeito que
+ * todo outro placeholder do app já declara, e este utilitário só
+ * desenha o brilho por cima dela.
+ *
+ * `background-position: 200% 0` é o repouso, igual ao `from` do
+ * keyframe — a faixa nasce fora da vista, então antes da animação
+ * começar (e depois dela ser capada a uma iteração por
+ * `prefers-reduced-motion`) o que sobra é o bloco liso.
+ */
+@utility skeleton-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 35%,
+    var(--shimmer-highlight) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  background-position: 200% 0;
+  background-repeat: no-repeat;
+}
+
 @layer base {
   /**
    * O traço do ícone afina conforme ele cresce — pág. 28.
@@ -234,10 +259,12 @@
    * `useReducedMotion`, because each one has a correct final frame to jump to
    * and CSS here cannot know what it is.
    *
-   * `animation-iteration-count` stays capped, and the only loop in the app is
-   * the skeleton's pulse — which is precisely what page 40 means by "mantido,
-   * **sem pulsação decorativa**". Capped, it settles at full opacity: the
-   * skeleton is still there saying "loading", it just stops breathing.
+   * `animation-iteration-count` stays capped, and the two loops in the app —
+   * the skeleton's shimmer and the syncing overlay's pulse — are precisely
+   * what page 40 means by "mantido, **sem pulsação decorativa**". Capped,
+   * each settles at its own resting frame (the shimmer's band parked outside
+   * the visible box, the pulse's mark at full opacity): both are still there
+   * saying "loading", they just stop breathing.
    */
   @media (prefers-reduced-motion: reduce) {
     *,

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -330,6 +330,18 @@ describe("the actions menu (⋮)", () => {
 
     await user.click(
       screen.getByRole("button", { name: "Remover?: Remover Abacate" }),
+    );
+    expect(onRemove).not.toHaveBeenCalled();
+
+    // Delete/Collapse: confirming starts the shrink, and `onRemove` only
+    // fires once that CSS transition actually finishes. "Abacate" is not a
+    // unique query by itself once the sheet's own title repeats it, so this
+    // walks up from a button that is.
+    fireEvent.transitionEnd(
+      screen
+        .getByRole("button", { name: "Mais ações para Abacate" })
+        .closest("li")!,
+      { propertyName: "grid-template-rows" },
     );
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
