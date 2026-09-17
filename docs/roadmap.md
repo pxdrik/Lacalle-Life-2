@@ -547,11 +547,18 @@ virou responsabilidade só do CSS, nunca do estado inicial).
 
 ---
 
-## 🔧 EM ANDAMENTO — Motion System v1 chega no código — 09/09/2026
+## ✅ Motion System v1 chega no código — 09/09/2026
 
 Implementação do que a pesquisa de motion (07/09) e a emenda do
 `docs/brandbook.md` já tinham decidido — não é pesquisa nova, é aplicar o
 que já foi aprovado.
+
+**Estava marcada "EM ANDAMENTO"; não estava mais.** A auditoria de
+12/09/2026 ("Auditoria do Motion System no código", mais acima neste
+arquivo) conferiu esta lista item a item contra o código real e achou tudo
+entregue, com só duas lacunas novas (Bottom Sheet, fechada na própria
+auditoria, e Delete/Collapse, que segue aberta) — nenhuma delas é o que
+este bloco "Ainda no mapa" listava.
 
 **Entregue:**
 
@@ -728,12 +735,19 @@ formulário + create/update), troca de exercício, porção/macros na busca.
 Espec completa, com os oito fluxos de teste e o texto de cada item na
 íntegra: `docs/melhorias-teste-real-08-09-2026.md`.
 
-## ⏳ PENDENTE — Motion System v1 (pesquisa entregue, sem código) — 07/09/2026
+## 📋 Pesquisa entregue — Motion System v1 (histórico) — 07/09/2026
+
+**Entrada histórica: o "pendente, sem código" do título não vale mais.** O
+que saiu desta pesquisa foi implementado nas entradas de 09/09 e 12/09
+acima — `--duration-data`, a decisão de nunca usar física de mola, e os
+doze padrões priorizados abaixo, todos conferidos contra o código real na
+auditoria de 12/09. Mantida como registro do que a pesquisa original
+encontrou, não como lista de trabalho pendente.
 
 Pesquisa de motion feita contra seis fontes (60fps.design, React Bits,
 Uiverse, Curated, Motion Sites, GetLayers), lida contra o Brandbook e os
 tokens que já existem em `src/design-system/tokens.css`. Nenhum arquivo foi
-alterado, nenhuma dependência instalada.
+alterado, nenhuma dependência instalada — na época.
 
 **Relatório completo:** https://claude.ai/code/artifact/ff5fc5a5-3f99-477b-9080-c15e90cac5e7
 (mesmo relatório está anotado no roadmap do Finance, é a mesma pesquisa para

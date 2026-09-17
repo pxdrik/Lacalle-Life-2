@@ -91,25 +91,41 @@ menor que 16 e joga o layout fora no meio da digitação. A mesa recebe 14.
 
 ---
 
-## Proposta de emenda — Motion System v1 (pendente, sem código)
+## Motion System v1 — em código, emenda formal ainda pendente no PDF
 
-Não é uma sétima divergência: a aplicação atual não contraria a pág. 40 nem a
-pág. 53 em nada abaixo. É uma lacuna que a pesquisa de motion de 07/09/2026
-encontrou — contra seis fontes externas (60fps.design, React Bits, Uiverse,
-Curated, Motion Sites, GetLayers) — e uma decisão que vale registrar por
-escrito antes que alguém a reabra por conta própria numa sessão futura.
-Relatório completo: https://claude.ai/code/artifact/ff5fc5a5-3f99-477b-9080-c15e90cac5e7
+Não é uma sétima divergência: a aplicação não contraria a pág. 40 nem a
+pág. 53 em nada abaixo. Era uma lacuna que a pesquisa de motion de
+07/09/2026 encontrou — contra seis fontes externas (60fps.design, React
+Bits, Uiverse, Curated, Motion Sites, GetLayers) — e já foi implementada.
+O que falta é só a ratificação no PDF: os tokens abaixo estão em
+`tokens.css` e em uso, não são mais proposta. Relatório completo da
+pesquisa: https://claude.ai/code/artifact/ff5fc5a5-3f99-477b-9080-c15e90cac5e7
 
-### A lacuna: falta um tier "Data" nomeado
+**Onde já está aplicado**, para quem for auditar sem reler todo o código:
+sete primitivas (`--animate-rise`, `--animate-pop`, `--animate-pulse-soft`,
+`--animate-drain`, `--animate-draw-line`, `--animate-value-change`,
+`--animate-tab-indicator`) cobrindo transição entre páginas, toasts, cards
+de refeição/rotina/sessão, o banner de treino em andamento, a barra de
+descanso, skeleton de carregamento, overlay de sincronização, os visuais da
+landing, o toggle de tema, o check de série concluída, a barra de desarme
+de dois toques, o gráfico de tendência de peso e as métricas grandes.
 
-`tokens.css` já tem `--duration-micro` (150), `--duration-standard` (250),
-`--duration-signature` (450) e `--duration-hero` (800). O que anima número,
-gráfico e progresso — count-up, barra — não tem token próprio: o Finance usa
-`520` e `600` soltos no código (`Finance/src/components/ui.jsx`), dois valores
-próximos mas diferentes, nenhum nomeado. **Proposta:** `--duration-data: 550ms`
-nos dois produtos, dentro da mesma faixa que a pág. 40 já tolera para
-progresso contínuo. Não muda nenhum comportamento visível — troca um número
-mágico por um token.
+### Dois tiers de emenda, os dois já em código
+
+`tokens.css` tinha `--duration-micro` (150), `--duration-standard` (250),
+`--duration-signature` (450) e `--duration-hero` (800) — os quatro da pág.
+38. Faltavam dois papéis que os quatro não nomeiam, e os dois já entraram:
+
+- **`--duration-data: 550ms`** — o que anima número, gráfico e progresso
+  (count-up, barra, traço de linha). Antes disso o Finance usava `520` e
+  `600` soltos no código (`Finance/src/components/ui.jsx`), dois valores
+  próximos mas diferentes, nenhum nomeado. Hoje move `--animate-draw-line`
+  (o traço do gráfico de tendência em `trend-chart.tsx`) nos dois produtos,
+  dentro da mesma faixa que a pág. 40 já tolerava para progresso contínuo.
+- **`--duration-sheet: 350ms`** — não estava nesta pesquisa original; entrou
+  depois pelo mesmo processo, para o bottom sheet ter timing próprio em vez
+  de herdar o `standard` do modal centralizado. Move o slide direcional de
+  `dialog[data-placement="sheet-bottom"|"sheet-left"]` em `globals.css`.
 
 ### A decisão: nenhuma física de mola entra como token
 
@@ -136,13 +152,16 @@ Decisão do Pedro em 07/09/2026, verificada e registrada na seção 01b do
 relatório. Nenhuma referência usada acima depende de conteúdo pago — onde a
 fonte tem um plano pago (60fps PRO, React Bits Pro, Curated Pro, GetLayers
 Unlimited/Full Stack), a análise ficou no que o plano gratuito de cada uma
-cobre. Duas ressalvas ficam para quando a implementação começar de verdade:
+cobre.
 
-- **React Bits:** confirmar que Count Up, Carousel e Dock continuam no tier
-  Starter (134 dos 166 componentes) antes de usar como referência.
-- **GetLayers:** o gradiente de hero da landing (Top 15, item 15) precisa vir
-  do conjunto gratuito — templates citados só como exemplo de tom (Wanderlust,
-  Vesper) são pagos e não devem ser copiados sem decisão explícita de assinar.
+**As duas ressalvas nunca chegaram a valer.** A implementação não importou
+nenhum componente de nenhuma das seis fontes — nem React Bits Count Up,
+Carousel ou Dock, nem o gradiente de hero do GetLayers. As seis serviram só
+de referência de padrão de mercado; o Motion System v1 ficou inteiro em
+CSS/tokens escritos à mão, a mesma escolha que o resto do design system já
+fazia (ver `VolumeChart`: "sem biblioteca de gráfico" pelo mesmo motivo).
+Sem dependência nova, as duas checagens de plano gratuito ficaram sem
+objeto.
 
 ### Number Update — exceção pontual à pág. 48, decidida pelo Pedro em 09/09/2026
 
