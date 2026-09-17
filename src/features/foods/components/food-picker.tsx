@@ -330,6 +330,6 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
  */
 export function referencePortion(food: Food): { readonly grams: number; readonly label: string } {
   return food.practicalUnit === undefined
-    ? { grams: 100, label: "100 g" }
+    ? { grams: 100, label: `100 ${food.unit}` }
     : { grams: food.practicalUnit.grams, label: food.practicalUnit.label };
 }

@@ -35,7 +35,6 @@ import {
   reorderMeals,
   saveMealAsAlternative,
   setItemGrams,
-  setItemUnit,
   updateMeal,
 } from "../services/edit-diet";
 import { MealCard } from "./meal-card";
@@ -178,11 +177,6 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                   onItemGramsChange={(itemId, grams) => {
                     apply((current) =>
                       setItemGrams(current, meal.id, itemId, grams),
-                    );
-                  }}
-                  onItemUnitChange={(itemId, unit) => {
-                    apply((current) =>
-                      setItemUnit(current, meal.id, itemId, unit),
                     );
                   }}
                   onRemoveItem={(itemId) => {

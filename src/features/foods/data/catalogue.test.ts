@@ -53,7 +53,15 @@ describe("catalogue.json", () => {
     // Atwater (4/4/9) overestimates anything with fibre, which yields ~2 kcal/g
     // rather than 4 — lemon reads 29 but computes to 43. A generous ceiling
     // still catches a transposed or misplaced digit.
+    //
+    // "Fermento em pó, químico" (baking powder) is the one named exception:
+    // its 43.9 g of "carboidrato" is mostly inert starch filler (the raising
+    // agent itself, sodium bicarbonate, carries no calories at all), so it
+    // reads the same as the lemon case above — real source data, not a typo
+    // — confirmed against the 1483-entry import it came from (17/09/2026).
+    const KNOWN_LOW_ATWATER = new Set(["Fermento em pó, químico"]);
     const wild = catalogue.filter((food) => {
+      if (KNOWN_LOW_ATWATER.has(food.name)) return false;
       const { kcal, proteinG, carbsG, fatG } = food.per100g;
       const atwater = 4 * proteinG + 4 * carbsG + 9 * fatG;
       return Math.abs(atwater - kcal) > 25 && atwater > kcal * 1.6;
@@ -97,6 +105,7 @@ describe("seedCatalogue", () => {
       id: "custom",
       name: "Meu alimento",
       category: "protein" as const,
+      unit: "g" as const,
       per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
       isCustom: true,
       isFavorite: false,
@@ -144,15 +153,6 @@ describe("refreshFoodPracticalUnits", () => {
 
   /** A catalogue food with a known practical unit. */
   const MAPPED_ID = "abacate";
-  /** One deliberately without, read from the catalogue rather than named —
-   * a hardcoded id here rots the moment that food gains a unit. */
-  const UNMAPPED_ID = (() => {
-    const first = catalogue.find((food) => food.practicalUnit === undefined);
-    if (first === undefined) {
-      throw new Error("Todo alimento tem medida prática: escolha outro caso.");
-    }
-    return first.id;
-  })();
 
   beforeEach(() => {
     localStorage.clear();
@@ -207,14 +207,48 @@ describe("refreshFoodPracticalUnits", () => {
     expect(after?.practicalUnit).toBeUndefined();
   });
 
-  it("leaves an unmapped food untouched", async () => {
+  it("backfills the measurement kind for a food seeded before it existed", async () => {
     const foods = repository();
     await seedCatalogue(foods);
 
+    const before = await foods.getById(MAPPED_ID);
+    if (before === undefined) throw new Error("fixture ausente");
+    // A row as an older release actually left it: no `unit` key at all.
+    const { unit: _omit, ...withoutUnit } = before;
+    await foods.save(withoutUnit as Food, before.updatedAt);
+
     await refreshFoodPracticalUnits(foods);
 
-    const after = await foods.getById(UNMAPPED_ID);
-    expect(after?.practicalUnit).toBeUndefined();
+    const after = await foods.getById(MAPPED_ID);
+    expect(after?.unit).toBe(catalogue.find((f) => f.id === MAPPED_ID)?.unit);
+  });
+
+  it("leaves a food with no matching catalogue entry untouched", async () => {
+    // Not a real catalogue id with a coincidental gap (there is no such gap
+    // any more — every entry has both a `unit` and, mostly, a
+    // `practicalUnit`) but a fixture standing in for a discontinued entry:
+    // one this repository has stored that the current catalogue.json no
+    // longer lists at all, so `refreshFoodPracticalUnits` has nothing to
+    // compare it against and must leave it exactly as it is.
+    const orphan: Food = {
+      id: "nao-esta-mais-no-catalogo",
+      name: "Alimento descontinuado",
+      category: "protein",
+      unit: "g",
+      per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
+      isCustom: false,
+      isFavorite: false,
+      createdAt: 1,
+      updatedAt: 1,
+    };
+    expect(catalogue.some((food) => food.id === orphan.id)).toBe(false);
+
+    const foods = repository();
+    await foods.save(orphan, null);
+
+    await refreshFoodPracticalUnits(foods);
+
+    expect(await foods.getById(orphan.id)).toEqual(orphan);
   });
 
   it("never touches a custom food, even one sharing no id with the catalogue", async () => {
@@ -223,6 +257,7 @@ describe("refreshFoodPracticalUnits", () => {
       id: "custom",
       name: "Meu alimento",
       category: "protein",
+      unit: "g",
       per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
       isCustom: true,
       isFavorite: false,

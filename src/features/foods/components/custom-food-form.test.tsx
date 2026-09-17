@@ -13,6 +13,7 @@ const SAVED: Food = {
   id: "saved-1",
   name: "Barra proteica",
   category: "protein",
+  unit: "g",
   per100g: { kcal: 100, proteinG: 10, carbsG: 10, fatG: 1 },
   isCustom: true,
   isFavorite: false,
@@ -103,6 +104,43 @@ describe("clearing a validation message", () => {
     await userEvent.type(screen.getByLabelText("Carboidrato"), "20");
 
     expect(screen.queryByText(/somam mais de 100 g/)).not.toBeInTheDocument();
+  });
+});
+
+describe("the measurement kind", () => {
+  it("defaults to Gramas and sends it on save", async () => {
+    const save = vi.fn(async () => SAVED);
+    render(
+      <CustomFoodForm initial={null} save={save} pending={false} error={null} />,
+    );
+
+    expect(screen.getByLabelText("Medido em")).toHaveValue("g");
+
+    await userEvent.type(nameField(), "Suco de laranja");
+    await userEvent.type(screen.getByLabelText("Calorias"), "45");
+    await userEvent.type(screen.getByLabelText("Proteína"), "0");
+    await userEvent.type(screen.getByLabelText("Carboidrato"), "10");
+    await userEvent.type(screen.getByLabelText("Gordura"), "0");
+    await userEvent.click(submit());
+
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ unit: "g" }));
+  });
+
+  it("sends Mililitros once selected", async () => {
+    const save = vi.fn(async () => SAVED);
+    render(
+      <CustomFoodForm initial={null} save={save} pending={false} error={null} />,
+    );
+
+    await userEvent.selectOptions(screen.getByLabelText("Medido em"), "ml");
+    await userEvent.type(nameField(), "Suco de laranja");
+    await userEvent.type(screen.getByLabelText("Calorias"), "45");
+    await userEvent.type(screen.getByLabelText("Proteína"), "0");
+    await userEvent.type(screen.getByLabelText("Carboidrato"), "10");
+    await userEvent.type(screen.getByLabelText("Gordura"), "0");
+    await userEvent.click(submit());
+
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ unit: "ml" }));
   });
 });
 

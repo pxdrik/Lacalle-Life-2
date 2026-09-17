@@ -19,6 +19,7 @@ function food(name: string, overrides: Partial<Food> = {}): Food {
     id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
     category: "protein",
+    unit: "g",
     per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
     isCustom: false,
     isFavorite: false,

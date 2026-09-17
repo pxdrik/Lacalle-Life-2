@@ -133,6 +133,7 @@ describe("isolamento entre identidades — todas as stores pessoais", () => {
     const anonFood = createCustomFood({
       name: "Comida Anônima",
       category: "protein",
+      unit: "g",
       per100g: { kcal: 100, proteinG: 10, carbsG: 10, fatG: 10 },
     });
     await anon.repositories.foods.save(anonFood, null);
@@ -172,6 +173,7 @@ describe("isolamento entre identidades — todas as stores pessoais", () => {
     const foodA = createCustomFood({
       name: "Comida A",
       category: "protein",
+      unit: "g",
       per100g: { kcal: 200, proteinG: 20, carbsG: 20, fatG: 20 },
     });
     await a.repositories.foods.save(foodA, null);

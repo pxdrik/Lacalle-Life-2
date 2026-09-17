@@ -44,6 +44,7 @@ const CHICKEN: Food = {
   id: "peito-de-frango-grelhado",
   name: "Peito de frango grelhado",
   category: "protein",
+  unit: "g",
   per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 },
   isCustom: false,
   isFavorite: false,

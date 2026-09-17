@@ -130,6 +130,7 @@ function QuantityConfirm({
   const [draft, setDraft] = useState(() => text(initial.grams));
   const grams = parseDecimal(draft) ?? 0;
   const macros = roundMacros(scaleMacros(food.per100g, grams));
+  const unitLabel = food.unit === "ml" ? "Mililitros" : "Gramas";
 
   return (
     <form
@@ -144,7 +145,7 @@ function QuantityConfirm({
           htmlFor="quantidade-alimento"
           className="text-xs font-medium tracking-wide text-ink-subtle uppercase"
         >
-          Gramas
+          {unitLabel}
         </label>
         <input
           id="quantidade-alimento"
@@ -163,9 +164,8 @@ function QuantityConfirm({
         />
         {food.practicalUnit !== undefined && (
           <p className="mt-1.5 text-xs text-ink-subtle">
-            Referência: {initial.label} ({formatDecimal(initial.grams)} g).
-            Quantas medidas ou os gramas de cada vez se ajustam depois, na
-            própria refeição.
+            Referência: {initial.label} ({formatDecimal(initial.grams)}{" "}
+            {food.unit}). A gramatura ajusta depois, na própria refeição.
           </p>
         )}
       </div>

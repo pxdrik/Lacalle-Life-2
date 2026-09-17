@@ -11,6 +11,7 @@ import {
 const VALID = {
   name: "Whey protein",
   category: "protein",
+  unit: "g",
   per100g: { kcal: 400, proteinG: 80, carbsG: 8, fatG: 7 },
 } as const;
 
@@ -64,6 +65,7 @@ describe("updateCustomFood", () => {
     id: "food-1",
     name: "Whey",
     category: "protein",
+    unit: "g",
     per100g: { kcal: 380, proteinG: 75, carbsG: 10, fatG: 5 },
     isCustom: true,
     isFavorite: true,
@@ -184,6 +186,7 @@ describe("customFoodSchema", () => {
     const result = customFoodSchema.safeParse({
       name: "",
       category: "protein",
+      unit: "g",
       per100g: {
         kcal: Number.NaN,
         proteinG: Number.NaN,

@@ -55,7 +55,6 @@ interface Props {
    */
   readonly onAddFoodClick: () => void;
   readonly onItemGramsChange: (itemId: string, grams: number) => void;
-  readonly onItemUnitChange: (itemId: string, unit: MealItem["unit"]) => void;
   readonly onRemoveItem: (itemId: string) => void;
   readonly onReorderItems: (activeId: string, overId: string) => void;
   /** The other meals a food can be sent to. Empty when this is the only one. */
@@ -110,7 +109,6 @@ export function MealCard({
   onMove,
   onAddFoodClick,
   onItemGramsChange,
-  onItemUnitChange,
   onRemoveItem,
   onReorderItems,
   otherMeals,
@@ -351,21 +349,6 @@ export function MealCard({
         </div>
       </Dialog>
 
-      {/* Secundária de propósito: "Gramas"/"Unidade" acima de cada campo
-          (`meal-item-row.tsx`) já identificam o número na hora. Isto é só a
-          confirmação por extenso, para quem quiser ler.
-          Só quando se aplica: um alimento sem medida caseira conhecida
-          continua mostrando um campo de grama só, exatamente como antes
-          disto existir, e a explicação seria sobre um controle que nem
-          está na tela. */}
-      {meal.items.some((item) => item.practicalUnit !== undefined) && (
-        <p className="mt-2 text-xs text-ink-subtle">
-          Gramas é o peso do alimento. Unidade, quando aparece, é quantas
-          medidas dele, por exemplo 2 em &quot;1/2 xícara&quot;, e se
-          converte em grama sozinha.
-        </p>
-      )}
-
       {meal.items.length > 0 && (
         <SortableList
           ids={meal.items.map((item) => item.id)}
@@ -384,9 +367,6 @@ export function MealCard({
                     otherMeals={otherMeals}
                     onGramsChange={(grams) => {
                       onItemGramsChange(item.id, grams);
-                    }}
-                    onUnitChange={(unit) => {
-                      onItemUnitChange(item.id, unit);
                     }}
                     onRemove={() => {
                       onRemoveItem(item.id);

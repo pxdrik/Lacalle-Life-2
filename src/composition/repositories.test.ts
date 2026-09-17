@@ -22,6 +22,7 @@ describe("createRepositories", () => {
         id: "ovo",
         name: "Ovo",
         category: "protein",
+        unit: "g",
         per100g: { kcal: 143, proteinG: 13, carbsG: 1, fatG: 10 },
         isCustom: false,
         isFavorite: false,

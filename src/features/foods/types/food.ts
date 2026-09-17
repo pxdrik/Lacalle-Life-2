@@ -8,6 +8,7 @@ export const FOOD_CATEGORIES = [
   "dairy",
   "vegetable",
   "fruit",
+  "beverage",
 ] as const;
 
 export type FoodCategory = (typeof FOOD_CATEGORIES)[number];
@@ -23,7 +24,19 @@ export const FOOD_CATEGORY_LABELS: Record<FoodCategory, string> = {
   dairy: "Laticínios",
   vegetable: "Vegetais",
   fruit: "Frutas",
+  beverage: "Bebidas",
 };
+
+/**
+ * What a food is measured in — grams for anything solid, millilitres for
+ * anything poured, on the assumption (already made throughout `features/diet`
+ * — see `MealItemUnit`) that 1 ml ≈ 1 g. A property of the *food*, not a
+ * per-meal choice: water is always `"ml"`, rice is always `"g"`, so a
+ * `MealItem` copies this at add time instead of asking the person every time
+ * they log it (17/09/2026, Pedro: liquids and solids should already come
+ * "definidos", not re-picked per portion).
+ */
+export type FoodUnit = "g" | "ml";
 
 /**
  * A named household measure for one food — "1 fatia média" is 80 g of
@@ -40,8 +53,20 @@ export interface PracticalUnit {
 export interface Food extends Entity {
   readonly name: string;
   readonly category: FoodCategory;
-  /** Nutrition per 100 g — the unit the whole catalogue is normalised to. */
+  /**
+   * Nutrition per 100 g — or per 100 ml, when `unit` is `"ml"`. The catalogue
+   * field name predates liquids and still describes the great majority of
+   * entries; it was not worth renaming everywhere `Macros` is read just to
+   * keep one word accurate for the smaller half.
+   */
   readonly per100g: Macros;
+  /**
+   * Grams or millilitres — see `FoodUnit`. Required going forward; a record
+   * written before this field existed reads as `"g"` (`normalize()` in
+   * `local-food-repository.ts`), same convention as `isFavorite`, since
+   * every food in this catalogue was solid before liquids were added here.
+   */
+  readonly unit: FoodUnit;
   /** The catalogue's household measure for this food, when one is known. */
   readonly practicalUnit?: PracticalUnit | undefined;
   /**

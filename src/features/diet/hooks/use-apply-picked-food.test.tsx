@@ -29,7 +29,20 @@ const CHICKEN: Food = {
   id: "peito-de-frango",
   name: "Peito de frango",
   category: "protein",
+  unit: "g",
   per100g: { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 },
+  isCustom: false,
+  isFavorite: false,
+  createdAt: 1,
+  updatedAt: 1,
+};
+
+const COCONUT_WATER: Food = {
+  id: "agua-de-coco",
+  name: "Água de coco",
+  category: "beverage",
+  unit: "ml",
+  per100g: { kcal: 19, proteinG: 0.2, carbsG: 4.5, fatG: 0.1 },
   isCustom: false,
   isFavorite: false,
   createdAt: 1,
@@ -57,14 +70,17 @@ function Probe({
   return <span data-testid="rendered" />;
 }
 
-function mount(apply: (change: (current: FoodLog) => FoodLog) => void) {
+function mount(
+  apply: (change: (current: FoodLog) => FoodLog) => void,
+  food: Food = CHICKEN,
+) {
   const repository = new LocalFoodRepository(
     new MemoryStore<Food>(FOODS_STORE),
   );
 
   return render(
     <FoodRepositoryProvider
-      repository={repository.save(CHICKEN, null).then(() => repository)}
+      repository={repository.save(food, null).then(() => repository)}
     >
       <Probe apply={apply} />
     </FoodRepositoryProvider>,
@@ -110,5 +126,27 @@ describe("useApplyPickedFood", () => {
       grams: 150,
     });
     expect(mockReplace).toHaveBeenCalledWith("/diario");
+  });
+
+  it("copies the food's own unit onto the new item, instead of always assuming grams", async () => {
+    const mealId = "m1";
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({
+        addFoodId: COCONUT_WATER.id,
+        addMealId: mealId,
+        addGrams: "200",
+      }),
+    );
+    const log = emptyLog(mealId);
+    const apply = vi.fn((change: (current: FoodLog) => FoodLog) => change(log));
+
+    mount(apply, COCONUT_WATER);
+
+    await waitFor(() => {
+      expect(apply).toHaveBeenCalledTimes(1);
+    });
+
+    const result = apply.mock.results[0]?.value as FoodLog;
+    expect(result.meals[0]?.items[0]).toMatchObject({ unit: "ml" });
   });
 });

@@ -56,11 +56,19 @@ const practicalUnitSchema = z.object({
     .max(10_000, "Medida: no máximo 10.000 g."),
 });
 
+/**
+ * Optional here, unlike on `Food` itself: `foodRecordSchema` (backup import)
+ * extends this shape, and a backup exported before liquids existed has no
+ * `unit` key at all. `seedCatalogue`/`refreshFoodPracticalUnits` default a
+ * missing value to `"g"` when reading the bundled catalogue, same as
+ * `normalize()` does for a record already in the store.
+ */
 export const catalogueEntrySchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1).max(120),
   category: z.enum(FOOD_CATEGORIES),
   per100g: per100gSchema,
+  unit: z.enum(["g", "ml"]).optional(),
   practicalUnit: practicalUnitSchema.optional(),
 });
 
@@ -77,6 +85,7 @@ export const customFoodSchema = z.object({
     .min(1, "Dê um nome ao alimento.")
     .max(120, "Nome muito longo."),
   category: z.enum(FOOD_CATEGORIES),
+  unit: z.enum(["g", "ml"]),
   per100g: per100gSchema,
   // Opcional, como no catálogo curado (`Food.practicalUnit`): nem todo
   // alimento tem uma porção de referência confiável, e quem cria o próprio

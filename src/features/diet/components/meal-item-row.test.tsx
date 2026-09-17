@@ -37,7 +37,6 @@ function row(item: MealItem) {
         dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
         otherMeals={[]}
         onGramsChange={() => undefined}
-        onUnitChange={() => undefined}
         onRemove={() => undefined}
         onSend={() => undefined}
       />
@@ -47,7 +46,6 @@ function row(item: MealItem) {
 
 function mount(item: MealItem = ITEM) {
   const onGramsChange = vi.fn();
-  const onUnitChange = vi.fn();
 
   const { rerender } = render(
     <ul>
@@ -56,7 +54,6 @@ function mount(item: MealItem = ITEM) {
         dragHandle={{ attributes: {}, listeners: undefined, isDragging: false }}
         otherMeals={[]}
         onGramsChange={onGramsChange}
-        onUnitChange={onUnitChange}
         onRemove={() => undefined}
         onSend={() => undefined}
       />
@@ -65,9 +62,7 @@ function mount(item: MealItem = ITEM) {
 
   return {
     field: screen.getByLabelText("Quantidade de Abacate"),
-    unitField: screen.getByLabelText("Unidade de Abacate"),
     onGramsChange,
-    onUnitChange,
     rerender: (next: MealItem) => {
       rerender(row(next));
     },
@@ -164,101 +159,65 @@ describe("the portion field", () => {
   });
 });
 
-describe("the practical unit field", () => {
+describe("the portion reference", () => {
+  // 17/09/2026, Pedro: "não precisa de botar adicionar 1 porção" — a medida
+  // caseira é só texto, nunca um segundo campo, e a pessoa só ajusta a
+  // gramatura no `GramsField` acima.
   const WITH_UNIT: MealItem = {
     ...ITEM,
     grams: 100,
     practicalUnit: { label: "1/2 unidade média", grams: 100 },
   };
 
-  it("does not render when the food has no practical unit", () => {
+  it("does not show when the food has no practical unit", () => {
     mount(ITEM);
 
+    expect(screen.queryByText(/unidade média/)).not.toBeInTheDocument();
+  });
+
+  it("shows the reference as plain text, not an editable field", () => {
+    mount(WITH_UNIT);
+
+    expect(
+      screen.getByText("1/2 unidade média = 100 g"),
+    ).toBeInTheDocument();
     expect(
       screen.queryByLabelText("Quantidade de Abacate em 1/2 unidade média"),
     ).not.toBeInTheDocument();
   });
 
-  it("shows the quantity the stored grams work out to", () => {
-    mount(WITH_UNIT);
-
-    expect(
-      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
-    ).toHaveValue("1");
-  });
-
-  it("shows a fractional quantity when grams is not a whole number of units", () => {
-    mount({ ...WITH_UNIT, grams: 150 });
-
-    expect(
-      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
-    ).toHaveValue("1,5");
-  });
-
-  it("converts a typed quantity to grams through the same callback as the grams field", async () => {
-    const { onGramsChange } = mount(WITH_UNIT);
-    const unitField = screen.getByLabelText(
-      "Quantidade de Abacate em 1/2 unidade média",
-    );
-
-    await userEvent.clear(unitField);
-    await userEvent.type(unitField, "2");
-
-    expect(last(onGramsChange)).toBe(200);
-  });
-
-  it("stays in sync when the grams prop changes from elsewhere", () => {
-    // The grams field's own edits reach `item.grams` through `onGramsChange`
-    // and a re-render with the new prop — exactly what `rerender` simulates
-    // here, and what typing into the grams field in this same mount cannot,
-    // since `onGramsChange` is a bare mock that never feeds back into `item`.
+  it("never changes when the stored grams change — it is the food's own reference, not a live count", () => {
     const { rerender } = mount(WITH_UNIT);
 
     rerender({ ...WITH_UNIT, grams: 250 });
 
     expect(
-      screen.getByLabelText("Quantidade de Abacate em 1/2 unidade média"),
-    ).toHaveValue("2,5");
+      screen.getByText("1/2 unidade média = 100 g"),
+    ).toBeInTheDocument();
   });
 
-  it("accepts a comma, like the grams field", async () => {
-    const { onGramsChange } = mount(WITH_UNIT);
-    const unitField = screen.getByLabelText(
-      "Quantidade de Abacate em 1/2 unidade média",
-    );
+  it("reads in millilitres for a liquid food", () => {
+    mount({
+      ...WITH_UNIT,
+      unit: "ml",
+      practicalUnit: { label: "1 copo", grams: 200 },
+    });
 
-    await userEvent.clear(unitField);
-    await userEvent.type(unitField, "1,5");
-
-    expect(last(onGramsChange)).toBe(150);
+    expect(screen.getByText("1 copo = 200 ml")).toBeInTheDocument();
   });
 });
 
-describe("the unit selector", () => {
-  it("defaults to grams", () => {
-    const { unitField } = mount();
+describe("the unit label", () => {
+  it("shows g for a solid food, next to the grams field", () => {
+    mount();
 
-    expect(unitField).toHaveValue("g");
+    expect(screen.getByText("g")).toBeInTheDocument();
   });
 
-  it("switches to millilitres without changing the stored quantity", async () => {
-    // 1 ml ≈ 1 g is the whole approximation — the number itself never moves,
-    // only the label. `onGramsChange` must not fire from a unit change.
-    const { unitField, onUnitChange, onGramsChange } = mount({
-      ...ITEM,
-      grams: 250,
-    });
+  it("shows ml for a liquid food", () => {
+    mount({ ...ITEM, unit: "ml" });
 
-    await userEvent.selectOptions(unitField, "ml");
-
-    expect(onUnitChange).toHaveBeenCalledWith("ml");
-    expect(onGramsChange).not.toHaveBeenCalled();
-  });
-
-  it("shows ml when the item is already stored that way", () => {
-    const { unitField } = mount({ ...ITEM, unit: "ml" });
-
-    expect(unitField).toHaveValue("ml");
+    expect(screen.getByText("ml")).toBeInTheDocument();
   });
 });
 
@@ -279,26 +238,6 @@ describe("the food name", () => {
 
     const [nameSpan] = screen.getAllByText(longName);
     expect(nameSpan?.className).toContain("truncate");
-  });
-});
-
-describe("field heights", () => {
-  it("gives the grams field, its unit and the practical-unit field the same height", () => {
-    mount({
-      ...ITEM,
-      grams: 100,
-      practicalUnit: { label: "1/2 unidade média", grams: 100 },
-    });
-
-    const gramsField = screen.getByLabelText(`Quantidade de ${ITEM.name}`);
-    const unitSelect = screen.getByLabelText(`Unidade de ${ITEM.name}`);
-    const unitField = screen.getByLabelText(
-      `Quantidade de ${ITEM.name} em 1/2 unidade média`,
-    );
-
-    expect(gramsField.className).toContain("h-8");
-    expect(unitSelect.className).toContain("h-8");
-    expect(unitField.className).toContain("h-8");
   });
 });
 
@@ -324,7 +263,6 @@ describe("the actions menu (⋮)", () => {
           }}
           otherMeals={otherMeals}
           onGramsChange={() => undefined}
-          onUnitChange={() => undefined}
           onRemove={onRemove}
           onSend={onSend}
         />

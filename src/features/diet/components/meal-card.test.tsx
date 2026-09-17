@@ -49,7 +49,6 @@ function mount(
       onMove={vi.fn()}
       onAddFoodClick={vi.fn()}
       onItemGramsChange={vi.fn()}
-      onItemUnitChange={vi.fn()}
       onRemoveItem={vi.fn()}
       onReorderItems={vi.fn()}
       otherMeals={[]}
@@ -67,8 +66,6 @@ function mount(
     },
   };
 }
-
-const EXPLANATION = /Gramas é o peso do alimento/;
 
 describe("the check button", () => {
   it("does not render without onToggleChecked", () => {
@@ -241,30 +238,6 @@ describe("the actions menu (⋮)", () => {
 
     await user.click(screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("the grams-vs-unit explanation", () => {
-  it("does not show for a meal with no items", () => {
-    mount(meal([]));
-
-    expect(screen.queryByText(EXPLANATION)).not.toBeInTheDocument();
-  });
-
-  it("does not show when no item has a practical unit", () => {
-    mount(meal([item()]));
-
-    expect(screen.queryByText(EXPLANATION)).not.toBeInTheDocument();
-  });
-
-  it("shows once an item has a practical unit", () => {
-    mount(
-      meal([
-        item({ practicalUnit: { label: "1/2 unidade média", grams: 100 } }),
-      ]),
-    );
-
-    expect(screen.getByText(EXPLANATION)).toBeInTheDocument();
   });
 });
 

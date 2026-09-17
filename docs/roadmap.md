@@ -5,6 +5,53 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Catálogo de alimentos importado (580 → 1483) + porção vira só referência — 17/09/2026
+
+Pedro pediu, depois de uma dúvida sobre como classificar a unidade de medida
+dos 580 alimentos existentes: "adicione essa base nova", um arquivo com 1483
+alimentos (`alimentos_completos_100g_unidade_ml.txt`, TBCA/TACO), cada um já
+com grama ou mililitro definido e uma porção de referência. Pediu também que
+"1 porção = X gramas" apareça como texto, nunca como um botão de "adicionar 1
+porção" — a pessoa só ajusta a gramatura, não uma contagem de porções.
+
+- ✅ **Dados validados antes de qualquer código** (princípio "Validar o
+  instrumento antes da conclusão"): os 580 alimentos antigos batem 100% por
+  nome com o arquivo novo, macros idênticos, zero divergência — só os rótulos
+  de medida caseira do arquivo novo são mais genéricos ("1 porção" vs. "1/2
+  unidade média"), por isso os 580 mantiveram sua própria medida caseira
+  curada em vez de herdar a do arquivo. Todos os 1483 batem os limites do
+  schema (kcal ≤900, cada macro ≤100 g, soma ≤100 g).
+- ✅ **`Food.unit` novo** (`"g" | "ml"`), copiado para `MealItem.unit` na
+  hora de adicionar — a mesma regra de sempre (`per100g`/`practicalUnit`
+  também são cópia, nunca lookup). Opcional no tipo, mas obrigatório em todo
+  alimento seedado; um registro anterior a este campo lê como `"g"` (mesma
+  convenção de `isFavorite`).
+- ✅ **Categoria nova, `beverage`** ("Bebidas"), para as 100 entradas
+  líquidas — `FOOD_CATEGORIES` é fonte única, então o chip de filtro e o
+  schema já vieram de graça.
+- ✅ **803 alimentos sólidos novos, sem categoria no arquivo-fonte:**
+  heurística por palavra-chave (laticínio/fruta/vegetal, calibrada contra os
+  580 já categorizados) com fallback por macro dominante (Atwater 4/4/9).
+  Aproximada, ao contrário do resto dos dados — que vem exato do arquivo.
+- ✅ **Porção virou texto somente-leitura** em `meal-item-row.tsx`: saiu o
+  seletor g/ml manual (o alimento já diz) e o campo de "quantas medidas"
+  (`UnitQuantityField`) — sobrou só a gramatura, editável, com "1 porção = X
+  g" ao lado, nunca um controle. Comentário desatualizado sobre o campo
+  removido, corrigido em `meal-card.tsx`.
+- ✅ **Backfill estendido:** `refreshFoodPracticalUnits` (revisão 2) agora
+  também atualiza `unit`, não só `practicalUnit`, para quem já tinha
+  semeado o catálogo antes deste campo existir.
+- ✅ **`CustomFoodForm` ganhou "Medido em"** (Gramas/Mililitros), e
+  `/alimentos/selecionar` rotula o campo de quantidade "Gramas" ou
+  "Mililitros" conforme o alimento.
+
+`npm run verify` (typecheck + lint + 1729 testes) e `npm run build` verdes;
+confirmado ao vivo no navegador — 1483 alimentos carregados, "Água mineral"
+sob "Bebidas", porção como texto na refeição, "Medido em" no formulário de
+alimento novo.
+
+---
+
 ## ✅ Ajustes de Dieta/Diário/Treino depois do teste real — 17/09/2026
 
 Pedro usou a entrega anterior (item abaixo) e voltou com 5 pontos:

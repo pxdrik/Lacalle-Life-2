@@ -14,7 +14,7 @@ import { useToast } from "@/design-system/components/toast";
 import { MACRO_CODING } from "@/design-system/macros";
 
 import { estimateKcal } from "../services/create-food";
-import type { Food } from "../types/food";
+import type { Food, FoodUnit } from "../types/food";
 import { FOOD_CATEGORIES, FOOD_CATEGORY_LABELS } from "../types/food";
 import {
   customFoodSchema,
@@ -29,11 +29,13 @@ import {
 type NumericKey = "kcal" | "proteinG" | "carbsG" | "fatG";
 type Draft = Record<"name" | NumericKey | "unitLabel" | "unitGrams", string> & {
   category: (typeof FOOD_CATEGORIES)[number];
+  unit: FoodUnit;
 };
 
 const EMPTY: Draft = {
   name: "",
   category: "protein",
+  unit: "g",
   kcal: "",
   proteinG: "",
   carbsG: "",
@@ -51,6 +53,7 @@ function draftFrom(food: Food | null): Draft {
   return {
     name: food.name,
     category: food.category,
+    unit: food.unit,
     kcal: text(food.per100g.kcal),
     proteinG: text(food.per100g.proteinG),
     carbsG: text(food.per100g.carbsG),
@@ -154,6 +157,7 @@ export function CustomFoodForm({
     const parsed = customFoodSchema.safeParse({
       name: draft.name,
       category: draft.category,
+      unit: draft.unit,
       per100g: {
         kcal: parseDecimal(draft.kcal) ?? Number.NaN,
         proteinG: proteinG ?? Number.NaN,
@@ -235,9 +239,24 @@ export function CustomFoodForm({
         )}
       </Field>
 
+      <Field label="Medido em" id="unit">
+        {({ id }) => (
+          <Select
+            id={id}
+            value={draft.unit}
+            onChange={(event) => {
+              update("unit", event.target.value);
+            }}
+          >
+            <option value="g">Gramas</option>
+            <option value="ml">Mililitros</option>
+          </Select>
+        )}
+      </Field>
+
       <fieldset className="space-y-3">
         <legend className="mb-1 text-sm font-medium text-ink">
-          Por 100 g{" "}
+          Por 100 {draft.unit}{" "}
           <span className="text-ink-subtle">(como está no rótulo)</span>
         </legend>
 

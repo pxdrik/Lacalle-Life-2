@@ -1,6 +1,6 @@
 import { revise } from "@/core/domain/entity";
 
-import type { Food, PracticalUnit } from "../types/food";
+import type { Food, FoodUnit, PracticalUnit } from "../types/food";
 import type { CatalogueEntry } from "../validation/food-schema";
 import type { FoodRepository } from "./food-repository";
 
@@ -44,6 +44,7 @@ export async function seedCatalogue(repository: FoodRepository): Promise<void> {
   const now = Date.now();
   const foods: Food[] = missing.map((entry) => ({
     ...entry,
+    unit: entry.unit ?? "g",
     createdAt: now,
     updatedAt: now,
     isCustom: false,
@@ -55,20 +56,22 @@ export async function seedCatalogue(repository: FoodRepository): Promise<void> {
 
 /**
  * Bumped whenever `catalogue.json` changes which entries carry a
- * `practicalUnit`.
+ * `practicalUnit`, or (revision 2, 17/09/2026) which measurement kind
+ * (`unit`) an entry declares.
  *
  * `seedCatalogue` only ever inserts ids missing from the store — see its own
- * comment — so a browser that already seeded, say, "Abacate" before this
- * field existed keeps the medialess (unit-less) copy forever unless
- * something goes back and patches it in. This is that something, modelled
- * directly on `refreshExerciseMedia` in the workouts feature, which solved
- * the identical problem for exercise photos.
+ * comment — so a browser that already seeded, say, "Abacate" before one of
+ * these fields existed keeps the old copy forever unless something goes back
+ * and patches it in. This is that something, modelled directly on
+ * `refreshExerciseMedia` in the workouts feature, which solved the identical
+ * problem for exercise photos.
  */
-const PRACTICAL_UNIT_REVISION = 1;
+const PRACTICAL_UNIT_REVISION = 2;
 const REVISION_KEY = "lacalle-life:food-practical-unit-revision";
 
 /**
- * Brings stored catalogue foods up to the current set of practical units.
+ * Brings stored catalogue foods up to the current practical units and
+ * measurement kinds.
  *
  * Gated on a revision marker for the same reason as the exercise refresh:
  * the honest check is "read every row and compare", and paying that on every
@@ -83,22 +86,35 @@ export async function refreshFoodPracticalUnits(
 
   const { default: entries } = await import("./catalogue.json");
   const typed = entries as readonly CatalogueEntry[];
-  const unitById = new Map<string, PracticalUnit | undefined>(
-    typed.map((entry) => [entry.id, entry.practicalUnit]),
+  const byId = new Map<
+    string,
+    { readonly unit: FoodUnit; readonly practicalUnit: PracticalUnit | undefined }
+  >(
+    typed.map((entry) => [
+      entry.id,
+      { unit: entry.unit ?? "g", practicalUnit: entry.practicalUnit },
+    ]),
   );
 
-  const stale = (await repository.listAll()).filter(
-    (food) =>
+  const stale = (await repository.listAll()).filter((food) => {
+    const current = byId.get(food.id);
+    return (
       !food.isCustom &&
-      unitById.has(food.id) &&
-      !sameUnit(food.practicalUnit, unitById.get(food.id)),
-  );
+      current !== undefined &&
+      (food.unit !== current.unit ||
+        !sameUnit(food.practicalUnit, current.practicalUnit))
+    );
+  });
 
   if (stale.length > 0) {
     await repository.saveMany(
-      stale.map((food) =>
-        revise(food, { practicalUnit: unitById.get(food.id) }),
-      ),
+      stale.map((food) => {
+        const current = byId.get(food.id);
+        return revise(food, {
+          unit: current?.unit ?? food.unit,
+          practicalUnit: current?.practicalUnit,
+        });
+      }),
     );
   }
 

@@ -8,11 +8,9 @@ import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
-import { Select } from "@/design-system/components/select";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
-import type { PracticalUnit } from "@/features/foods";
 
 interface Props {
   readonly item: MealItem;
@@ -26,7 +24,6 @@ interface Props {
     readonly name: string;
   }[];
   readonly onGramsChange: (grams: number) => void;
-  readonly onUnitChange: (unit: MealItem["unit"]) => void;
   readonly onRemove: () => void;
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
   /**
@@ -59,13 +56,18 @@ interface Props {
  * exatamente o par de linhas que o Macros usa por alimento. "Mover para" e
  * "Remover" saíram do fluxo inteiramente, atrás do ⋮ — a mesma ideia do
  * kebab do cabeçalho da refeição (`meal-card.tsx`), agora por alimento.
+ *
+ * **Também 17/09/2026:** o toggle g/ml e o campo de "quantas medidas" saíram
+ * — Pedro: alimentos já vêm "definidos" como grama ou mililitro (o próprio
+ * catálogo diz, `Food.unit`), e a porção de referência é só texto, nunca um
+ * controle: "não precisa de botar adicionar 1 porção", a pessoa só ajusta a
+ * gramatura. `GramsField` continua sendo o único campo editável.
  */
 export function MealItemRow({
   item,
   dragHandle,
   otherMeals,
   onGramsChange,
-  onUnitChange,
   onRemove,
   onSend,
   justAdded = false,
@@ -117,38 +119,26 @@ export function MealItemRow({
         </div>
 
         <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <GramsField
               grams={item.grams}
               label={`Quantidade de ${item.name}`}
               onChange={onGramsChange}
             />
-            {/* g e ml só trocam o rótulo: 1 ml ≈ 1 g é a aproximação, não
-                uma segunda grandeza. */}
-            <Select
-              variant="compact"
-              value={item.unit}
-              aria-label={`Unidade de ${item.name}`}
-              onChange={(event) => {
-                onUnitChange(event.target.value === "ml" ? "ml" : "g");
-              }}
-            >
-              <option value="g">g</option>
-              <option value="ml">ml</option>
-            </Select>
+            {/* Nunca um controle — o alimento já diz se é grama ou mililitro
+                (`Food.unit`), e a gramatura é a única coisa editável aqui. */}
+            <span aria-hidden className="text-xs text-ink-subtle">
+              {item.unit}
+            </span>
 
-            {/* Só aparece quando o alimento tem uma medida caseira confiável
-                (TBCA/TACO/USDA FBG). Nem todo alimento tem uma, e onde falta
-                não existe substituto honesto além de gramas/ml. Os dois
-                campos escrevem no mesmo `grams`: editar um atualiza o
-                outro. */}
+            {/* Referência, não um controle (Pedro, 17/09/2026: "não precisa
+                de botar adicionar 1 porção") — só aparece quando o alimento
+                tem uma medida caseira confiável (TBCA/TACO/USDA FBG). */}
             {item.practicalUnit && (
-              <UnitQuantityField
-                grams={item.grams}
-                unit={item.practicalUnit}
-                itemName={item.name}
-                onChange={onGramsChange}
-              />
+              <span className="text-xs text-ink-subtle">
+                {item.practicalUnit.label} ={" "}
+                {formatDecimal(item.practicalUnit.grams)} {item.unit}
+              </span>
             )}
           </div>
 
@@ -354,93 +344,3 @@ function text(grams: number): string {
   return grams === 0 ? "" : String(grams).replace(".", ",");
 }
 
-/**
- * "Quantas medidas", not "quantos gramas" — a second view onto the same
- * `grams` the app already stores, so this never needs its own persistence
- * or migration. Typing "2" into "1/2 xícara" (100 g) calls `onChange(200)`
- * through the exact callback `GramsField` uses; typing grams directly still
- * works, and this field just shows what that comes out to (a quantity that
- * is not a whole number of measures, like 1,5, is not an error — it is
- * accurate).
- *
- * A second copy of `GramsField`'s draft/`seen` technique rather than a
- * shared one: the two fields hold different units of the same value (count
- * vs. grams), so unifying them means the shared component doing the
- * count↔grams conversion internally, which is a bigger change than this
- * field needs to make.
- */
-function UnitQuantityField({
-  grams,
-  unit,
-  itemName,
-  onChange,
-}: {
-  readonly grams: number;
-  readonly unit: PracticalUnit;
-  readonly itemName: string;
-  readonly onChange: (grams: number) => void;
-}) {
-  const quantity = quantityOf(grams, unit.grams);
-  const [draft, setDraft] = useState(() => quantityText(quantity));
-  const [seen, setSeen] = useState(grams);
-
-  if (seen !== grams) {
-    setSeen(grams);
-    if (parseDecimal(draft) !== quantity) setDraft(quantityText(quantity));
-  }
-
-  return (
-    <input
-      type="text"
-      inputMode="decimal"
-      value={draft}
-      aria-label={`Quantidade de ${itemName} em ${unit.label}`}
-      title={unit.label}
-      placeholder="0"
-      onFocus={(event) => {
-        event.target.select();
-      }}
-      onChange={(event) => {
-        const next = readQuantity(event.target.value);
-        setDraft(next.text);
-        onChange(clampGrams(next.quantity * unit.grams));
-      }}
-      // Era `text-ink-muted`: um valor real (a contagem de medidas caseiras,
-      // ex. "1" em "1 fatia") lido em cinza é indistinguível de um
-      // placeholder — achado num teste manual real. O campo continua menor
-      // que o de gramas (tamanho, não cor, marca que é secundário).
-      className="h-8 w-14 rounded-md border border-line bg-surface px-1.5 text-right text-xs tabular-nums text-ink transition-colors duration-150 ease-out hover:border-line-strong"
-    />
-  );
-}
-
-function quantityOf(grams: number, unitGrams: number): number {
-  if (unitGrams <= 0) return 0;
-  // Rounded to avoid float noise (200/100 as 1.9999999999998), not to limit
-  // precision the user actually typed — three decimals is well past what
-  // this field displays anyway.
-  return Math.round((grams / unitGrams) * 1000) / 1000;
-}
-
-function clampGrams(grams: number): number {
-  return Math.min(grams, MAX_GRAMS);
-}
-
-/** Same parsing shape as `readGrams`, for a quantity instead of a weight. */
-function readQuantity(input: string): {
-  readonly text: string;
-  readonly quantity: number;
-} {
-  const kept = input.replace(/[^\d,.]/g, "");
-  const [whole = "", ...rest] = kept.split(/[.,]/);
-  const text = rest.length === 0 ? whole : `${whole},${rest.join("")}`;
-
-  const value = parseDecimal(text);
-  if (value === null) return { text, quantity: 0 };
-
-  return { text, quantity: value };
-}
-
-function quantityText(quantity: number): string {
-  return quantity === 0 ? "" : String(quantity).replace(".", ",");
-}

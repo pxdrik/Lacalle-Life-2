@@ -45,6 +45,7 @@ function food(name: string, isCustom = false): Food {
     id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
     category: "protein",
+    unit: "g",
     per100g: { kcal: 100, proteinG: 10, carbsG: 5, fatG: 2 },
     isCustom,
     isFavorite: false,
@@ -140,6 +141,17 @@ describe.each(ADAPTERS)("LocalFoodRepository — $name", ({ create }) => {
 
       const [stored] = await repository.listAll();
       expect(stored?.isFavorite).toBe(false);
+    });
+
+    it("defaults unit to grams for a record that predates liquids", async () => {
+      const legacy = food("Arroz");
+      const withoutUnit: Record<string, unknown> = { ...legacy };
+      delete withoutUnit["unit"];
+
+      await repository.save(withoutUnit as unknown as Food, null);
+
+      const [stored] = await repository.listAll();
+      expect(stored?.unit).toBe("g");
     });
   });
 

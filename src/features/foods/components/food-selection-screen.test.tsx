@@ -28,6 +28,7 @@ function food(name: string, overrides: Partial<Food> = {}): Food {
     id: name.toLowerCase().replace(/\s+/g, "-"),
     name,
     category: "protein",
+    unit: "g",
     per100g: { kcal: 200, proteinG: 20, carbsG: 10, fatG: 5 },
     isCustom: false,
     isFavorite: false,
@@ -115,6 +116,25 @@ describe("FoodSelectionScreen", () => {
 
     expect(screen.getByRole("heading", { name: "Pão francês" })).toBeInTheDocument();
     expect(screen.getByLabelText("Gramas")).toHaveValue("50");
+  });
+
+  it("labels the field Mililitros for a liquid food", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/dietas/abc" }),
+    );
+    mount([food("Água de coco", { unit: "ml", category: "beverage" })]);
+    await afterLoad();
+
+    await userEvent.type(
+      screen.getByLabelText("Buscar alimento para adicionar"),
+      "água",
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: /Água de coco/ }),
+    );
+
+    expect(screen.getByLabelText("Mililitros")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Gramas")).not.toBeInTheDocument();
   });
 
   it("confirming the quantity navigates back with the food, meal and grams", async () => {

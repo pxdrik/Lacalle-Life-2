@@ -64,7 +64,11 @@ export class LocalFoodRepository implements FoodRepository {
  * as complete, and no destructive migration is ever needed to add a field.
  */
 function normalize(food: Food): Food {
-  return { ...food, isFavorite: food.isFavorite ?? false };
+  return {
+    ...food,
+    isFavorite: food.isFavorite ?? false,
+    unit: food.unit ?? "g",
+  };
 }
 
 /**

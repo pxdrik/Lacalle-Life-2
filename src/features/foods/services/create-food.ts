@@ -17,6 +17,7 @@ export function createCustomFood(input: CustomFoodInput): Food {
     id: createEntityId(),
     name: input.name.trim(),
     category: input.category,
+    unit: input.unit,
     per100g: input.per100g,
     practicalUnit: input.practicalUnit,
     isCustom: true,
@@ -44,6 +45,7 @@ export function updateCustomFood(food: Food, input: CustomFoodInput): Food {
   return revise(food, {
     name: input.name.trim(),
     category: input.category,
+    unit: input.unit,
     per100g: input.per100g,
     practicalUnit: input.practicalUnit,
   });

@@ -11,5 +11,6 @@ export {
   FOOD_CATEGORY_LABELS,
   type Food,
   type FoodCategory,
+  type FoodUnit,
   type PracticalUnit,
 } from "./types/food";

@@ -1,6 +1,6 @@
 import { createEntityId, entityTimestamp } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
-import type { PracticalUnit } from "@/features/foods";
+import type { FoodUnit, PracticalUnit } from "@/features/foods";
 
 import type { Diet, Meal, MealItem } from "../types/diet";
 
@@ -103,6 +103,8 @@ export function createMealItem(source: {
   readonly foodId: string | null;
   readonly name: string;
   readonly grams: number;
+  /** Defaults to `"g"` — every caller that predates liquid foods relies on this. */
+  readonly unit?: FoodUnit | undefined;
   readonly per100g: Macros;
   readonly practicalUnit?: PracticalUnit | undefined;
 }): MealItem {
@@ -111,7 +113,7 @@ export function createMealItem(source: {
     foodId: source.foodId,
     name: source.name,
     grams: source.grams,
-    unit: "g",
+    unit: source.unit ?? "g",
     per100g: source.per100g,
     practicalUnit: source.practicalUnit,
   };

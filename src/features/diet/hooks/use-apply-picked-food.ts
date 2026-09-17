@@ -72,6 +72,7 @@ export function useApplyPickedFood<T extends MealOwner>(
             foodId: food.id,
             name: food.name,
             grams,
+            unit: food.unit,
             per100g: food.per100g,
             practicalUnit: food.practicalUnit,
           }),

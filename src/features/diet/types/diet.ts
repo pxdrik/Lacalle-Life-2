@@ -1,6 +1,6 @@
 import type { Entity, EntityId } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
-import type { PracticalUnit } from "@/features/foods";
+import type { FoodUnit, PracticalUnit } from "@/features/foods";
 
 /**
  * One food in one meal.
@@ -16,13 +16,15 @@ import type { PracticalUnit } from "@/features/foods";
 /**
  * What the quantity is measured in. `grams` never changes meaning — a
  * `unit` of `"ml"` is a display choice for a liquid, on the assumption that
- * 1 ml ≈ 1 g, not a second physical quantity. A food's `practicalUnit` (a
- * household measure like "1 fatia média") is a separate, optional thing:
- * it only ever offers a second way to *enter* a quantity, converted to grams
- * at input time — it is never a third value here, so a row without one
- * behaves exactly as it always has.
+ * 1 ml ≈ 1 g, not a second physical quantity. Copied from the food's own
+ * `FoodUnit` at add time (same as `per100g`) and never edited per item —
+ * a food's measurement kind is a property of the food, not a choice made
+ * meal by meal. A food's `practicalUnit` (a household measure like "1 fatia
+ * média") is a separate, optional thing: it only ever offers a second way to
+ * *enter* a quantity, converted to grams at input time — it is never a third
+ * value here, so a row without one behaves exactly as it always has.
  */
-export type MealItemUnit = "g" | "ml";
+export type MealItemUnit = FoodUnit;
 
 export interface MealItem {
   readonly id: EntityId;
