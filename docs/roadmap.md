@@ -5,6 +5,50 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Fecha os três pontos pendentes do Motion System — 17/09/2026
+
+Pedro perguntou de novo se as animações do brandbook estavam no Life
+("não está com as animações ainda, ou se tiver, estão muito leves"). Antes
+de mexer em código: confirmado que o Motion System já estava
+implementado (auditorias de 09/09 e 12/09 acima) e que a causa real era
+`prefers-reduced-motion` ativo no ambiente do Pedro — capando toda
+animação a 120ms, o que explica "leve demais". Sobravam só três itens
+reais da auditoria de 12/09, dois esperando decisão dele e um sem
+trigger definido. Pedro respondeu "Pode implementar os 3".
+
+- ✅ **Shimmer vs. Pulse.** `Skeleton` usava `--animate-pulse-soft`
+  emprestado — o brandbook reserva "Pulse" pra sincronização em segundo
+  plano (`SyncingOverlay`, único uso que sobrou) e nomeia "Shimmer" como
+  o padrão de carregamento, brilho varrendo a superfície. Token novo
+  `--animate-shimmer` + `--shimmer-highlight` (um valor por tema — no
+  escuro `elevated` é mais escuro que `muted`, então o passo "mais claro"
+  não é o mesmo token dos dois lados) e o utilitário `skeleton-shimmer`
+  em `globals.css`.
+- ✅ **Focus Transition.** A série seguinte em `performed-set-row.tsx`
+  ganhou a mesma barra lateral de 3px que `Card` já usa pra "este é o
+  destaque" (pág. 24) — reservada e transparente mesmo fora do estado,
+  pra a barra chegar como transição de cor, nunca como salto de layout.
+  A mensagem "a duração não muda, só o dia" saiu, obsoleta desde que a
+  duração ganhou campo próprio (entrega anterior, mesmo dia).
+- ✅ **Delete/Collapse.** Item encolhe (`grid-template-rows` `1fr`→`0fr`)
+  antes de sumir, em vez do array cortar na hora. Um hook só,
+  `useCollapsibleRemove` (`design-system/hooks/`), reusado nos quatro
+  pontos que a auditoria de 12/09 já tinha nomeado — série (viva e
+  planejada), exercício (rotina), refeição, alimento — em vez de
+  reimplementar a dança de duas fases quatro vezes. `onRemove` só roda
+  quando a transição de `grid-template-rows` termina de verdade, nunca
+  por um `setTimeout` que arriscaria dessincronizar do
+  `--duration-standard` ou do corte pra 120ms do `prefers-reduced-motion`.
+
+Testado no navegador (não só os testes): as três séries do Treino A, uma
+com confirmação de dois toques, colapsaram e sumiram sem deixar buraco;
+a barra de acento migrou de série em série ao confirmar cada uma.
+`npm run verify` (1744 testes — 1 falha de timeout em
+`identity-isolation.test.ts`, não relacionada, não reproduz isolada,
+saturação de máquina) e `npm run build` limpos. Commit `2ce3917`.
+
+---
+
 ## ✅ Catálogo de alimentos importado (580 → 1483) + porção vira só referência — 17/09/2026
 
 Pedro pediu, depois de uma dúvida sobre como classificar a unidade de medida
@@ -229,6 +273,14 @@ Delete/Collapse (testes quebrando, retomar depois)"), não commitado, não
 descartado. Retomar exige primeiro entender por que o jsdom não dispara o
 evento como o componente espera.
 
+**Retomado em 17/09/2026, por uma rota diferente — ver o topo deste
+arquivo.** Não foi o `git stash` acima que voltou: a implementação que
+entrou usa `grid-template-rows` como `transition`/`onTransitionEnd`, não
+`animation`/`onAnimationEnd`, e por isso nunca esbarra no bug do jsdom
+que travou esta tentativa. O stash continua parado no repositório,
+agora superado — candidato a `git stash drop`, verificado com o Pedro
+antes de descartar dado alheio.
+
 ---
 
 ## ✅ Auditoria do Motion System no código + Bottom Sheet ganha slide direcional — 12/09/2026
@@ -266,25 +318,26 @@ retrabalho, não achado novo.
   `standard`. Confirmado no navegador via `getComputedStyle` (não só
   visual): `transitionProperty` inclui `translate`, `0.35s`,
   `data-placement="sheet-bottom"` presente.
-- ⏳ **Delete/Collapse** (um item sendo removido encolhe antes de sumir, em
-  vez de cortar na hora) segue sem implementar — já era candidato
-  registrado em 09/09/2026, e o motivo continua o mesmo: exige adiar a
-  remoção de verdade até a animação terminar, arquitetura de duas fases
-  espalhada por vários pontos de remoção (refeição, exercício, série,
-  alimento), não uma classe CSS a aplicar. Fica pra uma rodada própria.
-
-**Duas coisas fora do meu critério, esperando o Pedro:**
-
-- **Focus Transition** não tem gatilho concreto decidido — o candidato mais
-  óbvio é destacar a próxima série em `session-runner.tsx`, mas isso é
-  decisão de produto, não uma classe a aplicar.
-- **Shimmer vs. Pulse**: o `Skeleton` do app usa `animate-pulse-soft`
-  (opacidade pulsando) pra loading; o brandbook nomeia "Shimmer" como um
-  padrão de gradiente varrendo a superfície, especificamente pra não
-  parecer "spinner genérico", e "Pulse" como um padrão bem menor pra
-  sincronização em segundo plano. Os nomes/mecânicas não batem 1:1 — não é
-  bug, é uma pergunta de nomenclatura/spec que vale uma decisão explícita
-  antes de mexer.
+- ✅ **Delete/Collapse** (um item sendo removido encolhe antes de sumir, em
+  vez de cortar na hora) — fechado em 17/09/2026, ver a entrada do topo
+  deste arquivo. Ficou sem implementar por mais uma rodada depois desta
+  (16/09/2026, ver "Trabalho não commitado encontrado" acima): uma
+  primeira tentativa usou `animation`/`onAnimationEnd`
+  (`--animate-dismiss`, opacidade+escala) e travou porque o jsdom não
+  dispara `animationend` do jeito que esse código esperava — ficou em
+  `git stash`, nunca commitada. A versão que entrou é técnica diferente
+  (`grid-template-rows` como `transition`, `onTransitionEnd`), que não
+  esbarra nesse problema — `fireEvent.transitionEnd` funciona no jsdom
+  sem gambiarra — e também encolhe o espaço de verdade, não só
+  opacidade+escala com um salto de layout escondido no fim.
+- ✅ **Focus Transition** — fechado em 17/09/2026. O gatilho era o
+  candidato óbvio mesmo ("destacar a próxima série em
+  `performed-set-row.tsx`"): Pedro respondeu "Pode implementar os 3" em
+  vez de decidir diferente.
+- ✅ **Shimmer vs. Pulse** — fechado em 17/09/2026. Resolvido como o
+  brandbook já descrevia: `Skeleton` vira Shimmer (token
+  `--animate-shimmer` novo), `SyncingOverlay` fica com Pulse
+  (`--animate-pulse-soft`, único uso que sobra dele).
 
 `npm run verify` e `npm run build` limpos.
 
