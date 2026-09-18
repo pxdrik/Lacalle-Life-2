@@ -167,10 +167,10 @@ const Close: FC = () => {
   const L = useLayout();
   const dim = interpolate(frame, [48, 62], [1, 0.32], { ...clamp, easing: ease });
   const cta = interpolate(frame, [88, 108], [0, 1], { ...clamp, easing: ease });
-  const top = L.portrait ? 520 : 250;
+  const top = L.portrait ? 520 : 140;
   const size = L.portrait ? 64 : 76;
   return (
-    <div style={{ position: "absolute", left: L.textX, top, width: L.textW + 60 }}>
+    <div style={{ position: "absolute", left: L.textX, top, width: L.portrait ? L.textW + 60 : 1500 }}>
       <div style={{ opacity: dim }}>
         <Words text="Monte dietas." start={2} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
         <Words text="Monte treinos." start={12} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
@@ -183,11 +183,11 @@ const Close: FC = () => {
         size={L.portrait ? 104 : 124}
         weight={700}
         color={C.accent}
-        style={{ marginTop: 64 }}
+        style={{ marginTop: L.portrait ? 64 : 48 }}
       />
       <div
         style={{
-          marginTop: 96,
+          marginTop: L.portrait ? 96 : 64,
           opacity: cta,
           transform: `translateY(${(1 - cta) * 26}px)`,
         }}
