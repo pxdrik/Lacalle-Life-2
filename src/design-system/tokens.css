@@ -888,6 +888,19 @@ textarea {
   --animate-rise: rise var(--duration-standard) var(--ease-out) both;
 
   /**
+   * A entrada de página, sozinha — mesmo `rise`, mesma curva, mas no tier
+   * `signature`, não `standard`. Achado real, 17/09/2026: Pedro achou a
+   * transição entre abas (`PageTransition`) rápida demais mesmo depois da
+   * distância dobrar. `signature` é literalmente o tier que a pág. 38
+   * reserva para "troca de módulo" — trocar de Hoje pra Treinos é
+   * exatamente isso, não um card ou modal comuns, então isto não é
+   * inflar um número à toa, é corrigir qual tier já devia estar em uso.
+   * Token à parte de `--animate-rise` de propósito: toast, item novo de
+   * lista e o resto continuam em `standard`, sem ficar mais lentos junto.
+   */
+  --animate-page-enter: rise var(--duration-signature) var(--ease-out) both;
+
+  /**
    * "Pulse" — sincronização em segundo plano, nunca carregamento de
    * conteúdo. A marca de `SyncingOverlay` respira enquanto uma escrita de
    * rede está em voo; um elemento pequeno, não uma tela inteira de

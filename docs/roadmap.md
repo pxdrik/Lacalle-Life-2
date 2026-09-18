@@ -5,6 +5,34 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## 🔧 Transição de página mais lenta + experimento de bounce — 17/09/2026
+
+Duas coisas, uma decidida e uma em aberto.
+
+- ✅ **`PageTransition` ficou mais lenta de verdade** — token novo,
+  `--animate-page-enter` (`rise` no tier `signature`, 450ms, não mais
+  `standard`, 250ms). Não é número inventado: a pág. 38 já reserva
+  `signature` pra "troca de módulo", que é exatamente trocar de Hoje pra
+  Treinos — a transição estava só no tier errado. Isolado de
+  `--animate-rise`, que toast/item novo/etc. continuam usando sem ficar
+  mais lentos junto.
+- 🔧 **Bounce, como experimento isolado, aguardando decisão do Pedro.**
+  Pedro pediu pra ver física de mola na entrada de página "só pra
+  decidir" — minutos depois de confirmar de novo "sem bounce" na entrada
+  anterior. `page-transition.tsx` usa `animate-page-enter-bounce-preview`
+  (bloco "EXPERIMENTO — NÃO ADOTADO" em `globals.css`, fora de `@layer
+  base` de propósito) em vez do token oficial. Pedro pediu commit antes
+  de conseguir testar no celular (`localhost` não abre por wifi; a URL de
+  rede que o `next dev` mostra, tipo `http://<ip-da-máquina>:3000`, abre
+  de qualquer aparelho na mesma rede). **Isto não é a decisão final** —
+  só existe commitado pra não perder o trabalho enquanto ele confere.
+  Duas saídas, dependendo do veredito: gostou → emenda formal no
+  brandbook (mesmo processo do "Number Update"); não gostou → apagar o
+  bloco de `globals.css` e a linha `ENTER_CLASS` experimental, voltando
+  pro `--animate-page-enter` sem mola.
+
+---
+
 ## ✅ Mais cobertura de motion — trocar de aba e selecionar algo — 17/09/2026
 
 Pedro, depois da entrada anterior (mesmo dia): "eu queria deixar ele com
