@@ -2,6 +2,7 @@
 
 import { Pencil, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
@@ -31,6 +32,11 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
   const { requestRemove, collapseProps } = useCollapsibleRemove(() => {
     onRemove(food);
   });
+
+  // Mesma técnica do check de série (`performed-set-row.tsx`): a pop
+  // entra pelo número de toques, não por `isFavorite` — senão todo
+  // alimento já favoritado saltaria de uma vez ao abrir o catálogo.
+  const [favoriteTaps, setFavoriteTaps] = useState(0);
 
   return (
     // Delete/Collapse: only food.isCustom rows ever call requestRemove —
@@ -67,6 +73,7 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
         <button
           type="button"
           onClick={() => {
+            setFavoriteTaps((count) => count + 1);
             onToggleFavorite(food);
           }}
           aria-pressed={food.isFavorite}
@@ -82,8 +89,12 @@ export function FoodRow({ food, onToggleFavorite, onRemove }: Props) {
           )}
         >
           <Star
+            key={favoriteTaps}
             aria-hidden
-            className="size-4"
+            className={cn(
+              "size-4",
+              favoriteTaps > 0 && "animate-pop motion-reduce:animate-none",
+            )}
             fill={food.isFavorite ? "currentColor" : "none"}
           />
         </button>

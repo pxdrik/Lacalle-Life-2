@@ -146,6 +146,13 @@ bottom sheet, que só parece natural com física real — isso é candidato a
 emenda formal da V1.2, pelo mesmo processo desta seção, e não uma decisão de
 implementação isolada numa sprint qualquer.
 
+**Testada de verdade em 17/09/2026 — é exatamente o cenário que este
+parágrafo existe para prevenir.** Pedro pediu animações "tipo o proprio
+iphone", que é física de mola por definição. Perguntado antes de mexer, ele
+confirmou: manter sem bounce, ampliar cobertura em vez disso (ver
+`docs/roadmap.md`, entrada do mesmo dia). A decisão não foi reaberta por
+engano — foi reaberta de propósito, examinada, e mantida.
+
 ### Restrição: só plano gratuito das seis fontes
 
 Decisão do Pedro em 07/09/2026, verificada e registrada na seção 01b do

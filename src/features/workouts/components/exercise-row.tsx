@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Plus, Star } from "lucide-react";
+import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
 
@@ -37,6 +38,13 @@ export function ExerciseRow({
   const equipment = exercise.equipment
     .map((e) => EQUIPMENT_LABELS[e])
     .join(" · ");
+
+  // How many times *this* star has been pressed in this mount — same
+  // technique as the set-complete check (`performed-set-row.tsx`). Keying
+  // the pop off the tap, not off `isFavorite` itself, is what stops every
+  // already-favourited row from popping at once the moment the catalogue
+  // mounts.
+  const [favoriteTaps, setFavoriteTaps] = useState(0);
 
   return (
     <li className="group flex items-center gap-3 px-3 py-2.5 transition-colors duration-100 ease-out hover:bg-muted">
@@ -79,6 +87,7 @@ export function ExerciseRow({
       <button
         type="button"
         onClick={() => {
+          setFavoriteTaps((count) => count + 1);
           onToggleFavorite(exercise);
         }}
         aria-pressed={exercise.isFavorite}
@@ -96,8 +105,12 @@ export function ExerciseRow({
         )}
       >
         <Star
+          key={favoriteTaps}
           aria-hidden
-          className="size-4"
+          className={cn(
+            "size-4",
+            favoriteTaps > 0 && "animate-pop motion-reduce:animate-none",
+          )}
           fill={exercise.isFavorite ? "currentColor" : "none"}
         />
       </button>

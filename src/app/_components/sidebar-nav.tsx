@@ -83,7 +83,12 @@ function Marker() {
   return (
     <span
       aria-hidden
-      className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-accent"
+      // Monta e desmonta a cada troca de rota (só existe enquanto o item
+      // está ativo) — sem animação isso era um corte seco, a barra
+      // simplesmente aparecia. `--animate-side-marker`, a versão vertical
+      // de `--animate-tab-indicator`: mesma ideia, "entra com escala, não
+      // pronta", só que crescendo em altura em vez de largura.
+      className="absolute inset-y-1 left-0 w-[3px] rounded-full bg-accent [animation:var(--animate-side-marker)] motion-reduce:animate-none"
     />
   );
 }

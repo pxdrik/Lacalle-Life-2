@@ -154,7 +154,18 @@ export function BottomNav() {
               aria-current={active ? "page" : undefined}
               className={cn(TAB, active ? "text-accent-text" : IDLE)}
             >
-              <span className={cn(GLYPH, active && "bg-accent-surface")}>
+              {/* `animate-pop` só entra junto com a cor de fundo — a pílula
+                  pousa na aba nova em vez de só trocar de cor por baixo do
+                  ícone parado. Mesma técnica sem overshoot do check de
+                  série (`--animate-pop`), disparada pela própria classe
+                  chegando: o ícone que já estava ativo não replaya a cada
+                  re-render, só o que acabou de ficar ativo. */}
+              <span
+                className={cn(
+                  GLYPH,
+                  active && "animate-pop bg-accent-surface motion-reduce:animate-none",
+                )}
+              >
                 <Icon aria-hidden className="size-5" />
               </span>
               {label}
@@ -171,7 +182,12 @@ export function BottomNav() {
           aria-expanded={more}
           className={cn(TAB, inRest ? "text-accent-text" : IDLE)}
         >
-          <span className={cn(GLYPH, inRest && "bg-accent-surface")}>
+          <span
+            className={cn(
+              GLYPH,
+              inRest && "animate-pop bg-accent-surface motion-reduce:animate-none",
+            )}
+          >
             <Menu aria-hidden className="size-5" />
           </span>
           Mais

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Card, cardSurface } from "@/design-system/components/card";
+import { Tabs } from "@/design-system/components/tabs";
 
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
@@ -85,38 +86,23 @@ export function EvolutionScreen() {
 
   return (
     <div className="space-y-8">
-      <div
-        role="group"
-        aria-label="Métrica do gráfico"
-        className="inline-flex rounded-md border border-line p-0.5 text-xs"
-      >
-        <button
-          type="button"
-          aria-pressed={!isDuration}
-          onClick={() => {
-            setChartMetric("volume");
-          }}
-          className={cn(
-            "rounded-sm px-3 py-1.5 font-medium transition-colors",
-            !isDuration ? "bg-muted text-ink" : "text-ink-subtle",
-          )}
-        >
-          Volume
-        </button>
-        <button
-          type="button"
-          aria-pressed={isDuration}
-          onClick={() => {
-            setChartMetric("duration");
-          }}
-          className={cn(
-            "rounded-sm px-3 py-1.5 font-medium transition-colors",
-            isDuration ? "bg-muted text-ink" : "text-ink-subtle",
-          )}
-        >
-          Duração
-        </button>
-      </div>
+      {/* `Tabs` de verdade, não dois botões com `aria-pressed` — achado
+          real, 17/09/2026: o componente de aba do design system, com o
+          indicador animado e a semântica de `role="tab"`, existia e nunca
+          tinha sido usado em lugar nenhum do app. Esta troca era o caso
+          mais direto: duas opções, mutuamente exclusivas, exatamente o
+          que `Tabs` já resolve. */}
+      <Tabs
+        idPrefix="evolucao-metrica"
+        items={[
+          { id: "volume", label: "Volume" },
+          { id: "duration", label: "Duração" },
+        ]}
+        value={chartMetric}
+        onChange={(id) => {
+          setChartMetric(id === "duration" ? "duration" : "volume");
+        }}
+      />
 
       <section>
         <h2 className="text-sm font-medium text-ink">

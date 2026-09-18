@@ -985,6 +985,17 @@ textarea {
    * já tinha só em CSS solto (`LacalleFinance.jsx`) — seção 43, "Tabs".
    */
   --animate-tab-indicator: tab-indicator var(--duration-standard) var(--ease-out) both;
+
+  /**
+   * O mesmo "entra com escala, não pronta" do indicador de aba acima, só que
+   * na vertical — a barra de 3px que marca o item ativo da navegação
+   * principal (`sidebar-nav.tsx`) cresce em altura, não em largura. Achado
+   * real, 17/09/2026: essa barra só montava e desmontava sem transição
+   * nenhuma, um corte seco a cada troca de rota — `--animate-tab-indicator`
+   * não serve aqui direto porque escala no eixo errado para uma marca
+   * vertical.
+   */
+  --animate-side-marker: side-marker var(--duration-standard) var(--ease-out) both;
 }
 
 @keyframes rise {
@@ -1067,6 +1078,17 @@ textarea {
   from {
     opacity: 0;
     scale: 0.2 1;
+  }
+  to {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+@keyframes side-marker {
+  from {
+    opacity: 0;
+    scale: 1 0.2;
   }
   to {
     opacity: 1;

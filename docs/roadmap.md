@@ -5,6 +5,63 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Mais cobertura de motion — trocar de aba e selecionar algo — 17/09/2026
+
+Pedro, depois da entrada anterior (mesmo dia): "eu queria deixar ele com
+mais animações, tipo as animações que o proprio iphone tem, quero que
+tudo tenha animação... e que seja bem visivel". "Tipo o iPhone"
+especificamente significa física de mola/bounce — e isso é a decisão que
+a pesquisa de Motion System v1 (07/09/2026, `docs/brandbook.md`) já tomou
+e registrou por escrito **para não ser reaberta por engano**: "nenhuma
+física de mola entra como token", justamente comparando contra o
+60fps.design, que é "quase todo spring physics nativo" tipo iOS. Perguntei
+antes de mexer; Pedro escolheu manter sem bounce e só ampliar cobertura.
+
+**Achado real no caminho:** o design system já tinha um componente `Tabs`
+completo — `role="tablist"`/`"tab"`, `aria-selected`, roving tabindex,
+indicador animado — e **nunca tinha sido importado em lugar nenhum do
+app**. Todo toggle de aba real (Evolução) e todo item de navegação
+(sidebar, barra inferior) foi reimplementado à mão, sem a animação que já
+existia pronta.
+
+**Trocar de aba:**
+- ✅ **Evolução (Volume/Duração)**: os dois `<button aria-pressed>` viraram
+  o `Tabs` de verdade — ganha o indicador animado de graça, e a semântica
+  de aba que faltava.
+- ✅ **Barra lateral (`sidebar-nav.tsx`)**: a marca de 3px do item ativo só
+  montava/desmontava sem transição, um corte seco a cada troca de rota.
+  Token novo, `--animate-side-marker` — a versão vertical (cresce em
+  altura) de `--animate-tab-indicator`, que já existia mas escala no eixo
+  errado para uma marca vertical.
+- ✅ **Barra inferior (`bottom-nav.tsx`)**: a pílula do ícone ativo só
+  trocava de cor; ganhou `--animate-pop` (a mesma queda de escala sem
+  overshoot do check de série) pousando na aba nova, nas quatro abas e no
+  botão "Mais".
+
+**Selecionar algo:**
+- ✅ **Favoritar** (`exercise-row.tsx`, `food-row.tsx`): a estrela também
+  só trocava de cor/preenchimento. Mesma técnica de `--animate-pop` do
+  check de série, incluindo o mesmo cuidado — presa ao *toque*
+  (contador de cliques), nunca ao dado (`isFavorite`), para reabrir um
+  catálogo com itens já favoritados não fizer todas as estrelas saltarem
+  de uma vez.
+
+**Não é "tudo tudo tudo" ainda, de propósito — bounded e testado antes de
+seguir.** Candidatos óbvios para uma próxima rodada: o seletor de fase do
+exercício (`exercise-photos.tsx`, já tem cross-fade de foto, falta o
+mesmo cuidado nos botões de fase), os filtros multi-seleção de
+alimento/exercício (chips, não abas — não cabem no `Tabs`, mas cabe uma
+seleção mais visível), o toggle de tema e o de densidade.
+
+Três testes novos onde não havia nenhum (`evolution-screen.test.tsx`,
+que também não existia; casos novos em `exercise-row.test.tsx`,
+`food-row.test.tsx`, `bottom-nav.test.tsx`). `npm run verify` (1756
+testes) e `npm run build` limpos; verificado ao vivo no navegador que a
+troca Volume/Duração funciona com os dados reais e a barra da sidebar
+renderiza certo nos dois estados.
+
+---
+
 ## ✅ Amplitude/duração maiores em três primitivas de motion — 17/09/2026
 
 Pedro testou de novo com "reduzir movimento" **confirmadamente desligado**

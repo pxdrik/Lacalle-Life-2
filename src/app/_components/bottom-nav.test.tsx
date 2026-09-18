@@ -49,6 +49,30 @@ describe("which tab reads as current", () => {
   });
 });
 
+describe("a pílula da aba ativa", () => {
+  it("pousa com animate-pop, não só troca de cor", () => {
+    at("/diario");
+
+    const active = screen
+      .getAllByRole("link")
+      .find((link) => link.getAttribute("aria-current") === "page")!;
+
+    expect(active.querySelector("span")).toHaveClass("animate-pop");
+  });
+
+  it("não pousa nas abas que não estão ativas", () => {
+    at("/diario");
+
+    const inactive = screen
+      .getAllByRole("link")
+      .filter((link) => link.getAttribute("aria-current") !== "page");
+
+    for (const link of inactive) {
+      expect(link.querySelector("span")).not.toHaveClass("animate-pop");
+    }
+  });
+});
+
 describe("the Mais sheet", () => {
   it("keeps the setup screens one tap away rather than dropping them", async () => {
     at("/hoje");

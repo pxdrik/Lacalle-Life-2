@@ -88,3 +88,42 @@ describe("the exercise name", () => {
     ).toHaveClass("touch-44");
   });
 });
+
+describe("favouriting", () => {
+  const star = () =>
+    screen
+      .getByRole("button", { name: /Favoritar|dos favoritos/ })
+      .querySelector("svg");
+
+  it("does not pop for a row that arrives already favourited", () => {
+    render(
+      <ul>
+        <ExerciseRow
+          exercise={exercise({ isFavorite: true })}
+          onToggleFavorite={vi.fn()}
+          onOpenDetail={vi.fn()}
+        />
+      </ul>,
+    );
+
+    expect(star()).not.toHaveClass("animate-pop");
+  });
+
+  it("pops the moment the star is tapped", async () => {
+    render(
+      <ul>
+        <ExerciseRow
+          exercise={exercise()}
+          onToggleFavorite={vi.fn()}
+          onOpenDetail={vi.fn()}
+        />
+      </ul>,
+    );
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Favoritar Supino Reto com Barra" }),
+    );
+
+    expect(star()).toHaveClass("animate-pop");
+  });
+});

@@ -64,3 +64,26 @@ describe("a catalogue food, not the user's own", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+describe("favouriting", () => {
+  const star = () =>
+    screen
+      .getByRole("button", { name: /Favoritar|dos favoritos/ })
+      .querySelector("svg");
+
+  it("does not pop for a row that arrives already favourited", () => {
+    mount({ isFavorite: true });
+
+    expect(star()).not.toHaveClass("animate-pop");
+  });
+
+  it("pops the moment the star is tapped", async () => {
+    mount();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Favoritar Abacate" }),
+    );
+
+    expect(star()).toHaveClass("animate-pop");
+  });
+});
