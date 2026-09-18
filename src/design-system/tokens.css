@@ -880,12 +880,20 @@ textarea {
    * acima: um papel que os quatro tiers oficiais não nomeiam ganha o
    * próprio número, em vez de forçar num deles. `--duration-signature`
    * (450ms) é o tier oficial mais perto de "troca de módulo", mas Pedro
-   * pediu mais devagar ainda depois de ver a entrada de página com bounce
-   * ao vivo (17/09/2026) — subir isto inflaria também o LaCalle Reveal da
+   * pediu mais devagar depois de ver a entrada de página com bounce ao
+   * vivo (17/09/2026) — subir isto inflaria também o LaCalle Reveal da
    * Landing, que já usa `signature` e não pediu mudança nenhuma. Usado só
    * por `--animate-page-enter`.
+   *
+   * **900ms, não mais 600** — segundo pedido de "mais devagar" no mesmo
+   * dia, depois de já ter subido uma vez de 450. Acima de `--duration-hero`
+   * (800ms, splash/onboarding/campanhas) de propósito: é o mesmo motivo
+   * de ter um tier dedicado em vez de reusar `hero` — este papel
+   * (bounce numa troca de aba comum, repetida o dia inteiro) não é
+   * splash nem campanha, e emprestar o número de `hero` prenderia os
+   * dois a mudar juntos por coincidência, não por serem o mesmo caso.
    */
-  --duration-page: 600ms;
+  --duration-page: 900ms;
 
   /**
    * A origem do LaCalle Reveal — Sprint 8, Fase 3.6.

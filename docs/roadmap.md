@@ -5,6 +5,38 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Página ainda mais lenta + aviso de sincronizar sai da tela — 17/09/2026
+
+Dois pedidos do Pedro, sem relação entre si.
+
+- ✅ **`--duration-page` subiu de 600ms para 900ms** — segundo "mais
+  devagar" no mesmo dia sobre a mesma transição (entrada 17/09 acima).
+  De propósito acima de `--duration-hero` (800ms): emprestar o número do
+  tier de splash/onboarding prenderia os dois a mudar juntos por
+  coincidência, não por serem o mesmo papel.
+- ✅ **"Dados salvos neste dispositivo. Entre na sua conta para
+  sincronizar."** saiu das cinco telas onde aparecia (Treinos — duas
+  vezes, uma já resolvida em 02/09 —, Dietas, Diário, Evolução). Antes de
+  mexer, perguntei o escopo: só o aviso, ou a funcionalidade de
+  conta/sync inteira (login, Supabase, botão de sincronizar)? Pedro
+  confirmou só o aviso — a funcionalidade continua existindo
+  (`/entrar`, `/cadastro`, `runRoutineSync` e companhia), só parou de
+  ser anunciada pra quem está sem conta. Sem sessão, os cinco
+  componentes de status agora retornam `null` em vez do parágrafo.
+  Página de aterrissagem (`hero.tsx`, `account-section.tsx`) não foi
+  tocada — é o único lugar cujo propósito inteiro é explicar a conta
+  pra quem ainda não tem uma, diferente do aviso repetido dentro do
+  app.
+
+Teste reescrito em `food-log-sync-status.test.tsx` (as duas asserções que
+checavam o texto agora checam ausência total, `container` vazio);
+`session-sync-status.test.tsx` não precisou mudar, já retornava `null`
+antes por outro motivo (evitar duplicar a mensagem que `RoutineSyncStatus`
+mostrava — motivo que também desapareceu, comentário atualizado).
+`npm run verify` e `npm run build` limpos.
+
+---
+
 ## ✅ Bounce na transição de página — exceção de marca, decidida e mais lenta ainda — 17/09/2026
 
 Fecha a entrada anterior (mesmo dia, "Transição de página mais lenta +
@@ -21,10 +53,11 @@ mais devagar ainda.
   nenhum outro `--animate-*` ganha overshoot por associação. Bloco
   "EXPERIMENTO — NÃO ADOTADO" saiu de `globals.css`; `page-transition.tsx`
   perdeu a flag `ENTER_CLASS` e usa `animate-page-enter` direto.
-- ✅ **Mais devagar ainda** — `--duration-page`, um sétimo tier (600ms,
-  era 450ms/`signature`). Tier próprio, não `signature` inflado: subir
-  `signature` em si arrastaria o LaCalle Reveal da Landing, que usa o
-  mesmo tier e não pediu nada disto.
+- ✅ **Mais devagar ainda** — `--duration-page`, um sétimo tier (600ms
+  nesta rodada, era 450ms/`signature`; subiu de novo para 900ms na
+  mesma tarde, ver entrada acima). Tier próprio, não `signature`
+  inflado: subir `signature` em si arrastaria o LaCalle Reveal da
+  Landing, que usa o mesmo tier e não pediu nada disto.
 
 `npm run verify` e `npm run build` limpos.
 

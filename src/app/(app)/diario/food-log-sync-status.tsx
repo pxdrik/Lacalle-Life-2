@@ -196,15 +196,12 @@ export function FoodLogSyncStatus({ day }: { readonly day: string }) {
     );
   }
 
-  if (auth === "anonymous") {
-    return (
-      <div className="mt-4 flex items-center gap-2">
-        <p className="text-xs text-ink-subtle">
-          Dados salvos neste dispositivo. Entre na sua conta para sincronizar.
-        </p>
-      </div>
-    );
-  }
+  // Sem sessão, não há nada pra este componente mostrar — pedido do
+  // Pedro (17/09/2026): o aviso "Dados salvos neste dispositivo..." saiu
+  // de toda tela, repetido em Treinos/Dietas/Diário/Evolução. O login e a
+  // sincronização continuam existindo (`/entrar`, `runFoodLogSync`), só
+  // pararam de ser anunciados aqui.
+  if (auth === "anonymous") return null;
 
   return (
     <div className="mt-4 flex items-center gap-2">

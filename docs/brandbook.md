@@ -189,8 +189,9 @@ overshoot por associação. Um pedido futuro de bounce em outro lugar
 não "já tem mola em algum canto, então por que não aqui".
 
 **Tier próprio, não `--duration-signature` inflado.** `--duration-page`
-(600ms) existe para não arrastar o LaCalle Reveal da Landing, que já usa
-`signature` e não pediu nada disto — ver a nota em `tokens.css`.
+(900ms, depois de um segundo pedido de "mais devagar" no mesmo dia) existe
+para não arrastar o LaCalle Reveal da Landing, que já usa `signature` e não
+pediu nada disto — ver a nota em `tokens.css`.
 
 ### Restrição: só plano gratuito das seis fontes
 

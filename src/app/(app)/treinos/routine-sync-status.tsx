@@ -148,13 +148,12 @@ export function RoutineSyncStatus() {
     );
   }
 
-  if (auth === "anonymous") {
-    return (
-      <p className="text-xs text-ink-subtle">
-        Dados salvos neste dispositivo. Entre na sua conta para sincronizar.
-      </p>
-    );
-  }
+  // Sem sessão, não há nada pra este componente mostrar — pedido do
+  // Pedro (17/09/2026): o aviso "Dados salvos neste dispositivo..." saiu
+  // de toda tela, repetido em Treinos/Dietas/Diário/Evolução. O login e a
+  // sincronização continuam existindo (`/entrar`, `runRoutineSync`), só
+  // pararam de ser anunciados aqui.
+  if (auth === "anonymous") return null;
 
   return (
     <div className="flex items-center gap-2">

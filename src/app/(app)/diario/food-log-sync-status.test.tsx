@@ -76,23 +76,26 @@ describe("FoodLogSyncStatus", () => {
    * já recusa em silêncio (`pushFoodLog`/`pullFoodLog` voltam
    * "not-authenticated"), então o clique morto não tinha explicação nenhuma
    * na tela.
+   *
+   * **17/09/2026, pedido do Pedro:** o aviso "Dados salvos neste
+   * dispositivo..." que substituía o botão saiu de vez — sem sessão, o
+   * componente agora não mostra nada, em vez de anunciar sincronização.
    */
-  it("replaces the sync button with a discrete message when there is no session", async () => {
+  it("shows nothing, not the sync button, when there is no session", async () => {
     isSupabaseConfigured.mockReturnValue(true);
     getUser.mockResolvedValue(null);
-    render(<FoodLogSyncStatus day="2026-08-26" />);
+    const { container } = render(<FoodLogSyncStatus day="2026-08-26" />);
 
-    expect(
-      await screen.findByText(
-        "Dados salvos neste dispositivo. Entre na sua conta para sincronizar.",
-      ),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getUser).toHaveBeenCalled();
+    });
+    expect(container).toBeEmptyDOMElement();
     expect(
       screen.queryByRole("button", { name: "Sincronizar" }),
     ).not.toBeInTheDocument();
   });
 
-  it("shows the sync button, not the message, once a session exists", async () => {
+  it("shows the sync button once a session exists", async () => {
     isSupabaseConfigured.mockReturnValue(true);
     getUser.mockResolvedValue({ id: "u1", email: "a@b.com" });
     render(<FoodLogSyncStatus day="2026-08-26" />);
@@ -100,20 +103,13 @@ describe("FoodLogSyncStatus", () => {
     expect(
       await screen.findByRole("button", { name: "Sincronizar" }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/Entre na sua conta para sincronizar/),
-    ).not.toBeInTheDocument();
   });
 
-  it("shows the same discrete message when Supabase is not configured at all", async () => {
+  it("shows nothing when Supabase is not configured at all", () => {
     isSupabaseConfigured.mockReturnValue(false);
-    render(<FoodLogSyncStatus day="2026-08-26" />);
+    const { container } = render(<FoodLogSyncStatus day="2026-08-26" />);
 
-    expect(
-      await screen.findByText(
-        "Dados salvos neste dispositivo. Entre na sua conta para sincronizar.",
-      ),
-    ).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
     expect(getUser).not.toHaveBeenCalled();
   });
 });
