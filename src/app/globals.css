@@ -143,21 +143,25 @@
   }
 
   /* Feedback de toque universal — pág. 25 ("o active reduz a escala"),
-     generalizado pra todo `<button>` da página, não só quem já tinha a
-     classe escrita à mão (`Button`, o check de série). Pedido do Pedro,
-     17/09/2026, ver a nota em `--press-scale` (`tokens.css`).
+     generalizado pra todo `<button>` e `<a>` da página, não só quem já
+     tinha a classe escrita à mão (`Button`, o check de série). Pedido do
+     Pedro, 17/09/2026, ampliado a todo link no dia seguinte (achado real:
+     abrir um treino em `routine-list.tsx` é um `<Link>` sem nenhum
+     feedback) — "tudo que seja clicável, tudo mesmo". Ver a nota em
+     `--press-scale` (`tokens.css`).
 
-     `:not(:disabled)` cumpre duas funções: exclui o botão desabilitado, que
-     não deveria reagir a toque nenhum, e dá especificidade suficiente pra
-     vencer qualquer `transition-colors`/`transition-[...]` que o próprio
-     componente já declare (uma classe sozinha tem menos peso que elemento +
-     pseudo-classe) — sem isto, a lista de propriedades de quem chegasse
-     depois na cascata apagaria `scale` dela, e o encolhimento saltaria sem
-     suavizar em vez de animar.
+     `html a` em vez de só `a`: um seletor de elemento sozinho (0,0,1) perde
+     de qualquer `transition-colors` do Tailwind (0,1,0) na cascata — um
+     segundo elemento empata a especificidade. `button` já ganha esse
+     empate de `:not(:disabled)`, que também exclui o botão desabilitado
+     (que não deveria reagir a toque nenhum). Sem isto, a lista de
+     propriedades de quem chegasse depois na cascata apagaria `scale`
+     dela, e o encolhimento saltaria sem suavizar em vez de animar.
 
      A lista de propriedades é a de `transition-colors` do Tailwind mais
-     `scale` — superconjunto de propósito, pra nenhum botão que já
+     `scale` — superconjunto de propósito, pra nenhum botão ou link que já
      transicionava cor perder isso por esta regra ganhar a cascata. */
+  html a,
   button:not(:disabled) {
     transition-property:
       background-color, border-color, color, text-decoration-color, fill,
@@ -166,6 +170,7 @@
     transition-timing-function: var(--ease-out);
   }
 
+  html a:active,
   button:not(:disabled):active {
     scale: var(--press-scale);
   }

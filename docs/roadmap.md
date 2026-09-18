@@ -5,6 +5,36 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Encolher no toque chega a todo link também — 18/09/2026
+
+Pedro testou o encolhimento universal do dia anterior e achou um buraco
+real: abrir um treino (`routine-list.tsx`) não encolhia nada. O motivo é
+que aquele card inteiro é um `<Link>`, e a regra global de `globals.css`
+só mirava `<button>` — decisão explícita da entrada anterior, que excluía
+`<a>` de propósito pra não pegar link corrido dentro de parágrafo. Pedro
+pediu de novo, sem deixar margem: **"tudo que seja clicável, tudo mesmo"**.
+
+- ✅ `globals.css`: a regra que já encolhia todo `<button>` agora também
+  encolhe todo `<a>` da página — mesmo `--press-scale`, mesma transição.
+  Inclui o link corrido que a versão anterior excluía de propósito; não
+  excluir mais é escolha explícita desta vez, não descuido.
+- ✅ **`html a`, não só `a`.** Um seletor de elemento sozinho perde de
+  especificidade pra qualquer `transition-colors` que o próprio link já
+  declare — `button` ganhava esse empate de graça com `:not(:disabled)`,
+  que não faz sentido num link (não existe `<a disabled>`), então `html a`
+  faz o mesmo trabalho com um segundo elemento em vez de um pseudo-seletor
+  emprestado.
+- ✅ Itens de navegação (`sidebar-nav.tsx`, `bottom-nav.tsx`) já tinham
+  `--animate-side-marker`/`--animate-pop` como feedback de seleção — o
+  encolhimento some por cima disso, não substitui nada.
+
+Testado ao vivo: abrir "Treino A" em `/treinos` continua navegando
+certinho pra `/treinos/[id]` depois da mudança. `npm run verify` e
+`npm run build` limpos, 1756/1756 testes (o flake de
+`identity-isolation.test.ts` não repetiu desta vez).
+
+---
+
 ## ✅ Encolher no toque virou universal, não só de quem já tinha a classe — 17/09/2026
 
 Pedro pediu uma animação de clique nas "pílulas" (os campos de peso/reps/
