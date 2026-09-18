@@ -277,36 +277,3 @@
     }
   }
 }
-
-/* ==========================================================================
- * EXPERIMENTO — NÃO ADOTADO, fora de `@layer base` de propósito.
- *
- * Pedro pediu pra ver bounce na entrada de página, só pra decidir — minutos
- * depois de confirmar de novo "sem física de mola"
- * (`docs/brandbook.md`, "A decisão: nenhuma física de mola entra como
- * token"). Isolado do token real (`--animate-page-enter`, em
- * `tokens.css`, que o resto do app continua usando) pra não vazar bounce
- * pra toast, item de lista ou qualquer outro consumidor de `rise`.
- *
- * `cubic-bezier(0.34, 1.56, 0.64, 1)` é uma curva com overshoot — nunca uma
- * das duas curvas oficiais (`--ease-out`/`--ease-in`), de propósito: é
- * exatamente o que a pág. 36 proíbe, aqui só pra ser visto.
- *
- * Apagar este bloco inteiro e a linha equivalente em `page-transition.tsx`
- * se a resposta for "não gostei" ou "mantém sem mola".
- * ========================================================================== */
-@keyframes page-enter-bounce-preview {
-  from {
-    opacity: 0;
-    translate: 0 0.75rem;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
-  }
-}
-
-.animate-page-enter-bounce-preview {
-  animation: page-enter-bounce-preview var(--duration-signature)
-    cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}

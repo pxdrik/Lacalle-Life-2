@@ -5,31 +5,28 @@ depender da memória de nenhuma conversa.
 
 ---
 
-## 🔧 Transição de página mais lenta + experimento de bounce — 17/09/2026
+## ✅ Bounce na transição de página — exceção de marca, decidida e mais lenta ainda — 17/09/2026
 
-Duas coisas, uma decidida e uma em aberto.
+Fecha a entrada anterior (mesmo dia, "Transição de página mais lenta +
+experimento de bounce"), que ficou em aberto até o Pedro conseguir
+testar. Testou pela URL de rede do `next dev` (`localhost` não abre por
+wifi) e respondeu: **"gostei do bounce, pode deixar"** — pedindo também
+mais devagar ainda.
 
-- ✅ **`PageTransition` ficou mais lenta de verdade** — token novo,
-  `--animate-page-enter` (`rise` no tier `signature`, 450ms, não mais
-  `standard`, 250ms). Não é número inventado: a pág. 38 já reserva
-  `signature` pra "troca de módulo", que é exatamente trocar de Hoje pra
-  Treinos — a transição estava só no tier errado. Isolado de
-  `--animate-rise`, que toast/item novo/etc. continuam usando sem ficar
-  mais lentos junto.
-- 🔧 **Bounce, como experimento isolado, aguardando decisão do Pedro.**
-  Pedro pediu pra ver física de mola na entrada de página "só pra
-  decidir" — minutos depois de confirmar de novo "sem bounce" na entrada
-  anterior. `page-transition.tsx` usa `animate-page-enter-bounce-preview`
-  (bloco "EXPERIMENTO — NÃO ADOTADO" em `globals.css`, fora de `@layer
-  base` de propósito) em vez do token oficial. Pedro pediu commit antes
-  de conseguir testar no celular (`localhost` não abre por wifi; a URL de
-  rede que o `next dev` mostra, tipo `http://<ip-da-máquina>:3000`, abre
-  de qualquer aparelho na mesma rede). **Isto não é a decisão final** —
-  só existe commitado pra não perder o trabalho enquanto ele confere.
-  Duas saídas, dependendo do veredito: gostou → emenda formal no
-  brandbook (mesmo processo do "Number Update"); não gostou → apagar o
-  bloco de `globals.css` e a linha `ENTER_CLASS` experimental, voltando
-  pro `--animate-page-enter` sem mola.
+- ✅ **Bounce virou exceção de marca de verdade, não mais experimento.**
+  `--ease-bounce` (`cubic-bezier(0.34,1.56,0.64,1)`), token novo,
+  registrado em `docs/brandbook.md` ("Bounce na transição de página")
+  com o mesmo cuidado do "Number Update": por que a decisão de "sem mola"
+  não bloqueia este caso, e o que isto **não** abre precedente para —
+  nenhum outro `--animate-*` ganha overshoot por associação. Bloco
+  "EXPERIMENTO — NÃO ADOTADO" saiu de `globals.css`; `page-transition.tsx`
+  perdeu a flag `ENTER_CLASS` e usa `animate-page-enter` direto.
+- ✅ **Mais devagar ainda** — `--duration-page`, um sétimo tier (600ms,
+  era 450ms/`signature`). Tier próprio, não `signature` inflado: subir
+  `signature` em si arrastaria o LaCalle Reveal da Landing, que usa o
+  mesmo tier e não pediu nada disto.
+
+`npm run verify` e `npm run build` limpos.
 
 ---
 

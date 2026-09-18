@@ -799,7 +799,7 @@ textarea {
   --radius-2xl: var(--corner-2xl);
 
   /**
-   * As duas curvas oficiais — pág. 38. Não existe terceira.
+   * As duas curvas oficiais — pág. 38.
    *
    * `ease-out` é a entrada de qualquer elemento: sai rápido e desacelera com
    * suavidade. `ease-in` é a saída e a navegação de retorno. Linear é proibido,
@@ -813,10 +813,28 @@ textarea {
    * Mapeadas sobre o namespace `--ease-*` do próprio Tailwind de propósito:
    * cada `ease-out` já escrito pelo app passa a usar a curva da marca sem nada
    * a migrar.
+   *
+   * **Uma terceira entrou, `--ease-bounce`, abaixo — não aqui.** Ela não é
+   * oficial: é a segunda exceção pontual que este arquivo registra (a
+   * primeira é `--animate-drain`, linear). Fica separada das duas de cima
+   * de propósito, para "as duas curvas oficiais" continuar significando
+   * as duas curvas oficiais.
    */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.64, 0, 0.78, 0);
   --ease-in-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /**
+   * Exceção pontual, não a terceira curva oficial — ver a nota em
+   * `--ease-out` acima. Decidida por Pedro em 17/09/2026, depois de ver um
+   * protótipo ao vivo (registrada em `docs/brandbook.md`, "Bounce na
+   * transição de página"): física de mola *só* na entrada de página
+   * (`--animate-page-enter`), em lugar nenhum mais. Um leve overshoot
+   * físico, não uma curva desenhada — exatamente o que a pesquisa de
+   * Motion System v1 tinha decidido não adotar, revista agora por
+   * decisão explícita, não por engano.
+   */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /**
    * Os quatro tiers de duração da pág. 38.
@@ -858,6 +876,18 @@ textarea {
   --duration-sheet: 350ms;
 
   /**
+   * Um sétimo tier, mesma lógica de `--duration-data`/`--duration-sheet`
+   * acima: um papel que os quatro tiers oficiais não nomeiam ganha o
+   * próprio número, em vez de forçar num deles. `--duration-signature`
+   * (450ms) é o tier oficial mais perto de "troca de módulo", mas Pedro
+   * pediu mais devagar ainda depois de ver a entrada de página com bounce
+   * ao vivo (17/09/2026) — subir isto inflaria também o LaCalle Reveal da
+   * Landing, que já usa `signature` e não pediu mudança nenhuma. Usado só
+   * por `--animate-page-enter`.
+   */
+  --duration-page: 600ms;
+
+  /**
    * A origem do LaCalle Reveal — Sprint 8, Fase 3.6.
    *
    * `50% 50%` é o padrão declarado aqui, não em cada call site: a máscara
@@ -888,17 +918,25 @@ textarea {
   --animate-rise: rise var(--duration-standard) var(--ease-out) both;
 
   /**
-   * A entrada de página, sozinha — mesmo `rise`, mesma curva, mas no tier
-   * `signature`, não `standard`. Achado real, 17/09/2026: Pedro achou a
-   * transição entre abas (`PageTransition`) rápida demais mesmo depois da
-   * distância dobrar. `signature` é literalmente o tier que a pág. 38
-   * reserva para "troca de módulo" — trocar de Hoje pra Treinos é
-   * exatamente isso, não um card ou modal comuns, então isto não é
-   * inflar um número à toa, é corrigir qual tier já devia estar em uso.
-   * Token à parte de `--animate-rise` de propósito: toast, item novo de
-   * lista e o resto continuam em `standard`, sem ficar mais lentos junto.
+   * A entrada de página, sozinha — mesmo `rise`, mas com tier e curva
+   * próprios, os dois decididos ao vivo com o Pedro em 17/09/2026.
+   *
+   * **Tier `--duration-page` (600ms), não `signature` (450ms).**
+   * `signature` é o tier que a pág. 38 reserva para "troca de módulo" —
+   * trocar de Hoje pra Treinos é exatamente isso — mas mesmo nesse tier a
+   * transição ainda leu como rápida demais. Subir `signature` em si
+   * teria arrastado o LaCalle Reveal da Landing junto, que usa o mesmo
+   * tier e não pediu mudança nenhuma — daí o sétimo tier, dedicado.
+   *
+   * **`--ease-bounce`, não `--ease-out`.** Exceção pontual registrada em
+   * `docs/brandbook.md` ("Bounce na transição de página") — decisão
+   * consciente do Pedro depois de ver um protótipo ao vivo, não a mola
+   * que a pesquisa de Motion System v1 já tinha rejeitado por padrão.
+   * Escopo apertado de propósito: só esta transição. `--animate-rise`
+   * continua com `--ease-out`, sem física de mola nenhuma — toast, item
+   * novo de lista e o resto do app não ganham bounce de graça.
    */
-  --animate-page-enter: rise var(--duration-signature) var(--ease-out) both;
+  --animate-page-enter: rise var(--duration-page) var(--ease-bounce) both;
 
   /**
    * "Pulse" — sincronização em segundo plano, nunca carregamento de

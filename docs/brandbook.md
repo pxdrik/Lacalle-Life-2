@@ -147,11 +147,50 @@ emenda formal da V1.2, pelo mesmo processo desta seção, e não uma decisão de
 implementação isolada numa sprint qualquer.
 
 **Testada de verdade em 17/09/2026 — é exatamente o cenário que este
-parágrafo existe para prevenir.** Pedro pediu animações "tipo o proprio
-iphone", que é física de mola por definição. Perguntado antes de mexer, ele
-confirmou: manter sem bounce, ampliar cobertura em vez disso (ver
-`docs/roadmap.md`, entrada do mesmo dia). A decisão não foi reaberta por
-engano — foi reaberta de propósito, examinada, e mantida.
+parágrafo existe para prevenir, e o processo funcionou.** Pedro pediu
+animações "tipo o proprio iphone" (física de mola) em tudo. Perguntado
+antes de mexer, a primeira resposta foi manter sem bounce e só ampliar
+cobertura (ver `docs/roadmap.md`, entrada do mesmo dia). Mais tarde,
+depois de pedir e ver um protótipo isolado da transição de página com
+bounce, a decisão mudou — não por engano, de novo, mas pelo mesmo
+processo: viu ao vivo, decidiu conscientemente. **O resultado não é
+"reabrir a mola pra tudo"**, é a exceção pontual registrada logo abaixo,
+com o mesmo escopo apertado que o parágrafo acima sempre prometeu ter.
+
+### Bounce na transição de página — exceção pontual, decidida pelo Pedro em 17/09/2026
+
+Depois de testar a entrada de página mais lenta (mesmo dia, seção
+anterior), Pedro pediu pra ver bounce "só pra decidir" — um protótipo
+isolado, marcado como não adotado, só na transição de página
+(`--animate-page-enter`), sem tocar `--animate-rise` nem nenhum outro
+consumidor. Testou ao vivo (pelo endereço de rede do `next dev`, já que
+`localhost` não abre por wifi) e respondeu: **"gostei do bounce, pode
+deixar"**, pedindo também mais devagar ainda.
+
+**Por que a decisão de "nenhuma física de mola" acima não bloqueia isto:**
+
+- A decisão original é sobre **token compartilhado** — uma curva de mola
+  entrando no vocabulário geral do app, disponível (e portanto tentadora)
+  em qualquer lugar. Aqui é o oposto: uma curva nova, `--ease-bounce`,
+  usada em exatamente um consumidor, `--animate-page-enter`. Todo o resto
+  do app — toast, item novo de lista, check de série, barra de foco —
+  continua em `--ease-out`/`--ease-in`, sem mola nenhuma.
+- **Trocar de módulo é o caso que a própria pesquisa de 07/09 citou como
+  "se um caso concreto exigir".** Não era o caso previsto (arrastar bottom
+  sheet), mas é do mesmo tipo: uma transição de identidade, rara o
+  bastante (uma vez por troca de aba, não dezenas de vezes por minuto)
+  para um leve overshoot físico não cansar.
+- **Visto ao vivo antes de decidir**, não julgado por descrição — o mesmo
+  padrão que resolveu o Number Update (09/09/2026, abaixo).
+
+**O que isto não abre precedente para:** nenhum outro `--animate-*` ganha
+overshoot por associação. Um pedido futuro de bounce em outro lugar
+(botão, card, item de lista) é uma decisão nova, pelo mesmo processo —
+não "já tem mola em algum canto, então por que não aqui".
+
+**Tier próprio, não `--duration-signature` inflado.** `--duration-page`
+(600ms) existe para não arrastar o LaCalle Reveal da Landing, que já usa
+`signature` e não pediu nada disto — ver a nota em `tokens.css`.
 
 ### Restrição: só plano gratuito das seis fontes
 

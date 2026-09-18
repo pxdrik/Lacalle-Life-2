@@ -56,24 +56,18 @@
  * `prefers-reduced-motion` needs nothing here — `globals.css` already caps
  * every animation to 120ms globally, this one included.
  *
- * **17/09/2026: `animate-rise` → `animate-page-enter`.** Same keyframe, but
- * its own token (`tokens.css`) at the `signature` tier instead of
- * `standard` — Pedro found switching tabs too fast even after `rise`'s
- * distance doubled. `signature` is literally the tier page 38 reserves for
- * "troca de módulo", which is what this is; every other `animate-rise`
- * consumer (toast, list insert) stays at `standard`, unaffected.
+ * **17/09/2026: `animate-rise` → `animate-page-enter`.** Same keyframe, its
+ * own token (`tokens.css`), and — after Pedro watched a live prototype and
+ * asked to keep it — its own timing function too: `--ease-bounce`, a
+ * deliberate, narrowly-scoped exception to the two-curve rule, registered
+ * in `docs/brandbook.md` ("Bounce na transição de página"). Every other
+ * `animate-rise` consumer (toast, list insert) stays on `--ease-out`,
+ * `--duration-standard`, no spring anywhere else.
  */
-const ENTER_CLASS =
-  // EXPERIMENTO — Pedro pediu pra ver bounce, só pra decidir; ver o bloco
-  // "EXPERIMENTO — NÃO ADOTADO" em globals.css. Trocar esta linha pela de
-  // baixo (ou apagar as duas) volta pro tier oficial, sem física de mola.
-  "animate-page-enter-bounce-preview";
-// const ENTER_CLASS = "animate-page-enter";
-
 export function PageTransition({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
-  return <div className={ENTER_CLASS}>{children}</div>;
+  return <div className="animate-page-enter">{children}</div>;
 }
