@@ -236,11 +236,13 @@ export function PerformedSetRow({
               }
               className={cn(
                 "flex size-11 shrink-0 items-center justify-center rounded-lg border",
-                "transition-[background-color,border-color,color,scale] duration-150 ease-out",
-                // The one bit of tactile feedback in the app, on the one action
-                // repeated dozens of times per workout. It has to answer the tap
-                // before the state even changes.
-                "active:scale-90",
+                // The scale-on-press itself is now the same global
+                // `--press-scale` every `<button>` in the app gets
+                // (`globals.css`, 17/09/2026) — this class used to hand-carry
+                // its own 90%, which the global rule would have silently
+                // overridden anyway (higher specificity), so it stayed as
+                // dead code lying about the real number.
+                "transition-colors duration-150 ease-out",
                 set.isCompleted
                   ? "border-accent bg-accent text-accent-ink"
                   : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",

@@ -55,10 +55,15 @@ const SIZES = {
  * SemiBold 600, que é o peso que a pág. 16 atribui a botões e a pág. 25 repete.
  * Era Medium 500.
  *
- * `active:scale-[0.98]` vem da mesma página: "o active reduz a escala para
- * 0,98 — sem deslocamento vertical". Substitui um `active:opacity-80`, que
- * dizia a mesma coisa apagando o botão em vez de afundá-lo.
+ * `active:scale-(--press-scale)` vem da mesma página: "o active reduz a
+ * escala — sem deslocamento vertical". Substitui um `active:opacity-80`, que
+ * dizia a mesma coisa apagando o botão em vez de afundá-lo. O número em si
+ * (`--press-scale`, `tokens.css`) mudou de 0,98 pra 0,95 e virou universal —
+ * `globals.css` já aplica o mesmo valor a todo `<button>` da página, então
+ * este componente lê o token em vez de repetir um número, pro dia em que ele
+ * mudar de novo não exigir achar cada cópia.
  *
+
  * **O desabilitado deixou de ser opacidade.** A pág. 27 é explícita: "opacidade
  * não é suficiente: reduzir contraste e remover interação". Um primário a 45%
  * de opacidade continua sendo um bloco verde, só que lavado — parece quebrado,
@@ -69,7 +74,7 @@ const SIZES = {
 const BASE = cn(
   "inline-flex shrink-0 select-none items-center justify-center whitespace-nowrap",
   "font-semibold transition-[background-color,border-color,color,scale]",
-  "duration-(--duration-micro) ease-out active:scale-[0.98]",
+  "duration-(--duration-micro) ease-out active:scale-(--press-scale)",
   "disabled:pointer-events-none disabled:border-transparent",
   "disabled:bg-muted disabled:text-ink-subtle disabled:active:scale-100",
 );

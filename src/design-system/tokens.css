@@ -837,6 +837,30 @@ textarea {
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /**
+   * O toque encolhendo o controle — pág. 25: "o active reduz a escala para
+   * 0,98, sem deslocamento vertical". Universal agora, não só o componente
+   * `Button`: `globals.css` aplica isto a todo `<button>` da página,
+   * incluindo os que nunca tiveram nenhum feedback de clique próprio (chips
+   * de filtro, item de RPE, remover série) — pedido do Pedro, 17/09/2026,
+   * no mesmo dia do `--ease-bounce` acima: "encolhe mais, e bote fazer em
+   * todos os botões".
+   *
+   * **0,95, não mais 0,98** — o número da pág. 25 é o mesmo achado do dia:
+   * lia como "sem animação" mesmo com o motion reduction do sistema
+   * desligado. `buttonClasses()` (usado também por `<Link>` com cara de
+   * botão, que o seletor `<button>` de `globals.css` não alcança)
+   * referencia este mesmo token, então um link estilizado como botão
+   * encolhe igual a um botão de verdade.
+   *
+   * Só `<button>` — não `<a>`. Os itens de navegação (`sidebar-nav.tsx`,
+   * `bottom-nav.tsx`) são links, e já têm o próprio feedback de seleção
+   * (`--animate-side-marker`, `--animate-pop`); estender o encolhimento a
+   * todo link do app pegaria também texto corrido dentro de parágrafo, que
+   * nunca pediu nenhum.
+   */
+  --press-scale: 0.95;
+
+  /**
    * Os quatro tiers de duração da pág. 38.
    *
    * micro: hover, feedback, mudança de estado, toggle, foco.

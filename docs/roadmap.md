@@ -5,6 +5,49 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Encolher no toque virou universal, não só de quem já tinha a classe — 17/09/2026
+
+Pedro pediu uma animação de clique nas "pílulas" (os campos de peso/reps/
+duração da série, chamados assim no próprio código de
+`performed-set-row.tsx`) crescendo e entrando na tela. Perguntei qual grupo
+ele queria antes de mexer, e a resposta ampliou o pedido: **"todos os
+botões"**.
+
+- ✅ A pág. 25 do brandbook já documenta o clique de um botão encolhendo a
+  0,98 — é o que `Button` e o check de concluir série já faziam, então
+  "crescer" contrariaria uma decisão de marca escrita, não uma lacuna.
+  Perguntei de novo: crescer em todos (reescrevendo a pág. 25), encolher só
+  onde faltava, ou encolher mais forte em todos. Pedro escolheu **encolher
+  mais forte, em todos os botões**.
+- ✅ **`--press-scale` (tokens.css): 0,95, não mais 0,98.** Universal agora
+  via uma regra em `globals.css` (`@layer base`) que aplica a todo
+  `<button>` da página, não só a quem já tinha a classe escrita à mão —
+  cobre os chips de filtro (`food-filters.tsx`, `exercise-filter-bar.tsx`),
+  remover série, RPE, e qualquer outro botão sem feedback próprio até
+  então. `Button` (`button.tsx`) e o check de série
+  (`performed-set-row.tsx`) passaram a ler o mesmo token em vez de repetir
+  um número (0,98 e 90 respectivamente, cada um dono do seu próprio
+  valor antes).
+- ✅ **Só `<button>`, não `<a>`.** Itens de navegação (`sidebar-nav.tsx`,
+  `bottom-nav.tsx`) são links e já têm o próprio feedback de seleção
+  (`--animate-side-marker`, `--animate-pop`); estender a todo link do app
+  pegaria texto corrido dentro de parágrafo, que nunca pediu nada disto.
+- ✅ A regra global usa `:not(:disabled)` por dois motivos: excluir o
+  botão desabilitado, e ganhar especificidade suficiente pra vencer
+  qualquer `transition-colors`/`transition-[...]` que o componente já
+  declare — sem isso, a lista de propriedades de quem chegasse depois na
+  cascata apagaria `scale` dela, e o encolhimento saltaria sem suavizar.
+  A lista de propriedades da regra global é a de `transition-colors` do
+  Tailwind mais `scale`, de propósito, pra nenhum botão que já
+  transicionava cor perder isso.
+
+Testado ao vivo em `/alimentos` → Filtros: o chip "Proteínas" continua
+alternando corretamente (208 alimentos filtrados) depois da mudança de CSS.
+`npm run verify` e `npm run build` limpos (só o flake conhecido de
+`identity-isolation.test.ts` sob carga, que passa isolado).
+
+---
+
 ## ✅ Página ainda mais lenta + aviso de sincronizar sai da tela — 17/09/2026
 
 Dois pedidos do Pedro, sem relação entre si.

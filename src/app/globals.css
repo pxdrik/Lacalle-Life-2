@@ -142,6 +142,34 @@
     color: var(--accent-ink);
   }
 
+  /* Feedback de toque universal — pág. 25 ("o active reduz a escala"),
+     generalizado pra todo `<button>` da página, não só quem já tinha a
+     classe escrita à mão (`Button`, o check de série). Pedido do Pedro,
+     17/09/2026, ver a nota em `--press-scale` (`tokens.css`).
+
+     `:not(:disabled)` cumpre duas funções: exclui o botão desabilitado, que
+     não deveria reagir a toque nenhum, e dá especificidade suficiente pra
+     vencer qualquer `transition-colors`/`transition-[...]` que o próprio
+     componente já declare (uma classe sozinha tem menos peso que elemento +
+     pseudo-classe) — sem isto, a lista de propriedades de quem chegasse
+     depois na cascata apagaria `scale` dela, e o encolhimento saltaria sem
+     suavizar em vez de animar.
+
+     A lista de propriedades é a de `transition-colors` do Tailwind mais
+     `scale` — superconjunto de propósito, pra nenhum botão que já
+     transicionava cor perder isso por esta regra ganhar a cascata. */
+  button:not(:disabled) {
+    transition-property:
+      background-color, border-color, color, text-decoration-color, fill,
+      stroke, scale;
+    transition-duration: var(--duration-micro);
+    transition-timing-function: var(--ease-out);
+  }
+
+  button:not(:disabled):active {
+    scale: var(--press-scale);
+  }
+
   /* Modal entry and exit — page 36: "scale 0,98 → 1 + overlay fade, 200 ms,
      Ease Out". It used to rise 8 px instead, which is the gesture page 36
      assigns to a toast; a modal takes the centre of the screen and does not
