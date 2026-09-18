@@ -5,6 +5,43 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Botão de sincronizar some de vez, logado ou não — 18/09/2026
+
+O aviso de texto tinha saído no dia anterior, mas o botão manual
+"Sincronizar" continuava aparecendo pra quem tinha conta — decisão
+explícita daquela rodada. Pedro testou logado e o botão ainda incomodava.
+Perguntei se era sessão ativa (era) e o que fazer: esconder também
+autenticado, ou sair da conta — escolheu **esconder também autenticado**.
+
+- ✅ Os cinco componentes de status
+  (`food-log-sync-status.tsx`, `routine-sync-status.tsx`,
+  `diet-sync-status.tsx`, `body-entry-sync-status.tsx`,
+  `session-sync-status.tsx`) perderam o botão manual de vez — não mais
+  condicionado a `auth === "authenticated"`, porque `auth` em si saiu:
+  o rastreamento de sessão (`getUser`/`onAuthStateChange`,
+  `createSupabaseAuthRepository`) não tinha mais nenhum outro consumidor
+  depois que o botão foi embora, e ficaria como estado morto.
+- ✅ **A sincronização automática ao montar a tela continua intacta** —
+  o efeito que chama `runXSync()` sozinho nunca dependeu de `auth`, só de
+  `isSupabaseConfigured()`. O que sumiu foi só o controle manual; a
+  sincronização em si roda do mesmo jeito pra quem tem conta.
+  Conflito de verdade e falha real do auto-sync continuam aparecendo —
+  são os únicos dois motivos que restam pra estes componentes existirem
+  na árvore.
+- ✅ Login, cadastro e as rotas de conta (`/entrar`, `/cadastro`,
+  `/conta`) não foram tocados — a funcionalidade de conta em si segue de
+  pé, só o botão de sincronizar manual que anunciava ela dentro das telas
+  é que não existe mais.
+
+Testes reescritos em `food-log-sync-status.test.tsx` e
+`session-sync-status.test.tsx` — trocam a checagem de "botão aparece
+autenticado" por "nada aparece depois de um auto-sync limpo" e um teste
+novo pra falha real do auto-sync. `diet-sync-status.tsx`,
+`body-entry-sync-status.tsx` e `routine-sync-status.tsx` não têm teste
+dedicado; `npm run verify` (1755/1755) e `npm run build` limpos.
+
+---
+
 ## ✅ Encolher no toque chega a todo link também — 18/09/2026
 
 Pedro testou o encolhimento universal do dia anterior e achou um buraco

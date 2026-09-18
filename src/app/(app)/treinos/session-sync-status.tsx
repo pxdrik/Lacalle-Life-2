@@ -8,7 +8,6 @@ import {
   runSessionSync,
 } from "@/composition/sync/sync-engine";
 import type { SessionConflict, SessionConflictResolution } from "@/composition/sync/session-sync";
-import { createSupabaseAuthRepository } from "@/features/auth/data/supabase-auth-repository";
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
@@ -27,9 +26,10 @@ import { Notice } from "@/design-system/components/notice";
  * que já vale para rotinas.
  *
  * Mesmo desenho de `RoutineSyncStatus`: sincroniza sozinha ao montar a
- * tela, sem spinner, e só troca o botão comum pela tela de resolução
- * quando há conflito de verdade — um conflito aqui só pode existir para
- * uma sessão já finalizada (nada em andamento chega a este ponto).
+ * tela, sem spinner, sem botão manual (18/09/2026), e só troca o silêncio
+ * pela tela de resolução quando há conflito de verdade — um conflito aqui
+ * só pode existir para uma sessão já finalizada (nada em andamento chega a
+ * este ponto).
  */
 interface SyncedState {
   readonly conflicts: readonly SessionConflict[];
@@ -38,34 +38,9 @@ interface SyncedState {
 
 const IDLE: SyncedState = { conflicts: [], error: null };
 
-type AuthKnowledge = "unknown" | "anonymous" | "authenticated";
-
 export function SessionSyncStatus() {
   const [pending, setPending] = useState(false);
-  const [auth, setAuth] = useState<AuthKnowledge>(() =>
-    isSupabaseConfigured() ? "unknown" : "anonymous",
-  );
   const [synced, setSynced] = useState<SyncedState>(IDLE);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured()) return;
-
-    const repository = createSupabaseAuthRepository();
-    let active = true;
-
-    void repository.getUser().then((user) => {
-      if (active) setAuth(user === null ? "anonymous" : "authenticated");
-    });
-
-    const unsubscribe = repository.onAuthStateChange((user) => {
-      if (active) setAuth(user === null ? "anonymous" : "authenticated");
-    });
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -96,24 +71,6 @@ export function SessionSyncStatus() {
       active = false;
     };
   }, []);
-
-  async function sync() {
-    setPending(true);
-    try {
-      const outcome = await runSessionSync();
-      setSynced({
-        conflicts: outcome.pull.status === "done" ? outcome.pull.conflicts : [],
-        error: outcome.pull.status === "error" ? outcome.pull.message : null,
-      });
-    } catch (cause) {
-      setSynced({
-        conflicts: [],
-        error: cause instanceof Error ? cause.message : "Falha ao sincronizar.",
-      });
-    } finally {
-      setPending(false);
-    }
-  }
 
   async function resolve(
     sessionId: string,
@@ -155,28 +112,17 @@ export function SessionSyncStatus() {
     );
   }
 
-  // Sem sessão, não há nada pra mostrar aqui — o aviso "Dados salvos
-  // neste dispositivo..." que `RoutineSyncStatus` mostrava logo acima
-  // saiu de vez a pedido do Pedro (17/09/2026), então isto já não tem
-  // uma segunda mensagem pra evitar duplicar (era esse o motivo original,
-  // achado de auditoria de design, 02/09/2026: as duas apareciam uma
-  // embaixo da outra). Quando autenticado, o botão abaixo continua
-  // próprio desta lista ("Sincronizar treinos executados"), porque aí a
-  // ação é realmente distinta da de `RoutineSyncStatus`.
-  if (auth === "anonymous") {
-    return null;
+  // Nem o botão manual de sincronizar aparece mais, logado ou não — pedido
+  // do Pedro (18/09/2026), um passo além do de ontem (que já tinha tirado
+  // o aviso de texto e, aqui, evitava um segundo botão duplicando
+  // `RoutineSyncStatus`). A sincronização em si continua rodando sozinha
+  // ao montar a tela (o efeito acima); só resta mostrar algo se esse
+  // auto-sync falhou de verdade.
+  if (error !== null) {
+    return <Notice tone="warning">{error}</Notice>;
   }
 
-  return (
-    <div className="flex items-center gap-2">
-      {auth === "authenticated" && (
-        <Button variant="ghost" size="sm" pending={pending} onClick={() => void sync()}>
-          Sincronizar treinos executados
-        </Button>
-      )}
-      {error !== null && <Notice tone="warning">{error}</Notice>}
-    </div>
-  );
+  return null;
 }
 
 function SessionConflictCard({

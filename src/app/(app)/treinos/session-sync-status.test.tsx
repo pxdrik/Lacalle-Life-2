@@ -16,44 +16,32 @@ vi.mock("@/core/auth/env", () => ({
   isSupabaseConfigured: () => isSupabaseConfigured(),
 }));
 
-const getUser = vi.fn();
-const onAuthStateChange = vi.fn();
-
-vi.mock("@/features/auth/data/supabase-auth-repository", () => ({
-  createSupabaseAuthRepository: () => ({
-    getUser: () => getUser(),
-    onAuthStateChange: (callback: (user: unknown) => void) => {
-      onAuthStateChange(callback);
-      return () => {};
-    },
-  }),
-}));
-
 /**
  * Achado de auditoria de design (02/09/2026): "Dados salvos neste
  * dispositivo. Entre na sua conta para sincronizar." aparecia duas vezes
- * seguidas em `/treinos` — uma vinda de `RoutineSyncStatus`, outra deste
- * componente. `RoutineSyncStatus` é montado primeiro na página e continua
- * mostrando o aviso; este componente agora fica em silêncio quando anônimo,
- * exatamente para não repeti-lo.
+ * seguidas em `/treinos`. O aviso saiu de vez a pedido do Pedro (17/09),
+ * e o botão manual que restava saiu também no dia seguinte (18/09) — este
+ * componente agora só aparece quando há mesmo algo pra decidir ou avisar.
  */
 describe("SessionSyncStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUser.mockResolvedValue(null);
   });
 
-  it("renders nothing when there is no session, instead of repeating the sync notice", async () => {
+  it("renders nothing once the automatic sync is clean, no manual button", async () => {
     isSupabaseConfigured.mockReturnValue(true);
-    getUser.mockResolvedValue(null);
+    runSessionSync.mockResolvedValue({
+      push: { status: "ok" },
+      pull: { status: "done", conflicts: [] },
+    });
     const { container } = render(<SessionSyncStatus />);
 
     await waitFor(() => {
-      expect(getUser).toHaveBeenCalled();
+      expect(runSessionSync).toHaveBeenCalled();
     });
 
     expect(
-      screen.queryByText(/Entre na sua conta para sincronizar/),
+      screen.queryByRole("button", { name: "Sincronizar treinos executados" }),
     ).not.toBeInTheDocument();
     expect(container).toBeEmptyDOMElement();
   });
@@ -62,19 +50,17 @@ describe("SessionSyncStatus", () => {
     isSupabaseConfigured.mockReturnValue(false);
     const { container } = render(<SessionSyncStatus />);
 
-    expect(
-      screen.queryByText(/Entre na sua conta para sincronizar/),
-    ).not.toBeInTheDocument();
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("still shows its own sync button once a session exists", async () => {
+  it("shows an error notice, alone, when the automatic sync fails", async () => {
     isSupabaseConfigured.mockReturnValue(true);
-    getUser.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    runSessionSync.mockRejectedValue(new Error("Falha ao sincronizar."));
     render(<SessionSyncStatus />);
 
+    expect(await screen.findByText("Falha ao sincronizar.")).toBeInTheDocument();
     expect(
-      await screen.findByRole("button", { name: "Sincronizar treinos executados" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Sincronizar treinos executados" }),
+    ).not.toBeInTheDocument();
   });
 });

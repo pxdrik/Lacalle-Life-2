@@ -12,7 +12,6 @@ import type {
   BodyEntryConflict,
   BodyEntryConflictResolution,
 } from "@/composition/sync/body-entry-sync";
-import { createSupabaseAuthRepository } from "@/features/auth/data/supabase-auth-repository";
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
@@ -24,11 +23,12 @@ import { Notice } from "@/design-system/components/notice";
  * `AGENTS.md`).
  *
  * Mesmo desenho de `DietSyncStatus`: sincroniza sozinha ao montar a tela,
- * sem spinner (transparente), e só troca o botão comum pela tela de
- * resolução quando há conflito de verdade. A diferença é que aqui um
- * conflito é um dia inteiro (peso, gordura corporal, medidas, notas), não
- * uma dieta ou rotina — e pode haver mais de um dia em conflito ao mesmo
- * tempo, cada um resolvido independentemente dos outros.
+ * sem spinner (transparente), e sem botão manual nenhum (18/09/2026,
+ * pedido do Pedro) — só troca o silêncio pela tela de resolução quando há
+ * conflito de verdade. A diferença é que aqui um conflito é um dia inteiro
+ * (peso, gordura corporal, medidas, notas), não uma dieta ou rotina — e
+ * pode haver mais de um dia em conflito ao mesmo tempo, cada um resolvido
+ * independentemente dos outros.
  *
  * Montada dentro de `/evolucao`, junto de `BodyScreen` — a única tela que
  * lê e edita `BodyEntry`.
@@ -40,34 +40,9 @@ interface SyncedState {
 
 const IDLE: SyncedState = { conflicts: [], error: null };
 
-type AuthKnowledge = "unknown" | "anonymous" | "authenticated";
-
 export function BodyEntrySyncStatus() {
   const [pending, setPending] = useState(false);
-  const [auth, setAuth] = useState<AuthKnowledge>(() =>
-    isSupabaseConfigured() ? "unknown" : "anonymous",
-  );
   const [synced, setSynced] = useState<SyncedState>(IDLE);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured()) return;
-
-    const repository = createSupabaseAuthRepository();
-    let active = true;
-
-    void repository.getUser().then((user) => {
-      if (active) setAuth(user === null ? "anonymous" : "authenticated");
-    });
-
-    const unsubscribe = repository.onAuthStateChange((user) => {
-      if (active) setAuth(user === null ? "anonymous" : "authenticated");
-    });
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, []);
 
   useEffect(() => {
     let active = true;
@@ -98,24 +73,6 @@ export function BodyEntrySyncStatus() {
       active = false;
     };
   }, []);
-
-  async function sync() {
-    setPending(true);
-    try {
-      const outcome = await runBodyEntrySync();
-      setSynced({
-        conflicts: outcome.pull.status === "done" ? outcome.pull.conflicts : [],
-        error: outcome.pull.status === "error" ? outcome.pull.message : null,
-      });
-    } catch (cause) {
-      setSynced({
-        conflicts: [],
-        error: cause instanceof Error ? cause.message : "Falha ao sincronizar.",
-      });
-    } finally {
-      setPending(false);
-    }
-  }
 
   async function resolve(
     day: string,
@@ -157,23 +114,16 @@ export function BodyEntrySyncStatus() {
     );
   }
 
-  // Sem sessão, não há nada pra este componente mostrar — pedido do
-  // Pedro (17/09/2026): o aviso "Dados salvos neste dispositivo..." saiu
-  // de toda tela, repetido em Treinos/Dietas/Diário/Evolução. O login e a
-  // sincronização continuam existindo (`/entrar`), só pararam de ser
-  // anunciados aqui.
-  if (auth === "anonymous") return null;
+  // Nem o botão manual de sincronizar aparece mais, logado ou não — pedido
+  // do Pedro (18/09/2026), um passo além do de ontem (que só tirava o
+  // aviso pra quem estava sem conta). A sincronização em si continua
+  // rodando sozinha ao montar a tela (o efeito acima); só resta mostrar
+  // algo se esse auto-sync falhou de verdade.
+  if (error !== null) {
+    return <Notice tone="warning">{error}</Notice>;
+  }
 
-  return (
-    <div className="flex items-center gap-2">
-      {auth === "authenticated" && (
-        <Button variant="ghost" size="sm" pending={pending} onClick={() => void sync()}>
-          Sincronizar peso e medidas
-        </Button>
-      )}
-      {error !== null && <Notice tone="warning">{error}</Notice>}
-    </div>
-  );
+  return null;
 }
 
 function BodyEntryConflictCard({

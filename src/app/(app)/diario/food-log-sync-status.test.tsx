@@ -16,19 +16,6 @@ vi.mock("@/core/auth/env", () => ({
   isSupabaseConfigured: () => isSupabaseConfigured(),
 }));
 
-const getUser = vi.fn();
-const onAuthStateChange = vi.fn();
-
-vi.mock("@/features/auth/data/supabase-auth-repository", () => ({
-  createSupabaseAuthRepository: () => ({
-    getUser: () => getUser(),
-    onAuthStateChange: (callback: (user: unknown) => void) => {
-      onAuthStateChange(callback);
-      return () => {};
-    },
-  }),
-}));
-
 // Found 26/08/2026 by an external audit: a production deploy missing its
 // Supabase env vars made this effect throw on every day it mounted for,
 // logging the same exception repeatedly and showing an alarming "Falha ao
@@ -37,7 +24,6 @@ vi.mock("@/features/auth/data/supabase-auth-repository", () => ({
 describe("FoodLogSyncStatus", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    getUser.mockResolvedValue(null);
   });
 
   it("does not attempt to sync, or show an error, when Supabase is not configured", async () => {
@@ -56,53 +42,38 @@ describe("FoodLogSyncStatus", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("syncs normally when Supabase is configured", async () => {
+  it("syncs automatically and shows nothing, no manual button, once it's clean", async () => {
     isSupabaseConfigured.mockReturnValue(true);
-    getUser.mockResolvedValue({ id: "u1", email: "a@b.com" });
     runFoodLogSync.mockResolvedValue({
       push: { status: "ok" },
       pull: { status: "ok" },
     });
-    render(<FoodLogSyncStatus day="2026-08-26" />);
+    const { container } = render(<FoodLogSyncStatus day="2026-08-26" />);
 
     await waitFor(() => {
       expect(runFoodLogSync).toHaveBeenCalledWith("2026-08-26");
     });
-  });
 
-  /**
-   * Achado de auditoria externa (27/08/2026, UX-01): sem sessão, o botão
-   * "Sincronizar" existia e não fazia nada visível ao ser tocado — o motor
-   * já recusa em silêncio (`pushFoodLog`/`pullFoodLog` voltam
-   * "not-authenticated"), então o clique morto não tinha explicação nenhuma
-   * na tela.
-   *
-   * **17/09/2026, pedido do Pedro:** o aviso "Dados salvos neste
-   * dispositivo..." que substituía o botão saiu de vez — sem sessão, o
-   * componente agora não mostra nada, em vez de anunciar sincronização.
-   */
-  it("shows nothing, not the sync button, when there is no session", async () => {
-    isSupabaseConfigured.mockReturnValue(true);
-    getUser.mockResolvedValue(null);
-    const { container } = render(<FoodLogSyncStatus day="2026-08-26" />);
-
-    await waitFor(() => {
-      expect(getUser).toHaveBeenCalled();
-    });
-    expect(container).toBeEmptyDOMElement();
     expect(
       screen.queryByRole("button", { name: "Sincronizar" }),
     ).not.toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it("shows the sync button once a session exists", async () => {
+  /**
+   * Pedido do Pedro (18/09/2026): nem o botão manual de sincronizar
+   * aparece mais, com sessão ou sem — só uma falha real do auto-sync
+   * ainda mostra algo.
+   */
+  it("shows an error notice, alone, when the automatic sync fails", async () => {
     isSupabaseConfigured.mockReturnValue(true);
-    getUser.mockResolvedValue({ id: "u1", email: "a@b.com" });
+    runFoodLogSync.mockRejectedValue(new Error("Falha ao sincronizar."));
     render(<FoodLogSyncStatus day="2026-08-26" />);
 
+    expect(await screen.findByText("Falha ao sincronizar.")).toBeInTheDocument();
     expect(
-      await screen.findByRole("button", { name: "Sincronizar" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: "Sincronizar" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows nothing when Supabase is not configured at all", () => {
@@ -110,6 +81,5 @@ describe("FoodLogSyncStatus", () => {
     const { container } = render(<FoodLogSyncStatus day="2026-08-26" />);
 
     expect(container).toBeEmptyDOMElement();
-    expect(getUser).not.toHaveBeenCalled();
   });
 });
