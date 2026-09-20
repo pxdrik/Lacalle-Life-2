@@ -179,10 +179,10 @@ const Close: FC = () => {
         <Words text="Acompanhe sua evolução." start={22} size={size} weight={600} color="#cfd4da" />
       </div>
       <Words
-        text="Nada além disso."
+        text="Tudo em um lugar só."
         start={54}
-        stagger={4}
-        size={L.portrait ? 104 : 124}
+        stagger={3}
+        size={L.portrait ? 88 : 124}
         weight={700}
         color={C.accent}
         style={{ marginTop: L.portrait ? 64 : 48 }}

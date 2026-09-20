@@ -51,7 +51,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
     },
   },
   mobile: {
-    masterDb: 0,
+    masterDb: 3,
     masterFadeOutFrames: 20,
     stems: {
       music: { ...full, gainDb: 0, outFrame: 851, fadeOutFrames: 48 },
@@ -67,10 +67,8 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
  * Picos-alvo de cada stem depois do acabamento: definem o equilíbrio de base entre eles.
  */
 export const SYNTH = {
-  bpm: 120,
-  stemPeakDb: { music: -7, impacts: -6, ui: -13, closing: -11 } satisfies Record<StemName, number>,
-  /** Só no perfil mobile: distância (dB) permitida entre o corpo do som e o pico do stem (0 = sem limitar). Impactos e fechamento ficam intactos para preservar o contraste do gancho. */
-  mobileCrestDb: { music: 11, impacts: 0, ui: 12, closing: 0 } satisfies Record<StemName, number>,
+  /** Pico-alvo de cada stem depois do acabamento: define o equilíbrio de base entre eles. */
+  stemPeakDb: { music: -10, impacts: -7, ui: -15, closing: -12 } satisfies Record<StemName, number>,
   /** Teto de pico de cada stem antes da normalização. */
   stemCeilingDb: -2,
 };

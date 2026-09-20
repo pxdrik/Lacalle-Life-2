@@ -24,16 +24,23 @@ npm run score         # regenera a trilha
 npm run capture       # recaptura as telas (Life rodando em http://localhost:3000)
 ```
 
-## Áudio v2 (direção sonora nova)
+## Áudio v2 (versão mínima, com suspense)
 
 Estado: **em teste**. O padrão do `npm run render` ainda é a trilha provisória (v1). Para aprovar, troque
-`DEFAULT_AUDIO_VERSION` para `"v2"` em `src/audio/config.ts`. Nada de cena, captura, texto ou animação depende disso.
+`DEFAULT_AUDIO_VERSION` para `"v2"` em `src/audio/config.ts`. O áudio não altera cena, captura, texto ou animação.
 
-Tudo é gerado por código, localmente. Quatro stems por perfil (`public/audio/v2/<perfil>/`, não versionados,
-`npm run audio` regera em ~30 s): **music** (pad, sub, baixo, ritmo, arpejo, motivo), **impacts** (os três
-"problemas" do gancho, o golpe de "Agora, um só.", transições), **ui** (toques, registros, séries, rolagens)
-e **closing** (resolução de "Nada além disso." e assinatura). Dois perfis: **cinematic** (dinâmica ampla) e
-**mobile** (social e alto-falante de celular: grave gerenciado, presença, crista menor, ~ -16 LUFS).
+Direção: pouquíssimo som, limpo (nada de saturação), muito ar e silêncio. Uma base em ré com **quarta suspensa
+(sol)** que fica "pendurada" o filme inteiro e só resolve na **terça maior (fá sustenido)** quando aparece
+"Tudo em um lugar só.". O fá sustenido não aparece em nenhum outro lugar, então a chegada soa como resolução.
+Os sons de interface não são cliques por cima da música: cada evento importante toca **uma nota tonal**, da mesma
+escala da base (ré, mi, sol, lá). São sete notas no filme inteiro. Tudo é gerado por código, localmente.
+
+Quatro stems por perfil (`public/audio/v2/<perfil>/`, não versionados; `npm run audio` regera em ~40 s):
+**music** (base sustentada), **impacts** (três baques discretos do gancho, um golpe limpo em "Agora, um só.",
+sopros de transição), **ui** (as sete notas) e **closing** (a resolução e a assinatura). Dois perfis: **cinematic**
+(~ -20 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença, mais centrado, ~ -18 LUFS).
+
+Para silenciar os sons de interface: `ui.gainDb: -99` em `src/audio/config.ts`.
 
 | Quero ajustar | Onde | Precisa regerar? |
 | --- | --- | --- |
@@ -43,11 +50,11 @@ e **closing** (resolução de "Nada além disso." e assinatura). Dois perfis: **
 | Deslocar um stem no tempo | `offsetFrames` | não |
 | Espaço antes de "Comece sem criar conta." | `music.outFrame` e o vale gravado em `compose.mjs` (`duck`) | o vale sim |
 | Equilíbrio de base entre stems | `SYNTH.stemPeakDb` | sim (`npm run audio`) |
-| Notas, ritmo, timbre, momentos | `scripts/audio/compose.mjs` | sim |
+| Notas, harmonia, timbre, momentos | `scripts/audio/compose.mjs` | sim |
 | Quadros dos eventos do vídeo | `src/audio/timeline.ts` (espelha `Ad.tsx`) | sim |
 
 Comandos: `npm run audio` (gera stems), `npm run audio:check -- cinematic --png` (loudness, pico, mono,
-equilíbrio por seção, sincronia, espectrogramas em `out/audio-report/`), `npm run audio:selftest`,
+equilíbrio por seção, sincronia, espectrogramas em `out/audio-report/`), `npm run audio:selftest`, `node scripts/audio/clicks.mjs arquivo.wav` (procura estalos),
 `npm run render:mobile` e `npm run render:wide:mobile` (MP4 com o perfil mobile).
 
 Para ouvir sem re-renderizar o vídeo: `npx remotion render Ad out/test/audio-cinematic.wav --codec=wav

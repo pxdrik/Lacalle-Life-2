@@ -16,7 +16,7 @@ export const CUES = {
   diario: { cut: 292, taps: [322, 352], states: [326, 356], hoje: [386, 398] },
   treino: { cut: 402, ultimaVez: 422, taps: [442, 482, 522], states: [448, 488, 528] },
   evolucao: { cut: 582, scroll: [[622, 682], [698, 764]] },
-  fechamento: { lines: [774, 784, 794], nada: [826, 830, 834], cta: [860, 880] },
+  fechamento: { lines: [774, 784, 794], tudo: [826, 829, 832, 835, 838], cta: [860, 880] },
 } as const;
 
 export const sec = (frame: number) => frame / FPS;

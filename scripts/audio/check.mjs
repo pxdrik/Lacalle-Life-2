@@ -101,12 +101,11 @@ function report(L, R, label, stems) {
 /** Sincronia: para cada marca, acha o pico de energia perto do instante previsto. */
 function syncReport(stems) {
   const cues = JSON.parse(readFileSync("public/audio/v2/cues.json", "utf8"));
-  const soft = /bed|pad|swell|whoosh|shimmer|rolagem|groove|motivo|percussão|totais|gráfico|volume|recordes|hoje|nada|linha|assinatura|ultima|refeição|série|assenta/;
   console.log("\n--- sincronia (início do som vs. instante planejado; só eventos secos) ---");
   let worst = 0;
   let checked = 0;
   for (const c of cues) {
-    if (soft.test(c.name)) continue;
+    if (!/^(hook|hit|nota|assinatura)/.test(c.name)) continue;
     const st = stems[c.stem];
     if (!st) continue;
     const a = Math.round(Math.max(0, c.t - 0.03) * SR), b = Math.round((c.t + (c.name === "toque" ? 0.06 : 0.15)) * SR);
@@ -135,9 +134,9 @@ if (stems) syncReport(stems);
 
 if (png) {
   mkdirSync("out/audio-report", { recursive: true });
-  const marks = [S(CUES.logo.start), S(CUES.agora[0]), S(CUES.diario.cut), S(CUES.treino.cut), S(CUES.evolucao.cut), S(CUES.fechamento.nada[0]), S(CUES.fechamento.cta[0])];
+  const marks = [S(CUES.logo.start), S(CUES.agora[0]), S(CUES.diario.cut), S(CUES.treino.cut), S(CUES.evolucao.cut), S(CUES.fechamento.tudo[0]), S(CUES.fechamento.cta[0])];
   spectrogram(`out/audio-report/${profile}-mix.png`, L, R, { marks });
   if (stems) for (const n of STEMS) spectrogram(`out/audio-report/${profile}-${n}.png`, stems[n].L, stems[n].R, { marks, height: 300 });
-  console.log(`\nespectrogramas em out/audio-report/${profile}-*.png (linhas vermelhas: logo, "Agora um só", diário, treino, evolução, "Nada além disso", chamada)`);
+  console.log(`\nespectrogramas em out/audio-report/${profile}-*.png (linhas vermelhas: logo, "Agora um só", diário, treino, evolução, "Tudo em um lugar só", chamada)`);
 }
 void rmsProfile;
