@@ -1,4 +1,4 @@
-// Procura transientes agudos que não caem em evento planejado nem na grade rítmica: candidatos a estalo.
+// Procura transientes agudos fora de um swoosh ou clique planejado: candidatos a estalo.
 // Uso: node scripts/audio/clicks.mjs caminho.wav
 import { readFileSync } from "node:fs";
 import { CUES, FPS } from "../../src/audio/timeline.ts";
@@ -15,11 +15,13 @@ for (let s = 0; s + win <= mono.length; s += win) {
   for (let i = s; i < s + win; i++) v += mono[i] * mono[i];
   e.push(10 * Math.log10(v / win + 1e-14));
 }
-const T0 = CUES.agora[0] / FPS;
 const planned = [];
-for (const f of [...CUES.hook.lines, ...CUES.agora, ...CUES.diario.taps, ...CUES.diario.states, ...CUES.treino.taps, ...CUES.treino.states, CUES.treino.ultimaVez, CUES.fechamento.cta[0]]) planned.push(f / FPS);
-const nearPlanned = (t) => planned.some((p) => Math.abs(t - p) < 0.25);
-const onGrid = (t) => { const g = (t - T0) / 0.125; return t > T0 - 0.05 && Math.abs(g - Math.round(g)) * 0.125 < 0.014; };
+for (const f of [...CUES.diario.taps, ...CUES.diario.states, ...CUES.treino.taps, ...CUES.treino.states,
+  (CUES.logo.start + CUES.logo.sharp) / 2, (CUES.stage.enter + CUES.stage.settled) / 2, CUES.diario.cut + 4,
+  (CUES.diario.hoje[0] + CUES.diario.hoje[1]) / 2, CUES.treino.cut + 4, CUES.evolucao.cut + 5,
+  (CUES.stage.exitStart + CUES.stage.exitEnd) / 2]) planned.push(f / FPS);
+const nearPlanned = (t) => planned.some((p) => Math.abs(t - p) < 0.6);
+const onGrid = () => false;
 const flagged = [];
 for (let k = 60; k < e.length - 60; k++) {
   const med = [...e.slice(k - 50, k + 50)].sort((a, b) => a - b)[50];

@@ -24,37 +24,33 @@ npm run score         # regenera a trilha
 npm run capture       # recaptura as telas (Life rodando em http://localhost:3000)
 ```
 
-## Áudio v2 (mínimo, com suspense)
+## Áudio v2 (só efeitos, sem música)
 
-Estado: **em teste**, e já é o padrão do `npm run render` (a trilha v1 tem 30 s e não cobre os 31,2 s do vídeo;
-os arquivos dela continuam em `public/audio/score.wav` para voltar atrás). Para voltar: `DEFAULT_AUDIO_VERSION = "v1"`
-em `src/audio/config.ts`. O áudio não altera cena, captura, texto ou animação.
+Estado: **em teste**, e é o padrão do `npm run render`. O áudio não altera cena, captura, texto ou animação.
 
-Direção: pouquíssimo som, limpo (nada de saturação), muito ar e silêncio. Uma base em ré com **quarta suspensa
-(sol)** que fica "pendurada" o filme inteiro e só resolve na **terça maior (fá sustenido)** quando aparece
-"Tudo em um lugar só.". O fá sustenido não aparece em nenhum outro lugar, então a chegada soa como resolução.
+Sem música de fundo. Só dois tipos de som, ambos gerados por código, localmente e sem saturação:
 
-O que existe, e mais nada: a base (só o filtro abre com a narrativa), três baques no gancho, um golpe limpo em
-"Agora, um só.", **um swoosh por troca de página** (seis, sempre a mesma família de ar filtrado, com o pico no
-meio do fade da tela), **três notas** (uma por página, na escala da base) e a resolução mais a assinatura do
-fim. Tudo é gerado por código, localmente.
+- **Swooshes** (stem `swooshes`): um por troca de página, sempre ar filtrado, com o pico no meio do fade
+  da tela. Sete no total: logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai. Os que vão "para
+  frente" sobem de frequência; a saída do aparelho desce.
+- **Cliques** (stem `clicks`): dois sons por toque, como um interruptor de verdade. O toque do dedo (corpo
+  grave curto com um estalo macio) e, 4 a 6 quadros depois, um tique leve quando o item marca. Cinco toques
+  no filme (2 no Diário, 3 no Treino).
 
-Quatro stems por perfil (`public/audio/v2/<perfil>/`, não versionados; `npm run audio` regera em ~40 s):
-**music** (a base), **impacts** (baques, sopro até o logo, golpe e swooshes), **ui** (as três notas) e **closing**
-(resolução e assinatura). Dois perfis: **cinematic** (~ -20 LUFS, pico -7 dBFS) e **mobile** (celular e social:
-sem subgrave, presença, mais centrado, ~ -18 LUFS).
+A versão anterior, com a base sustentada, os baques do gancho, o golpe de "Agora, um só.", as três notas e a
+resolução do fim, está no histórico do git (commit `790c853`), se algum desses sons precisar voltar.
 
-Para silenciar as notas: `ui.gainDb: -99`. Para tirar os swooshes: `impacts.gainDb: -99` (leva junto o golpe e os baques).
+Dois perfis: **cinematic** (~ -22 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença,
+mais centrado, ~ -19 LUFS). `npm run audio` regera os stems em ~10 s (`public/audio/v2/<perfil>/`, não versionados).
 
 | Quero ajustar | Onde | Precisa regerar? |
 | --- | --- | --- |
-| Volume de música, impactos, UI, fechamento | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
+| Volume dos swooshes ou dos cliques | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
 | Volume geral | `MIX[perfil].masterDb` | não |
-| Onde a trilha entra e sai, fades | `inFrame`, `outFrame`, `fadeInFrames`, `fadeOutFrames` | não |
-| Deslocar um stem no tempo | `offsetFrames` | não |
-| Espaço antes de "Comece sem criar conta." | `music.outFrame` e o vale gravado em `compose.mjs` (`duck`) | o vale sim |
-| Equilíbrio de base entre stems | `SYNTH.stemPeakDb` | sim (`npm run audio`) |
-| Notas, harmonia, timbre, momentos | `scripts/audio/compose.mjs` | sim |
+| Onde entram e saem, fades, deslocamento | `inFrame`, `outFrame`, `fadeInFrames`, `fadeOutFrames`, `offsetFrames` | não |
+| Silenciar um dos dois | `gainDb: -Infinity` no stem | não |
+| Equilíbrio de base entre os dois | `SYNTH.stemPeakDb` | sim (`npm run audio`) |
+| Timbre, duração, nível de cada som | `scripts/audio/voices.mjs` e `compose.mjs` | sim |
 | Quadros dos eventos do vídeo | `src/audio/timeline.ts` (espelha `Ad.tsx`) | sim |
 
 Comandos: `npm run audio` (gera stems), `npm run audio:check -- cinematic --png` (loudness, pico, mono,

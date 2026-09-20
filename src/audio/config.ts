@@ -3,18 +3,18 @@
 // marcados "regerar" mexem no que está gravado nos stems e pedem `npm run audio`.
 // Só sintaxe apagável (sem enum), para o Node importar direto.
 
-import { CUES, DURATION } from "./timeline.ts";
+import { DURATION } from "./timeline.ts";
 
 export type AudioVersion = "v1" | "v2";
 export type AudioProfile = "cinematic" | "mobile";
-export type StemName = "music" | "impacts" | "ui" | "closing";
+export type StemName = "swooshes" | "clicks";
 
 /** Qual trilha o `npm run render` usa. A v1 (provisória, 30 s) não cobre a duração atual do vídeo. */
 export const DEFAULT_AUDIO_VERSION: AudioVersion = "v2";
 /** "cinematic": dinâmica ampla, para fones e telas grandes. "mobile": social, alto-falante de celular. */
 export const DEFAULT_AUDIO_PROFILE: AudioProfile = "cinematic";
 
-export const STEMS: readonly StemName[] = ["music", "impacts", "ui", "closing"];
+export const STEMS: readonly StemName[] = ["swooshes", "clicks"];
 
 export interface StemMix {
   /** Volume do stem em dB (ao vivo). 0 = como foi gerado. */
@@ -44,22 +44,16 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
     masterDb: 0,
     masterFadeOutFrames: 20,
     stems: {
-      // A música vai saindo aos poucos (48 quadros) e some 9 quadros antes da chamada: sobra ~300 ms de silêncio.
-      // Isso deixa ~300 ms de espaço para "Comece sem criar conta." ficar clara.
-      music: { ...full, gainDb: 0, outFrame: CUES.fechamento.cta[0] - 9, fadeOutFrames: 48 },
-      impacts: { ...full, gainDb: 0 },
-      ui: { ...full, gainDb: 0 },
-      closing: { ...full, gainDb: 0 },
+      swooshes: { ...full, gainDb: 0 },
+      clicks: { ...full, gainDb: 0 },
     },
   },
   mobile: {
     masterDb: 3,
     masterFadeOutFrames: 20,
     stems: {
-      music: { ...full, gainDb: 0, outFrame: CUES.fechamento.cta[0] - 9, fadeOutFrames: 48 },
-      impacts: { ...full, gainDb: 0 },
-      ui: { ...full, gainDb: 0 },
-      closing: { ...full, gainDb: 0 },
+      swooshes: { ...full, gainDb: 0 },
+      clicks: { ...full, gainDb: 0 },
     },
   },
 };
@@ -70,7 +64,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
  */
 export const SYNTH = {
   /** Pico-alvo de cada stem depois do acabamento: define o equilíbrio de base entre eles. */
-  stemPeakDb: { music: -10, impacts: -7, ui: -15, closing: -12 } satisfies Record<StemName, number>,
+  stemPeakDb: { swooshes: -7, clicks: -9 } satisfies Record<StemName, number>,
   /** Teto de pico de cada stem antes da normalização. */
   stemCeilingDb: -2,
 };

@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import { CUES, FPS } from "../../src/audio/timeline.ts";
 import { STEMS, stemGain } from "../../src/audio/config.ts";
-import { DUR, N, SR, applyBiquad, biquad, db, fft, loudness, peakDb, readWav, rmsProfile, spectrogram, truePeakDb } from "./dsp.mjs";
+import { DUR, N, SR, db, fft, loudness, peakDb, readWav, rmsProfile, spectrogram, truePeakDb } from "./dsp.mjs";
 
 const args = process.argv.slice(2);
 const profile = args.find((a) => a === "cinematic" || a === "mobile") ?? "cinematic";
@@ -45,9 +45,7 @@ const sections = [
   ["hoje", S(CUES.diario.hoje[0]), S(CUES.treino.cut)],
   ["treino", S(CUES.treino.cut), S(CUES.evolucao.cut)],
   ["evolução", S(CUES.evolucao.cut), S(CUES.fechamento.lines[0])],
-  ["fechamento", S(CUES.fechamento.lines[0]), cta - 0.32],
-  ["espaço (antes da chamada)", cta - 0.25, cta - 0.03],
-  ["chamada + assinatura", cta, DUR],
+  ["fechamento", S(CUES.fechamento.lines[0]), DUR],
 ];
 
 const bands = [["sub <60", 20, 60], ["grave 60-250", 60, 250], ["médio 250-2k", 250, 2000], ["presença 2-6k", 2000, 6000], ["ar >6k", 6000, 16000]];
@@ -111,23 +109,20 @@ function syncReport(stems) {
     if (c.name.startsWith("swoosh")) {
       // swoosh: o pico de energia (janelas de 10 ms) tem que cair no centro previsto da troca de página
       const w = Math.round(0.01 * SR);
-      // só a banda aguda (> 1,5 kHz): a cauda grave de reverb de outros eventos não engana o pico
-      const hp = biquad("hp", 1500, 0.7);
-      const hs = (stems.__hp ??= Object.fromEntries(Object.entries(stems).map(([k, v]) => [k, { L: applyBiquad(Float32Array.from(v.L), hp), R: applyBiquad(Float32Array.from(v.R), hp) }])));
       let best = 0, bt = c.t;
       for (let s0 = Math.round((c.t - 0.5) * SR); s0 < Math.round((c.t + 0.5) * SR); s0 += w) {
         let e = 0;
-        for (let i = s0; i < s0 + w; i++) e += Math.abs(hs[c.stem].L[i]) + Math.abs(hs[c.stem].R[i]);
+        for (let i = s0; i < s0 + w; i++) e += Math.abs(stems[c.stem].L[i]) + Math.abs(stems[c.stem].R[i]);
         if (e > best) { best = e; bt = (s0 + w / 2) / SR; }
       }
       const d = (bt - c.t) * 1000;
       swooshes.push(`${c.name} ${d >= 0 ? "+" : ""}${d.toFixed(0)} ms`);
       continue;
     }
-    if (!/^(hook|hit|nota|assinatura)/.test(c.name)) continue;
+    if (!/^(clique|confirma)/.test(c.name)) continue;
     const st = stems[c.stem];
     if (!st) continue;
-    const a = Math.round(Math.max(0, c.t - 0.03) * SR), b = Math.round((c.t + (c.name === "toque" ? 0.06 : 0.15)) * SR);
+    const a = Math.round(Math.max(0, c.t - 0.03) * SR), b = Math.round((c.t + (c.name.startsWith("clique") ? 0.06 : 0.15)) * SR);
     let pk = 0;
     for (let i = a; i < b; i++) pk = Math.max(pk, Math.abs(st.L[i]) + Math.abs(st.R[i]));
     // início do som: primeira amostra que passa de 20% do pico local (é o que o olho vê)
