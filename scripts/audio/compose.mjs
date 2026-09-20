@@ -1,10 +1,11 @@
-// Áudio v2, só efeitos: um swoosh por troca de página e um clique por toque. Sem música.
+// Áudio v2, só efeitos, sem música: um swoosh por troca de página, um clique por toque e uma
+// pequena subida aguda na hora em que cada bloco de texto entra.
 //
-// Todos os tempos vêm de src/audio/timeline.ts (que espelha Ad.tsx).
-// Gera 2 stems por perfil: swooshes e clicks.
+// Todos os tempos vêm de src/timeline.ts, a mesma fonte que monta o vídeo (Ad.tsx).
+// Gera 3 stems por perfil: swooshes, clicks e text.
 // Uso: node scripts/audio/compose.mjs [cinematic] [mobile]   (sem argumento, gera os dois)
 import { mkdirSync, writeFileSync } from "node:fs";
-import { CUES, FPS } from "../../src/audio/timeline.ts";
+import { CUES, FPS } from "../../src/timeline.ts";
 import { SYNTH } from "../../src/audio/config.ts";
 import { N, Reverb, lin, makeIR, peakDb, writeWav } from "./dsp.mjs";
 import * as V from "./voices.mjs";
@@ -50,18 +51,40 @@ function buildClicks(u) {
   });
 }
 
+// ================================ TEXTO ==========================================
+// Uma subida curta e aguda por bloco de texto, no instante em que as palavras começam a assentar
+// (as palavras sobem e desfocam ao longo de ~18 quadros; o pico do som cai 9 quadros depois do
+// início). É mais aguda e mais curta que o swoosh de página, para os dois não se confundirem
+// quando uma tela e o seu título entram juntos.
+function buildText(x) {
+  const PEAK = 9; // quadros depois do início do bloco
+  const lift = (label, frame, gain, dur = 0.24) => {
+    const [l, r] = V.swoosh({ dur, f0: 2400, f1: 6500, q: 1.1 });
+    x.put(S(frame + PEAK) - 0.44 * dur, l, r, { gain, send: 0.3 });
+    cue("text", `texto-${label}`, S(frame + PEAK));
+  };
+  CUES.text.hook.forEach((f, i) => lift(`gancho-${i + 1}`, f, [0.7, 0.85, 1][i])); // o gancho cresce
+  lift("agora-um-so", CUES.text.agora, 1);
+  ["dieta", "diario", "treino", "evolucao"].forEach((n, i) => lift(n, CUES.text.titles[i], 0.9));
+  lift("fecho-linhas", CUES.text.closeLines, 0.6); // as três linhas do fecho entram juntas: um som só
+  lift("tudo-em-um-lugar", CUES.text.tudo, 1.1, 0.3);
+  lift("cta", CUES.text.cta, 0.8);
+}
+
 // ================================ orquestração ==========================================
 const REVERBS = {
   swooshes: { ir: { rt60: 2.2, predelay: 0.02, hfStart: 9000, hfEnd: 2500, lowCut: 200, seed: 22 }, wet: 0.25 },
   clicks: { ir: { rt60: 1.1, predelay: 0.01, hfStart: 10000, hfEnd: 3000, lowCut: 300, seed: 33 }, wet: 0.16 },
+  text: { ir: { rt60: 1.4, predelay: 0.01, hfStart: 12000, hfEnd: 4000, lowCut: 400, seed: 55 }, wet: 0.2 },
 };
 
 function build(profile) {
   V.reseed();
   cues.length = 0;
-  const tracks = { swooshes: new Track("swooshes"), clicks: new Track("clicks") };
+  const tracks = { swooshes: new Track("swooshes"), clicks: new Track("clicks"), text: new Track("text") };
   buildSwooshes(tracks.swooshes);
   buildClicks(tracks.clicks);
+  buildText(tracks.text);
   for (const [name, tr] of Object.entries(tracks)) {
     const cfg = REVERBS[name];
     V.finishTrack(tr, { reverb: new Reverb(makeIR(cfg.ir)), wet: cfg.wet, profile, kind: name, ceilingDb: SYNTH.stemCeilingDb });

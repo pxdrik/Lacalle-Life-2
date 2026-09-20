@@ -4,7 +4,7 @@
 //   sem --file: simula a mixagem do Remotion a partir dos stems e da config (src/audio/config.ts).
 //   com --file: analisa um WAV já renderizado (por exemplo, o áudio final do Remotion).
 import { mkdirSync, readFileSync } from "node:fs";
-import { CUES, FPS } from "../../src/audio/timeline.ts";
+import { CUES, FPS } from "../../src/timeline.ts";
 import { STEMS, stemGain } from "../../src/audio/config.ts";
 import { DUR, N, SR, db, fft, loudness, peakDb, readWav, rmsProfile, spectrogram, truePeakDb } from "./dsp.mjs";
 
@@ -106,7 +106,7 @@ function syncReport(stems) {
   let checked = 0;
   const swooshes = [];
   for (const c of cues) {
-    if (c.name.startsWith("swoosh")) {
+    if (c.name.startsWith("swoosh") || c.name.startsWith("texto")) {
       // swoosh: o pico de energia (janelas de 10 ms) tem que cair no centro previsto da troca de página
       const w = Math.round(0.01 * SR);
       let best = 0, bt = c.t;
@@ -133,7 +133,7 @@ function syncReport(stems) {
     checked++;
     if (Math.abs(dt) > 25) console.log(`  ${c.stem}/${c.name} @ ${c.t}s: início ${dt.toFixed(0)} ms depois do previsto`);
   }
-  if (swooshes.length) console.log(`pico de cada swoosh vs. centro da troca de página: ${swooshes.join(" | ")}`);
+  if (swooshes.length) console.log(`pico de cada swoosh/texto vs. instante previsto: ${swooshes.join(" | ")}`);
   console.log(`${checked} eventos secos conferidos; maior desvio ${worst.toFixed(0)} ms (1 quadro = 33 ms)`);
 }
 

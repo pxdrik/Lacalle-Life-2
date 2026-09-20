@@ -3,18 +3,18 @@
 // marcados "regerar" mexem no que está gravado nos stems e pedem `npm run audio`.
 // Só sintaxe apagável (sem enum), para o Node importar direto.
 
-import { DURATION } from "./timeline.ts";
+import { DURATION } from "../timeline.ts";
 
 export type AudioVersion = "v1" | "v2";
 export type AudioProfile = "cinematic" | "mobile";
-export type StemName = "swooshes" | "clicks";
+export type StemName = "swooshes" | "clicks" | "text";
 
 /** Qual trilha o `npm run render` usa. A v1 (provisória, 30 s) não cobre a duração atual do vídeo. */
 export const DEFAULT_AUDIO_VERSION: AudioVersion = "v2";
 /** "cinematic": dinâmica ampla, para fones e telas grandes. "mobile": social, alto-falante de celular. */
 export const DEFAULT_AUDIO_PROFILE: AudioProfile = "cinematic";
 
-export const STEMS: readonly StemName[] = ["swooshes", "clicks"];
+export const STEMS: readonly StemName[] = ["swooshes", "clicks", "text"];
 
 export interface StemMix {
   /** Volume do stem em dB (ao vivo). 0 = como foi gerado. */
@@ -46,6 +46,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
     stems: {
       swooshes: { ...full, gainDb: 0 },
       clicks: { ...full, gainDb: 0 },
+      text: { ...full, gainDb: 0 },
     },
   },
   mobile: {
@@ -54,6 +55,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
     stems: {
       swooshes: { ...full, gainDb: 0 },
       clicks: { ...full, gainDb: 0 },
+      text: { ...full, gainDb: 0 },
     },
   },
 };
@@ -64,7 +66,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
  */
 export const SYNTH = {
   /** Pico-alvo de cada stem depois do acabamento: define o equilíbrio de base entre eles. */
-  stemPeakDb: { swooshes: -7, clicks: -9 } satisfies Record<StemName, number>,
+  stemPeakDb: { swooshes: -7, clicks: -9, text: -12 } satisfies Record<StemName, number>,
   /** Teto de pico de cada stem antes da normalização. */
   stemCeilingDb: -2,
 };

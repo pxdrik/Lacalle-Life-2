@@ -1,4 +1,4 @@
-# Lacalle Life, comercial de 31,2 s
+# Lacalle Life, comercial de 26,7 s
 
 Vídeo feito em código com [Remotion](https://www.remotion.dev). As telas são capturas reais
 do app (Playwright, dados de demonstração), nada é mockup redesenhado.
@@ -7,7 +7,7 @@ do app (Playwright, dados de demonstração), nada é mockup redesenhado.
 
 | Pasta | O que tem |
 | --- | --- |
-| `src/` | A composição: `Ad.tsx` é a linha do tempo (30 fps, 900 quadros). |
+| `src/` | A composição: `Ad.tsx` monta as cenas, e `src/timeline.ts` é a **fonte única de tempo** (30 fps, 800 quadros). |
 | `scripts/capture.mjs` | Sobe um navegador limpo, importa dados de demonstração e captura as telas em `public/shots/`. |
 | `scripts/demo-data.mjs` | Dados de demonstração (dieta, treinos, 10 semanas de histórico), montados sobre o catálogo real. |
 | `scripts/score.mjs` | Trilha provisória sintetizada por código, sincronizada com os cortes e toques. |
@@ -24,34 +24,41 @@ npm run score         # regenera a trilha
 npm run capture       # recaptura as telas (Life rodando em http://localhost:3000)
 ```
 
+## Ritmo (src/timeline.ts)
+
+Todo o tempo do filme mora em `T`, em `src/timeline.ts`. `Ad.tsx` monta as cenas a partir dele e o áudio lê o
+mesmo `T` (por `CUES`), então mudar o ritmo é mexer só ali e rodar `npm run audio`. O filme tem 26,7 s: gancho e logo
+curtos, rolagens e séries mais rápidas, texto entrando em 18 quadros. O Diário segura ~0,9 s antes do primeiro toque e o
+Hoje ("quanto ainda cabe no dia") ~1,3 s, como pedido.
+
 ## Áudio v2 (só efeitos, sem música)
 
 Estado: **em teste**, e é o padrão do `npm run render`. O áudio não altera cena, captura, texto ou animação.
 
-Sem música de fundo. Só dois tipos de som, ambos gerados por código, localmente e sem saturação:
+Sem música de fundo. Três tipos de som, todos gerados por código, localmente e sem saturação:
 
-- **Swooshes** (stem `swooshes`): um por troca de página, sempre ar filtrado, com o pico no meio do fade
-  da tela. Sete no total: logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai. Os que vão "para
-  frente" sobem de frequência; a saída do aparelho desce.
-- **Cliques** (stem `clicks`): dois sons por toque, como um interruptor de verdade. O toque do dedo (corpo
-  grave curto com um estalo macio) e, 4 a 6 quadros depois, um tique leve quando o item marca. Cinco toques
-  no filme (2 no Diário, 3 no Treino).
+- **Swooshes** (stem `swooshes`): um por troca de página, ar filtrado com o pico no meio do fade da tela. Sete:
+  logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai.
+- **Cliques** (stem `clicks`): dois sons por toque, como um interruptor. O toque do dedo (corpo grave curto com
+  estalo macio) e, 4 a 6 quadros depois, um tique leve quando o item marca. Cinco toques (2 Diário, 3 Treino).
+- **Texto** (stem `text`): uma pequena subida aguda e curta na hora em que cada bloco de texto entra, mais aguda que
+  o swoosh de página para os dois não se confundirem. Onze: as três linhas do gancho (crescendo), "Agora, um só.",
+  os quatro títulos, as linhas do fecho (um som só), "Tudo em um lugar só." e a chamada.
 
-A versão anterior, com a base sustentada, os baques do gancho, o golpe de "Agora, um só.", as três notas e a
-resolução do fim, está no histórico do git (commit `790c853`), se algum desses sons precisar voltar.
+A versão com música (base, baques, golpe, notas, resolução) está no histórico do git (commit `790c853`).
 
-Dois perfis: **cinematic** (~ -22 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença,
-mais centrado, ~ -19 LUFS). `npm run audio` regera os stems em ~10 s (`public/audio/v2/<perfil>/`, não versionados).
+Dois perfis: **cinematic** (~ -22 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença, mais
+centrado, ~ -19 LUFS). `npm run audio` regera os stems em ~15 s (`public/audio/v2/<perfil>/`, não versionados).
 
 | Quero ajustar | Onde | Precisa regerar? |
 | --- | --- | --- |
-| Volume dos swooshes ou dos cliques | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
+| Volume dos swooshes, dos cliques ou do texto | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
 | Volume geral | `MIX[perfil].masterDb` | não |
 | Onde entram e saem, fades, deslocamento | `inFrame`, `outFrame`, `fadeInFrames`, `fadeOutFrames`, `offsetFrames` | não |
 | Silenciar um dos dois | `gainDb: -Infinity` no stem | não |
 | Equilíbrio de base entre os dois | `SYNTH.stemPeakDb` | sim (`npm run audio`) |
 | Timbre, duração, nível de cada som | `scripts/audio/voices.mjs` e `compose.mjs` | sim |
-| Quadros dos eventos do vídeo | `src/audio/timeline.ts` (espelha `Ad.tsx`) | sim |
+| Ritmo do filme (quando cada coisa acontece) | `T` em `src/timeline.ts` | sim (`npm run audio`) e re-render do vídeo |
 
 Comandos: `npm run audio` (gera stems), `npm run audio:check -- cinematic --png` (loudness, pico, mono,
 equilíbrio por seção, sincronia, espectrogramas em `out/audio-report/`), `npm run audio:selftest`, `node scripts/audio/clicks.mjs arquivo.wav` (procura estalos),

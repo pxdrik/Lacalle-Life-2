@@ -3,6 +3,9 @@ import { interpolate, useCurrentFrame } from "remotion";
 import { MARK_PATH, MARK_VIEWBOX } from "./brand";
 import { C, FONT, clamp, ease, easeIn, useLayout } from "./theme";
 
+/** Quadros que uma palavra leva para subir, desfocar e assentar. */
+const REVEAL = 18;
+
 /** Palavra por palavra: sobe, desfoca e assenta, na curva do Motion System. */
 export const Words: FC<{
   text: string;
@@ -28,7 +31,7 @@ export const Words: FC<{
       }}
     >
       {text.split(" ").map((word, i) => {
-        const p = interpolate(frame, [start + i * stagger, start + i * stagger + 22], [0, 1], {
+        const p = interpolate(frame, [start + i * stagger, start + i * stagger + REVEAL], [0, 1], {
           ...clamp,
           easing: ease,
         });

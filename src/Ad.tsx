@@ -8,16 +8,14 @@ import { Backdrop, Grain } from "./Backdrop";
 import { Fade, Phone, Scroller, Shot, Tap } from "./Phone";
 import { Headline, Lockup, Words } from "./Text";
 import { BEZEL, C, FONT, clamp, ease, easeIn, easeInOut, useLayout } from "./theme";
+import { DURATION, FPS, T } from "./timeline";
+
+export { DURATION, FPS };
 
 /** Trocar aqui quando o endereço final de divulgação for outro. */
 const CTA_URL = "lacalle-life-2.vercel.app";
 
-/** Tempo extra: a tela Diário fica visível antes do primeiro toque e a tela Hoje ("quanto ainda cabe no dia") segura mais. */
-const PRE_TAP = 12;
-const HOJE_HOLD = 24;
-const X = PRE_TAP + HOJE_HOLD;
-export const DURATION = 900 + X;
-export const FPS = 30;
+// Todo o tempo vem de src/timeline.ts (T). Nada de número solto aqui.
 
 // ---------------------------------------------------------------------------
 // 1. Gancho: três apps para três coisas.
@@ -26,7 +24,7 @@ const Hook: FC = () => {
   const frame = useCurrentFrame();
   const L = useLayout();
   const lines = ["Um app para a dieta.", "Outro para o treino.", "Outro para a evolução."];
-  const out = interpolate(frame, [86, 102], [1, 0], { ...clamp, easing: easeIn });
+  const out = interpolate(frame, [...T.hook.exit], [1, 0], { ...clamp, easing: easeIn });
   const top = L.portrait ? 620 : 300;
   return (
     <div
@@ -46,12 +44,12 @@ const Hook: FC = () => {
               fontWeight: 500,
               fontSize: 30,
               color: C.accent,
-              opacity: interpolate(frame, [6 + i * 22, 22 + i * 22], [0, 1], clamp),
+              opacity: interpolate(frame, [T.hook.lines[i]!, T.hook.lines[i]! + 16], [0, 1], clamp),
             }}
           >
             0{i + 1}
           </span>
-          <Words text={line} start={6 + i * 22} size={L.portrait ? 84 : 96} weight={600} color={i === 2 ? C.ink : "#cfd4da"} />
+          <Words text={line} start={T.hook.lines[i]!} size={L.portrait ? 84 : 96} weight={600} color={i === 2 ? C.ink : "#cfd4da"} />
         </div>
       ))}
     </div>
@@ -64,8 +62,8 @@ const Hook: FC = () => {
 const LogoReveal: FC = () => {
   const frame = useCurrentFrame();
   const L = useLayout();
-  const p = interpolate(frame, [0, 26], [0, 1], { ...clamp, easing: ease });
-  const out = interpolate(frame, [66, 84], [1, 0], { ...clamp, easing: easeIn });
+  const p = interpolate(frame, [0, T.logo.mark], [0, 1], { ...clamp, easing: ease });
+  const out = interpolate(frame, [...T.logo.exit], [1, 0], { ...clamp, easing: easeIn });
   return (
     <AbsoluteFill
       style={{
@@ -79,7 +77,7 @@ const LogoReveal: FC = () => {
         <Lockup size={L.portrait ? 116 : 150} />
       </div>
       <div style={{ marginTop: 56 }}>
-        <Words text="Agora, um só." start={30} size={L.portrait ? 60 : 72} weight={500} color={C.muted} />
+        <Words text="Agora, um só." start={T.logo.words} size={L.portrait ? 60 : 72} weight={500} color={C.muted} />
       </div>
     </AbsoluteFill>
   );
@@ -100,17 +98,26 @@ const Stage: FC = () => {
   const f = useCurrentFrame();
   const L = useLayout();
   const { screenW } = L;
+  const S0 = T.stage.enter;
 
-  const enter = interpolate(f, [0, 44], [0, 1], { ...clamp, easing: ease });
-  const exit = interpolate(f, [610 + X, 636 + X], [0, 1], { ...clamp, easing: easeIn });
+  const enter = interpolate(f, [0, T.stage.settle], [0, 1], { ...clamp, easing: ease });
+  const exit = interpolate(f, [T.stage.exitStart - S0, T.stage.exitEnd - S0], [0, 1], { ...clamp, easing: easeIn });
   const y = (1 - enter) * 640 + exit * 820;
   const tilt = (1 - enter) * 16;
-  const scale = 1 + (f / (640 + X)) * 0.05;
+  const scale = 1 + (f / (T.stage.exitEnd + 4 - S0)) * 0.05;
   const yaw = Math.sin(f / 110) * 2.4 * enter;
   const o = interpolate(f, [0, 14], [0, 1], clamp) * (1 - exit);
 
-  const dietScroll = interpolate(f, [34, 122], [0, 880], { ...clamp, easing: easeInOut });
-  const evoScroll = interpolate(f - (414 + X), [40, 100, 116, 182], [0, 1400, 1400, 2150], { ...clamp, easing: easeInOut });
+  const dietScroll = interpolate(f, [T.dieta.scroll[0] - S0, T.dieta.scroll[1] - S0], [0, 880], { ...clamp, easing: easeInOut });
+  const evo = T.evolucao;
+  const evoScroll = interpolate(
+    f - (evo.cut - S0),
+    [evo.scroll[0][0] - evo.cut, evo.scroll[0][1] - evo.cut, evo.scroll[1][0] - evo.cut, evo.scroll[1][1] - evo.cut],
+    [0, 1400, 1400, 2150],
+    { ...clamp, easing: easeInOut },
+  );
+  const d = T.diario;
+  const t = T.treino;
 
   return (
     <AbsoluteFill style={{ perspective: 2600 }}>
@@ -128,33 +135,33 @@ const Stage: FC = () => {
       >
         <Phone screenW={screenW} style={{ left: 0, top: 0 }}>
           {/* dieta: rola pelas refeições */}
-          <Sequence from={0} durationInFrames={134}>
+          <Sequence from={0} durationInFrames={d.cut - S0 + 10}>
             <Scroller name="dieta-tall" nav="nav-mais" scroll={dietScroll} screenW={screenW} />
           </Sequence>
 
           {/* diário: marca café e almoço; depois o Hoje mostra o que resta */}
-          <Sequence from={124} durationInFrames={118 + X}>
+          <Sequence from={d.cut - S0} durationInFrames={t.cut - d.cut + 8}>
             <Shot name="diario-0" />
-            <Shot name="diario-1" at={34 + PRE_TAP} fade={4} />
-            <Shot name="diario-2" at={64 + PRE_TAP} fade={4} />
-            <Shot name="hoje-2" at={94 + PRE_TAP} fade={12} />
-            <Tap {...taps.diarioCafe} at={30 + PRE_TAP} screenW={screenW} />
-            <Tap {...taps.diarioAlmoco} at={60 + PRE_TAP} screenW={screenW} />
+            <Shot name="diario-1" at={d.states[0] - d.cut} fade={4} />
+            <Shot name="diario-2" at={d.states[1] - d.cut} fade={4} />
+            <Shot name="hoje-2" at={d.hoje[0] - d.cut} fade={d.hoje[1] - d.hoje[0]} />
+            <Tap {...taps.diarioCafe} at={d.taps[0] - d.cut} screenW={screenW} />
+            <Tap {...taps.diarioAlmoco} at={d.taps[1] - d.cut} screenW={screenW} />
           </Sequence>
 
           {/* treino: três séries marcadas, descanso correndo */}
-          <Sequence from={234 + X} durationInFrames={188}>
+          <Sequence from={t.cut - S0} durationInFrames={evo.cut - t.cut + 8}>
             <Shot name="sessao-0" />
-            <Shot name="sessao-1" at={46} fade={4} />
-            <Shot name="sessao-2" at={86} fade={4} />
-            <Shot name="sessao-3" at={126} fade={4} />
-            <Tap {...taps.sessao1} at={40} screenW={screenW} />
-            <Tap {...taps.sessao2} at={80} screenW={screenW} />
-            <Tap {...taps.sessao3} at={120} screenW={screenW} />
+            <Shot name="sessao-1" at={t.states[0] - t.cut} fade={4} />
+            <Shot name="sessao-2" at={t.states[1] - t.cut} fade={4} />
+            <Shot name="sessao-3" at={t.states[2] - t.cut} fade={4} />
+            <Tap {...taps.sessao1} at={t.taps[0] - t.cut} screenW={screenW} />
+            <Tap {...taps.sessao2} at={t.taps[1] - t.cut} screenW={screenW} />
+            <Tap {...taps.sessao3} at={t.taps[2] - t.cut} screenW={screenW} />
           </Sequence>
 
           {/* evolução: gráfico, volume semanal, recordes */}
-          <Sequence from={414 + X} durationInFrames={214}>
+          <Sequence from={evo.cut - S0} durationInFrames={T.stage.exitEnd - evo.cut - 8}>
             <Fade at={0} fade={10}>
               <Scroller name="evolucao-tall" nav="nav-evolucao" scroll={evoScroll} screenW={screenW} />
             </Fade>
@@ -171,20 +178,21 @@ const Stage: FC = () => {
 const Close: FC = () => {
   const frame = useCurrentFrame();
   const L = useLayout();
-  const dim = interpolate(frame, [48, 62], [1, 0.32], { ...clamp, easing: ease });
-  const cta = interpolate(frame, [88, 108], [0, 1], { ...clamp, easing: ease });
+  const c = T.close;
+  const dim = interpolate(frame, [...c.dim], [1, 0.32], { ...clamp, easing: ease });
+  const cta = interpolate(frame, [...c.cta], [0, 1], { ...clamp, easing: ease });
   const top = L.portrait ? 520 : 140;
   const size = L.portrait ? 64 : 76;
   return (
     <div style={{ position: "absolute", left: L.textX, top, width: L.portrait ? L.textW + 60 : 1500 }}>
       <div style={{ opacity: dim }}>
-        <Words text="Monte dietas." start={2} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
-        <Words text="Monte treinos." start={12} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
-        <Words text="Acompanhe sua evolução." start={22} size={size} weight={600} color="#cfd4da" />
+        <Words text="Monte dietas." start={c.lines[0]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
+        <Words text="Monte treinos." start={c.lines[1]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
+        <Words text="Acompanhe sua evolução." start={c.lines[2]} size={size} weight={600} color="#cfd4da" />
       </div>
       <Words
         text="Tudo em um lugar só."
-        start={54}
+        start={c.tudo}
         stagger={3}
         size={L.portrait ? 88 : 124}
         weight={700}
@@ -211,49 +219,51 @@ const Close: FC = () => {
 };
 
 // ---------------------------------------------------------------------------
-// Linha do tempo (30 fps, 900 frames = 30 s)
+// Linha do tempo (30 fps; a duração vem de src/timeline.ts)
 // ---------------------------------------------------------------------------
 export interface AdProps {
-  /** "v1" = trilha provisória; "v2" = stems novos (src/audio). Só o áudio muda. */
+  /** "v1" = trilha provisória; "v2" = efeitos novos (src/audio). Só o áudio muda. */
   audio?: AudioVersion;
   profile?: AudioProfile;
 }
 
 export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAULT_AUDIO_PROFILE }) => {
   const frame = useCurrentFrame();
-  const vol = interpolate(frame, [0, 24, 860 + X, 900 + X], [0, 1, 1, 0], clamp);
+  const vol = interpolate(frame, [0, 24, DURATION - 40, DURATION], [0, 1, 1, 0], clamp);
+  const topLogoStart = T.stage.enter - 10;
+  const topLogoDur = T.stage.exitStart - topLogoStart;
   return (
     <AbsoluteFill style={{ background: C.deep }}>
-      <Backdrop glowFrom={96} glowTo={160} />
+      <Backdrop glowFrom={T.logo.start - 2} glowTo={T.logo.start + 62} />
 
-      <Sequence from={0} durationInFrames={104}>
+      <Sequence from={0} durationInFrames={T.hook.dur}>
         <Hook />
       </Sequence>
-      <Sequence from={98} durationInFrames={84}>
+      <Sequence from={T.logo.start} durationInFrames={T.logo.dur}>
         <LogoReveal />
       </Sequence>
 
-      <Sequence from={158} durationInFrames={620 + X}>
-        <TopLogo dur={620 + X} />
+      <Sequence from={topLogoStart} durationInFrames={topLogoDur}>
+        <TopLogo dur={topLogoDur} />
       </Sequence>
-      <Sequence from={168} durationInFrames={640 + X}>
+      <Sequence from={T.stage.enter} durationInFrames={T.stage.exitEnd + 4 - T.stage.enter}>
         <Stage />
       </Sequence>
 
-      <Sequence from={176} durationInFrames={120}>
-        <Headline title="Monte sua dieta." sub="Refeições e totais contra a sua meta." dur={120} />
+      <Sequence from={T.dieta.title} durationInFrames={T.diario.cut + 4 - T.dieta.title}>
+        <Headline title="Monte sua dieta." sub="Refeições e totais contra a sua meta." dur={T.diario.cut + 4 - T.dieta.title} />
       </Sequence>
-      <Sequence from={292} durationInFrames={114 + X}>
-        <Headline title="Marque o que comeu." sub="E veja quanto ainda cabe no dia." dur={114 + X} />
+      <Sequence from={T.diario.cut} durationInFrames={T.treino.cut + 4 - T.diario.cut}>
+        <Headline title="Marque o que comeu." sub="E veja quanto ainda cabe no dia." dur={T.treino.cut + 4 - T.diario.cut} />
       </Sequence>
-      <Sequence from={402 + X} durationInFrames={184}>
-        <Headline title="Monte seu treino." sub="Cada série, com a carga da última vez." dur={184} />
+      <Sequence from={T.treino.cut} durationInFrames={T.evolucao.cut + 4 - T.treino.cut}>
+        <Headline title="Monte seu treino." sub="Cada série, com a carga da última vez." dur={T.evolucao.cut + 4 - T.treino.cut} />
       </Sequence>
-      <Sequence from={582 + X} durationInFrames={192}>
-        <Headline title="Acompanhe sua evolução." sub="Peso, volume e recordes ao longo do tempo." dur={192} />
+      <Sequence from={T.evolucao.cut} durationInFrames={T.close.start + 2 - T.evolucao.cut}>
+        <Headline title="Acompanhe sua evolução." sub="Peso, volume e recordes ao longo do tempo." dur={T.close.start + 2 - T.evolucao.cut} />
       </Sequence>
 
-      <Sequence from={772 + X} durationInFrames={128}>
+      <Sequence from={T.close.start} durationInFrames={T.close.dur}>
         <Close />
       </Sequence>
 

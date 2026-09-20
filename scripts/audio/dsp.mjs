@@ -2,7 +2,7 @@
 // compressor, limitador, medidores (LUFS, true peak) e espectrograma em PNG.
 import { writeFileSync } from "node:fs";
 import zlib from "node:zlib";
-import { DURATION, FPS } from "../../src/audio/timeline.ts";
+import { DURATION, FPS } from "../../src/timeline.ts";
 
 export const SR = 48000;
 export const DUR = DURATION / FPS; // 31,2 s: vem da linha do tempo do vídeo
