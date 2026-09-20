@@ -1,4 +1,4 @@
-# Lacalle Life, comercial de 30 s
+# Lacalle Life, comercial de 31,2 s
 
 Vídeo feito em código com [Remotion](https://www.remotion.dev). As telas são capturas reais
 do app (Playwright, dados de demonstração), nada é mockup redesenhado.
@@ -24,23 +24,27 @@ npm run score         # regenera a trilha
 npm run capture       # recaptura as telas (Life rodando em http://localhost:3000)
 ```
 
-## Áudio v2 (versão mínima, com suspense)
+## Áudio v2 (mínimo, com suspense)
 
-Estado: **em teste**. O padrão do `npm run render` ainda é a trilha provisória (v1). Para aprovar, troque
-`DEFAULT_AUDIO_VERSION` para `"v2"` em `src/audio/config.ts`. O áudio não altera cena, captura, texto ou animação.
+Estado: **em teste**, e já é o padrão do `npm run render` (a trilha v1 tem 30 s e não cobre os 31,2 s do vídeo;
+os arquivos dela continuam em `public/audio/score.wav` para voltar atrás). Para voltar: `DEFAULT_AUDIO_VERSION = "v1"`
+em `src/audio/config.ts`. O áudio não altera cena, captura, texto ou animação.
 
 Direção: pouquíssimo som, limpo (nada de saturação), muito ar e silêncio. Uma base em ré com **quarta suspensa
 (sol)** que fica "pendurada" o filme inteiro e só resolve na **terça maior (fá sustenido)** quando aparece
 "Tudo em um lugar só.". O fá sustenido não aparece em nenhum outro lugar, então a chegada soa como resolução.
-Os sons de interface não são cliques por cima da música: cada evento importante toca **uma nota tonal**, da mesma
-escala da base (ré, mi, sol, lá). São sete notas no filme inteiro. Tudo é gerado por código, localmente.
+
+O que existe, e mais nada: a base (só o filtro abre com a narrativa), três baques no gancho, um golpe limpo em
+"Agora, um só.", **um swoosh por troca de página** (seis, sempre a mesma família de ar filtrado, com o pico no
+meio do fade da tela), **três notas** (uma por página, na escala da base) e a resolução mais a assinatura do
+fim. Tudo é gerado por código, localmente.
 
 Quatro stems por perfil (`public/audio/v2/<perfil>/`, não versionados; `npm run audio` regera em ~40 s):
-**music** (base sustentada), **impacts** (três baques discretos do gancho, um golpe limpo em "Agora, um só.",
-sopros de transição), **ui** (as sete notas) e **closing** (a resolução e a assinatura). Dois perfis: **cinematic**
-(~ -20 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença, mais centrado, ~ -18 LUFS).
+**music** (a base), **impacts** (baques, sopro até o logo, golpe e swooshes), **ui** (as três notas) e **closing**
+(resolução e assinatura). Dois perfis: **cinematic** (~ -20 LUFS, pico -7 dBFS) e **mobile** (celular e social:
+sem subgrave, presença, mais centrado, ~ -18 LUFS).
 
-Para silenciar os sons de interface: `ui.gainDb: -99` em `src/audio/config.ts`.
+Para silenciar as notas: `ui.gainDb: -99`. Para tirar os swooshes: `impacts.gainDb: -99` (leva junto o golpe e os baques).
 
 | Quero ajustar | Onde | Precisa regerar? |
 | --- | --- | --- |

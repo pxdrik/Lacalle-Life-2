@@ -181,6 +181,31 @@ export function noiseSweep({ dur, f0, f1, q = 1.1, shape = (p) => p * p, mode = 
   });
 }
 
+/**
+ * Swoosh de transição de página: ar filtrado (ruído rosa em banda larga) que sobe ou desce de
+ * frequência, com envelope em sino suave (pico em 44%) e largura estéreo. Sem clique, sem chiado.
+ */
+export function swoosh({ dur = 0.42, f0 = 900, f1 = 3600, q = 0.75 }) {
+  const n = n_(dur);
+  return [0, 1].map(() => {
+    const x = new Float32Array(n);
+    let b0 = 0, b1 = 0, b2 = 0; // ruído rosa (aproximação de Paul Kellet)
+    for (let i = 0; i < n; i++) {
+      const w = noise();
+      b0 = 0.99765 * b0 + w * 0.099046;
+      b1 = 0.963 * b1 + w * 0.2965164;
+      b2 = 0.57 * b2 + w * 1.0526913;
+      x[i] = (b0 + b1 + b2 + w * 0.1848) * 0.3;
+    }
+    const y = svf(x, (t) => f0 * (f1 / f0) ** Math.min(1, t / dur), q, "bp");
+    for (let i = 0; i < n; i++) {
+      const p = i / n;
+      y[i] *= (p ** 1.6 * (1 - p) ** 2) / 0.0844; // sino assimétrico normalizado a 1 no pico
+    }
+    return fadeEnds(y, 6, 10);
+  });
+}
+
 /** Soma o reverb, tira o subgrave inútil e aplica o perfil. Sem saturação e sem excitador de grave. */
 export function finishTrack(track, { reverb, wet = 0.3, profile = "cinematic", kind = "music", ceilingDb = -3 }) {
   const { L, R } = track;

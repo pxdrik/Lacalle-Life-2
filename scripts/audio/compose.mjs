@@ -1,11 +1,13 @@
-// Áudio v2, versão mínima: pouca coisa, limpa, com suspense harmônico.
+// Áudio v2, ainda mais mínimo: base sustentada, três baques no gancho, um golpe, swooshes de
+// transição de página, três notas e o fechamento. Nada além disso.
 //
 // Ideia: uma base em ré (ré, lá) com uma quarta suspensa (sol) que fica "pendurada" o filme
 // inteiro e só resolve na terça maior (fá sustenido) quando aparece "Tudo em um lugar só.".
 // O fá sustenido não é usado em nenhum outro lugar, então a chegada é ouvida como resolução.
-// Os sons de interface não são uma camada de cliques: cada evento importante toca UMA nota
-// tonal, da mesma escala da base, então eles são a melodia. O resto é silêncio e espaço.
+// Os swooshes marcam cada troca de página, sempre a mesma família de ar filtrado. As três
+// notas são o único "som de interface" e ficam na escala da base.
 //
+// Todos os tempos vêm de src/audio/timeline.ts (que espelha Ad.tsx).
 // Gera 4 stems por perfil: music, impacts, ui, closing.
 // Uso: node scripts/audio/compose.mjs [cinematic] [mobile]   (sem argumento, gera os dois)
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -16,8 +18,8 @@ import * as V from "./voices.mjs";
 
 const { Track } = V;
 const S = (f) => f / FPS;
-const T0 = S(CUES.agora[0]); // "Agora, um só." (4,27 s)
-const TUDO = S(CUES.fechamento.tudo[0]); // "Tudo em um lugar só." (27,53 s)
+const T0 = S(CUES.agora[0]); // "Agora, um só."
+const TUDO = S(CUES.fechamento.tudo[0]); // "Tudo em um lugar só."
 const CTA = S(CUES.fechamento.cta[0]);
 const smooth = (x) => { const c = Math.min(1, Math.max(0, x)); return c * c * (3 - 2 * c); };
 /** Automação por pontos [tempo, valor], suavizada entre eles. */
@@ -35,55 +37,42 @@ const cue = (stem, name, t) => cues.push({ stem, name, t: +t.toFixed(4), frame: 
 // ================================ MÚSICA ==========================================
 function buildMusic(m) {
   // Gancho: o "problema" é um aglomerado grave (ré e mi bemol, que batem a ~4 Hz) que cresce
-  // devagar, e um par agudo quase igual (3 Hz de diferença) que cintila. Some 60 ms antes do golpe.
+  // devagar. Some 60 ms antes do golpe.
   const hookEnd = T0 - 0.06;
   const [hl, hr] = V.padChord({ notes: ["D2", "Eb2"], dur: hookEnd - 0.2, attack: 3.4, release: 0.05, cutoff: [260, 560], seed: 5 });
   m.put(0.2, hl, hr, { gain: 0.15, send: 0.25 });
-  m.put(1.2, V.sub({ freq: 880, dur: hookEnd - 1.2, attack: 2.4, release: 0.05 }), null, { gain: 0.012, pan: -0.5, send: 0.4 });
-  m.put(1.2, V.sub({ freq: 883.2, dur: hookEnd - 1.2, attack: 2.4, release: 0.05 }), null, { gain: 0.012, pan: 0.5, send: 0.4 });
   cue("music", "bed-gancho", 0.2);
 
-  // A base: ré, lá, ré (quinta vazia) e a quarta suspensa (sol). O filtro abre com a narrativa.
+  // A base: ré e lá (quinta vazia) e a quarta suspensa (sol). O filtro abre com a narrativa,
+  // e é só isso que muda: nenhuma nota entra ou sai até a resolução.
   const cut = auto([[T0, 520], [S(CUES.diario.cut), 780], [S(CUES.treino.cut), 900], [S(CUES.evolucao.cut), 1050],
-    [S(CUES.evolucao.scroll[0][0]), 1300], [S(CUES.evolucao.scroll[1][1]), 2500], [27.9, 1300], [28.4, 900]]);
-  const sus = TUDO - 0.08; // o sol sai um instante antes do fá sustenido chegar
+    [S(CUES.evolucao.scroll[0][0]), 1300], [S(CUES.evolucao.scroll[1][1]), 2500], [TUDO + 0.4, 1300], [TUDO + 0.9, 900]]);
   const layer = (notes, t0, t1, opts, gain, send = 0.3) => {
-    const [l, r] = V.padChord({ notes, dur: t1 - t0, ...opts, cutoff: opts.cutoff ?? ((tl) => cut(t0 + tl)) });
+    const [l, r] = V.padChord({ notes, dur: t1 - t0, ...opts, cutoff: (tl) => cut(t0 + tl) });
     m.put(t0, l, r, { gain, send });
   };
-  // Uma oitava acima do que parece natural: caixa pequena (celular, notebook) reproduz e não estoura.
-  layer(["D3", "A3", "D4"], T0, 28.0, { attack: 0.9, release: 0.6, breath: 0.16, seed: 11 }, 0.16);
-  m.put(T0, V.sub({ freq: hz("D2"), dur: 28.0 - T0, attack: 0.9, release: 0.6 }), null, { gain: 0.04 }); // só um fio de grave
-  layer(["G3"], T0, sus, { attack: 1.2, release: 0.12, seed: 12 }, 0.085);
+  layer(["D3", "A3"], T0, TUDO + 0.47, { attack: 0.9, release: 0.6, breath: 0.16, seed: 11 }, 0.15);
+  layer(["G3"], T0, TUDO - 0.08, { attack: 1.2, release: 0.12, seed: 12 }, 0.08); // sai um instante antes do fá sustenido
   cue("music", "base-ré-lá", T0);
-  cue("music", "quarta-suspensa-sol", T0);
-  // Treino: uma sétima menor (dó) entra baixinho. A tensão sobe um degrau, sem ritmo.
-  layer(["C4"], S(CUES.treino.cut), 19.7, { attack: 1.0, release: 1.2, cutoff: [800, 1100], seed: 13 }, 0.05);
-  // Evolução: a base se abre com uma segunda e uma quinta em cima (mi, lá) e um brilho agudo.
-  layer(["E4", "A4"], S(CUES.evolucao.cut), 27.9, { attack: 1.6, release: 1.6, cutoff: auto([[19.4, 1500], [25.47, 3200], [27.9, 1600]]), seed: 14 }, 0.06);
-  cue("music", "abre-evolução", S(CUES.evolucao.cut));
-  const [sl, sr] = V.shimmer({ notes: ["A5", "E6"], dur: 27.4 - 20.2, attack: 2.0, release: 2.0 });
-  m.put(20.2, sl, sr, { gain: 0.03, send: 0.8 });
 }
 
 // ================================ IMPACTOS ==========================================
 function buildImpacts(p) {
-  // Gancho: três "problemas". Cada um é um baque grave curto mais um par dissonante que acumula.
-  const clusters = [["A3", "Bb3"], ["A3", "Bb3", "E4", "F4"], ["A3", "Bb3", "E4", "F4", "Db5", "D5"]];
+  // Gancho: três "problemas". Cada um é um baque grave curto mais o mesmo par dissonante
+  // (lá e si bemol), um pouco mais forte a cada vez.
   const lv = [0.5, 0.72, 1];
   CUES.hook.lines.forEach((f, i) => {
     const t = S(f) + 0.13;
     p.put(t, V.sub({ freq: 56, dur: 0.04, release: 0.32, glideFrom: 88, glideTau: 0.05, tau: 0.18 }), null, { gain: 0.3 * lv[i], send: 0.25 });
-    clusters[i].forEach((n, k) => p.put(t + 0.004 * k, V.mallet({ freq: hz(n), dur: 1.6, tau: 0.6, bright: 0.3 }), null, { gain: 0.05 * lv[i], pan: (k % 2 ? 0.4 : -0.4), send: 0.9 }));
+    ["A3", "Bb3"].forEach((n, k) => p.put(t + 0.004 * k, V.mallet({ freq: hz(n), dur: 1.6, tau: 0.6, bright: 0.3 }), null, { gain: 0.055 * lv[i], pan: k ? 0.4 : -0.4, send: 0.9 }));
     cue("impacts", `hook-${i + 1}`, t);
   });
 
-  // A tensão sobe até o logo e há um respiro de silêncio antes do golpe
+  // A tensão sobe até o logo (só ar) e há um respiro de silêncio antes do golpe
   const swellStart = S(CUES.logo.start);
   const swellDur = T0 - 0.04 - swellStart;
   const [wl, wr] = V.noiseSweep({ dur: swellDur, f0: 350, f1: 5200, q: 0.8, shape: (x) => x ** 2.8 * (x > 0.94 ? (1 - x) / 0.06 : 1) });
   p.put(swellStart, wl, wr, { gain: 0.06, send: 0.6 });
-  p.put(swellStart, V.riserTone({ dur: swellDur, f0: 147, f1: 587 }), null, { gain: 0.035, send: 0.5 });
   cue("impacts", "subida-logo", swellStart);
 
   // "Agora, um só.": um golpe limpo e curto, e o ar que sai depois
@@ -92,42 +81,42 @@ function buildImpacts(p) {
   p.put(T0, al, ar, { gain: 0.035, send: 0.8 });
   cue("impacts", "hit-agora-um-so", T0);
 
-  // Transições: só um sopro, quase nada
-  const sweep = (t0, dur, f0, f1, gain, shape) => {
-    const [l, r] = V.noiseSweep({ dur, f0, f1, q: 1, shape });
-    p.put(t0, l, r, { gain, send: 0.5 });
+  // Swooshes: uma troca de página, um swoosh. O pico cai no meio do fade da tela, que é o
+  // instante em que o olho troca de página. Trocas "para frente" sobem de frequência.
+  const swoosh = (label, centerFrame, dur, f0, f1, gain) => {
+    const [l, r] = V.swoosh({ dur, f0, f1 });
+    p.put(S(centerFrame) - 0.44 * dur, l, r, { gain, send: 0.35 });
+    cue("impacts", `swoosh-${label}`, S(centerFrame));
   };
-  const up = (x) => x ** 2;
-  const down = (x) => (x < 0.08 ? x / 0.08 : (1 - x) ** 1.5);
-  sweep(S(CUES.treino.cut) - 0.5, 0.5, 500, 3500, 0.025, up);
-  sweep(S(CUES.evolucao.cut) - 0.8, 0.8, 300, 5000, 0.03, up);
-  sweep(S(CUES.stage.exitStart), 0.85, 4200, 300, 0.03, down);
+  swoosh("aparelho-sobe", (CUES.stage.enter + CUES.stage.settled) / 2, 0.9, 400, 3000, 0.16);
+  swoosh("diário", CUES.diario.cut + 4, 0.42, 900, 3600, 0.2);
+  swoosh("hoje", (CUES.diario.hoje[0] + CUES.diario.hoje[1]) / 2, 0.42, 900, 3600, 0.2);
+  swoosh("treino", CUES.treino.cut + 4, 0.42, 900, 3600, 0.2);
+  swoosh("evolução", CUES.evolucao.cut + 5, 0.5, 700, 4200, 0.24);
+  swoosh("aparelho-sai", (CUES.stage.exitStart + CUES.stage.exitEnd) / 2, 0.8, 3200, 350, 0.13);
 }
 
 // ================================ INTERFACE ==========================================
-// Uma nota por evento, sempre de {ré, mi, sol, lá}: nunca fá sustenido, que fica reservado para a resolução.
+// Três notas, uma por página, sempre de {ré, mi, sol, lá}: nunca fá sustenido, que é da resolução.
 function buildUI(u) {
-  const note = (frame, name, gain, label) => {
-    u.put(S(frame), V.mallet({ freq: hz(name), dur: 1.9, tau: 0.6 }), null, { gain, send: 0.7 });
+  const note = (frame, name, label) => {
+    u.put(S(frame), V.mallet({ freq: hz(name), dur: 1.9, tau: 0.6 }), null, { gain: 0.09, send: 0.7 });
     cue("ui", `nota-${label}`, S(frame));
   };
-  CUES.diario.states.forEach((f, i) => note(f, ["A4", "D5"][i], 0.1, `diário-${i + 1}`));
-  CUES.treino.states.forEach((f, i) => note(f, ["D5", "E5", "A5"][i], 0.1, `treino-${i + 1}`));
-  // Evolução: quando o volume semanal entra na tela e quando chegam os recordes
-  note(CUES.evolucao.scroll[0][1] - 6, "E5", 0.085, "evolução-volume");
-  note(CUES.evolucao.scroll[1][0] + 34, "A5", 0.085, "evolução-recordes");
+  note(CUES.diario.states[0], "D5", "diário"); // a primeira refeição registrada
+  note(CUES.treino.states[2], "A5", "treino"); // a última série concluída
+  note(CUES.evolucao.scroll[1][0] + 34, "E5", "evolução"); // os recordes chegam
 }
 
 // ================================ FECHAMENTO ==========================================
 function buildClosing(c) {
   // "Tudo em um lugar só.": a quarta suspensa resolve. Fá sustenido pela primeira vez, sem impacto.
-  const [pl, pr] = V.padChord({ notes: ["F#3", "A3", "D4", "F#4"], dur: 0.5, attack: 0.28, release: 0.7, cutoff: [1300, 2400], seed: 41 });
-  c.put(TUDO, pl, pr, { gain: 0.2, send: 0.5 });
-  c.put(TUDO, V.mallet({ freq: hz("F#5"), dur: 1.8, tau: 0.7 }), null, { gain: 0.075, send: 0.8 });
-  c.put(TUDO, V.sub({ freq: hz("D2"), dur: 0.3, attack: 0.08, release: 0.6 }), null, { gain: 0.11, send: 0.2 });
+  const [pl, pr] = V.padChord({ notes: ["F#3", "A3", "D4"], dur: 0.5, attack: 0.28, release: 0.7, cutoff: [1300, 2400], seed: 41 });
+  c.put(TUDO, pl, pr, { gain: 0.18, send: 0.5 });
+  c.put(TUDO, V.mallet({ freq: hz("F#5"), dur: 1.8, tau: 0.7 }), null, { gain: 0.07, send: 0.8 });
   cue("closing", "resolução-tudo", TUDO);
   // Assinatura: lá, ré. Quinta e oitava, sem terça, então nem alegre nem triste.
-  const sig = CTA + 0.53; // 29,2 s, quando o bloco da chamada já está legível
+  const sig = CTA + 0.53; // quando o bloco da chamada já está legível
   c.put(sig, V.mallet({ freq: hz("A5"), dur: 1.7, tau: 0.65 }), null, { gain: 0.14, send: 0.85 });
   c.put(sig + 0.28, V.mallet({ freq: hz("D6"), dur: 1.5, tau: 0.65 }), null, { gain: 0.12, send: 0.9 });
   cue("closing", "assinatura", sig);
@@ -164,7 +153,7 @@ function build(profile) {
     const cfg = REVERBS[name];
     V.finishTrack(tr, { reverb: new Reverb(makeIR(cfg.ir)), wet: cfg.wet, profile, kind: name, ceilingDb: SYNTH.stemCeilingDb });
     // O espaço antes da chamada é gravado no stem de fechamento; a música sai ao vivo, pela config.
-    if (name === "closing") duck(tr, 28.3, 28.4, 28.72, 28.85, -42);
+    if (name === "closing") duck(tr, CTA - 0.367, CTA - 0.267, CTA + 0.053, CTA + 0.183, -42);
     const g = lin(SYNTH.stemPeakDb[name]) / lin(peakDb(tr.L, tr.R));
     for (let i = 0; i < N; i++) { tr.L[i] *= g; tr.R[i] *= g; }
   }

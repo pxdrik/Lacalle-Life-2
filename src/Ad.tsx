@@ -12,7 +12,11 @@ import { BEZEL, C, FONT, clamp, ease, easeIn, easeInOut, useLayout } from "./the
 /** Trocar aqui quando o endereço final de divulgação for outro. */
 const CTA_URL = "lacalle-life-2.vercel.app";
 
-export const DURATION = 900;
+/** Tempo extra: a tela Diário fica visível antes do primeiro toque e a tela Hoje ("quanto ainda cabe no dia") segura mais. */
+const PRE_TAP = 12;
+const HOJE_HOLD = 24;
+const X = PRE_TAP + HOJE_HOLD;
+export const DURATION = 900 + X;
 export const FPS = 30;
 
 // ---------------------------------------------------------------------------
@@ -98,15 +102,15 @@ const Stage: FC = () => {
   const { screenW } = L;
 
   const enter = interpolate(f, [0, 44], [0, 1], { ...clamp, easing: ease });
-  const exit = interpolate(f, [610, 636], [0, 1], { ...clamp, easing: easeIn });
+  const exit = interpolate(f, [610 + X, 636 + X], [0, 1], { ...clamp, easing: easeIn });
   const y = (1 - enter) * 640 + exit * 820;
   const tilt = (1 - enter) * 16;
-  const scale = 1 + (f / 640) * 0.05;
+  const scale = 1 + (f / (640 + X)) * 0.05;
   const yaw = Math.sin(f / 110) * 2.4 * enter;
   const o = interpolate(f, [0, 14], [0, 1], clamp) * (1 - exit);
 
   const dietScroll = interpolate(f, [34, 122], [0, 880], { ...clamp, easing: easeInOut });
-  const evoScroll = interpolate(f - 414, [40, 100, 116, 182], [0, 1400, 1400, 2150], { ...clamp, easing: easeInOut });
+  const evoScroll = interpolate(f - (414 + X), [40, 100, 116, 182], [0, 1400, 1400, 2150], { ...clamp, easing: easeInOut });
 
   return (
     <AbsoluteFill style={{ perspective: 2600 }}>
@@ -129,17 +133,17 @@ const Stage: FC = () => {
           </Sequence>
 
           {/* diário: marca café e almoço; depois o Hoje mostra o que resta */}
-          <Sequence from={124} durationInFrames={118}>
+          <Sequence from={124} durationInFrames={118 + X}>
             <Shot name="diario-0" />
-            <Shot name="diario-1" at={34} fade={4} />
-            <Shot name="diario-2" at={64} fade={4} />
-            <Shot name="hoje-2" at={94} fade={12} />
-            <Tap {...taps.diarioCafe} at={30} screenW={screenW} />
-            <Tap {...taps.diarioAlmoco} at={60} screenW={screenW} />
+            <Shot name="diario-1" at={34 + PRE_TAP} fade={4} />
+            <Shot name="diario-2" at={64 + PRE_TAP} fade={4} />
+            <Shot name="hoje-2" at={94 + PRE_TAP} fade={12} />
+            <Tap {...taps.diarioCafe} at={30 + PRE_TAP} screenW={screenW} />
+            <Tap {...taps.diarioAlmoco} at={60 + PRE_TAP} screenW={screenW} />
           </Sequence>
 
           {/* treino: três séries marcadas, descanso correndo */}
-          <Sequence from={234} durationInFrames={188}>
+          <Sequence from={234 + X} durationInFrames={188}>
             <Shot name="sessao-0" />
             <Shot name="sessao-1" at={46} fade={4} />
             <Shot name="sessao-2" at={86} fade={4} />
@@ -150,7 +154,7 @@ const Stage: FC = () => {
           </Sequence>
 
           {/* evolução: gráfico, volume semanal, recordes */}
-          <Sequence from={414} durationInFrames={214}>
+          <Sequence from={414 + X} durationInFrames={214}>
             <Fade at={0} fade={10}>
               <Scroller name="evolucao-tall" nav="nav-evolucao" scroll={evoScroll} screenW={screenW} />
             </Fade>
@@ -217,7 +221,7 @@ export interface AdProps {
 
 export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAULT_AUDIO_PROFILE }) => {
   const frame = useCurrentFrame();
-  const vol = interpolate(frame, [0, 24, 860, 900], [0, 1, 1, 0], clamp);
+  const vol = interpolate(frame, [0, 24, 860 + X, 900 + X], [0, 1, 1, 0], clamp);
   return (
     <AbsoluteFill style={{ background: C.deep }}>
       <Backdrop glowFrom={96} glowTo={160} />
@@ -229,27 +233,27 @@ export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAU
         <LogoReveal />
       </Sequence>
 
-      <Sequence from={158} durationInFrames={620}>
-        <TopLogo dur={620} />
+      <Sequence from={158} durationInFrames={620 + X}>
+        <TopLogo dur={620 + X} />
       </Sequence>
-      <Sequence from={168} durationInFrames={640}>
+      <Sequence from={168} durationInFrames={640 + X}>
         <Stage />
       </Sequence>
 
       <Sequence from={176} durationInFrames={120}>
         <Headline title="Monte sua dieta." sub="Refeições e totais contra a sua meta." dur={120} />
       </Sequence>
-      <Sequence from={292} durationInFrames={114}>
-        <Headline title="Marque o que comeu." sub="E veja quanto ainda cabe no dia." dur={114} />
+      <Sequence from={292} durationInFrames={114 + X}>
+        <Headline title="Marque o que comeu." sub="E veja quanto ainda cabe no dia." dur={114 + X} />
       </Sequence>
-      <Sequence from={402} durationInFrames={184}>
+      <Sequence from={402 + X} durationInFrames={184}>
         <Headline title="Monte seu treino." sub="Cada série, com a carga da última vez." dur={184} />
       </Sequence>
-      <Sequence from={582} durationInFrames={192}>
+      <Sequence from={582 + X} durationInFrames={192}>
         <Headline title="Acompanhe sua evolução." sub="Peso, volume e recordes ao longo do tempo." dur={192} />
       </Sequence>
 
-      <Sequence from={772} durationInFrames={128}>
+      <Sequence from={772 + X} durationInFrames={128}>
         <Close />
       </Sequence>
 

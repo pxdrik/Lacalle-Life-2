@@ -6,7 +6,7 @@
 import { mkdirSync, readFileSync } from "node:fs";
 import { CUES, FPS } from "../../src/audio/timeline.ts";
 import { STEMS, stemGain } from "../../src/audio/config.ts";
-import { N, SR, db, fft, loudness, peakDb, readWav, rmsProfile, spectrogram, truePeakDb } from "./dsp.mjs";
+import { DUR, N, SR, applyBiquad, biquad, db, fft, loudness, peakDb, readWav, rmsProfile, spectrogram, truePeakDb } from "./dsp.mjs";
 
 const args = process.argv.slice(2);
 const profile = args.find((a) => a === "cinematic" || a === "mobile") ?? "cinematic";
@@ -36,16 +36,18 @@ function simulate() {
   return { L, R, stems };
 }
 
+const cta = S(CUES.fechamento.cta[0]);
 const sections = [
   ["gancho", 0, S(CUES.logo.start)],
   ["logo/agora", S(CUES.logo.start), S(CUES.stage.enter)],
   ["dieta", S(CUES.stage.enter), S(CUES.diario.cut)],
-  ["diário", S(CUES.diario.cut), S(CUES.treino.cut)],
+  ["diário", S(CUES.diario.cut), S(CUES.diario.hoje[0])],
+  ["hoje", S(CUES.diario.hoje[0]), S(CUES.treino.cut)],
   ["treino", S(CUES.treino.cut), S(CUES.evolucao.cut)],
   ["evolução", S(CUES.evolucao.cut), S(CUES.fechamento.lines[0])],
-  ["fechamento", S(CUES.fechamento.lines[0]), 28.35],
-  ["espaço (antes da chamada)", 28.4, S(CUES.fechamento.cta[0])],
-  ["chamada + assinatura", S(CUES.fechamento.cta[0]), 30],
+  ["fechamento", S(CUES.fechamento.lines[0]), cta - 0.32],
+  ["espaço (antes da chamada)", cta - 0.25, cta - 0.03],
+  ["chamada + assinatura", cta, DUR],
 ];
 
 const bands = [["sub <60", 20, 60], ["grave 60-250", 60, 250], ["médio 250-2k", 250, 2000], ["presença 2-6k", 2000, 6000], ["ar >6k", 6000, 16000]];
@@ -104,7 +106,24 @@ function syncReport(stems) {
   console.log("\n--- sincronia (início do som vs. instante planejado; só eventos secos) ---");
   let worst = 0;
   let checked = 0;
+  const swooshes = [];
   for (const c of cues) {
+    if (c.name.startsWith("swoosh")) {
+      // swoosh: o pico de energia (janelas de 10 ms) tem que cair no centro previsto da troca de página
+      const w = Math.round(0.01 * SR);
+      // só a banda aguda (> 1,5 kHz): a cauda grave de reverb de outros eventos não engana o pico
+      const hp = biquad("hp", 1500, 0.7);
+      const hs = (stems.__hp ??= Object.fromEntries(Object.entries(stems).map(([k, v]) => [k, { L: applyBiquad(Float32Array.from(v.L), hp), R: applyBiquad(Float32Array.from(v.R), hp) }])));
+      let best = 0, bt = c.t;
+      for (let s0 = Math.round((c.t - 0.5) * SR); s0 < Math.round((c.t + 0.5) * SR); s0 += w) {
+        let e = 0;
+        for (let i = s0; i < s0 + w; i++) e += Math.abs(hs[c.stem].L[i]) + Math.abs(hs[c.stem].R[i]);
+        if (e > best) { best = e; bt = (s0 + w / 2) / SR; }
+      }
+      const d = (bt - c.t) * 1000;
+      swooshes.push(`${c.name} ${d >= 0 ? "+" : ""}${d.toFixed(0)} ms`);
+      continue;
+    }
     if (!/^(hook|hit|nota|assinatura)/.test(c.name)) continue;
     const st = stems[c.stem];
     if (!st) continue;
@@ -119,6 +138,7 @@ function syncReport(stems) {
     checked++;
     if (Math.abs(dt) > 25) console.log(`  ${c.stem}/${c.name} @ ${c.t}s: início ${dt.toFixed(0)} ms depois do previsto`);
   }
+  if (swooshes.length) console.log(`pico de cada swoosh vs. centro da troca de página: ${swooshes.join(" | ")}`);
   console.log(`${checked} eventos secos conferidos; maior desvio ${worst.toFixed(0)} ms (1 quadro = 33 ms)`);
 }
 

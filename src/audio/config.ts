@@ -3,12 +3,14 @@
 // marcados "regerar" mexem no que está gravado nos stems e pedem `npm run audio`.
 // Só sintaxe apagável (sem enum), para o Node importar direto.
 
+import { CUES, DURATION } from "./timeline.ts";
+
 export type AudioVersion = "v1" | "v2";
 export type AudioProfile = "cinematic" | "mobile";
 export type StemName = "music" | "impacts" | "ui" | "closing";
 
-/** Qual trilha o `npm run render` usa. "v1" é a provisória; troque para "v2" ao aprovar. */
-export const DEFAULT_AUDIO_VERSION: AudioVersion = "v1";
+/** Qual trilha o `npm run render` usa. A v1 (provisória, 30 s) não cobre a duração atual do vídeo. */
+export const DEFAULT_AUDIO_VERSION: AudioVersion = "v2";
 /** "cinematic": dinâmica ampla, para fones e telas grandes. "mobile": social, alto-falante de celular. */
 export const DEFAULT_AUDIO_PROFILE: AudioProfile = "cinematic";
 
@@ -35,16 +37,16 @@ interface ProfileMix {
   stems: Record<StemName, StemMix>;
 }
 
-const full = { inFrame: 0, outFrame: 900, fadeInFrames: 0, fadeOutFrames: 0, offsetFrames: 0 };
+const full = { inFrame: 0, outFrame: DURATION, fadeInFrames: 0, fadeOutFrames: 0, offsetFrames: 0 };
 
 export const MIX: Record<AudioProfile, ProfileMix> = {
   cinematic: {
     masterDb: 0,
     masterFadeOutFrames: 20,
     stems: {
-      // A música vai saindo aos poucos (803 a 851) e some antes da frase final: o CTA só aparece em 860.
+      // A música vai saindo aos poucos (48 quadros) e some 9 quadros antes da chamada: sobra ~300 ms de silêncio.
       // Isso deixa ~300 ms de espaço para "Comece sem criar conta." ficar clara.
-      music: { ...full, gainDb: 0, outFrame: 851, fadeOutFrames: 48 },
+      music: { ...full, gainDb: 0, outFrame: CUES.fechamento.cta[0] - 9, fadeOutFrames: 48 },
       impacts: { ...full, gainDb: 0 },
       ui: { ...full, gainDb: 0 },
       closing: { ...full, gainDb: 0 },
@@ -54,7 +56,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
     masterDb: 3,
     masterFadeOutFrames: 20,
     stems: {
-      music: { ...full, gainDb: 0, outFrame: 851, fadeOutFrames: 48 },
+      music: { ...full, gainDb: 0, outFrame: CUES.fechamento.cta[0] - 9, fadeOutFrames: 48 },
       impacts: { ...full, gainDb: 0 },
       ui: { ...full, gainDb: 0 },
       closing: { ...full, gainDb: 0 },
@@ -76,7 +78,7 @@ export const SYNTH = {
 const lin = (db: number) => 10 ** (db / 20);
 
 /** Ganho linear de um stem em um quadro da composição (janela de entrada/saída, fades, master). */
-export function stemGain(profile: AudioProfile, stem: StemName, frame: number, totalFrames = 900): number {
+export function stemGain(profile: AudioProfile, stem: StemName, frame: number, totalFrames = DURATION): number {
   const p = MIX[profile];
   const m = p.stems[stem];
   if (frame < m.inFrame || frame >= m.outFrame) return 0;

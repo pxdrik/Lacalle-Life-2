@@ -5,18 +5,19 @@
 // Só sintaxe apagável (sem enum), para o Node importar direto.
 
 export const FPS = 30;
-export const DURATION = 900;
+/** 30 s originais + 36 quadros: a tela Diário aparece antes do 1º toque (+12) e a tela Hoje segura (+24). */
+export const DURATION = 936;
 
 export const CUES = {
   hook: { lines: [6, 28, 50], exitStart: 86, exitEnd: 102 },
   logo: { start: 98, sharp: 124, exitStart: 164, exitEnd: 182 },
   agora: [128, 131, 134],
-  stage: { enter: 168, settled: 212, exitStart: 778, exitEnd: 804 },
+  stage: { enter: 168, settled: 212, exitStart: 814, exitEnd: 840 },
   dieta: { headline: 176, scroll: [202, 290] },
-  diario: { cut: 292, taps: [322, 352], states: [326, 356], hoje: [386, 398] },
-  treino: { cut: 402, ultimaVez: 422, taps: [442, 482, 522], states: [448, 488, 528] },
-  evolucao: { cut: 582, scroll: [[622, 682], [698, 764]] },
-  fechamento: { lines: [774, 784, 794], tudo: [826, 829, 832, 835, 838], cta: [860, 880] },
+  diario: { cut: 292, taps: [334, 364], states: [338, 368], hoje: [398, 410] },
+  treino: { cut: 438, ultimaVez: 458, taps: [478, 518, 558], states: [484, 524, 564] },
+  evolucao: { cut: 618, scroll: [[658, 718], [734, 800]] },
+  fechamento: { lines: [810, 820, 830], tudo: [862, 865, 868, 871, 874], cta: [896, 916] },
 } as const;
 
 export const sec = (frame: number) => frame / FPS;
