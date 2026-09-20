@@ -2,6 +2,8 @@ import type { FC } from "react";
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame } from "remotion";
 import taps from "../public/shots/taps.json";
 import "./fonts";
+import { AudioTrack } from "./audio/AudioTrack";
+import { DEFAULT_AUDIO_PROFILE, DEFAULT_AUDIO_VERSION, type AudioProfile, type AudioVersion } from "./audio/config";
 import { Backdrop, Grain } from "./Backdrop";
 import { Fade, Phone, Scroller, Shot, Tap } from "./Phone";
 import { Headline, Lockup, Words } from "./Text";
@@ -207,7 +209,13 @@ const Close: FC = () => {
 // ---------------------------------------------------------------------------
 // Linha do tempo (30 fps, 900 frames = 30 s)
 // ---------------------------------------------------------------------------
-export const Ad: FC = () => {
+export interface AdProps {
+  /** "v1" = trilha provisória; "v2" = stems novos (src/audio). Só o áudio muda. */
+  audio?: AudioVersion;
+  profile?: AudioProfile;
+}
+
+export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAULT_AUDIO_PROFILE }) => {
   const frame = useCurrentFrame();
   const vol = interpolate(frame, [0, 24, 860, 900], [0, 1, 1, 0], clamp);
   return (
@@ -246,7 +254,7 @@ export const Ad: FC = () => {
       </Sequence>
 
       <Grain />
-      <Audio src={staticFile("audio/score.wav")} volume={vol} />
+      {audio === "v2" ? <AudioTrack profile={profile} /> : <Audio src={staticFile("audio/score.wav")} volume={vol} />}
     </AbsoluteFill>
   );
 };

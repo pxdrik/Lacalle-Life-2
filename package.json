@@ -8,7 +8,12 @@
     "capture": "node scripts/capture.mjs",
     "render": "remotion render Ad out/lacalle-life-9x16.mp4",
     "render:wide": "remotion render AdWide out/lacalle-life-16x9.mp4",
-    "score": "node scripts/score.mjs"
+    "score": "node scripts/score.mjs",
+    "audio": "node scripts/audio/compose.mjs",
+    "audio:check": "node scripts/audio/check.mjs",
+    "render:mobile": "remotion render Ad out/lacalle-life-9x16-mobile.mp4 --props=props/mobile.json",
+    "render:wide:mobile": "remotion render AdWide out/lacalle-life-16x9-mobile.mp4 --props=props/mobile.json",
+    "audio:selftest": "node scripts/audio/selftest.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.526",
