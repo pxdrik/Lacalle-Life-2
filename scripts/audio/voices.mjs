@@ -168,6 +168,20 @@ export function click({ body = 190, top = 2600, dur = 0.07, bodyGain = 1, topGai
 }
 
 /**
+ * Toque de texto: um seno redondo e curto (com um pouco de 2º harmônico para soar em alto-falante
+ * de celular), ataque macio de 6 ms, sem ruído e sem varredura de pitch. Só avisa que a frase chegou.
+ */
+export function blip({ freq = 440, dur = 0.14 }) {
+  const n = n_(dur);
+  const x = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = i / SR;
+    x[i] = smooth(Math.min(1, t / 0.006)) * (Math.sin(TAU * freq * t) + 0.22 * Math.sin(TAU * 2 * freq * t)) * Math.exp(-t / 0.035);
+  }
+  return fadeEnds(x, 0, 10);
+}
+
+/**
  * "Pop" de recompensa: um seno curto que sobe de pitch (de `f0` a `f1`), com um estalo de ar de
  * poucos milissegundos no começo. Limpo, sem saturação; é o som de "acertou".
  */

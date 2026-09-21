@@ -1,5 +1,5 @@
-// Áudio v2, só efeitos, sem música: um swoosh por troca de página, um clique por toque, uma
-// pequena subida aguda na hora em que cada bloco de texto entra e um "pop" a cada recompensa
+// Áudio v2, só efeitos, sem música: um swoosh por troca de página, um clique por toque, um toque
+// suave na hora em que cada bloco de texto entra e um "pop" a cada recompensa
 // (o "Chega." do gancho, cada check, os números em destaque, o botão do CTA).
 //
 // Todos os tempos vêm de src/timeline.ts, a mesma fonte que monta o vídeo (Ad.tsx).
@@ -52,21 +52,20 @@ function buildClicks(u) {
 
 // ================================ TEXTO ==========================================
 // (O gancho e o botão do CTA têm o próprio som, no stem rewards.)
-// Uma subida curta e aguda por bloco de texto, no instante em que as palavras começam a assentar
-// (as palavras sobem e desfocam ao longo de ~18 quadros; o pico do som cai 9 quadros depois do
-// início). É mais aguda e mais curta que o swoosh de página, para os dois não se confundirem
-// quando uma tela e o seu título entram juntos.
+// Um toque só por bloco de texto: um seno redondo e curto (lá 4), sem ruído e sem varredura, quando as
+// palavras começam a assentar. Não compete com o swoosh de página (ar) nem com os pops de recompensa
+// (sobem de nota e têm estalo): é grave, macio e sempre a mesma nota. A frase final, que é a chegada,
+// vem uma quarta acima (ré 5).
 function buildText(x) {
-  const PEAK = 9; // quadros depois do início do bloco
-  const lift = (label, frame, gain, dur = 0.24) => {
-    const [l, r] = V.swoosh({ dur, f0: 2400, f1: 6500, q: 1.1 });
-    x.put(S(frame + PEAK) - 0.44 * dur, l, r, { gain, send: 0.3 });
-    cue("text", `texto-${label}`, S(frame + PEAK));
+  const ONSET = 4; // quadros depois do início do bloco: a primeira palavra já está aparecendo
+  const blip = (label, frame, note, gain) => {
+    x.put(S(frame + ONSET), V.blip({ freq: hz(note) }), null, { gain, send: 0.2 });
+    cue("text", `texto-${label}`, S(frame + ONSET));
   };
-  lift("agora-um-so", CUES.text.agora, 1);
-  ["dieta", "diario", "treino", "evolucao"].forEach((n, i) => lift(n, CUES.text.titles[i], 0.9));
-  lift("fecho-linhas", CUES.text.closeLines, 0.6); // as três linhas do fecho entram juntas: um som só
-  lift("tudo-em-um-lugar", CUES.text.tudo, 1.1, 0.3);
+  blip("agora-um-so", CUES.text.agora, "A4", 0.8);
+  ["dieta", "diario", "treino", "evolucao"].forEach((n, i) => blip(n, CUES.text.titles[i], "A4", 0.8));
+  blip("fecho-linhas", CUES.text.closeLines, "A4", 0.6); // as três linhas do fecho entram juntas: um som só
+  blip("tudo-em-um-lugar", CUES.text.tudo, "D5", 1);
 }
 
 // ================================ RECOMPENSAS ==========================================
@@ -108,7 +107,7 @@ function buildRewards(r) {
 const REVERBS = {
   swooshes: { ir: { rt60: 2.2, predelay: 0.02, hfStart: 9000, hfEnd: 2500, lowCut: 200, seed: 22 }, wet: 0.25 },
   clicks: { ir: { rt60: 1.1, predelay: 0.01, hfStart: 10000, hfEnd: 3000, lowCut: 300, seed: 33 }, wet: 0.16 },
-  text: { ir: { rt60: 1.4, predelay: 0.01, hfStart: 12000, hfEnd: 4000, lowCut: 400, seed: 55 }, wet: 0.2 },
+  text: { ir: { rt60: 1.4, predelay: 0.01, hfStart: 12000, hfEnd: 4000, lowCut: 400, seed: 55 }, wet: 0.14 },
   rewards: { ir: { rt60: 1.6, predelay: 0.012, hfStart: 11000, hfEnd: 3500, lowCut: 300, seed: 77 }, wet: 0.2 },
 };
 

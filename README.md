@@ -60,9 +60,10 @@ Sem música de fundo. Quatro tipos de som, todos gerados por código, localmente
   logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai.
 - **Cliques** (stem `clicks`): o toque do dedo (corpo grave curto com estalo macio). Cinco toques (2 Diário, 3 Treino).
   Quem responde ao toque, 4 quadros depois, é o pop do stem `rewards`.
-- **Texto** (stem `text`): uma pequena subida aguda e curta na hora em que cada bloco de texto entra, mais aguda que
-  o swoosh de página para os dois não se confundirem. Sete: "Agora, um só.", os quatro títulos, as linhas do fecho
-  (um som só) e "Tudo em um lugar só.".
+- **Texto** (stem `text`): um toque suave por bloco de texto, quando as palavras começam a assentar: um seno redondo e
+  curto (lá 4), sem ruído e sem varredura, para não competir com o swoosh de página (ar) nem com os pops de
+  recompensa. A frase final, que é a chegada, vem uma quarta acima (ré 5). Sete: "Agora, um só.", os quatro títulos,
+  as linhas do fecho (um som só) e "Tudo em um lugar só.".
 - **Recompensas** (stem `rewards`): um som por ganho, no quadro em que ele aparece. Três pops que sobem no gancho
   (ré, fá sustenido, lá) e uma batida grave no "Chega."; um pop a cada check que sobe de nota (fecha em ré agudo); um
   "ding" de vidro macio nos números em destaque (o que cai junto de um check não repete); e no CTA, um pop na entrada do
