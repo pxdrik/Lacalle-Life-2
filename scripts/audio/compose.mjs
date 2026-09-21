@@ -18,24 +18,23 @@ const cues = [];
 const cue = (stem, name, t) => cues.push({ stem, name, t: +t.toFixed(4), frame: +(t * FPS).toFixed(2) });
 
 // ================================ SWOOSHES ==========================================
-// Uma troca de página, um "swish": ar filtrado em banda estreita, curto e macio, sem corpo grave e
-// sem cauda longa (o swoosh anterior, de 0,4 a 0,9 s em 400 a 4200 Hz, era o som mais longo e mais
-// alto do filme e destoava dos cliques e dos pops). O pico cai no meio do fade da tela, que é o
-// instante em que o olho troca de página. Trocas "para frente" sobem de frequência; a saída do
-// aparelho desce.
+// Uma troca de página, um sopro: ar filtrado em banda estreita, bem curto e baixo, só o bastante para
+// marcar a troca sem chamar atenção sobre os cliques, o texto e os pops (o swish anterior, de 0,24 a
+// 0,5 s, ainda se destacava demais). O pico cai no meio do fade da tela, que é o instante em que o
+// olho troca de página. Trocas "para frente" sobem de frequência; a saída do aparelho desce.
 function buildSwooshes(p) {
   const swoosh = (label, centerFrame, dur, f0, f1, gain) => {
-    const [l, r] = V.swoosh({ dur, f0, f1, q: 1.3 });
-    p.put(S(centerFrame) - 0.44 * dur, l, r, { gain, send: 0.25 });
+    const [l, r] = V.swoosh({ dur, f0, f1, q: 1.6 });
+    p.put(S(centerFrame) - 0.44 * dur, l, r, { gain, send: 0.15 });
     cue("swooshes", `swoosh-${label}`, S(centerFrame));
   };
-  swoosh("logo", (CUES.logo.start + CUES.logo.sharp) / 2, 0.5, 800, 3200, 0.2);
-  swoosh("aparelho-sobe", (CUES.stage.enter + CUES.stage.settled) / 2, 0.5, 700, 2800, 0.16);
-  swoosh("diário", CUES.diario.cut + 4, 0.24, 1000, 2800, 0.2);
-  swoosh("hoje", (CUES.diario.hoje[0] + CUES.diario.hoje[1]) / 2, 0.24, 1000, 2800, 0.2);
-  swoosh("treino", CUES.treino.cut + 4, 0.24, 1000, 2800, 0.2);
-  swoosh("evolução", CUES.evolucao.cut + 5, 0.3, 900, 3000, 0.22);
-  swoosh("aparelho-sai", (CUES.stage.exitStart + CUES.stage.exitEnd) / 2, 0.45, 2800, 700, 0.13);
+  swoosh("logo", (CUES.logo.start + CUES.logo.sharp) / 2, 0.32, 900, 2800, 0.2);
+  swoosh("aparelho-sobe", (CUES.stage.enter + CUES.stage.settled) / 2, 0.32, 800, 2400, 0.2);
+  swoosh("diário", CUES.diario.cut + 4, 0.18, 1200, 2600, 0.2);
+  swoosh("hoje", (CUES.diario.hoje[0] + CUES.diario.hoje[1]) / 2, 0.18, 1200, 2600, 0.2);
+  swoosh("treino", CUES.treino.cut + 4, 0.18, 1200, 2600, 0.2);
+  swoosh("evolução", CUES.evolucao.cut + 5, 0.2, 1100, 2700, 0.22);
+  swoosh("aparelho-sai", (CUES.stage.exitStart + CUES.stage.exitEnd) / 2, 0.3, 2400, 800, 0.16);
 }
 
 // ================================ CLIQUES ==========================================
@@ -109,7 +108,7 @@ function buildRewards(r) {
 
 // ================================ orquestração ==========================================
 const REVERBS = {
-  swooshes: { ir: { rt60: 1.2, predelay: 0.015, hfStart: 9000, hfEnd: 2500, lowCut: 250, seed: 22 }, wet: 0.18 },
+  swooshes: { ir: { rt60: 0.9, predelay: 0.015, hfStart: 9000, hfEnd: 2500, lowCut: 250, seed: 22 }, wet: 0.12 },
   clicks: { ir: { rt60: 1.1, predelay: 0.01, hfStart: 10000, hfEnd: 3000, lowCut: 300, seed: 33 }, wet: 0.16 },
   text: { ir: { rt60: 1.4, predelay: 0.01, hfStart: 12000, hfEnd: 4000, lowCut: 400, seed: 55 }, wet: 0.2 },
   rewards: { ir: { rt60: 1.6, predelay: 0.012, hfStart: 11000, hfEnd: 3500, lowCut: 300, seed: 77 }, wet: 0.2 },
