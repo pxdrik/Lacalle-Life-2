@@ -56,8 +56,10 @@ Estado: **em teste**, e é o padrão do `npm run render`. O áudio não altera c
 
 Sem música de fundo. Quatro tipos de som, todos gerados por código, localmente e sem saturação:
 
-- **Swooshes** (stem `swooshes`): um por troca de página, ar filtrado com o pico no meio do fade da tela. Sete:
-  logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai.
+- **Swooshes** (stem `swooshes`): um "swish" por troca de página, ar filtrado em banda estreita (curto, 0,24 a 0,5 s, sem
+  corpo grave e sem cauda longa), com o pico no meio do fade da tela. É o som mais baixo dos efeitos de página, mas
+  continua 9 a 13 dB acima do resto no próprio instante. Sete: logo, aparelho sobe, Diário, Hoje, Treino, Evolução,
+  aparelho sai. (O swoosh anterior, de 0,4 a 0,9 s em 400 a 4200 Hz, destoava dos cliques e dos pops.)
 - **Cliques** (stem `clicks`): o toque do dedo (corpo grave curto com estalo macio). Cinco toques (2 Diário, 3 Treino).
   Quem responde ao toque, 4 quadros depois, é o pop do stem `rewards`.
 - **Texto** (stem `text`): uma pequena subida aguda e curta na hora em que cada bloco de texto entra, mais aguda que

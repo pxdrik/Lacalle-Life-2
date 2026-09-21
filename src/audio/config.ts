@@ -71,7 +71,7 @@ export const MIX: Record<AudioProfile, ProfileMix> = {
  */
 export const SYNTH = {
   /** Pico-alvo de cada stem depois do acabamento: define o equilíbrio de base entre eles. */
-  stemPeakDb: { swooshes: -7, clicks: -9, text: -12, rewards: -8, music: -16 } satisfies Record<StemName, number>,
+  stemPeakDb: { swooshes: -9.5, clicks: -9, text: -12, rewards: -8, music: -16 } satisfies Record<StemName, number>,
   /** Teto de pico de cada stem antes da normalização. */
   stemCeilingDb: -2,
 };
