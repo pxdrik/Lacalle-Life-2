@@ -20,7 +20,8 @@ for (const f of [...CUES.diario.taps, ...CUES.diario.states, ...CUES.treino.taps
   (CUES.logo.start + CUES.logo.sharp) / 2, (CUES.stage.enter + CUES.stage.settled) / 2, CUES.diario.cut + 4,
   (CUES.diario.hoje[0] + CUES.diario.hoje[1]) / 2, CUES.treino.cut + 4, CUES.evolucao.cut + 5,
   (CUES.stage.exitStart + CUES.stage.exitEnd) / 2,
-  ...CUES.text.hook, CUES.text.agora, ...CUES.text.titles, CUES.text.closeLines, CUES.text.tudo, CUES.text.cta]) planned.push(f / FPS);
+  CUES.text.agora, ...CUES.text.titles, CUES.text.closeLines, CUES.text.tudo,
+  ...CUES.hook.lines, CUES.hookChega, ...CUES.callouts, CUES.botao.pop, CUES.botao.press]) planned.push(f / FPS);
 const nearPlanned = (t) => planned.some((p) => Math.abs(t - p) < 0.6);
 const onGrid = () => false;
 const flagged = [];

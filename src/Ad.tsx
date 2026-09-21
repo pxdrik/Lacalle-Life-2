@@ -6,7 +6,8 @@ import { AudioTrack } from "./audio/AudioTrack";
 import { DEFAULT_AUDIO_PROFILE, DEFAULT_AUDIO_VERSION, type AudioProfile, type AudioVersion } from "./audio/config";
 import { Backdrop, Grain } from "./Backdrop";
 import { Fade, Phone, Scroller, Shot, Tap } from "./Phone";
-import { Headline, Lockup, Words } from "./Text";
+import { Burst, Callout, CtaButton, Flash } from "./Reward";
+import { Headline, Lockup, Slam, Words } from "./Text";
 import { BEZEL, C, FONT, clamp, ease, easeIn, easeInOut, useLayout } from "./theme";
 import { DURATION, FPS, T } from "./timeline";
 
@@ -14,18 +15,25 @@ export { DURATION, FPS };
 
 /** Trocar aqui quando o endereço final de divulgação for outro. */
 const CTA_URL = "lacalle-life-2.vercel.app";
+/** A palavra que quebra o padrão depois das três linhas do gancho. */
+const HOOK_PUNCH = "Chega.";
 
 // Todo o tempo vem de src/timeline.ts (T). Nada de número solto aqui.
 
 // ---------------------------------------------------------------------------
-// 1. Gancho: três apps para três coisas.
+// 1. Gancho: três apps para três coisas, e um "Chega." que quebra o padrão.
 // ---------------------------------------------------------------------------
 const Hook: FC = () => {
   const frame = useCurrentFrame();
   const L = useLayout();
+  const H = T.hook;
   const lines = ["Um app para a dieta.", "Outro para o treino.", "Outro para a evolução."];
-  const out = interpolate(frame, [...T.hook.exit], [1, 0], { ...clamp, easing: easeIn });
-  const top = L.portrait ? 620 : 300;
+  const out = interpolate(frame, [...H.exit], [1, 0], { ...clamp, easing: easeIn });
+  // as três linhas escurecem quando o "Chega." cai, e a cena treme por um instante (impacto)
+  const dim = interpolate(frame, [H.chega, H.chega + 6], [1, 0.28], clamp);
+  const k = frame - H.chega;
+  const shake = k >= 0 && k < 9 ? Math.sin(k * 3.4) * 10 * (1 - k / 9) : 0;
+  const top = L.portrait ? 560 : 250;
   return (
     <div
       style={{
@@ -33,25 +41,28 @@ const Hook: FC = () => {
         left: L.textX,
         top,
         opacity: out,
-        transform: `translateY(${(1 - out) * -30}px)`,
+        transform: `translate(${shake}px, ${(1 - out) * -30}px)`,
       }}
     >
-      {lines.map((line, i) => (
-        <div key={line} style={{ display: "flex", alignItems: "baseline", gap: 28, marginBottom: 46 }}>
-          <span
-            style={{
-              fontFamily: FONT,
-              fontWeight: 500,
-              fontSize: 30,
-              color: C.accent,
-              opacity: interpolate(frame, [T.hook.lines[i]!, T.hook.lines[i]! + 16], [0, 1], clamp),
-            }}
-          >
-            0{i + 1}
-          </span>
-          <Words text={line} start={T.hook.lines[i]!} size={L.portrait ? 84 : 96} weight={600} color={i === 2 ? C.ink : "#cfd4da"} />
-        </div>
-      ))}
+      <div style={{ opacity: dim }}>
+        {lines.map((line, i) => (
+          <div key={line} style={{ display: "flex", alignItems: "baseline", gap: 28, marginBottom: 40 }}>
+            <span
+              style={{
+                fontFamily: FONT,
+                fontWeight: 500,
+                fontSize: 30,
+                color: C.accent,
+                opacity: interpolate(frame, [H.lines[i]!, H.lines[i]! + 6], [0, 1], clamp),
+              }}
+            >
+              0{i + 1}
+            </span>
+            <Slam text={line} start={H.lines[i]!} size={L.portrait ? 84 : 96} color={i === 2 ? C.ink : "#cfd4da"} />
+          </div>
+        ))}
+      </div>
+      <Slam text={HOOK_PUNCH} start={H.chega} size={L.portrait ? 210 : 220} from={1.7} weight={700} color={C.accent} style={{ marginTop: 6 }} />
     </div>
   );
 };
@@ -104,7 +115,12 @@ const Stage: FC = () => {
   const exit = interpolate(f, [T.stage.exitStart - S0, T.stage.exitEnd - S0], [0, 1], { ...clamp, easing: easeIn });
   const y = (1 - enter) * 640 + exit * 820;
   const tilt = (1 - enter) * 16;
-  const scale = 1 + (f / (T.stage.exitEnd + 4 - S0)) * 0.05;
+  // cada check dá um "soquinho" no aparelho (recompensa)
+  const punch = [...T.diario.states, ...T.treino.states].reduce((s, st) => {
+    const k = f - (st - S0);
+    return s + (k >= 0 && k < 8 ? 0.022 * (1 - k / 8) ** 2 : 0);
+  }, 0);
+  const scale = 1 + (f / (T.stage.exitEnd + 4 - S0)) * 0.05 + punch;
   const yaw = Math.sin(f / 110) * 2.4 * enter;
   const o = interpolate(f, [0, 14], [0, 1], clamp) * (1 - exit);
 
@@ -147,6 +163,8 @@ const Stage: FC = () => {
             <Shot name="hoje-2" at={d.hoje[0] - d.cut} fade={d.hoje[1] - d.hoje[0]} />
             <Tap {...taps.diarioCafe} at={d.taps[0] - d.cut} screenW={screenW} />
             <Tap {...taps.diarioAlmoco} at={d.taps[1] - d.cut} screenW={screenW} />
+            <Burst {...taps.diarioCafe} at={d.states[0] - d.cut} screenW={screenW} />
+            <Burst {...taps.diarioAlmoco} at={d.states[1] - d.cut} screenW={screenW} />
           </Sequence>
 
           {/* treino: três séries marcadas, descanso correndo */}
@@ -158,6 +176,9 @@ const Stage: FC = () => {
             <Tap {...taps.sessao1} at={t.taps[0] - t.cut} screenW={screenW} />
             <Tap {...taps.sessao2} at={t.taps[1] - t.cut} screenW={screenW} />
             <Tap {...taps.sessao3} at={t.taps[2] - t.cut} screenW={screenW} />
+            <Burst {...taps.sessao1} at={t.states[0] - t.cut} screenW={screenW} />
+            <Burst {...taps.sessao2} at={t.states[1] - t.cut} screenW={screenW} />
+            <Burst {...taps.sessao3} at={t.states[2] - t.cut} screenW={screenW} />
           </Sequence>
 
           {/* evolução: gráfico, volume semanal, recordes */}
@@ -173,46 +194,41 @@ const Stage: FC = () => {
 };
 
 // ---------------------------------------------------------------------------
-// 4. Fechamento.
+// 4. Fechamento: a frase, a marca e um CTA com botão que é "tocado".
 // ---------------------------------------------------------------------------
 const Close: FC = () => {
   const frame = useCurrentFrame();
   const L = useLayout();
   const c = T.close;
   const dim = interpolate(frame, [...c.dim], [1, 0.32], { ...clamp, easing: ease });
-  const cta = interpolate(frame, [...c.cta], [0, 1], { ...clamp, easing: ease });
-  const top = L.portrait ? 520 : 140;
-  const size = L.portrait ? 64 : 76;
+  const after = interpolate(frame, [c.cta[0] - 6, c.cta[0] + 10], [0, 1], { ...clamp, easing: ease });
+  const top = L.portrait ? 520 : 150;
+  const size = L.portrait ? 60 : 64;
   return (
     <div style={{ position: "absolute", left: L.textX, top, width: L.portrait ? L.textW + 60 : 1500 }}>
       <div style={{ opacity: dim }}>
-        <Words text="Monte dietas." start={c.lines[0]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
-        <Words text="Monte treinos." start={c.lines[1]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 8 }} />
+        <Words text="Monte dietas." start={c.lines[0]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 6 }} />
+        <Words text="Monte treinos." start={c.lines[1]} size={size} weight={600} color="#cfd4da" style={{ marginBottom: 6 }} />
         <Words text="Acompanhe sua evolução." start={c.lines[2]} size={size} weight={600} color="#cfd4da" />
       </div>
       <Words
         text="Tudo em um lugar só."
         start={c.tudo}
         stagger={3}
-        size={L.portrait ? 88 : 124}
+        size={L.portrait ? 88 : 108}
         weight={700}
         color={C.accent}
-        style={{ marginTop: L.portrait ? 64 : 48 }}
+        style={{ marginTop: L.portrait ? 44 : 30 }}
       />
-      <div
-        style={{
-          marginTop: L.portrait ? 96 : 64,
-          opacity: cta,
-          transform: `translateY(${(1 - cta) * 26}px)`,
-        }}
-      >
-        <Lockup size={L.portrait ? 64 : 76} />
-        <div style={{ fontFamily: FONT, fontSize: L.portrait ? 40 : 46, fontWeight: 500, color: C.ink, marginTop: 30 }}>
-          Comece sem criar conta.
-        </div>
-        <div style={{ fontFamily: FONT, fontSize: L.portrait ? 32 : 36, fontWeight: 400, color: C.muted, marginTop: 12 }}>
-          {CTA_URL}
-        </div>
+      <div style={{ marginTop: L.portrait ? 52 : 34, opacity: after }}>
+        <Lockup size={L.portrait ? 54 : 56} />
+      </div>
+      <div style={{ marginTop: L.portrait ? 34 : 24 }}>
+        <CtaButton frame={frame} pop={c.cta[0]} press={c.press} portrait={L.portrait} />
+      </div>
+      <div style={{ opacity: after, marginTop: L.portrait ? 30 : 22 }}>
+        <div style={{ fontFamily: FONT, fontSize: L.portrait ? 42 : 40, fontWeight: 600, color: C.ink }}>Sem criar conta.</div>
+        <div style={{ fontFamily: FONT, fontSize: L.portrait ? 34 : 34, fontWeight: 400, color: C.muted, marginTop: 8 }}>{CTA_URL}</div>
       </div>
     </div>
   );
@@ -234,9 +250,12 @@ export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAU
   const vol = interpolate(frame, [0, 24, DURATION - 40, DURATION], [0, 1, 1, 0], clamp);
   const topLogoStart = T.stage.enter - 10;
   const topLogoDur = T.stage.exitStart - topLogoStart;
+  // instantes de recompensa: o fundo dá um brilho verde em cada um
+  const rewardFrames = [T.hook.chega, ...T.diario.states, ...T.treino.states, ...T.callouts.map((c) => c.at), T.close.start + T.close.press];
   return (
     <AbsoluteFill style={{ background: C.deep }}>
       <Backdrop glowFrom={T.logo.start - 2} glowTo={T.logo.start + 62} />
+      <Flash frames={rewardFrames} />
 
       <Sequence from={0} durationInFrames={T.hook.dur}>
         <Hook />
@@ -264,6 +283,13 @@ export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAU
       <Sequence from={T.evolucao.cut} durationInFrames={T.close.start + 2 - T.evolucao.cut}>
         <Headline title="Acompanhe sua evolução." sub="Peso, volume e recordes ao longo do tempo." dur={T.close.start + 2 - T.evolucao.cut} />
       </Sequence>
+
+      {/* recompensas: um número em destaque por ganho, por cima do aparelho */}
+      {T.callouts.map((c) => (
+        <Sequence key={c.at} from={c.at} durationInFrames={c.dur}>
+          <Callout value={c.value} label={c.label} dur={c.dur} />
+        </Sequence>
+      ))}
 
       <Sequence from={T.close.start} durationInFrames={T.close.dur}>
         <Close />

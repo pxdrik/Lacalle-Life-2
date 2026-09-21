@@ -167,6 +167,47 @@ export function click({ body = 190, top = 2600, dur = 0.07, bodyGain = 1, topGai
   return fadeEnds(x, 0, 6);
 }
 
+/**
+ * "Pop" de recompensa: um seno curto que sobe de pitch (de `f0` a `f1`), com um estalo de ar de
+ * poucos milissegundos no começo. Limpo, sem saturação; é o som de "acertou".
+ */
+export function pop({ f0 = 700, f1 = 1300, dur = 0.12 }) {
+  const n = n_(dur);
+  const nz = new Float32Array(n);
+  for (let i = 0; i < n; i++) nz[i] = noise();
+  const air = svf(nz, 4200, 1.2, "bp");
+  const x = new Float32Array(n);
+  let ph = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i / SR;
+    const f = f0 * (f1 / f0) ** Math.min(1, t / (dur * 0.35));
+    ph += f / SR;
+    const a = Math.min(1, t / 0.002);
+    x[i] = a * (Math.sin(TAU * ph) + 0.12 * Math.sin(TAU * 2 * ph)) * Math.exp(-t / (dur * 0.28)) + 0.5 * air[i] * Math.exp(-t / 0.004);
+  }
+  return fadeEnds(x, 0, 8);
+}
+
+/**
+ * Batida grave de impacto: seno que cai de pitch, com o 2º e o 3º harmônicos (para continuar audível
+ * no alto-falante do celular, que corta o grave) e um estalo curto de ar. Sem saturação.
+ */
+export function thump({ freq = 58, dur = 0.34 }) {
+  const n = n_(dur);
+  const nz = new Float32Array(n);
+  for (let i = 0; i < n; i++) nz[i] = noise();
+  const air = svf(nz, 1600, 0.9, "bp");
+  const x = new Float32Array(n);
+  let ph = 0;
+  for (let i = 0; i < n; i++) {
+    const t = i / SR;
+    ph += (freq * (1 + 1.4 * Math.exp(-t / 0.03))) / SR;
+    const a = Math.min(1, t / 0.002);
+    x[i] = a * (Math.sin(TAU * ph) * Math.exp(-t / 0.11) + 0.4 * Math.sin(TAU * 2 * ph) * Math.exp(-t / 0.06) + 0.25 * Math.sin(TAU * 3 * ph) * Math.exp(-t / 0.045) + 0.3 * air[i] * Math.exp(-t / 0.006));
+  }
+  return fadeEnds(x, 0, 24);
+}
+
 /** Soma o reverb, tira o subgrave inútil e aplica o perfil. Sem saturação. */
 export function finishTrack(track, { reverb, wet = 0.3, profile = "cinematic", kind = "swooshes", ceilingDb = -3 }) {
   const { L, R } = track;

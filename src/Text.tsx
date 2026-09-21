@@ -1,7 +1,7 @@
 import type { CSSProperties, FC } from "react";
 import { interpolate, useCurrentFrame } from "remotion";
 import { MARK_PATH, MARK_VIEWBOX } from "./brand";
-import { C, FONT, clamp, ease, easeIn, useLayout } from "./theme";
+import { C, FONT, clamp, ease, easeIn, easeOutBack, useLayout } from "./theme";
 
 /** Quadros que uma palavra leva para subir, desfocar e assentar. */
 const REVEAL = 18;
@@ -50,6 +50,40 @@ export const Words: FC<{
           </span>
         );
       })}
+    </div>
+  );
+};
+
+/** Texto que estoura: entra grande, passa um pouco do tamanho e assenta em ~9 quadros. Para o gancho. */
+export const Slam: FC<{
+  text: string;
+  start: number;
+  size: number;
+  from?: number;
+  weight?: number;
+  color?: string;
+  style?: CSSProperties;
+}> = ({ text, start, size, from = 1.35, weight = 600, color = C.ink, style }) => {
+  const frame = useCurrentFrame();
+  const p = interpolate(frame, [start, start + 9], [0, 1], { ...clamp, easing: easeOutBack });
+  const o = interpolate(frame, [start, start + 3], [0, 1], clamp);
+  return (
+    <div
+      style={{
+        fontFamily: FONT,
+        fontSize: size,
+        fontWeight: weight,
+        lineHeight: 1.06,
+        letterSpacing: size > 60 ? "-0.02em" : "-0.005em",
+        color,
+        whiteSpace: "nowrap",
+        opacity: o,
+        transformOrigin: "left center",
+        transform: `scale(${from - (from - 1) * p})`,
+        ...style,
+      }}
+    >
+      {text}
     </div>
   );
 };

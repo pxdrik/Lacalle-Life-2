@@ -1,13 +1,14 @@
-// Áudio v2, só efeitos, sem música: um swoosh por troca de página, um clique por toque e uma
-// pequena subida aguda na hora em que cada bloco de texto entra.
+// Áudio v2, só efeitos, sem música: um swoosh por troca de página, um clique por toque, uma
+// pequena subida aguda na hora em que cada bloco de texto entra e um "pop" a cada recompensa
+// (o "Chega." do gancho, cada check, os números em destaque, o botão do CTA).
 //
 // Todos os tempos vêm de src/timeline.ts, a mesma fonte que monta o vídeo (Ad.tsx).
-// Gera 3 stems por perfil: swooshes, clicks e text.
+// Gera 4 stems por perfil: swooshes, clicks, text e rewards.
 // Uso: node scripts/audio/compose.mjs [cinematic] [mobile]   (sem argumento, gera os dois)
 import { mkdirSync, writeFileSync } from "node:fs";
 import { CUES, FPS } from "../../src/timeline.ts";
 import { SYNTH } from "../../src/audio/config.ts";
-import { N, Reverb, lin, makeIR, peakDb, writeWav } from "./dsp.mjs";
+import { N, Reverb, hz, lin, makeIR, peakDb, writeWav } from "./dsp.mjs";
 import * as V from "./voices.mjs";
 
 const { Track } = V;
@@ -35,23 +36,22 @@ function buildSwooshes(p) {
 }
 
 // ================================ CLIQUES ==========================================
-// Dois sons por toque, como um interruptor de verdade: o toque do dedo (corpo grave curto com um
-// estalo macio) e, 4 a 6 quadros depois, um tique leve quando o item marca.
+// O toque do dedo: corpo grave curto com um estalo macio. Quem responde ao toque (o item que
+// marca) é o "pop" do stem rewards, alguns quadros depois.
 function buildClicks(u) {
-  const pairs = [
-    ...CUES.diario.taps.map((t, i) => [t, CUES.diario.states[i], "diário"]),
-    ...CUES.treino.taps.map((t, i) => [t, CUES.treino.states[i], "treino"]),
+  const taps = [
+    ...CUES.diario.taps.map((t) => [t, "diário"]),
+    ...CUES.treino.taps.map((t) => [t, "treino"]),
   ];
-  pairs.forEach(([tap, state, page], i) => {
+  taps.forEach(([tap, page], i) => {
     // o corpo sobe um pouquinho a cada toque, para uma série de cliques não soar como metralhadora
     u.put(S(tap), V.click({ body: 185 + 6 * i }), null, { gain: 0.5, send: 0.15 });
     cue("clicks", `clique-${page}-${i + 1}`, S(tap));
-    u.put(S(state), V.click({ body: 0, top: 3600, dur: 0.045, topGain: 1.3 }), null, { gain: 0.3, send: 0.2 });
-    cue("clicks", `confirma-${page}-${i + 1}`, S(state));
   });
 }
 
 // ================================ TEXTO ==========================================
+// (O gancho e o botão do CTA têm o próprio som, no stem rewards.)
 // Uma subida curta e aguda por bloco de texto, no instante em que as palavras começam a assentar
 // (as palavras sobem e desfocam ao longo de ~18 quadros; o pico do som cai 9 quadros depois do
 // início). É mais aguda e mais curta que o swoosh de página, para os dois não se confundirem
@@ -63,12 +63,45 @@ function buildText(x) {
     x.put(S(frame + PEAK) - 0.44 * dur, l, r, { gain, send: 0.3 });
     cue("text", `texto-${label}`, S(frame + PEAK));
   };
-  CUES.text.hook.forEach((f, i) => lift(`gancho-${i + 1}`, f, [0.7, 0.85, 1][i])); // o gancho cresce
   lift("agora-um-so", CUES.text.agora, 1);
   ["dieta", "diario", "treino", "evolucao"].forEach((n, i) => lift(n, CUES.text.titles[i], 0.9));
   lift("fecho-linhas", CUES.text.closeLines, 0.6); // as três linhas do fecho entram juntas: um som só
   lift("tudo-em-um-lugar", CUES.text.tudo, 1.1, 0.3);
-  lift("cta", CUES.text.cta, 0.8);
+}
+
+// ================================ RECOMPENSAS ==========================================
+// Um som por ganho, sempre no quadro em que ele aparece na tela:
+//  - gancho: três pops que sobem (D5, F#5, A5), e uma batida grave quando cai o "Chega.";
+//  - cada check: um pop que sobe de nota a cada item marcado (a escala fecha em D6);
+//  - cada número em destaque: um "ding" de vidro macio (D6). Quando o número aparece junto de um
+//    check (2 quadros depois), o pop do check já cobre, e o ding não repete;
+//  - CTA: pop na entrada do botão e, no toque, o estalo do dedo mais um arpejo curto (D6 e A6).
+function buildRewards(r) {
+  const at = (label, frame, voice, opts) => {
+    r.put(S(frame), voice, null, opts);
+    cue("rewards", label, S(frame));
+  };
+  const pop = (label, frame, note, gain = 0.55) => at(label, frame, V.pop({ f0: hz(note) * 0.72, f1: hz(note) }), { gain, send: 0.25 });
+
+  ["D5", "F#5", "A5"].forEach((note, i) => pop(`gancho-${i + 1}`, CUES.hook.lines[i] + 2, note, 0.48 + 0.05 * i));
+  at("chega-batida", CUES.hookChega + 3, V.thump({ freq: 58 }), { gain: 0.62, send: 0.1 });
+
+  const checks = [
+    ...CUES.diario.states.map((f, i) => [f, ["A5", "D6"][i], "diário"]),
+    ...CUES.treino.states.map((f, i) => [f, ["F#5", "A5", "D6"][i], "treino"]),
+  ];
+  checks.forEach(([f, note, page], i) => pop(`check-${page}-${i + 1}`, f, note));
+
+  const near = (f) => checks.some(([c]) => Math.abs(c - f) <= 6);
+  CUES.callouts.forEach((f, i) => {
+    if (!near(f)) at(`numero-${i + 1}`, f, V.mallet({ freq: hz("D6"), dur: 0.6, tau: 0.3, bright: 0.6 }), { gain: 0.5, send: 0.35 });
+  });
+
+  pop("cta-botao", CUES.botao.pop + 2, "A5");
+  at("cta-toque", CUES.botao.press, V.click({ body: 170 }), { gain: 0.4, send: 0.15 });
+  [["D6", 3], ["A6", 8]].forEach(([note, off], i) =>
+    at(`cta-arpejo-${i + 1}`, CUES.botao.press + off, V.mallet({ freq: hz(note), dur: 0.9, tau: 0.45, bright: 0.5 }), { gain: 0.46 - 0.05 * i, send: 0.4 }),
+  );
 }
 
 // ================================ orquestração ==========================================
@@ -76,15 +109,17 @@ const REVERBS = {
   swooshes: { ir: { rt60: 2.2, predelay: 0.02, hfStart: 9000, hfEnd: 2500, lowCut: 200, seed: 22 }, wet: 0.25 },
   clicks: { ir: { rt60: 1.1, predelay: 0.01, hfStart: 10000, hfEnd: 3000, lowCut: 300, seed: 33 }, wet: 0.16 },
   text: { ir: { rt60: 1.4, predelay: 0.01, hfStart: 12000, hfEnd: 4000, lowCut: 400, seed: 55 }, wet: 0.2 },
+  rewards: { ir: { rt60: 1.6, predelay: 0.012, hfStart: 11000, hfEnd: 3500, lowCut: 300, seed: 77 }, wet: 0.2 },
 };
 
 function build(profile) {
   V.reseed();
   cues.length = 0;
-  const tracks = { swooshes: new Track("swooshes"), clicks: new Track("clicks"), text: new Track("text") };
+  const tracks = { swooshes: new Track("swooshes"), clicks: new Track("clicks"), text: new Track("text"), rewards: new Track("rewards") };
   buildSwooshes(tracks.swooshes);
   buildClicks(tracks.clicks);
   buildText(tracks.text);
+  buildRewards(tracks.rewards);
   for (const [name, tr] of Object.entries(tracks)) {
     const cfg = REVERBS[name];
     V.finishTrack(tr, { reverb: new Reverb(makeIR(cfg.ir)), wet: cfg.wet, profile, kind: name, ceilingDb: SYNTH.stemCeilingDb });

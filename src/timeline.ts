@@ -7,25 +7,38 @@ export const FPS = 30;
 
 /**
  * "abs" = quadro absoluto do filme. "local" = relativo ao começo da própria cena.
- * Ritmo: gancho e logo curtos, rolagens e séries mais rápidas. O Diário segura ~0,9 s antes do
- * primeiro toque e o Hoje ("quanto ainda cabe no dia") segura ~1,3 s, como pedido antes.
+ * Ritmo pensado para prender: gancho que estoura em 2,6 s ("Chega."), uma recompensa visível a
+ * cada ganho (callouts e estouros de check) e um CTA com botão e pausa longa (~2,3 s inteiro).
  */
 export const T = {
-  hook: { lines: [4, 22, 40], exit: [74, 88], dur: 90 }, // local
-  logo: { start: 76, mark: 22, words: 22, exit: [50, 66], dur: 66 }, // start abs, resto local
-  stage: { enter: 128, settle: 38, exitStart: 690, exitEnd: 714 }, // abs (settle em quadros)
-  dieta: { title: 134, scroll: [158, 234] }, // abs
-  diario: { cut: 236, taps: [276, 302], states: [280, 306], hoje: [332, 344] }, // abs
-  treino: { cut: 372, taps: [408, 444, 480], states: [414, 450, 486] }, // abs
-  evolucao: { cut: 528, scroll: [[562, 612], [624, 676]] }, // abs
-  close: { start: 684, dur: 116, lines: [2, 8, 14], dim: [30, 42], tudo: 32, cta: [58, 76] }, // start abs, resto local
+  hook: { lines: [3, 17, 31], chega: 46, exit: [64, 76], dur: 78 }, // local (a cena começa em 0)
+  logo: { start: 64, mark: 20, words: 20, exit: [44, 58], dur: 60 }, // start abs, resto local
+  stage: { enter: 108, settle: 36, exitStart: 664, exitEnd: 688 }, // abs (settle em quadros)
+  dieta: { title: 114, scroll: [136, 208] }, // abs
+  diario: { cut: 210, taps: [250, 276], states: [254, 280], hoje: [306, 318] }, // abs
+  treino: { cut: 346, taps: [382, 418, 454], states: [388, 424, 460] }, // abs
+  evolucao: { cut: 502, scroll: [[536, 586], [598, 650]] }, // abs
+  close: { start: 658, dur: 132, lines: [2, 8, 14], dim: [24, 34], tudo: 26, cta: [50, 64], press: 92 }, // start abs, resto local
+  /**
+   * Recompensas: um número em destaque por ganho. Os valores são os que aparecem na própria tela
+   * (dados de demonstração do app). Um de cada vez, sem sobrepor.
+   */
+  callouts: [
+    { at: 142, dur: 40, value: "2.973", label: "kcal de meta" }, // dieta
+    { at: 282, dur: 30, value: "1.588", label: "kcal registrados" }, // diário (805 + 783)
+    { at: 320, dur: 32, value: "1.385", label: "kcal restantes" }, // hoje
+    { at: 462, dur: 34, value: "3/13", label: "séries" }, // treino
+    { at: 512, dur: 36, value: "+2,4", label: "kg em 9 semanas" }, // evolução (73,4 → 75,8)
+    { at: 608, dur: 34, value: "223,3 kg", label: "recorde de 1RM" }, // evolução (recordes)
+  ],
 } as const;
 
-export const DURATION = T.close.start + T.close.dur; // 800 quadros = 26,7 s
+export const DURATION = T.close.start + T.close.dur; // 790 quadros = 26,3 s
 
-/** Visão em quadros absolutos para o áudio (mesma forma de sempre). */
+/** Visão em quadros absolutos para o áudio. */
 export const CUES = {
   hook: { lines: T.hook.lines, exitStart: T.hook.exit[0], exitEnd: T.hook.exit[1] },
+  hookChega: T.hook.chega,
   logo: {
     start: T.logo.start,
     sharp: T.logo.start + T.logo.mark,
@@ -43,6 +56,10 @@ export const CUES = {
     tudo: [0, 1, 2, 3, 4].map((i) => T.close.start + T.close.tudo + 3 * i),
     cta: [T.close.start + T.close.cta[0], T.close.start + T.close.cta[1]],
   },
+  /** O botão do CTA: quando aparece e quando é "tocado". */
+  botao: { pop: T.close.start + T.close.cta[0], press: T.close.start + T.close.press },
+  /** Instantes das recompensas (o som acompanha). */
+  callouts: T.callouts.map((c) => c.at),
   /** Onde cada bloco de texto começa a entrar (o som de entrada acompanha). */
   text: {
     hook: T.hook.lines,

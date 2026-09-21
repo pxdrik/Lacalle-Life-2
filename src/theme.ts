@@ -17,6 +17,8 @@ export const FONT = "'IBM Plex Sans', system-ui, sans-serif";
 export const ease = Easing.bezier(0.22, 1, 0.36, 1);
 export const easeIn = Easing.bezier(0.64, 0, 0.78, 0);
 export const easeInOut = Easing.bezier(0.65, 0, 0.35, 1);
+/** Passa um pouco do alvo e assenta: o "pop" que dá recompensa (botão, número, palavra que estoura). */
+export const easeOutBack = Easing.bezier(0.34, 1.56, 0.64, 1);
 
 export const clamp = {
   extrapolateLeft: "clamp",

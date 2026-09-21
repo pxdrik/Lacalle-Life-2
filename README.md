@@ -1,4 +1,4 @@
-# Lacalle Life, comercial de 26,7 s
+# Lacalle Life, comercial de 26,3 s
 
 Vídeo feito em código com [Remotion](https://www.remotion.dev). As telas são capturas reais
 do app (Playwright, dados de demonstração), nada é mockup redesenhado.
@@ -7,7 +7,7 @@ do app (Playwright, dados de demonstração), nada é mockup redesenhado.
 
 | Pasta | O que tem |
 | --- | --- |
-| `src/` | A composição: `Ad.tsx` monta as cenas, e `src/timeline.ts` é a **fonte única de tempo** (30 fps, 800 quadros). |
+| `src/` | A composição: `Ad.tsx` monta as cenas, e `src/timeline.ts` é a **fonte única de tempo** (30 fps, 790 quadros). |
 | `scripts/capture.mjs` | Sobe um navegador limpo, importa dados de demonstração e captura as telas em `public/shots/`. |
 | `scripts/demo-data.mjs` | Dados de demonstração (dieta, treinos, 10 semanas de histórico), montados sobre o catálogo real. |
 | `scripts/score.mjs` | Trilha provisória sintetizada por código, sincronizada com os cortes e toques. |
@@ -27,23 +27,43 @@ npm run capture       # recaptura as telas (Life rodando em http://localhost:300
 ## Ritmo (src/timeline.ts)
 
 Todo o tempo do filme mora em `T`, em `src/timeline.ts`. `Ad.tsx` monta as cenas a partir dele e o áudio lê o
-mesmo `T` (por `CUES`), então mudar o ritmo é mexer só ali e rodar `npm run audio`. O filme tem 26,7 s: gancho e logo
+mesmo `T` (por `CUES`), então mudar o ritmo é mexer só ali e rodar `npm run audio`. O filme tem 26,3 s: gancho e logo
 curtos, rolagens e séries mais rápidas, texto entrando em 18 quadros. O Diário segura ~0,9 s antes do primeiro toque e o
 Hoje ("quanto ainda cabe no dia") ~1,3 s, como pedido.
+
+## Retenção e CTA (recompensas)
+
+Feito para prender: um gancho que quebra o padrão e uma recompensa visível a cada ganho, sem inventar número.
+
+- **Gancho** (0 a 2,6 s): as três linhas ("Um app para a dieta. Outro para o treino. Outro para a evolução.") entram com
+  "slam" (escala 1,35 para 1), e então cai um **"Chega."** grande em verde, a cena treme por 8 quadros e as três linhas
+  escurecem. O texto do soco é `HOOK_PUNCH` em `src/Ad.tsx`.
+- **Números em destaque** (`T.callouts`): uma pílula por ganho, um de cada vez, com o valor que já aparece na tela do
+  app (dados de demonstração): 2.973 kcal de meta, 1.588 kcal registrados, 1.385 kcal restantes, séries 3/13, +2,4 kg
+  em 9 semanas, recorde de 1RM de 223,3 kg. Nada de estatística inventada.
+- **Checks**: cada item marcado dá um estouro (anel e pontos) no botão, um "soquinho" no aparelho e um brilho verde no fundo.
+- **CTA**: o fecho segura ~2,3 s inteiro. As três linhas, "Tudo em um lugar só.", a marca, o botão **"Experimentar agora"**
+  (aparece com pop, pulsa chamando o toque e é "tocado" com uma onda), "Sem criar conta." e o endereço. O rótulo do botão
+  está em `CtaButton` (`src/Reward.tsx`); o endereço, em `CTA_URL` (`src/Ad.tsx`). Só se afirma o que é verdade
+  (sem conta, sim; "grátis", não).
 
 ## Áudio v2 (só efeitos, sem música)
 
 Estado: **em teste**, e é o padrão do `npm run render`. O áudio não altera cena, captura, texto ou animação.
 
-Sem música de fundo. Três tipos de som, todos gerados por código, localmente e sem saturação:
+Sem música de fundo. Quatro tipos de som, todos gerados por código, localmente e sem saturação:
 
 - **Swooshes** (stem `swooshes`): um por troca de página, ar filtrado com o pico no meio do fade da tela. Sete:
   logo, aparelho sobe, Diário, Hoje, Treino, Evolução, aparelho sai.
-- **Cliques** (stem `clicks`): dois sons por toque, como um interruptor. O toque do dedo (corpo grave curto com
-  estalo macio) e, 4 a 6 quadros depois, um tique leve quando o item marca. Cinco toques (2 Diário, 3 Treino).
+- **Cliques** (stem `clicks`): o toque do dedo (corpo grave curto com estalo macio). Cinco toques (2 Diário, 3 Treino).
+  Quem responde ao toque, 4 quadros depois, é o pop do stem `rewards`.
 - **Texto** (stem `text`): uma pequena subida aguda e curta na hora em que cada bloco de texto entra, mais aguda que
-  o swoosh de página para os dois não se confundirem. Onze: as três linhas do gancho (crescendo), "Agora, um só.",
-  os quatro títulos, as linhas do fecho (um som só), "Tudo em um lugar só." e a chamada.
+  o swoosh de página para os dois não se confundirem. Sete: "Agora, um só.", os quatro títulos, as linhas do fecho
+  (um som só) e "Tudo em um lugar só.".
+- **Recompensas** (stem `rewards`): um som por ganho, no quadro em que ele aparece. Três pops que sobem no gancho
+  (ré, fá sustenido, lá) e uma batida grave no "Chega."; um pop a cada check que sobe de nota (fecha em ré agudo); um
+  "ding" de vidro macio nos números em destaque (o que cai junto de um check não repete); e no CTA, um pop na entrada do
+  botão e, no toque, o estalo do dedo com um arpejo curto (ré e lá agudos).
 
 A versão com música (base, baques, golpe, notas, resolução) está no histórico do git (commit `790c853`).
 
@@ -65,12 +85,13 @@ centrado, ~ -19 LUFS). `npm run audio` regera os stems em ~15 s (`public/audio/v
 
 | Quero ajustar | Onde | Precisa regerar? |
 | --- | --- | --- |
-| Volume dos swooshes, dos cliques ou do texto | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
+| Volume dos swooshes, cliques, texto ou recompensas | `MIX[perfil].stems[stem].gainDb` em `src/audio/config.ts` | não, vale no Studio e no render |
 | Volume geral | `MIX[perfil].masterDb` | não |
 | Onde entram e saem, fades, deslocamento | `inFrame`, `outFrame`, `fadeInFrames`, `fadeOutFrames`, `offsetFrames` | não |
 | Silenciar um dos dois | `gainDb: -Infinity` no stem | não |
 | Equilíbrio de base entre os dois | `SYNTH.stemPeakDb` | sim (`npm run audio`) |
 | Timbre, duração, nível de cada som | `scripts/audio/voices.mjs` e `compose.mjs` | sim |
+| Texto do soco, do botão, quais números aparecem | `HOOK_PUNCH` (`Ad.tsx`), `CtaButton` (`Reward.tsx`), `T.callouts` (`timeline.ts`) | só o vídeo, nada de áudio se o tempo não mudar |
 | Ritmo do filme (quando cada coisa acontece) | `T` em `src/timeline.ts` | sim (`npm run audio`) e re-render do vídeo |
 
 Comandos: `npm run audio` (gera stems), `npm run audio:check -- cinematic --png` (loudness, pico, mono,

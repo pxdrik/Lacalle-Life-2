@@ -121,7 +121,7 @@ function syncReport(stems) {
       swooshes.push(`${c.name} ${d >= 0 ? "+" : ""}${d.toFixed(0)} ms`);
       continue;
     }
-    if (!/^(clique|confirma)/.test(c.name)) continue;
+    if (!/^(clique|gancho|chega|check|numero|cta)/.test(c.name)) continue;
     const st = stems[c.stem];
     if (!st) continue;
     const a = Math.round(Math.max(0, c.t - 0.03) * SR), b = Math.round((c.t + (c.name.startsWith("clique") ? 0.06 : 0.15)) * SR);
