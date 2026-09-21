@@ -1,4 +1,4 @@
-# Lacalle Life, comercial de 26,3 s
+# Lacalle Life, comercial de 25,1 s
 
 Vídeo feito em código com [Remotion](https://www.remotion.dev). As telas são capturas reais
 do app (Playwright, dados de demonstração), nada é mockup redesenhado.
@@ -7,7 +7,7 @@ do app (Playwright, dados de demonstração), nada é mockup redesenhado.
 
 | Pasta | O que tem |
 | --- | --- |
-| `src/` | A composição: `Ad.tsx` monta as cenas, e `src/timeline.ts` é a **fonte única de tempo** (30 fps, 790 quadros). |
+| `src/` | A composição: `Ad.tsx` monta as cenas, e `src/timeline.ts` é a **fonte única de tempo** (30 fps, 752 quadros). |
 | `scripts/capture.mjs` | Sobe um navegador limpo, importa dados de demonstração e captura as telas em `public/shots/`. |
 | `scripts/demo-data.mjs` | Dados de demonstração (dieta, treinos, 10 semanas de histórico), montados sobre o catálogo real. |
 | `scripts/score.mjs` | Trilha provisória sintetizada por código, sincronizada com os cortes e toques. |
@@ -27,9 +27,12 @@ npm run capture       # recaptura as telas (Life rodando em http://localhost:300
 ## Ritmo (src/timeline.ts)
 
 Todo o tempo do filme mora em `T`, em `src/timeline.ts`. `Ad.tsx` monta as cenas a partir dele e o áudio lê o
-mesmo `T` (por `CUES`), então mudar o ritmo é mexer só ali e rodar `npm run audio`. O filme tem 26,3 s: gancho e logo
+mesmo `T` (por `CUES`), então mudar o ritmo é mexer só ali e rodar `npm run audio`. O filme tem 25,1 s: gancho e logo
 curtos, rolagens e séries mais rápidas, texto entrando em 18 quadros. O Diário segura ~0,9 s antes do primeiro toque e o
 Hoje ("quanto ainda cabe no dia") ~1,3 s, como pedido.
+O Treino foi apertado a pedido (parecia uma "freada"): primeiro toque 0,9 s depois do corte e um toque a cada 0,8 s,
+em vez de 1,2 s, e a virada para Evolução vem logo depois do "3/13 séries". Para afrouxar ou apertar de novo, mexa só em
+`T.treino` (e no que vem depois, `T.evolucao`, `T.stage`, `T.close`, `T.callouts`, que andam junto).
 
 ## Retenção e CTA (recompensas)
 

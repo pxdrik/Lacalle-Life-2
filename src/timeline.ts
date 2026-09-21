@@ -13,12 +13,12 @@ export const FPS = 30;
 export const T = {
   hook: { lines: [3, 17, 31], chega: 46, exit: [64, 76], dur: 78 }, // local (a cena começa em 0)
   logo: { start: 64, mark: 20, words: 20, exit: [44, 58], dur: 60 }, // start abs, resto local
-  stage: { enter: 108, settle: 36, exitStart: 664, exitEnd: 688 }, // abs (settle em quadros)
+  stage: { enter: 108, settle: 36, exitStart: 626, exitEnd: 650 }, // abs (settle em quadros)
   dieta: { title: 114, scroll: [136, 208] }, // abs
   diario: { cut: 210, taps: [250, 276], states: [254, 280], hoje: [306, 318] }, // abs
-  treino: { cut: 346, taps: [382, 418, 454], states: [388, 424, 460] }, // abs
-  evolucao: { cut: 502, scroll: [[536, 586], [598, 650]] }, // abs
-  close: { start: 658, dur: 132, lines: [2, 8, 14], dim: [24, 34], tudo: 26, cta: [50, 64], press: 92 }, // start abs, resto local
+  treino: { cut: 346, taps: [374, 398, 422], states: [380, 404, 428] }, // abs (toques a cada 0,8 s, sem freada)
+  evolucao: { cut: 464, scroll: [[498, 548], [560, 612]] }, // abs
+  close: { start: 620, dur: 132, lines: [2, 8, 14], dim: [24, 34], tudo: 26, cta: [50, 64], press: 92 }, // start abs, resto local
   /**
    * Recompensas: um número em destaque por ganho. Os valores são os que aparecem na própria tela
    * (dados de demonstração do app). Um de cada vez, sem sobrepor.
@@ -27,13 +27,13 @@ export const T = {
     { at: 142, dur: 40, value: "2.973", label: "kcal de meta" }, // dieta
     { at: 282, dur: 30, value: "1.588", label: "kcal registrados" }, // diário (805 + 783)
     { at: 320, dur: 32, value: "1.385", label: "kcal restantes" }, // hoje
-    { at: 462, dur: 34, value: "3/13", label: "séries" }, // treino
-    { at: 512, dur: 36, value: "+2,4", label: "kg em 9 semanas" }, // evolução (73,4 → 75,8)
-    { at: 608, dur: 34, value: "223,3 kg", label: "recorde de 1RM" }, // evolução (recordes)
+    { at: 430, dur: 30, value: "3/13", label: "séries" }, // treino
+    { at: 474, dur: 36, value: "+2,4", label: "kg em 9 semanas" }, // evolução (73,4 → 75,8)
+    { at: 570, dur: 34, value: "223,3 kg", label: "recorde de 1RM" }, // evolução (recordes)
   ],
 } as const;
 
-export const DURATION = T.close.start + T.close.dur; // 790 quadros = 26,3 s
+export const DURATION = T.close.start + T.close.dur; // 752 quadros = 25,1 s
 
 /** Visão em quadros absolutos para o áudio. */
 export const CUES = {
