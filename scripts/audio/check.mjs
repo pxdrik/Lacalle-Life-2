@@ -12,6 +12,8 @@ const args = process.argv.slice(2);
 const profile = args.find((a) => a === "cinematic" || a === "mobile") ?? "cinematic";
 const file = args.includes("--file") ? args[args.indexOf("--file") + 1] : null;
 const png = args.includes("--png");
+const withMusic = args.includes("--music");
+const ACTIVE = withMusic ? [...STEMS, "music"] : STEMS;
 const S = (f) => f / FPS;
 const FRAME = SR / FPS;
 
@@ -24,7 +26,7 @@ function simulate() {
   const L = new Float32Array(N);
   const R = new Float32Array(N);
   const stems = {};
-  for (const name of STEMS) {
+  for (const name of ACTIVE) {
     const st = loadStem(name);
     stems[name] = st;
     for (let i = 0; i < N; i++) {
@@ -137,6 +139,33 @@ function syncReport(stems) {
   console.log(`${checked} eventos secos conferidos; maior desvio ${worst.toFixed(0)} ms (1 quadro = 33 ms)`);
 }
 
+/** Arco da música sozinha e o quanto ela fica abaixo dos efeitos. */
+function musicReport(stems) {
+  const gain = (name) => (i) => stemGain(profile, name, Math.floor(i / FRAME));
+  const mix = (names) => {
+    const l = new Float32Array(N), r = new Float32Array(N);
+    for (const n of names) { const g = gain(n); for (let i = 0; i < N; i++) { l[i] += stems[n].L[i] * g(i); r[i] += stems[n].R[i] * g(i); } }
+    return [l, r];
+  };
+  const [ml, mr] = mix(["music"]);
+  const [el, er] = mix(STEMS);
+  const ldm = loudness(ml, mr);
+  console.log("\n--- música sozinha ---");
+  console.log(`LUFS integrado ${ldm.integrated.toFixed(1)}  |  curto prazo máx ${ldm.shortMax.toFixed(1)}  |  pico ${peakDb(ml, mr).toFixed(1)} dBFS`);
+  console.log("arco (RMS da música a cada 1,2 s; a barra cresce com a energia):");
+  const marks = { [S(CUES.stage.enter).toFixed(1)]: "aparelho entra", [S(CUES.treino.cut).toFixed(1)]: "treino", [S(CUES.evolucao.cut).toFixed(1)]: "evolução", [S(CUES.fechamento.tudo[0]).toFixed(1)]: "frase final", [S(CUES.fechamento.cta[0]).toFixed(1)]: "chamada" };
+  for (let t = 0; t < DUR - 0.5; t += 1.2) {
+    const r = rmsWindow(ml, mr, t, t + 1.2);
+    const key = Object.keys(marks).find((k) => Number(k) >= t && Number(k) < t + 1.2);
+    console.log(`  ${t.toFixed(1).padStart(4)} s  ${r.toFixed(1).padStart(6)} dBFS  ${"#".repeat(Math.max(0, Math.round((r + 62) / 2)))}${key ? "   <- " + marks[key] : ""}`);
+  }
+  const win = [S(CUES.fechamento.tudo[0]) - 1.5, S(CUES.fechamento.tudo[0]) + 1.5];
+  console.log(`na frase final: música ${rmsWindow(ml, mr, ...win).toFixed(1)} dBFS RMS, efeitos ${rmsWindow(el, er, ...win).toFixed(1)} dBFS RMS`);
+  console.log(`última 0,25 s da música: ${rmsWindow(ml, mr, DUR - 0.25, DUR - 0.01).toFixed(1)} dBFS (silêncio limpo no fim)`);
+  const be = bandEnergies(ml, mr, S(CUES.evolucao.cut), S(CUES.fechamento.cta[0]));
+  console.log("energia por banda no trecho mais forte (dB, relativo):", bands.map(([n], i) => `${n} ${be[i].toFixed(0)}`).join(" | "));
+}
+
 let L, R, stems = null;
 if (file) {
   [L, R] = readWav(readFileSync(file));
@@ -146,12 +175,13 @@ if (file) {
 }
 report(L.subarray(0, N), R.subarray(0, N), `${profile}${file ? ` (${file})` : " (simulação dos stems + config)"}`, stems);
 if (stems) syncReport(stems);
+if (stems && withMusic) musicReport(stems);
 
 if (png) {
   mkdirSync("out/audio-report", { recursive: true });
   const marks = [S(CUES.logo.start), S(CUES.agora[0]), S(CUES.diario.cut), S(CUES.treino.cut), S(CUES.evolucao.cut), S(CUES.fechamento.tudo[0]), S(CUES.fechamento.cta[0])];
   spectrogram(`out/audio-report/${profile}-mix.png`, L, R, { marks });
-  if (stems) for (const n of STEMS) spectrogram(`out/audio-report/${profile}-${n}.png`, stems[n].L, stems[n].R, { marks, height: 300 });
+  if (stems) for (const n of ACTIVE) spectrogram(`out/audio-report/${profile}-${n}.png`, stems[n].L, stems[n].R, { marks, height: 300 });
   console.log(`\nespectrogramas em out/audio-report/${profile}-*.png (linhas vermelhas: logo, "Agora um só", diário, treino, evolução, "Tudo em um lugar só", chamada)`);
 }
 void rmsProfile;

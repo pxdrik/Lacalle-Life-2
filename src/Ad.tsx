@@ -225,9 +225,11 @@ export interface AdProps {
   /** "v1" = trilha provisória; "v2" = efeitos novos (src/audio). Só o áudio muda. */
   audio?: AudioVersion;
   profile?: AudioProfile;
+  /** Acrescenta a trilha (stem "music") por baixo dos efeitos. Por padrão, só efeitos. */
+  music?: boolean;
 }
 
-export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAULT_AUDIO_PROFILE }) => {
+export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAULT_AUDIO_PROFILE, music = false }) => {
   const frame = useCurrentFrame();
   const vol = interpolate(frame, [0, 24, DURATION - 40, DURATION], [0, 1, 1, 0], clamp);
   const topLogoStart = T.stage.enter - 10;
@@ -268,7 +270,7 @@ export const Ad: FC<AdProps> = ({ audio = DEFAULT_AUDIO_VERSION, profile = DEFAU
       </Sequence>
 
       <Grain />
-      {audio === "v2" ? <AudioTrack profile={profile} /> : <Audio src={staticFile("audio/score.wav")} volume={vol} />}
+      {audio === "v2" ? <AudioTrack profile={profile} music={music} /> : <Audio src={staticFile("audio/score.wav")} volume={vol} />}
     </AbsoluteFill>
   );
 };

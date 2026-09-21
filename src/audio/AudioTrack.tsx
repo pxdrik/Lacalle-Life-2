@@ -16,13 +16,14 @@ const StemPlayer: FC<{ stem: StemName; profile: AudioProfile }> = ({ stem, profi
 };
 
 /**
- * Áudio v2: quatro stems (music, impacts, ui, closing), cada um com o próprio volume, janela de
- * entrada/saída e fades vindos de `config.ts`. Ajustar a config muda o Studio e o render na hora,
- * sem regerar nada. Os stems são gerados por `npm run audio`.
+ * Áudio v2: os stems de efeitos (swooshes, clicks, text), cada um com o próprio volume, janela de
+ * entrada/saída e fades vindos de `config.ts`, mais a trilha (stem "music") quando `music` é true.
+ * Ajustar a config muda o Studio e o render na hora, sem regerar nada. Os stems são gerados por
+ * `npm run audio` (efeitos) e `npm run audio:music` (trilha).
  */
-export const AudioTrack: FC<{ profile: AudioProfile }> = ({ profile }) => (
+export const AudioTrack: FC<{ profile: AudioProfile; music?: boolean }> = ({ profile, music = false }) => (
   <>
-    {STEMS.map((stem) => (
+    {(music ? [...STEMS, "music" as const] : STEMS).map((stem) => (
       <StemPlayer key={stem} stem={stem} profile={profile} />
     ))}
   </>

@@ -13,7 +13,10 @@
     "audio:check": "node scripts/audio/check.mjs",
     "render:mobile": "remotion render Ad out/lacalle-life-9x16-mobile.mp4 --props=props/mobile.json",
     "render:wide:mobile": "remotion render AdWide out/lacalle-life-16x9-mobile.mp4 --props=props/mobile.json",
-    "audio:selftest": "node scripts/audio/selftest.mjs"
+    "audio:selftest": "node scripts/audio/selftest.mjs",
+    "audio:music": "node scripts/audio/music.mjs",
+    "render:musica": "remotion render Ad out/lacalle-life-9x16-musica.mp4 --props=props/cinematic-musica.json",
+    "render:wide:musica": "remotion render AdWide out/lacalle-life-16x9-musica.mp4 --props=props/cinematic-musica.json"
   },
   "dependencies": {
     "@remotion/cli": "4.0.526",

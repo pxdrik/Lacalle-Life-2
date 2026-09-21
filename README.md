@@ -47,6 +47,19 @@ Sem música de fundo. Três tipos de som, todos gerados por código, localmente 
 
 A versão com música (base, baques, golpe, notas, resolução) está no histórico do git (commit `790c853`).
 
+### Versão com música (opcional)
+
+A trilha original é um arquivo à parte: **não entra nos renders padrão**, que continuam só com efeitos. Ela é
+gerada por `npm run audio:music` (`scripts/audio/music.mjs`, ~10 s) e entra quando a composição recebe
+`music: true` (`props/cinematic-musica.json`, `props/mobile-musica.json`, ou `npm run render:musica`).
+
+Ambient eletrônico minimalista, ré maior, 100 bpm, sem bateria e sem melodia marcante. Poucas camadas por vez:
+pad profundo, ar (textura), grave limpo que "respira", pequenos pulsos tonais em grupos de 3+3+2 e sete notas
+soltas. O arco acompanha as cenas: quase vazio no gancho e na abertura, pulso sutil quando o aparelho entra, mais
+densidade no treino, pico em "Tudo em um lugar só." e um release curto sob a chamada, com cauda limpa. A grade
+de compassos é ancorada nessa frase e as seções vêm de `src/timeline.ts`, então retimar o filme move a música.
+Volume próprio: `music.gainDb` em `src/audio/config.ts`. Verificação: `npm run audio:check -- cinematic --music --png`.
+
 Dois perfis: **cinematic** (~ -22 LUFS, pico -7 dBFS) e **mobile** (celular e social: sem subgrave, presença, mais
 centrado, ~ -19 LUFS). `npm run audio` regera os stems em ~15 s (`public/audio/v2/<perfil>/`, não versionados).
 
