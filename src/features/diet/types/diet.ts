@@ -114,6 +114,24 @@ export interface Meal {
    * read time. See `mealCheckState` in `services/meal-execution.ts`.
    */
   readonly plannedSnapshot?: readonly MealItem[] | undefined;
+  /**
+   * Where this meal sits among its owner's other meals — set once, when it
+   * enters the list (creation, duplication, a diet check/open into a
+   * `FoodLog`), and touched again only by an explicit move
+   * (`moveMeal`/`reorderMeals` in `edit-diet.ts`). `undefined` predates this
+   * field; array position is the fallback until the next mutation stamps it
+   * (see `mergeFoodLogMeals` in `composition/sync/food-log-merge.ts`).
+   *
+   * Only `FoodLog.meals` actually needs this: it is unioned by id across
+   * devices during sync (§19.5), and array position alone does not survive
+   * that union — two devices merging the same set would each see their own
+   * local order as "the" order and never agree. A `Diet`'s own meals never
+   * go through that merge (a diet syncs as one whole document, §19.5), so
+   * this field is simply unused there — kept on the shared `Meal` type
+   * anyway rather than split, since `edit-diet.ts` already runs the same
+   * operations against both.
+   */
+  readonly order?: number | undefined;
 }
 
 /**

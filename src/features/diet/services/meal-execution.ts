@@ -1,4 +1,9 @@
-import { createEntityId, revise, type EntityId } from "@/core/domain/entity";
+import {
+  createEntityId,
+  entityTimestamp,
+  revise,
+  type EntityId,
+} from "@/core/domain/entity";
 import { sumMacros, type Macros } from "@/core/domain/macros";
 
 import { mealMacros } from "./diet-macros";
@@ -88,6 +93,9 @@ function snapshotMeal(diet: Diet, meal: Meal, eaten: boolean): Meal {
     // `mealCheckState` below, which is what this pays for.
     plannedSnapshot: items,
     eaten,
+    // Appended to the log, so this always sorts after whatever is already
+    // there — see `Meal.order`.
+    order: entityTimestamp(),
   };
 }
 

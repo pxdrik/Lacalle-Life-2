@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createDiet, createMealItem } from "./create-diet";
-import { addItem, setItemGrams } from "./edit-diet";
+import { addItem, addMeal, setItemGrams, updateMeal } from "./edit-diet";
 import { mealCheckState } from "./meal-execution";
 import { startDayFromDiet, createFoodLog } from "./start-day";
 import { isEmptyLog } from "../types/food-log";
@@ -89,6 +89,18 @@ describe("startDayFromDiet", () => {
       sourceDietId: diet.id,
       sourceMealId: diet.meals[0]!.id,
     });
+  });
+
+  it("copies meals in the diet's own order, by Meal.order — not by whatever the next cross-device merge would tie-break to", () => {
+    let diet = dietWithLunch();
+    diet = updateMeal(diet, diet.meals[0]!.id, { name: "Almoço" });
+    diet = addMeal(diet);
+    diet = updateMeal(diet, diet.meals[1]!.id, { name: "Jantar" });
+
+    const log = startDayFromDiet(diet, "2026-08-07");
+
+    expect(log.meals.map((m) => m.name)).toEqual(["Almoço", "Jantar"]);
+    expect(log.meals[1]!.order!).toBeGreaterThan(log.meals[0]!.order!);
   });
 
   it("seeds every meal unchecked — starting the day is the plan, not a record of already having eaten", () => {

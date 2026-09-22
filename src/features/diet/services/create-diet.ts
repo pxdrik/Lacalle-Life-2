@@ -39,6 +39,10 @@ export function createMeal(position: number): Meal {
     time: null,
     notes: "",
     items: [],
+    // Always the newest value `entityTimestamp()` has produced in this
+    // process, so a fresh meal sorts after every meal already in the list —
+    // see `Meal.order`.
+    order: entityTimestamp(),
   };
 }
 

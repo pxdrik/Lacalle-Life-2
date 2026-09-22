@@ -59,6 +59,10 @@ export function startDayFromDiet(diet: Diet, day: string): FoodLog {
       sourceMealId: meal.id,
       plannedSnapshot: items,
       eaten: false,
+      // One call per meal, in the diet's own order — `entityTimestamp()` is
+      // strictly increasing within a process, so the day opens with exactly
+      // the diet's order (see `Meal.order`).
+      order: entityTimestamp(),
     };
   });
 

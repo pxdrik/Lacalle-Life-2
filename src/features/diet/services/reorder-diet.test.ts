@@ -92,6 +92,53 @@ describe("moveMeal", () => {
   });
 });
 
+describe("Meal.order after a move", () => {
+  // `order` is what survives the food log's cross-device merge
+  // (`mergeFoodLogMeals`, §19.5) — array position alone does not. A move
+  // that changed every meal's `order`, not just the one dragged, would make
+  // every bystander meal look edited to that merge. See `edit-diet.ts`.
+  it("reorderMeals only changes the order of the meal that moved", () => {
+    const diet = dietWithMeals("Café", "Almoço", "Jantar");
+    const untouchedIds = [diet.meals[1]!.id, diet.meals[2]!.id];
+    const untouchedBefore = untouchedIds.map(
+      (id) => diet.meals.find((m) => m.id === id)!.order,
+    );
+
+    const moved = reorderMeals(diet, diet.meals[0]!.id, diet.meals[2]!.id);
+    const untouchedAfter = untouchedIds.map(
+      (id) => moved.meals.find((m) => m.id === id)!.order,
+    );
+
+    expect(untouchedAfter).toEqual(untouchedBefore);
+  });
+
+  it("moveMeal only changes the order of the meal that moved", () => {
+    const diet = dietWithMeals("Café", "Almoço", "Jantar");
+    const untouchedIds = [diet.meals[1]!.id, diet.meals[2]!.id];
+    const untouchedBefore = untouchedIds.map(
+      (id) => diet.meals.find((m) => m.id === id)!.order,
+    );
+
+    const moved = moveMeal(diet, diet.meals[0]!.id, 1);
+    const untouchedAfter = untouchedIds.map(
+      (id) => moved.meals.find((m) => m.id === id)!.order,
+    );
+
+    expect(untouchedAfter).toEqual(untouchedBefore);
+  });
+
+  it("the moved meal's new order sits between its new neighbors", () => {
+    const diet = dietWithMeals("Café", "Almoço", "Jantar");
+
+    const moved = reorderMeals(diet, diet.meals[2]!.id, diet.meals[0]!.id);
+    const [first, second, third] = moved.meals;
+
+    expect(first?.name).toBe("Jantar");
+    expect(first?.order).toBeLessThan(second!.order!);
+    expect(second?.order).toBeLessThan(third!.order!);
+  });
+});
+
 describe("reorderMealItems", () => {
   function dietWithFoods(...names: string[]) {
     let diet = createDiet("Cutting");

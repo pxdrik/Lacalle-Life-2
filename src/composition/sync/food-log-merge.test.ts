@@ -17,6 +17,7 @@ function meal(id: string, overrides: Partial<Meal> = {}): Meal {
     time: overrides.time ?? null,
     notes: overrides.notes ?? "",
     items: overrides.items ?? [],
+    order: overrides.order,
   };
 }
 
@@ -105,9 +106,14 @@ describe("mergeFoodLogMeals", () => {
   });
 
   it("5. ordem das refeições após a união é a mesma nos dois dispositivos, independente de quem sincronizou primeiro", () => {
-    const breakfast = meal("m-breakfast", { name: "Café", time: "08:00" });
-    const lunch = meal("m-lunch", { name: "Almoço", time: "12:00" });
-    const dinner = meal("m-dinner", { name: "Jantar", time: "20:00" });
+    // `order` é cunhado uma vez por quem cria a refeição (ver `Meal.order`)
+    // — o mesmo valor chega aos dois lados independente de quem sincroniza
+    // primeiro, ao contrário de `time` (revisão de 22/09/2026: a maioria das
+    // refeições do Diário nunca tem horário, então a regra antiga na
+    // prática desempatava por id, não pela ordem em que a pessoa adicionou).
+    const breakfast = meal("m-breakfast", { name: "Café", order: 1 });
+    const lunch = meal("m-lunch", { name: "Almoço", order: 2 });
+    const dinner = meal("m-dinner", { name: "Jantar", order: 3 });
 
     // A: breakfast + lunch. B: breakfast + dinner.
     const fromA = mergeFoodLogMeals([breakfast, lunch], [wire(breakfast), wire(dinner)], null);
@@ -120,12 +126,56 @@ describe("mergeFoodLogMeals", () => {
     expect(orderB).toEqual(orderA);
   });
 
-  it("desempata refeições com o mesmo horário (ou sem horário) por Meal.id, não por ordem de chegada", () => {
-    const noTimeZ = meal("zzz", { name: "Sem horário Z" });
-    const noTimeA = meal("aaa", { name: "Sem horário A" });
+  it("5b. editar uma refeição não move as vizinhas — o bug relatado por Pedro (22/09/2026)", () => {
+    // As três nunca tiveram horário (o caso comum no Diário) e já têm
+    // `order` de quando cada uma entrou no dia. Reportado: sincronizar
+    // depois de editar "Almoço" fazia a refeição editada, ou as outras,
+    // pularem de posição — a ordenação antiga (`time` então `id`) reduzia,
+    // sem `time`, a um desempate por id que ignorava por completo a ordem em
+    // que as refeições foram adicionadas.
+    const breakfast = meal("m-breakfast", { name: "Café", order: 1 });
+    const lunch = meal("m-lunch", { name: "Almoço", order: 2 });
+    const dinner = meal("m-dinner", { name: "Jantar", order: 3 });
+    const base = [wire(breakfast), wire(lunch), wire(dinner)];
 
-    const fromOneOrder = mergeFoodLogMeals([noTimeZ], [wire(noTimeA)], null);
-    const fromOtherOrder = mergeFoodLogMeals([noTimeA], [wire(noTimeZ)], null);
+    // Edita só o conteúdo do almoço (um item novo) — a posição não muda.
+    const editedLunch = meal("m-lunch", {
+      name: "Almoço",
+      order: 2,
+      items: [
+        {
+          id: "i1",
+          foodId: null,
+          name: "Arroz",
+          grams: 200,
+          unit: "g",
+          per100g: { kcal: 130, proteinG: 3, carbsG: 28, fatG: 0.3 },
+        },
+      ],
+    });
+
+    const result = mergeFoodLogMeals(
+      [breakfast, editedLunch, dinner],
+      base,
+      base,
+      2,
+      1,
+    );
+
+    expect(result.conflicts).toHaveLength(0);
+    expect(result.liveMeals.map((m) => m.id)).toEqual([
+      "m-breakfast",
+      "m-lunch",
+      "m-dinner",
+    ]);
+  });
+
+  it("desempata refeições com o mesmo `order` (inclusive sem nenhum, pelo fallback de posição) por Meal.id", () => {
+    const noOrderZ = meal("zzz", { name: "Sem order Z" });
+    const noOrderA = meal("aaa", { name: "Sem order A" });
+
+    const fromOneOrder = mergeFoodLogMeals([noOrderZ], [wire(noOrderA)], null);
+    const fromOtherOrder = mergeFoodLogMeals([noOrderA], [wire(noOrderZ)], null);
 
     expect(fromOneOrder.liveMeals.map((m) => m.id)).toEqual(["aaa", "zzz"]);
     expect(fromOtherOrder.liveMeals.map((m) => m.id)).toEqual(["aaa", "zzz"]);

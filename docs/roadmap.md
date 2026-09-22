@@ -5,6 +5,39 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: refeição não pula mais de posição depois de sincronizar + 110 alimentos-base novos — 22/09/2026
+
+Bug relatado pelo Pedro: no Diário, a última refeição editada "pulava" para o
+topo (ou qualquer posição) depois de sincronizar. Causa raiz em
+`composition/sync/food-log-merge.ts`: a união de refeições entre
+dispositivos ordenava por `Meal.time` e depois por `Meal.id` — mas a maioria
+das refeições do Diário nunca tem horário preenchido, então na prática a
+regra quase sempre desempatava por um UUID aleatório, sem relação nenhuma
+com a ordem em que a pessoa foi adicionando.
+
+- ✅ **`Meal` ganha `order: number`** — cunhado uma vez, quando a refeição
+  entra na lista (criação, duplicação, um check/abrir de refeição
+  planejada), nunca recalculado pelo merge. É conteúdo da refeição, igual a
+  `id`: qualquer dispositivo que una o mesmo conjunto de refeições chega ao
+  mesmo array. Detalhe completo, e por que a decisão de 24/08/2026
+  (`time`+`id`) não resolvia, em `docs/arquitetura-sincronizacao.md` §19.5.
+- ✅ **Um arrastar-e-soltar só toca a refeição movida.** `moveMeal`/
+  `reorderMeals` (`edit-diet.ts`) recalculam o `order` só da refeição que
+  mudou de posição, para um valor entre seus novos vizinhos — mover uma
+  refeição não faz as outras parecerem editadas no próximo merge.
+  Refeições que predatam o campo (dado já sincronizado) recebem `order` pela
+  posição no array de cada lado, dentro do próprio `mergeFoodLogMeals`.
+- ✅ **110 alimentos-base adicionados ao catálogo** (1483 → 1593): queijos,
+  frios, molhos/condimentos, cortes de carne/frango/porco, conservas e
+  guarnições que faltavam para montar refeições comuns (sanduíche, hambúrguer,
+  marmita). Lista trazida pelo Pedro
+  (`ingredientes_base_faltantes_v2.txt`), macros conforme fornecidos.
+  A lista do app já é alfabética por leitura (`local-food-repository.ts`
+  ordena com colation pt-BR), então nenhuma mudança de código era necessária
+  para isso — só adicionar as entradas.
+
+---
+
 ## ✅ Lista de compras da semana em Dietas: tela, texto e PDF — 21/09/2026
 
 Ideia do Pedro: uma página em Dietas para baixar um PDF com o que comprar

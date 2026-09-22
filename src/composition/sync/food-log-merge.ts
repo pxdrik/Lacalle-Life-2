@@ -18,7 +18,7 @@ export interface MealConflict {
 }
 
 export interface FoodLogMergeResult {
-  /** Refeições vivas, ordenadas por horário e depois por id — prontas para a UI e para gravação local. */
+  /** Refeições vivas, ordenadas por `order` e depois por id — prontas para a UI e para gravação local. */
   readonly liveMeals: readonly Meal[];
   /** O payload de fio completo (vivas + tombstones) — o que vai para `save_food_log` e vira o próximo snapshot conhecido. */
   readonly wireMeals: readonly WireMeal[];
@@ -65,13 +65,19 @@ export function mergeFoodLogMeals(
   localUpdatedAt = 0,
   remoteUpdatedAt = 0,
 ): FoodLogMergeResult {
-  const base = lastSynced ?? [];
+  // `order` backfilled from array position wherever a meal predates the
+  // field (a local day, or a server row, from before this shipped) — see
+  // `withOrder` and `Meal.order`. Everything below reads these, never the
+  // raw parameters, so every meal reaching `merged` already carries a real
+  // number.
+  const orderedLocal = withOrder(local);
+  const base = withOrder(lastSynced ?? []);
   const baseById = new Map(base.map((meal) => [meal.id, meal]));
-  const liveLocalIds = new Set(local.map((meal) => meal.id));
+  const liveLocalIds = new Set(orderedLocal.map((meal) => meal.id));
   const now = new Date().toISOString();
 
   const localWire = new Map<string, WireMeal>();
-  for (const meal of local) localWire.set(meal.id, { ...meal, deletedAt: null });
+  for (const meal of orderedLocal) localWire.set(meal.id, { ...meal, deletedAt: null });
 
   for (const baseMeal of base) {
     if (localWire.has(baseMeal.id)) continue;
@@ -85,7 +91,7 @@ export function mergeFoodLogMeals(
     }
   }
 
-  const remoteWire = new Map(remote.map((meal) => [meal.id, meal]));
+  const remoteWire = new Map(withOrder(remote).map((meal) => [meal.id, meal]));
   const allIds = new Set([...localWire.keys(), ...remoteWire.keys()]);
 
   const merged = new Map<string, WireMeal>();
@@ -151,7 +157,7 @@ export function mergeFoodLogMeals(
   const liveMeals = wireMeals
     .filter((meal) => meal.deletedAt === null)
     .map(stripDeletedAt)
-    .sort(byTimeThenId);
+    .sort(byOrderThenId);
 
   return { liveMeals, wireMeals, conflicts };
 }
@@ -181,12 +187,35 @@ function liveContentEqual(a: WireMeal, b: WireMeal): boolean {
   return deepEqual(restA, restB);
 }
 
-/** Sem horário vai para o final; empate (inclusive as duas sem horário) desempata por id lexicográfico — §19.5, decisão fechada em 24/08/2026. */
-function byTimeThenId(a: Meal, b: Meal): number {
-  if (a.time !== b.time) {
-    if (a.time === null) return 1;
-    if (b.time === null) return -1;
-    return a.time.localeCompare(b.time);
-  }
+/**
+ * Ascendente por `order`; empate (praticamente só duas refeições recém-
+ * criadas no mesmo milissegundo) desempata por id lexicográfico — revisão de
+ * 22/09/2026 da decisão original de §19.5 (24/08/2026, que ordenava por
+ * `Meal.time` e depois id). `order` é conteúdo de cada refeição, igual a
+ * `id` — cunhado uma vez por quem criou a refeição, nunca recalculado pelo
+ * merge — então qualquer dispositivo que rode esta função sobre o mesmo
+ * conjunto de refeições chega ao mesmo array, exatamente pela mesma razão
+ * que a decisão original já dava para `time`+`id`. A troca resolve um bug
+ * relatado por Pedro (22/09/2026): a maioria das refeições do Diário nunca
+ * tem `time` preenchido, então a regra antiga na prática ordenava por id —
+ * uma refeição recém-editada "pulava" para qualquer posição depois de
+ * qualquer sincronização, sem relação com a ordem em que foram adicionadas.
+ */
+function byOrderThenId(a: Meal, b: Meal): number {
+  const diff = (a.order ?? 0) - (b.order ?? 0);
+  if (diff !== 0) return diff;
   return a.id.localeCompare(b.id);
+}
+
+/**
+ * Preenche `order` a partir da posição no array para qualquer refeição que
+ * predate o campo — um dia local nunca tocado desde antes desta mudança, ou
+ * uma linha do servidor gravada antes dela. Depois desta chamada, todo
+ * `merged`/`liveMeals` deste merge tem um `order` de verdade, nunca o
+ * fallback `?? 0` de `byOrderThenId`.
+ */
+function withOrder<T extends Meal>(meals: readonly T[]): readonly T[] {
+  return meals.map((meal, index) =>
+    meal.order !== undefined ? meal : { ...meal, order: index },
+  );
 }

@@ -339,6 +339,9 @@ export const mealSchema = z
     // este campo continuar validando.
     alternatives: z.array(mealAlternativeSchema).max(50).optional(),
     eaten: z.boolean().optional(),
+    // Same convention as `eaten`/`alternatives` above: optional so a meal
+    // backed up before this field existed keeps validating. See `Meal.order`.
+    order: z.number().optional(),
   })
   .strict();
 

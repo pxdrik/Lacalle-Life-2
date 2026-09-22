@@ -148,6 +148,15 @@ describe("duplicateMeal", () => {
     expect(duplicateMeal(diet, "gone")).toBe(diet);
   });
 
+  it("gives the copy an order strictly between the original and what followed it", () => {
+    const { diet, almoco } = fullDiet();
+    const after = duplicateMeal(diet, almoco);
+    const [original, copy, next] = after.meals;
+
+    expect(copy?.order).toBeGreaterThan(original!.order!);
+    expect(copy?.order).toBeLessThan(next!.order!);
+  });
+
   it("copies saved alternatives with fresh ids at every depth", () => {
     const { diet, almoco } = fullDiet();
     const withAlternative = saveMealAsAlternative(diet, almoco, "Sem arroz");

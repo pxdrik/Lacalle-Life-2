@@ -23622,5 +23622,1765 @@
       "grams": 200
     },
     "unit": "ml"
+  },
+  {
+    "id": "queijo-mussarela",
+    "name": "Queijo mussarela",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mussarela-fatiada",
+    "name": "Mussarela fatiada",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mussarela-ralada",
+    "name": "Mussarela ralada",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mozarela-fatiada",
+    "name": "Mozarela fatiada",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "catupiry",
+    "name": "Catupiry",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "requeijao-tradicional",
+    "name": "Requeijão tradicional",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "requeijao-light",
+    "name": "Requeijão light",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "cheddar-cremoso",
+    "name": "Cheddar cremoso",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 250,
+      "proteinG": 8,
+      "carbsG": 45,
+      "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 colher de chá",
+      "grams": 3
+    },
+    "unit": "g"
+  },
+  {
+    "id": "cream-cheese",
+    "name": "Cream cheese",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-coalho",
+    "name": "Queijo coalho",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-gouda",
+    "name": "Queijo gouda",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-gorgonzola",
+    "name": "Queijo gorgonzola",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-provolone",
+    "name": "Queijo provolone",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-brie",
+    "name": "Queijo brie",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-camembert",
+    "name": "Queijo camembert",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-feta",
+    "name": "Queijo feta",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-gruyere",
+    "name": "Queijo gruyère",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-mascarpone",
+    "name": "Queijo mascarpone",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-cottage",
+    "name": "Queijo cottage",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-minas-padrao",
+    "name": "Queijo minas padrão",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-meia-cura-fatiado",
+    "name": "Queijo meia cura fatiado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-parmesao-ralado",
+    "name": "Queijo parmesão ralado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-prato-fatiado",
+    "name": "Queijo prato fatiado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "queijo-branco-fatiado",
+    "name": "Queijo branco fatiado",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ricota-temperada",
+    "name": "Ricota temperada",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "creme-de-ricota",
+    "name": "Creme de ricota",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "margarina-com-sal",
+    "name": "Margarina com sal",
+    "category": "fat",
+    "per100g": {
+      "kcal": 600,
+      "proteinG": 1,
+      "carbsG": 1,
+      "fatG": 65
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
+    },
+    "unit": "g"
+  },
+  {
+    "id": "margarina-sem-sal",
+    "name": "Margarina sem sal",
+    "category": "fat",
+    "per100g": {
+      "kcal": 600,
+      "proteinG": 1,
+      "carbsG": 1,
+      "fatG": 65
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 10
+    },
+    "unit": "g"
+  },
+  {
+    "id": "maionese-tradicional",
+    "name": "Maionese tradicional",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "maionese-light",
+    "name": "Maionese light",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ketchup-tradicional",
+    "name": "Ketchup tradicional",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ketchup-picante",
+    "name": "Ketchup picante",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mostarda-amarela",
+    "name": "Mostarda amarela",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mostarda-escura",
+    "name": "Mostarda escura",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-barbecue",
+    "name": "Molho barbecue",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-de-tomate-pronto",
+    "name": "Molho de tomate pronto",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-de-tomate-caseiro",
+    "name": "Molho de tomate caseiro",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-branco",
+    "name": "Molho branco",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-quatro-queijos",
+    "name": "Molho quatro queijos",
+    "category": "dairy",
+    "per100g": {
+      "kcal": 330,
+      "proteinG": 22,
+      "carbsG": 3,
+      "fatG": 25
+    },
+    "practicalUnit": {
+      "label": "1 fatia/colher",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-pesto",
+    "name": "Molho pesto",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-rose",
+    "name": "Molho rosé",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-de-alho",
+    "name": "Molho de alho",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-de-pimenta",
+    "name": "Molho de pimenta",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-shoyu",
+    "name": "Molho shoyu",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-ingles",
+    "name": "Molho inglês",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "molho-de-mostarda-e-mel",
+    "name": "Molho de mostarda e mel",
+    "category": "fat",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 2,
+      "carbsG": 15,
+      "fatG": 12
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 30
+    },
+    "unit": "g"
+  },
+  {
+    "id": "presunto-fatiado",
+    "name": "Presunto fatiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "peito-de-peru-fatiado",
+    "name": "Peito de peru fatiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "lombo-canadense",
+    "name": "Lombo canadense",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mortadela-fatiada",
+    "name": "Mortadela fatiada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "mortadela-com-pistache",
+    "name": "Mortadela com pistache",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "salame-italiano",
+    "name": "Salame italiano",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "salame-hamburgues",
+    "name": "Salame hamburguês",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pepperoni-fatiado",
+    "name": "Pepperoni fatiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "copa-fatiada",
+    "name": "Copa fatiada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pastrami-fatiado",
+    "name": "Pastrami fatiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "rosbife-fatiado",
+    "name": "Rosbife fatiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 260,
+      "proteinG": 15,
+      "carbsG": 3,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "3 fatias",
+      "grams": 40
+    },
+    "unit": "g"
+  },
+  {
+    "id": "carne-moida-crua",
+    "name": "Carne moída crua",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "carne-moida-refogada",
+    "name": "Carne moída refogada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "patinho-bovino",
+    "name": "Patinho bovino",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "acem-bovino",
+    "name": "Acém bovino",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "alcatra-bovina",
+    "name": "Alcatra bovina",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "picanha-bovina",
+    "name": "Picanha bovina",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "maminha-bovina",
+    "name": "Maminha bovina",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "file-mignon-bovino",
+    "name": "Filé mignon bovino",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "contra-file-bovino",
+    "name": "Contra-filé bovino",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "costela-bovina-assada",
+    "name": "Costela bovina assada",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "cupim-bovino",
+    "name": "Cupim bovino",
+    "category": "protein",
+    "per100g": {
+      "kcal": 220,
+      "proteinG": 25,
+      "carbsG": 0,
+      "fatG": 13
+    },
+    "practicalUnit": {
+      "label": "1 bife/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pernil-suino-assado",
+    "name": "Pernil suíno assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "lombo-suino-assado",
+    "name": "Lombo suíno assado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "panceta-suina",
+    "name": "Panceta suína",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "bisteca-suina",
+    "name": "Bisteca suína",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "costelinha-suina",
+    "name": "Costelinha suína",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "peito-de-frango-desfiado",
+    "name": "Peito de frango desfiado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 filé/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "file-de-frango-grelhado",
+    "name": "Filé de frango grelhado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 filé/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "file-de-frango-cru",
+    "name": "Filé de frango cru",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 filé/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "file-de-frango-cozido",
+    "name": "Filé de frango cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 filé/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "frango-empanado-congelado",
+    "name": "Frango empanado congelado",
+    "category": "protein",
+    "per100g": {
+      "kcal": 180,
+      "proteinG": 28,
+      "carbsG": 0,
+      "fatG": 7
+    },
+    "practicalUnit": {
+      "label": "1 filé/porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "linguica-toscana",
+    "name": "Linguiça toscana",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "linguica-de-pernil",
+    "name": "Linguiça de pernil",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "linguica-cuiabana",
+    "name": "Linguiça cuiabana",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "salsicha-de-frango",
+    "name": "Salsicha de frango",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "salsicha-bovina",
+    "name": "Salsicha bovina",
+    "category": "protein",
+    "per100g": {
+      "kcal": 280,
+      "proteinG": 22,
+      "carbsG": 0,
+      "fatG": 20
+    },
+    "practicalUnit": {
+      "label": "1 porção",
+      "grams": 120
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ovo-de-galinha-frito",
+    "name": "Ovo de galinha frito",
+    "category": "protein",
+    "per100g": {
+      "kcal": 150,
+      "proteinG": 13,
+      "carbsG": 1,
+      "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ovo-de-galinha-mexido",
+    "name": "Ovo de galinha mexido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 150,
+      "proteinG": 13,
+      "carbsG": 1,
+      "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ovo-de-galinha-cozido",
+    "name": "Ovo de galinha cozido",
+    "category": "protein",
+    "per100g": {
+      "kcal": 150,
+      "proteinG": 13,
+      "carbsG": 1,
+      "fatG": 10
+    },
+    "practicalUnit": {
+      "label": "1 unidade",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "milho-verde-em-conserva",
+    "name": "Milho verde em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "ervilha-em-conserva",
+    "name": "Ervilha em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "champignon-em-conserva",
+    "name": "Champignon em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "tomate-seco",
+    "name": "Tomate seco",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "cebola-caramelizada",
+    "name": "Cebola caramelizada",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pepino-em-conserva",
+    "name": "Pepino em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "picles",
+    "name": "Picles",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "jalapeno-em-conserva",
+    "name": "Jalapeño em conserva",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "palmito-em-rodelas",
+    "name": "Palmito em rodelas",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "batata-palha-tradicional",
+    "name": "Batata palha tradicional",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "farofa-pronta",
+    "name": "Farofa pronta",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "alho-frito",
+    "name": "Alho frito",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "cebola-frita",
+    "name": "Cebola frita",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 80,
+      "proteinG": 3,
+      "carbsG": 12,
+      "fatG": 2
+    },
+    "practicalUnit": {
+      "label": "2 colheres de sopa",
+      "grams": 50
+    },
+    "unit": "g"
+  },
+  {
+    "id": "oregano",
+    "name": "Orégano",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 250,
+      "proteinG": 8,
+      "carbsG": 45,
+      "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 colher de chá",
+      "grams": 3
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pimenta-calabresa",
+    "name": "Pimenta calabresa",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 250,
+      "proteinG": 8,
+      "carbsG": 45,
+      "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 colher de chá",
+      "grams": 3
+    },
+    "unit": "g"
+  },
+  {
+    "id": "granulado-de-chocolate",
+    "name": "Granulado de chocolate",
+    "category": "fat",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "coco-ralado",
+    "name": "Coco ralado",
+    "category": "fat",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "castanha-de-caju-torrada",
+    "name": "Castanha de caju torrada",
+    "category": "fat",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "amendoim-triturado",
+    "name": "Amendoim triturado",
+    "category": "fat",
+    "per100g": {
+      "kcal": 450,
+      "proteinG": 8,
+      "carbsG": 50,
+      "fatG": 22
+    },
+    "practicalUnit": {
+      "label": "1 colher de sopa",
+      "grams": 20
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pure-de-batata",
+    "name": "Purê de batata",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 130,
+      "proteinG": 2.2,
+      "carbsG": 17,
+      "fatG": 5.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 180
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pure-de-batata-caseiro",
+    "name": "Purê de batata caseiro",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 125,
+      "proteinG": 2.3,
+      "carbsG": 17,
+      "fatG": 5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 180
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pure-de-batata-com-leite",
+    "name": "Purê de batata com leite",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 115,
+      "proteinG": 2.5,
+      "carbsG": 16,
+      "fatG": 4.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 180
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pure-de-batata-com-manteiga",
+    "name": "Purê de batata com manteiga",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 145,
+      "proteinG": 2.2,
+      "carbsG": 17,
+      "fatG": 6.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 180
+    },
+    "unit": "g"
+  },
+  {
+    "id": "pure-de-batata-instantaneo-preparado",
+    "name": "Purê de batata instantâneo preparado",
+    "category": "vegetable",
+    "per100g": {
+      "kcal": 110,
+      "proteinG": 2,
+      "carbsG": 18,
+      "fatG": 3.5
+    },
+    "practicalUnit": {
+      "label": "1 concha",
+      "grams": 180
+    },
+    "unit": "g"
   }
 ]

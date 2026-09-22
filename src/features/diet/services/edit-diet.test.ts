@@ -68,6 +68,13 @@ describe("meals", () => {
     expect(diet.meals[1]?.name).toBe("Refeição 2");
   });
 
+  it("gives an appended meal an order after every meal already there", () => {
+    const diet = addMeal(addMeal(createDiet("Cutting")));
+
+    expect(diet.meals[1]!.order!).toBeGreaterThan(diet.meals[0]!.order!);
+    expect(diet.meals[2]!.order!).toBeGreaterThan(diet.meals[1]!.order!);
+  });
+
   it("removes a meal", () => {
     const diet = addMeal(createDiet("Cutting"));
     const without = removeMeal(diet, diet.meals[0]!.id);

@@ -1096,12 +1096,44 @@ confirma que uma das duas chamadas retorna a versão antiga.
   cada um tentando depois "corrigir" o outro numa sincronização sem fim.
   Uma regra de merge que depende de qual lado a executa não é uma regra.
 
-  **Decisão fechada:** ordenar o resultado da união por `Meal.time`
-  quando presente (refeições sem horário vão para o final), e entre
-  refeições empatadas em horário (inclusive as duas sem horário) desempatar
-  por `Meal.id` em ordem lexicográfica. `Meal.id` é um UUID estável dos
-  dois lados — qualquer dispositivo que rode o merge chega exatamente à
-  mesma ordem, porque a regra não depende de qual array veio "primeiro".
+  **Decisão fechada (24/08/2026):** ordenar o resultado da união por
+  `Meal.time` quando presente (refeições sem horário vão para o final), e
+  entre refeições empatadas em horário (inclusive as duas sem horário)
+  desempatar por `Meal.id` em ordem lexicográfica. `Meal.id` é um UUID
+  estável dos dois lados — qualquer dispositivo que rode o merge chega
+  exatamente à mesma ordem, porque a regra não depende de qual array veio
+  "primeiro".
+
+  **Revisão (22/09/2026), corrigindo a decisão acima.** Bug relatado pelo
+  Pedro: no Diário, a refeição que ele acabava de editar "pulava" de
+  posição depois de sincronizar. Causa — a maioria das refeições do Diário
+  nunca tem `time` preenchido (só quem monta um horário fixo o faz), então
+  a regra de 24/08 na prática degenerava quase sempre no desempate por
+  `Meal.id`: um UUID aleatório, sem relação nenhuma com a ordem em que a
+  pessoa foi adicionando as refeições. A propriedade que a decisão original
+  queria proteger — mesma ordem nos dois dispositivos, sem depender de qual
+  rodou o merge primeiro — continua necessária; o que faltava era um sinal
+  determinístico que também refletisse a ordem de inserção, já que a
+  interface tem drag-and-drop desde antes desta decisão (§19.5 já dizia:
+  "a ordem é dado de produto, não só exibição").
+
+  **Decisão fechada agora:** `Meal` ganha um campo próprio, `order: number`
+  — cunhado uma vez, quando a refeição entra na lista (criação, duplicação,
+  ou um check/abrir de refeição planejada), nunca recalculado pelo merge.
+  É conteúdo da refeição exatamente como `id` já é: qualquer dispositivo
+  que rode a união sobre o mesmo conjunto de refeições chega ao mesmo
+  array, pela mesma razão que `time`+`id` já garantia isso — só que agora o
+  valor tem relação real com a ordem em que a pessoa criou cada refeição, e
+  sobrevive a um arrastar-e-soltar porque mover uma refeição
+  (`moveMeal`/`reorderMeals` em `edit-diet.ts`) recalcula o `order` só da
+  refeição movida, para o valor entre seus novos vizinhos — nunca o das
+  outras, o que evitaria que um reordenar parecesse uma edição em toda
+  refeição vizinha no próximo merge. Ordenação final: `order` ascendente,
+  desempate por `Meal.id` lexicográfico (só relevante para duas refeições
+  novas cunhadas no mesmíssimo milissegundo). Uma refeição que predata o
+  campo (dado já sincronizado antes desta mudança) tem `order` preenchido a
+  partir da posição no array de cada lado, no próprio `mergeFoodLogMeals` —
+  ver `withOrder` em `composition/sync/food-log-merge.ts`.
 - **Granularidade confirmada: por refeição inteira, nunca por item dentro
   dela.** Editar o nome de uma refeição num aparelho e adicionar um item a
   ela no outro, ambos offline, é tratado como o mesmo caso "mesmo

@@ -67,6 +67,18 @@ describe("checkMeal", () => {
     expect(log.meals[0]?.items[0]?.id).not.toBe(meal.items[0]?.id);
   });
 
+  it("gives the snapshot an order after every meal already logged", () => {
+    // Checking a planned meal appends it — it should land at the end of
+    // the Diário's list, not wherever the cross-device merge's id tie-break
+    // happens to put it. See `Meal.order`.
+    const diet = dietWithBreakfast();
+    const meal = diet.meals[0]!;
+    let log = checkMeal(createFoodLog("2026-08-31"), diet, meal);
+    log = checkMeal(log, diet, { ...meal, id: "outra-refeicao" });
+
+    expect(log.meals[1]!.order!).toBeGreaterThan(log.meals[0]!.order!);
+  });
+
   it("is a no-op if the meal is already checked", () => {
     const diet = dietWithBreakfast();
     const meal = diet.meals[0]!;

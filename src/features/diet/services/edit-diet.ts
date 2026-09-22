@@ -1,6 +1,7 @@
 import { reorderById, shiftById } from "@/core/domain/collection";
 import {
   createEntityId,
+  entityTimestamp,
   revise,
   type Entity,
   type EntityId,
@@ -75,8 +76,17 @@ export function duplicateMeal<T extends MealOwner>(
   const index = diet.meals.findIndex((meal) => meal.id === mealId);
   if (index === -1) return diet;
 
+  const copy: Meal = {
+    ...copyMeal(diet.meals[index]!),
+    order: orderBetween(
+      effectiveOrder(diet.meals, index),
+      index + 1 < diet.meals.length
+        ? effectiveOrder(diet.meals, index + 1)
+        : undefined,
+    ),
+  };
   const meals = [...diet.meals];
-  meals.splice(index + 1, 0, copyMeal(diet.meals[index]!));
+  meals.splice(index + 1, 0, copy);
 
   return withMeals(diet, meals);
 }
@@ -113,6 +123,52 @@ export function removeItem<T extends MealOwner>(
   }));
 }
 
+/**
+ * `meal.order`, or its position in `meals` when the field predates that
+ * meal — see `Meal.order`.
+ */
+function effectiveOrder(meals: readonly Meal[], index: number): number {
+  return meals[index]?.order ?? index;
+}
+
+/**
+ * A value strictly between two neighbors, so a move only ever has to change
+ * the `order` of the one meal that actually moved — every other meal in the
+ * list keeps the value it already had, which is what keeps a reorder from
+ * looking like an edit to any meal beside the one dragged (see `Meal.order`
+ * and `mergeFoodLogMeals` in `composition/sync/food-log-merge.ts`, the
+ * reason this field exists at all).
+ *
+ * `undefined` on either side means an edge of the list, not a legacy meal —
+ * callers pass `effectiveOrder`'s already-defaulted result for anything that
+ * exists, so `undefined` here only ever means "there is no neighbor there."
+ *
+ * ponytail: two flat numbers, not a fractional-index library — precision
+ * only degrades after dozens of consecutive drops into the exact same slot,
+ * which does not happen in a list of a handful of meals. Upgrade path if it
+ * ever does: renumber the whole array on that one collision.
+ */
+function orderBetween(before: number | undefined, after: number | undefined): number {
+  if (before === undefined) {
+    return after === undefined ? entityTimestamp() : after - 1;
+  }
+  if (after === undefined) return before + 1;
+  return (before + after) / 2;
+}
+
+/** Re-derives `order` for `mealId` from its new neighbors after a move. */
+function restampMoved<T extends Meal>(meals: readonly T[], mealId: EntityId): readonly T[] {
+  const index = meals.findIndex((meal) => meal.id === mealId);
+  if (index === -1) return meals;
+
+  const order = orderBetween(
+    index > 0 ? effectiveOrder(meals, index - 1) : undefined,
+    index < meals.length - 1 ? effectiveOrder(meals, index + 1) : undefined,
+  );
+
+  return meals.map((meal, i) => (i === index ? { ...meal, order } : meal));
+}
+
 /** Moves a meal by `offset`, clamped. What the arrow buttons report. */
 export function moveMeal<T extends MealOwner>(
   diet: T,
@@ -122,7 +178,7 @@ export function moveMeal<T extends MealOwner>(
   const meals = shiftById(diet.meals, mealId, offset);
   if (meals === diet.meals) return diet;
 
-  return withMeals(diet, meals);
+  return withMeals(diet, restampMoved(meals, mealId));
 }
 
 /** Puts one meal where another is. What a drag reports. */
@@ -134,7 +190,7 @@ export function reorderMeals<T extends MealOwner>(
   const meals = reorderById(diet.meals, activeId, overId);
   if (meals === diet.meals) return diet;
 
-  return withMeals(diet, meals);
+  return withMeals(diet, restampMoved(meals, activeId));
 }
 
 export function reorderMealItems<T extends MealOwner>(
