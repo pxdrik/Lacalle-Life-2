@@ -1,0 +1,4 @@
+{
+  "git": { "deploymentEnabled": { "comercial-video": false } },
+  "ignoreCommand": "[ \"$VERCEL_GIT_COMMIT_REF\" = \"comercial-video\" ]"
+}
