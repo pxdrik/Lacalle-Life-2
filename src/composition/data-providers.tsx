@@ -388,7 +388,11 @@ export function DietDataProvider({
 }) {
   return (
     <DietRepositoryProvider repository={dietRepository()}>
-      {children}
+      {/* Os alimentos só para a lista de compras agrupar por categoria: o item
+          da dieta guarda o `foodId`, e a categoria mora no catálogo. */}
+      <FoodRepositoryProvider repository={foodRepository()}>
+        {children}
+      </FoodRepositoryProvider>
     </DietRepositoryProvider>
   );
 }

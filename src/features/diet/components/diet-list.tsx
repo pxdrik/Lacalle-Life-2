@@ -18,6 +18,7 @@ import { dietMacros } from "../services/diet-macros";
 import { WEEKDAY_SHORT_LABELS } from "../services/diet-schedule";
 import type { Diet } from "../types/diet";
 import { MacroSummary } from "./macro-summary";
+import { ShoppingListButton } from "./shopping-list-dialog";
 import { WeekdayPicker } from "./weekday-picker";
 
 export function DietList() {
@@ -78,6 +79,10 @@ export function DietList() {
           Criar
         </Button>
       </form>
+
+      {state.status === "ready" && state.diets.length > 0 && (
+        <ShoppingListButton diets={state.diets} />
+      )}
 
       {writeError !== null && (
         <p role="alert" className={noticeClasses()}>

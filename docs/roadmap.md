@@ -5,6 +5,56 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Lista de compras da semana em Dietas: tela, texto e PDF — 21/09/2026
+
+Ideia do Pedro: uma página em Dietas para baixar um PDF com o que comprar
+para passar a semana. Serve a "montar dieta" (regra 1) e não sugere nada
+(regra 3): só soma o que já está montado.
+
+**Decisão dele, e que define o escopo:** a lista mostra **só o que a dieta
+pede, do jeito que pede**. "300 g de arroz cozido" sai como "300 g de arroz
+cozido"; sem conversão de peso cozido para cru, sem aviso, sem arredondar
+para embalagem ou unidade caseira. (Eu tinha proposto sinalizar os 253
+alimentos cozidos/grelhados do catálogo; ele preferiu que a pessoa se vire.)
+Ele também pediu "Copiar texto" além do PDF.
+
+- ✅ **A conta** (`services/shopping-list.ts`, pura e testada): cada dieta com
+  dias marcados entra tantas vezes quantos forem os dias, e o mesmo alimento
+  é somado entre refeições e dietas (por `foodId`; sem `foodId`, por nome e
+  unidade; g e ml ficam separados). Fora da conta: dieta sem dia marcado e as
+  alternativas salvas de uma refeição, porque a lista segue o que está
+  montado hoje. Quantidade arredondada **para cima** (sobrar é melhor que
+  faltar), com duas casas antes do teto para o ruído de ponto flutuante não
+  virar uma grama a mais. Mil ou mais sobe de unidade (1,4 kg, 1,5 L).
+- ✅ **Agrupada por categoria** do catálogo (o item da dieta só guarda o
+  `foodId`, então a categoria é consulta ao catálogo). Sem categoria (alimento
+  criado à mão, ou removido do catálogo) cai em "Outros". Se o catálogo falhar
+  ao carregar, a lista continua certa e só perde o agrupamento.
+- ✅ **PDF escrito à mão** (`services/shopping-list-pdf.ts`, ~140 linhas),
+  sem biblioteca: uma lista é texto em linhas, e PDF 1.4 com Helvetica cobre.
+  Zero peso no pacote de um app que funciona offline. Só Latin-1 (cobre o
+  português; todos os nomes do catálogo cabem); o que não cabe vira `?`. A4,
+  várias páginas, caixinha ao lado de cada item. Validado com um leitor
+  independente (pdf.js): texto e acentos extraídos certos e página renderizada.
+- ✅ **Tela:** botão "Lista de compras" em `/dietas` abre um `Dialog` (é
+  consulta, regra 6) com a lista, "Copiar texto" e "Baixar PDF" **no alto**,
+  para não depender de rolar a lista inteira no celular. O catálogo só é
+  carregado com o modal aberto.
+- ⚠️ `DietDataProvider` agora também dá o repositório de alimentos (só a
+  lista de compras usa). Item de dieta gravado antes de existirem líquidos
+  não tem `unit`; a lista lê como "g", como o resto do app.
+
+Testes: 14 da conta, 7 do PDF (tabela de referências cruzadas, tamanho do
+stream, escapes, quebra de linha, várias páginas) e 4 do modal. Provei que
+os da conta pegam o bug: estraguei quatro comportamentos (ruído de ponto
+flutuante, `unit` ausente, multiplicar pelos dias, dieta sem dia) e cada um
+derrubou pelo menos um teste. Conferido no navegador nos dois temas.
+`npm run verify` (1780/1780) e `npm run build` limpos. Uma rodada do
+`verify` falhou por timeout de 5 s em `identity-isolation.test.ts` com a
+máquina saturada; passa sozinho em 2,4 s e passou na rodada seguinte.
+
+---
+
 ## ✅ Botão de sincronizar some de vez, logado ou não — 18/09/2026
 
 O aviso de texto tinha saído no dia anterior, mas o botão manual
