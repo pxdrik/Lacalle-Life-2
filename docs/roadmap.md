@@ -5,6 +5,32 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário/Dietas: kcal do dia maior e centralizada — 23/09/2026
+
+Continuação da entrada anterior (total da refeição vs. do alimento): "pra
+diferenciar a kcal do dia e dos alimentos, vamos deixar as kcal do dia mais
+centralizada no card e maior".
+
+- ✅ **`macro-progress.tsx`** — a figura de kcal ganha `text-xl font-medium`
+  e fica centralizada na própria célula do grid; Prot/Carb/Gord ao lado
+  continuam exatamente do tamanho e alinhamento de sempre. Um `isKcal`
+  checado uma vez por figura, não um componente novo — a barra de progresso
+  em si não muda, só o número acima dela.
+- ✅ **As duas telas que usam este componente, de graça.** `MacroProgress`
+  é compartilhado entre `food-log-screen.tsx` (Diário) e `diet-editor.tsx`
+  (Dietas) sem nenhuma diferença de uso entre as duas — a mesma confusão
+  "kcal do total parece um alimento" que motivou a entrada anterior existe
+  nos dois lugares, então a correção sai nos dois por construção, não por
+  terem sido editados um a um.
+- ✅ **Verificado sem risco de dado real** — nenhuma tela do app foi
+  interagida; o markup real do componente foi injetado isolado numa aba
+  carregando o CSS já compilado do próprio app (mesma técnica da entrada
+  anterior), e o estilo computado confirmado via JS: `justify-content:
+  center` + `font-size: 20px` na linha de kcal contra `normal` + `14px` nas
+  outras três.
+
+---
+
 ## ✅ Diário: total da refeição colado no nome, caixas de nutriente alinhadas — 23/09/2026
 
 Pedro, olhando duas telas reais do Diário: "1) jogar as calorias da

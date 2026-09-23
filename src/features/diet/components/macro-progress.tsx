@@ -97,9 +97,16 @@ export function MacroProgress({
         const target = targets[key];
         const ratio = target === 0 ? 0 : value / target;
         const over = ratio > 1;
+        // Achado real, 23/09/2026: "diferenciar a kcal do dia e dos
+        // alimentos" — kcal já lê maior e centralizado em cada card de
+        // alimento (`MealItemDetailScreen`, `MacroSummary size="lg"`); o
+        // total do dia, aqui, ainda era do mesmo tamanho que Prot/Carb/Gord
+        // ao lado dele. Maior e centrado na própria célula, não a lista
+        // inteira — as três metas continuam do jeito que estavam.
+        const isKcal = key === "kcal";
 
         return (
-          <div key={key}>
+          <div key={key} className={cn(isKcal && "text-center")}>
             {/* From `lg` in `rows` the name leads the line and carries the
                 dot, which is the same coding the grid puts underneath —
                 moved, not invented. Below that it goes back to `sr-only` and
@@ -132,8 +139,15 @@ export function MacroProgress({
               )}
             </dt>
             <dd className={cn(rows && "lg:mt-1")}>
-              <div className="flex items-baseline gap-1 text-sm tabular-nums">
-                <span className="text-ink">{formatDecimal(value)}</span>
+              <div
+                className={cn(
+                  "flex items-baseline gap-1 tabular-nums",
+                  isKcal ? "justify-center text-xl" : "text-sm",
+                )}
+              >
+                <span className={cn("text-ink", isKcal && "font-medium")}>
+                  {formatDecimal(value)}
+                </span>
                 <span className="text-ink-subtle">
                   /{formatDecimal(target)}
                   {unit}
@@ -190,6 +204,7 @@ export function MacroProgress({
                 className={cn(
                   "mt-1 flex items-center gap-1.5 text-[0.6875rem] text-ink-subtle",
                   rows && "lg:hidden",
+                  isKcal && "justify-center",
                 )}
               >
                 <span
