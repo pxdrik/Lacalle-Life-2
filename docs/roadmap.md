@@ -5,6 +5,25 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Splash de abertura: preto → gradiente do ícone do app — 23/09/2026
+
+Pedro, depois de ver a splash de verdade no celular (RM09, entrada mais
+abaixo): "vamos transformar ela em verde esmeralda, igual a da logo".
+
+- ✅ **Reaproveita `ICON_GRADIENT`** (`design-system/brand/mark.ts`), o
+  mesmo gradiente que `apple-icon.tsx`/`icon.svg` já usam — não um verde
+  digitado de novo em `boot-splash.tsx`. Se a constante mudar (ela ainda é o
+  emerald literal do V1.1, não o Verdant do resto do design system — ver o
+  comentário da própria constante), a splash acompanha de graça.
+- ✅ **Verificado ao vivo no navegador desta vez** — círculo verde com o
+  símbolo branco por cima, igual ao ícone do app. Teste novo
+  (`boot-splash.test.tsx`) compara o `background` computado do overlay
+  contra o mesmo `linear-gradient(...)` montado a partir de `ICON_GRADIENT`,
+  em vez de comparar string hexadecimal direto — jsdom normaliza `#10B981`
+  para `rgb(16, 185, 129)` ao ler `style.background` de volta.
+
+---
+
 ## ✅ Roadmap Mestre — RM11: carregamento e sincronização global — 23/09/2026
 
 Fecha o último item do Roadmap Mestre. Antes, cada aba (Diário, Treinos,

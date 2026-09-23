@@ -2,12 +2,24 @@
 
 import { useEffect, useState } from "react";
 
+import { ICON_GRADIENT } from "@/design-system/brand/mark";
 import { Mark } from "@/design-system/brand/signature";
 import { cn } from "@/design-system/cn";
 
 import { useReducedMotion } from "../hooks/use-reduced-motion";
 
 type Phase = "start" | "in" | "out" | "done";
+
+/**
+ * O mesmo gradiente do ícone do app (`apple-icon.tsx`, `icon.svg`) — pedido
+ * do Pedro (23/09/2026) depois de ver a splash de verdade no celular: "vamos
+ * transformar ela em verde esmeralda, igual a da logo". Reaproveitado de
+ * `ICON_GRADIENT`, não reescrito aqui, então a splash segue essa cor
+ * automaticamente se ela mudar de novo — ver o comentário da própria
+ * constante sobre por que ainda é o emerald literal, não o Verdant do resto
+ * do design system.
+ */
+const SPLASH_BACKGROUND = `linear-gradient(${String(ICON_GRADIENT.angle)}deg, ${ICON_GRADIENT.from}, ${ICON_GRADIENT.to})`;
 
 /** Matches the timing LaCalle Finance already validated for the same reveal. */
 const EXPAND_MS = 1000;
@@ -91,9 +103,10 @@ export function BootSplash() {
       <div
         aria-hidden
         className={cn(
-          "pointer-events-none fixed inset-0 z-[60] bg-[#0a0a0a] transition-opacity duration-[120ms] ease-linear",
+          "pointer-events-none fixed inset-0 z-[60] transition-opacity duration-[120ms] ease-linear",
           phase === "out" ? "opacity-0" : "opacity-100",
         )}
+        style={{ background: SPLASH_BACKGROUND }}
       />
     );
   }
@@ -109,8 +122,9 @@ export function BootSplash() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center bg-[#0a0a0a]"
+      className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center"
       style={{
+        background: SPLASH_BACKGROUND,
         clipPath: covering ? "circle(75% at 50% 50%)" : "circle(0% at 50% 50%)",
         transition:
           phase === "start"
