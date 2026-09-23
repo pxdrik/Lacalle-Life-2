@@ -5,6 +5,41 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: total da refeição colado no nome, caixas de nutriente alinhadas — 23/09/2026
+
+Pedro, olhando duas telas reais do Diário: "1) jogar as calorias da
+refeição mais próximo do nome da refeição, hoje parece que as kcals da
+refeição toda é um alimento específico" e "cliquei no alimento e ficou meio
+bugado o design, os boxes ficaram desalinhados".
+
+- ✅ **`meal-card.tsx` — o total da refeição sobe pro bloco do nome.**
+  `MacroSummary` usa exatamente a mesma tipografia pro total da refeição e
+  pra cada alimento embaixo dela — sem estar colado no nome, "192 kcal 7
+  Prot..." lia como o primeiro alimento da lista (que é literalmente o que
+  Pedro descreveu), não como a soma da refeição inteira. Antes ficava solto
+  ao lado do ⋮, numa segunda linha só dele com `justify-between` empurrando
+  tudo pras pontas; agora fica empilhado logo abaixo do nome e do horário,
+  dentro do mesmo bloco — a `border-t` que já separa a lista de alimentos
+  faz o resto do trabalho de dizer "isto aqui é outra coisa". O ⋮ virou um
+  botão solto, sem o `div` que só existia para segurar os dois juntos.
+- ✅ **`meal-item-detail-screen.tsx` — `items-end` no grid de nutrientes.**
+  "Gordura saturada (g / 100 g)" quebra em duas linhas, "Sódio (mg / 100 g)"
+  cabe numa só — o grid esticava cada rótulo pra altura da linha e o texto
+  ficava ancorado no topo, então as duas caixas de input da mesma linha
+  saíam em alturas diferentes. Alinhando pelo fim da célula, é o input — o
+  último elemento de cada rótulo — que bate no mesmo lugar dos dois lados,
+  não o texto acima dele. Reproduzido isolado (HTML solto, sem tocar o app
+  nem dado nenhum) antes de aplicar, pra confirmar a mecânica do CSS sem
+  risco: o "antes" reproduziu o desalinhamento exato do print, o "depois"
+  corrigiu.
+- ⚠️ Não verificado com dado real do Diário no navegador desta vez — o
+  ambiente de dev local está com o dia de hoje vazio, e criar refeição de
+  teste ali arriscava sincronizar lixo pra conta real do Pedro se a sessão
+  estiver logada nela. Os dois testes acima (isolado + suíte de testes)
+  cobrem a mecânica; vale conferir na tela de verdade.
+
+---
+
 ## ✅ Splash de abertura: preto → gradiente do ícone do app — 23/09/2026
 
 Pedro, depois de ver a splash de verdade no celular (RM09, entrada mais

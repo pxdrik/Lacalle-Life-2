@@ -249,12 +249,14 @@ export function MealCard({
             dragHandle?.isDragging === true && "border-accent shadow-modal",
           )}
         >
-          {/* Wraps on a phone: name + check on one line, the macro bar and the
-              ⋮ trigger (both `shrink-0`) drop to their own line below rather
-              than forcing the row past a 390px screen. Lighter risk than it
-              used to be — the header carries one compact bar and one button now,
-              not four action buttons plus a four-figure macro line — but the
-              wrap costs nothing to keep.
+          {/* Achado real, 23/09/2026: o total da refeição usa o mesmo
+              `MacroSummary` que cada alimento embaixo dele usa para o
+              próprio total — mesma tipografia, mesma cor. Sem estar colado
+              no nome, "192 kcal 7 Prot..." lia como o primeiro alimento da
+              lista, não como a soma da refeição. Empilhado logo abaixo do
+              nome (e do horário), dentro do mesmo bloco flexível, em vez de
+              solto ao lado do ⋮ — a proximidade com o nome é o que resolve,
+              a `border-t` que já separa a lista de alimentos faz o resto.
 
               RM01: holding anywhere on this header (outside the inputs and
               buttons it already carries — `useLongPress` excludes those at
@@ -375,27 +377,26 @@ export function MealCard({
                   className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
                 />
               </div>
-            </div>
 
-            <div className="flex shrink-0 items-center gap-2 max-sm:order-last max-sm:w-full max-sm:justify-between">
               {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
                   escondia os números atrás de uma cor — Pedro queria ver os
                   números mesmo, não "esse graficozinho". De volta ao
-                  `MacroSummary` de sempre, já compacto o bastante pra caber
-                  aqui ao lado do ⋮. */}
-              <MacroSummary macros={macros} />
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowingActions(true);
-                }}
-                aria-label={`Mais ações para ${meal.name}`}
-                className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
-              >
-                <MoreVertical aria-hidden className="size-4" />
-              </button>
+                  `MacroSummary` de sempre. */}
+              <div className="mt-1">
+                <MacroSummary macros={macros} />
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowingActions(true);
+              }}
+              aria-label={`Mais ações para ${meal.name}`}
+              className="flex size-8 shrink-0 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
+              <MoreVertical aria-hidden className="size-4" />
+            </button>
           </header>
 
           {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de

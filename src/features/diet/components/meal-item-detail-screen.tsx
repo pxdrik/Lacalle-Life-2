@@ -120,8 +120,16 @@ export function MealItemDetailScreen() {
 
         {/* Por 100 g/ml, igual ao resto do app (`Macros`/`per100g`) — não o
             valor já escalado pela porção, para bater com a mesma base que
-            o rótulo de qualquer embalagem de verdade mostra. */}
-        <div className="grid grid-cols-2 gap-3">
+            o rótulo de qualquer embalagem de verdade mostra.
+
+            `items-end`, achado real (23/09/2026): "Gordura saturada (g /
+            100 g)" quebra em duas linhas, "Sódio (mg / 100 g)" cabe numa só
+            — sem isto cada `NutrientField` esticava para a altura da linha
+            do grid e o texto ficava ancorado no topo, então as duas caixas
+            de input da mesma linha saíam em alturas diferentes. Alinhando
+            pelo fim, é o input — o último elemento de cada rótulo — que
+            bate no mesmo lugar dos dois lados, não o texto acima dele. */}
+        <div className="grid grid-cols-2 items-end gap-3">
           <NutrientField
             label="Gordura saturada"
             unit="g / 100 g"
