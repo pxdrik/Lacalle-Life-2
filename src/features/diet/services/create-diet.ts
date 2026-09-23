@@ -111,6 +111,12 @@ export function createMealItem(source: {
   readonly unit?: FoodUnit | undefined;
   readonly per100g: Macros;
   readonly practicalUnit?: PracticalUnit | undefined;
+  /** RM02 — copied straight through from the picked `Food`, same as `practicalUnit`. See `MealItem.brand`. */
+  readonly brand?: string | undefined;
+  readonly saturatedFatG?: number | undefined;
+  readonly sodiumMg?: number | undefined;
+  readonly fiberG?: number | undefined;
+  readonly sugarG?: number | undefined;
 }): MealItem {
   return {
     id: createEntityId(),
@@ -119,6 +125,11 @@ export function createMealItem(source: {
     grams: source.grams,
     unit: source.unit ?? "g",
     per100g: source.per100g,
+    brand: source.brand,
+    saturatedFatG: source.saturatedFatG,
+    sodiumMg: source.sodiumMg,
+    fiberG: source.fiberG,
+    sugarG: source.sugarG,
     practicalUnit: source.practicalUnit,
   };
 }

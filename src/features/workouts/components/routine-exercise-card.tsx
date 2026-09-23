@@ -171,7 +171,7 @@ export function RoutineExerciseCard({
             aria-hidden
             className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
           >
-            <span className="w-6 text-center">#</span>
+            <span className="w-6 text-center">Série</span>
             {isCardio ? (
               <span className="flex-[2] text-center">Duração (min)</span>
             ) : (

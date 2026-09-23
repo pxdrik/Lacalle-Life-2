@@ -13,6 +13,7 @@ import {
   saveMealAsAlternative,
   setItemGrams,
   updateMeal,
+  updateMealItemDetails,
 } from "./edit-diet";
 
 const CHICKEN = { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 };
@@ -119,6 +120,70 @@ describe("items", () => {
     const { diet, mealId, itemId } = dietWithFood();
 
     expect(removeItem(diet, mealId, itemId).meals[0]?.items).toHaveLength(0);
+  });
+});
+
+describe("updateMealItemDetails", () => {
+  it("sets brand and the four optional nutrients", () => {
+    const { diet, mealId, itemId } = dietWithFood();
+
+    const updated = updateMealItemDetails(diet, mealId, itemId, {
+      brand: "Marca X",
+      saturatedFatG: 1.2,
+      sodiumMg: 60,
+      fiberG: 0,
+      sugarG: 0.5,
+    });
+
+    expect(updated.meals[0]?.items[0]).toMatchObject({
+      brand: "Marca X",
+      saturatedFatG: 1.2,
+      sodiumMg: 60,
+      fiberG: 0,
+      sugarG: 0.5,
+    });
+  });
+
+  it("clears a field back to undefined rather than leaving the old value", () => {
+    const { diet, mealId, itemId } = dietWithFood();
+    const withBrand = updateMealItemDetails(diet, mealId, itemId, {
+      brand: "Marca X",
+    });
+
+    const cleared = updateMealItemDetails(withBrand, mealId, itemId, {
+      brand: undefined,
+    });
+
+    expect(cleared.meals[0]?.items[0]?.brand).toBeUndefined();
+  });
+
+  it("touches only the targeted item, leaving a sibling item alone", () => {
+    const { diet, mealId, itemId } = dietWithFood();
+    const secondItem = createMealItem({
+      foodId: "arroz",
+      name: "Arroz",
+      grams: 100,
+      per100g: { kcal: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3 },
+    });
+    const withTwoItems = addItem(diet, mealId, secondItem);
+
+    const updated = updateMealItemDetails(withTwoItems, mealId, itemId, {
+      sodiumMg: 60,
+    });
+
+    expect(updated.meals[0]?.items[1]).toEqual(secondItem);
+  });
+
+  it("ignores an item that is no longer there", () => {
+    // `setItemGrams`'s own "stale references" test below sets the same
+    // precedent: an unknown item id inside a real meal is checked by
+    // content, not by reference — `mapMeal` only guards at the meal level.
+    const { diet, mealId, itemId } = dietWithFood();
+
+    expect(
+      updateMealItemDetails(diet, mealId, "gone", { sodiumMg: 60 }).meals[0]
+        ?.items[0],
+    ).toMatchObject({ id: itemId, sodiumMg: undefined });
   });
 });
 

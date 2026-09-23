@@ -41,6 +41,21 @@ export interface MealItem {
    * food had none, or was custom, or predates this field.
    */
   readonly practicalUnit?: PracticalUnit | undefined;
+  /**
+   * Copied from `Food.brand`/`Food.saturatedFatG`/etc. at add time, same
+   * reason as `practicalUnit` above — and independently editable afterwards
+   * from the item's own detail page (RM02, roadmap 23/09/2026), since these
+   * are exactly the fields a food's own catalogue entry realistically never
+   * has: the person looks at the actual package in front of them and fills
+   * in what the catalogue could not know in advance. `undefined` means "not
+   * informed", never a silent zero — see `Food.saturatedFatG` for why that
+   * distinction matters here.
+   */
+  readonly brand?: string | undefined;
+  readonly saturatedFatG?: number | undefined;
+  readonly sodiumMg?: number | undefined;
+  readonly fiberG?: number | undefined;
+  readonly sugarG?: number | undefined;
 }
 
 /**

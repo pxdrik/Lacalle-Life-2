@@ -32,6 +32,13 @@ interface Props {
 export function AdherenceChart({ points, format }: Props) {
   const chronological = [...points].reverse();
 
+  // Mesmo piso de `VolumeChart` (treinos): 6 rótulos é o que 12 semanas
+  // (ADHERENCE_WEEKS) cabem sem truncar — achado real de 17/09/2026 lá,
+  // nunca portado pra cá porque este gráfico é uma receita separada, não um
+  // componente compartilhado (ver o comentário do arquivo).
+  const labelStep =
+    chronological.length > 6 ? Math.ceil(chronological.length / 6) : 1;
+
   const [selected, setSelected] = useState<number | null>(null);
   const activeIndex =
     selected === null
@@ -114,11 +121,13 @@ export function AdherenceChart({ points, format }: Props) {
           <li
             key={point.startsAt}
             className={cn(
-              "flex-1 truncate text-center text-xs tabular-nums",
+              "flex-1 text-center text-xs tabular-nums",
               index === activeIndex ? "font-medium text-ink" : "text-ink-subtle",
             )}
           >
-            {format(point)}
+            {(index % labelStep === 0 || index === activeIndex) && (
+              <span className="whitespace-nowrap">{format(point)}</span>
+            )}
           </li>
         ))}
       </ul>

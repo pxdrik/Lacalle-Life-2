@@ -70,6 +70,30 @@ export interface Food extends Entity {
   /** The catalogue's household measure for this food, when one is known. */
   readonly practicalUnit?: PracticalUnit | undefined;
   /**
+   * A specific product's brand — "Nestlé", "Seara" — never inferred, only
+   * ever what someone actually typed. `undefined` is the overwhelming
+   * common case: the catalogue is generic (TBCA/TACO/USDA), not brand-name
+   * products, so this is realistically only ever filled on a food a person
+   * created themselves.
+   */
+  readonly brand?: string | undefined;
+  /**
+   * Per 100 g (or 100 ml, same basis as `per100g`) — RM02, roadmap
+   * 23/09/2026. Deliberately not folded into `Macros`: that type drives
+   * every total the app already sums and scales (`scaleMacros`,
+   * `sumMacros`), and none of the four numbers below has ever been part of
+   * that arithmetic — adding them there would mean touching every one of
+   * those call sites for a field most foods will never have a value for.
+   *
+   * `undefined` means "not informed", never a silent zero — a food with no
+   * fiber data on file must never read as "0 g of fiber", which would be a
+   * fabricated fact, not an absence of one.
+   */
+  readonly saturatedFatG?: number | undefined;
+  readonly sodiumMg?: number | undefined;
+  readonly fiberG?: number | undefined;
+  readonly sugarG?: number | undefined;
+  /**
    * Catalogue entries are `false`; foods the user created are `true`.
    *
    * They live in the same store on purpose: search, favourites and a future

@@ -75,6 +75,11 @@ export function useApplyPickedFood<T extends MealOwner>(
             unit: food.unit,
             per100g: food.per100g,
             practicalUnit: food.practicalUnit,
+            brand: food.brand,
+            saturatedFatG: food.saturatedFatG,
+            sodiumMg: food.sodiumMg,
+            fiberG: food.fiberG,
+            sugarG: food.sugarG,
           }),
         ),
       );

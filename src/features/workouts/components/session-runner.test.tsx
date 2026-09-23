@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
+import { ToastProvider } from "@/design-system/components/toast";
 
 import { ExerciseRepositoryProvider } from "../data/exercise-repository-context";
 import { LocalExerciseRepository } from "../data/local-exercise-repository";
@@ -83,6 +84,76 @@ function mount(session: Session) {
         <SessionRunner sessionId={session.id} />
       </ExerciseRepositoryProvider>
     </WorkoutRepositoryProvider>,
+  );
+
+  return sessions;
+}
+
+/** A finished session with one completed set — the only shape `personalRecords` reads. */
+function finishedSessionWithSet(weightKg: number, reps: number): Session {
+  return {
+    id: "prior",
+    routineId: null,
+    name: "Treino anterior",
+    startedAt: Date.now() - 86_400_000,
+    finishedAt: Date.now() - 86_400_000,
+    createdAt: 1,
+    updatedAt: 1,
+    exercises: [
+      {
+        id: "se-prior",
+        exerciseId: "supino-reto-com-barra",
+        name: "Supino reto",
+        restSeconds: null,
+        notes: "",
+        sets: [
+          {
+            id: "set-prior",
+            reps,
+            weightKg,
+            rpe: null,
+            durationSeconds: null,
+            isCompleted: true,
+            planned: null,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+/**
+ * Mounts an in-progress session, optionally alongside an already-finished
+ * one, and wires the toast provider so RM05's confirmation is observable —
+ * `mount` above never wraps `ToastProvider`, so `useToast()` there is
+ * always the silent no-op.
+ */
+function mountWithHistory(session: Session, prior: Session | null) {
+  const sessions = new LocalSessionRepository(
+    new MemoryStore<Session>(SESSIONS_STORE),
+  );
+  const routines = new LocalRoutineRepository(
+    new MemoryStore<Routine>(ROUTINES_STORE),
+  );
+  const exercises = new LocalExerciseRepository(
+    new MemoryStore<Exercise>(EXERCISES_STORE),
+  );
+
+  const ready = Promise.all([
+    prior === null ? Promise.resolve() : sessions.save(prior, null),
+    sessions.save(session, null),
+  ]);
+
+  render(
+    <ToastProvider>
+      <WorkoutRepositoryProvider
+        repositories={ready.then(() => ({ routines, sessions }))}
+      >
+        <ExerciseRepositoryProvider repository={ready.then(() => exercises)}>
+          <SessionRunner sessionId={session.id} />
+        </ExerciseRepositoryProvider>
+      </WorkoutRepositoryProvider>
+    </ToastProvider>,
   );
 
   return sessions;
@@ -375,5 +446,68 @@ describe("marking two different sets done in the same React batch", () => {
       expect(sets[1]?.isCompleted).toBe(true);
       expect(sets[2]?.isCompleted).toBe(true);
     });
+  });
+});
+
+/**
+ * RM05 (roadmap 22/09/2026): um toast discreto quando a série concluída
+ * bate o recorde histórico do exercício — todo o tempo, não só este treino.
+ */
+describe("personal record toast", () => {
+  it("announces a record when the completed set beats the all-time best", async () => {
+    const sessions = mountWithHistory(
+      sessionWith(0, 1),
+      finishedSessionWithSet(50, 5),
+    );
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+
+    // sessionWith usa 60 kg / 10 reps — acima dos 50 kg do treino anterior.
+    expect(
+      await screen.findByText("Recorde batido: 60 kg em Supino reto."),
+    ).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(
+        (await sessions.getById("s1"))?.exercises[0]?.sets[0],
+      ).toMatchObject({ isCompleted: true });
+    });
+  });
+
+  it("says nothing when the set does not beat the historical best", async () => {
+    const sessions = mountWithHistory(
+      sessionWith(0, 1),
+      finishedSessionWithSet(100, 10),
+    );
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+
+    await waitFor(async () => {
+      expect(
+        (await sessions.getById("s1"))?.exercises[0]?.sets[0],
+      ).toMatchObject({ isCompleted: true });
+    });
+    expect(screen.queryByText(/Recorde batido/)).not.toBeInTheDocument();
+  });
+
+  it("says nothing the first time an exercise is ever logged — no record to beat yet", async () => {
+    const sessions = mountWithHistory(sessionWith(0, 1), null);
+    await waitForRunner();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }),
+    );
+
+    await waitFor(async () => {
+      expect(
+        (await sessions.getById("s1"))?.exercises[0]?.sets[0],
+      ).toMatchObject({ isCompleted: true });
+    });
+    expect(screen.queryByText(/Recorde batido/)).not.toBeInTheDocument();
   });
 });

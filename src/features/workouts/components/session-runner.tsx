@@ -16,13 +16,19 @@ import { Button } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
 import { DisarmProgress } from "@/design-system/components/disarm-progress";
 import { useArmed } from "@/design-system/hooks/use-armed";
+import { useToast } from "@/design-system/components/toast";
 
 import { useExerciseLookup } from "../hooks/use-exercise-lookup";
 import { useRestTimer } from "../hooks/use-rest-timer";
 import { useSessionHistory } from "../hooks/use-session-history";
 import { useSessionRunner } from "../hooks/use-session-runner";
 import { useTicker } from "../hooks/use-ticker";
-import { lastPerformanceByExercise } from "../services/history";
+import {
+  estimateOneRepMax,
+  lastPerformanceByExercise,
+  personalRecords,
+  type PersonalRecord,
+} from "../services/history";
 import {
   addPerformedSet,
   completeSet,
@@ -60,6 +66,7 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   const detail = useExerciseDetail();
   const timer = useRestTimer();
   const finish = useArmed();
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   // Um toque em "concluir" numa série sem reps nem peso pede confirmação em
   // vez de completar direto — achado de auditoria externa (27/08/2026): sem
@@ -74,6 +81,19 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
 
   const running = state.status === "ready" && state.session.finishedAt === null;
   const now = useTicker(running);
+
+  // Todo o tempo, nunca só este treino/semana/mês (RM05) — `personalRecords`
+  // já filtra por `finishedSessions`, então o treino em andamento (ainda sem
+  // `finishedAt`) nunca contamina o próprio recorde que está tentando bater.
+  const priorRecords: ReadonlyMap<string, PersonalRecord> =
+    history.status === "ready"
+      ? new Map(
+          personalRecords(history.sessions).map((record) => [
+            record.exerciseId,
+            record,
+          ]),
+        )
+      : new Map();
 
   // Excludes this session, so a workout cannot answer questions about itself.
   const lastTimes =
@@ -137,6 +157,28 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
   ) {
     apply((current) => completeSet(current, exerciseId, setId));
     if (restSeconds !== null && restSeconds > 0) timer.start(restSeconds);
+  }
+
+  /**
+   * RM05: um toast discreto quando a série que acabou de ser concluída
+   * supera o recorde histórico (nunca só deste treino) — peso mais pesado
+   * ou estimativa de 1RM, o mesmo par que `personalRecords` já distingue.
+   * Sem confetti nem badge — uma linha de texto, no mesmo canal que já
+   * confirma outras escritas silenciosas do app (`useToast`).
+   */
+  function announceIfRecord(
+    exerciseId: string,
+    exerciseName: string,
+    weightKg: number,
+    reps: number,
+  ) {
+    const prior = priorRecords.get(exerciseId);
+    if (prior === undefined) return;
+
+    const oneRepMax = estimateOneRepMax(weightKg, reps);
+    if (weightKg > prior.heaviestKg || oneRepMax > prior.bestOneRepMax) {
+      toast(`Recorde batido: ${formatDecimal(weightKg)} kg em ${exerciseName}.`);
+    }
   }
 
   const next = nextIncompleteSet(session);
@@ -351,6 +393,15 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
                 if (set?.reps === null && set.weightKg === null) {
                   setPendingComplete({ exerciseId: exercise.id, setId });
                   return;
+                }
+
+                if (set !== undefined && set.weightKg !== null && set.reps !== null) {
+                  announceIfRecord(
+                    exercise.exerciseId,
+                    exercise.name,
+                    set.weightKg,
+                    set.reps,
+                  );
                 }
 
                 completeSetWithTimer(exercise.id, setId, exercise.restSeconds);

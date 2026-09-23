@@ -5,6 +5,82 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Roadmap Mestre — primeiro lote: RM02(a), RM04, RM05, RM08, RM09, RM10 — 23/09/2026
+
+Pedro trouxe um PDF ("LaCalle Life — Roadmap Mestre") com 11 itens de UX
+(RM01–RM11) vistos usando o app. Antes de implementar, investiguei os 11 em
+paralelo para dar um custo real por item, e entreguei os que saíram baratos
+e sem ambiguidade nesta rodada. RM01/RM03 (long press pra reordenar —
+primitiva nova, ainda não existe no app), RM06 (timer de descanso — **já
+estava pronto**, nada a fazer), RM07 (editar treino ativo) e RM11
+(carregamento global) ficaram para depois — o último em especial é mudança
+estrutural grande (mover todos os `*DataProvider` pro layout raiz), não
+uma tarde de trabalho.
+
+- ✅ **RM10 — o par de bugs que o Pedro lembrou de cabeça.** "A gente tinha
+  corrigido 1, era pra vc ter corrigido o outro também": o corte de rótulo
+  de semana já resolvido em `volume-chart.tsx` (17/09/2026, commit
+  `2c88958`) nunca chegou em `adherence-chart.tsx` (evolução de aderência
+  da dieta) — cópia estrutural do mesmo componente, nunca compartilhada, daí
+  o fix de um não ter propagado pro outro. Portado o mesmo `labelStep` +
+  `whitespace-nowrap`, com teste de regressão de 12 semanas que reproduz o
+  corte antes do fix.
+- ✅ **RM04 + RM08 — alinhamento e o "#" na tela de Treinos.** O cabeçalho da
+  lista de séries desalinhou da linha quando uma borda de foco foi
+  adicionada só às linhas (17/09/2026) — `session-exercise-card.tsx` ganhou
+  a mesma borda que `performed-set-row.tsx` já tinha. O "#" (decoração de
+  cabeçalho, não texto por série) virou "Série" nos dois lugares que o
+  reaproveitam (sessão ativa e editor de rotina).
+- ✅ **RM02(a) — kcal e macros na mesma linha.** `meal-item-row.tsx` juntou
+  os quatro números num só `MacroSummary` (o mesmo componente que a
+  refeição já usa pro total) em vez de kcal isolada ao lado do nome e P/C/G
+  numa linha à parte — exatamente a queixa do roadmap.
+- ✅ **RM05 — recorde histórico batido, toast discreto.** O cálculo
+  (`personalRecords`, todo o histórico, nunca só o treino atual) e o
+  componente de toast já existiam prontos; faltava ligar um no outro. Uma
+  série concluída que bate o peso mais pesado ou o 1RM estimado de todo o
+  tempo mostra "Recorde batido: X kg em [exercício]." — sem confetti, sem
+  badge.
+- ✅ **RM09 — splash escura.** O manifest já tinha fundo escuro configurado
+  pro PWA instalado, mas o Pedro confirmou que o flash branco aparece de
+  qualquer jeito — a janela entre o HTML cru e a interface pronta, que o
+  manifest não cobre. A pedido dele, portei a mesma transição que o
+  LaCalle Finance já usa (`LaCalleReveal`, `Finance/src/components/ui.jsx`):
+  símbolo branco sobre preto, cobre a tela desde o primeiro frame, recua
+  revelando o app ~2s depois. Componente novo, `boot-splash.tsx`, montado
+  no layout raiz — como layouts do Next.js não remontam em navegação
+  client-side, aparece sozinho uma vez por abertura real do app, sem
+  precisar rastrear sessão à mão.
+- ✅ **RM02(b) — página de detalhes do alimento, com os 4 nutrientes
+  opcionais.** Perguntei ao Pedro qual das duas leituras era a certa: a
+  ficha genérica do alimento no catálogo, ou o que foi registrado
+  *naquele dia específico*. Ele confirmou a segunda. `MealItem` (e `Food`,
+  pela mesma razão que já copia `per100g`/`practicalUnit`) ganharam `brand`
+  e os 4 opcionais — gordura saturada, sódio, fibras, açúcares — nunca
+  dentro de `Macros` (o motor de soma/escala do app não muda). Vazio
+  significa "não informado", nunca um 0 inventado. Clicar num alimento
+  dentro de uma refeição do Diário agora abre `/diario/alimento`, uma
+  página própria com o registro daquele dia e os campos editáveis; o
+  clique na refeição em si continua intocado.
+- ⚠️ **Achado durante a verificação no navegador, não um bug de código:** a
+  aba automatizada usada para conferir o RM09 sofre throttling severo e
+  imprevisível de timers/scheduler do React (confirmado com um
+  `setInterval` de controle rodando ~3x mais devagar, e casos onde nem isso
+  bastou para explicar o atraso) — não reflete um navegador real em uso
+  normal. A lógica da splash está coberta por teste determinístico
+  (`boot-splash.test.tsx`, timers falsos) e um bug real que achei nesse
+  processo (a tela cobria só a partir da fase "in", não desde o primeiro
+  frame) já foi corrigido. Vale conferir a olho a próxima vez que o Pedro
+  abrir o app de verdade.
+- ⚠️ **Sem querer, encerrei uma sessão de treino de teste** ("Treino A",
+  1/1 séries já completas, parada havia 6 dias) clicando num lugar que eu
+  achava ser "Retomar" durante essa mesma verificação — o layout deve ter
+  se movido sob o atraso da aba. Sem perda de dado real (a sessão já
+  estava 100% feita, só não fechada), mas registrando porque não pedi
+  permissão antes.
+
+---
+
 ## ✅ Catálogo: 38 alimentos raros removidos, com curadoria contra a lista automática — 23/09/2026
 
 Pedro trouxe `lista_limpa_com_acoes.csv`: uma auditoria de todo o catálogo

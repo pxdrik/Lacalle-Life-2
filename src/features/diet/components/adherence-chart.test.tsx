@@ -57,4 +57,36 @@ describe("AdherenceChart", () => {
 
     expect(container.querySelectorAll("button")).toHaveLength(0);
   });
+
+  /**
+   * RM10 (roadmap 23/09/2026): este gráfico é a mesma receita de
+   * `VolumeChart` (treinos), e herdou o mesmo bug que já tinha sido
+   * corrigido lá em 17/09/2026 — 12 semanas rotuladas por inteiro numa tela
+   * de celular truncava o texto até sobrar um caractere solto. A correção
+   * portada é a mesma: rotular só um ponto a cada `labelStep`, sem truncar
+   * o que fica visível.
+   */
+  it("skips labels past a step instead of truncating them, with 12 weeks", () => {
+    const weeks: readonly AdherencePoint[] = Array.from(
+      { length: 12 },
+      (_, i) => ({
+        startsAt: 12 - i,
+        checkedMeals: 1,
+        plannedMeals: 2,
+        daysWithPlan: 1,
+      }),
+    );
+
+    render(<AdherenceChart points={weeks} format={format} />);
+
+    // labelStep = ceil(12 / 6) = 2 → índices pares (0,2,4,6,8,10) pelo
+    // passo, mais o índice ativo (11, o mais recente, ímpar) fora do passo —
+    // 7 rótulos visíveis. Cronologia reversa: índice i = semana (i + 1).
+    expect(screen.getAllByText(/^semana \d+$/)).toHaveLength(7);
+    // Semana 10 (índice 9, ímpar, fora do passo e não é a ativa) não
+    // deveria aparecer.
+    expect(screen.queryByText("semana 10")).not.toBeInTheDocument();
+    // A mais recente (semana 12) é o índice ativo por padrão — sempre visível.
+    expect(screen.getByText("semana 12")).toBeInTheDocument();
+  });
 });

@@ -5,13 +5,13 @@ import { useState } from "react";
 
 import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
-import { MACRO_CODING } from "@/design-system/macros";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
+import { MacroSummary } from "./macro-summary";
 
 interface Props {
   readonly item: MealItem;
@@ -27,6 +27,8 @@ interface Props {
   readonly onGramsChange: (grams: number) => void;
   readonly onRemove: () => void;
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
+  /** RM02 — the food's own detail page. `undefined` outside the Diário; see `MealCard.onOpenItemDetail`. */
+  readonly onOpenDetail?: (() => void) | undefined;
   /**
    * True for exactly one render: o item que acabou de ser adicionado à
    * refeição. Nunca derivado da lista em si — presa à ação de adicionar em
@@ -53,10 +55,18 @@ interface Props {
  * em ~310px de card num telefone, e o botão de remover sempre visível
  * (`sm:opacity-0` só existia a partir do breakpoint que o celular nunca
  * atinge) empurrava tudo pra uma quarta linha sozinho. Duas linhas fixas
- * agora, nunca três: nome + kcal + ⋮ em cima, quantidade + macros embaixo —
- * exatamente o par de linhas que o Macros usa por alimento. "Mover para" e
- * "Remover" saíram do fluxo inteiramente, atrás do ⋮ — a mesma ideia do
- * kebab do cabeçalho da refeição (`meal-card.tsx`), agora por alimento.
+ * agora, nunca três: nome + ⋮ em cima, quantidade + macros embaixo. "Mover
+ * para" e "Remover" saíram do fluxo inteiramente, atrás do ⋮ — a mesma
+ * ideia do kebab do cabeçalho da refeição (`meal-card.tsx`), agora por
+ * alimento.
+ *
+ * **Kcal juntou o grupo dos macros (RM02, 23/09/2026).** Vivia sozinha na
+ * linha do nome, separada de P/C/G na linha de baixo — exatamente a queixa
+ * do roadmap ("kcal isolada... macros numa linha inferior"). Agora as
+ * quatro leem como um bloco só, via `MacroSummary` (o mesmo componente que
+ * já soma isso no cabeçalho da refeição), que embrulha (`flex-wrap`)
+ * sozinho se não couber — sem repetir o estouro horizontal que motivou a
+ * reescrita de 17/09/2026 acima.
  *
  * **Também 17/09/2026:** o toggle g/ml e o campo de "quantas medidas" saíram
  * — Pedro: alimentos já vêm "definidos" como grama ou mililitro (o próprio
@@ -68,6 +78,7 @@ export function MealItemRow({
   item,
   dragHandle,
   otherMeals,
+  onOpenDetail,
   onGramsChange,
   onRemove,
   onSend,
@@ -109,12 +120,21 @@ export function MealItemRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <span className="min-w-0 flex-1 truncate text-sm text-ink">
-              {item.name}
-            </span>
-            <span className="shrink-0 text-sm font-medium tabular-nums text-ink">
-              {formatDecimal(macros.kcal)}
-            </span>
+            {onOpenDetail === undefined ? (
+              <span className="min-w-0 flex-1 truncate text-sm text-ink">
+                {item.name}
+              </span>
+            ) : (
+              // Só o nome, não a linha inteira — o campo de gramas e o ⋮
+              // continuam clicáveis pelo que já eram, sem competir com isto.
+              <button
+                type="button"
+                onClick={onOpenDetail}
+                className="min-w-0 flex-1 truncate text-left text-sm text-ink underline-offset-2 hover:underline"
+              >
+                {item.name}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -151,13 +171,7 @@ export function MealItemRow({
               )}
             </div>
 
-            <p className="flex items-baseline gap-2 text-xs tabular-nums">
-              {MACRO_CODING.map(({ key, short, text }) => (
-                <span key={key} className={text}>
-                  {short[0]}: {formatDecimal(macros[key])}
-                </span>
-              ))}
-            </p>
+            <MacroSummary macros={macros} />
           </div>
         </div>
 

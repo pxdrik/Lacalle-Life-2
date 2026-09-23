@@ -85,12 +85,16 @@ export function SessionExerciseCard({
 
       {/* Same header the routine editor already shows — the column labels
           shouldn't only exist where a set is being planned, not where it's
-          being done. */}
+          being done. `border-l-[3px] border-transparent px-1` and `gap-px`
+          mirror `PerformedSetRow`'s own row exactly (its focus-highlight
+          border added 17/09/2026, never carried up here) — without them the
+          header sat ~7px left of every column it labels, a misalignment
+          found reviewing RM04/RM08 (23/09/2026). */}
       <div
         aria-hidden
-        className="mt-3 flex items-center justify-between gap-0.5 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
+        className="mt-3 flex items-center justify-between gap-px border-b border-line border-l-[3px] border-l-transparent px-1 pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
       >
-        <span className="w-4 text-center">#</span>
+        <span className="w-4 text-center">Série</span>
         {isCardio ? (
           <span className="w-24 text-center">Duração (min)</span>
         ) : (

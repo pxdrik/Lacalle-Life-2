@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { IBM_Plex_Sans } from "next/font/google";
 
+import { BootSplash } from "@/design-system/components/boot-splash";
 import { ToastProvider } from "@/design-system/components/toast";
 import { DensityProvider } from "@/design-system/density/density-provider";
 import { DensityScript } from "@/design-system/density/density-script";
@@ -94,6 +95,7 @@ export default async function RootLayout({
                   client-side, porque este layout nunca é remontado nela. */}
               {children}
               <ServiceWorker />
+              <BootSplash />
             </ToastProvider>
           </DensityProvider>
         </ThemeProvider>

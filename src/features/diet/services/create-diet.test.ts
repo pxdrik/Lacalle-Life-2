@@ -36,4 +36,41 @@ describe("createMealItem", () => {
 
     expect(item.practicalUnit).toBeUndefined();
   });
+
+  it("copies brand and the four optional nutrients (RM02) the same way", () => {
+    const item = createMealItem({
+      foodId: "iogurte-marca",
+      name: "Iogurte",
+      grams: 100,
+      per100g: PER_100G,
+      brand: "Marca X",
+      saturatedFatG: 1.5,
+      sodiumMg: 45,
+      fiberG: 0,
+      sugarG: 12,
+    });
+
+    expect(item).toMatchObject({
+      brand: "Marca X",
+      saturatedFatG: 1.5,
+      sodiumMg: 45,
+      fiberG: 0,
+      sugarG: 12,
+    });
+  });
+
+  it("leaves the four optional nutrients undefined, not zero, when the food has none on file", () => {
+    const item = createMealItem({
+      foodId: "salmao",
+      name: "Salmão",
+      grams: 100,
+      per100g: PER_100G,
+    });
+
+    expect(item.brand).toBeUndefined();
+    expect(item.saturatedFatG).toBeUndefined();
+    expect(item.sodiumMg).toBeUndefined();
+    expect(item.fiberG).toBeUndefined();
+    expect(item.sugarG).toBeUndefined();
+  });
 });

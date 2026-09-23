@@ -73,7 +73,7 @@ describe("SessionExerciseCard", () => {
     );
 
     const header = screen.getByText("Reps").closest("div");
-    expect(header).toHaveTextContent("#");
+    expect(header).toHaveTextContent("Série");
     expect(header).toHaveTextContent("Reps");
     expect(header).toHaveTextContent("Peso");
     expect(header).toHaveTextContent("RPE");

@@ -241,6 +241,43 @@ describe("the food name", () => {
   });
 });
 
+describe("the food name as a link to its detail page (RM02)", () => {
+  it("calls onOpenDetail when the name is clicked, given one", async () => {
+    const onOpenDetail = vi.fn();
+
+    render(
+      <ul>
+        <MealItemRow
+          item={ITEM}
+          dragHandle={{
+            attributes: {},
+            listeners: undefined,
+            isDragging: false,
+          }}
+          otherMeals={[]}
+          onOpenDetail={onOpenDetail}
+          onGramsChange={() => undefined}
+          onRemove={() => undefined}
+          onSend={() => undefined}
+        />
+      </ul>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: ITEM.name }));
+
+    expect(onOpenDetail).toHaveBeenCalledOnce();
+  });
+
+  it("renders plain text, not a button, when onOpenDetail is not given", () => {
+    render(row(ITEM));
+
+    expect(
+      screen.queryByRole("button", { name: ITEM.name }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByText(ITEM.name)[0]?.tagName).toBe("SPAN");
+  });
+});
+
 describe("the actions menu (⋮)", () => {
   function mountWithMenu(
     otherMeals: readonly { readonly id: string; readonly name: string }[] = [],

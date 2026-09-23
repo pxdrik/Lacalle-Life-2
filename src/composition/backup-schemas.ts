@@ -295,6 +295,14 @@ const mealItemSchema = z
     unit: z.enum(["g", "ml"]),
     per100g: macrosSchema,
     practicalUnit: practicalUnitSchema.optional(),
+    // RM02 (roadmap 23/09/2026) — opcionais desde o primeiro dia, mesma
+    // razão de `alternatives`/`eaten` acima: um item de refeição anterior a
+    // este campo continua validando. Ver `MealItem.saturatedFatG`.
+    brand: z.string().max(NAME_MAX).optional(),
+    saturatedFatG: bounded("gordura saturada inválida.", 0, 100).optional(),
+    sodiumMg: bounded("sódio inválido.", 0, 40_000).optional(),
+    fiberG: bounded("fibras inválidas.", 0, 100).optional(),
+    sugarG: bounded("açúcares inválidos.", 0, 100).optional(),
   })
   .strict();
 

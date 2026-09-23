@@ -18,6 +18,15 @@ function required(label: string, max: number, unit: string) {
     .max(max, `${label}: no máximo ${String(max)} ${unit} por 100 g.`);
 }
 
+/** Same bound shape as `required`, but absent is a valid answer — "not informed", never zero. See `Food.saturatedFatG`. */
+function optional(label: string, max: number, unit: string) {
+  return z
+    .number()
+    .min(0, `${label} não pode ser negativo.`)
+    .max(max, `${label}: no máximo ${String(max)} ${unit} por 100 g.`)
+    .optional();
+}
+
 /**
  * Bounds are physical rather than arbitrary: nothing edible exceeds 900 kcal
  * per 100 g (pure fat is 900), and no single macro can exceed 100 g in 100 g
@@ -70,6 +79,13 @@ export const catalogueEntrySchema = z.object({
   per100g: per100gSchema,
   unit: z.enum(["g", "ml"]).optional(),
   practicalUnit: practicalUnitSchema.optional(),
+  // RM02 (roadmap 23/09/2026) — quase sempre ausente no catálogo curado
+  // (genérico, não de marca); ver `Food.brand`/`Food.saturatedFatG`.
+  brand: z.string().trim().max(120).optional(),
+  saturatedFatG: optional("a gordura saturada", 100, "g"),
+  sodiumMg: optional("o sódio", 40_000, "mg"),
+  fiberG: optional("as fibras", 100, "g"),
+  sugarG: optional("os açúcares", 100, "g"),
 });
 
 export type CatalogueEntry = z.infer<typeof catalogueEntrySchema>;

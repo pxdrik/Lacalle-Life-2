@@ -266,6 +266,31 @@ export function setItemGrams<T extends MealOwner>(
   }));
 }
 
+export type MealItemDetailChanges = Partial<
+  Pick<MealItem, "brand" | "saturatedFatG" | "sodiumMg" | "fiberG" | "sugarG">
+>;
+
+/**
+ * RM02's detail page — the one surface that edits the four optional
+ * nutrients (and the brand) after a food was already added. `undefined` in
+ * `changes` clears a field back to "not informed" rather than leaving it
+ * alone, the same as every other field this function touches: the page
+ * sends the whole current form on every save, not a diff.
+ */
+export function updateMealItemDetails<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  itemId: EntityId,
+  changes: MealItemDetailChanges,
+): T {
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    items: meal.items.map((item) =>
+      item.id === itemId ? { ...item, ...changes } : item,
+    ),
+  }));
+}
+
 /**
  * Snapshots the meal's current foods as a new named suggestion.
  *

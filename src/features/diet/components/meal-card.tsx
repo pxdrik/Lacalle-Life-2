@@ -97,6 +97,14 @@ interface Props {
     | ((alternativeId: string, name: string) => void)
     | undefined;
   readonly onRemoveAlternative?: ((alternativeId: string) => void) | undefined;
+  /**
+   * RM02 — a food's own detail page, one click away. `undefined` in
+   * `DietEditor`: a plan's item has no day to show "what happened" for, so
+   * there is nothing this page would say that is not already on the card.
+   * Only `FoodLogScreen` gives this, the same "only where it means
+   * something" rule `checkState`/`onSaveAlternative` above already follow.
+   */
+  readonly onOpenItemDetail?: ((itemId: string) => void) | undefined;
 }
 
 export function MealCard({
@@ -121,6 +129,7 @@ export function MealCard({
   onApplyAlternative,
   onRenameAlternative,
   onRemoveAlternative,
+  onOpenItemDetail,
 }: Props) {
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
@@ -376,6 +385,13 @@ export function MealCard({
                         item={item}
                         dragHandle={handle}
                         otherMeals={otherMeals}
+                        onOpenDetail={
+                          onOpenItemDetail === undefined
+                            ? undefined
+                            : () => {
+                                onOpenItemDetail(item.id);
+                              }
+                        }
                         onGramsChange={(grams) => {
                           onItemGramsChange(item.id, grams);
                         }}

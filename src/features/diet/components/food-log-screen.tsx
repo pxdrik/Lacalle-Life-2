@@ -336,6 +336,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                             `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
                           );
                         }}
+                        onOpenItemDetail={(itemId) => {
+                          router.push(
+                            `/diario/alimento?dia=${day}&mealId=${meal.id}&itemId=${itemId}`,
+                          );
+                        }}
                         onItemGramsChange={(itemId, grams) => {
                           apply((current) =>
                             setItemGrams(current, meal.id, itemId, grams),
