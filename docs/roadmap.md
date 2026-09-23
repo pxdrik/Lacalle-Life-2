@@ -5,6 +5,54 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Catálogo: 38 alimentos raros removidos, com curadoria contra a lista automática — 23/09/2026
+
+Pedro trouxe `lista_limpa_com_acoes.csv`: uma auditoria de todo o catálogo
+(1597 linhas — 1593 do catálogo + 4 alimentos pessoais dele), classificando
+cada item em MANTER (1473), UNIFICAR/RENOMEAR (61) ou DESATIVAR/REMOVER (63).
+
+**Não apliquei a lista como veio.** Duas checagens antes de apagar qualquer
+coisa (memória: nunca excluir em massa sem revisar em caso de ambiguidade)
+acharam problemas reais na própria auditoria:
+
+- ✅ **8 itens marcados para remover eram contradição direta com o que eu
+  tinha acabado de adicionar** a pedido do Pedro no dia anterior: os 6
+  queijos gourmet (brie, camembert, feta, gorgonzola, gruyère, mascarpone) +
+  Copa fatiada + Panceta suína + Pastrami fatiado. Mantidos.
+- ✅ **3 "duplicatas exatas" eram do escopo errado** — Mel, Toddy e
+  Bisnaguinha do catálogo foram marcadas como duplicata só porque o Pedro
+  tem uma versão pessoal de cada uma na própria conta. Apagar do catálogo
+  compartilhado tiraria esses alimentos comuns de todo mundo, não só
+  resolveria a duplicata dele — mantidas. A duplicata em si é dado pessoal
+  dele (IndexedDB do navegador), fora do alcance de uma edição neste
+  repositório; ele resolve apagando a cópia própria pelo app.
+- ✅ **"Whey protein" marcado como "raro ou pouco cotidiano"** — claramente
+  errado para um app de dieta/treino. Mantido.
+- ✅ **Grupo limítrofe perguntado ao Pedro** (Quinoa cozida, Jiló cru, Kefir
+  de leite, Kombucha adoçada, Tofu, "Soja, queijo (tofu)", Tempeh, Truta,
+  Ovo de codorna, Salgadinho de milho, Biscoito salgado cream cracker) — ele
+  pediu para manter todos.
+- ✅ **UNIFICAR/RENOMEAR (61 itens) foi pulado por inteiro.** A coluna de
+  nome sugerido quase sempre repetia o nome original (nenhuma fusão real
+  proposta), e nos poucos casos com um nome diferente pelo menos 3 juntavam
+  **cru com assado** (ex.: "Frango peito com pele cru" → "Frango peito com
+  pele assado") — o oposto exato da regra que o Pedro deu ("preparações
+  nutricionalmente diferentes devem continuar separadas"). Base fraca demais
+  para decidir sozinho sem risco de fundir itens errados; catálogo
+  inalterado nessa parte.
+- ✅ **38 itens removidos de verdade**: os que sobraram depois de excluir os
+  24 acima — em geral frutas/vegetais regionais raros (umbu, graviola,
+  jurubeba, cará, taioba, caruru, catalonha), bacalhau (4 variações), miúdos
+  de porco, lula/polvo, licores, xaropes.
+- ⚠️ **Limitação conhecida, não resolvida agora:** `seedCatalogue` só
+  adiciona o que falta, nunca remove — então estes 38 continuam no
+  IndexedDB de quem já tinha semeado o catálogo antes desta mudança
+  (inclusive o próprio Pedro). Isso limpa o catálogo para instalações
+  novas; uma limpeza retroativa em dispositivos já semeados seria uma
+  migração à parte, no molde de `refreshFoodPracticalUnits`.
+
+---
+
 ## ✅ Diário: refeição não pula mais de posição depois de sincronizar + 110 alimentos-base novos — 22/09/2026
 
 Bug relatado pelo Pedro: no Diário, a última refeição editada "pulava" para o

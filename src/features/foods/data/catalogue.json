@@ -460,22 +460,6 @@
     "unit": "g"
   },
   {
-    "id": "bacalhau",
-    "name": "Bacalhau",
-    "category": "protein",
-    "per100g": {
-      "kcal": 82,
-      "proteinG": 18,
-      "carbsG": 0,
-      "fatG": 0.7
-    },
-    "practicalUnit": {
-      "label": "1 filé médio",
-      "grams": 150
-    },
-    "unit": "g"
-  },
-  {
     "id": "banana",
     "name": "Banana",
     "category": "fruit",
@@ -752,18 +736,6 @@
     "practicalUnit": {
       "label": "1 unidade média",
       "grams": 170
-    },
-    "unit": "g"
-  },
-  {
-    "id": "cara-cozido",
-    "name": "Cará cozido",
-    "category": "carb",
-    "per100g": {
-      "kcal": 110,
-      "proteinG": 1.5,
-      "carbsG": 26,
-      "fatG": 0.1
     },
     "unit": "g"
   },
@@ -1832,22 +1804,6 @@
     "unit": "g"
   },
   {
-    "id": "lula-cozida",
-    "name": "Lula cozida",
-    "category": "protein",
-    "per100g": {
-      "kcal": 92,
-      "proteinG": 16,
-      "carbsG": 3,
-      "fatG": 1.4
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
     "id": "maca-com-casca",
     "name": "Maçã com casca",
     "category": "fruit",
@@ -2839,22 +2795,6 @@
     },
     "practicalUnit": {
       "label": "1 fatia",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "polvo-cozido",
-    "name": "Polvo cozido",
-    "category": "protein",
-    "per100g": {
-      "kcal": 82,
-      "proteinG": 15,
-      "carbsG": 2,
-      "fatG": 1
-    },
-    "practicalUnit": {
-      "label": "1 porção",
       "grams": 100
     },
     "unit": "g"
@@ -4040,22 +3980,6 @@
     "unit": "g"
   },
   {
-    "id": "alfavaca-crua",
-    "name": "Alfavaca crua",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 29,
-      "proteinG": 2.7,
-      "carbsG": 5.2,
-      "fatG": 0.5
-    },
-    "practicalUnit": {
-      "label": "1 colher de sopa picada",
-      "grams": 5
-    },
-    "unit": "g"
-  },
-  {
     "id": "alho-poro-cru",
     "name": "Alho-poró cru",
     "category": "vegetable",
@@ -4068,38 +3992,6 @@
     "practicalUnit": {
       "label": "1/2 unidade média",
       "grams": 90
-    },
-    "unit": "g"
-  },
-  {
-    "id": "almeirao-cru",
-    "name": "Almeirão cru",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 18,
-      "proteinG": 1.8,
-      "carbsG": 3.3,
-      "fatG": 0.2
-    },
-    "practicalUnit": {
-      "label": "1 xícara",
-      "grams": 30
-    },
-    "unit": "g"
-  },
-  {
-    "id": "almeirao-refogado",
-    "name": "Almeirão refogado",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 65,
-      "proteinG": 1.7,
-      "carbsG": 5.7,
-      "fatG": 4.8
-    },
-    "practicalUnit": {
-      "label": "1 xícara",
-      "grams": 70
     },
     "unit": "g"
   },
@@ -4232,70 +4124,6 @@
     "unit": "g"
   },
   {
-    "id": "cara-cru",
-    "name": "Cará cru",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 96,
-      "proteinG": 2.3,
-      "carbsG": 23,
-      "fatG": 0.1
-    },
-    "practicalUnit": {
-      "label": "1 pedaço médio",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "caruru-cru",
-    "name": "Caruru cru",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 34,
-      "proteinG": 3.2,
-      "carbsG": 6,
-      "fatG": 0.6
-    },
-    "practicalUnit": {
-      "label": "1 xícara picada",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "catalonha-crua",
-    "name": "Catalonha crua",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 24,
-      "proteinG": 1.9,
-      "carbsG": 4.8,
-      "fatG": 0.3
-    },
-    "practicalUnit": {
-      "label": "1 xícara",
-      "grams": 30
-    },
-    "unit": "g"
-  },
-  {
-    "id": "catalonha-refogada",
-    "name": "Catalonha refogada",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 63,
-      "proteinG": 2,
-      "carbsG": 4.8,
-      "fatG": 4.8
-    },
-    "practicalUnit": {
-      "label": "1 xícara",
-      "grams": 30
-    },
-    "unit": "g"
-  },
-  {
     "id": "cebolinha-crua",
     "name": "Cebolinha crua",
     "category": "vegetable",
@@ -4308,22 +4136,6 @@
     "practicalUnit": {
       "label": "1 colher de sopa picada",
       "grams": 6
-    },
-    "unit": "g"
-  },
-  {
-    "id": "chicoria-crua",
-    "name": "Chicória crua",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 14,
-      "proteinG": 1.1,
-      "carbsG": 2.9,
-      "fatG": 0.1
-    },
-    "practicalUnit": {
-      "label": "1 xícara",
-      "grams": 30
     },
     "unit": "g"
   },
@@ -4472,22 +4284,6 @@
     "unit": "g"
   },
   {
-    "id": "jurubeba-crua",
-    "name": "Jurubeba crua",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 126,
-      "proteinG": 4.4,
-      "carbsG": 23.1,
-      "fatG": 3.9
-    },
-    "practicalUnit": {
-      "label": "1/2 xícara",
-      "grams": 50
-    },
-    "unit": "g"
-  },
-  {
     "id": "mandioca-crua",
     "name": "Mandioca crua",
     "category": "vegetable",
@@ -4596,22 +4392,6 @@
     "practicalUnit": {
       "label": "1 unidade média",
       "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "palmito-pupunha-em-conserva",
-    "name": "Palmito pupunha em conserva",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 29,
-      "proteinG": 2.5,
-      "carbsG": 5.5,
-      "fatG": 0.5
-    },
-    "practicalUnit": {
-      "label": "3 pedaços",
-      "grams": 60
     },
     "unit": "g"
   },
@@ -4744,22 +4524,6 @@
     "unit": "g"
   },
   {
-    "id": "taioba-crua",
-    "name": "Taioba crua",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 34,
-      "proteinG": 2.9,
-      "carbsG": 5.4,
-      "fatG": 0.9
-    },
-    "practicalUnit": {
-      "label": "1 folha",
-      "grams": 30
-    },
-    "unit": "g"
-  },
-  {
     "id": "tomate-com-semente-cru",
     "name": "Tomate com semente cru",
     "category": "vegetable",
@@ -4851,22 +4615,6 @@
     },
     "practicalUnit": {
       "label": "1/2 xícara de polpa",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "abiu-cru",
-    "name": "Abiu cru",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 62,
-      "proteinG": 0.8,
-      "carbsG": 14.9,
-      "fatG": 0.7
-    },
-    "practicalUnit": {
-      "label": "1 unidade média",
       "grams": 100
     },
     "unit": "g"
@@ -5252,38 +5000,6 @@
     "practicalUnit": {
       "label": "1 unidade média",
       "grams": 170
-    },
-    "unit": "g"
-  },
-  {
-    "id": "graviola-crua",
-    "name": "Graviola crua",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 62,
-      "proteinG": 0.8,
-      "carbsG": 15.8,
-      "fatG": 0.2
-    },
-    "practicalUnit": {
-      "label": "1 xícara de polpa",
-      "grams": 150
-    },
-    "unit": "g"
-  },
-  {
-    "id": "graviola-polpa-congelada",
-    "name": "Graviola polpa congelada",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 38,
-      "proteinG": 0.6,
-      "carbsG": 9.8,
-      "fatG": 0.1
-    },
-    "practicalUnit": {
-      "label": "1/2 xícara de polpa",
-      "grams": 100
     },
     "unit": "g"
   },
@@ -5688,22 +5404,6 @@
     "unit": "g"
   },
   {
-    "id": "nespera-crua",
-    "name": "Nêspera crua",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 43,
-      "proteinG": 0.3,
-      "carbsG": 11.5,
-      "fatG": 0
-    },
-    "practicalUnit": {
-      "label": "3 unidades",
-      "grams": 90
-    },
-    "unit": "g"
-  },
-  {
     "id": "pequi-cru",
     "name": "Pequi cru",
     "category": "fruit",
@@ -5844,38 +5544,6 @@
     "practicalUnit": {
       "label": "1 unidade (polpa)",
       "grams": 30
-    },
-    "unit": "g"
-  },
-  {
-    "id": "umbu-cru",
-    "name": "Umbu cru",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 37,
-      "proteinG": 0.8,
-      "carbsG": 9.4,
-      "fatG": 0
-    },
-    "practicalUnit": {
-      "label": "5 unidades",
-      "grams": 50
-    },
-    "unit": "g"
-  },
-  {
-    "id": "umbu-polpa-congelada",
-    "name": "Umbu polpa congelada",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 34,
-      "proteinG": 0.5,
-      "carbsG": 8.8,
-      "fatG": 0.1
-    },
-    "practicalUnit": {
-      "label": "1/2 xícara de polpa",
-      "grams": 100
     },
     "unit": "g"
   },
@@ -6164,22 +5832,6 @@
     "practicalUnit": {
       "label": "1 lata drenada",
       "grams": 120
-    },
-    "unit": "g"
-  },
-  {
-    "id": "bacalhau-salgado-refogado",
-    "name": "Bacalhau salgado refogado",
-    "category": "protein",
-    "per100g": {
-      "kcal": 140,
-      "proteinG": 24,
-      "carbsG": 1.2,
-      "fatG": 3.6
-    },
-    "practicalUnit": {
-      "label": "1 filé médio",
-      "grams": 150
     },
     "unit": "g"
   },
@@ -8336,22 +7988,6 @@
     "unit": "g"
   },
   {
-    "id": "porco-orelha-salgada-crua",
-    "name": "Porco orelha salgada crua",
-    "category": "protein",
-    "per100g": {
-      "kcal": 258,
-      "proteinG": 18.5,
-      "carbsG": 0,
-      "fatG": 19.9
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
     "id": "porco-pernil-assado",
     "name": "Porco pernil assado",
     "category": "protein",
@@ -8376,22 +8012,6 @@
       "proteinG": 20.1,
       "carbsG": 0,
       "fatG": 11.1
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "porco-rabo-salgado-cru",
-    "name": "Porco rabo salgado cru",
-    "category": "protein",
-    "per100g": {
-      "kcal": 377,
-      "proteinG": 15.6,
-      "carbsG": 0,
-      "fatG": 34.5
     },
     "practicalUnit": {
       "label": "1 porção",
@@ -8716,22 +8336,6 @@
       "proteinG": 27.2,
       "carbsG": 20.3,
       "fatG": 43.9
-    },
-    "practicalUnit": {
-      "label": "10 unidades",
-      "grams": 10
-    },
-    "unit": "g"
-  },
-  {
-    "id": "amendoim-torrado-salgado",
-    "name": "Amendoim torrado salgado",
-    "category": "fat",
-    "per100g": {
-      "kcal": 606,
-      "proteinG": 22.5,
-      "carbsG": 18.7,
-      "fatG": 54
     },
     "practicalUnit": {
       "label": "10 unidades",
@@ -9160,22 +8764,6 @@
     "unit": "g"
   },
   {
-    "id": "pupunha-cozida",
-    "name": "Pupunha cozida",
-    "category": "fat",
-    "per100g": {
-      "kcal": 219,
-      "proteinG": 2.5,
-      "carbsG": 29.6,
-      "fatG": 12.8
-    },
-    "practicalUnit": {
-      "label": "1 colher de sopa",
-      "grams": 14
-    },
-    "unit": "g"
-  },
-  {
     "id": "almondega",
     "name": "Almondega",
     "category": "fat",
@@ -9412,22 +9000,6 @@
     "practicalUnit": {
       "label": "1 concha/xícara",
       "grams": 150
-    },
-    "unit": "g"
-  },
-  {
-    "id": "cuxa-molho",
-    "name": "Cuxá, molho",
-    "category": "fat",
-    "per100g": {
-      "kcal": 80,
-      "proteinG": 5.6,
-      "carbsG": 5.7,
-      "fatG": 3.6
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 100
     },
     "unit": "g"
   },
@@ -10904,22 +10476,6 @@
     "unit": "g"
   },
   {
-    "id": "acai-polpa-com-xarope-de-guarana-e-glucose",
-    "name": "Açaí, polpa, com xarope de guaraná e glucose",
-    "category": "fruit",
-    "per100g": {
-      "kcal": 110,
-      "proteinG": 0.7,
-      "carbsG": 21.5,
-      "fatG": 3.7
-    },
-    "practicalUnit": {
-      "label": "1 colher de sopa",
-      "grams": 15
-    },
-    "unit": "g"
-  },
-  {
     "id": "banana-da-terra-crua",
     "name": "Banana, da terra, crua",
     "category": "fruit",
@@ -11640,38 +11196,6 @@
     "unit": "g"
   },
   {
-    "id": "amendoa-torrada-salgada",
-    "name": "Amêndoa, torrada, salgada",
-    "category": "fat",
-    "per100g": {
-      "kcal": 581,
-      "proteinG": 18.6,
-      "carbsG": 29.5,
-      "fatG": 47.3
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 100
-    },
-    "unit": "g"
-  },
-  {
-    "id": "castanha-de-caju-torrada-salgada",
-    "name": "Castanha-de-caju, torrada, salgada",
-    "category": "fat",
-    "per100g": {
-      "kcal": 570,
-      "proteinG": 18.5,
-      "carbsG": 29.1,
-      "fatG": 46.3
-    },
-    "practicalUnit": {
-      "label": "1 colher de sopa",
-      "grams": 15
-    },
-    "unit": "g"
-  },
-  {
     "id": "coco-verde-cru",
     "name": "Coco, verde, cru",
     "category": "fruit",
@@ -11844,22 +11368,6 @@
     "practicalUnit": {
       "label": "1 unidade",
       "grams": 50
-    },
-    "unit": "g"
-  },
-  {
-    "id": "bacalhau-salgado-cru",
-    "name": "Bacalhau, salgado, cru",
-    "category": "protein",
-    "per100g": {
-      "kcal": 136,
-      "proteinG": 29,
-      "carbsG": 0,
-      "fatG": 1.3
-    },
-    "practicalUnit": {
-      "label": "1 filé/bife",
-      "grams": 120
     },
     "unit": "g"
   },
@@ -13002,22 +12510,6 @@
   {
     "id": "acaraje-simples",
     "name": "Acarajé simples",
-    "category": "fat",
-    "per100g": {
-      "kcal": 320,
-      "proteinG": 10,
-      "carbsG": 32,
-      "fatG": 17
-    },
-    "practicalUnit": {
-      "label": "1 unidade",
-      "grams": 80
-    },
-    "unit": "g"
-  },
-  {
-    "id": "bolinho-de-bacalhau",
-    "name": "Bolinho de bacalhau",
     "category": "fat",
     "per100g": {
       "kcal": 320,
@@ -14532,38 +14024,6 @@
     "practicalUnit": {
       "label": "1 porção",
       "grams": 200
-    },
-    "unit": "g"
-  },
-  {
-    "id": "bacalhau-ao-forno-com-batatas",
-    "name": "Bacalhau ao forno com batatas",
-    "category": "vegetable",
-    "per100g": {
-      "kcal": 240,
-      "proteinG": 20,
-      "carbsG": 5,
-      "fatG": 16
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 120
-    },
-    "unit": "g"
-  },
-  {
-    "id": "lula-a-dore",
-    "name": "Lula à dorê",
-    "category": "fat",
-    "per100g": {
-      "kcal": 240,
-      "proteinG": 20,
-      "carbsG": 5,
-      "fatG": 16
-    },
-    "practicalUnit": {
-      "label": "1 porção",
-      "grams": 120
     },
     "unit": "g"
   },
@@ -23400,22 +22860,6 @@
     "unit": "ml"
   },
   {
-    "id": "vodca-com-energetico",
-    "name": "Vodca com energético",
-    "category": "beverage",
-    "per100g": {
-      "kcal": 90,
-      "proteinG": 0,
-      "carbsG": 8,
-      "fatG": 0
-    },
-    "practicalUnit": {
-      "label": "1 copo/garrafa",
-      "grams": 300
-    },
-    "unit": "ml"
-  },
-  {
     "id": "gin-tonica",
     "name": "Gin-tônica",
     "category": "beverage",
@@ -23444,38 +22888,6 @@
     "practicalUnit": {
       "label": "1 copo/garrafa",
       "grams": 300
-    },
-    "unit": "ml"
-  },
-  {
-    "id": "licor-de-chocolate",
-    "name": "Licor de chocolate",
-    "category": "beverage",
-    "per100g": {
-      "kcal": 280,
-      "proteinG": 2,
-      "carbsG": 35,
-      "fatG": 8
-    },
-    "practicalUnit": {
-      "label": "1 copo/garrafa",
-      "grams": 60
-    },
-    "unit": "ml"
-  },
-  {
-    "id": "licor-de-cafe",
-    "name": "Licor de café",
-    "category": "beverage",
-    "per100g": {
-      "kcal": 250,
-      "proteinG": 0,
-      "carbsG": 35,
-      "fatG": 0
-    },
-    "practicalUnit": {
-      "label": "1 copo/garrafa",
-      "grams": 60
     },
     "unit": "ml"
   },
@@ -23556,22 +22968,6 @@
     "practicalUnit": {
       "label": "1 copo/garrafa",
       "grams": 500
-    },
-    "unit": "ml"
-  },
-  {
-    "id": "xarope-de-groselha-diluido",
-    "name": "Xarope de groselha diluído",
-    "category": "beverage",
-    "per100g": {
-      "kcal": 45,
-      "proteinG": 0,
-      "carbsG": 11,
-      "fatG": 0
-    },
-    "practicalUnit": {
-      "label": "1 copo/garrafa",
-      "grams": 250
     },
     "unit": "ml"
   },
