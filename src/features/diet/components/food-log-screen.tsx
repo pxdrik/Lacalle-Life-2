@@ -12,10 +12,7 @@ import { dayKey, formatDay } from "@/core/format/day";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { DateField } from "@/design-system/components/date-field";
-import {
-  SortableItem,
-  SortableList,
-} from "@/design-system/components/sortable-list";
+import { ReorderSheet } from "@/design-system/components/reorder-sheet";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { useNutritionTargets } from "@/features/profile";
 
@@ -89,6 +86,9 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
   const [picking, setPicking] = useState(false);
+  // RM01 (roadmap 23/09/2026) — long press on any meal card opens this,
+  // scoped to every meal of the day (see `ReorderSheet` below).
+  const [showingMealReorder, setShowingMealReorder] = useState(false);
   useApplyPickedFood(apply);
 
   const today = dayKey(new Date());
@@ -249,158 +249,149 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
               }}
             />
           ) : (
-            <SortableList
-              ids={state.log.meals.map((meal) => meal.id)}
-              describe={(id) =>
-                state.log.meals.find((meal) => meal.id === id)?.name ??
-                "refeição"
-              }
-              onReorder={(activeId, overId) => {
-                apply((current) => reorderMeals(current, activeId, overId));
-              }}
-            >
-              <div className="mt-5 space-y-3">
-                {state.log.meals.map((meal, index) => {
-                  // Calculado uma vez, reaproveitado pelo check e pelo
-                  // "Fechar" no ⋮ abaixo — os dois só existem numa refeição
-                  // vinda da dieta (`sourceDietId`/`sourceMealId`), e
-                  // `checkState` já é a forma certa de perguntar "está
-                  // comida?" sem ler `meal.eaten` direto aqui (ver a nota em
-                  // `meal-execution.ts`: só aquele arquivo lê o campo cru).
-                  const sourceDietId = meal.sourceDietId;
-                  const sourceMealId = meal.sourceMealId;
-                  const checkState =
-                    sourceDietId !== undefined && sourceMealId !== undefined
-                      ? mealCheckState(state.log, sourceDietId, sourceMealId)
-                      : undefined;
+            <div className="mt-5 space-y-3">
+              {state.log.meals.map((meal, index) => {
+                // Calculado uma vez, reaproveitado pelo check e pelo
+                // "Fechar" no ⋮ abaixo — os dois só existem numa refeição
+                // vinda da dieta (`sourceDietId`/`sourceMealId`), e
+                // `checkState` já é a forma certa de perguntar "está
+                // comida?" sem ler `meal.eaten` direto aqui (ver a nota em
+                // `meal-execution.ts`: só aquele arquivo lê o campo cru).
+                const sourceDietId = meal.sourceDietId;
+                const sourceMealId = meal.sourceMealId;
+                const checkState =
+                  sourceDietId !== undefined && sourceMealId !== undefined
+                    ? mealCheckState(state.log, sourceDietId, sourceMealId)
+                    : undefined;
 
-                  return (
-                  <SortableItem key={meal.id} id={meal.id}>
-                    {(dragHandle) => (
-                      <MealCard
-                        meal={meal}
-                        position={index}
-                        total={state.log.meals.length}
-                        dragHandle={dragHandle}
-                        onChange={(changes) => {
-                          apply((current) =>
-                            updateMeal(current, meal.id, changes),
-                          );
-                        }}
-                        onRemove={() => {
-                          apply((current) => removeMeal(current, meal.id));
-                        }}
-                        onDuplicate={() => {
-                          apply((current) => duplicateMeal(current, meal.id));
-                        }}
-                        onMove={(offset) => {
-                          apply((current) =>
-                            moveMeal(current, meal.id, offset),
-                          );
-                        }}
-                        otherMeals={state.log.meals
-                          .filter((other) => other.id !== meal.id)
-                          .map((other) => ({ id: other.id, name: other.name }))}
-                        onSendItem={(itemId, targetMealId, mode) => {
-                          apply((current) =>
-                            mode === "copy"
-                              ? copyItemToMeal(
-                                  current,
-                                  meal.id,
-                                  itemId,
-                                  targetMealId,
-                                )
-                              : moveItemToMeal(
-                                  current,
-                                  meal.id,
-                                  itemId,
-                                  targetMealId,
-                                ),
-                          );
-                        }}
-                        onReorderItems={(activeId, overId) => {
-                          apply((current) =>
-                            reorderMealItems(
+                return (
+                  <MealCard
+                    key={meal.id}
+                    meal={meal}
+                    position={index}
+                    total={state.log.meals.length}
+                    onLongPressReorder={() => {
+                      setShowingMealReorder(true);
+                    }}
+                    onChange={(changes) => {
+                      apply((current) =>
+                        updateMeal(current, meal.id, changes),
+                      );
+                    }}
+                    onRemove={() => {
+                      apply((current) => removeMeal(current, meal.id));
+                    }}
+                    onDuplicate={() => {
+                      apply((current) => duplicateMeal(current, meal.id));
+                    }}
+                    onMove={(offset) => {
+                      apply((current) => moveMeal(current, meal.id, offset));
+                    }}
+                    otherMeals={state.log.meals
+                      .filter((other) => other.id !== meal.id)
+                      .map((other) => ({ id: other.id, name: other.name }))}
+                    onSendItem={(itemId, targetMealId, mode) => {
+                      apply((current) =>
+                        mode === "copy"
+                          ? copyItemToMeal(
                               current,
                               meal.id,
-                              activeId,
-                              overId,
+                              itemId,
+                              targetMealId,
+                            )
+                          : moveItemToMeal(
+                              current,
+                              meal.id,
+                              itemId,
+                              targetMealId,
                             ),
-                          );
-                        }}
-                        onAddFoodClick={() => {
-                          const returnTo = encodeURIComponent(
-                            day === today ? "/diario" : `/diario?dia=${day}`,
-                          );
-                          router.push(
-                            `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
-                          );
-                        }}
-                        onOpenItemDetail={(itemId) => {
-                          router.push(
-                            `/diario/alimento?dia=${day}&mealId=${meal.id}&itemId=${itemId}`,
-                          );
-                        }}
-                        onItemGramsChange={(itemId, grams) => {
-                          apply((current) =>
-                            setItemGrams(current, meal.id, itemId, grams),
-                          );
-                        }}
-                        onRemoveItem={(itemId) => {
-                          apply((current) =>
-                            removeItem(current, meal.id, itemId),
-                          );
-                        }}
-                        // Só aparece numa refeição que veio da dieta — de um
-                        // check individual ou de "Começar de X" — uma
-                        // refeição montada aqui à mão não tem
-                        // `sourceDietId`/`sourceMealId`, então não há nada
-                        // para o check representar. Pode ser "unchecked"
-                        // sim: "Começar de X" entra com todas as refeições
-                        // do dia já visíveis, mas ainda por comer.
-                        checkState={checkState}
-                        onToggleChecked={
-                          sourceDietId !== undefined &&
-                          sourceMealId !== undefined
-                            ? () => {
-                                apply((current) =>
-                                  toggleLoggedMeal(
-                                    current,
-                                    sourceDietId,
-                                    sourceMealId,
-                                  ),
-                                );
-                              }
-                            : undefined
-                        }
-                        // "Fechar" no ⋮ — mesma proveniência do check acima,
-                        // mas só quando ainda não comida: fechar uma
-                        // refeição já registrada apagaria um registro real,
-                        // e `closeMeal` já se recusa a fazer isso sozinho —
-                        // aqui a checagem evita nem oferecer a opção.
-                        onClose={
-                          sourceDietId !== undefined &&
-                          sourceMealId !== undefined &&
-                          checkState === "unchecked"
-                            ? () => {
-                                apply((current) =>
-                                  closeMeal(
-                                    current,
-                                    sourceDietId,
-                                    sourceMealId,
-                                  ),
-                                );
-                              }
-                            : undefined
-                        }
-                      />
-                    )}
-                  </SortableItem>
-                  );
-                })}
-              </div>
-            </SortableList>
+                      );
+                    }}
+                    onReorderItems={(activeId, overId) => {
+                      apply((current) =>
+                        reorderMealItems(current, meal.id, activeId, overId),
+                      );
+                    }}
+                    onAddFoodClick={() => {
+                      const returnTo = encodeURIComponent(
+                        day === today ? "/diario" : `/diario?dia=${day}`,
+                      );
+                      router.push(
+                        `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
+                      );
+                    }}
+                    onOpenItemDetail={(itemId) => {
+                      router.push(
+                        `/diario/alimento?dia=${day}&mealId=${meal.id}&itemId=${itemId}`,
+                      );
+                    }}
+                    onItemGramsChange={(itemId, grams) => {
+                      apply((current) =>
+                        setItemGrams(current, meal.id, itemId, grams),
+                      );
+                    }}
+                    onRemoveItem={(itemId) => {
+                      apply((current) => removeItem(current, meal.id, itemId));
+                    }}
+                    // Só aparece numa refeição que veio da dieta — de um
+                    // check individual ou de "Começar de X" — uma refeição
+                    // montada aqui à mão não tem `sourceDietId`/
+                    // `sourceMealId`, então não há nada para o check
+                    // representar. Pode ser "unchecked" sim: "Começar de X"
+                    // entra com todas as refeições do dia já visíveis, mas
+                    // ainda por comer.
+                    checkState={checkState}
+                    onToggleChecked={
+                      sourceDietId !== undefined && sourceMealId !== undefined
+                        ? () => {
+                            apply((current) =>
+                              toggleLoggedMeal(
+                                current,
+                                sourceDietId,
+                                sourceMealId,
+                              ),
+                            );
+                          }
+                        : undefined
+                    }
+                    // "Fechar" no ⋮ — mesma proveniência do check acima, mas
+                    // só quando ainda não comida: fechar uma refeição já
+                    // registrada apagaria um registro real, e `closeMeal`
+                    // já se recusa a fazer isso sozinho — aqui a checagem
+                    // evita nem oferecer a opção.
+                    onClose={
+                      sourceDietId !== undefined &&
+                      sourceMealId !== undefined &&
+                      checkState === "unchecked"
+                        ? () => {
+                            apply((current) =>
+                              closeMeal(current, sourceDietId, sourceMealId),
+                            );
+                          }
+                        : undefined
+                    }
+                  />
+                );
+              })}
+            </div>
           )}
+
+          {/* RM01: long press em qualquer refeição acima abre isto — a
+              lista do dia inteiro, não só a que foi tocada. */}
+          <ReorderSheet
+            open={showingMealReorder}
+            title="Reordenar refeições"
+            items={state.log.meals.map((meal) => ({
+              id: meal.id,
+              label: meal.name,
+            }))}
+            onReorder={(activeId, overId) => {
+              apply((current) => reorderMeals(current, activeId, overId));
+            }}
+            onClose={() => {
+              setShowingMealReorder(false);
+            }}
+          />
 
           {state.log.meals.length > 0 && (
             <button

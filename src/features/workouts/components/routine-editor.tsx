@@ -11,10 +11,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
-import {
-  SortableItem,
-  SortableList,
-} from "@/design-system/components/sortable-list";
+import { ReorderSheet } from "@/design-system/components/reorder-sheet";
 
 import { useRoutineEditor } from "../hooks/use-routine-editor";
 import {
@@ -61,6 +58,8 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   // guardar a folha contra fechar sem querer — ver `confirmClose` abaixo e
   // o comentário em `ExerciseBrowser.onSelectionChange`.
   const [pendingSelection, setPendingSelection] = useState(0);
+  // RM03 (roadmap 23/09/2026) — long press em qualquer exercício abre isto.
+  const [showingReorder, setShowingReorder] = useState(false);
 
   useEffect(() => {
     if (pendingSelection === 0) return;
@@ -154,75 +153,81 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         </p>
       )}
 
-      <SortableList
-        ids={routine.exercises.map((exercise) => exercise.id)}
-        describe={(id) =>
-          routine.exercises.find((exercise) => exercise.id === id)?.name ??
-          "exercício"
-        }
+      <div className="mt-5 space-y-3">
+        {routine.exercises.map((exercise, index) => (
+          <RoutineExerciseCard
+            key={exercise.id}
+            exercise={exercise}
+            catalogue={catalogue.get(exercise.exerciseId)}
+            onOpenDetail={detail.show}
+            position={index}
+            total={routine.exercises.length}
+            onLongPressReorder={() => {
+              setShowingReorder(true);
+            }}
+            onChange={(changes) => {
+              apply((current) =>
+                updateExercise(current, exercise.id, changes),
+              );
+            }}
+            onRemove={() => {
+              apply((current) => removeExercise(current, exercise.id));
+            }}
+            onDuplicate={() => {
+              apply((current) =>
+                duplicateRoutineExercise(current, exercise.id),
+              );
+            }}
+            onSwap={() => {
+              setPicking(false);
+              setSwappingId(exercise.id);
+            }}
+            onMove={(offset) => {
+              apply((current) => moveExercise(current, exercise.id, offset));
+            }}
+            onAddSet={() => {
+              apply((current) => addSet(current, exercise.id));
+            }}
+            onRemoveSet={(setId) => {
+              apply((current) => removeSet(current, exercise.id, setId));
+            }}
+            onSetChange={(setId, changes) => {
+              apply((current) =>
+                updateSet(current, exercise.id, setId, changes),
+              );
+            }}
+            justAdded={justAddedIds.has(exercise.id)}
+            onEntranceEnd={() => {
+              setJustAddedIds((current) => {
+                if (!current.has(exercise.id)) return current;
+                const next = new Set(current);
+                next.delete(exercise.id);
+                return next;
+              });
+            }}
+          />
+        ))}
+      </div>
+
+      {/* RM03: long press em qualquer exercício acima abre isto — a lista
+          inteira da rotina, não só o que foi tocado. As setas do card
+          continuam a forma sem drag de mover um por vez (comentário em
+          `routine-exercise-card.tsx`); isto é o jeito rápido de mover
+          vários. */}
+      <ReorderSheet
+        open={showingReorder}
+        title="Reordenar exercícios"
+        items={routine.exercises.map((exercise) => ({
+          id: exercise.id,
+          label: exercise.name,
+        }))}
         onReorder={(activeId, overId) => {
           apply((current) => reorderExercises(current, activeId, overId));
         }}
-      >
-        <div className="mt-5 space-y-3">
-          {routine.exercises.map((exercise, index) => (
-            <SortableItem key={exercise.id} id={exercise.id}>
-              {(dragHandle) => (
-                <RoutineExerciseCard
-                  exercise={exercise}
-                  catalogue={catalogue.get(exercise.exerciseId)}
-                  onOpenDetail={detail.show}
-                  position={index}
-                  total={routine.exercises.length}
-                  dragHandle={dragHandle}
-                  onChange={(changes) => {
-                    apply((current) =>
-                      updateExercise(current, exercise.id, changes),
-                    );
-                  }}
-                  onRemove={() => {
-                    apply((current) => removeExercise(current, exercise.id));
-                  }}
-                  onDuplicate={() => {
-                    apply((current) =>
-                      duplicateRoutineExercise(current, exercise.id),
-                    );
-                  }}
-                  onSwap={() => {
-                    setPicking(false);
-                    setSwappingId(exercise.id);
-                  }}
-                  onMove={(offset) => {
-                    apply((current) =>
-                      moveExercise(current, exercise.id, offset),
-                    );
-                  }}
-                  onAddSet={() => {
-                    apply((current) => addSet(current, exercise.id));
-                  }}
-                  onRemoveSet={(setId) => {
-                    apply((current) => removeSet(current, exercise.id, setId));
-                  }}
-                  onSetChange={(setId, changes) => {
-                    apply((current) =>
-                      updateSet(current, exercise.id, setId, changes),
-                    );
-                  }}
-                  justAdded={justAddedIds.has(exercise.id)}
-                  onEntranceEnd={() => {
-                    setJustAddedIds((current) => {
-                      if (!current.has(exercise.id)) return current;
-                      const next = new Set(current);
-                      next.delete(exercise.id);
-                      return next;
-                    });
-                  }}
-                />
-              )}
-            </SortableItem>
-          ))}
-        </div>
-      </SortableList>
+        onClose={() => {
+          setShowingReorder(false);
+        }}
+      />
 
       <div className="mt-4">
         <button

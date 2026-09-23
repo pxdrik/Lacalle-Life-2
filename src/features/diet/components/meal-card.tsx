@@ -18,12 +18,14 @@ import { useState } from "react";
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
+import { ReorderSheet } from "@/design-system/components/reorder-sheet";
 import {
   SortableItem,
   SortableList,
 } from "@/design-system/components/sortable-list";
 import { TimeField } from "@/design-system/components/time-field";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
+import { useLongPress } from "@/design-system/hooks/use-long-press";
 
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
@@ -37,11 +39,21 @@ interface Props {
   readonly meal: Meal;
   readonly position: number;
   readonly total: number;
-  readonly dragHandle: {
-    readonly attributes: React.HTMLAttributes<HTMLElement>;
-    readonly listeners: Record<string, unknown> | undefined;
-    readonly isDragging: boolean;
-  };
+  /**
+   * Props for the drag handle, when the card sits inside a sortable list —
+   * `undefined` in the Diário since RM01 (roadmap 23/09/2026): dragging
+   * there only happens inside the long-press sheet, never in the normal
+   * list. `DietEditor` still passes this, unchanged. Cascades to
+   * `MealItemRow`'s own drag handle below: a meal without one renders its
+   * items the same, plain way (see `itemsDragHandle`).
+   */
+  readonly dragHandle?:
+    | {
+        readonly attributes: React.HTMLAttributes<HTMLElement>;
+        readonly listeners: Record<string, unknown> | undefined;
+        readonly isDragging: boolean;
+      }
+    | undefined;
   readonly onChange: (
     changes: Partial<Pick<Meal, "name" | "time" | "notes">>,
   ) => void;
@@ -105,6 +117,12 @@ interface Props {
    * something" rule `checkState`/`onSaveAlternative` above already follow.
    */
   readonly onOpenItemDetail?: ((itemId: string) => void) | undefined;
+  /**
+   * RM01 — holding the header opens the day's "reorder refeições" sheet.
+   * `undefined` in `DietEditor`, the same as `dragHandle` above — the two
+   * are mutually exclusive, never both given for the same card.
+   */
+  readonly onLongPressReorder?: (() => void) | undefined;
 }
 
 export function MealCard({
@@ -130,9 +148,15 @@ export function MealCard({
   onRenameAlternative,
   onRemoveAlternative,
   onOpenItemDetail,
+  onLongPressReorder,
 }: Props) {
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
+  const [showingItemReorder, setShowingItemReorder] = useState(false);
+  const { isPressing, ...longPress } = useLongPress(
+    onLongPressReorder ?? (() => undefined),
+    { disabled: onLongPressReorder === undefined },
+  );
   // Mesma técnica de `performed-set-row.tsx` ("Concluir série"): a animação
   // é presa ao toque, nunca ao estado — `checkState` sozinho dispararia de
   // novo em toda remontagem do Diário, marcando de volta uma refeição que só
@@ -157,6 +181,58 @@ export function MealCard({
 
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
+  /**
+   * One food's row, in either mode: `handle` given renders the old drag
+   * handle (`DietEditor`), `undefined` renders none and wires the long
+   * press that opens `showingItemReorder` instead (Diário, RM01).
+   */
+  function renderItemRow(
+    item: MealItem,
+    handle:
+      | {
+          readonly attributes: React.HTMLAttributes<HTMLElement>;
+          readonly listeners: Record<string, unknown> | undefined;
+          readonly isDragging: boolean;
+        }
+      | undefined,
+  ) {
+    return (
+      <MealItemRow
+        key={item.id}
+        item={item}
+        dragHandle={handle}
+        onLongPressReorder={
+          handle === undefined
+            ? () => {
+                setShowingItemReorder(true);
+              }
+            : undefined
+        }
+        otherMeals={otherMeals}
+        onOpenDetail={
+          onOpenItemDetail === undefined
+            ? undefined
+            : () => {
+                onOpenItemDetail(item.id);
+              }
+        }
+        onGramsChange={(grams) => {
+          onItemGramsChange(item.id, grams);
+        }}
+        onRemove={() => {
+          onRemoveItem(item.id);
+        }}
+        onSend={(targetMealId, mode) => {
+          onSendItem(item.id, targetMealId, mode);
+        }}
+        justAdded={item.id === justAddedId}
+        onEntranceEnd={() => {
+          setJustAddedId((current) => (current === item.id ? null : current));
+        }}
+      />
+    );
+  }
+
   return (
     // Delete/Collapse: this wrapper is only the shrinking grid track
     // (`useCollapsibleRemove`) — `Card` itself keeps its own shadow
@@ -170,7 +246,7 @@ export function MealCard({
           as="section"
           className={cn(
             "transition-shadow duration-150 ease-out",
-            dragHandle.isDragging && "border-accent shadow-modal",
+            dragHandle?.isDragging === true && "border-accent shadow-modal",
           )}
         >
           {/* Wraps on a phone: name + check on one line, the macro bar and the
@@ -178,17 +254,30 @@ export function MealCard({
               than forcing the row past a 390px screen. Lighter risk than it
               used to be — the header carries one compact bar and one button now,
               not four action buttons plus a four-figure macro line — but the
-              wrap costs nothing to keep. */}
-          <header className="flex flex-wrap items-start gap-2">
-            <button
-              type="button"
-              aria-label={`Reordenar ${meal.name}`}
-              {...dragHandle.attributes}
-              {...dragHandle.listeners}
-              className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
-            >
-              <GripVertical aria-hidden className="size-4" />
-            </button>
+              wrap costs nothing to keep.
+
+              RM01: holding anywhere on this header (outside the inputs and
+              buttons it already carries — `useLongPress` excludes those at
+              the source) opens the day's reorder sheet, in the Diário only. */}
+          <header
+            {...longPress}
+            className={cn(
+              "flex flex-wrap items-start gap-2",
+              isPressing && "select-none rounded-md bg-muted",
+            )}
+          >
+            {/* `undefined` in the Diário (RM01) — see the prop's own doc. */}
+            {dragHandle !== undefined && (
+              <button
+                type="button"
+                aria-label={`Reordenar ${meal.name}`}
+                {...dragHandle.attributes}
+                {...dragHandle.listeners}
+                className="-ml-1 flex size-8 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink active:cursor-grabbing"
+              >
+                <GripVertical aria-hidden className="size-4" />
+              </button>
+            )}
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -369,51 +458,31 @@ export function MealCard({
             </div>
           </Dialog>
 
-          {meal.items.length > 0 && (
-            <SortableList
-              ids={meal.items.map((item) => item.id)}
-              describe={(id) =>
-                meal.items.find((item) => item.id === id)?.name ?? "alimento"
-              }
-              onReorder={onReorderItems}
-            >
+          {meal.items.length > 0 &&
+            (dragHandle === undefined ? (
+              // RM01: no permanent handle in the Diário — a long press on
+              // any row (`renderItemRow` below) opens `itemReorderSheet`
+              // instead, scoped to this meal's own items.
               <ul className="mt-2 divide-y divide-line border-t border-line pt-1">
-                {meal.items.map((item: MealItem) => (
-                  <SortableItem key={item.id} id={item.id}>
-                    {(handle) => (
-                      <MealItemRow
-                        item={item}
-                        dragHandle={handle}
-                        otherMeals={otherMeals}
-                        onOpenDetail={
-                          onOpenItemDetail === undefined
-                            ? undefined
-                            : () => {
-                                onOpenItemDetail(item.id);
-                              }
-                        }
-                        onGramsChange={(grams) => {
-                          onItemGramsChange(item.id, grams);
-                        }}
-                        onRemove={() => {
-                          onRemoveItem(item.id);
-                        }}
-                        onSend={(targetMealId, mode) => {
-                          onSendItem(item.id, targetMealId, mode);
-                        }}
-                        justAdded={item.id === justAddedId}
-                        onEntranceEnd={() => {
-                          setJustAddedId((current) =>
-                            current === item.id ? null : current,
-                          );
-                        }}
-                      />
-                    )}
-                  </SortableItem>
-                ))}
+                {meal.items.map((item) => renderItemRow(item, undefined))}
               </ul>
-            </SortableList>
-          )}
+            ) : (
+              <SortableList
+                ids={meal.items.map((item) => item.id)}
+                describe={(id) =>
+                  meal.items.find((item) => item.id === id)?.name ?? "alimento"
+                }
+                onReorder={onReorderItems}
+              >
+                <ul className="mt-2 divide-y divide-line border-t border-line pt-1">
+                  {meal.items.map((item) => (
+                    <SortableItem key={item.id} id={item.id}>
+                      {(handle) => renderItemRow(item, handle)}
+                    </SortableItem>
+                  ))}
+                </ul>
+              </SortableList>
+            ))}
 
           {/* Adicionar alimento e Observações na mesma linha — dividir em duas
               era espaço parado embaixo de toda refeição, a maior parte das
@@ -487,6 +556,23 @@ export function MealCard({
               }}
             />
           )}
+
+          {/* RM01: only ever reachable in the Diário — a long press on a
+              row (`renderItemRow` above) is the only thing that opens
+              this, and that path only exists when `dragHandle` itself is
+              `undefined`. */}
+          <ReorderSheet
+            open={showingItemReorder}
+            title={`Reordenar alimentos de ${meal.name}`}
+            items={meal.items.map((item) => ({
+              id: item.id,
+              label: item.name,
+            }))}
+            onReorder={onReorderItems}
+            onClose={() => {
+              setShowingItemReorder(false);
+            }}
+          />
         </Card>
       </div>
     </div>

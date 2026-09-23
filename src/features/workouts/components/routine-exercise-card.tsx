@@ -14,6 +14,7 @@ import { parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
+import { useLongPress } from "@/design-system/hooks/use-long-press";
 
 import type { ExerciseChanges, SetChanges } from "../services/edit-routine";
 import type { Exercise } from "../types/exercise";
@@ -35,6 +36,12 @@ interface Props {
     readonly listeners: Record<string, unknown> | undefined;
     readonly isDragging: boolean;
   };
+  /**
+   * RM03 (roadmap 23/09/2026) — holding the card opens the routine's
+   * "reorder exercícios" sheet. `undefined` whenever `dragHandle` is given:
+   * the two never coexist, one editor mode at a time.
+   */
+  readonly onLongPressReorder?: (() => void) | undefined;
   readonly onChange: (changes: ExerciseChanges) => void;
   readonly onRemove: () => void;
   readonly onDuplicate: () => void;
@@ -62,6 +69,7 @@ export function RoutineExerciseCard({
   position,
   total,
   dragHandle,
+  onLongPressReorder,
   onChange,
   onRemove,
   onDuplicate,
@@ -75,6 +83,10 @@ export function RoutineExerciseCard({
 }: Props) {
   const isCardio = catalogue?.movementPattern === "cardio";
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
+  const { isPressing, ...longPress } = useLongPress(
+    onLongPressReorder ?? (() => undefined),
+    { disabled: onLongPressReorder === undefined },
+  );
 
   return (
     // Delete/Collapse: this wrapper is only the shrinking grid track
@@ -89,9 +101,11 @@ export function RoutineExerciseCard({
         <Card
           as="section"
           onAnimationEnd={justAdded ? onEntranceEnd : undefined}
+          {...longPress}
           className={cn(
             "transition-shadow duration-150 ease-out",
             dragHandle?.isDragging === true && "border-accent shadow-modal",
+            isPressing && "select-none border-accent bg-muted",
             justAdded && "animate-rise motion-reduce:animate-none",
           )}
         >

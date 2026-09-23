@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -472,5 +472,58 @@ describe("navigating to a future day", () => {
     expect(screen.getByLabelText("Dia do registro")).not.toHaveAttribute(
       "max",
     );
+  });
+});
+
+describe("RM01 — long press on a meal opens the day's reorder sheet", () => {
+  function logWithTwoMeals(): FoodLog {
+    const log = logWithMeal();
+    return {
+      ...log,
+      meals: [
+        ...log.meals,
+        { id: "m2", name: "Almoço", time: null, notes: "", items: [] },
+      ],
+    };
+  }
+
+  it("lists every meal of the day, not just the one held", async () => {
+    mount(logWithTwoMeals());
+    await screen.findByDisplayValue("Café da manhã");
+
+    // Fake timers only from here — the load above goes through the real
+    // IndexedDB-backed repository, which needs real ones to ever resolve.
+    vi.useFakeTimers();
+    const header = screen
+      .getByRole("button", { name: "Mais ações para Café da manhã" })
+      .closest("header")!;
+    fireEvent.pointerDown(header, {
+      clientX: 0,
+      clientY: 0,
+      pointerType: "touch",
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    vi.useRealTimers();
+
+    expect(
+      await screen.findByRole("heading", { name: "Reordenar refeições" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reordenar Café da manhã" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Reordenar Almoço" }),
+    ).toBeInTheDocument();
+  });
+
+  it("no meal card shows a permanent drag handle", async () => {
+    mount(logWithTwoMeals());
+    await screen.findByDisplayValue("Café da manhã");
+
+    expect(
+      screen.queryByRole("button", { name: /^Reordenar /u }),
+    ).not.toBeInTheDocument();
   });
 });

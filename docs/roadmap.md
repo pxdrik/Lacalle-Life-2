@@ -5,6 +5,50 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Roadmap Mestre — RM01/RM03: long press pra reordenar, no Diário e nos Treinos — 23/09/2026
+
+O handle de arrastar permanente saiu da tela normal do Diário e do editor de
+rotina. Segurar o card (~2s) abre uma folha dedicada só com a lista e os
+handles — a mesma filosofia nos dois lugares, primeira vez que o app precisou
+de um long press de verdade.
+
+- ✅ **`useLongPress`, a primitiva que não existia** — novo hook em
+  `design-system/hooks/`, Pointer Events (toque, mouse e caneta pela mesma
+  API), cancela se o dedo se move mais que 8px (mesmo limiar que
+  `PointerSensor` do `SortableList` já usa pra não confundir um scroll com
+  um toque) e nunca começa a contar num `input`/`textarea`/`select` — seguraria
+  o campo de gramas ou de observações e roubaria a seleção de texto que o
+  celular já oferece ali.
+- ✅ **`ReorderSheet`, um componente novo em vez de três folhas quase
+  iguais** — `design-system/components/`, reaproveitado pelas refeições do
+  dia, pelos alimentos de uma refeição e pelos exercícios de uma rotina.
+  Nome + handle, nada mais; `SortableList` por baixo já traz o sensor de
+  teclado, então nenhuma das três perdeu a alternativa sem arrastar.
+- ✅ **Nunca o único jeito de reordenar** — no Diário, "Mover para
+  cima/baixo" continua atrás do ⋮ de cada refeição (already existia,
+  17/09/2026); nos Treinos, as setas ao lado de cada exercício continuam
+  visíveis sem precisar segurar nada — comentário do próprio
+  `routine-exercise-card.tsx`: "dragging a card with one thumb at the gym
+  is worse than tapping an arrow". O long press é o jeito rápido de mover
+  vários de uma vez, não a única porta.
+- ✅ **Escopo: só onde o roadmap mostrou telas — Diário e editor de
+  rotina.** `MealCard`/`MealItemRow` são compartilhados com `DietEditor`
+  (a tela de Dietas), que continua exatamente como estava — `dragHandle`
+  virou opcional nos dois componentes, e o editor de dieta nunca deixou de
+  passá-lo. Zero mudança lá.
+- ⚠️ **Não verificado ao vivo no navegador desta vez.** A mesma aba
+  automatizada que atrapalhou a verificação da splash (RM09, entrada
+  anterior) sofre o mesmo throttling severo de timers — e um long press
+  depende de exatamente 2 segundos reais pra disparar, o pior caso possível
+  pra essa limitação. Pra não repetir o incidente da sessão de treino
+  encerrada sem querer, não tentei de novo. Em vez disso: 22 testes novos
+  com timers falsos (determinísticos, sem essa dependência de tempo real)
+  cobrindo `useLongPress` isolado e os quatro componentes que o usam — vale
+  você experimentar segurando um card de verdade na próxima vez que abrir
+  o app.
+
+---
+
 ## ✅ Roadmap Mestre — primeiro lote: RM02(a), RM04, RM05, RM08, RM09, RM10 — 23/09/2026
 
 Pedro trouxe um PDF ("LaCalle Life — Roadmap Mestre") com 11 itens de UX

@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Meal, MealItem } from "../types/diet";
 import { MealCard } from "./meal-card";
@@ -280,5 +280,96 @@ describe("the newly added item's entrance", () => {
       ?.closest(".overflow-hidden");
     expect(existing).not.toHaveClass("animate-rise");
     expect(added).toHaveClass("animate-rise");
+  });
+});
+
+describe("RM01 — long press instead of a permanent handle in the Diário", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  /** No `dragHandle` at all — the Diário's own shape, never `DietEditor`'s. */
+  function mountLongPress(
+    theMeal: Meal,
+    onLongPressReorder = vi.fn(),
+    onReorderItems = vi.fn(),
+  ) {
+    render(
+      <MealCard
+        meal={theMeal}
+        position={0}
+        total={1}
+        onLongPressReorder={onLongPressReorder}
+        onChange={vi.fn()}
+        onRemove={vi.fn()}
+        onDuplicate={vi.fn()}
+        onMove={vi.fn()}
+        onAddFoodClick={vi.fn()}
+        onItemGramsChange={vi.fn()}
+        onRemoveItem={vi.fn()}
+        onReorderItems={onReorderItems}
+        otherMeals={[]}
+        onSendItem={vi.fn()}
+      />,
+    );
+
+    return { onLongPressReorder, onReorderItems };
+  }
+
+  function press(target: HTMLElement) {
+    fireEvent.pointerDown(target, {
+      clientX: 0,
+      clientY: 0,
+      pointerType: "touch",
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+  }
+
+  it("renders no meal-level drag handle", () => {
+    mountLongPress(meal([]));
+
+    expect(
+      screen.queryByRole("button", { name: "Reordenar Refeição 1" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("holding the header opens the day's reorder sheet", () => {
+    const { onLongPressReorder } = mountLongPress(meal([]));
+
+    press(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" })
+        .closest("header")!,
+    );
+
+    expect(onLongPressReorder).toHaveBeenCalledOnce();
+  });
+
+  it("renders no item-level drag handle either", () => {
+    mountLongPress(meal([item()]));
+
+    expect(
+      screen.queryByRole("button", { name: "Reordenar Abacate" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("holding an item opens this meal's own reorder sheet, not the day's", () => {
+    const { onLongPressReorder } = mountLongPress(
+      meal([item(), item({ id: "i2", name: "Banana" })]),
+    );
+
+    const row = screen.getAllByText("Abacate")[0]!.closest("li")!
+      .firstElementChild as HTMLElement;
+    press(row);
+
+    expect(
+      screen.getByRole("heading", { name: "Reordenar alimentos de Refeição 1" }),
+    ).toBeInTheDocument();
+    expect(onLongPressReorder).not.toHaveBeenCalled();
   });
 });

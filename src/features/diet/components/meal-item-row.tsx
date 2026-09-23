@@ -8,6 +8,7 @@ import { cn } from "@/design-system/cn";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
+import { useLongPress } from "@/design-system/hooks/use-long-press";
 
 import { itemMacros } from "../services/diet-macros";
 import type { MealItem } from "../types/diet";
@@ -15,11 +16,20 @@ import { MacroSummary } from "./macro-summary";
 
 interface Props {
   readonly item: MealItem;
-  readonly dragHandle: {
-    readonly attributes: React.HTMLAttributes<HTMLElement>;
-    readonly listeners: Record<string, unknown> | undefined;
-    readonly isDragging: boolean;
-  };
+  /**
+   * Props for the drag handle, when the row sits inside a sortable list —
+   * `undefined` in the Diário since RM01 (roadmap 23/09/2026): dragging
+   * there only happens inside the long-press sheet
+   * (`design-system/components/reorder-sheet.tsx`), never in the normal
+   * list. `DietEditor` still passes this, unchanged.
+   */
+  readonly dragHandle?:
+    | {
+        readonly attributes: React.HTMLAttributes<HTMLElement>;
+        readonly listeners: Record<string, unknown> | undefined;
+        readonly isDragging: boolean;
+      }
+    | undefined;
   readonly otherMeals: readonly {
     readonly id: string;
     readonly name: string;
@@ -29,6 +39,12 @@ interface Props {
   readonly onSend: (targetMealId: string, mode: "copy" | "move") => void;
   /** RM02 — the food's own detail page. `undefined` outside the Diário; see `MealCard.onOpenItemDetail`. */
   readonly onOpenDetail?: (() => void) | undefined;
+  /**
+   * RM01 — holding the row opens the meal's "reorder alimentos" sheet.
+   * `undefined` when `dragHandle` is given (`DietEditor`): the two are
+   * mutually exclusive, one meal-owner mode never gives both.
+   */
+  readonly onLongPressReorder?: (() => void) | undefined;
   /**
    * True for exactly one render: o item que acabou de ser adicionado à
    * refeição. Nunca derivado da lista em si — presa à ação de adicionar em
@@ -79,6 +95,7 @@ export function MealItemRow({
   dragHandle,
   otherMeals,
   onOpenDetail,
+  onLongPressReorder,
   onGramsChange,
   onRemove,
   onSend,
@@ -88,6 +105,10 @@ export function MealItemRow({
   const macros = itemMacros(item);
   const [showingActions, setShowingActions] = useState(false);
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
+  const { isPressing, ...longPress } = useLongPress(
+    onLongPressReorder ?? (() => undefined),
+    { disabled: onLongPressReorder === undefined },
+  );
 
   return (
     // Delete/Collapse: the li is only the shrinking grid track
@@ -99,24 +120,29 @@ export function MealItemRow({
     >
       <div
         onAnimationEnd={justAdded ? onEntranceEnd : undefined}
+        {...longPress}
         className={cn(
           "flex items-start gap-2 overflow-hidden py-1.5",
-          dragHandle.isDragging && "rounded-sm bg-muted",
+          isPressing && "select-none rounded-sm bg-muted",
+          dragHandle?.isDragging === true && "rounded-sm bg-muted",
           justAdded && "animate-rise motion-reduce:animate-none",
         )}
       >
         {/* Only within a meal, and only by dragging: the order of foods inside a
             meal is cosmetic, and two arrow buttons per row would cost more than
-            the reordering is worth. The keyboard sensor still covers it. */}
-        <button
-          type="button"
-          aria-label={`Reordenar ${item.name}`}
-          {...dragHandle.attributes}
-          {...dragHandle.listeners}
-          className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
-        >
-          <GripVertical aria-hidden className="size-3.5" />
-        </button>
+            the reordering is worth. The keyboard sensor still covers it.
+            `undefined` in the Diário (RM01) — see the prop's own doc. */}
+        {dragHandle !== undefined && (
+          <button
+            type="button"
+            aria-label={`Reordenar ${item.name}`}
+            {...dragHandle.attributes}
+            {...dragHandle.listeners}
+            className="mt-0.5 flex size-6 shrink-0 cursor-grab touch-none items-center justify-center touch-44 rounded-md text-ink-subtle/60 transition-colors duration-150 ease-out hover:text-ink active:cursor-grabbing"
+          >
+            <GripVertical aria-hidden className="size-3.5" />
+          </button>
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">

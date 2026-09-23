@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { MealItem } from "../types/diet";
 import { MealItemRow } from "./meal-item-row";
@@ -381,5 +381,76 @@ describe("the actions menu (⋮)", () => {
       { propertyName: "grid-template-rows" },
     );
     expect(onRemove).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("RM01 — long press instead of a permanent handle in the Diário", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function mountLongPress(onLongPressReorder = vi.fn()) {
+    render(
+      <ul>
+        <MealItemRow
+          item={ITEM}
+          otherMeals={[]}
+          onLongPressReorder={onLongPressReorder}
+          onGramsChange={() => undefined}
+          onRemove={() => undefined}
+          onSend={() => undefined}
+        />
+      </ul>,
+    );
+
+    return onLongPressReorder;
+  }
+
+  it("renders no drag handle when dragHandle is not given", () => {
+    mountLongPress();
+
+    expect(
+      screen.queryByRole("button", { name: "Reordenar Abacate" }),
+    ).not.toBeInTheDocument();
+  });
+
+  // `useLongPress` is spread onto the `<div>` inside the `<li>` (the same
+  // element `dragHandle.isDragging`'s tint already targets), not the `<li>`
+  // itself — pointer events bubble up, never down, so the test has to fire
+  // on that div directly.
+  function longPressTarget() {
+    // "Abacate" also names the (closed) actions sheet's own heading — the
+    // row itself is the first match.
+    return screen.getAllByText("Abacate")[0]!.closest("li")!
+      .firstElementChild as HTMLElement;
+  }
+
+  it("opens the reorder sheet after holding the row for ~2s", () => {
+    const onLongPressReorder = mountLongPress();
+
+    const row = longPressTarget();
+    fireEvent.pointerDown(row, { clientX: 0, clientY: 0, pointerType: "touch" });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(onLongPressReorder).toHaveBeenCalledOnce();
+  });
+
+  it("does nothing on an ordinary tap", () => {
+    const onLongPressReorder = mountLongPress();
+
+    const row = longPressTarget();
+    fireEvent.pointerDown(row, { clientX: 0, clientY: 0, pointerType: "touch" });
+    fireEvent.pointerUp(row);
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(onLongPressReorder).not.toHaveBeenCalled();
   });
 });

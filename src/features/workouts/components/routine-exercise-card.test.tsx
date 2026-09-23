@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "../types/exercise";
 import type { RoutineExercise } from "../types/routine";
@@ -130,5 +130,56 @@ describe("the entrance animation", () => {
     const { card } = mount(undefined, { justAdded: true });
 
     expect(card).toHaveClass("animate-rise");
+  });
+});
+
+describe("RM03 — long press instead of a permanent handle", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("renders no drag handle when dragHandle is not given", () => {
+    mount(undefined);
+
+    expect(
+      screen.queryByRole("button", { name: "Reordenar Esteira" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("calls onLongPressReorder after holding the card for ~2s", () => {
+    const onLongPressReorder = vi.fn();
+    const { card } = mount(undefined, { onLongPressReorder });
+
+    fireEvent.pointerDown(card!, {
+      clientX: 0,
+      clientY: 0,
+      pointerType: "touch",
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(onLongPressReorder).toHaveBeenCalledOnce();
+  });
+
+  it("does nothing on an ordinary tap", () => {
+    const onLongPressReorder = vi.fn();
+    const { card } = mount(undefined, { onLongPressReorder });
+
+    fireEvent.pointerDown(card!, {
+      clientX: 0,
+      clientY: 0,
+      pointerType: "touch",
+    });
+    fireEvent.pointerUp(card!);
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(onLongPressReorder).not.toHaveBeenCalled();
   });
 });
