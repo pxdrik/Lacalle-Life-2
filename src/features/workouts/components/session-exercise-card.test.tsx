@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Exercise } from "../types/exercise";
@@ -132,6 +133,71 @@ describe("SessionExerciseCard", () => {
 
     it("stays a plain card once nothing in it is next", () => {
       expect(mount(null)?.className).not.toContain("border-l-accent");
+    });
+  });
+
+  describe("RM07 — swapping the exercise mid-workout", () => {
+    function mount(exercise: SessionExercise, onSwap = vi.fn()) {
+      render(
+        <SessionExerciseCard
+          exercise={exercise}
+          catalogue={undefined}
+          onOpenDetail={vi.fn()}
+          nextSetId={null}
+          lastTime={undefined}
+          onSetChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemoveSet={vi.fn()}
+          onAddSet={vi.fn()}
+          onNotesChange={vi.fn()}
+          onSwap={onSwap}
+        />,
+      );
+      return { onSwap };
+    }
+
+    it("does not render a swap button without onSwap", () => {
+      render(
+        <SessionExerciseCard
+          exercise={EXERCISE}
+          catalogue={undefined}
+          onOpenDetail={vi.fn()}
+          nextSetId={null}
+          lastTime={undefined}
+          onSetChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemoveSet={vi.fn()}
+          onAddSet={vi.fn()}
+          onNotesChange={vi.fn()}
+        />,
+      );
+
+      expect(
+        screen.queryByRole("button", { name: /Trocar/ }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("calls onSwap when the exercise has no completed sets yet", async () => {
+      const user = userEvent.setup();
+      const { onSwap } = mount(EXERCISE);
+
+      await user.click(
+        screen.getByRole("button", { name: "Trocar Supino reto por outro exercício" }),
+      );
+
+      expect(onSwap).toHaveBeenCalledOnce();
+    });
+
+    it("disables the swap button once a set is already completed", () => {
+      const done: SessionExercise = {
+        ...EXERCISE,
+        sets: [{ ...EXERCISE.sets[0]!, isCompleted: true }],
+      };
+      mount(done);
+
+      expect(
+        screen.getByRole("button", { name: "Trocar Supino reto por outro exercício" }),
+      ).toBeDisabled();
     });
   });
 });

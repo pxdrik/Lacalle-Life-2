@@ -4,11 +4,13 @@ import { createRoutine, createRoutineExercise } from "./create-routine";
 import { addExercise, updateExercise, updateSet } from "./edit-routine";
 import {
   addPerformedSet,
+  addSessionExercise,
   completeSet,
   finishSession,
   moveSessionToDay,
   removePerformedSet,
   reopenSession,
+  replaceSessionExercise,
   setSessionDuration,
   setSessionExerciseNotes,
   setSessionStartedAt,
@@ -186,6 +188,105 @@ describe("editing during the workout", () => {
     );
 
     expect(after.exercises[0]?.notes).toBe("Ombro incomodou");
+  });
+});
+
+describe("addSessionExercise", () => {
+  it("appends an exercise the routine never planned", () => {
+    const { session } = runningSession();
+    const after = addSessionExercise(session, {
+      exerciseId: "rosca-direta",
+      name: "Rosca Direta",
+    });
+
+    expect(after.exercises).toHaveLength(2);
+    expect(after.exercises[1]).toMatchObject({
+      exerciseId: "rosca-direta",
+      name: "Rosca Direta",
+      restSeconds: null,
+      notes: "",
+    });
+  });
+
+  it("starts with a single blank set, nothing prescribed it", () => {
+    const { session } = runningSession();
+    const after = addSessionExercise(session, {
+      exerciseId: "rosca-direta",
+      name: "Rosca Direta",
+    });
+
+    expect(after.exercises[1]?.sets).toHaveLength(1);
+    expect(after.exercises[1]?.sets[0]).toMatchObject({
+      reps: null,
+      weightKg: null,
+      isCompleted: false,
+      planned: null,
+    });
+  });
+
+  it("leaves the existing exercises untouched", () => {
+    const { session, exerciseId } = runningSession();
+    const after = addSessionExercise(session, {
+      exerciseId: "rosca-direta",
+      name: "Rosca Direta",
+    });
+
+    expect(after.exercises[0]?.id).toBe(exerciseId);
+    expect(after.exercises[0]?.sets).toHaveLength(3);
+  });
+});
+
+describe("replaceSessionExercise", () => {
+  it("swaps the catalogue reference and name, keeping the slot id and sets", () => {
+    const { session, exerciseId, setIds } = runningSession();
+    const after = replaceSessionExercise(session, exerciseId, {
+      exerciseId: "supino-inclinado",
+      name: "Supino Inclinado",
+    });
+
+    expect(after.exercises[0]).toMatchObject({
+      id: exerciseId,
+      exerciseId: "supino-inclinado",
+      name: "Supino Inclinado",
+    });
+    expect(after.exercises[0]?.sets.map((s) => s.id)).toEqual(setIds);
+  });
+
+  it("refuses once any set in the slot is already completed", () => {
+    // Those sets are a record of what was actually lifted under the old
+    // exercise — Evolução and personal records read it straight off
+    // `exerciseId`, so re-labeling them would misattribute that history.
+    const { session, exerciseId, setIds } = runningSession();
+    const started = completeSet(session, exerciseId, setIds[0]!);
+
+    const after = replaceSessionExercise(started, exerciseId, {
+      exerciseId: "supino-inclinado",
+      name: "Supino Inclinado",
+    });
+
+    expect(after).toBe(started);
+  });
+
+  it("still allows the swap while every set is uncompleted", () => {
+    const { session, exerciseId } = runningSession();
+
+    const after = replaceSessionExercise(session, exerciseId, {
+      exerciseId: "supino-inclinado",
+      name: "Supino Inclinado",
+    });
+
+    expect(after.exercises[0]?.exerciseId).toBe("supino-inclinado");
+  });
+
+  it("ignores an unknown slot", () => {
+    const { session } = runningSession();
+
+    expect(
+      replaceSessionExercise(session, "gone", {
+        exerciseId: "x",
+        name: "X",
+      }),
+    ).toBe(session);
   });
 });
 

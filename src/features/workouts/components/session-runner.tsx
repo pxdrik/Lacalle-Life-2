@@ -7,7 +7,7 @@ import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { TimeField } from "@/design-system/components/time-field";
-import { ArrowLeft, Flag, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Flag, Plus, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -31,9 +31,11 @@ import {
 } from "../services/history";
 import {
   addPerformedSet,
+  addSessionExercise,
   completeSet,
   finishSession,
   removePerformedSet,
+  replaceSessionExercise,
   setSessionExerciseNotes,
   setSessionStartedAt,
   uncompleteSet,
@@ -48,6 +50,7 @@ import {
   timeOfDay,
 } from "../services/session-stats";
 import type { Session } from "../types/session";
+import { ExerciseBrowser } from "./exercise-browser";
 import {
   ExerciseDetailDialog,
   useExerciseDetail,
@@ -78,6 +81,13 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
     readonly exerciseId: string;
     readonly setId: string;
   } | null>(null);
+  // RM07 (roadmap 23/09/2026) — editar o treino em andamento: adicionar um
+  // exercício que a rotina não previa, ou trocar o que preenche um slot
+  // antes da primeira série (guarda em `replaceSessionExercise`). Mesma
+  // convenção do editor de rotina: `picking` para adicionar, o id do slot
+  // (ou `null`) para trocar, nunca as duas folhas abertas juntas.
+  const [picking, setPicking] = useState(false);
+  const [swappingId, setSwappingId] = useState<string | null>(null);
 
   const running = state.status === "ready" && state.session.finishedAt === null;
   const now = useTicker(running);
@@ -419,9 +429,82 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
                   setSessionExerciseNotes(current, exercise.id, notes),
                 );
               }}
+              onSwap={() => {
+                setPicking(false);
+                setSwappingId(exercise.id);
+              }}
             />
           ))}
         </div>
+      )}
+
+      {/* RM07: mesma folha que o editor de rotina já usa para adicionar,
+          uma seleção por vez — decidir fazer mais um exercício hoje é uma
+          escolha imediata, não um lote como montar a rotina do zero. */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={() => {
+            setPicking(true);
+          }}
+          className="inline-flex h-(--control-h-lg) w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm text-ink-muted transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+        >
+          <Plus aria-hidden className="size-4" />
+          Adicionar exercício
+        </button>
+      </div>
+
+      {picking && (
+        <Dialog
+          open
+          title="Adicionar exercício"
+          onClose={() => {
+            setPicking(false);
+          }}
+          placement="sheet-bottom"
+        >
+          <ExerciseBrowser
+            persistQuery={false}
+            autoFocus
+            onSelect={(exercise) => {
+              apply((current) =>
+                addSessionExercise(current, {
+                  exerciseId: exercise.id,
+                  name: exercise.name,
+                }),
+              );
+              setPicking(false);
+            }}
+          />
+        </Dialog>
+      )}
+
+      {swappingId !== null && (
+        <Dialog
+          open
+          title={`Trocar ${
+            session.exercises.find((item) => item.id === swappingId)?.name ??
+            "exercício"
+          }`}
+          onClose={() => {
+            setSwappingId(null);
+          }}
+          placement="sheet-bottom"
+        >
+          <ExerciseBrowser
+            persistQuery={false}
+            autoFocus
+            onSelect={(exercise) => {
+              apply((current) =>
+                replaceSessionExercise(current, swappingId, {
+                  exerciseId: exercise.id,
+                  name: exercise.name,
+                }),
+              );
+              setSwappingId(null);
+            }}
+          />
+        </Dialog>
       )}
 
       {/* The end of the workout, and the one moment on this screen that is not

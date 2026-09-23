@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Repeat } from "lucide-react";
 
 import { formatDecimal } from "@/core/format/decimal";
 
@@ -25,6 +25,13 @@ interface Props {
   readonly onRemoveSet: (setId: string) => void;
   readonly onAddSet: () => void;
   readonly onNotesChange: (notes: string) => void;
+  /**
+   * RM07 (roadmap 23/09/2026) — opens the picker to swap which exercise
+   * fills this slot mid-workout. Absent in `SessionEditor`: editing a
+   * finished workout corrects what was recorded, it does not change which
+   * exercise it was.
+   */
+  readonly onSwap?: (() => void) | undefined;
 }
 
 export function SessionExerciseCard({
@@ -38,6 +45,7 @@ export function SessionExerciseCard({
   onRemoveSet,
   onAddSet,
   onNotesChange,
+  onSwap,
 }: Props) {
   const isCardio = catalogue?.movementPattern === "cardio";
   const done = exercise.sets.filter((set) => set.isCompleted).length;
@@ -65,10 +73,21 @@ export function SessionExerciseCard({
             ? null
             : `Descanso de ${String(exercise.restSeconds)}s`}
         </ExerciseIdentity>
-        <span className="shrink-0 text-xs tabular-nums text-ink-subtle">
-          {done}/{exercise.sets.length}
-          {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}
-        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <span className="text-xs tabular-nums text-ink-subtle">
+            {done}/{exercise.sets.length}
+            {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}
+          </span>
+          {onSwap !== undefined && (
+            <IconButton
+              label={`Trocar ${exercise.name} por outro exercício`}
+              disabled={done > 0}
+              onClick={onSwap}
+            >
+              <Repeat aria-hidden className="size-4" />
+            </IconButton>
+          )}
+        </div>
       </header>
 
       {/* The question this app is opened to answer: what did I do last time.
@@ -152,6 +171,30 @@ export function SessionExerciseCard({
         />
       </div>
     </Card>
+  );
+}
+
+function IconButton({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  readonly label: string;
+  readonly onClick: () => void;
+  readonly disabled?: boolean;
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="flex size-8 items-center justify-center touch-44 rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink disabled:opacity-30"
+    >
+      {children}
+    </button>
   );
 }
 

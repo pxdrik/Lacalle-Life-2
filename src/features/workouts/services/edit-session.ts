@@ -96,29 +96,26 @@ function sanitizeSetChanges(changes: PerformedSetChanges): PerformedSetChanges {
  * the numbers from the last set, because an extra set is almost always more of
  * the same.
  */
+function createBlankPerformedSet(previous?: PerformedSet): PerformedSet {
+  return {
+    id: createEntityId(),
+    reps: previous?.reps ?? null,
+    weightKg: previous?.weightKg ?? null,
+    durationSeconds: previous?.durationSeconds ?? null,
+    rpe: null,
+    isCompleted: false,
+    planned: null,
+  };
+}
+
 export function addPerformedSet(
   session: Session,
   exerciseId: EntityId,
 ): Session {
-  return mapExercise(session, exerciseId, (exercise) => {
-    const last = exercise.sets.at(-1);
-
-    return {
-      ...exercise,
-      sets: [
-        ...exercise.sets,
-        {
-          id: createEntityId(),
-          reps: last?.reps ?? null,
-          weightKg: last?.weightKg ?? null,
-          durationSeconds: last?.durationSeconds ?? null,
-          rpe: null,
-          isCompleted: false,
-          planned: null,
-        },
-      ],
-    };
-  });
+  return mapExercise(session, exerciseId, (exercise) => ({
+    ...exercise,
+    sets: [...exercise.sets, createBlankPerformedSet(exercise.sets.at(-1))],
+  }));
 }
 
 export function removePerformedSet(
@@ -140,6 +137,59 @@ export function setSessionExerciseNotes(
   return mapExercise(session, exerciseId, (exercise) => ({
     ...exercise,
     notes,
+  }));
+}
+
+/**
+ * Adds an exercise the routine never planned — "hoje vou fazer isso também",
+ * decided mid-workout. One blank set to start, same "nothing prescribed it"
+ * shape `addPerformedSet` already gives a set with no plan behind it; more
+ * come from the same "Série extra" button every other exercise has.
+ */
+export function addSessionExercise(
+  session: Session,
+  exercise: { readonly exerciseId: EntityId; readonly name: string },
+): Session {
+  return revise(session, {
+    exercises: [
+      ...session.exercises,
+      {
+        id: createEntityId(),
+        exerciseId: exercise.exerciseId,
+        name: exercise.name,
+        restSeconds: null,
+        notes: "",
+        sets: [createBlankPerformedSet()],
+      },
+    ],
+  });
+}
+
+/**
+ * Swaps which catalogue exercise a slot points to — same convention as
+ * `replaceExercise` in `edit-routine.ts`: `exerciseId` names the session's
+ * own slot, not the catalogue entry, and only `exerciseId`/`name` change.
+ *
+ * Refuses once any set in the slot is completed. Those sets are a record of
+ * what was actually lifted — Evolução and personal records read it straight
+ * off `exerciseId` — and re-labeling them under a different exercise would
+ * misattribute that history. A swap is for "errei o exercício" or "a máquina
+ * está ocupada", decided before the first set, not a rewrite of what already
+ * happened.
+ */
+export function replaceSessionExercise(
+  session: Session,
+  exerciseId: EntityId,
+  replacement: { readonly exerciseId: EntityId; readonly name: string },
+): Session {
+  const exercise = session.exercises.find((item) => item.id === exerciseId);
+  if (exercise === undefined) return session;
+  if (exercise.sets.some((set) => set.isCompleted)) return session;
+
+  return mapExercise(session, exerciseId, (item) => ({
+    ...item,
+    exerciseId: replacement.exerciseId,
+    name: replacement.name,
   }));
 }
 

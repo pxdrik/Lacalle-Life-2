@@ -5,6 +5,40 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Roadmap Mestre — RM07: editar treino ativo — 23/09/2026
+
+Trocar ou adicionar exercício sem sair do treino em andamento, o mesmo padrão
+que o editor de rotina já tinha (folha do `ExerciseBrowser` por cima da
+tela), agora também na execução.
+
+- ✅ **`addSessionExercise`** — adiciona um exercício que a rotina nunca
+  previu ("hoje vou fazer isso também"), com uma série em branco pra
+  começar; o botão "Série extra" que cada card já tem cobre o resto. Também
+  funciona numa sessão avulsa que começou sem nenhum exercício.
+- ✅ **`replaceSessionExercise`** — troca qual exercício preenche um slot,
+  mesma convenção do `replaceExercise` do editor de rotina (`edit-routine.ts`):
+  o id do slot não muda, só a referência ao catálogo e o nome.
+- ✅ **A guarda que o item do roadmap pedia — "sem corromper séries já
+  registradas".** `replaceSessionExercise` recusa (no-op) assim que qualquer
+  série do slot já está concluída, e o botão de trocar (`session-exercise-card.tsx`)
+  aparece desabilitado nesse caso. Uma série concluída é um registro do que
+  foi levantado de verdade — Evolução e recordes pessoais leem direto de
+  `exerciseId` — e re-rotulá-la sob outro exercício reescreveria esse
+  histórico. Trocar é para "errei o exercício" ou "a máquina está ocupada",
+  decidido antes da primeira série, nunca depois.
+- ✅ **Fora da tela de editar treino já concluído.** `SessionEditor`
+  (correção pós-treino) reusa o mesmo `SessionExerciseCard`, mas nunca passa
+  `onSwap` — o comentário do próprio arquivo já dizia que ali é sobre
+  corrigir o que foi registrado, não sobre mudar qual exercício foi; RM07 é
+  só sobre o treino ainda em andamento.
+- ⚠️ **Não verificado ao vivo no navegador desta vez** — mesma limitação de
+  automação já registrada na entrada de RM01/RM03 abaixo, que aqui não pesa
+  tanto (nada depende de tempo real): 10 testes novos determinísticos
+  (`edit-session.test.ts`, `session-exercise-card.test.tsx`) cobrindo as duas
+  funções e a guarda do botão.
+
+---
+
 ## ✅ Roadmap Mestre — RM01/RM03: long press pra reordenar, no Diário e nos Treinos — 23/09/2026
 
 O handle de arrastar permanente saiu da tela normal do Diário e do editor de
