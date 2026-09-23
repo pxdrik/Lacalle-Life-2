@@ -5,6 +5,50 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Roadmap Mestre — RM11: carregamento e sincronização global — 23/09/2026
+
+Fecha o último item do Roadmap Mestre. Antes, cada aba (Diário, Treinos,
+Evolução...) só abria o próprio repositório — e só então sincronizava — na
+primeira vez que alguém entrava nela; navegar pela primeira vez a cada aba
+pagava esse custo na ordem em que a pessoa foi clicando.
+
+- ✅ **`AppDataBoot`, novo componente em `app/_components/`** — montado em
+  `(app)/layout.tsx`, que só existe uma vez por entrada no app e nunca
+  remonta entre `/hoje`, `/diario`, `/treinos` etc. (comentário do próprio
+  arquivo). Embrulha `{children}` com `FoodLogDataProvider` +
+  `WorkoutDataProvider` + `BodyDataProvider` — a essência da mudança: fazer
+  isso aqui, e não em cada página, dispara a abertura de todo IndexedDB em
+  paralelo no instante em que o app aparece, em vez de tela por tela.
+- ✅ **Nenhuma tela precisou mudar.** Cada fábrica de repositório em
+  `data-providers.tsx` já memoiza a própria promise (`once<T>`) — a mesma
+  instância resolvida volta instantânea pra quem pedir de novo. O provider
+  que cada página já embrulha (`FoodLogDataProvider` em `/diario`, etc.)
+  continua exatamente como estava, só que agora recebe de volta algo já
+  resolvido em vez de abrir do zero. Deixei essas chamadas no lugar de
+  propósito — cada tela continua documentando ali mesmo de que repositório
+  precisa, e ganhar isso de graça pelo layout quebraria silenciosamente se
+  `AppDataBoot` um dia sumisse.
+- ✅ **O pull de sincronização entra pela mesma porta, uma vez, ao montar** —
+  perfil, dietas, rotinas, sessões e corpo (cada um cobre todo o histórico) e
+  o diário do dia de hoje, o único que a abertura do app pode adivinhar, já
+  que o diário é por dia. Silencioso de propósito, mesma convenção do push
+  debounçado que `data-providers.tsx` já tinha: uma falha aqui (rede fora,
+  sem sessão) não aparece em lugar nenhum — as `*-sync-status.tsx` de cada
+  tela continuam rodando o próprio sync ao montar e mostrando um erro de
+  verdade, se ele persistir.
+- ✅ **Não é o carregamento global estrutural que a entrada anterior
+  descrevia como grande** — não moveu nenhum provider de rota nem mudou quem
+  possui a UI de conflito de cada tela; só adiantou o que cada fábrica já
+  fazia. O resultado prático pedido (navegar rápido entre abas) é o mesmo, com
+  bem menos superfície de risco.
+- ⚠️ **Não verificado ao vivo no navegador desta vez** — mesma limitação de
+  automação já registrada nas duas entradas anteriores. 4 testes novos
+  (`app-data-boot.test.tsx`) cobrindo os repositórios chegando aos filhos, os
+  seis syncs disparando uma vez cada, a guarda de Supabase não configurado, e
+  que uma falha de sync não derruba o app.
+
+---
+
 ## ✅ Roadmap Mestre — RM07: editar treino ativo — 23/09/2026
 
 Trocar ou adicionar exercício sem sair do treino em andamento, o mesmo padrão

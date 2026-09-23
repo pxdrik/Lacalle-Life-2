@@ -1,4 +1,5 @@
 import { AnonymousDataFoundPrompt } from "../_components/anonymous-data-found-prompt";
+import { AppDataBoot } from "../_components/app-data-boot";
 import { AppNav } from "../_components/app-nav";
 import { Sidebar } from "../_components/sidebar";
 
@@ -24,7 +25,7 @@ export default function AppLayout({
   readonly children: React.ReactNode;
 }) {
   return (
-    <>
+    <AppDataBoot>
       {/* Two navigations, one at a time. `Sidebar` owns `lg` and up;
           below that it is not rendered and `AppNav` carries the header
           and the phone's tab bar. The padding is what keeps content
@@ -36,6 +37,6 @@ export default function AppLayout({
         {children}
       </div>
       <AnonymousDataFoundPrompt />
-    </>
+    </AppDataBoot>
   );
 }
