@@ -53,7 +53,11 @@ export function WaterCard({ day }: { readonly day: string }) {
     <Card>
       <div className="flex items-center justify-between gap-3">
         <span className="flex items-center gap-2 text-sm font-medium text-ink">
-          <ICONS.water aria-hidden className="size-4 text-ink-subtle" />
+          {/* `text-protein-text` — the only blue in the design system,
+              reused for water on purpose (Pedro, 24/09/2026: "o desenho da
+              água azulzinho"). See `TodayHydration`'s comment for why this
+              never collides with the macro grid's own blue. */}
+          <ICONS.water aria-hidden className="size-4 text-protein-text" />
           Água
         </span>
 

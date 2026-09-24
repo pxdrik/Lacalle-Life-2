@@ -11,6 +11,8 @@ import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
 import { MACRO_CODING } from "@/design-system/macros";
 
+import { MacroDonut } from "./macro-donut";
+
 /**
  * What the engine decided, and why.
  *
@@ -85,7 +87,11 @@ function Plan({
           <span className="text-sm text-ink-subtle">kcal por dia</span>
         </div>
 
-        <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line pt-4">
+        <div className="mt-4 flex items-center justify-center border-t border-line pt-4">
+          <MacroDonut macros={plan.targets} />
+        </div>
+
+        <dl className="mt-4 grid grid-cols-3 gap-4">
           {MACRO_CODING.map(({ key, long, text }) => (
             <div key={key}>
               <dd className={`text-xl tabular-nums ${text}`}>

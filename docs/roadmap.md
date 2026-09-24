@@ -5,6 +5,36 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Ícone da água azul, gráfico de distribuição de macros — 24/09/2026
+
+Ajuste nas duas entregas de hoje, pedido pelo Pedro depois de ver a versão
+sem cor/sem gráfico: "vamos deixar o desenho da água azulzinho, além disso,
+a distribuição vamos fazer o gráfico, igual mandei em imagem. Vai ficar mais
+fácil do usuário enxergar."
+
+- ✅ **Água, ícone azul.** `text-protein-text` — o único azul que o design
+  system já tem (`--protein`, tokens.css), reaproveitado em vez de criar um
+  token novo. `TodayHydration`/`WaterCard` nunca competem visualmente com o
+  azul do grid de macro pelo mesmo motivo de sempre: contexto e rótulo já
+  diferenciam ("Água" vs. "Proteína"), o par nunca aparece como dois pontos
+  de dado disputando o mesmo significado.
+- ✅ **`MacroDonut`** (`features/profile/components/`) — reverte a decisão
+  "sem gráfico" da entrada de distribuição de macros abaixo, só na tela de
+  resumo (`PlanSummary`): o app de referência também desenha a lista de
+  presets sem gráfico nenhum, e só o "Goals" (o resumo) tem o donut — a
+  mesma divisão que este app já tinha, sem querer. Lê a proporção direto dos
+  gramas de `plan.targets` (não de `macroSplit`), então funciona igual em
+  modo automático ou personalizado, sem duplicar o que `distribution.ts` já
+  decidiu. `aria-hidden`: o grid de gramas ao lado já é a fonte acessível.
+- ✅ **4 testes novos** (`macro-donut.test.tsx`) — um arco por macro com
+  fatia de verdade, rótulo de porcentagem certo, fatia fina demais pulada, e
+  divisão por zero segura quando tudo está zerado.
+
+`npm run verify` (typecheck + lint + 1925 testes) e `npm run build` verdes.
+Mesma ressalva de verificação visual das duas entregas anteriores.
+
+---
+
 ## ✅ Meta de água: nova, aditiva, sincronizada — 24/09/2026
 
 Segunda metade do pedido do Pedro (ver entrada logo abaixo, distribuição de

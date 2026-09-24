@@ -34,7 +34,13 @@ export function TodayHydration({ day }: { readonly day: string }) {
       className="flex min-h-(--control-h-sm) min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-sm px-1 py-2 transition-colors duration-150 ease-out hover:bg-muted lg:col-span-2"
     >
       <span className="flex items-center gap-2 text-sm text-ink-muted">
-        <ICONS.water aria-hidden className="size-4 text-ink-subtle" />
+        {/* `text-protein-text` — the only blue this design system has, and
+            the one association everyone already reads correctly: water is
+            blue. It never collides with the macro grid's own blue (Pedro,
+            24/09/2026, "deixar o desenho da água azulzinho"): the two never
+            appear as adjacent data points competing for the same colour to
+            mean two different things, each carries its own label. */}
+        <ICONS.water aria-hidden className="size-4 text-protein-text" />
         Água
       </span>
 

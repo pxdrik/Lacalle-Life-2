@@ -16,6 +16,7 @@ export {
   FIBER_REFERENCE_G,
   GOALS,
   INPUT_BOUNDS,
+  KCAL_PER_GRAM,
   MACRO_SPLIT_PRESETS,
   type ActivityLevel,
   type BiologicalSex,
