@@ -5,6 +5,78 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Detalhes do alimento: gordura saturada quebrando linha, de novo — causa raiz diferente da primeira vez — 24/09/2026
+
+Pedro: "deu novamente o erro de desing da gordura saturada estar quebrando
+linha." A correção de 23/09/2026 (`items-end` no grid, ver a entrada "Diário:
+total da refeição colado no nome, caixas de nutriente alinhadas" abaixo)
+tinha ficado com um ⚠️ próprio: não verificada com dado real no navegador.
+Foi exatamente aí que escondia um bug diferente, não uma regressão da mesma
+correção.
+
+- ✅ **Causa raiz de verdade, achada reproduzindo na tela real** (produção,
+  "Marmita Carne de Panela" do Pedro, coluna estreitada via
+  `el.style.maxWidth` no elemento de verdade — não um resize de viewport,
+  pouco confiável neste ambiente). `align-items: flex-end` alinha a caixa
+  **inteira** de cada célula do grid pelo fim da linha, não só o input —
+  então o rótulo curto de "Sódio" descia junto, e o texto dele ia parar na
+  altura da *segunda* linha de "Gordura saturada", lendo como se as duas
+  frases fossem uma só. Diferente do bug original (as caixas de input
+  desalinhadas), por isso parecia "a mesma coisa de novo" sem ser a mesma
+  causa.
+- ✅ **`min-h-8` no `<span>` do rótulo (`NutrientField`, dentro de
+  `meal-item-detail-screen.tsx`), em vez de `items-end` no grid.** Reserva a
+  altura de duas linhas pra qualquer rótulo, curto ou longo — o texto de
+  cada um fica sempre ancorado no topo, e o input de baixo, vindo depois
+  dessa altura fixa nos dois lados, sai alinhado de qualquer jeito, sem
+  precisar mover a caixa inteira. Confirmado lado a lado ("atual" vs.
+  "proposta", HTML solto com as classes reais do Tailwind) antes de tocar o
+  componente de produção.
+- ✅ **1 teste novo**, em `meal-item-detail-screen.test.tsx`: confere
+  `min-h-8` no rótulo e a ausência de `items-end` no grid — trava o
+  mecanismo da correção, não só o efeito visual.
+
+---
+
+## ✅ Diário: desfazer disponível mesmo bem depois do toast — 24/09/2026
+
+**Ampliação da entrada "Transformar em 1 alimento: desfazer, e virar
+alimento de verdade" abaixo.** Pedro, numa refeição que já tinha juntado
+antes ("Marmita Carne de Panela"): "quero que apareça o desfazer para uma
+refeição que eu ja juntei." O toast de 23/09/2026 desfazia certo, mas só
+enquanto estivesse na tela — sem nada pra desfazer depois que ele já tinha
+fechado.
+
+- ✅ **`Meal.consolidatedFrom?: readonly MealItem[]` (novo campo, mesma
+  convenção de `plannedSnapshot`)** — os itens de antes da transformação,
+  congelados na própria refeição, não só numa variável local do hook.
+  Presente exatamente quando há algo pra desfazer; `undefined` — nunca
+  `[]` — antes da primeira transformação, e limpo de volta a `undefined`
+  pelo próprio desfazer. Sincroniza sem mudança nenhuma em
+  `food-log-merge.ts`: o merge já é por refeição inteira (`deepEqual` +
+  "mais recente vence"), sem regra por campo.
+- ✅ **`edit-diet.ts` — `replaceMealItems` virou `consolidateMealItems` +
+  `undoConsolidateMealItems`.** A primeira grava `items` e congela o que
+  havia em `consolidatedFrom`; a segunda restaura de lá e limpa o campo —
+  um clique repetido, ou um clique tardio numa refeição que mudou de outro
+  jeito, não encontra nada pra restaurar e não faz nada. `useConsolidateMeal`
+  passou a chamar as duas em vez de fechar sobre uma cópia local dos itens
+  antigos — o toast e o ⋮ da refeição agora rodam o mesmo mecanismo, não
+  dois.
+- ✅ **`meal-card.tsx` — "Desfazer transformação" no ⋮**, ao lado de
+  "Transformar em 1 alimento" (os dois nunca aparecem juntos: transformar
+  pede 2+ itens, e uma transformação bem-sucedida deixa exatamente 1).
+  Aparece sempre que `meal.consolidatedFrom` tem algo, independente de
+  quando a transformação aconteceu ou se o toast ainda existe.
+- ✅ **9 testes novos** — `edit-diet.test.ts` (congela e restaura, no-op sem
+  histórico, no-op na segunda chamada) e `meal-card.test.tsx` (some sem a
+  prop, some numa refeição nunca transformada, chama `onUndoConsolidate`).
+  Os 4 testes já existentes de `use-consolidate-meal.test.tsx` continuam
+  verdes sem alteração — a troca de mecanismo não mudou o comportamento
+  observável.
+
+---
+
 ## ✅ Transformar em 1 alimento: desfazer, e virar alimento de verdade — 23/09/2026
 
 **Correção/ampliação da entrada logo abaixo.** Pedro, depois de usar:

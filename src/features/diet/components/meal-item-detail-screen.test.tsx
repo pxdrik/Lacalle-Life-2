@@ -140,4 +140,24 @@ describe("MealItemDetailScreen", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Diário/ })).toBeInTheDocument();
   });
+
+  /**
+   * Achado real (23/09/2026, segunda rodada): a primeira correção
+   * (`items-end` no grid) alinhava as caixas de input, mas empurrava a
+   * `label` inteira de "Sódio" pra baixo — o texto dela ia parar na
+   * altura da segunda linha de "Gordura saturada", lendo como se fossem
+   * uma frase só. `min-h-8` no rótulo resolve sem depender de
+   * `items-end`: reserva a altura de duas linhas pra qualquer rótulo, e
+   * o texto de cada um fica sempre ancorado no topo.
+   */
+  it("reserva duas linhas pro rótulo de cada nutriente, sem empurrar o texto pra baixo", async () => {
+    mount(logWithItem(), { dia: TODAY, mealId: "m1", itemId: "i1" });
+    await screen.findByText("Ovo inteiro");
+
+    const label = screen.getByText("Gordura saturada").closest("span");
+    expect(label?.className).toContain("min-h-8");
+
+    const grid = label?.closest("label")?.parentElement;
+    expect(grid?.className).not.toContain("items-end");
+  });
 });

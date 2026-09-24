@@ -13,7 +13,7 @@ import {
 
 import { createMealItem } from "../services/create-diet";
 import { combinedMealTotals } from "../services/diet-macros";
-import { replaceMealItems } from "../services/edit-diet";
+import { consolidateMealItems, undoConsolidateMealItems } from "../services/edit-diet";
 import type { Meal, MealOwner } from "../types/diet";
 
 /**
@@ -36,11 +36,15 @@ import type { Meal, MealOwner } from "../types/diet";
  * the problem beats a form staying open with nothing left to fix by hand.
  *
  * Success gets the same channel with an undo — Pedro: "faltou um botão
- * para desfazer". `previousItems` is captured before anything is written,
- * so "Desfazer" is `replaceMealItems` run once more with what was there;
- * the food stays in the catalogue either way, deletable from Alimentos
- * like any other custom food, the same as it would be if it turned out to
- * be a mistake made through the normal create-food screen.
+ * para desfazer" (24/09/2026: "quero que apareça o desfazer para uma
+ * refeição que eu ja juntei", after the toast that first offered it was
+ * long gone). `consolidateMealItems` freezes the previous items into the
+ * meal's own `consolidatedFrom` field, so the toast's "Desfazer" and the
+ * meal card's persistent "⋮ → Desfazer transformação" both just call
+ * `undoConsolidateMealItems` — one mechanism, two entry points. The food
+ * stays in the catalogue either way, deletable from Alimentos like any
+ * other custom food, the same as it would be if it turned out to be a
+ * mistake made through the normal create-food screen.
  *
  * `T extends MealOwner`, matching every other write in `edit-diet.ts` —
  * only `FoodLogScreen` wires this today, but the function itself does not
@@ -75,9 +79,8 @@ export function useConsolidateMeal<T extends MealOwner>(
           const food = createCustomFood(parsed.data);
           await (await repository).save(food, null);
 
-          const previousItems = meal.items;
           apply((current) =>
-            replaceMealItems(current, meal.id, [
+            consolidateMealItems(current, meal.id, [
               createMealItem({
                 foodId: food.id,
                 name: food.name,
@@ -91,9 +94,7 @@ export function useConsolidateMeal<T extends MealOwner>(
           toast(`${food.name} virou 1 alimento no catálogo.`, {
             label: "Desfazer",
             onAction: () => {
-              apply((current) =>
-                replaceMealItems(current, meal.id, previousItems),
-              );
+              apply((current) => undoConsolidateMealItems(current, meal.id));
             },
           });
         } catch (cause) {

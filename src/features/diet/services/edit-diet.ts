@@ -292,21 +292,49 @@ export function updateMealItemDetails<T extends MealOwner>(
 }
 
 /**
- * Replaces a meal's whole item list outright.
+ * "Transformar em 1 alimento" (`useConsolidateMeal`, roadmap 23/09/2026,
+ * extended 24/09/2026) — installs `items` and freezes what the meal had
+ * right before into `consolidatedFrom`, so "Desfazer" stays available from
+ * the meal's own ⋮ menu any time later, not only from the toast that fired
+ * at the moment of the transformation.
  *
- * The low-level move behind "transformar em 1 alimento"
- * (`useConsolidateMeal`, roadmap 23/09/2026) — several foods collapsed into
- * one that references a real catalogue entry — and its own undo, which is
- * the exact same operation run with the list from before. Neither of those
- * decisions belongs here: this only ever installs whatever list it is
- * given, unconditionally.
+ * Overwrites a previous `consolidatedFrom` outright if the meal was
+ * consolidated once already and grew new items since — undo always
+ * reverts one step, to whatever came right before the latest
+ * transformation, not to some deeper history.
  */
-export function replaceMealItems<T extends MealOwner>(
+export function consolidateMealItems<T extends MealOwner>(
   diet: T,
   mealId: EntityId,
   items: readonly MealItem[],
 ): T {
-  return mapMeal(diet, mealId, (meal) => ({ ...meal, items }));
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    items,
+    consolidatedFrom: meal.items,
+  }));
+}
+
+/**
+ * The undo — restores `items` from `consolidatedFrom` and clears it, so a
+ * second click (or a stale one, after the meal changed some other way)
+ * finds nothing to restore and leaves the meal alone rather than firing
+ * again. The `Food` the original transformation created stays in the
+ * catalogue either way — deletable from Alimentos like any other custom
+ * food, same as if it had been added by hand and then removed.
+ */
+export function undoConsolidateMealItems<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+): T {
+  const items = diet.meals.find((meal) => meal.id === mealId)?.consolidatedFrom;
+  if (items === undefined) return diet;
+
+  return mapMeal(diet, mealId, (current) => ({
+    ...current,
+    items,
+    consolidatedFrom: undefined,
+  }));
 }
 
 /**

@@ -350,6 +350,8 @@ export const mealSchema = z
     // Same convention as `eaten`/`alternatives` above: optional so a meal
     // backed up before this field existed keeps validating. See `Meal.order`.
     order: z.number().optional(),
+    // Same convention again — see `Meal.consolidatedFrom`.
+    consolidatedFrom: z.array(mealItemSchema).max(500).optional(),
   })
   .strict();
 

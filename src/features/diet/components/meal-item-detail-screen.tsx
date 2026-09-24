@@ -122,14 +122,21 @@ export function MealItemDetailScreen() {
             valor já escalado pela porção, para bater com a mesma base que
             o rótulo de qualquer embalagem de verdade mostra.
 
-            `items-end`, achado real (23/09/2026): "Gordura saturada (g /
-            100 g)" quebra em duas linhas, "Sódio (mg / 100 g)" cabe numa só
-            — sem isto cada `NutrientField` esticava para a altura da linha
-            do grid e o texto ficava ancorado no topo, então as duas caixas
-            de input da mesma linha saíam em alturas diferentes. Alinhando
-            pelo fim, é o input — o último elemento de cada rótulo — que
-            bate no mesmo lugar dos dois lados, não o texto acima dele. */}
-        <div className="grid grid-cols-2 items-end gap-3">
+            Achado real (23/09/2026, segunda rodada): "Gordura saturada
+            (g / 100 g)" quebra em duas linhas, "Sódio (mg / 100 g)" cabe
+            numa só. A primeira correção (`items-end` no grid) alinhava as
+            duas caixas de input, mas empurrava a `label` inteira de
+            "Sódio" pra baixo — o texto dela ia parar na altura da SEGUNDA
+            linha de "Gordura saturada", lendo como se as duas frases
+            fossem uma só. `min-h-8` no `<span>` do rótulo, dentro de
+            `NutrientField`, resolve as duas coisas: reserva a altura de
+            duas linhas pra qualquer rótulo (curto ou longo), então o texto
+            de "Sódio" continua ancorado no topo — lendo na mesma altura da
+            PRIMEIRA linha de "Gordura saturada", não da segunda — e o
+            input de baixo, vindo logo depois dessa altura fixa nos dois
+            lados, sai alinhado de qualquer jeito, sem precisar empurrar a
+            label inteira. */}
+        <div className="grid grid-cols-2 gap-3">
           <NutrientField
             label="Gordura saturada"
             unit="g / 100 g"
@@ -256,7 +263,10 @@ function NutrientField({
 
   return (
     <label className="block">
-      <span className="text-xs text-ink-subtle">
+      {/* `min-h-8`: reserva duas linhas pra qualquer rótulo, curto ou
+          longo, em vez de deixar cada um ficar do tamanho do próprio
+          texto — ver o comentário no grid que embrulha isto. */}
+      <span className="block min-h-8 text-xs text-ink-subtle">
         {label} <span className="text-ink-subtle/70">({unit})</span>
       </span>
       <input

@@ -13,6 +13,7 @@ import {
   Plus,
   Shuffle,
   Trash2,
+  Undo2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -147,6 +148,14 @@ interface Props {
   readonly onConsolidate?:
     | ((name: string, category: FoodCategory) => void)
     | undefined;
+  /**
+   * Pedro, 24/09/2026: "quero que apareça o desfazer para uma refeição
+   * que eu ja juntei" — a fez tempo depois de o toast de `onConsolidate`
+   * já ter fechado. Aparece no ⋮ sempre que `meal.consolidatedFrom` tem
+   * algo pra restaurar, então convive com o mesmo `undefined` de
+   * `onConsolidate` acima em qualquer tela que não passa nenhum dos dois.
+   */
+  readonly onUndoConsolidate?: (() => void) | undefined;
 }
 
 export function MealCard({
@@ -174,6 +183,7 @@ export function MealCard({
   onOpenItemDetail,
   onLongPressReorder,
   onConsolidate,
+  onUndoConsolidate,
 }: Props) {
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
@@ -515,6 +525,22 @@ export function MealCard({
                   <Combine aria-hidden className="size-4" />
                 </MenuRow>
               )}
+              {/* Pedro, 24/09/2026: "quero que apareça o desfazer para uma
+                  refeição que eu ja juntei" — o toast some, isto não:
+                  aparece sempre que a refeição tem algo pra restaurar,
+                  independente de quando a transformação aconteceu. */}
+              {onUndoConsolidate !== undefined &&
+                meal.consolidatedFrom !== undefined && (
+                  <MenuRow
+                    label="Desfazer transformação"
+                    onClick={() => {
+                      setShowingActions(false);
+                      onUndoConsolidate();
+                    }}
+                  >
+                    <Undo2 aria-hidden className="size-4" />
+                  </MenuRow>
+                )}
               <ConfirmButton
                 onConfirm={() => {
                   setShowingActions(false);

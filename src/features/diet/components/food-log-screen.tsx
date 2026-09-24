@@ -32,6 +32,7 @@ import {
   reorderMealItems,
   reorderMeals,
   setItemGrams,
+  undoConsolidateMealItems,
   updateMeal,
 } from "../services/edit-diet";
 import {
@@ -337,6 +338,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                     }}
                     onConsolidate={(name, category) => {
                       consolidateMeal(meal, name, category);
+                    }}
+                    onUndoConsolidate={() => {
+                      apply((current) =>
+                        undoConsolidateMealItems(current, meal.id),
+                      );
                     }}
                     // Só aparece numa refeição que veio da dieta — de um
                     // check individual ou de "Começar de X" — uma refeição

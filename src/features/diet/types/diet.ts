@@ -147,6 +147,16 @@ export interface Meal {
    * operations against both.
    */
   readonly order?: number | undefined;
+  /**
+   * The items this meal had right before "transformar em 1 alimento"
+   * (`useConsolidateMeal`, roadmap 23/09/2026) replaced them with a single
+   * item referencing the new catalogue food. `undefined` — same convention
+   * as `plannedSnapshot` above — until that first happens, and cleared back
+   * to `undefined` by the undo, so its presence alone is what the ⋮ menu
+   * checks to decide whether "Desfazer transformação" has anything to
+   * restore, independent of whichever toast fired at the time.
+   */
+  readonly consolidatedFrom?: readonly MealItem[] | undefined;
 }
 
 /**

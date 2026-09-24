@@ -36,6 +36,7 @@ function mount(
     readonly onRenameAlternative?: (alternativeId: string, name: string) => void;
     readonly onRemoveAlternative?: (alternativeId: string) => void;
     readonly onConsolidate?: (name: string, category: string) => void;
+    readonly onUndoConsolidate?: () => void;
   } = {},
 ) {
   const card = (theMeal: Meal) => (
@@ -361,6 +362,63 @@ describe("transformar em 1 alimento", () => {
       "Marmita de carne",
       "carb",
     );
+  });
+});
+
+/**
+ * Pedro, 24/09/2026: "quero que apareça o desfazer para uma refeição que eu
+ * ja juntei" — precisa continuar disponível bem depois do toast que a
+ * transformação em si já mostrou.
+ */
+describe("desfazer transformação", () => {
+  function consolidatedMeal() {
+    return {
+      ...meal([item({ id: "i1", name: "Marmita de carne" })]),
+      consolidatedFrom: [
+        item({ id: "old1", name: "Arroz" }),
+        item({ id: "old2", name: "Feijão" }),
+      ],
+    };
+  }
+
+  async function openMenu() {
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+    return user;
+  }
+
+  it("não aparece sem onUndoConsolidate", async () => {
+    mount(consolidatedMeal());
+    await openMenu();
+
+    expect(
+      screen.queryByRole("button", { name: "Desfazer transformação" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("não aparece numa refeição que nunca foi transformada, mesmo com onUndoConsolidate", async () => {
+    mount(meal([item({ id: "i1" }), item({ id: "i2", name: "Banana" })]), {
+      onUndoConsolidate: vi.fn(),
+    });
+    await openMenu();
+
+    expect(
+      screen.queryByRole("button", { name: "Desfazer transformação" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("chama onUndoConsolidate ao clicar", async () => {
+    const onUndoConsolidate = vi.fn();
+    mount(consolidatedMeal(), { onUndoConsolidate });
+    const user = await openMenu();
+
+    await user.click(
+      screen.getByRole("button", { name: "Desfazer transformação" }),
+    );
+
+    expect(onUndoConsolidate).toHaveBeenCalledTimes(1);
   });
 });
 
