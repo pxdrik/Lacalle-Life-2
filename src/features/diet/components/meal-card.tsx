@@ -249,14 +249,16 @@ export function MealCard({
             dragHandle?.isDragging === true && "border-accent shadow-modal",
           )}
         >
-          {/* Achado real, 23/09/2026: o total da refeição usa o mesmo
-              `MacroSummary` que cada alimento embaixo dele usa para o
-              próprio total — mesma tipografia, mesma cor. Sem estar colado
-              no nome, "192 kcal 7 Prot..." lia como o primeiro alimento da
-              lista, não como a soma da refeição. Empilhado logo abaixo do
-              nome (e do horário), dentro do mesmo bloco flexível, em vez de
-              solto ao lado do ⋮ — a proximidade com o nome é o que resolve,
-              a `border-t` que já separa a lista de alimentos faz o resto.
+          {/* Achado real, 23/09/2026: o total da refeição usava o mesmo
+              `MacroSummary` (mesma tipografia, mesma cor) que cada alimento
+              embaixo dele usa pro próprio total. Sem estar colado no nome,
+              "192 kcal 7 Prot..." lia como o primeiro alimento da lista, não
+              como a soma da refeição — primeira correção foi só a posição,
+              empilhado logo abaixo do nome (e do horário) em vez de solto ao
+              lado do ⋮. Não bastou: os dois ainda liam do mesmo peso visual
+              lado a lado, então o bloco abaixo também ganhou `size="lg"` e
+              centralização — a `border-t` que já separa a lista de
+              alimentos faz o resto.
 
               RM01: holding anywhere on this header (outside the inputs and
               buttons it already carries — `useLongPress` excludes those at
@@ -381,9 +383,15 @@ export function MealCard({
               {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
                   escondia os números atrás de uma cor — Pedro queria ver os
                   números mesmo, não "esse graficozinho". De volta ao
-                  `MacroSummary` de sempre. */}
-              <div className="mt-1">
-                <MacroSummary macros={macros} />
+                  `MacroSummary` de sempre.
+
+                  `size="lg"` e centralizado, achado real de 23/09/2026: o
+                  total da refeição precisa ler maior que o de cada alimento
+                  embaixo dele (`MealItemRow` continua em `size` padrão),
+                  não só mais perto do nome — senão os dois seguem
+                  competindo pelo mesmo peso visual. */}
+              <div className="mt-1 flex justify-center">
+                <MacroSummary macros={macros} size="lg" />
               </div>
             </div>
 

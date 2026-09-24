@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { dayKey } from "@/core/format/day";
+
 import { AppDataBoot } from "./app-data-boot";
 
 vi.mock("@/composition/data-providers", () => ({
@@ -66,7 +68,10 @@ describe("AppDataBoot", () => {
 
   it("syncs every domain once, and the food log for today", async () => {
     isSupabaseConfigured.mockReturnValue(true);
-    const today = new Date().toISOString().slice(0, 10);
+    // `dayKey`, não `toISOString().slice(0, 10)`: a mesma UTC-vs-local que
+    // `dayKey` existe pra evitar já tinha feito este teste falhar de
+    // verdade, depois das 21h local, num fuso atrás de UTC.
+    const today = dayKey(new Date());
     render(<AppDataBoot>{null}</AppDataBoot>);
 
     await waitFor(() => {

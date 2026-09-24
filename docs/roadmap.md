@@ -5,29 +5,38 @@ depender da memória de nenhuma conversa.
 
 ---
 
-## ✅ Diário/Dietas: kcal do dia maior e centralizada — 23/09/2026
+## ✅ Diário: total da refeição maior e centralizado (corrigido) — 23/09/2026
 
-Continuação da entrada anterior (total da refeição vs. do alimento): "pra
-diferenciar a kcal do dia e dos alimentos, vamos deixar as kcal do dia mais
-centralizada no card e maior".
+**Corrige a entrada anterior, que tinha entendido "kcal do dia" errado.** Eu
+tinha lido como o total do topo da tela (`MacroProgress`, "1.450/1.930") e
+deixado só a figura de kcal ali maior/centralizada. Pedro mandou um print
+circulando outra coisa: o total da própria refeição ("192 kcal 7 Prot 32,3
+Carb 3,5 Gord", logo abaixo de "Café da manhã") — "não quero essa barra, eu
+quero essa aqui... essa outra pode manter igual as outras, sem problema".
 
-- ✅ **`macro-progress.tsx`** — a figura de kcal ganha `text-xl font-medium`
-  e fica centralizada na própria célula do grid; Prot/Carb/Gord ao lado
-  continuam exatamente do tamanho e alinhamento de sempre. Um `isKcal`
-  checado uma vez por figura, não um componente novo — a barra de progresso
-  em si não muda, só o número acima dela.
-- ✅ **As duas telas que usam este componente, de graça.** `MacroProgress`
-  é compartilhado entre `food-log-screen.tsx` (Diário) e `diet-editor.tsx`
-  (Dietas) sem nenhuma diferença de uso entre as duas — a mesma confusão
-  "kcal do total parece um alimento" que motivou a entrada anterior existe
-  nos dois lugares, então a correção sai nos dois por construção, não por
-  terem sido editados um a um.
-- ✅ **Verificado sem risco de dado real** — nenhuma tela do app foi
-  interagida; o markup real do componente foi injetado isolado numa aba
-  carregando o CSS já compilado do próprio app (mesma técnica da entrada
-  anterior), e o estilo computado confirmado via JS: `justify-content:
-  center` + `font-size: 20px` na linha de kcal contra `normal` + `14px` nas
-  outras três.
+- ✅ **`macro-progress.tsx` revertido para antes da entrada anterior** —
+  commit `0de7041` desfeito neste arquivo (`git show 0de7041^:...`, byte a
+  byte). O total do topo volta a tratar kcal igual a Prot/Carb/Gord.
+- ✅ **`meal-card.tsx` — o total da refeição ganha `size="lg"` e
+  centralização**, não só a proximidade do nome que a entrada de duas atrás
+  já tinha corrigido. `MacroSummary` já tinha essa variante grande pronta
+  (usada em `MealItemDetailScreen` e no fallback sem perfil de
+  `food-log-screen`/`diet-editor`) — reaproveitada aqui, não reinventada.
+  Cada alimento embaixo (`MealItemRow`) continua no tamanho padrão.
+- ✅ **Verificado sem risco de dado real, duas vezes** — primeiro no site de
+  produção de verdade (`lacalle-life-2.vercel.app/diario`, dados reais do
+  Pedro), removendo a splash por `style.display` em vez de `.remove()` (a
+  primeira tentativa tirou o nó da árvore que o React ainda esperava
+  controlar, e derrubou a página num `ErrorBoundary` — inofensivo, mas
+  corrigido). Depois, pra esta correção especificamente, o markup real
+  injetado isolado (mesma técnica de sempre), comparando lado a lado a
+  linha da refeição (20px, centralizada) contra a linha de um alimento
+  (14px, à esquerda, sem mudança nenhuma).
+- ✅ **De brinde:** um teste de `app-data-boot.test.tsx` (RM11) que usava
+  `toISOString().slice(0, 10)` em vez de `dayKey()` quebrou de verdade às
+  21h locais — o mesmo problema de fuso que `dayKey` existe pra evitar,
+  citado no próprio comentário de `diario/page.tsx`. Corrigido para usar
+  `dayKey`, a mesma função que o componente testado usa.
 
 ---
 
