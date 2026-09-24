@@ -22,6 +22,7 @@ import { useFoodLogDay } from "../hooks/use-food-log";
 import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
 import {
   addMeal,
+  consolidateMealItems,
   copyItemToMeal,
   duplicateMeal,
   moveItemToMeal,
@@ -332,6 +333,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                     }}
                     onRemoveItem={(itemId) => {
                       apply((current) => removeItem(current, meal.id, itemId));
+                    }}
+                    onConsolidate={(name) => {
+                      apply((current) =>
+                        consolidateMealItems(current, meal.id, name),
+                      );
                     }}
                     // Só aparece numa refeição que veio da dieta — de um
                     // check individual ou de "Começar de X" — uma refeição

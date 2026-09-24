@@ -36,6 +36,22 @@ export function scaleMacros(per100g: Macros, grams: number): Macros {
 }
 
 /**
+ * `scaleMacros`'s inverse: the per-100 g density that produced `totals` for
+ * `totalGrams` grams. Exists for building one food out of a total someone
+ * already has — several foods on a plate collapsed into a single named
+ * item (`consolidateMealItems` in `features/diet`), keeping the real
+ * combined weight instead of a fabricated one, so a portion of the new
+ * "food" still means something.
+ *
+ * `totalGrams <= 0` has no meaningful density — `ZERO_MACROS`, not a
+ * division by zero.
+ */
+export function per100gFrom(totals: Macros, totalGrams: number): Macros {
+  if (totalGrams <= 0) return ZERO_MACROS;
+  return scaleMacros(totals, 10000 / totalGrams);
+}
+
+/**
  * Display precision: whole calories, one decimal for grams.
  *
  * Rounding happens per portion, *before* totals are summed, so the numbers on

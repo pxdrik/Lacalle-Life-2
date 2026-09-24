@@ -35,6 +35,7 @@ function mount(
     readonly onApplyAlternative?: (alternativeId: string) => void;
     readonly onRenameAlternative?: (alternativeId: string, name: string) => void;
     readonly onRemoveAlternative?: (alternativeId: string) => void;
+    readonly onConsolidate?: (name: string) => void;
   } = {},
 ) {
   const card = (theMeal: Meal) => (
@@ -248,6 +249,94 @@ describe("the actions menu (⋮)", () => {
       { propertyName: "grid-template-rows" },
     );
     expect(onRemove).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * Pedro, 23/09/2026: "minha refeição foi arroz, feijão, carne e purê, mas
+ * quero um botão pra transformar ela em 'marmita de carne'".
+ */
+describe("transformar em 1 alimento", () => {
+  function twoItems() {
+    return meal([
+      item({ id: "i1", name: "Arroz" }),
+      item({ id: "i2", name: "Feijão" }),
+    ]);
+  }
+
+  async function openMenu() {
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+    );
+    return user;
+  }
+
+  it("não aparece sem onConsolidate", async () => {
+    mount(twoItems());
+    await openMenu();
+
+    expect(
+      screen.queryByRole("button", { name: "Transformar em 1 alimento" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("não aparece com só 1 alimento, mesmo com onConsolidate", async () => {
+    mount(meal([item({ id: "i1", name: "Arroz" })]), {
+      onConsolidate: vi.fn(),
+    });
+    await openMenu();
+
+    expect(
+      screen.queryByRole("button", { name: "Transformar em 1 alimento" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("abre um formulário pedindo o nome do novo alimento", async () => {
+    mount(twoItems(), { onConsolidate: vi.fn() });
+    const user = await openMenu();
+
+    await user.click(
+      screen.getByRole("button", { name: "Transformar em 1 alimento" }),
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Transformar Refeição 1 em 1 alimento" }),
+    ).toBeInTheDocument();
+  });
+
+  it("o botão de confirmar fica desabilitado até um nome ser digitado", async () => {
+    mount(twoItems(), { onConsolidate: vi.fn() });
+    const user = await openMenu();
+    await user.click(
+      screen.getByRole("button", { name: "Transformar em 1 alimento" }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Transformar" }),
+    ).toBeDisabled();
+  });
+
+  it("chama onConsolidate com o nome digitado, e fecha o formulário", async () => {
+    const onConsolidate = vi.fn();
+    mount(twoItems(), { onConsolidate });
+    const user = await openMenu();
+    await user.click(
+      screen.getByRole("button", { name: "Transformar em 1 alimento" }),
+    );
+
+    await user.type(
+      screen.getByLabelText("Nome do novo alimento"),
+      "Marmita de carne",
+    );
+    await user.click(screen.getByRole("button", { name: "Transformar" }));
+
+    expect(onConsolidate).toHaveBeenCalledExactlyOnceWith("Marmita de carne");
+    expect(
+      screen.queryByRole("heading", {
+        name: "Transformar Refeição 1 em 1 alimento",
+      }),
+    ).not.toBeInTheDocument();
   });
 });
 

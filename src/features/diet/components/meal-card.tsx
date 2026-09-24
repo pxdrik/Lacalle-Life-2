@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronsUp,
   ChevronUp,
+  Combine,
   Copy,
   GripVertical,
   MoreVertical,
@@ -16,8 +17,10 @@ import {
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
+import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
+import { Input } from "@/design-system/components/input";
 import { ReorderSheet } from "@/design-system/components/reorder-sheet";
 import {
   SortableItem,
@@ -123,6 +126,15 @@ interface Props {
    * are mutually exclusive, never both given for the same card.
    */
   readonly onLongPressReorder?: (() => void) | undefined;
+  /**
+   * Pedro, 23/09/2026: "minha refeição foi arroz, feijão, carne e purê, mas
+   * quero um botão pra transformar ela em 'marmita de carne'". Turns every
+   * food in the meal into one, named by whoever is logging it — same combined
+   * macros, one row instead of several. `undefined` in `DietEditor`, the
+   * same "only where it means something" rule as `onOpenItemDetail` above:
+   * this is about what actually got eaten, not a plan for what might.
+   */
+  readonly onConsolidate?: ((name: string) => void) | undefined;
 }
 
 export function MealCard({
@@ -149,10 +161,13 @@ export function MealCard({
   onRemoveAlternative,
   onOpenItemDetail,
   onLongPressReorder,
+  onConsolidate,
 }: Props) {
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
   const [showingItemReorder, setShowingItemReorder] = useState(false);
+  const [showingConsolidate, setShowingConsolidate] = useState(false);
+  const [consolidateName, setConsolidateName] = useState("");
   const { isPressing, ...longPress } = useLongPress(
     onLongPressReorder ?? (() => undefined),
     { disabled: onLongPressReorder === undefined },
@@ -467,6 +482,22 @@ export function MealCard({
               >
                 <ChevronDown aria-hidden className="size-4" />
               </MenuRow>
+              {/* Pedro, 23/09/2026: "transformar ela em 'marmita de
+                  carne'" — só aparece com 2+ alimentos (nada a combinar com
+                  0 ou 1) e só no Diário (`onConsolidate` indefinido no
+                  editor de dieta, ver a doc da prop). */}
+              {onConsolidate !== undefined && meal.items.length >= 2 && (
+                <MenuRow
+                  label="Transformar em 1 alimento"
+                  onClick={() => {
+                    setShowingActions(false);
+                    setConsolidateName("");
+                    setShowingConsolidate(true);
+                  }}
+                >
+                  <Combine aria-hidden className="size-4" />
+                </MenuRow>
+              )}
               <ConfirmButton
                 onConfirm={() => {
                   setShowingActions(false);
@@ -597,6 +628,62 @@ export function MealCard({
               setShowingItemReorder(false);
             }}
           />
+
+          {/* Pedro, 23/09/2026: "transformar ela em 'marmita de carne'" —
+              os alimentos atuais somem, viram um só com este nome e o
+              total combinado. O preview abaixo (lista + `MacroSummary`) é
+              o mesmo total que a pessoa já está olhando na tela, pra não
+              confirmar às cegas o que vai perder de detalhe. */}
+          {onConsolidate !== undefined && (
+            <Dialog
+              open={showingConsolidate}
+              title={`Transformar ${meal.name} em 1 alimento`}
+              onClose={() => {
+                setShowingConsolidate(false);
+              }}
+              placement="sheet-bottom"
+            >
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  if (consolidateName.trim() === "") return;
+                  onConsolidate(consolidateName);
+                  setShowingConsolidate(false);
+                }}
+                className="space-y-4"
+              >
+                <p className="text-sm text-ink-muted">
+                  {meal.items.map((item) => item.name).join(", ")} viram um
+                  alimento só, com o total combinado abaixo. Os alimentos
+                  individuais não ficam guardados em lugar nenhum.
+                </p>
+
+                <MacroSummary macros={macros} />
+
+                <div>
+                  <Input
+                    value={consolidateName}
+                    onChange={(event) => {
+                      setConsolidateName(event.target.value);
+                    }}
+                    placeholder="Nome do alimento, ex.: Marmita de carne"
+                    aria-label="Nome do novo alimento"
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={consolidateName.trim() === ""}
+                >
+                  <Combine aria-hidden className="size-4" />
+                  Transformar
+                </Button>
+              </form>
+            </Dialog>
+          )}
         </Card>
       </div>
     </div>

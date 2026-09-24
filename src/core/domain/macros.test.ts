@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  per100gFrom,
   roundMacros,
   scaleMacros,
   sumMacros,
@@ -36,6 +37,28 @@ describe("scaleMacros", () => {
     // 33 g of chicken is 10.23 g of protein. Rounding here would push error
     // into every total built from it.
     expect(scaleMacros(CHICKEN, 33).proteinG).toBeCloseTo(10.23, 10);
+  });
+});
+
+describe("per100gFrom", () => {
+  it("inverts scaleMacros — round trips back to the totals", () => {
+    const totals = scaleMacros(CHICKEN, 330);
+    const roundTripped = per100gFrom(totals, 330);
+
+    // Binary floating point, same reason `scaleMacros`'s own precision test
+    // uses `toBeCloseTo`: 10000/330 does not land on an exact value.
+    expect(roundTripped.kcal).toBeCloseTo(CHICKEN.kcal, 10);
+    expect(roundTripped.proteinG).toBeCloseTo(CHICKEN.proteinG, 10);
+    expect(roundTripped.carbsG).toBeCloseTo(CHICKEN.carbsG, 10);
+    expect(roundTripped.fatG).toBeCloseTo(CHICKEN.fatG, 10);
+  });
+
+  it("is zero grams' inverse: no weight, no meaningful density", () => {
+    expect(per100gFrom(CHICKEN, 0)).toEqual(ZERO_MACROS);
+  });
+
+  it("refuses a negative weight the same way", () => {
+    expect(per100gFrom(CHICKEN, -50)).toEqual(ZERO_MACROS);
   });
 });
 

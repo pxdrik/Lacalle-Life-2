@@ -5,6 +5,36 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: transformar uma refeição em 1 alimento — 23/09/2026
+
+Pedro: "minha refeição foi arroz, feijão, carne e purê, mas quero um botão
+pra transformar ela em 'marmita de carne' por exemplo".
+
+- ✅ **`consolidateMealItems` (`edit-diet.ts`)** — substitui os alimentos da
+  refeição por um só, nomeado pela pessoa. O total combinado é
+  `mealMacros` (a soma já arredondada por item, a mesma que a tela já
+  mostra) — o número na tela não se move ao virar uma linha só, muda
+  quantas linhas levam até ele. O peso é o peso real somado dos alimentos
+  (`per100gFrom`, nova função em `core/domain/macros.ts`, a inversa de
+  `scaleMacros`), não um placeholder tipo 100 g — uma porção desse
+  alimento novo continua significando algo depois. `foodId: null`: nunca
+  esteve no catálogo, igual a qualquer alimento digitado à mão.
+- ✅ **`meal-card.tsx`** — "Transformar em 1 alimento" no ⋮, só com 2+
+  alimentos (nada pra combinar com 0 ou 1) e só no Diário (`onConsolidate`
+  indefinido no editor de dieta — é sobre o que já foi comido, não um
+  plano). Abre uma folha com a lista dos alimentos atuais, o total
+  combinado (`MacroSummary`) e um campo de nome — o mesmo total que a
+  pessoa já está olhando, pra não confirmar às cegas o que vai perder de
+  detalhe.
+- ✅ **Sem tocar `DietEditor`** — o prop é opcional, seguindo a mesma regra
+  de escopo de `onOpenItemDetail`/`checkState` já estabelecida no arquivo.
+- ✅ **15 testes novos** — `macros.test.ts` (`per100gFrom`), `edit-diet.test.ts`
+  (substituição, totais preservados, peso real, sem proveniência,
+  no-ops) e `meal-card.test.tsx` (o botão só aparece com 2+ alimentos e
+  `onConsolidate`, o formulário, o fluxo completo).
+
+---
+
 ## ✅ Excluir refeição/alimento: texto de confirmação invisível — 23/09/2026
 
 Pedro, olhando o ⋮ de "Café da manhã": "Eu vi aqui, e o texto de
