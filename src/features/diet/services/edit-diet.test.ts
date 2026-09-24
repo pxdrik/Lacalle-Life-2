@@ -5,18 +5,17 @@ import {
   addItem,
   addMeal,
   applyMealAlternative,
-  consolidateMealItems,
   removeItem,
   removeMeal,
   removeMealAlternative,
   renameDiet,
   renameMealAlternative,
+  replaceMealItems,
   saveMealAsAlternative,
   setItemGrams,
   updateMeal,
   updateMealItemDetails,
 } from "./edit-diet";
-import { mealMacros } from "./diet-macros";
 
 const CHICKEN = { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 };
 
@@ -125,7 +124,7 @@ describe("items", () => {
   });
 });
 
-describe("consolidateMealItems", () => {
+describe("replaceMealItems", () => {
   function dietWithTwoFoods() {
     let diet = createDiet("Cutting");
     const mealId = diet.meals[0]!.id;
@@ -153,63 +152,47 @@ describe("consolidateMealItems", () => {
     return { diet, mealId };
   }
 
-  it("replaces every item with a single one, named by the person", () => {
+  it("swaps the whole item list for the one given", () => {
     const { diet, mealId } = dietWithTwoFoods();
+    const replacement = createMealItem({
+      foodId: "marmita-de-frango",
+      name: "Marmita de frango",
+      grams: 250,
+      per100g: { kcal: 121, proteinG: 12.5, carbsG: 11.2, fatG: 2.2 },
+    });
 
-    const consolidated = consolidateMealItems(diet, mealId, "Marmita de frango");
+    const updated = replaceMealItems(diet, mealId, [replacement]);
 
-    expect(consolidated.meals[0]?.items).toHaveLength(1);
-    expect(consolidated.meals[0]?.items[0]?.name).toBe("Marmita de frango");
+    expect(updated.meals[0]?.items).toEqual([replacement]);
   });
 
-  it("keeps the combined totals exactly what they were before", () => {
+  it("also works to put an untouched list back — the undo of itself", () => {
     const { diet, mealId } = dietWithTwoFoods();
-    const before = mealMacros(diet.meals[0]!);
+    const original = diet.meals[0]!.items;
 
-    const consolidated = consolidateMealItems(diet, mealId, "Marmita de frango");
+    const consolidated = replaceMealItems(diet, mealId, [
+      createMealItem({
+        foodId: "marmita",
+        name: "Marmita",
+        grams: 250,
+        per100g: { kcal: 121, proteinG: 12.5, carbsG: 11.2, fatG: 2.2 },
+      }),
+    ]);
+    const restored = replaceMealItems(consolidated, mealId, original);
 
-    expect(mealMacros(consolidated.meals[0]!)).toEqual(before);
+    expect(restored.meals[0]?.items).toEqual(original);
   });
 
-  it("carries the real combined weight, not a fabricated one", () => {
+  it("empties a meal when given an empty list", () => {
     const { diet, mealId } = dietWithTwoFoods();
 
-    const consolidated = consolidateMealItems(diet, mealId, "Marmita de frango");
-
-    // 150 g de frango + 100 g de arroz.
-    expect(consolidated.meals[0]?.items[0]?.grams).toBe(250);
-  });
-
-  it("has no catalogue provenance — it was never a real food", () => {
-    const { diet, mealId } = dietWithTwoFoods();
-
-    const consolidated = consolidateMealItems(diet, mealId, "Marmita de frango");
-
-    expect(consolidated.meals[0]?.items[0]?.foodId).toBeNull();
-  });
-
-  it("trims the name and refuses a blank one", () => {
-    const { diet, mealId } = dietWithTwoFoods();
-
-    expect(
-      consolidateMealItems(diet, mealId, "  Marmita  ").meals[0]?.items[0]
-        ?.name,
-    ).toBe("Marmita");
-    expect(consolidateMealItems(diet, mealId, "   ")).toBe(diet);
-  });
-
-  it("is a no-op on a meal with nothing in it", () => {
-    const diet = createDiet("Cutting");
-
-    expect(consolidateMealItems(diet, diet.meals[0]!.id, "Marmita")).toBe(
-      diet,
-    );
+    expect(replaceMealItems(diet, mealId, []).meals[0]?.items).toEqual([]);
   });
 
   it("ignores an unknown meal", () => {
     const { diet } = dietWithTwoFoods();
 
-    expect(consolidateMealItems(diet, "gone", "Marmita")).toBe(diet);
+    expect(replaceMealItems(diet, "gone", [])).toBe(diet);
   });
 });
 

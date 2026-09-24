@@ -27,6 +27,21 @@ function Trigger({ message = "Salvo." }: { readonly message?: string }) {
   );
 }
 
+function TriggerWithAction({ onAction }: { readonly onAction: () => void }) {
+  const toast = useToast();
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        toast("Refeição transformada.", { label: "Desfazer", onAction });
+      }}
+    >
+      agir
+    </button>
+  );
+}
+
 function mount(ui: React.ReactNode = <Trigger />) {
   render(<ToastProvider>{ui}</ToastProvider>);
 }
@@ -60,6 +75,42 @@ describe("showing a confirmation", () => {
 
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+});
+
+/**
+ * Pedro, 23/09/2026: "faltou um botão para desfazer" — a segunda ação que
+ * uma confirmação simples nunca precisou carregar.
+ */
+describe("um toast com ação (desfazer)", () => {
+  it("mostra o botão da ação, ao lado da mensagem", async () => {
+    mount(<TriggerWithAction onAction={vi.fn()} />);
+
+    await act_();
+
+    expect(screen.getByText("Refeição transformada.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Desfazer" }),
+    ).toBeInTheDocument();
+  });
+
+  it("chama onAction e fecha o toast ao tocar no botão", async () => {
+    const onAction = vi.fn();
+    mount(<TriggerWithAction onAction={onAction} />);
+    await act_();
+
+    await userEvent.click(screen.getByRole("button", { name: "Desfazer" }));
+
+    expect(onAction).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Refeição transformada.")).not.toBeInTheDocument();
+  });
+
+  it("uma mensagem sem ação não mostra nenhum botão", async () => {
+    mount();
+
+    await act_();
+
+    expect(screen.queryByRole("button", { name: "Desfazer" })).not.toBeInTheDocument();
   });
 });
 
@@ -113,5 +164,23 @@ describe("after a few seconds", () => {
     });
 
     expect(screen.getByText("Salvo.")).toBeInTheDocument();
+  });
+
+  it("dá mais tempo pra um toast com ação — não some no mesmo prazo de uma confirmação simples", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    mount(<TriggerWithAction onAction={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: "agir" }));
+    act(() => {
+      // Prazo de uma confirmação simples já passou — a versão com ação
+      // continua na tela.
+      vi.advanceTimersByTime(4000);
+    });
+    expect(screen.getByText("Refeição transformada.")).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.queryByText("Refeição transformada.")).not.toBeInTheDocument();
   });
 });

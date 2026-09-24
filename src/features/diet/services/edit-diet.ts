@@ -6,7 +6,6 @@ import {
   type Entity,
   type EntityId,
 } from "@/core/domain/entity";
-import { per100gFrom } from "@/core/domain/macros";
 
 import type {
   Diet,
@@ -16,7 +15,6 @@ import type {
   MealOwner,
 } from "../types/diet";
 import { copyMeal, createMeal } from "./create-diet";
-import { mealMacros } from "./diet-macros";
 
 /**
  * Every edit is a pure function from one meal owner to the next.
@@ -294,50 +292,21 @@ export function updateMealItemDetails<T extends MealOwner>(
 }
 
 /**
- * Turns a meal's several foods into one, named by the person — "arroz,
- * feijão, carne e purê" becomes "Marmita de carne", logged as a single row
- * from here on.
+ * Replaces a meal's whole item list outright.
  *
- * The combined macros are the meal's current totals (`mealMacros`, already
- * rounded per item) rather than recomputed from raw per-item precision, so
- * the number on screen does not move when the rows collapse into one — only
- * how many of them it takes to reach it. The weight is the real combined
- * weight of what was there (`per100gFrom`), not a placeholder like 100 g,
- * so a portion of this new "food" still means something later.
- *
- * `foodId: null`: this food was never in the catalogue, the same as
- * anything typed by hand — see `MealItem.foodId`'s own doc.
- *
- * A no-op on a blank name or a meal with nothing in it — there is nothing
- * to combine, and nothing to call it.
+ * The low-level move behind "transformar em 1 alimento"
+ * (`useConsolidateMeal`, roadmap 23/09/2026) — several foods collapsed into
+ * one that references a real catalogue entry — and its own undo, which is
+ * the exact same operation run with the list from before. Neither of those
+ * decisions belongs here: this only ever installs whatever list it is
+ * given, unconditionally.
  */
-export function consolidateMealItems<T extends MealOwner>(
+export function replaceMealItems<T extends MealOwner>(
   diet: T,
   mealId: EntityId,
-  name: string,
+  items: readonly MealItem[],
 ): T {
-  const trimmed = name.trim();
-  if (trimmed === "") return diet;
-
-  const meal = diet.meals.find((candidate) => candidate.id === mealId);
-  if (meal === undefined || meal.items.length === 0) return diet;
-
-  const totalGrams = meal.items.reduce((sum, item) => sum + item.grams, 0);
-  const totals = mealMacros(meal);
-
-  return mapMeal(diet, mealId, (current) => ({
-    ...current,
-    items: [
-      {
-        id: createEntityId(),
-        foodId: null,
-        name: trimmed,
-        grams: totalGrams,
-        unit: "g",
-        per100g: per100gFrom(totals, totalGrams),
-      },
-    ],
-  }));
+  return mapMeal(diet, mealId, (meal) => ({ ...meal, items }));
 }
 
 /**

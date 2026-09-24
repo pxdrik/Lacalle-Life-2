@@ -5,6 +5,56 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Transformar em 1 alimento: desfazer, e virar alimento de verdade — 23/09/2026
+
+**Correção/ampliação da entrada logo abaixo.** Pedro, depois de usar:
+"faltou um botão para desfazer, alem disso, queria que isso virasse um
+alimento, e eu poder usar em outros dias no diario e ate mesmo adicionar
+na dieta. Ent ele deve criar um novo alimento mesmo." A primeira versão
+criava um item avulso (`foodId: null`) — servia só naquela refeição, não
+aparecia buscando em outro dia nem na dieta.
+
+- ✅ **Cria um `Food` de verdade no catálogo**, reaproveitando
+  `createCustomFood` (o mesmo serviço que a tela normal de criar alimento
+  usa) em vez de inventar um caminho novo. O item que substitui os
+  alimentos da refeição referencia esse `Food` pelo `foodId`
+  (`createMealItem`, também reaproveitado — o mesmo par que
+  `useApplyPickedFood` já usa quando uma busca normal escolhe um
+  alimento). Resultado: "Marmita de carne" agora aparece buscando em
+  qualquer outro dia do Diário, e ao montar uma Dieta — exatamente o
+  pedido.
+  - Nova categoria no formulário (`Select`, reaproveitando
+    `FOOD_CATEGORIES`/`FOOD_CATEGORY_LABELS` de `custom-food-form.tsx`):
+    `Food.category` é obrigatório, e um prato misto não tem uma categoria
+    óbvia — "proteína" como ponto de partida, trocável.
+  - O nome e a densidade combinada passam pela mesma validação
+    (`customFoodSchema`) que o formulário normal já aplica, antes de
+    salvar — não confia cegamente no que foi calculado.
+- ✅ **Botão de desfazer, num toast** — `useToast`/`ToastProvider` ganham
+  uma ação opcional (rótulo + callback), não só uma mensagem; o toast fica
+  6s em vez de 3,2s quando carrega uma ação, tempo real pra notar, decidir
+  e tocar. "Desfazer" restaura a lista de itens exata de antes
+  (`replaceMealItems`, a mesma função de baixo nível que fez a
+  transformação, rodada ao contrário) — o `Food` recém-criado continua no
+  catálogo, apagável de Alimentos como qualquer outro alimento criado à
+  mão, do jeito que já seria se tivesse sido um engano feito pela tela
+  normal.
+- ✅ **`consolidateMealItems` vira dois lugares distintos:**
+  `replaceMealItems` (`edit-diet.ts`) — só troca a lista de itens, usada
+  tanto pra transformar quanto pra desfazer — e `useConsolidateMeal`
+  (hook novo), que orquestra criar o `Food`, salvar, trocar os itens e
+  mostrar o toast. Peso real (`combinedMealTotals`, `diet-macros.ts`) e a
+  chamada ao repositório de alimentos não cabiam numa função pura de
+  `edit-diet.ts` — dependem de I/O assíncrono, que o resto do arquivo
+  nunca tem.
+- ✅ **20 testes novos** entre `toast.test.tsx` (a ação, o prazo maior),
+  `use-consolidate-meal.test.tsx` (cria o `Food`, substitui os itens,
+  mostra o toast, desfaz, recusa nome em branco), `edit-diet.test.ts`
+  (`replaceMealItems`) e `meal-card.test.tsx` (a categoria no
+  formulário).
+
+---
+
 ## ✅ Diário: transformar uma refeição em 1 alimento — 23/09/2026
 
 Pedro: "minha refeição foi arroz, feijão, carne e purê, mas quero um botão

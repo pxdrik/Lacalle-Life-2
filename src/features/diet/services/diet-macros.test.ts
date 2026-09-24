@@ -4,7 +4,12 @@ import { ZERO_MACROS } from "@/core/domain/macros";
 
 import { createDiet, createMealItem } from "./create-diet";
 import { addItem, addMeal } from "./edit-diet";
-import { dietMacros, itemMacros, mealMacros } from "./diet-macros";
+import {
+  combinedMealTotals,
+  dietMacros,
+  itemMacros,
+  mealMacros,
+} from "./diet-macros";
 
 const CHICKEN = { kcal: 165, proteinG: 31, carbsG: 0, fatG: 3.6 };
 const RICE = { kcal: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3 };
@@ -60,6 +65,46 @@ describe("mealMacros", () => {
     );
 
     expect(mealMacros(meal).proteinG).toBeCloseTo(byHand, 10);
+  });
+});
+
+/**
+ * Achado real (23/09/2026): "queria que isso virasse um alimento" —
+ * `useConsolidateMeal` precisa do peso real e da densidade combinada pra
+ * criar um `Food` de verdade, não um item avulso.
+ */
+describe("combinedMealTotals", () => {
+  it("soma o peso real dos alimentos, não um número inventado", () => {
+    let diet = createDiet("Cutting");
+    const mealId = diet.meals[0]!.id;
+    diet = addItem(diet, mealId, item("Frango", 150, CHICKEN));
+    diet = addItem(diet, mealId, item("Arroz", 100, RICE));
+
+    expect(combinedMealTotals(diet.meals[0]!).totalGrams).toBe(250);
+  });
+
+  it("a densidade por 100g, escalada de volta ao peso total, reproduz o total exibido", () => {
+    let diet = createDiet("Cutting");
+    const mealId = diet.meals[0]!.id;
+    diet = addItem(diet, mealId, item("Frango", 150, CHICKEN));
+    diet = addItem(diet, mealId, item("Arroz", 100, RICE));
+
+    const meal = diet.meals[0]!;
+    const { totalGrams, per100g } = combinedMealTotals(meal);
+
+    expect(per100g.kcal * (totalGrams / 100)).toBeCloseTo(
+      mealMacros(meal).kcal,
+      6,
+    );
+  });
+
+  it("é zero para uma refeição sem nada", () => {
+    const { totalGrams, per100g } = combinedMealTotals(
+      createDiet("Cutting").meals[0]!,
+    );
+
+    expect(totalGrams).toBe(0);
+    expect(per100g).toEqual(ZERO_MACROS);
   });
 });
 

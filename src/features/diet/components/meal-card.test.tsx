@@ -35,7 +35,7 @@ function mount(
     readonly onApplyAlternative?: (alternativeId: string) => void;
     readonly onRenameAlternative?: (alternativeId: string, name: string) => void;
     readonly onRemoveAlternative?: (alternativeId: string) => void;
-    readonly onConsolidate?: (name: string) => void;
+    readonly onConsolidate?: (name: string, category: string) => void;
   } = {},
 ) {
   const card = (theMeal: Meal) => (
@@ -317,7 +317,7 @@ describe("transformar em 1 alimento", () => {
     ).toBeDisabled();
   });
 
-  it("chama onConsolidate com o nome digitado, e fecha o formulário", async () => {
+  it("chama onConsolidate com o nome digitado e a categoria padrão", async () => {
     const onConsolidate = vi.fn();
     mount(twoItems(), { onConsolidate });
     const user = await openMenu();
@@ -331,12 +331,36 @@ describe("transformar em 1 alimento", () => {
     );
     await user.click(screen.getByRole("button", { name: "Transformar" }));
 
-    expect(onConsolidate).toHaveBeenCalledExactlyOnceWith("Marmita de carne");
+    expect(onConsolidate).toHaveBeenCalledExactlyOnceWith(
+      "Marmita de carne",
+      "protein",
+    );
     expect(
       screen.queryByRole("heading", {
         name: "Transformar Refeição 1 em 1 alimento",
       }),
     ).not.toBeInTheDocument();
+  });
+
+  it("deixa escolher outra categoria além do padrão", async () => {
+    const onConsolidate = vi.fn();
+    mount(twoItems(), { onConsolidate });
+    const user = await openMenu();
+    await user.click(
+      screen.getByRole("button", { name: "Transformar em 1 alimento" }),
+    );
+
+    await user.type(
+      screen.getByLabelText("Nome do novo alimento"),
+      "Marmita de carne",
+    );
+    await user.selectOptions(screen.getByLabelText("Categoria"), "carb");
+    await user.click(screen.getByRole("button", { name: "Transformar" }));
+
+    expect(onConsolidate).toHaveBeenCalledExactlyOnceWith(
+      "Marmita de carne",
+      "carb",
+    );
   });
 });
 

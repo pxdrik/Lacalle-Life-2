@@ -20,8 +20,10 @@ import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
+import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 import { ReorderSheet } from "@/design-system/components/reorder-sheet";
+import { Select } from "@/design-system/components/select";
 import {
   SortableItem,
   SortableList,
@@ -29,6 +31,11 @@ import {
 import { TimeField } from "@/design-system/components/time-field";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 import { useLongPress } from "@/design-system/hooks/use-long-press";
+import {
+  FOOD_CATEGORIES,
+  FOOD_CATEGORY_LABELS,
+  type FoodCategory,
+} from "@/features/foods";
 
 import { mealMacros } from "../services/diet-macros";
 import type { Meal, MealItem } from "../types/diet";
@@ -128,13 +135,18 @@ interface Props {
   readonly onLongPressReorder?: (() => void) | undefined;
   /**
    * Pedro, 23/09/2026: "minha refeição foi arroz, feijão, carne e purê, mas
-   * quero um botão pra transformar ela em 'marmita de carne'". Turns every
-   * food in the meal into one, named by whoever is logging it — same combined
-   * macros, one row instead of several. `undefined` in `DietEditor`, the
-   * same "only where it means something" rule as `onOpenItemDetail` above:
-   * this is about what actually got eaten, not a plan for what might.
+   * quero um botão pra transformar ela em 'marmita de carne'... queria que
+   * isso virasse um alimento, e eu poder usar em outros dias no diario e
+   * ate mesmo adicionar na dieta". Turns every food in the meal into one
+   * real catalogue `Food` — same combined macros, reusable everywhere any
+   * other food already is, not a one-off row. `undefined` in `DietEditor`,
+   * the same "only where it means something" rule as `onOpenItemDetail`
+   * above: this is about what actually got eaten, not a plan for what
+   * might.
    */
-  readonly onConsolidate?: ((name: string) => void) | undefined;
+  readonly onConsolidate?:
+    | ((name: string, category: FoodCategory) => void)
+    | undefined;
 }
 
 export function MealCard({
@@ -168,6 +180,11 @@ export function MealCard({
   const [showingItemReorder, setShowingItemReorder] = useState(false);
   const [showingConsolidate, setShowingConsolidate] = useState(false);
   const [consolidateName, setConsolidateName] = useState("");
+  // Mesmo padrão do `EMPTY.category` em `custom-food-form.tsx` — não há
+  // categoria "certa" pra um prato misto, só um ponto de partida razoável
+  // que a pessoa pode trocar.
+  const [consolidateCategory, setConsolidateCategory] =
+    useState<FoodCategory>("protein");
   const { isPressing, ...longPress } = useLongPress(
     onLongPressReorder ?? (() => undefined),
     { disabled: onLongPressReorder === undefined },
@@ -629,11 +646,14 @@ export function MealCard({
             }}
           />
 
-          {/* Pedro, 23/09/2026: "transformar ela em 'marmita de carne'" —
-              os alimentos atuais somem, viram um só com este nome e o
-              total combinado. O preview abaixo (lista + `MacroSummary`) é
-              o mesmo total que a pessoa já está olhando na tela, pra não
-              confirmar às cegas o que vai perder de detalhe. */}
+          {/* Pedro, 23/09/2026: "transformar ela em 'marmita de carne'...
+              queria que isso virasse um alimento, e eu poder usar em
+              outros dias no diario e ate mesmo adicionar na dieta". Os
+              alimentos atuais desta refeição viram um alimento novo de
+              verdade, no catálogo — não um item avulso — com o total
+              combinado abaixo (mesmo total que a pessoa já está olhando na
+              tela, pra não confirmar às cegas o que vai perder de
+              detalhe). */}
           {onConsolidate !== undefined && (
             <Dialog
               open={showingConsolidate}
@@ -647,15 +667,15 @@ export function MealCard({
                 onSubmit={(event) => {
                   event.preventDefault();
                   if (consolidateName.trim() === "") return;
-                  onConsolidate(consolidateName);
+                  onConsolidate(consolidateName, consolidateCategory);
                   setShowingConsolidate(false);
                 }}
                 className="space-y-4"
               >
                 <p className="text-sm text-ink-muted">
                   {meal.items.map((item) => item.name).join(", ")} viram um
-                  alimento só, com o total combinado abaixo. Os alimentos
-                  individuais não ficam guardados em lugar nenhum.
+                  alimento novo no catálogo, com o total combinado abaixo —
+                  dá pra usar em qualquer outro dia ou dieta depois.
                 </p>
 
                 <MacroSummary macros={macros} />
@@ -672,6 +692,26 @@ export function MealCard({
                     autoFocus
                   />
                 </div>
+
+                <Field label="Categoria" id="consolidate-category">
+                  {({ id }) => (
+                    <Select
+                      id={id}
+                      value={consolidateCategory}
+                      onChange={(event) => {
+                        setConsolidateCategory(
+                          event.target.value as FoodCategory,
+                        );
+                      }}
+                    >
+                      {FOOD_CATEGORIES.map((category) => (
+                        <option key={category} value={category}>
+                          {FOOD_CATEGORY_LABELS[category]}
+                        </option>
+                      ))}
+                    </Select>
+                  )}
+                </Field>
 
                 <Button
                   type="submit"

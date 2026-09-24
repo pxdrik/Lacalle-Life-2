@@ -6,11 +6,15 @@
  * not an accident.
  */
 export { FoodPicker } from "./components/food-picker";
+export { useFoodRepository } from "./data/food-repository-context";
 export { useFoodCatalogue } from "./hooks/use-food-catalogue";
+export { createCustomFood } from "./services/create-food";
 export {
+  FOOD_CATEGORIES,
   FOOD_CATEGORY_LABELS,
   type Food,
   type FoodCategory,
   type FoodUnit,
   type PracticalUnit,
 } from "./types/food";
+export { customFoodSchema, type CustomFoodInput } from "./validation/food-schema";
