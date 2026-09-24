@@ -5,6 +5,44 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: total da refeição, layout empilhado (print de referência) — 23/09/2026
+
+**Quarta correção na mesma tarde — a `justify-center` da entrada logo
+abaixo nunca chegou a ser testada no celular real do Pedro**, que mandou
+outro print ainda mostrando "3,5 Gord" preso na esquerda. Junto, mandou uma
+referência visual de outro app (valor grande em cima, rótulo pequeno
+embaixo, quatro colunas iguais) e foi direto: "Os 4 devem estar na mesma
+linha, altura, mas devem estar mais centralizados doq os dos alimentos".
+
+- ✅ **Parar de tentar consertar o wrap, e tirar o wrap do caminho.**
+  `layout="inline"` (o de sempre) põe cada figura como "valor unidade"
+  lado a lado — a largura de cada uma é a SOMA dos dois. Com quatro
+  figuras grandes, essa soma não cabe na largura de um card de celular,
+  não importa o que aconteça com `justify-content`. `layout="stacked"`
+  (novo, só para o total da refeição) põe o valor em cima do rótulo — a
+  largura de cada coluna é o MAIOR entre os dois, quase sempre o valor
+  sozinho, já que os rótulos daqui são curtos (kcal/Prot/Carb/Gord). Isso
+  sobra folga de sobra pra caber numa linha só, sempre, e o `grid-cols-4`
+  centraliza as quatro colunas por construção — não tem wrap pra
+  centralizar errado.
+- ✅ **`macro-summary.tsx`** — `center` sai (não sobrevive nem uma entrada
+  inteira), entra `layout?: "inline" | "stacked"`. `"inline"` continua
+  sendo o padrão, sem nenhuma mudança pros outros dois lugares que usam
+  `size="lg"` (`MealItemDetailScreen`, os fallbacks sem perfil).
+- ✅ **`meal-card.tsx`** troca pra `layout="stacked"`.
+- ✅ **Verificado isolado, reproduzindo a largura real de um card de
+  celular** (com o botão ⋮ tirando espaço do lado, como no app de
+  verdade) — cabe numa linha, as quatro grandes, centralizadas, visual
+  batendo com o print de referência.
+- ⚠️ **Suíte de testes completa instável nesta sessão** (máquina com
+  Chrome/Steam/VPN rodando junto, muitos ciclos de `verify`/`build`
+  seguidos — falhas dispersas em arquivos sem nenhuma relação com esta
+  mudança, cada rodada num arquivo diferente). `tsc`, `eslint` e a suíte
+  inteira de `src/features/diet` (319 testes) rodaram limpos, isolados,
+  mais de uma vez.
+
+---
+
 ## ✅ Diário: as quatro figuras maiores, de verdade centralizadas — 23/09/2026
 
 **Terceira correção na mesma tarde.** A entrada logo abaixo trocou pra só

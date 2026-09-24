@@ -12,30 +12,33 @@ function dl() {
 }
 
 /**
- * Achado real (23/09/2026): a primeira tentativa de destacar o total da
- * refeição em `meal-card.tsx` centralizava o bloco todo por fora
- * (`<div className="flex justify-center">` embrulhando `MacroSummary`) —
- * quando as quatro figuras não cabiam numa linha só, a segunda linha
- * ("3,5 Gord" sozinho) ficava pregada na borda esquerda, porque
- * `justify-content` só existe por dentro de quem quebra a linha. `center`
- * fica no próprio `dl`, que é quem tem `flex-wrap` — assim cada linha
- * quebrada centraliza sozinha, não só o bloco como unidade.
+ * Achado real (23/09/2026), com print de referência do Pedro: o total da
+ * refeição precisa ler maior que o de cada alimento embaixo dele — as
+ * quatro figuras juntas, sempre numa linha só, nunca quebrando. Duas
+ * tentativas com `layout="inline"` (`size="lg"`, depois tentando
+ * `justify-center` no `dl`) não davam conta: quatro pares "valor unidade"
+ * lado a lado não cabem na largura de um card de celular, e uma vez que
+ * quebra, nada centraliza a segunda linha sozinha. `"stacked"` evita o
+ * problema em vez de tentar consertar o wrap: cada coluna só precisa da
+ * largura do maior entre o valor e o rótulo curto, nunca da soma dos dois.
  */
-describe("MacroSummary — center", () => {
-  it("põe justify-center no próprio dl, não num wrapper por fora", () => {
-    render(<MacroSummary macros={MACROS} center />);
+describe("MacroSummary — layout='stacked'", () => {
+  it("cada figura vira uma coluna, valor em cima do rótulo", () => {
+    render(<MacroSummary macros={MACROS} layout="stacked" />);
 
-    expect(dl()?.className).toContain("justify-center");
+    const kcalValue = screen.getByText("192");
+    const kcalLabel = screen.getByText("kcal");
+    // Ambos filhos diretos da mesma coluna, valor primeiro no DOM — dd/dt
+    // são block-level por padrão, então a ordem no DOM já é a ordem visual
+    // de cima pra baixo, sem precisar de flex-col.
+    expect(kcalValue.parentElement).toBe(kcalLabel.parentElement);
+    expect(kcalValue.compareDocumentPosition(kcalLabel)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
   });
 
-  it("sem center, nenhum justify-center aparece", () => {
-    render(<MacroSummary macros={MACROS} />);
-
-    expect(dl()?.className).not.toContain("justify-center");
-  });
-
-  it("size='lg' aumenta as quatro figuras juntas — kcal e as três macros", () => {
-    render(<MacroSummary macros={MACROS} size="lg" />);
+  it("as quatro figuras ficam grandes juntas, kcal e as três macros", () => {
+    render(<MacroSummary macros={MACROS} layout="stacked" />);
 
     expect(screen.getByText("192").className).toContain("text-xl");
     expect(screen.getByText("7").className).toContain("text-xl");
@@ -43,10 +46,25 @@ describe("MacroSummary — center", () => {
     expect(screen.getByText("3,5").className).toContain("text-xl");
   });
 
-  it("tamanho padrão continua pequeno para as quatro", () => {
+  it("o dl vira um grid de 4 colunas — nunca quebra linha", () => {
+    render(<MacroSummary macros={MACROS} layout="stacked" />);
+
+    expect(dl()?.className).toContain("grid-cols-4");
+    expect(dl()?.className).not.toContain("flex-wrap");
+  });
+});
+
+describe("MacroSummary — layout padrão ('inline'), sem mudança", () => {
+  it("size='lg' aumenta as quatro figuras juntas", () => {
+    render(<MacroSummary macros={MACROS} size="lg" />);
+
+    expect(screen.getByText("192").className).toContain("text-xl");
+    expect(screen.getByText("7").className).toContain("text-xl");
+  });
+
+  it("tamanho padrão continua pequeno", () => {
     render(<MacroSummary macros={MACROS} />);
 
     expect(screen.getByText("192").className).toContain("text-sm");
-    expect(screen.getByText("7").className).toContain("text-sm");
   });
 });

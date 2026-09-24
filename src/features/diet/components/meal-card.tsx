@@ -256,9 +256,9 @@ export function MealCard({
               como a soma da refeição — primeira correção foi só a posição,
               empilhado logo abaixo do nome (e do horário) em vez de solto ao
               lado do ⋮. Não bastou: os dois ainda liam do mesmo peso visual
-              lado a lado, então o bloco abaixo também ganhou `size="lg"` e
-              centralização — a `border-t` que já separa a lista de
-              alimentos faz o resto.
+              lado a lado, então o bloco abaixo também ganhou destaque de
+              verdade (`layout="stacked"`, ver o comentário logo ali) — a
+              `border-t` que já separa a lista de alimentos faz o resto.
 
               RM01: holding anywhere on this header (outside the inputs and
               buttons it already carries — `useLongPress` excludes those at
@@ -385,22 +385,22 @@ export function MealCard({
                   números mesmo, não "esse graficozinho". De volta ao
                   `MacroSummary` de sempre.
 
-                  `size="lg"` e `center`, achado real de 23/09/2026: o total
-                  da refeição precisa ler maior que o de cada alimento
-                  embaixo dele (`MealItemRow` continua em `size` padrão),
-                  não só mais perto do nome. Pedro quer as quatro figuras
-                  maiores, não só kcal — uma tentativa intermediária só
-                  aumentou kcal, exatamente pra não arriscar a linha quebrar
-                  num celular estreito, mas não era isso que ele pediu.
-                  `center` fica em `MacroSummary` mesmo (não num `<div>`
-                  centralizando o bloco por fora): se as quatro figuras não
-                  couberem numa linha só, é cada linha que precisa
-                  centralizar sozinha, e só `justify-center` no próprio
-                  `dl` (o container que quebra linha) faz isso — um `<div>`
-                  por fora só centraliza o bloco inteiro como uma unidade
-                  só, e a segunda linha fica pregada na borda esquerda. */}
+                  `layout="stacked"`, achado real de 23/09/2026, com print
+                  de referência do Pedro: o total da refeição precisa ler
+                  maior que o de cada alimento embaixo dele (`MealItemRow`
+                  continua em `layout` padrão), as quatro figuras juntas —
+                  não só kcal — e sempre numa linha só, nunca quebrando.
+                  `"inline"` a `size="lg"` (duas tentativas antes desta)
+                  não dava conta: quatro pares "valor unidade" lado a lado
+                  não cabem na largura de um card de celular, e uma vez que
+                  quebra, "centralizar" o bloco por fora nunca centraliza a
+                  segunda linha sozinha. Empilhado (valor em cima, rótulo
+                  embaixo) cada coluna só precisa da largura do maior dos
+                  dois, não da soma — cabe numa linha com folga, e o
+                  `grid-cols-4` centraliza as quatro por construção, sem
+                  depender de wrap nenhum. */}
               <div className="mt-1">
-                <MacroSummary macros={macros} size="lg" center />
+                <MacroSummary macros={macros} layout="stacked" />
               </div>
             </div>
 
