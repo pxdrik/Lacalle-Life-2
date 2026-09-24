@@ -1,5 +1,12 @@
 import { formatDecimal } from "@/core/format/decimal";
-import type { NutritionPlan, NutritionProfile, PlanResult } from "@/core/nutrition";
+import type {
+  MacroSplit,
+  NutritionPlan,
+  NutritionProfile,
+  PlanResult,
+} from "@/core/nutrition";
+import { MACRO_SPLIT_PRESETS } from "@/core/nutrition";
+import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
 import { MACRO_CODING } from "@/design-system/macros";
@@ -15,9 +22,13 @@ import { MACRO_CODING } from "@/design-system/macros";
 export function PlanSummary({
   result,
   goal,
+  macroSplit,
+  onEditSplit,
 }: {
   readonly result: PlanResult;
   readonly goal: NutritionProfile["goal"];
+  readonly macroSplit: MacroSplit | undefined;
+  readonly onEditSplit: () => void;
 }) {
   if (!result.ok) {
     return (
@@ -34,15 +45,26 @@ export function PlanSummary({
     );
   }
 
-  return <Plan plan={result.plan} goal={goal} />;
+  return (
+    <Plan
+      plan={result.plan}
+      goal={goal}
+      macroSplit={macroSplit}
+      onEditSplit={onEditSplit}
+    />
+  );
 }
 
 function Plan({
   plan,
   goal,
+  macroSplit,
+  onEditSplit,
 }: {
   readonly plan: NutritionPlan;
   readonly goal: NutritionProfile["goal"];
+  readonly macroSplit: MacroSplit | undefined;
+  readonly onEditSplit: () => void;
 }) {
   const balance = plan.energyBalanceKcal;
   // The engine applies a safety floor before it applies what was asked for —
@@ -74,6 +96,18 @@ function Plan({
             </div>
           ))}
         </dl>
+
+        {/* Below the grid it explains, not beside the kcal figure above it —
+            this is about how the three macros were split, not about the
+            calorie target itself. */}
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
+          <p className="text-xs text-ink-subtle">
+            {macroSplitLabel(macroSplit)}
+          </p>
+          <Button variant="ghost" size="sm" onClick={onEditSplit}>
+            Ajustar distribuição
+          </Button>
+        </div>
 
         <dl className="mt-4 grid grid-cols-2 gap-4 border-t border-line pt-4 text-sm">
           <Derivation
@@ -146,6 +180,19 @@ function Plan({
       </p>
     </div>
   );
+}
+
+function macroSplitLabel(macroSplit: MacroSplit | undefined): string {
+  if (macroSplit === undefined) return "Distribuição automática (peso + objetivo)";
+
+  const preset = MACRO_SPLIT_PRESETS.find(
+    (candidate) =>
+      candidate.proteinPercent === macroSplit.proteinPercent &&
+      candidate.carbsPercent === macroSplit.carbsPercent &&
+      candidate.fatPercent === macroSplit.fatPercent,
+  );
+
+  return `Distribuição: ${preset?.label ?? "Personalizada"}`;
 }
 
 function Derivation({

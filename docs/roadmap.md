@@ -5,6 +5,54 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Perfil: distribuição de macros por % (ajuste opcional) — 24/09/2026
+
+Pedro sentiu a proteína alta demais na meta atual e trouxe o print de outro
+app (tela "Goals", presets "Diet type") como referência de querer balancear
+os três macros manualmente. `core/nutrition/distribution.ts` calculava
+proteína/gordura/carbo só a partir de peso + objetivo, sem nenhuma forma de
+ajuste — e o comentário do arquivo já era explícito: é a única fonte de meta
+de macro do app, então a distribuição por % tinha que entrar como um segundo
+*input* dessa mesma função, nunca uma segunda implementação. **Ajuste
+opcional, não substituição**: quem nunca abrir a tela nova continua recebendo
+a meta automática de sempre. Parte B (meta de água, separada dos macros)
+segue como item próprio abaixo.
+
+- ✅ **`NutritionProfile.macroSplit` opcional** (`core/nutrition/profile.ts`)
+  — três percentuais que somam 100 (`macroSplitSchema`), ausente = automático.
+  `computeDistribution` ramifica no topo: com split, aloca os gramas direto
+  da % (mesma técnica de "carboidrato pega o resto em kcal" que o algoritmo
+  por prioridade já usava, pra manter a soma batendo dentro da tolerância).
+  `findViolations` não mudou nada — já opera sobre os gramas resultantes,
+  não sobre como foram calculados, então um preset inviável (ex.: Cetogênica
+  numa meta de kcal baixa) cai no mesmo "não é possível montar uma meta
+  segura" que um automático inviável já caía.
+- ✅ **`MACRO_SPLIT_PRESETS`** (`core/nutrition/constants.ts`) — Padrão,
+  Balanceada, Pouca gordura, Rica em proteína, Cetogênica, valores nossos
+  (não copiados do app de referência).
+- ✅ **`MacroSplitDialog`** (`features/profile/components/`) — sem
+  donut/gráfico de propósito: é a mesma régua já registrada nesta lista pro
+  card de refeição ("mostra os números mesmo, não esse graficozinho"), e
+  esta é a tela onde alguém *escolhe* uma distribuição, não só lê uma. Tocar
+  num preset (ou "Automático") comita na hora; "Personalizado" expande três
+  campos e só libera "Salvar" com a soma em 100%.
+- ✅ **`ProfileScreen`/`PlanSummary`** — nenhuma persistência nova, o split
+  mora dentro do `NutritionProfile` que já viaja pelo `profileRepository`
+  existente. `PlanSummary` ganha uma linha mostrando o preset ativo (ou
+  "Distribuição automática") com um botão pra ajustar.
+- ✅ **12 testes novos** (`distribution.test.ts`, `macro-split-dialog.test.tsx`,
+  mais os 3 existentes de `plan-summary.test.tsx` atualizados) — presets
+  somando 100, alocação por %, o mesmo gate de segurança recusando um split
+  inviável, e a soma de 100% travando o "Salvar" do personalizado.
+
+`npm run verify` (typecheck + lint + 1897 testes) e `npm run build` verdes.
+⚠️ Não confirmado ao vivo no navegador desta vez: o overlay de erro do Next
+dev trava o renderer neste ambiente de automação (reproduz até na Landing
+Page, sem relação com esta entrega) — Pedro, vale abrir `/perfil` no seu
+Chrome de verdade antes de considerar fechado.
+
+---
+
 ## ✅ Detalhes do alimento: gordura saturada quebrando linha, de novo — causa raiz diferente da primeira vez — 24/09/2026
 
 Pedro: "deu novamente o erro de desing da gordura saturada estar quebrando

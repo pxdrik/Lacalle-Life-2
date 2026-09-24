@@ -8,6 +8,29 @@ import {
 } from "./constants";
 
 /**
+ * A percentage macro split, chosen by the person instead of computed by
+ * `distribution.ts`'s priority algorithm. The three parts must sum to 100 —
+ * `findViolations` still checks the resulting grams against the same safety
+ * floors either way, so a split that is arithmetically valid here can still
+ * be refused downstream as unsafe.
+ */
+export const macroSplitSchema = z
+  .object({
+    carbsPercent: z.number().min(0).max(100),
+    proteinPercent: z.number().min(0).max(100),
+    fatPercent: z.number().min(0).max(100),
+  })
+  .refine(
+    (split) =>
+      Math.abs(
+        split.carbsPercent + split.proteinPercent + split.fatPercent - 100,
+      ) < 0.5,
+    { message: "Os percentuais precisam somar 100%." },
+  );
+
+export type MacroSplit = z.infer<typeof macroSplitSchema>;
+
+/**
  * The inputs a calorie target is derived from.
  *
  * One schema, used on every entry point. Anything that reaches the engine has
@@ -86,6 +109,14 @@ export const nutritionProfileSchema = z.object({
       `Ritmo máximo: ${INPUT_BOUNDS.weeklyChangeKg.max} kg por semana.`,
     )
     .optional(),
+
+  /**
+   * Optional. When present, `distribution.ts` allocates macros from these
+   * percentages instead of its own priority algorithm — a choice the person
+   * made, not a second way to arrive at a target. Absent means "automatic",
+   * the same meaning `bodyFatPercent` being absent already has.
+   */
+  macroSplit: macroSplitSchema.optional(),
 });
 
 export type NutritionProfile = z.infer<typeof nutritionProfileSchema>;

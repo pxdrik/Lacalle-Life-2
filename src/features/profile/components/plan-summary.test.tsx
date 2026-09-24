@@ -33,7 +33,14 @@ describe("PlanSummary", () => {
     const result = unwrap(ADVERSARIAL_CUT);
     expect(result.plan.energyBalanceKcal).toBeGreaterThan(0);
 
-    render(<PlanSummary result={result} goal="cut" />);
+    render(
+      <PlanSummary
+        result={result}
+        goal="cut"
+        macroSplit={undefined}
+        onEditSplit={() => {}}
+      />,
+    );
 
     const notice = screen.getByText(/Seu objetivo era/).closest("p");
     expect(notice).toHaveTextContent("perder peso");
@@ -50,7 +57,14 @@ describe("PlanSummary", () => {
       goal: "maintain",
     });
 
-    render(<PlanSummary result={result} goal="maintain" />);
+    render(
+      <PlanSummary
+        result={result}
+        goal="maintain"
+        macroSplit={undefined}
+        onEditSplit={() => {}}
+      />,
+    );
 
     expect(screen.queryByText(/Seu objetivo era/)).not.toBeInTheDocument();
   });
@@ -67,9 +81,47 @@ describe("PlanSummary", () => {
     });
     expect(result.plan.energyBalanceKcal).toBeLessThan(0);
 
-    render(<PlanSummary result={result} goal="cut" />);
+    render(
+      <PlanSummary
+        result={result}
+        goal="cut"
+        macroSplit={undefined}
+        onEditSplit={() => {}}
+      />,
+    );
 
     expect(screen.queryByText(/Seu objetivo era/)).not.toBeInTheDocument();
     expect(screen.getByText(/Déficit/)).toBeInTheDocument();
+  });
+
+  it("names the active preset, and falls back to automatic when none is set", () => {
+    const result = unwrap({
+      sex: "male",
+      ageYears: 30,
+      heightCm: 180,
+      weightKg: 80,
+      activityLevel: "moderate",
+      goal: "maintain",
+    });
+
+    const { rerender } = render(
+      <PlanSummary
+        result={result}
+        goal="maintain"
+        macroSplit={undefined}
+        onEditSplit={() => {}}
+      />,
+    );
+    expect(screen.getByText(/Distribuição automática/)).toBeInTheDocument();
+
+    rerender(
+      <PlanSummary
+        result={result}
+        goal="maintain"
+        macroSplit={{ proteinPercent: 25, carbsPercent: 50, fatPercent: 25 }}
+        onEditSplit={() => {}}
+      />,
+    );
+    expect(screen.getByText("Distribuição: Balanceada")).toBeInTheDocument();
   });
 });

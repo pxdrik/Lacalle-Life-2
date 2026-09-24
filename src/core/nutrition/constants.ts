@@ -105,6 +105,58 @@ export type BiologicalSex = (typeof BIOLOGICAL_SEXES)[number];
 export const GOALS = ["cut", "maintain", "bulk"] as const;
 export type Goal = (typeof GOALS)[number];
 
+/**
+ * Named percentage splits `distribution.ts` can allocate from instead of its
+ * own priority algorithm — an explicit choice the person made, not a second
+ * formula for the same number. Each row sums to 100; `distribution.test.ts`
+ * holds that invariant.
+ */
+export interface MacroSplitPreset {
+  readonly id: string;
+  readonly label: string;
+  readonly carbsPercent: number;
+  readonly proteinPercent: number;
+  readonly fatPercent: number;
+}
+
+export const MACRO_SPLIT_PRESETS: readonly MacroSplitPreset[] = [
+  {
+    id: "standard",
+    label: "Padrão",
+    carbsPercent: 50,
+    proteinPercent: 20,
+    fatPercent: 30,
+  },
+  {
+    id: "balanced",
+    label: "Balanceada",
+    carbsPercent: 50,
+    proteinPercent: 25,
+    fatPercent: 25,
+  },
+  {
+    id: "low-fat",
+    label: "Pouca gordura",
+    carbsPercent: 60,
+    proteinPercent: 25,
+    fatPercent: 15,
+  },
+  {
+    id: "high-protein",
+    label: "Rica em proteína",
+    carbsPercent: 25,
+    proteinPercent: 40,
+    fatPercent: 35,
+  },
+  {
+    id: "ketogenic",
+    label: "Cetogênica",
+    carbsPercent: 5,
+    proteinPercent: 30,
+    fatPercent: 65,
+  },
+] as const;
+
 /** Plausibility bounds for user-entered anthropometrics. */
 export const INPUT_BOUNDS = {
   ageYears: { min: 14, max: 100 },

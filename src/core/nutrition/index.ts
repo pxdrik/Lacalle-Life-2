@@ -16,16 +16,20 @@ export {
   FIBER_REFERENCE_G,
   GOALS,
   INPUT_BOUNDS,
+  MACRO_SPLIT_PRESETS,
   type ActivityLevel,
   type BiologicalSex,
   type Goal,
+  type MacroSplitPreset,
 } from "./constants";
 
 export {
   ACTIVITY_LABELS,
   GOAL_LABELS,
+  macroSplitSchema,
   SEX_LABELS,
   nutritionProfileSchema,
+  type MacroSplit,
   type NutritionProfile,
 } from "./profile";
 

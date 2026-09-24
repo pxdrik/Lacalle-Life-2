@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/design-system/theme/theme-toggle";
 
 import { useProfile } from "../hooks/use-profile";
 import { BackupPanel } from "./backup-panel";
+import { MacroSplitDialog } from "./macro-split-dialog";
 import { PlanSummary } from "./plan-summary";
 import { ProfileForm } from "./profile-form";
 import { StaleWeightNotice } from "./stale-weight-notice";
@@ -23,6 +24,7 @@ export function ProfileScreen() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
+  const [splitOpen, setSplitOpen] = useState(false);
 
   if (state.status === "loading") {
     return <Skeleton className="h-72 rounded-lg" />;
@@ -118,6 +120,25 @@ export function ProfileScreen() {
           <PlanSummary
             result={state.result}
             goal={state.profile.nutrition.goal}
+            macroSplit={state.profile.nutrition.macroSplit}
+            onEditSplit={() => {
+              setSplitOpen(true);
+            }}
+          />
+
+          <MacroSplitDialog
+            open={splitOpen}
+            onClose={() => {
+              setSplitOpen(false);
+            }}
+            current={state.profile.nutrition.macroSplit}
+            onSelect={(macroSplit) => {
+              void save({ ...state.profile.nutrition, macroSplit }).then(
+                (ok) => {
+                  if (ok) toast("Distribuição de macros atualizada.");
+                },
+              );
+            }}
           />
 
           <div className="flex gap-3">
