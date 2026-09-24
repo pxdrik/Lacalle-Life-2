@@ -69,10 +69,19 @@ export function ConfirmButton({
         // próprio `<button>`, sem overflow, e o pseudo-elemento sai livre.
         "touch-44",
         "transition-colors duration-150 ease-out",
-        armed
-          ? "bg-danger px-2.5 text-xs font-medium text-danger-ink"
-          : "text-ink-subtle hover:bg-danger/10 hover:text-danger",
+        !armed && "text-ink-subtle hover:bg-danger/10 hover:text-danger",
         className,
+        // Achado real, 23/09/2026: `className` vem depois do idle acima —
+        // de propósito, pra quem chama poder deixar o ícone/texto vermelho
+        // já em repouso (`meal-card.tsx`, `meal-item-row.tsx` passam
+        // `text-danger` sem hover) em vez do cinza padrão. Mas por isso
+        // mesmo esse `text-danger` também vencia aqui embaixo quando
+        // armado — texto vermelho sobre `bg-danger` sólido, ambos a mesma
+        // cor, "Excluir?"/"Remover?" invisível. As classes do estado
+        // armado vêm por último, depois de `className`, pra nunca perderem
+        // — o contraste de "vai apagar de verdade" não pode depender do
+        // chamador ter lembrado de não pisar nele.
+        armed && "bg-danger px-2.5 text-xs font-medium text-danger-ink",
       )}
     >
       {armed ? confirmLabel : children}

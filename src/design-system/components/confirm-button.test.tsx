@@ -139,6 +139,50 @@ describe("touch target (BUG-006)", () => {
   });
 });
 
+/**
+ * Achado real (23/09/2026): `meal-card.tsx` e `meal-item-row.tsx` passam
+ * `text-danger` em `className` pra deixar o ícone/texto vermelho já em
+ * repouso, sem depender do hover. Como `className` entrava depois de tudo
+ * na mesma `cn()`, esse `text-danger` também vencia o `text-danger-ink` do
+ * estado armado — texto vermelho sobre `bg-danger` sólido, mesma cor dos
+ * dois lados, "Excluir?"/"Remover?" ficava sem nenhum texto visível.
+ */
+describe("contraste do estado armado (achado real, 23/09/2026)", () => {
+  it("mantém text-danger-ink armado, mesmo com className tentando forçar text-danger", async () => {
+    render(
+      <ConfirmButton
+        onConfirm={vi.fn()}
+        label="Excluir Treino A"
+        confirmLabel="Excluir?"
+        className="text-danger"
+      >
+        Excluir
+      </ConfirmButton>,
+    );
+
+    await userEvent.click(trigger());
+
+    const armed = screen.getByRole("button", { name: /Excluir\?/ });
+    expect(armed.className).toContain("text-danger-ink");
+    expect(armed.className).toContain("bg-danger");
+  });
+
+  it("deixa o className do chamador valer em repouso, antes de armar", () => {
+    render(
+      <ConfirmButton
+        onConfirm={vi.fn()}
+        label="Excluir Treino A"
+        confirmLabel="Excluir?"
+        className="text-danger"
+      >
+        Excluir
+      </ConfirmButton>,
+    );
+
+    expect(trigger().className).toContain("text-danger");
+  });
+});
+
 describe("timeout", () => {
   beforeEach(() => {
     vi.useFakeTimers({ shouldAdvanceTime: true });

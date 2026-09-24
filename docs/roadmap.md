@@ -5,6 +5,36 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Excluir refeição/alimento: texto de confirmação invisível — 23/09/2026
+
+Pedro, olhando o ⋮ de "Café da manhã": "Eu vi aqui, e o texto de
+confirmação da exclusão ainda nao aparece" — print mostrando uma barra
+sólida vermelho-coral, sem nenhum texto.
+
+- ✅ **Causa raiz, em `confirm-button.tsx` (componente compartilhado, não
+  em cada tela).** Estado armado ("segundo toque, vai apagar de verdade")
+  pinta `bg-danger` sólido + `text-danger-ink` pra contraste — mas
+  `meal-card.tsx` e `meal-item-row.tsx` passam `className="... text-danger
+  ..."` pra deixar o ícone vermelho já em repouso, sem depender de hover.
+  Como `className` entrava por último na mesma `cn()`, esse `text-danger`
+  também vencia o `text-danger-ink` do estado armado — texto vermelho
+  sobre fundo vermelho sólido, mesma cor dos dois lados. "Excluir?" e
+  "Remover?" ficavam lá, só que invisíveis.
+- ✅ **Corrigido uma vez, no componente — nunca nas duas telas que o
+  usam.** As classes do estado armado agora vêm depois de `className` na
+  fusão (não antes), então sempre vencem, custe o que custar o chamador
+  tiver passado; as classes do estado em repouso continuam antes,
+  deixando o chamador customizar normalmente. `meal-item-row.tsx` tinha o
+  mesmo bug, no "Remover?" de excluir um alimento — nunca reportado, mas
+  a mesma causa, corrigida de graça.
+- ✅ **Prova de verdade, não só teste verde.** Escrito o teste, revertido
+  o `confirm-button.tsx` pra antes da correção (`git stash`) e confirmado
+  que ele falha do jeito certo (`text-danger` sobrevivendo no estado
+  armado) antes de reaplicar a correção — a prática que já rendeu memória
+  própria neste projeto.
+
+---
+
 ## ✅ Diário: total da refeição, largura certa pra centralizar — 23/09/2026
 
 **Quinta correção na mesma tarde.** O layout empilhado da entrada logo
