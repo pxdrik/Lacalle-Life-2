@@ -19,6 +19,9 @@ import type { Session } from "@/features/workouts/types/session";
 import { LocalBodyRepository } from "@/features/body/data/local-body-repository";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import type { BodyEntry } from "@/features/body/types/body-entry";
+import { LocalWaterRepository } from "@/features/hydration/data/local-water-repository";
+import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
+import type { WaterEntry } from "@/features/hydration/types/water-entry";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
@@ -63,6 +66,12 @@ import type {
   PullBodyEntriesResult,
   PushBodyEntriesResult,
 } from "./body-entry-sync";
+import { pullAllWaterEntries, pushAllWaterEntries, resolveWaterEntryConflict } from "./water-entry-sync";
+import type {
+  WaterEntryConflictResolution,
+  PullWaterEntriesResult,
+  PushWaterEntriesResult,
+} from "./water-entry-sync";
 
 export interface ProfileSyncOutcome {
   readonly push: PushProfileResult;
@@ -400,4 +409,53 @@ export async function resolveBodyEntryConflictAndSync(
   const { tracker, localOnly } = await openBodyEntrySyncStores();
   await resolveBodyEntryConflict(tracker, localOnly, day, resolution, remote);
   return runBodyEntrySync();
+}
+
+export interface WaterEntrySyncOutcome {
+  readonly push: PushWaterEntriesResult;
+  readonly pull: PullWaterEntriesResult;
+}
+
+async function openWaterEntrySyncStores() {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalWaterRepository(
+    new IndexedDbStore<WaterEntry>(db, WATER_ENTRIES_STORE.name),
+  );
+  const existing = await localOnly.listAll();
+  await backfillUntracked(tracker, "waterEntries", existing.map((entry) => entry.id));
+  return { tracker, localOnly };
+}
+
+/**
+ * Sincroniza todo o histórico de água de uma vez — mesmo desenho de
+ * `runBodyEntrySync`, não de `runFoodLogSync`: `WaterEntry` não tem
+ * substrutura pra mesclar (mesma família "documento inteiro" de
+ * `BodyEntry`), então não precisa da granularidade por dia que `FoodLog`
+ * precisa. Abre o `LocalWaterRepository` **puro**, nunca o
+ * `SyncingWaterRepository` que a UI usa.
+ */
+export async function runWaterEntrySync(): Promise<WaterEntrySyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const { tracker, localOnly } = await openWaterEntrySyncStores();
+
+  const push = await pushAllWaterEntries(supabase, tracker, localOnly);
+  const pull = await pullAllWaterEntries(supabase, tracker, localOnly);
+  notifyStoreChanged("waterEntries");
+
+  return { push, pull };
+}
+
+/**
+ * Resolve o conflito de um dia e roda o ciclo de novo — mesma regra de
+ * `resolveBodyEntryConflictAndSync`.
+ */
+export async function resolveWaterEntryConflictAndSync(
+  day: string,
+  resolution: WaterEntryConflictResolution,
+  remote: WaterEntry | null,
+): Promise<WaterEntrySyncOutcome> {
+  const { tracker, localOnly } = await openWaterEntrySyncStores();
+  await resolveWaterEntryConflict(tracker, localOnly, day, resolution, remote);
+  return runWaterEntrySync();
 }

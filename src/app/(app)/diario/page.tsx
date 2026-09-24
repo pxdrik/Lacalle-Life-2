@@ -8,6 +8,7 @@ import { dayKey } from "@/core/format/day";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { FoodLogScreen } from "@/features/diet/components/food-log-screen";
+import { WaterCard } from "@/features/hydration/components/water-card";
 import { PageShell } from "@/design-system/components/page-shell";
 
 import { FoodLogSyncStatus } from "./food-log-sync-status";
@@ -54,6 +55,9 @@ function DayFromUrl() {
   return (
     <>
       <FoodLogSyncStatus day={day} />
+      <div className="mb-4">
+        <WaterCard day={day} />
+      </div>
       <FoodLogScreen day={day} />
     </>
   );

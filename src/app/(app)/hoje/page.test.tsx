@@ -32,6 +32,9 @@ vi.mock("@/features/body", () => ({
 vi.mock("@/features/diet/components/today-energy", () => ({
   TodayEnergy: ({ day }: { day: string }) => <div>energia {day}</div>,
 }));
+vi.mock("@/features/hydration/components/today-hydration", () => ({
+  TodayHydration: ({ day }: { day: string }) => <div>água {day}</div>,
+}));
 vi.mock("@/features/diet/components/today-meals", () => ({
   TodayMeals: ({ day }: { day: string }) => <div>refeições {day}</div>,
 }));
@@ -63,7 +66,7 @@ describe("hydrating the /hoje page across a day boundary", () => {
 
     expect(late).toBe(early);
     // Nothing date-specific has leaked into the server markup.
-    expect(late).not.toMatch(/energia|refeições|treino/);
+    expect(late).not.toMatch(/energia|refeições|treino|água/);
   });
 
   it("hydrates without warning even when the browser's clock is already a day ahead of the server's, then fills in the real day", async () => {
@@ -93,6 +96,7 @@ describe("hydrating the /hoje page across a day boundary", () => {
     expect(hydrationWarning).toBe(false);
 
     expect(container.textContent).toContain("energia 2026-08-28");
+    expect(container.textContent).toContain("água 2026-08-28");
     expect(container.textContent).toContain("refeições 2026-08-28");
     expect(container.textContent).toContain("treino 2026-08-28");
     expect(container.textContent).toMatch(/sexta-feira, 28 de agosto/i);

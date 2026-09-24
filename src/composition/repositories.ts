@@ -26,6 +26,12 @@ import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { LocalFoodRepository } from "@/features/foods/data/local-food-repository";
 import type { Food } from "@/features/foods/types/food";
+import { LocalWaterRepository } from "@/features/hydration/data/local-water-repository";
+import {
+  WATER_ENTRIES_STORE,
+  type WaterRepository,
+} from "@/features/hydration/data/water-repository";
+import type { WaterEntry } from "@/features/hydration/types/water-entry";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import {
   PROFILE_STORE,
@@ -78,6 +84,7 @@ export interface Repositories {
   readonly exercises: ExerciseRepository;
   readonly routines: RoutineRepository;
   readonly sessions: SessionRepository;
+  readonly water: WaterRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
@@ -105,6 +112,9 @@ export function createRepositories(db: IDBPDatabase): Repositories {
     ),
     sessions: new LocalSessionRepository(
       new IndexedDbStore<Session>(db, SESSIONS_STORE.name),
+    ),
+    water: new LocalWaterRepository(
+      new IndexedDbStore<WaterEntry>(db, WATER_ENTRIES_STORE.name),
     ),
   };
 }

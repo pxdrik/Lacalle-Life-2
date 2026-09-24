@@ -35,6 +35,8 @@ export {
 
 export { buildNutritionPlan } from "./plan";
 
+export { computeHydrationTargetMl } from "./hydration";
+
 export { weeklyRatePresets, type RatePreset } from "./rate-presets";
 
 export {

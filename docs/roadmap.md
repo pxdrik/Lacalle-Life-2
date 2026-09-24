@@ -5,6 +5,72 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Meta de água: nova, aditiva, sincronizada — 24/09/2026
+
+Segunda metade do pedido do Pedro (ver entrada logo abaixo, distribuição de
+macros) — água como meta própria, fora dos macros, fórmula `peso (kg) × 35
+mL`, com progresso de verdade, não só um número solto.
+
+O app não tinha nenhum conceito de hidratação — sem campo, sem tela, sem
+registro — então isto entrou como feature nova do zero, seguindo o mesmo
+padrão do `BodyEntry` (id = dia, um registro por dia, sem substrutura pra
+mesclar) em vez do `FoodLog` (que precisa de merge por `Meal.id`).
+
+- ✅ **`computeHydrationTargetMl(weightKg)`** (`core/nutrition/hydration.ts`)
+  — irmão de `distribution.ts`, fora de `Macros`/`distribution.ts` de
+  propósito: é o "não precisa estar dentro dos macros" que o Pedro pediu, e
+  o mesmo padrão de "uma função, uma fonte" do resto do motor.
+- ✅ **`features/hydration`, domínio novo** — `WaterEntry` (`types/`),
+  `WaterRepository`/`LocalWaterRepository`/`SyncingWaterRepository`
+  (`data/`), `useWaterDay` (`hooks/`, espelha `useFoodLogDay` — otimista,
+  com conflito versionado — mas simplificado: um campo só, sem "mover de
+  dia").
+- ✅ **Migração Supabase (0031) aplicada em produção** — tabela
+  `water_entries`, RLS, `save_water_entry`/`delete_water_entry` — escrita
+  direto na forma final e correta que `save_body_entry`/`delete_body_entry`
+  só alcançaram depois de 3 gerações de bugs (referência ambígua,
+  applied/revive ausente, checagem de dono no revive), sem repetir nenhuma
+  delas. `get_advisors` confirmou: mesmo padrão de aviso (RPC
+  `security definer` executável por `authenticated`) que as outras 18
+  funções já têm, nada novo introduzido.
+  **Achado no caminho:** o projeto Supabase certo não é o que uma primeira
+  checagem (`list_projects`) mostrou — esse (`bzsqohkyadmywojmqhlk`,
+  "Lacalle Life" com espaço) está pausado e parece abandonado. O banco real,
+  confirmado batendo contra `NEXT_PUBLIC_SUPABASE_URL` do `.env.local`, é
+  `rtvscxcfwfsamxatkwit` ("Lacalle-Life", com hífen) — já ativo, não
+  precisou de restore nenhum. Path perigoso evitado: o Pedro pediu pra
+  pausar exatamente o banco de produção por engano; a migration só foi pro
+  projeto certo depois de confirmar isso com ele.
+- ✅ **Backup/export estendido** — `WaterRepository` ganhou `listAll()` (não
+  estava no escopo original, YAGNI — mas o backup precisa enumerar tudo, e
+  sem isso água nunca sobreviveria a perder o aparelho). `water` é opcional
+  no envelope do backup (`backup-schemas.ts`/`backup.ts`), não obrigatório
+  como os outros sete — um backup de antes de hoje não tem essa chave, e não
+  pode parar de restaurar por causa disso.
+- ✅ **UI, sem gráfico/barra** — `WaterCard` no Diário (irmão de
+  `FoodLogScreen`, não dentro: aquele arquivo já passa de 600 linhas) com
+  dois atalhos (+200/+500 mL) e o total clicável pra corrigir à mão.
+  `TodayHydration` no Hoje, mesma linha discreta que `TodayProgress` já usa
+  — nunca dentro de `TodayEnergy`, que é onde `MACRO_CODING` mora.
+- ✅ **24 testes novos** cobrindo fórmula, schema, repositório local
+  (incluindo conflito de escrita concorrente), decorador de sync, hook e os
+  dois componentes.
+
+`npm run verify` (typecheck + lint + 1921 testes, 1920 passaram — o único
+que falhou foi por timeout de 5s e só quando a suíte inteira roda sob carga,
+`identity-isolation.test.ts`; confirmado flakiness de máquina rodando ele
+isolado duas vezes seguidas (passou nas duas), não regressão) e
+`npm run build` verdes.
+⚠️ Mesma ressalva da entrega anterior: não confirmado ao vivo no navegador
+desta automação (overlay de erro do Next trava o renderer aqui). Achado no
+caminho, não deste código: os logs do `next dev` mostram um
+`indexedDB is not defined` de `composition/repositories.ts` rodando durante
+SSR — reproduz também na Landing Page, então é anterior a esta entrega, não
+causado por ela. Vale o Pedro checar `/hoje` e `/diario` no Chrome de
+verdade antes de considerar fechado, e talvez investigar esse SSR à parte.
+
+---
+
 ## ✅ Perfil: distribuição de macros por % (ajuste opcional) — 24/09/2026
 
 Pedro sentiu a proteína alta demais na meta atual e trouxe o print de outro

@@ -9,6 +9,7 @@ import { PageHeader } from "@/design-system/components/page-header";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { TodayProgress } from "@/features/body";
 import { TodayEnergy } from "@/features/diet/components/today-energy";
+import { TodayHydration } from "@/features/hydration/components/today-hydration";
 import { TodayMeals } from "@/features/diet/components/today-meals";
 import { ProfileIncompleteNotice } from "@/features/profile/components/profile-incomplete-notice";
 import { TodayWorkout } from "@/features/workouts/components/today-workout";
@@ -38,6 +39,9 @@ import { PageShell } from "@/design-system/components/page-shell";
  *
  * 1. **Hero** — `TodayEnergy`, the calorie ring with macros folded into the
  *    same card as a secondary metric strip, not a sibling card of equal rank.
+ *    `TodayHydration` sits right after it, same quiet-row treatment as
+ *    `TodayProgress` below — water is a target like kcal/macros, but it is
+ *    not one of them, and does not compete for the hero's rank.
  * 2. **Alimentação** — `TodayMeals`, a borderless `Section`.
  * 3. **Treino** — `TodayWorkout`, the same `Section` weight as Alimentação,
  *    except when a session is genuinely running right now, which keeps the
@@ -133,6 +137,13 @@ export default function HojePage() {
               rende mais: acontece toda vez que a tela abre, não só uma vez. */}
           <div className="mt-8 animate-rise motion-reduce:animate-none">
             <TodayEnergy day={today} />
+          </div>
+
+          <div
+            className="mt-2 animate-rise motion-reduce:animate-none"
+            style={{ animationDelay: "calc(var(--duration-stagger) * 1)" }}
+          >
+            <TodayHydration day={today} />
           </div>
 
           <div className="mt-6 flex flex-col gap-6">

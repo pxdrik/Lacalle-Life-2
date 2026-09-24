@@ -11,6 +11,9 @@ import { SyncingDietRepository } from "@/features/diet/data/syncing-diet-reposit
 import type { DietRepository } from "@/features/diet/data/diet-repository";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
+import { WaterRepositoryProvider } from "@/features/hydration/data/water-repository-context";
+import type { WaterRepository } from "@/features/hydration/data/water-repository";
+import { SyncingWaterRepository } from "@/features/hydration/data/syncing-water-repository";
 import { BackupRepositoryProvider } from "@/features/profile/data/backup-repository-context";
 import type {
   BackupRepository,
@@ -50,6 +53,7 @@ import { pushProfile } from "./sync/profile-sync";
 import { pushAllRoutines } from "./sync/routine-sync";
 import { pushAllSessions } from "./sync/session-sync";
 import { pushAllBodyEntries } from "./sync/body-entry-sync";
+import { pushAllWaterEntries } from "./sync/water-entry-sync";
 
 /**
  * Supplies each feature with its repository.
@@ -130,6 +134,37 @@ export function BodyDataProvider({
   );
 }
 
+/**
+ * Decorado com o outbox de sync (`SyncingWaterRepository`), mesmo motivo do
+ * `bodyRepository` acima — mesma família "documento inteiro", sem
+ * granularidade por dia.
+ */
+const waterRepository = once<WaterRepository>(async () => {
+  const local = (await getRepositories()).water;
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await local.listAll();
+  await backfillUntracked(tracker, "waterEntries", existing.map((entry) => entry.id));
+  const pushSoon = debouncedTrigger(() => {
+    pushAllWaterEntries(getSupabaseBrowserClient(), tracker, local).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` abaixo.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingWaterRepository(local, tracker, pushSoon);
+});
+
+export function WaterDataProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
+  return (
+    <WaterRepositoryProvider repository={waterRepository()}>
+      {children}
+    </WaterRepositoryProvider>
+  );
+}
+
 const foodRepository = once<FoodRepository>(async () => {
   return (await getRepositories()).foods;
 });
@@ -158,7 +193,8 @@ const foodLogRepository = once<FoodLogRepository>(async () => {
 
 /**
  * The food log needs the foods (to add one to a meal), the diets (to start a
- * day from one) and the profile (to compare the day against a target).
+ * day from one), the profile (to compare the day against a target) and now
+ * water (the Diário logs it alongside meals, on the same day).
  *
  * **The profile is the one that was missed, and it failed silently.**
  * `useNutritionTargets` reads through `useOptionalProfileRepository`, which
@@ -177,7 +213,7 @@ export function FoodLogDataProvider({
       <DietRepositoryProvider repository={dietRepository()}>
         <FoodRepositoryProvider repository={foodRepository()}>
           <ProfileRepositoryProvider repository={profileRepository()}>
-            {children}
+            <WaterDataProvider>{children}</WaterDataProvider>
           </ProfileRepositoryProvider>
         </FoodRepositoryProvider>
       </DietRepositoryProvider>
@@ -426,9 +462,11 @@ export function DietAdherenceDataProvider({
  * sessions, never their exercises). Wiring those in anyway would cost three
  * IndexedDB opens on the first screen of the app for data nothing on it reads.
  *
- * The body log joined the list when the screen grew a weight card. It was
- * excluded here on the grounds that nothing read it, and that stopped being
- * true — which is the whole point of stating the reason rather than the rule.
+ * The body log joined the list when the screen grew a weight card, and water
+ * joined it the same way — `TodayHydration`, a quiet row right after the
+ * hero card. Both were excluded here on the grounds that nothing read them,
+ * and that stopped being true — which is the whole point of stating the
+ * reason rather than the rule.
  */
 export function HomeDataProvider({
   children,
@@ -440,7 +478,7 @@ export function HomeDataProvider({
       <ProfileRepositoryProvider repository={profileRepository()}>
         <WorkoutRepositoryProvider repositories={workoutRepositories()}>
           <BodyRepositoryProvider repository={bodyRepository()}>
-            {children}
+            <WaterDataProvider>{children}</WaterDataProvider>
           </BodyRepositoryProvider>
         </WorkoutRepositoryProvider>
       </ProfileRepositoryProvider>

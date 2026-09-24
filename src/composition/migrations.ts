@@ -4,6 +4,7 @@ import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
+import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
 import { ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
@@ -71,5 +72,11 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Sync tracker: per-record last-known server version and pending-push flag, for the Supabase sync engine.",
     createStores: [SYNC_TRACKER_STORE],
+  },
+  {
+    version: 9,
+    description:
+      "Water log: mL logged per day, indexed by day, kept apart from macros.",
+    createStores: [WATER_ENTRIES_STORE],
   },
 ];

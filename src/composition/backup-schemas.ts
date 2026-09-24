@@ -163,6 +163,26 @@ export const bodyRecordSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// water
+// ---------------------------------------------------------------------------
+
+/**
+ * No `normalize()` to mirror — `LocalWaterRepository` defaults `ml` to `0`
+ * (`entry.ml ?? 0`), which is exactly what a required, non-negative `ml`
+ * below already guarantees: a legacy record missing the field entirely still
+ * fails validation the same way a record with a negative one does, and both
+ * are exactly as recoverable — `repairRecord` cannot invent a real total, so
+ * either shape is dropped rather than silently defaulted to zero water.
+ */
+export const waterRecordSchema = z
+  .object({
+    ...entityEnvelope,
+    day: dayString,
+    ml: bounded("mL inválido.", 0, 20_000),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
 // foods
 // ---------------------------------------------------------------------------
 
@@ -525,4 +545,5 @@ export const RECORD_SCHEMAS = {
   exercises: exerciseRecordSchema,
   routines: routineRecordSchema,
   sessions: sessionRecordSchema,
+  water: waterRecordSchema,
 } as const;

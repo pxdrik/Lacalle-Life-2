@@ -3,6 +3,7 @@ import {
   Apple,
   CalendarDays,
   ClipboardList,
+  Droplet,
   Dumbbell,
   TrendingUp,
   User,
@@ -46,4 +47,5 @@ export const ICONS = {
   exercises: Activity,
   foods: Apple,
   profile: User,
+  water: Droplet,
 } satisfies Record<string, LucideIcon>;

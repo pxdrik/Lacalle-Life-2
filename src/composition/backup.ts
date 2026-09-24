@@ -19,6 +19,8 @@ import type { Diet } from "@/features/diet/types/diet";
 import type { FoodLog } from "@/features/diet/types/food-log";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { Food } from "@/features/foods/types/food";
+import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
+import type { WaterEntry } from "@/features/hydration/types/water-entry";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
@@ -57,6 +59,7 @@ const STORE_NAMES = [
   EXERCISES_STORE.name,
   ROUTINES_STORE.name,
   SESSIONS_STORE.name,
+  WATER_ENTRIES_STORE.name,
 ] as const;
 
 export interface BackupFile {
@@ -71,6 +74,7 @@ export interface BackupFile {
     readonly exercises: readonly Exercise[];
     readonly routines: readonly Routine[];
     readonly sessions: readonly Session[];
+    readonly water: readonly WaterEntry[];
   };
 }
 
@@ -83,7 +87,7 @@ export interface BackupFile {
 async function exportFrom(repositories: Repositories): Promise<BackupFile> {
   const profile = await repositories.profile.get();
 
-  const [body, foodLogs, foods, diets, exercises, routines, sessions] =
+  const [body, foodLogs, foods, diets, exercises, routines, sessions, water] =
     await Promise.all([
       repositories.body.listAll(),
       repositories.foodLogs.listAll(),
@@ -92,6 +96,7 @@ async function exportFrom(repositories: Repositories): Promise<BackupFile> {
       repositories.exercises.listAll(),
       repositories.routines.listAll(),
       repositories.sessions.listAll(),
+      repositories.water.listAll(),
     ]);
 
   return {
@@ -106,6 +111,7 @@ async function exportFrom(repositories: Repositories): Promise<BackupFile> {
       exercises,
       routines,
       sessions,
+      water,
     },
   };
 }
@@ -194,6 +200,12 @@ const backupEnvelopeSchema = z.object({
     exercises: z.array(z.unknown()),
     routines: z.array(z.unknown()),
     sessions: z.array(z.unknown()),
+    // Optional, unlike every store above: a backup written before this
+    // feature existed has no `water` key at all, and that has to keep
+    // restoring rather than failing the whole file's envelope check — the
+    // same "old shape stays readable" contract `BACKUP_FORMAT_VERSION`'s own
+    // doc comment describes for a field, extended to a whole new store.
+    water: z.array(z.unknown()).optional(),
   }),
 });
 
@@ -239,6 +251,7 @@ interface StoresResult {
   readonly exercises: readonly z.infer<typeof RECORD_SCHEMAS.exercises>[];
   readonly routines: readonly z.infer<typeof RECORD_SCHEMAS.routines>[];
   readonly sessions: readonly z.infer<typeof RECORD_SCHEMAS.sessions>[];
+  readonly water: readonly z.infer<typeof RECORD_SCHEMAS.water>[];
 }
 
 /**
@@ -376,6 +389,9 @@ function parseBackupFile(raw: unknown): ParsedBackup {
   const exercises = processStore(RECORD_SCHEMAS.exercises, stores.exercises);
   const routines = processStore(RECORD_SCHEMAS.routines, stores.routines);
   const sessions = processStore(RECORD_SCHEMAS.sessions, stores.sessions);
+  // `stores.water` itself, not just its contents, is optional — see the
+  // envelope schema's comment.
+  const water = processStore(RECORD_SCHEMAS.water, stores.water ?? []);
 
   const outcomes = [
     body,
@@ -386,6 +402,7 @@ function parseBackupFile(raw: unknown): ParsedBackup {
     exercises,
     routines,
     sessions,
+    water,
   ];
 
   return {
@@ -399,6 +416,7 @@ function parseBackupFile(raw: unknown): ParsedBackup {
       exercises: exercises.records,
       routines: routines.records,
       sessions: sessions.records,
+      water: water.records,
     },
     recordCount: outcomes.reduce((sum, o) => sum + o.records.length, 0),
     sanitizedCount: outcomes.reduce((sum, o) => sum + o.sanitizedCount, 0),
@@ -457,6 +475,7 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
       writeStore(tx.objectStore(EXERCISES_STORE.name), stores.exercises),
       writeStore(tx.objectStore(ROUTINES_STORE.name), stores.routines),
       writeStore(tx.objectStore(SESSIONS_STORE.name), stores.sessions),
+      writeStore(tx.objectStore(WATER_ENTRIES_STORE.name), stores.water),
     ];
 
     await Promise.all([...writes, tx.done]);
@@ -495,8 +514,8 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
  * `writeStore` (compartilhado com o resto do arquivo) a saber sobre sync.
  *
  * Dois casos, por store sincronizada (`bodyEntries`, `foodLog`, `diets`,
- * `profile`, `routines`, `sessions` — as mesmas seis chaves de
- * `sync-engine.ts`; `foods`/`exercises` ainda não têm sync na camada de
+ * `profile`, `routines`, `sessions`, `waterEntries` — as mesmas sete chaves
+ * de `sync-engine.ts`; `foods`/`exercises` ainda não têm sync na camada de
  * app, ver auditoria):
  *
  * 1. **Todo id presente depois do import** vira `"pending"` com
@@ -532,6 +551,7 @@ async function reconcileSyncTrackerAfterImport(
     sessions: stores.sessions
       .filter((session) => session.finishedAt !== null)
       .map((session) => session.id),
+    waterEntries: stores.water.map((entry) => entry.id),
   };
 
   for (const [store, restoredIds] of Object.entries(restoredIdsByStore)) {
