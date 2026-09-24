@@ -5,6 +5,36 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Donut menor, e movido pro picker de distribuição — 25/09/2026
+
+Segundo ajuste na mesma entrega: "Nao era eesse tipo de circulo que eu
+queria, era dentro da mudança de distruibuição, mas ficou bom assim, mas
+deixe ele menor... e aplique os gráficos na aba de Ajustar Distribuição de
+Macros."
+
+- ✅ **`MacroDonut` generalizado** — trocou `macros: Macros` (gramas) por
+  `shares: Record<MacroKey, number>` (três pesos quaisquer) e ganhou
+  `size`/`showLabels`. Deixou de saber o que soma proteína/carbo/gordura em
+  kcal — quem chama decide a unidade (kcal-por-macro no resumo, % direto no
+  preset), o componente só desenha a proporção. Isso que permitiu reusar a
+  mesma peça nos dois tamanhos sem duplicar a matemática do arco.
+- ✅ **`PlanSummary`** — donut de 64 px (era 128; "deixe ele menor").
+- ✅ **`MacroSplitDialog`** — cada preset ganha um donut de 28 px sem
+  legenda (`showLabels={false}`) ao lado do nome, direto das próprias % do
+  preset — sem depender de nenhum plano calculado. "Automático" fica sem
+  donut de propósito: sua distribuição real depende do peso e objetivo do
+  perfil, não é um número fixo que esta tela já tem à mão (na dúvida,
+  omitir). "Personalizado" ganha um donut de 56 px, com legenda, que
+  atualiza ao vivo assim que os três campos têm número — antes de
+  "Salvar", antes até da soma bater 100%.
+- ✅ **6 testes novos/ajustados** — `MacroDonut` com a API nova, e dois
+  testes no dialog: um donut por preset (nenhum em "Automático"), e o preview
+  ao vivo aparecendo só quando os três campos estão preenchidos.
+
+`npm run verify` (typecheck + lint + 1928 testes) e `npm run build` verdes.
+
+---
+
 ## ✅ Ícone da água azul, gráfico de distribuição de macros — 24/09/2026
 
 Ajuste nas duas entregas de hoje, pedido pelo Pedro depois de ver a versão

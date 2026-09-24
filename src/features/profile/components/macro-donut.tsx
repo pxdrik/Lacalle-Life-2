@@ -1,20 +1,6 @@
-import type { Macros } from "@/core/domain/macros";
 import { formatDecimal } from "@/core/format/decimal";
-import { KCAL_PER_GRAM } from "@/core/nutrition";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING, type MacroKey } from "@/design-system/macros";
-
-const SIZE = 128;
-const CENTER = SIZE / 2;
-const RADIUS = 46;
-const STROKE = 18;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-const KCAL_KEY: Record<MacroKey, keyof typeof KCAL_PER_GRAM> = {
-  proteinG: "protein",
-  carbsG: "carbs",
-  fatG: "fat",
-};
 
 const STROKE_CLASS: Record<MacroKey, string> = {
   proteinG: "stroke-protein",
@@ -25,67 +11,70 @@ const STROKE_CLASS: Record<MacroKey, string> = {
 /**
  * The macro split, drawn — Pedro, 24/09/2026, after seeing the reference
  * app's "Goals" screen: "a distribuição vamos fazer o gráfico, igual mandei
- * em imagem. Vai ficar mais fácil do usuário enxergar."
+ * em imagem. Vai ficar mais fácil do usuário enxergar." Reused smaller
+ * (25/09/2026, "deixe ele menor") both on `PlanSummary` and, per Pedro's
+ * follow-up the same day, as a per-row preview inside `MacroSplitDialog` —
+ * `size` and `showLabels` exist for that second, much smaller context.
  *
- * Reverses the "no chart" call `macro-split-dialog.tsx` makes for itself —
- * that one still holds for the *picker*, which the reference app also draws
- * as a plain list; the donut belongs on the *summary*, exactly where the
- * reference draws one too.
+ * Takes weights, not grams or a `Macros` — a preset's percentages and a
+ * plan's kcal-per-macro are both "three non-negative numbers that describe a
+ * split", and normalising them is the same one division either way. The
+ * caller decides what a share *is* (kcal, a raw percent); this only draws
+ * the proportion.
  *
- * Reads shares straight from the plan's own `targets` grams, converted to
- * kcal — correct whether the split came from a preset, a custom entry, or
- * the automatic algorithm, with nothing here re-deciding a percentage
- * `distribution.ts` already owns.
- *
- * `aria-hidden`, same as `CalorieRing`: the grams-and-label grid this sits
- * beside already carries the real information to a screen reader, in the
- * same three colours (`MACRO_CODING`) — this is the visual reinforcement,
- * not a second source of it.
+ * `aria-hidden`: wherever this is used, the real numbers are already on
+ * screen in text, in the same three colours (`MACRO_CODING`) — this is the
+ * visual reinforcement, not a second source of it.
  */
 export function MacroDonut({
-  macros,
+  shares,
+  size = 80,
+  showLabels = true,
   className,
 }: {
-  readonly macros: Macros;
+  readonly shares: Record<MacroKey, number>;
+  readonly size?: number;
+  readonly showLabels?: boolean;
   readonly className?: string;
 }) {
-  const totalKcal =
-    macros.proteinG * KCAL_PER_GRAM.protein +
-    macros.carbsG * KCAL_PER_GRAM.carbs +
-    macros.fatG * KCAL_PER_GRAM.fat;
+  const center = size / 2;
+  const stroke = Math.max(4, Math.round(size * 0.16));
+  const radius = center - stroke / 2 - 2;
+  const circumference = 2 * Math.PI * radius;
+
+  const total = MACRO_CODING.reduce((sum, macro) => sum + shares[macro.key], 0);
 
   // Two passes rather than a running total mutated across iterations: each
   // slice's length depends only on its own share, and its start is the sum
   // of every share before it — a pure lookup, not state carried forward.
-  const shares = MACRO_CODING.map((macro) => {
-    const kcal = macros[macro.key] * KCAL_PER_GRAM[KCAL_KEY[macro.key]];
-    const fraction = totalKcal > 0 ? kcal / totalKcal : 0;
-    return { macro, fraction, length: fraction * CIRCUMFERENCE };
+  const slices = MACRO_CODING.map((macro) => {
+    const fraction = total > 0 ? shares[macro.key] / total : 0;
+    return { macro, fraction, length: fraction * circumference };
   });
 
-  const arcs = shares.map((share, index) => {
-    const start = shares
+  const arcs = slices.map((slice, index) => {
+    const start = slices
       .slice(0, index)
       .reduce((sum, prior) => sum + prior.length, 0);
     const midAngleRad =
-      ((start + share.length / 2) / CIRCUMFERENCE) * 2 * Math.PI -
+      ((start + slice.length / 2) / circumference) * 2 * Math.PI -
       Math.PI / 2;
 
-    return { ...share, start, midAngleRad };
+    return { ...slice, start, midAngleRad };
   });
 
   return (
     <svg
       aria-hidden
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
+      viewBox={`0 0 ${size} ${size}`}
       className={cn("shrink-0", className)}
     >
       <circle
-        cx={CENTER}
-        cy={CENTER}
-        r={RADIUS}
+        cx={center}
+        cy={center}
+        r={radius}
         fill="none"
-        strokeWidth={STROKE}
+        strokeWidth={stroke}
         className="stroke-muted"
       />
       {arcs.map(
@@ -93,35 +82,36 @@ export function MacroDonut({
           fraction > 0 && (
             <circle
               key={macro.key}
-              cx={CENTER}
-              cy={CENTER}
-              r={RADIUS}
+              cx={center}
+              cy={center}
+              r={radius}
               fill="none"
-              strokeWidth={STROKE}
-              strokeDasharray={`${length} ${CIRCUMFERENCE - length}`}
+              strokeWidth={stroke}
+              strokeDasharray={`${length} ${circumference - length}`}
               strokeDashoffset={-start}
-              transform={`rotate(-90 ${CENTER} ${CENTER})`}
+              transform={`rotate(-90 ${center} ${center})`}
               className={STROKE_CLASS[macro.key]}
             />
           ),
       )}
-      {arcs.map(
-        ({ macro, fraction, midAngleRad }) =>
-          // A slice too thin to hold its own number would just print digits
-          // on top of the next slice — skipped rather than crowded.
-          fraction >= 0.08 && (
-            <text
-              key={macro.key}
-              x={CENTER + RADIUS * Math.cos(midAngleRad)}
-              y={CENTER + RADIUS * Math.sin(midAngleRad)}
-              textAnchor="middle"
-              dominantBaseline="central"
-              className="fill-white text-[11px] font-semibold tabular-nums"
-            >
-              {formatDecimal(Math.round(fraction * 100))}%
-            </text>
-          ),
-      )}
+      {showLabels &&
+        arcs.map(
+          ({ macro, fraction, midAngleRad }) =>
+            // A slice too thin to hold its own number would just print
+            // digits on top of the next slice — skipped rather than crowded.
+            fraction >= 0.08 && (
+              <text
+                key={macro.key}
+                x={center + radius * Math.cos(midAngleRad)}
+                y={center + radius * Math.sin(midAngleRad)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                className="fill-white text-[11px] font-semibold tabular-nums"
+              >
+                {formatDecimal(Math.round(fraction * 100))}%
+              </text>
+            ),
+        )}
     </svg>
   );
 }

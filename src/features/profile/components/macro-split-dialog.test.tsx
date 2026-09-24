@@ -83,4 +83,46 @@ describe("MacroSplitDialog", () => {
       fatPercent: 30,
     });
   });
+
+  it("shows a mini donut next to every preset, none for Automático", () => {
+    render(
+      <MacroSplitDialog
+        open
+        onClose={() => {}}
+        current={undefined}
+        onSelect={() => {}}
+      />,
+    );
+
+    const automaticRow = screen.getByText("Automático").closest("button")!;
+    expect(automaticRow.querySelector("svg")).not.toBeInTheDocument();
+
+    for (const preset of MACRO_SPLIT_PRESETS) {
+      const row = screen.getByText(preset.label).closest("button")!;
+      expect(row.querySelector("svg")).toBeInTheDocument();
+    }
+  });
+
+  it("shows a live preview donut once all three custom percentages are filled in", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MacroSplitDialog
+        open
+        onClose={() => {}}
+        current={undefined}
+        onSelect={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByText("Personalizado"));
+    // One donut per preset, plus the dialog's own close-icon svg.
+    const baseline = document.querySelectorAll("svg").length;
+
+    await user.type(screen.getByLabelText(/Prot/), "40");
+    await user.type(screen.getByLabelText(/Carb/), "30");
+    await user.type(screen.getByLabelText(/Gord/), "30");
+
+    expect(document.querySelectorAll("svg")).toHaveLength(baseline + 1);
+  });
 });

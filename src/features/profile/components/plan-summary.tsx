@@ -5,7 +5,7 @@ import type {
   NutritionProfile,
   PlanResult,
 } from "@/core/nutrition";
-import { MACRO_SPLIT_PRESETS } from "@/core/nutrition";
+import { KCAL_PER_GRAM, MACRO_SPLIT_PRESETS } from "@/core/nutrition";
 import { Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Notice } from "@/design-system/components/notice";
@@ -88,7 +88,14 @@ function Plan({
         </div>
 
         <div className="mt-4 flex items-center justify-center border-t border-line pt-4">
-          <MacroDonut macros={plan.targets} />
+          <MacroDonut
+            size={64}
+            shares={{
+              proteinG: plan.targets.proteinG * KCAL_PER_GRAM.protein,
+              carbsG: plan.targets.carbsG * KCAL_PER_GRAM.carbs,
+              fatG: plan.targets.fatG * KCAL_PER_GRAM.fat,
+            }}
+          />
         </div>
 
         <dl className="mt-4 grid grid-cols-3 gap-4">

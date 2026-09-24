@@ -9,7 +9,9 @@ import { Button } from "@/design-system/components/button";
 import { Dialog } from "@/design-system/components/dialog";
 import { Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
-import { MACRO_CODING } from "@/design-system/macros";
+import { MACRO_CODING, type MacroKey } from "@/design-system/macros";
+
+import { MacroDonut } from "./macro-donut";
 
 interface Props {
   readonly open: boolean;
@@ -29,12 +31,18 @@ const PERCENT_FIELD = {
  * Picking how the day's calories split into protein/carb/fat, instead of
  * leaving it to `distribution.ts`'s priority algorithm.
  *
- * **Rows of plain numbers, never a donut.** The reference screenshot Pedro
- * shared draws a pie chart; this app already tried a colour bar in the same
- * spot for the meal card's macro total and pulled it back out — "mostra os
- * números mesmo, não esse graficozinho" (`docs/roadmap.md`). Same call here:
- * this is the one screen where somebody *picks* a split rather than reads
- * one, and a number is what a pick needs to be checked against.
+ * **A small donut per row, not the plain-numbers-only picker this screen
+ * started as.** Pedro's first ask was answered with rows of text — the same
+ * reasoning that pulled a colour bar back out of the meal card ("mostra os
+ * números mesmo, não esse graficozinho"). His follow-up (25/09/2026) asked
+ * for the chart here specifically: "aplique os gráficos na aba de Ajustar
+ * Distribuição de Macros." The numbers stay — `splitDetail` still prints
+ * every percentage — the donut is next to them, not instead of them.
+ * `MacroDonut`'s `size`/`showLabels` exist for exactly this: 28 px, no
+ * in-chart percentage text, next to a row; a slightly larger live one while
+ * "Personalizado" is open, since that is the one split nobody has committed
+ * to yet. "Automático" carries no donut — its actual split depends on the
+ * profile's weight and goal, not a fixed number this dialog has on hand.
  *
  * Tapping "Automático" or a preset commits immediately and closes, the same
  * one-tap-to-pick shape as every other selection sheet in the app.
@@ -97,6 +105,7 @@ export function MacroSplitDialog({ open, onClose, current, onSelect }: Props) {
             key={preset.id}
             label={preset.label}
             detail={splitDetail(preset)}
+            donut={sharesFromSplit(preset)}
             selected={current !== undefined && sameSplit(current, preset)}
             onClick={() => {
               choose({
@@ -123,6 +132,19 @@ export function MacroSplitDialog({ open, onClose, current, onSelect }: Props) {
 
         {customOpen && (
           <div className="space-y-3 rounded-md border border-line p-3">
+            {draftComplete && (
+              <div className="flex justify-center">
+                <MacroDonut
+                  size={56}
+                  shares={{
+                    proteinG: draftValues.proteinPercent!,
+                    carbsG: draftValues.carbsPercent!,
+                    fatG: draftValues.fatPercent!,
+                  }}
+                />
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-3">
               {MACRO_CODING.map((macro) => {
                 const field = PERCENT_FIELD[macro.key];
@@ -196,11 +218,13 @@ export function MacroSplitDialog({ open, onClose, current, onSelect }: Props) {
 function SplitRow({
   label,
   detail,
+  donut,
   selected,
   onClick,
 }: {
   readonly label: string;
   readonly detail: string | undefined;
+  readonly donut?: Record<MacroKey, number>;
   readonly selected: boolean;
   readonly onClick: () => void;
 }) {
@@ -210,16 +234,21 @@ function SplitRow({
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "flex w-full flex-col items-start rounded-md border px-3 py-2.5 text-left transition-colors duration-150 ease-out",
+        "flex w-full items-center gap-3 rounded-md border px-3 py-2.5 text-left transition-colors duration-150 ease-out",
         selected
           ? "border-accent bg-accent/10"
           : "border-line-strong hover:border-ink-subtle hover:bg-muted",
       )}
     >
-      <span className="text-sm font-medium text-ink">{label}</span>
-      {detail !== undefined && (
-        <span className="mt-0.5 text-xs text-ink-subtle">{detail}</span>
+      {donut !== undefined && (
+        <MacroDonut shares={donut} size={28} showLabels={false} />
       )}
+      <span className="flex min-w-0 flex-col items-start">
+        <span className="text-sm font-medium text-ink">{label}</span>
+        {detail !== undefined && (
+          <span className="mt-0.5 text-xs text-ink-subtle">{detail}</span>
+        )}
+      </span>
     </button>
   );
 }
@@ -228,6 +257,14 @@ function splitDetail(split: MacroSplit): string {
   return MACRO_CODING.map(
     (macro) => `${macro.short} ${formatDecimal(split[PERCENT_FIELD[macro.key]])}%`,
   ).join(" · ");
+}
+
+function sharesFromSplit(split: MacroSplit): Record<MacroKey, number> {
+  return {
+    proteinG: split.proteinPercent,
+    carbsG: split.carbsPercent,
+    fatG: split.fatPercent,
+  };
 }
 
 function sameSplit(a: MacroSplit, b: MacroSplit): boolean {
