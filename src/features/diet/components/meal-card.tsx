@@ -256,9 +256,9 @@ export function MealCard({
               como a soma da refeição — primeira correção foi só a posição,
               empilhado logo abaixo do nome (e do horário) em vez de solto ao
               lado do ⋮. Não bastou: os dois ainda liam do mesmo peso visual
-              lado a lado, então o bloco abaixo também ganhou
-              `emphasizeKcal` e centralização — a `border-t` que já separa
-              a lista de alimentos faz o resto.
+              lado a lado, então o bloco abaixo também ganhou `size="lg"` e
+              centralização — a `border-t` que já separa a lista de
+              alimentos faz o resto.
 
               RM01: holding anywhere on this header (outside the inputs and
               buttons it already carries — `useLongPress` excludes those at
@@ -385,17 +385,22 @@ export function MealCard({
                   números mesmo, não "esse graficozinho". De volta ao
                   `MacroSummary` de sempre.
 
-                  `emphasizeKcal` e centralizado, achado real de 23/09/2026:
-                  o total da refeição precisa ler maior que o de cada
-                  alimento embaixo dele (`MealItemRow` continua em `size`
-                  padrão), não só mais perto do nome. Primeira tentativa
-                  usou `size="lg"` nas quatro figuras — no card estreito de
-                  um celular isso quebrava a linha ("3,5 Gord" sozinho
-                  embaixo) e não sobrava nada pra centralizar de verdade.
-                  Só kcal cresce; Prot/Carb/Gord ficam do tamanho de sempre,
-                  e a linha inteira cabe numa linha só. */}
-              <div className="mt-1 flex justify-center">
-                <MacroSummary macros={macros} emphasizeKcal />
+                  `size="lg"` e `center`, achado real de 23/09/2026: o total
+                  da refeição precisa ler maior que o de cada alimento
+                  embaixo dele (`MealItemRow` continua em `size` padrão),
+                  não só mais perto do nome. Pedro quer as quatro figuras
+                  maiores, não só kcal — uma tentativa intermediária só
+                  aumentou kcal, exatamente pra não arriscar a linha quebrar
+                  num celular estreito, mas não era isso que ele pediu.
+                  `center` fica em `MacroSummary` mesmo (não num `<div>`
+                  centralizando o bloco por fora): se as quatro figuras não
+                  couberem numa linha só, é cada linha que precisa
+                  centralizar sozinha, e só `justify-center` no próprio
+                  `dl` (o container que quebra linha) faz isso — um `<div>`
+                  por fora só centraliza o bloco inteiro como uma unidade
+                  só, e a segunda linha fica pregada na borda esquerda. */}
+              <div className="mt-1">
+                <MacroSummary macros={macros} size="lg" center />
               </div>
             </div>
 

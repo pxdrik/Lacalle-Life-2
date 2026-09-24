@@ -5,6 +5,38 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: as quatro figuras maiores, de verdade centralizadas — 23/09/2026
+
+**Terceira correção na mesma tarde.** A entrada logo abaixo trocou pra só
+kcal crescer, achando que resolvia o pedido original com menos risco. Pedro
+foi direto: "eu nao quero que apenas a KCAL esteja grande... é pra ter os 4
+campos maiores e centralizados!! Nao erre dessa vez". As quatro, sempre foi
+isso — o problema real nunca foi o tamanho, foi a centralização não
+funcionar quando a linha quebrava.
+
+- ✅ **A causa raiz de verdade, desta vez.** `justify-center` estava num
+  `<div>` embrulhando `MacroSummary` por fora — isso centraliza o bloco
+  inteiro como uma unidade só. Quando as quatro figuras não cabem numa
+  linha (fecho num celular estreito) e quebram em duas, é o `dl` — o
+  próprio container com `flex-wrap` — que precisa do `justify-center`,
+  porque `justify-content` se aplica por linha, não pelo bloco todo.
+  Reproduzido isolado antes de mexer: a versão errada deixava "3,5 Gord"
+  pregado na borda esquerda da segunda linha; com `justify-center` no
+  `dl`, a segunda linha centraliza sozinha, igual à primeira.
+- ✅ **`macro-summary.tsx`** — `emphasizeKcal` sai, entra `center`
+  (booleano, no próprio `dl`). `size="lg"` continua intocado — os dois
+  lugares que já usavam as quatro figuras grandes de propósito
+  (`MealItemDetailScreen`, os fallbacks sem perfil) nunca tiveram esse
+  problema, porque nunca dividem a largura da tela com nada ao lado.
+- ✅ **`meal-card.tsx`** — volta a `size="lg"`, agora com `center` em vez do
+  `<div className="flex justify-center">` de antes.
+- ✅ **Verificado isolado de propósito no cenário que quebra** — não só o
+  caso feliz (cabe numa linha), mas forçando a largura estreita o
+  suficiente pra reproduzir a quebra real do print do Pedro, e confirmando
+  que a segunda linha centraliza também.
+
+---
+
 ## ✅ Diário: só kcal cresce no total da refeição, não as quatro figuras — 23/09/2026
 
 **Segunda correção na mesma tarde.** A entrada logo abaixo usou `size="lg"`
