@@ -5,6 +5,37 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: só kcal cresce no total da refeição, não as quatro figuras — 23/09/2026
+
+**Segunda correção na mesma tarde.** A entrada logo abaixo usou `size="lg"`
+nas quatro figuras do total da refeição. Pedro: "Voce deixou muito grande
+agora, fora que nem deixou ele centralizado" — print real mostrando "192
+kcal 7 Prot 32,3 Carb" numa linha e "3,5 Gord" sozinho, à esquerda, na linha
+de baixo.
+
+- ✅ **Causa raiz: quatro figuras em `text-xl` juntas não cabem na largura
+  de um card de celular.** `justify-center` no bloco todo não tem efeito
+  visível quando o bloco já ocupa quase a largura inteira do card — o que
+  "centralizar" quer dizer quando não sobra espaço nenhum dos dois lados?
+  E a segunda linha, sozinha, nunca fica centralizada por conta própria —
+  ela fica onde o `flex-wrap` a colocou, à esquerda.
+- ✅ **`macro-summary.tsx` ganha `emphasizeKcal`** — só a figura de kcal vai
+  pra `text-xl font-medium`; Prot/Carb/Gord continuam exatamente no tamanho
+  padrão. `size="lg"` continua existindo do jeito que estava, pros dois
+  lugares que já usavam as quatro figuras grandes de propósito
+  (`MealItemDetailScreen`, o fallback sem perfil de `food-log-screen`/
+  `diet-editor`) — nada ali mudou.
+- ✅ **`meal-card.tsx` troca `size="lg"` por `emphasizeKcal`** — mesma
+  centralização de antes, mas agora com algo real pra centralizar: a linha
+  inteira cabe numa linha só, então o espaço em branco dos dois lados
+  aparece de verdade.
+- ✅ **Verificado isolado de novo** (markup real, CSS já compilado do app,
+  sem tocar dado nenhum) — a versão nova cabe numa linha, "192" claramente
+  maior que "7"/"32,3"/"3,5", centralizada com folga visível dos dois lados.
+  3 testes novos em `macro-summary.test.tsx`.
+
+---
+
 ## ✅ Diário: total da refeição maior e centralizado (corrigido) — 23/09/2026
 
 **Corrige a entrada anterior, que tinha entendido "kcal do dia" errado.** Eu
