@@ -5,6 +5,33 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ `MacroDonut` sem `width`/`height` — só apareceu ao vivo — 25/09/2026
+
+**Achado gerando as capturas de tela pra um PDF de visão geral do produto**
+(pedido do Pedro, não uma entrega de feature): o donut de `PlanSummary`
+ocupava a largura inteira do card, gigante — não os 64 px pedidos. Os
+testes (`macro-donut.test.tsx`) nunca pegaram isso porque jsdom não faz
+layout de verdade; contam `<circle>`/`<text>`, não pixel.
+
+- ✅ **Causa:** o `<svg>` só tinha `viewBox`, nunca `width`/`height`. Sem
+  os dois, um SVG inline sem dimensão intrínseca cresce pra preencher o
+  espaço disponível do flex/bloco em vez de respeitar `size` — e como
+  `viewBox` escala todo o conteúdo junto, os números de porcentagem
+  cresciam junto com os arcos, gigantes.
+- ✅ **Correção:** `width={size}` e `height={size}` no `<svg>`, ao lado do
+  `viewBox` que já existia.
+
+Prova real: rodando `next build && next start` (produção, sem o problema
+de `eval()`/CSP do modo dev nesta automação — ver
+`ssr-indexeddb-lacalle-life` na memória) e conferindo com Playwright MCP.
+Confirmado nos três lugares que usam `MacroDonut` — resumo, cada preset e
+o preview do personalizado — com print de cada um.
+
+`npm run verify` (typecheck + lint + 1928 testes) e `npm run build`
+verdes.
+
+---
+
 ## ✅ Donut menor, e movido pro picker de distribuição — 25/09/2026
 
 Segundo ajuste na mesma entrega: "Nao era eesse tipo de circulo que eu

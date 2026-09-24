@@ -66,6 +66,8 @@ export function MacroDonut({
   return (
     <svg
       aria-hidden
+      width={size}
+      height={size}
       viewBox={`0 0 ${size} ${size}`}
       className={cn("shrink-0", className)}
     >
