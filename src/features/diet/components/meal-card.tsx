@@ -379,29 +379,6 @@ export function MealCard({
                   className="-mx-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-xs text-ink-muted transition-colors duration-150 ease-out hover:border-line focus:border-line-strong focus:bg-surface"
                 />
               </div>
-
-              {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
-                  escondia os números atrás de uma cor — Pedro queria ver os
-                  números mesmo, não "esse graficozinho". De volta ao
-                  `MacroSummary` de sempre.
-
-                  `layout="stacked"`, achado real de 23/09/2026, com print
-                  de referência do Pedro: o total da refeição precisa ler
-                  maior que o de cada alimento embaixo dele (`MealItemRow`
-                  continua em `layout` padrão), as quatro figuras juntas —
-                  não só kcal — e sempre numa linha só, nunca quebrando.
-                  `"inline"` a `size="lg"` (duas tentativas antes desta)
-                  não dava conta: quatro pares "valor unidade" lado a lado
-                  não cabem na largura de um card de celular, e uma vez que
-                  quebra, "centralizar" o bloco por fora nunca centraliza a
-                  segunda linha sozinha. Empilhado (valor em cima, rótulo
-                  embaixo) cada coluna só precisa da largura do maior dos
-                  dois, não da soma — cabe numa linha com folga, e o
-                  `grid-cols-4` centraliza as quatro por construção, sem
-                  depender de wrap nenhum. */}
-              <div className="mt-1">
-                <MacroSummary macros={macros} layout="stacked" />
-              </div>
             </div>
 
             <button
@@ -415,6 +392,35 @@ export function MealCard({
               <MoreVertical aria-hidden className="size-4" />
             </button>
           </header>
+
+          {/* Achado real, 17/09/2026: a barra fina colorida (`MealMacroBar`)
+              escondia os números atrás de uma cor — Pedro queria ver os
+              números mesmo, não "esse graficozinho". De volta ao
+              `MacroSummary` de sempre.
+
+              `layout="stacked"`, achado real de 23/09/2026, com print de
+              referência do Pedro: o total da refeição precisa ler maior
+              que o de cada alimento embaixo dele (`MealItemRow` continua
+              em `layout` padrão), as quatro figuras juntas — não só kcal —
+              sempre numa linha só, e de verdade centralizadas no card, não
+              só no que sobrava ao lado do ⋮.
+
+              **Por que este bloco saiu de dentro do `header`:** até aqui
+              ele vivia dentro do `<div className="min-w-0 flex-1">` que
+              divide a linha do cabeçalho com o botão ⋮ — e como os dois
+              ficam lado a lado na mesma linha flex, essa coluna nunca
+              tinha a largura inteira do card, só o que sobrava depois do
+              ⋮ (~40px a menos). `grid-cols-4` centralizava certinho dentro
+              *dessa* largura, só que essa largura não era a do card —
+              resultado, as quatro figuras pareciam empurradas pra
+              esquerda, com um vão sobrando à direita do tamanho de
+              aproximadamente uma coluna. Como bloco próprio, fora do
+              `header`, ele fica livre pra usar a largura inteira do card
+              (só o padding do `Card` de fora), e `grid-cols-4` finalmente
+              centraliza contra a largura certa. */}
+          <div className="mt-2">
+            <MacroSummary macros={macros} layout="stacked" />
+          </div>
 
           {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de
               densidade, 17/09/2026: eram quatro alvos de toque (duplicar, mover

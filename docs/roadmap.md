@@ -5,6 +5,38 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Diário: total da refeição, largura certa pra centralizar — 23/09/2026
+
+**Quinta correção na mesma tarde.** O layout empilhado da entrada logo
+abaixo agradou — "agora sim!!" — mas ainda não centralizava de verdade: as
+quatro colunas ficavam visivelmente empurradas pra esquerda, com um vão à
+direita do tamanho de quase uma coluna inteira.
+
+- ✅ **A causa: o bloco vivia dentro da coluna que divide espaço com o ⋮.**
+  `<MacroSummary layout="stacked">` estava dentro do
+  `<div className="min-w-0 flex-1">` do cabeçalho — a mesma coluna que o
+  nome e o horário usam, e que reparte a linha do `header` com o botão ⋮
+  (`shrink-0`, ao lado). `grid-cols-4` centraliza certinho contra a
+  largura que *recebe*, só que essa largura nunca foi a do card inteiro —
+  era o card menos o espaço do ⋮. O resultado: quatro colunas
+  perfeitamente centralizadas numa caixa que, ela mesma, não estava
+  centralizada no card.
+- ✅ **`meal-card.tsx`** — o bloco sai de dentro do `header` e vira um
+  irmão dele, depois do `</header>` fechar. Sem mais nenhum botão
+  dividindo a linha com ele, usa a largura inteira do card (só o padding
+  do próprio `Card`), e `grid-cols-4` finalmente centraliza contra a
+  largura certa.
+- ✅ **Verificado visualmente, não só por medição** — a mesma sessão
+  encontrou uma inconsistência real entre `getBoundingClientRect()` e
+  `getComputedStyle().width` neste ambiente (~15% de diferença, uniforme
+  em toda a árvore — provável artefato do sistema de densidade da UI
+  aplicando escala). Como não dava pra confiar em medir pixel a pixel
+  aqui, a confirmação foi por screenshot isolado (markup real, CSS
+  compilado do app): antes, as quatro colunas paravam a ~85% da largura
+  do card; depois, vão de ponta a ponta.
+
+---
+
 ## ✅ Diário: total da refeição, layout empilhado (print de referência) — 23/09/2026
 
 **Quarta correção na mesma tarde — a `justify-center` da entrada logo
