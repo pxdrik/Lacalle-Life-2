@@ -5,6 +5,51 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Trocar de aba esperava a rede — mesmo já em cache — 25/09/2026
+
+Pedro: "tem vezes que a minha ação demora mto pra contabilizar... quando eu
+clico em alguma aba, ele demora para abrir, as vezes tenho ate que clicar 2
+vezes."
+
+Causa raiz achada em `public/sw.js`: o `fetch` que o roteador do Next faz a
+cada troca de aba (Hoje/Diário/Treinos/Evolução) — a URL com `_rsc=...` —
+dividia a mesma estratégia `networkFirst` que a navegação de página inteira
+usa. Isso significa que **todo clique numa aba, mesmo numa rota já visitada
+e em cache, esperava uma ida e volta de rede de verdade** antes de mostrar
+qualquer coisa. Num sinal ruim — o próprio arquivo já documentava "geralmente
+um andar abaixo do nível da rua" — essa espera é exatamente onde nasce o
+segundo clique: a pessoa acha que o primeiro não registrou.
+
+- ✅ **`staleWhileRevalidate` nova, só para o cache de payload.** Responde
+  com o que já está em cache na hora (sem esperar rede nenhuma), e atualiza
+  o cache em segundo plano (`event.waitUntil`) para a próxima vez. Um deploy
+  novo ainda chega — uma troca de aba depois, nunca travando a que disparou
+  a atualização. A navegação de página inteira (`request.mode === "navigate"`)
+  continua em `networkFirst`, sem mudança — ali faz sentido esperar a rede,
+  é a única vez que uma casca desatualizada ficaria visível de verdade.
+  Primeira visita a uma rota nova (nada em cache ainda) continua esperando
+  a rede, porque não há outra coisa pra servir.
+- ✅ **`load-sw.ts` (harness de teste) ganhou um `waitUntil` de verdade.**
+  Era um no-op só no `dispatchFetch` — inofensivo enquanto nada chamava
+  `waitUntil` fora de `install`/`activate`, mas a nova estratégia chama.
+  Drena `pending` só depois de `event.result` resolver (não antes: no
+  caminho de cache-hit, `waitUntil` é chamado dentro da mesma função
+  assíncrona que resolve `result`, uma linha antes do próprio `return`).
+- ✅ **4 testes novos**, rodando o `public/sw.js` de verdade (não uma
+  reimplementação): responde do cache na hora mesmo com a rede prometendo
+  outra coisa, atualiza o cache em segundo plano pro próximo clique, continua
+  servindo o valor antigo se a atualização em segundo plano falhar, e uma
+  rota nunca aberta antes continua esperando a rede.
+
+`npm run verify` (typecheck + lint + 1936 testes) e `npm run build` verdes.
+`VERSION` do service worker não mudou de propósito — o payload já em cache
+continua válido, só a estratégia ao redor dele mudou.
+⚠️ Efeito só chega no aparelho de verdade depois do deploy (o service worker
+se auto-atualiza via `skipWaiting`/`clients.claim`, já existentes) — não dá
+pra confirmar a sensação de "mais rápido" fora de um celular real.
+
+---
+
 ## ✅ Três achados de um agente sem contexto do app — 25/09/2026
 
 Pedro pediu uma validação externa do estado do produto (PDF pra ChatGPT

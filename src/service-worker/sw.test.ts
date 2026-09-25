@@ -127,6 +127,77 @@ describe("the RSC payload cache has a ceiling", () => {
   });
 });
 
+describe("stale-while-revalidate on the RSC payload cache", () => {
+  // Pedro, 25/09/2026: "quando eu clico em alguma aba, ele demora pra abrir,
+  // às vezes tenho até que clicar 2 vezes." `isPayload` used to share
+  // `networkFirst` with the shell, which meant every tab tap — even to a
+  // route already cached from a moment ago — waited on a real round trip
+  // before rendering anything.
+  async function findPayloadCacheName(sw: ReturnType<typeof loadServiceWorker>) {
+    const names = await sw.caches.keys();
+    const name = names.find((n) => n.includes("payload"));
+    if (name === undefined) throw new Error("payload cache was never opened");
+    return name;
+  }
+
+  it("serves the cached payload immediately, before asking the network at all", async () => {
+    const fetchImpl = vi.fn(async () => fakeResponse(200, "first"));
+    const sw = loadServiceWorker(fetchImpl);
+
+    // Warms the cache.
+    await sw.dispatchFetch(payload(1));
+
+    // The network would now answer with something different — the point is
+    // that the dispatch below never has to find that out to respond.
+    fetchImpl.mockResolvedValue(fakeResponse(200, "second"));
+    const result = (await sw.dispatchFetch(payload(1))) as FakeResponse;
+
+    expect(result.label).toBe("first");
+  });
+
+  it("still refreshes the cache in the background, for the next tap", async () => {
+    const fetchImpl = vi.fn(async () => fakeResponse(200, "first"));
+    const sw = loadServiceWorker(fetchImpl);
+
+    await sw.dispatchFetch(payload(1));
+
+    fetchImpl.mockResolvedValue(fakeResponse(200, "second"));
+    await sw.dispatchFetch(payload(1));
+
+    const name = await findPayloadCacheName(sw);
+    const cached = sw.caches.peek(name)?.match(payload(1).url) as
+      | FakeResponse
+      | undefined;
+    expect(cached?.label).toBe("second");
+  });
+
+  it("keeps serving the stale entry when the background refresh itself fails", async () => {
+    const fetchImpl = vi.fn(async () => fakeResponse(200, "first"));
+    const sw = loadServiceWorker(fetchImpl);
+
+    await sw.dispatchFetch(payload(1));
+
+    fetchImpl.mockRejectedValue(new Error("offline"));
+    const result = (await sw.dispatchFetch(payload(1))) as FakeResponse;
+
+    expect(result.label).toBe("first");
+    const name = await findPayloadCacheName(sw);
+    const cached = sw.caches.peek(name)?.match(payload(1).url) as
+      | FakeResponse
+      | undefined;
+    expect(cached?.label).toBe("first");
+  });
+
+  it("still waits on the network for a route never opened before", async () => {
+    const fetchImpl = vi.fn(async () => fakeResponse(200, "fresh"));
+    const sw = loadServiceWorker(fetchImpl);
+
+    const result = (await sw.dispatchFetch(payload(1))) as FakeResponse;
+
+    expect(result.label).toBe("fresh");
+  });
+});
+
 describe("install precaches every static tab, including /hoje", () => {
   it("serves /hoje's own shell offline on the very first visit, never the landing page's", async () => {
     // Achado ao vivo (celular do Pedro, modo avião): clicar em "Hoje" offline

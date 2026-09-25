@@ -98,7 +98,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (isPayload(url)) {
-    event.respondWith(networkFirst(request, PAYLOADS));
+    event.respondWith(staleWhileRevalidate(event, PAYLOADS));
     return;
   }
 
@@ -140,8 +140,11 @@ function isImmutable(url) {
 }
 
 /**
- * The network wins when it answers, so a deploy is picked up on the next
- * navigation rather than whenever the cache happens to expire.
+ * The network wins when it answers, so a deploy is picked up on the next full
+ * navigation rather than whenever the cache happens to expire. Only for
+ * `SHELL` (`request.mode === "navigate"`) — a real page load, the moment a
+ * stale shell would actually be visible as a stale shell. `PAYLOADS` used to
+ * share this and no longer does; see `staleWhileRevalidate`.
  *
  * Falling back to the exact page first and to `/` second: an unvisited route
  * offline is better served by the app's own home screen — which reads real
@@ -160,7 +163,6 @@ async function networkFirst(request, cacheName) {
     if (response.ok) {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone());
-      if (cacheName === PAYLOADS) await prunePayloadCache();
     }
 
     return response;
@@ -173,6 +175,53 @@ async function networkFirst(request, cacheName) {
 
     throw new Error("offline e sem shell em cache");
   }
+}
+
+/**
+ * `PAYLOADS` moved here from `networkFirst` (25/09/2026, Pedro: "quando eu
+ * clico em alguma aba, ele demora pra abrir, às vezes tenho até que clicar 2
+ * vezes"). `isPayload` is exactly the request the client router fires on
+ * every tab tap — Hoje, Diário, Treinos, Evolução — and `networkFirst` made
+ * every one of those wait on a real round trip before rendering anything,
+ * even for a route already sitting in cache from a minute ago. On the signal
+ * this file's own header names — "geralmente um andar abaixo do nível da
+ * rua" — that round trip is exactly where the delay, and the second tap
+ * born of it, came from.
+ *
+ * Serves the cached payload instantly when there is one, and refreshes the
+ * cache in the background (`event.waitUntil`, so the fetch survives past the
+ * point `respondWith` already resolved) for the *next* tap. A deploy is
+ * still picked up — one tab switch later than before, never blocking the one
+ * that triggered the refresh. First visit to a route (nothing cached yet)
+ * still waits on the network; there is nothing else to serve.
+ */
+async function staleWhileRevalidate(event, cacheName) {
+  const { request } = event;
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+
+  const revalidate = fetch(request)
+    .then(async (response) => {
+      if (response.ok) {
+        await cache.put(request, response.clone());
+        await prunePayloadCache();
+      }
+      return response;
+    })
+    .catch(() => undefined);
+
+  if (cached !== undefined) {
+    event.waitUntil(revalidate);
+    return cached;
+  }
+
+  const response = await revalidate;
+  if (response !== undefined) return response;
+
+  const shell = await caches.match("/");
+  if (shell !== undefined) return shell;
+
+  throw new Error("offline e sem shell em cache, sem payload em cache");
 }
 
 /**

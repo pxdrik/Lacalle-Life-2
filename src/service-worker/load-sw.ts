@@ -142,6 +142,15 @@ interface FakeEvent {
   respondWith(value: unknown): void;
   waitUntil(value: unknown): void;
   result: unknown;
+  /**
+   * Every `waitUntil` call, `respondWith` or not — `staleWhileRevalidate` in
+   * `sw.js` uses `waitUntil` as a side channel alongside `respondWith` (the
+   * cached response returns immediately; the cache refresh keeps running
+   * after). Draining this before a dispatch resolves is what makes a test
+   * see the refreshed cache deterministically, instead of racing a promise
+   * this harness never awaited at all.
+   */
+  pending: unknown[];
 }
 
 type Listener = (event: FakeEvent) => void;
@@ -188,7 +197,18 @@ export function loadServiceWorker(
       throw new Error(`sw.js never registered a "${type}" listener`);
     }
     listener(event);
-    return event.result;
+    // `event.result` first, `event.pending` second — deliberately in that
+    // order. `staleWhileRevalidate`'s cache-hit branch calls `waitUntil`
+    // *inside* the same async function whose settling is what resolves
+    // `event.result`, one statement before its own `return`; awaiting
+    // `pending` any earlier would race a call that has not happened yet.
+    // Real browsers let `waitUntil`'s work outlive the event handler — this
+    // harness cannot offer that, so it offers the deterministic alternative
+    // instead: by the time a dispatch resolves, everything the SW started
+    // has finished, cache writes included.
+    const result = await event.result;
+    await Promise.all(event.pending);
+    return result;
   }
 
   return {
@@ -198,11 +218,12 @@ export function loadServiceWorker(
       const event: FakeEvent = {
         request: { method: "GET", mode: "navigate", ...request },
         result: undefined,
+        pending: [],
         respondWith(value) {
           this.result = value;
         },
-        waitUntil() {
-          // Unused by the fetch listener.
+        waitUntil(value) {
+          this.pending.push(value);
         },
       };
       return fireOn("fetch", event);
@@ -210,10 +231,12 @@ export function loadServiceWorker(
     dispatchLifecycle(type) {
       const event: FakeEvent = {
         result: undefined,
+        pending: [],
         respondWith() {
           // Unused by install/activate.
         },
         waitUntil(value) {
+          this.pending.push(value);
           this.result = value;
         },
       };
