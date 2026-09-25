@@ -5,6 +5,53 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Três achados de um agente sem contexto do app — 25/09/2026
+
+Pedro pediu uma validação externa do estado do produto (PDF pra ChatGPT
+avaliar). Dos 5 pontos que voltaram, 3 (clareza do produto, montar dieta,
+telas com dado real) foram testados ao vivo por um segundo agente — sem
+nenhum contexto deste repositório, só a interface — e não se confirmaram
+como problema. O teste achou 4 coisas reais; as 3 primeiras, por ordem de
+impacto, foram corrigidas nesta entrada (a quarta é dado de catálogo
+incompleto, não código — fica pra curadoria).
+
+- ✅ **Diário: por que o total do dia fica zerado depois de importar uma
+  dieta.** `startDayFromDiet` sempre semeou as refeições como `eaten: false`
+  — proposital, é o que faz o anel de calorias contar só o que foi
+  realmente comido — mas nada na tela dizia isso, então via como bug
+  ("a importação falhou"), não como comportamento esperado. Uma linha nova
+  abaixo do total ("N refeições planejadas ainda não foram marcadas como
+  comidas — os totais acima contam só o que já foi") aparece só enquanto
+  existir alguma, e some sozinha assim que a última é marcada.
+  `food-log-screen.tsx`.
+- ✅ **Diário: ninguém descobre a vinculação de dieta por dia da semana.**
+  "Começar de uma dieta" é o caminho mais natural pra quem nunca vinculou
+  nada — e é também exatamente por isso que o card "Dieta" da Evolução
+  fica sempre vazio pra essa pessoa, sem ela nunca saber que existe outro
+  jeito. Uma sugestão discreta ("Sabia que dá pra vincular uma dieta a
+  dias da semana?") aparece só nesse estado (nenhuma dieta jamais vinculada
+  a nenhum dia) e some pra quem já usa o recurso — não é a métrica de
+  aderência que mudou, só a descoberta dela. `food-log-screen.tsx`
+  (`EmptyDay`).
+- ✅ **Perfil: o botão de ritmo mostra um número que o resultado final não
+  bate.** "Moderado (0,82 kg)" é o teto de 1% do peso corporal — mas se o
+  déficit necessário pra chegar lá passar do teto de 25% do TDEE, o
+  resultado final entrega um ritmo menor (ex.: 0,63 kg/semana) sem
+  nenhuma explicação visível ligando os dois números. O aviso que já existia
+  pro corte de déficit (`DEFICIT_CLAMPED`/`SURPLUS_CLAMPED`) agora nomeia o
+  ritmo semanal resultante na mesma frase. `core/nutrition/energy.ts`.
+- ✅ **6 testes novos** cobrindo os três casos (a nota aparecendo/sumindo no
+  Diário, a sugestão de vinculação aparecendo só quando ninguém nunca usou
+  o recurso, e a mensagem de clamp nomeando o ritmo certo).
+
+Verificado ao vivo (`next build` + `next start` + Playwright, não só nos
+testes) reproduzindo o cenário exato que o agente encontrou — os três
+cenários de antes/depois batem com o esperado.
+
+`npm run verify` (typecheck + lint + 1932 testes) e `npm run build` verdes.
+
+---
+
 ## ✅ `MacroDonut` sem `width`/`height` — só apareceu ao vivo — 25/09/2026
 
 **Achado gerando as capturas de tela pra um PDF de visão geral do produto**

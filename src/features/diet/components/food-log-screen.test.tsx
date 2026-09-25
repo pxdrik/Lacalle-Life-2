@@ -20,7 +20,7 @@ import { LocalDietRepository } from "../data/local-diet-repository";
 import { LocalFoodLogRepository } from "../data/local-food-log-repository";
 import { createDiet, createMealItem } from "../services/create-diet";
 import { addItem } from "../services/edit-diet";
-import { assignWeekdays, weekdayOf } from "../services/diet-schedule";
+import { assignWeekdays, weekdayOf, WEEKDAYS } from "../services/diet-schedule";
 import type { Diet } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 import { FoodLogScreen } from "./food-log-screen";
@@ -397,6 +397,29 @@ describe("a day already started from a diet", () => {
       expect(saved?.meals[0]?.eaten).toBe(true);
     });
   });
+
+  // Achado por um agente sem contexto do app (25/09/2026): importar uma
+  // dieta pro dia deixa os totais lá em cima em zero até cada refeição ser
+  // marcada — sem aviso nenhum, isso lê como "a importação falhou".
+  it("explains why the totals read zero, and stops once everything is checked", async () => {
+    const diet = dietForToday();
+    mount(seededUnchecked(diet), diet);
+    await screen.findByDisplayValue("Refeição 1");
+
+    expect(
+      screen.getByText(/1 refeição planejada ainda não foi marcada como comida/),
+    ).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/ainda não foi marcada como comida/),
+      ).not.toBeInTheDocument();
+    });
+  });
 });
 
 describe("duplicating a meal in the diary", () => {
@@ -450,6 +473,32 @@ describe("an empty day", () => {
     expect(
       screen.getByRole("button", { name: "Adicionar refeição" }),
     ).toBeInTheDocument();
+  });
+
+  // Achado por um agente sem contexto do app (25/09/2026): "Começar de uma
+  // dieta" é o caminho mais natural pra quem nunca vinculou nada a um dia da
+  // semana, e nada nele menciona que a vinculação existe — resultado, o
+  // card de aderência da Evolução fica sempre vazio sem explicação.
+  it("suggests linking a diet to a weekday when nobody ever has", async () => {
+    mount(emptyLog(), createDiet("Dieta livre"));
+    await screen.findByText(/Nada registrado em/);
+
+    expect(
+      screen.getByText(/vincular uma dieta a dias da semana/),
+    ).toBeInTheDocument();
+  });
+
+  it("stays quiet once any diet is already linked to some weekday", async () => {
+    let diet = createDiet("Dieta de outro dia");
+    const today = weekdayOf(new Date());
+    const otherDay = WEEKDAYS.find((day) => day !== today)!;
+    diet = assignWeekdays([diet], diet.id, [otherDay])[0]!;
+    mount(emptyLog(), diet);
+    await screen.findByText(/Nada registrado em/);
+
+    expect(
+      screen.queryByText(/vincular uma dieta a dias da semana/),
+    ).not.toBeInTheDocument();
   });
 });
 

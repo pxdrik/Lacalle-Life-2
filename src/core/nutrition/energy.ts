@@ -95,11 +95,21 @@ export function computeEnergyTarget(
 
   if (appliedDelta > maxDelta) {
     appliedDelta = maxDelta;
+    // The rate chip picked (`weeklyKg`, above) and the rate this clamp leaves
+    // behind are now two different numbers on the same screen — found live by
+    // an agent walking through the app fresh (25/09/2026): the profile form
+    // reads "Moderado (0,82 kg)" and the plan a few lines below says "cerca de
+    // 0,63 kg por semana", with nothing connecting the two except the reader
+    // doing the arithmetic themselves. Naming the resulting rate here, in the
+    // same advisory that already explains the kcal clamp, closes that gap
+    // without a second UI element.
+    const clampedWeeklyKg = round((maxDelta * 7) / KCAL_PER_KG_BODY_MASS, 2);
     advisories.push({
       code: isCut ? "DEFICIT_CLAMPED" : "SURPLUS_CLAMPED",
       message:
         `${isCut ? "Déficit" : "Superávit"} limitado a ${round(maxDelta)} kcal ` +
-        `(${round((isCut ? MAX_DEFICIT_RATIO : MAX_SURPLUS_RATIO) * 100)}% do TDEE).`,
+        `(${round((isCut ? MAX_DEFICIT_RATIO : MAX_SURPLUS_RATIO) * 100)}% do TDEE), ` +
+        `o que deixa o ritmo em ${clampedWeeklyKg} kg por semana em vez do pedido.`,
     });
   }
 

@@ -52,6 +52,14 @@ import { MacroSummary } from "./macro-summary";
 import { MealCard } from "./meal-card";
 
 /** Shifts a `YYYY-MM-DD` day by whole days, without dragging a clock along. */
+/** Meals seeded by `startDayFromDiet` that nobody has checked as eaten yet —
+ * `meal.eaten === false` specifically, not just falsy: a hand-typed meal has
+ * no `sourceDietId` and no `eaten` field at all, and counts as eaten by
+ * default (`isEaten` in `meal-execution.ts`), not as one of these. */
+function plannedNotEatenCount(log: FoodLog): number {
+  return log.meals.filter((meal) => meal.eaten === false).length;
+}
+
 function shiftDay(day: string, offset: number): string {
   const [year, month, date] = day.split("-").map(Number);
   if (year === undefined || month === undefined || date === undefined)
@@ -197,6 +205,23 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                 totals={eatenMacros(state.log)}
                 targets={targets}
               />
+            )}
+
+            {/* Achado por um agente sem contexto nenhum do app (25/09/2026):
+                importar uma dieta pro dia mostra as refeições com os totais
+                certos nos cards, mas o total daqui em cima fica zerado até
+                cada uma ser marcada com o ✓ — sem esta linha, isso lê como
+                "a importação falhou", não como "nada foi marcado ainda
+                comido". O ✓ em si continua só ícone (Pedro, 17/09/2026:
+                "não precisa de escrita") — o texto mora aqui, uma vez por
+                dia, não repetido em cada card. */}
+            {plannedNotEatenCount(state.log) > 0 && (
+              <p className="mt-1 text-xs text-ink-subtle">
+                {plannedNotEatenCount(state.log) === 1
+                  ? "1 refeição planejada ainda não foi marcada como comida"
+                  : `${String(plannedNotEatenCount(state.log))} refeições planejadas ainda não foram marcadas como comidas`}{" "}
+                — os totais acima contam só o que já foi.
+              </p>
             )}
           </div>
 
@@ -515,6 +540,30 @@ function EmptyDay({
           Criar uma dieta
         </Link>
       </div>
+
+      {/* Achado por um agente sem contexto do app (25/09/2026): quem nunca
+          vinculou nenhuma dieta a um dia da semana só vê "Começar de uma
+          dieta" aqui — o caminho mais natural do Diário — e nada nele
+          menciona que existe a vinculação. Resultado: usa o app do jeito
+          mais óbvio a semana inteira e o card de aderência da Evolução fica
+          sempre vazio, sem saber por quê. Some sozinha assim que a pessoa
+          vincula qualquer dieta a qualquer dia — não é repetida pra quem já
+          conhece o recurso. */}
+      {linkedDiet === undefined &&
+        diets.length > 0 &&
+        diets.every((diet) => diet.weekdays.length === 0) && (
+          <p className="mx-auto mt-3 max-w-sm text-xs text-ink-subtle">
+            Sabia que dá pra{" "}
+            <Link
+              href="/dietas"
+              className="underline underline-offset-4 hover:text-ink"
+            >
+              vincular uma dieta a dias da semana
+            </Link>
+            ? Ela começa sozinha nesses dias, e a Evolução passa a mostrar
+            quanto do plano você realmente segue.
+          </p>
+        )}
 
       {picking && (
         <ul className="mx-auto mt-4 max-w-sm space-y-1.5 text-left">

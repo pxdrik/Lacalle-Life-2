@@ -4,6 +4,7 @@ import {
   ABSOLUTE_KCAL_FLOOR,
   CARB_G_ABSOLUTE_MIN,
   KCAL_PER_GRAM,
+  MAX_WEEKLY_LOSS_RATIO,
   PROTEIN_G_PER_KG,
 } from "./constants";
 import { computeBmr, computeTdee } from "./energy";
@@ -125,6 +126,22 @@ describe("energy target", () => {
 
     expect(p.advisories.map((a) => a.code)).toContain("WEEKLY_RATE_CLAMPED");
     expect(p.advisories[0]?.message).toMatch(/kg por semana/);
+  });
+
+  it("names the resulting weekly rate when the deficit clamp binds tighter than the rate itself", () => {
+    // Reproduces a scenario an agent found live (25/09/2026): requesting
+    // exactly the "Moderado" chip (the 1%-bodyweight ceiling, so the rate
+    // clamp never fires on its own) can still ask for more deficit than 25%
+    // of TDEE allows. Before this test, the DEFICIT_CLAMPED message explained
+    // the kcal cap but never said what weekly rate that cap actually leaves —
+    // the chip said one number, the plan quietly delivered another.
+    const maxWeeklyKg = BASE.weightKg * MAX_WEEKLY_LOSS_RATIO;
+    const p = plan(profile({ goal: "cut", weeklyChangeKg: maxWeeklyKg }));
+
+    expect(p.advisories.map((a) => a.code)).not.toContain("WEEKLY_RATE_CLAMPED");
+    const deficitAdvisory = p.advisories.find((a) => a.code === "DEFICIT_CLAMPED");
+    expect(deficitAdvisory?.message).toMatch(/kg por semana/);
+    expect(p.projectedWeeklyChangeKg).toBeLessThan(maxWeeklyKg);
   });
 
   it("never returns a target below resting expenditure", () => {
