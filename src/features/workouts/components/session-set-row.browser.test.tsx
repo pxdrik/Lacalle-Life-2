@@ -259,14 +259,10 @@ describe("TRAINING-023/024 — cada controle recebe o próprio toque", () => {
       const row = rows[0];
       if (row === undefined) throw new Error("sem linha");
 
-      // `dialog:not([open])` fica no DOM com os próprios botões dentro. Eles
-      // não estão na tela, então `elementFromPoint` nunca os devolve e medi-los
-      // seria medir o nada.
-      const controls = [...row.querySelectorAll("button, input")].filter(
-        (element) => element.closest("dialog:not([open])") === null,
-      );
-
-      for (const control of controls) {
+      // Sem filtro de `<dialog>`: desde a Fase 3 o `RpeSelect` manda a folha
+      // para fora da árvore do consumidor por portal, então tudo o que esta
+      // consulta encontra está mesmo na linha e mesmo na tela.
+      for (const control of row.querySelectorAll("button, input")) {
         for (const [index, hit] of hitTargetsAcross(control).entries()) {
           expect
             .soft(

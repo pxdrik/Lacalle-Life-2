@@ -378,6 +378,25 @@ de 32px sem `gap` põem os centros a 32px e sobrepõem os alvos em 12px; sem
 `z-index`, vence o último do DOM. Medido: os ~19% da direita de cada ícone da
 barra de ações do exercício disparavam o vizinho.
 
+### `.children` não é a contagem de itens de uma grade
+
+Em 26/09/2026 eu afirmei, no relatório e na mensagem de commit da Fase 2, que
+`RpeSelect` "ocupava duas faixas da grade" porque renderiza o gatilho e o
+`<dialog>` como irmãos. **Estava errado**, e medir desmentiu: um `<dialog>`
+fechado é `display: none`, e elemento assim sai da árvore de caixas — não
+vira item de grade, não consome faixa, não empurra ninguém.
+
+O defeito era do teste. Ele comparava `header.children.length` com
+`row.children.length`, e `.children` é DOM: conta nó invisível. O wrapper que
+entrou no consumidor para "corrigir" isso acertou a contagem sem corrigir
+layout nenhum, e veio com um comentário explicando um mecanismo inexistente.
+
+Duas lições. **Contagem de filhos não mede layout** — faixa de grade se
+confere pelo `gridTemplateColumns` resolvido ou pela posição das caixas.
+E **achado que vira comentário no código precisa ter sido medido**, não
+deduzido: o comentário errado sobreviveria a qualquer revisão, porque soava
+plausível.
+
 ### Não escrever dado falso em arquivo curado para testar o teste
 
 Se é preciso provar que uma checagem dispara, use fixture quebrada de

@@ -110,32 +110,33 @@ export function PlannedSetRow({
           )}
 
           {/* RPE reports effort against a rep/weight target — a treadmill has
-              neither, so there is nothing here for it to rate. */}
-          {/* O wrapper não é decorativo: `RpeSelect` renderiza o gatilho **e**
-              o `<dialog>` da folha como irmãos, então posto direto na grade
-              ele ocupa **duas** faixas, a segunda invisível e de largura zero.
-              A linha executada nunca viu isso porque lá o controle já vinha
-              embrulhado junto com a legenda `<Planned>`. Corrigido aqui no
-              consumidor porque `rpe-select.tsx` está congelado nesta fase; a
-              correção na origem é da Fase 3. */}
+              neither, so there is nothing here for it to rate.
+
+              `size-8` é o **desenho** — sem altura própria o mostrador
+              herdava a altura da linha e achatava, e um meio círculo pede
+              espaço igual dos dois lados (Pedro, 17/09/2026: "mais
+              quadradinho e não tão retangular"). A coluna é de 44px e o
+              desenho centraliza nela; `touch-44` põe o alvo de toque em 44px
+              sem crescer o desenho, o mesmo acordo que o catálogo de
+              exercícios já faz com a estrela de favorito.
+
+              O wrapper que esteve aqui entre 26/09 e a Fase 3 saiu junto com
+              a razão errada que ele carregava escrita: `RpeSelect` **não**
+              ocupava duas faixas da grade. O `<dialog>` fechado é
+              `display: none` e elemento assim não vira item de grade — foi
+              medido depois. O que estava errado era o teste, que comparava
+              `header.children.length` com `row.children.length`, e
+              `.children` conta nó invisível. Hoje o componente devolve um nó
+              só, porque a folha sai por portal, e nada disso é necessário. */}
           {!isCardio && (
-            <div className="justify-self-center">
-              {/* `size-8` continua sendo o **desenho** — sem altura própria o
-                  mostrador herdava a altura da linha e achatava, e um meio
-                  círculo pede espaço igual dos dois lados (Pedro, 17/09/2026:
-                  "mais quadradinho e não tão retangular"). A coluna é de 44px
-                  e o desenho centraliza nela; `touch-44` põe o alvo de toque
-                  em 44px sem crescer o desenho, o mesmo acordo que o catálogo
-                  de exercícios já faz com a estrela de favorito. */}
-              <RpeSelect
-                value={set.rpe}
-                label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
-                onChange={(rpe) => {
-                  onChange({ rpe });
-                }}
-                className="size-8 touch-44"
-              />
-            </div>
+            <RpeSelect
+              value={set.rpe}
+              label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
+              onChange={(rpe) => {
+                onChange({ rpe });
+              }}
+              className="size-8 touch-44 justify-self-center"
+            />
           )}
         </div>
       </div>
