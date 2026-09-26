@@ -174,51 +174,49 @@ export function EvolutionScreen() {
         }}
       />
 
-      <section>
-        <h2 className="text-sm font-medium text-ink">
-          {isDuration ? "Duração semanal" : "Volume semanal"}
-        </h2>
-        <p className="mt-0.5 text-xs text-ink-subtle">
-          {isDuration
+      {/* Sprint 5 — estes quatro cabeçalhos escreviam `text-sm font-medium
+          text-ink` à mão, junto com outros cinco espalhados pelo app. Agora
+          é `Section size="sub"`, que rende exatamente as mesmas classes e o
+          mesmo `mt-3`: a migração tira a duplicação sem mover um pixel. */}
+      <Section
+        size="sub"
+        title={isDuration ? "Duração semanal" : "Volume semanal"}
+        subtitle={
+          isDuration
             ? "Últimas 12 semanas, horas treinadas"
-            : "Últimas 12 semanas, em quilos movidos"}
-        </p>
-        <div className="mt-3">
-          <VolumeChart
-            points={weekly}
-            format={formatWeek}
-            metric={metric}
-            formatMetric={formatMetric}
-          />
-        </div>
-      </section>
+            : "Últimas 12 semanas, em quilos movidos"
+        }
+      >
+        <VolumeChart
+          points={weekly}
+          format={formatWeek}
+          metric={metric}
+          formatMetric={formatMetric}
+        />
+      </Section>
 
-      <section>
-        <h2 className="text-sm font-medium text-ink">
-          {isDuration ? "Duração mensal" : "Volume mensal"}
-        </h2>
-        <div className="mt-3">
-          <VolumeChart
-            points={monthly}
-            format={formatMonth}
-            metric={metric}
-            formatMetric={formatMetric}
-          />
-        </div>
-      </section>
+      <Section
+        size="sub"
+        title={isDuration ? "Duração mensal" : "Volume mensal"}
+      >
+        <VolumeChart
+          points={monthly}
+          format={formatMonth}
+          metric={metric}
+          formatMetric={formatMetric}
+        />
+      </Section>
 
       {records.length > 0 && (
-        <section>
-          <h2 className="text-sm font-medium text-ink">Recordes</h2>
-          <p className="mt-0.5 text-xs text-ink-subtle">
-            Série mais pesada e melhor estimativa de 1RM, quase sempre séries
-            diferentes
-          </p>
-
+        <Section
+          size="sub"
+          title="Recordes"
+          subtitle="Série mais pesada e melhor estimativa de 1RM, quase sempre séries diferentes"
+        >
           <Card
             as="ul"
             padded={false}
-            className="mt-3 divide-y divide-line overflow-hidden"
+            className="divide-y divide-line overflow-hidden"
           >
             {/* Sprint 3, achado C2 — `heaviestAt` já era calculado por
                 `personalRecords` e jogado fora aqui. "80 kg" sem data não diz
@@ -260,7 +258,7 @@ export function EvolutionScreen() {
               </li>
             ))}
           </Card>
-        </section>
+        </Section>
       )}
 
       {/* Sprint 3, achado C3 — a lista renderizava todas as sessões
@@ -281,9 +279,8 @@ export function EvolutionScreen() {
           é inventada. Só o primeiro lote é montado, e o botão traz o resto.
           Doze é o número que `Recordes` logo acima já usa — convenção da
           própria página, não um palpite novo. */}
-      <section>
-        <h2 className="text-sm font-medium text-ink">Histórico</h2>
-        <ul className="mt-3 space-y-2">
+      <Section size="sub" title="Histórico">
+        <ul className="space-y-2">
           {(showingAllHistory ? history : history.slice(0, HISTORY_PAGE)).map(
             (session) => (
               <SessionRow key={session.id} session={session} />
@@ -303,7 +300,7 @@ export function EvolutionScreen() {
             treinos
           </Button>
         )}
-      </section>
+      </Section>
     </div>
   );
 }

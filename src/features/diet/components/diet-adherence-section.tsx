@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
 import { noticeClasses } from "@/design-system/components/notice";
-import { Card } from "@/design-system/components/card";
+import { EmptyState } from "@/design-system/components/empty-state";
+import { ICONS } from "@/design-system/icons";
+import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 
 import { useDietAdherence } from "../hooks/use-diet-adherence";
@@ -49,35 +49,30 @@ export function DietAdherenceSection() {
 
   if (!hasSchedule) {
     return (
-      <Card tone="quiet" className="text-center">
-        <p className="text-ink">Nenhuma dieta vinculada a dias da semana.</p>
-        <p className="mt-1.5 text-sm text-ink-subtle">
-          Vincule uma dieta a um ou mais dias, na tela de Dietas, para
-          acompanhar aqui quanto do plano você realmente segue.
-        </p>
-        <Link
-          href="/dietas"
-          className="mt-5 inline-block text-sm text-ink underline underline-offset-4"
-        >
-          Ir para as dietas
-        </Link>
-      </Card>
+      // Sprint 5 — era o último dos três estados vazios da rolagem de
+      // `/evolucao` desenhado à mão. Peso já usava `EmptyState`, Treinos
+      // passou a usar na Sprint 3, e este ficava sem ícone e com um link
+      // sublinhado solto no lugar do botão. Mesma pergunta, mesma tela,
+      // agora a mesma anatomia.
+      <EmptyState
+        icon={ICONS.diary}
+        title="Nenhuma dieta vinculada a dias da semana."
+        caption="Vincule uma dieta a um ou mais dias, na tela de Dietas, para acompanhar aqui quanto do plano você realmente segue."
+        action={{ label: "Ir para as dietas", href: "/dietas" }}
+      />
     );
   }
 
   const points = adherenceByWeek(state.diets, state.logs, ADHERENCE_WEEKS);
 
   return (
-    <div>
-      <h2 className="text-sm font-medium text-ink">Aderência semanal</h2>
-      <p className="mt-0.5 text-xs text-ink-subtle">
-        Últimas {ADHERENCE_WEEKS} semanas, refeições marcadas contra o
-        planejado
-      </p>
-      <div className="mt-3">
-        <AdherenceChart points={points} format={formatWeek} />
-      </div>
-    </div>
+    <Section
+      size="sub"
+      title="Aderência semanal"
+      subtitle={`Últimas ${String(ADHERENCE_WEEKS)} semanas, refeições marcadas contra o planejado`}
+    >
+      <AdherenceChart points={points} format={formatWeek} />
+    </Section>
   );
 }
 

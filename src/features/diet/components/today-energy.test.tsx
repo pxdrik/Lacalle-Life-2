@@ -128,7 +128,7 @@ describe("without a profile", () => {
 
     expect(toProfile).toHaveLength(0);
     expect(
-      screen.getByRole("link", { name: "Abrir diário" }),
+      screen.getByRole("link", { name: "Ver diário" }),
     ).toBeInTheDocument();
   });
 

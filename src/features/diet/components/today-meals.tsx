@@ -64,7 +64,7 @@ export function TodayMeals({ day }: { readonly day: string }) {
             href="/diario"
             className="text-xs text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
           >
-            Abrir diário
+            Ver diário
           </Link>
         ) : undefined
       }

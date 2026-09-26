@@ -230,6 +230,50 @@ const PICKER_CX = 140;
 const PICKER_CY = 128;
 const PICKER_R = 110;
 const PICKER_NEEDLE_LEN = PICKER_R - 16;
+
+/**
+ * Onde o ponteiro **começa** — e por que ele deixou de começar no pivô.
+ *
+ * Achado da Sprint 4, medido por interseção do segmento com o glifo (caixa
+ * delimitadora superestima uma diagonal): o ponteiro cruzava a descrição em
+ * **seis dos oito valores**, ocupando de 18% a 39% do próprio comprimento
+ * dentro dela, e atravessava o próprio número em RPE 8,5, com 43%.
+ *
+ * A causa é geométrica e não tem nada de sutil: a leitura mora dentro do
+ * raio que o ponteiro varre. O número fica em raio 38 a 59 do pivô (linha de
+ * base em `CY - 38`, corpo 30) e a descrição em 11 a 23 (base em `CY - 14`,
+ * corpo 12); o ponteiro ia de 0 a 94. Qualquer mão de comprimento inteiro
+ * num mostrador com leitura centrada cruza essa leitura — é a composição que
+ * está em conflito, não o ângulo.
+ *
+ * A saída preserva tudo que se pode perceber do controle: o pivô continua
+ * desenhado, o arco continua o mesmo, o ângulo é o mesmo, e a matemática de
+ * `indexForAngle`/`angleForFraction` não foi tocada. Só a **representação**
+ * do ponteiro saiu da região textual, virando um indicador radial junto ao
+ * arco — que é o que um instrumento de verdade faz quando o mostrador
+ * digital fica no meio.
+ *
+ * 72 é medido, não arredondado — e a primeira tentativa foi 64, que falhou
+ * no teste por um fio. O erro foi calcular a folga contra a **altura do
+ * glifo** em vez da caixa que o navegador devolve: `getBoundingClientRect`
+ * num `<text>` de corpo 30 cobre a caixa em inteira, do topo do ascendente
+ * ao fundo do descendente, e não o desenho do "8". Isso põe o topo do número
+ * em `CY - 62`, três unidades acima de onde a conta no papel o colocava, e a
+ * ponta interna do indicador a 64 raspava nele em ±12,9° — RPE 8 e 8,5,
+ * justamente os dois valores mais usados.
+ *
+ * A 72, os dois casos apertados ficam: em ±12,9° a ponta cai em `CY - 70,2`,
+ * oito acima do topo do número; em ±64,3° cai em `CY - 31,2`, oito acima do
+ * topo da descrição. Os outros ângulos saem pela largura, não pela altura —
+ * o número tem ±22 de meia largura e a ponta já está além disso.
+ *
+ * A lição vale além deste arquivo: **quando a régua é o navegador, a conta
+ * também tem que ser.** O teste que pegou isso amostra o segmento e pergunta
+ * quantos pontos caem dentro do glifo, em vez de comparar retângulos — caixa
+ * delimitadora em volta de uma diagonal acusa colisão onde não há, e teria
+ * escondido a de verdade atrás de seis falsos positivos.
+ */
+const PICKER_NEEDLE_START = 72;
 const PICKER_PATH = arcPath(PICKER_CX, PICKER_CY, PICKER_R);
 const PICKER_ARC_LENGTH = Math.PI * PICKER_R;
 
@@ -438,7 +482,7 @@ function RpeDialPicker({
       {angle !== null && (
         <line
           x1={PICKER_CX}
-          y1={PICKER_CY}
+          y1={PICKER_CY - PICKER_NEEDLE_START}
           x2={PICKER_CX}
           y2={PICKER_CY - PICKER_NEEDLE_LEN}
           strokeWidth="4"

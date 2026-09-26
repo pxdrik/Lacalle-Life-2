@@ -78,6 +78,26 @@ export function VolumeChart({
       : Math.min(selected, chronological.length - 1);
   const active = chronological[activeIndex];
 
+  /**
+   * Quais períodos ganham rótulo — e por que o passo sozinho não bastava.
+   *
+   * A regra era "um a cada `labelStep`, mais o ativo, sempre". Com 12 pontos
+   * o passo é 2 e o ativo começa no último (índice 11), que fica **colado**
+   * no índice 10 do passo: dois rótulos vizinhos, cada um numa fatia de
+   * ~20px, disputando ~40px de texto. Até a Sprint 4 isso não aparecia
+   * porque as fatias se recusavam a encolher e empurravam o card inteiro
+   * para fora (os 52px); com `min-w-0`, a fatia encolhe e a colisão fica
+   * visível — "14/09" encostando em "21/09", medido e visto em captura.
+   *
+   * Trocar um sintoma por outro seria remendo. A causa é a regra ignorar
+   * distância: o rótulo do passo perde a vez quando o ativo está a menos de
+   * um passo dele. O ativo nunca cede, porque é ele que a linha de resumo
+   * acima está descrevendo.
+   */
+  const showsLabel = (index: number) =>
+    index === activeIndex ||
+    (index % labelStep === 0 && Math.abs(index - activeIndex) >= labelStep);
+
   return (
     <Card>
       {active !== undefined && (
@@ -179,7 +199,7 @@ export function VolumeChart({
               index === activeIndex ? "font-medium text-ink" : "text-ink-subtle",
             )}
           >
-            {(index % labelStep === 0 || index === activeIndex) && (
+            {showsLabel(index) && (
               <span className="whitespace-nowrap">{format(point)}</span>
             )}
           </li>

@@ -92,3 +92,57 @@ describe("UI-07 — o gráfico semanal", () => {
     expect(card.scrollWidth - card.clientWidth).toBeLessThanOrEqual(0);
   });
 });
+
+/**
+ * Sprint 5 — rótulos vizinhos não podem se tocar.
+ *
+ * O `min-w-0` da Sprint 4 resolveu o transbordo do card e, ao permitir que a
+ * fatia encolhesse, expôs um defeito que estava escondido atrás dele: o
+ * período ativo ganha rótulo sempre, e com 12 pontos ele cai colado no
+ * vizinho do passo. Visto em captura antes de ser medido — "14/09"
+ * encostando em "21/09".
+ *
+ * A régua é a caixa de cada rótulo desenhado contra a do seguinte. Contar
+ * quantos rótulos aparecem não serviria: o defeito é de posição.
+ */
+describe("os rótulos desenhados nunca se sobrepõem", () => {
+  for (const width of PHONE_WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px/${density}`, async () => {
+        await setViewport(width, 720);
+        setDensity(density);
+        const { labels } = mount(POINTS);
+
+        const drawn = [...labels.querySelectorAll("span")].map((span) => ({
+          text: span.textContent ?? "",
+          box: span.getBoundingClientRect(),
+        }));
+
+        expect(drawn.length).toBeGreaterThan(1);
+
+        for (let i = 1; i < drawn.length; i += 1) {
+          const previous = drawn[i - 1]!;
+          const current = drawn[i]!;
+          expect(
+            current.box.left,
+            `"${previous.text}" encosta em "${current.text}"`,
+          ).toBeGreaterThanOrEqual(previous.box.right);
+        }
+      });
+    }
+  }
+
+  it("o período ativo nunca perde o rótulo para um vizinho do passo", async () => {
+    await setViewport(320, 720);
+    setDensity("comfortable");
+    const { labels } = mount(POINTS);
+
+    const drawn = [...labels.querySelectorAll("span")];
+    const activeLi = [...labels.querySelectorAll("li")].at(-1)!;
+
+    // O mais recente é o ativo por padrão, e é o que a linha de resumo
+    // acima descreve — ele é o único que não pode ser omitido.
+    expect(activeLi.querySelector("span")).not.toBeNull();
+    expect(drawn.length).toBeGreaterThan(1);
+  });
+});

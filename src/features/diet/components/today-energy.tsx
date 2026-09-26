@@ -29,7 +29,7 @@ import { MacroSummary } from "./macro-summary";
  * screen. Sprint 8 puts them in the one piece the page exists to show: the
  * ring stays the only shape the app draws nowhere else, and the three macros
  * sit underneath it, smaller, past a rule — read *after* the ring, not beside
- * it. The `Abrir diário` / `Registrar` link that used to live on the macro
+ * it. The `Ver diário` / `Registrar` link that used to live on the macro
  * card's own header is gone from here: `TodayMeals` right below already
  * carries it, and printing it twice was the split card's own symptom.
  *
@@ -86,7 +86,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
           href="/diario"
           className="mt-4 inline-block text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
         >
-          {nothingYet ? "Registrar" : "Abrir diário"}
+          {nothingYet ? "Registrar" : "Ver diário"}
         </Link>
       </Card>
     );

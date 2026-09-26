@@ -524,3 +524,104 @@ describe("UI-03 e UI-04 — a folha do RPE cabe e não se sobrepõe", () => {
     },
   );
 });
+
+/**
+ * FINAL-RPE-01 — o ponteiro não cruza a leitura, em nenhum dos oito valores.
+ *
+ * A Sprint 4 mediu o defeito assim: 18% a 39% do comprimento do ponteiro
+ * dentro da descrição em seis dos oito valores, e 43% dentro do próprio
+ * número em RPE 8,5. A caixa delimitadora **não serve** como régua aqui —
+ * ela é um retângulo em volta de uma diagonal, e acusa sobreposição onde a
+ * linha passa ao lado. A régua certa é amostrar o segmento e perguntar
+ * quantos pontos caem dentro do glifo.
+ *
+ * A correção foi tirar a representação do ponteiro de dentro do raio de
+ * leitura (`PICKER_NEEDLE_START`), sem tocar em ângulo, escala, teclado ou
+ * toque — tudo isso continua coberto pelos blocos C1/C2 acima, que não
+ * mudaram.
+ */
+describe("FINAL-RPE-01 — o ponteiro fica fora da leitura", () => {
+  /** A fração do segmento do ponteiro que cai dentro de um retângulo. */
+  function fractionInside(
+    a: DOMPoint,
+    b: DOMPoint,
+    rect: DOMRect,
+    steps = 400,
+  ): number {
+    let inside = 0;
+    for (let i = 0; i <= steps; i += 1) {
+      const t = i / steps;
+      const x = a.x + (b.x - a.x) * t;
+      const y = a.y + (b.y - a.y) * t;
+      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+        inside += 1;
+    }
+
+    return inside / (steps + 1);
+  }
+
+  /** As duas pontas do ponteiro em coordenadas de tela, pelos próprios
+   * pontos do SVG — nada de reimplementar a rotação aqui. */
+  function endpoints(line: SVGLineElement) {
+    const svg = line.ownerSVGElement!;
+    const matrix = line.getScreenCTM()!;
+    const at = (x: number, y: number) => {
+      const point = svg.createSVGPoint();
+      point.x = x;
+      point.y = y;
+      return point.matrixTransform(matrix);
+    };
+
+    return {
+      a: at(line.x1.baseVal.value, line.y1.baseVal.value),
+      b: at(line.x2.baseVal.value, line.y2.baseVal.value),
+    };
+  }
+
+  for (const step of RPE_SCALE) {
+    it(`RPE ${step.label} não toca número nem descrição`, async () => {
+      const { slider } = await openPicker(step.value);
+
+      const needle = [...slider.querySelectorAll("line")].find(
+        (line) => line.getAttribute("stroke-width") === "4",
+      ) as SVGLineElement;
+      const { a, b } = endpoints(needle);
+
+      const texts = [...slider.querySelectorAll("text")];
+      expect(texts).toHaveLength(2);
+
+      for (const text of texts) {
+        expect(
+          fractionInside(a, b, text.getBoundingClientRect()),
+          `o ponteiro cruza "${text.textContent ?? ""}" em RPE ${step.label}`,
+        ).toBe(0);
+      }
+    });
+  }
+
+  it("mantém o pivô desenhado, para o mostrador continuar sendo um mostrador", async () => {
+    const { slider } = await openPicker(8);
+    const pivot = slider.querySelector("circle")!;
+
+    expect(pivot.getBoundingClientRect().width).toBeGreaterThan(0);
+  });
+
+  it.each(PHONE_WIDTHS)(
+    "FINAL-RPE-03/04 — o indicador fica dentro do SVG em %spx",
+    async (width) => {
+      await setViewport(width, 720);
+      const { slider } = await openPicker(7.5);
+      const needle = [...slider.querySelectorAll("line")].find(
+        (line) => line.getAttribute("stroke-width") === "4",
+      )!;
+
+      const box = needle.getBoundingClientRect();
+      const svg = slider.getBoundingClientRect();
+
+      expect(box.left).toBeGreaterThanOrEqual(svg.left - 0.5);
+      expect(box.right).toBeLessThanOrEqual(svg.right + 0.5);
+      expect(box.top).toBeGreaterThanOrEqual(svg.top - 0.5);
+      expect(box.bottom).toBeLessThanOrEqual(svg.bottom + 0.5);
+    },
+  );
+});

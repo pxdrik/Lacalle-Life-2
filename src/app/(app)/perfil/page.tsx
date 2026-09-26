@@ -7,6 +7,7 @@ import { ManualSyncButton } from "@/app/(app)/(auth)/conta/manual-sync-button";
 import { ProfileScreen } from "@/features/profile/components/profile-screen";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
+import { Section } from "@/design-system/components/section";
 import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
@@ -38,14 +39,11 @@ export default function ProfilePage() {
             "quero uma parte na aba de perfil dizendo qual é meu e-mail,
             senha, etc" — e hoje esta é também a única tela do app que leva
             a `/entrar`/`/cadastro`, que nenhuma navegação linka. */}
-        <div>
-          <h2 className="text-sm font-medium text-ink">Conta</h2>
-          <div className="mt-3">
-            <AuthDataProvider>
-              <AccountStatus />
-            </AuthDataProvider>
-          </div>
-        </div>
+        <Section size="sub" title="Conta">
+          <AuthDataProvider>
+            <AccountStatus />
+          </AuthDataProvider>
+        </Section>
 
         {/* Achado ao vivo contra produção (02/09/2026): o único lugar que
             disparava a sincronização do perfil era `/conta` — quem só abre

@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { noticeClasses } from "@/design-system/components/notice";
+import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { useState } from "react";
 
@@ -60,9 +61,8 @@ export function ProfileScreen() {
 
       {/* Independent of the nutrition profile below — a display preference
           applies whether or not the person has ever filled out a goal. */}
-      <div>
-        <h2 className="text-sm font-medium text-ink">Aparência</h2>
-        <div className="mt-3 flex flex-wrap items-center gap-4">
+      <Section size="sub" title="Aparência">
+        <div className="flex flex-wrap items-center gap-4">
           <div>
             <p className="mb-1.5 text-xs text-ink-subtle">Tema</p>
             <ThemeToggle />
@@ -72,7 +72,7 @@ export function ProfileScreen() {
             <DensityToggle />
           </div>
         </div>
-      </div>
+      </Section>
 
       {showForm ? (
         <ProfileForm
