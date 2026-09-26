@@ -61,6 +61,8 @@ describe("SessionExerciseCard", () => {
     render(
       <SessionExerciseCard
         exercise={EXERCISE}
+        position={0}
+        total={1}
         catalogue={undefined}
         onOpenDetail={vi.fn()}
         nextSetId={null}
@@ -74,10 +76,13 @@ describe("SessionExerciseCard", () => {
     );
 
     const header = screen.getByText("Reps").closest("div");
-    expect(header).toHaveTextContent("Série");
     expect(header).toHaveTextContent("Reps");
     expect(header).toHaveTextContent("Peso");
     expect(header).toHaveTextContent("RPE");
+    // "Série" saiu: o rótulo tem 37,7px de texto e a coluna que ele rotulava
+    // tem 18,4px, então ele transbordava por cima de "PESO" em vez de
+    // rotular qualquer coisa. A coluna continua reservada, só sem legenda.
+    expect(header).not.toHaveTextContent("Série");
   });
 
   describe("a cardio exercise", () => {
@@ -85,6 +90,8 @@ describe("SessionExerciseCard", () => {
       render(
         <SessionExerciseCard
           exercise={EXERCISE}
+          position={0}
+          total={1}
           catalogue={catalogueEntry({ movementPattern: "cardio" })}
           onOpenDetail={vi.fn()}
           nextSetId={null}
@@ -112,6 +119,8 @@ describe("SessionExerciseCard", () => {
       render(
         <SessionExerciseCard
           exercise={EXERCISE}
+          position={0}
+          total={1}
           catalogue={undefined}
           onOpenDetail={vi.fn()}
           nextSetId={nextSetId}
@@ -141,6 +150,8 @@ describe("SessionExerciseCard", () => {
       render(
         <SessionExerciseCard
           exercise={exercise}
+          position={0}
+          total={1}
           catalogue={undefined}
           onOpenDetail={vi.fn()}
           nextSetId={null}
@@ -160,6 +171,8 @@ describe("SessionExerciseCard", () => {
       render(
         <SessionExerciseCard
           exercise={EXERCISE}
+          position={0}
+          total={1}
           catalogue={undefined}
           onOpenDetail={vi.fn()}
           nextSetId={null}
@@ -198,6 +211,78 @@ describe("SessionExerciseCard", () => {
       expect(
         screen.getByRole("button", { name: "Trocar Supino reto por outro exercício" }),
       ).toBeDisabled();
+    });
+  });
+
+  describe("reordenar o exercício durante o treino", () => {
+    // `onMove` sem valor padrão de propósito: `= vi.fn()` faria
+    // `mount(1, 3, undefined)` cair no padrão em vez de passar `undefined`,
+    // e o teste de "sem seta nenhuma" testaria o contrário do que diz.
+    function mount(
+      position: number,
+      total: number,
+      onMove: ((offset: number) => void) | undefined,
+    ) {
+      render(
+        <SessionExerciseCard
+          exercise={EXERCISE}
+          position={position}
+          total={total}
+          catalogue={undefined}
+          onOpenDetail={vi.fn()}
+          nextSetId={null}
+          lastTime={undefined}
+          onSetChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemoveSet={vi.fn()}
+          onAddSet={vi.fn()}
+          onNotesChange={vi.fn()}
+          onMove={onMove}
+        />,
+      );
+      return { onMove };
+    }
+
+    const up = () =>
+      screen.getByRole("button", { name: "Mover Supino reto para cima" });
+    const down = () =>
+      screen.getByRole("button", { name: "Mover Supino reto para baixo" });
+
+    it("sobe e desce chamam onMove com -1 e +1", async () => {
+      const user = userEvent.setup();
+      const { onMove } = mount(1, 3, vi.fn());
+
+      await user.click(up());
+      expect(onMove).toHaveBeenLastCalledWith(-1);
+
+      await user.click(down());
+      expect(onMove).toHaveBeenLastCalledWith(1);
+    });
+
+    it("o primeiro não sobe", () => {
+      mount(0, 3, vi.fn());
+      expect(up()).toBeDisabled();
+      expect(down()).toBeEnabled();
+    });
+
+    it("o último não desce", () => {
+      mount(2, 3, vi.fn());
+      expect(up()).toBeEnabled();
+      expect(down()).toBeDisabled();
+    });
+
+    it("um exercício sozinho não tem para onde ir", () => {
+      mount(0, 1, vi.fn());
+      expect(up()).toBeDisabled();
+      expect(down()).toBeDisabled();
+    });
+
+    it("sem onMove não renderiza seta nenhuma — o editor de um treino já feito não reordena", () => {
+      mount(1, 3, undefined);
+
+      expect(
+        screen.queryByRole("button", { name: /Mover/ }),
+      ).not.toBeInTheDocument();
     });
   });
 });

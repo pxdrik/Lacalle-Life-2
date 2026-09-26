@@ -1,0 +1,293 @@
+# ANÁLISE COMPARATIVA DE DESIGN — LACALLE LIFE ORIGINAL vs V2
+
+**Nota metodológica antes de começar:** esta análise foi feita navegando ao vivo pelas duas aplicações (contas com dados já existentes: "Pedro Funes" no Original e uma conta já populada no V2), testando fluxos reais sempre que possível — adicionar alimento, editar quantidade, iniciar e finalizar treino, navegar histórico e progresso. Duas limitações precisam ficar explícitas: (1) a emulação de viewport mobile via redimensionamento de janela não surtiu efeito neste ambiente de testes — as capturas de tela continuaram em resolução desktop mesmo após o redimensionamento, então a análise "mobile" abaixo é inferida a partir do tamanho de elementos, espaçamento e densidade observados em desktop, não de uma verificação direta do breakpoint mobile; (2) algumas anomalias que descrevo (nomes duplicados de exercício, itens de teste no banco de alimentos, gráficos vazios) podem ser problemas de dados de seed da conta de teste, não necessariamente bugs de código — deixo isso marcado onde relevante.
+
+---
+
+## 1. RESUMO EXECUTIVO
+
+Os dois produtos resolvem o mesmo problema com filosofias opostas. O Original é um app "consumer fitness" — dashboard com anel de calorias, cards coloridos, IA integrada como funcionalidade central (chat, geração de plano alimentar) — mas com uma execução ainda imatura: edição de alimento exige apagar e readicionar, o plano alimentar gerado por IA não mostra itens reais ao expandir, o gráfico de peso tem o eixo de datas invertido, e dois gráficos de progresso aparecem vazios. O V2 é um "power tracker": tipografia monoespaçada, edição de tudo inline, sem modais, com bibliotecas completas de exercícios (183) e alimentos (220), e uma tela de treino ao vivo que de fato parece pensada para ser usada na academia. Em compensação, o V2 não tem uma tela de "visão geral do dia" (Dashboard) e sua identidade visual é fria, quase uma planilha.
+
+A conclusão central: **o V2 vence quase todas as decisões de produto e fluxo** (alimentação, treino, progresso, consistência de componentes). **O Original vence apenas em uma coisa clara: a tela de Dashboard/resumo diário**, que o V2 simplesmente não possui. A recomendação não é "misturar 50/50" — é levar a arquitetura do V2 como base e enxertar nela um Dashboard no estilo do Original.
+
+---
+
+## 2. ANÁLISE DO LACALLE LIFE ORIGINAL
+
+### 2.1 Identidade visual
+Tema escuro fixo (não encontrei toggle de tema funcional além de um item "Claro" no menu que não parece implementado), verde-esmeralda como cor primária, cards com fundo verde-escuro translúcido para elementos "quentes" (treino, refeições) e cinza-chumbo para o resto. Bordas arredondadas generosas, sem sombras pronunciadas (é um flat dark UI). Tipografia sans-serif padrão, pesos bem contrastados entre títulos e corpo. Ícones de linha simples e consistentes (talher, halteres, gráfico).
+
+Isso transmite fitness/saúde de forma imediata (verde = saudável, ícones de nutrição/treino na Home) e parece moderno e jovem, mas não parece particularmente premium — o excesso de cards com o mesmo verde-escuro translúcido em quase toda a interface (Dashboard, Registro Alimentar, Treinos) cria uma certa monotonia visual, e alguns elementos (o selo "Made with Manus" no canto inferior direito de toda tela) comunicam que é um produto ainda em prototipagem, o que reduz a percepção de confiabilidade.
+
+### 2.2 Layout
+Estrutura de sidebar fixa + conteúdo, largura de conteúdo confortável, padding generoso. A densidade de informação é baixa a moderada — bom para leitura rápida, mas em telas como Configurações isso se traduz em um scroll muito longo sem nenhuma segmentação por abas. Os cards do Dashboard têm boa hierarquia (resumo calórico em destaque, macros ao lado, treino/refeições abaixo, ações rápidas no rodapé). O que funciona muito bem: o Dashboard. O que parece desorganizado: a tela de Progresso, com dois gráficos completamente vazios ocupando espaço sem explicação. O que poderia ser simplificado: Configurações, que mistura perfil, metas calculadas, dados pessoais, objetivo, preferências alimentares e restrições em um único formulário corrido.
+
+### 2.3 Navegação
+Sidebar com ícone + rótulo, item ativo destacado em verde sólido — fácil entender onde se está. Um grupo secundário (Ajuda, Configurações, tema, conta) fica separado visualmente no rodapé da sidebar, o que é uma boa prática de hierarquia (ações de conta vs. ações de produto). Não há breadcrumbs, mas a profundidade de navegação é baixa (no máximo duas camadas: lista → detalhe de treino), então não fazem falta. A tela de Chat com IA e a de Plano Alimentar dependem fortemente de IA para funcionar; se a geração de IA falhar ou demorar, essas telas ficam praticamente vazias — um ponto de fragilidade de produto, não só de UI.
+
+### 2.4 Dashboard
+Hierarquia de informação é o ponto forte do Original: saudação + data, depois o anel de calorias com "kcal restantes" (a métrica mais importante do dia, em destaque visual máximo), macros em barras ao lado, depois treino do dia e refeições do dia lado a lado, alertas contextuais (ex.: "Meta calórica não atingida") e por fim quatro botões de ação rápida. Isso deveria ser mantido quase integralmente. O que removeria: o selo "Made with Manus" (branding de plataforma, não do produto) e a duplicação de ações (o botão "+Registrar" no card de macros faz a mesma coisa que "Registrar Refeição" no rodapé — redundância de CTA). O que o V2 faz melhor aqui: nada — o V2 simplesmente não tem uma tela equivalente.
+
+### 2.5 Alimentação
+Registro Alimentar organiza por refeição (café da manhã, almoço, jantar, lanche) com barras de macro no topo. Adicionar alimento abre um modal completo: busca, filtro por macro, lista de resultados, seleção, campo de quantidade, pré-visualização de calorias/macros, e só então o botão "Adicionar" (que ainda passa por um estado "Adicionando..."). Isso é seguro e didático, mas lento — são no mínimo 4 a 5 toques para registrar um único alimento. Pior: depois de adicionado, o item só pode ser **excluído**, não editado; para corrigir a quantidade é preciso apagar e adicionar de novo, refazendo todo o fluxo do modal. Também notei um bug visual real: enquanto a lista de alimentos carrega, o skeleton loading aparece como blocos sólidos laranja (em vez de um shimmer cinza discreto), o que chama atenção indevida e parece um elemento quebrado, não um estado de carregamento.
+
+O Plano Alimentar mostra um resumo de macros e uma lista de refeições com nomes inconsistentes ("Breakfast" em inglês ao lado de "Almoço" em português — falha de localização). Ao expandir uma refeição, no meu teste não apareceu nenhum alimento — só o botão "Mudar Refeição com IA". Isso pode ser um problema de dados da conta testada, mas do ponto de vista de produto é um risco: se a geração de IA não retornar itens detalhados, o usuário fica sem visibilidade nenhuma do que deveria comer.
+
+Resposta às duas perguntas centrais: registrar uma refeição é mais lento e trabalhoso no Original (modal multi-etapas); entender a alimentação do dia é razoavelmente claro no Registro Alimentar (barras de macro por refeição), mas a falta de edição de quantidade prejudica a confiança nos números ao longo do dia.
+
+### 2.6 Treinos
+A listagem de rotinas e o histórico são claros, com um botão "Iniciar" grande e verde. A tela de execução ao vivo tem um bom esqueleto: timer, série numerada, checkmark de conclusão, campos de peso/reps editáveis, botões para adicionar série/exercício. O modal de "Finalizar Treino" com seleção de intensidade (Leve/Moderado/Pesado) mapeada para estimativa de kcal é um detalhe de produto muito bom, pois conecta o treino de volta ao orçamento calórico do dia. Pontos negativos: não há indicação de "última vez" (peso/reps da sessão anterior) pré-preenchida nos campos, o que obrigaria o usuário a lembrar ou consultar o histórico manualmente; encontrei rotinas listadas como "0 exercícios" no card principal que, ao abrir, continham exercícios normalmente — uma inconsistência de contagem que gera desconfiança; e há exercícios duplicados com o mesmo nome dentro de uma mesma sessão histórica ("Tríceps testa" aparecendo duas vezes como blocos separados).
+
+Para o cenário de "estou na academia, cansado, com uma mão só": os campos são grandes o suficiente e os checkmarks têm bom tamanho de toque, mas a ausência do valor da última sessão como referência é uma falha real de usabilidade nesse contexto — o usuário tem que adivinhar o peso a repetir.
+
+### 2.7 Progresso
+Cards de estatística no topo (peso atual, média calórica, treinos realizados, dias com registro) são claros. O gráfico "Evolução do Peso" tem um bug de eixo: as datas aparecem na ordem 27/07 → 25/07 (da esquerda para a direita), ou seja, ao contrário da ordem cronológica real, o que faz a leitura da tendência ficar tecnicamente incorreta mesmo que a linha "pareça" fazer sentido visualmente. Os gráficos "Calorias Diárias" e "Macronutrientes (g/dia)" apareceram completamente vazios na minha sessão de teste — não sei dizer com certeza se é falta de dados históricos da conta ou um bug de renderização, mas do ponto de vista do usuário o efeito é o mesmo: uma seção de progresso com dois terços de gráficos "quebrados". Não há tabela de recordes (1RM), nem separação clara entre progresso corporal e progresso de treino.
+
+### 2.8 Configurações/Perfil
+Um único formulário longo: conta, metas calculadas (card roxo com kcal/proteína/carbo/gordura/TMB/TDEE — visualmente bonito e informativo), dados pessoais, objetivo com nível de déficit, preferências alimentares (lista de gosta/não gosta com busca, dentro de uma caixa com scroll interno — padrão pouco comum e um pouco confuso), restrições alimentares em chips, e um único botão "Salvar Configurações" no final. A tela é tecnicamente completa, mas é densa e cansativa de rolar; sem seções colapsáveis ou abas, o usuário perde o contexto de onde está no formulário depois de rolar algumas telas.
+
+### 2.9 Chat com IA
+Interface de chat padrão, bem formatada (negrito, listas, fórmulas passo a passo do cálculo de TMB/TDEE), com aviso de responsabilidade no rodapé ("as respostas são geradas por IA e não substituem orientação profissional"). É uma tela sólida, mas por ser um item de navegação de primeiro nível, ela compete visualmente com as funcionalidades centrais (alimentação, treino) — no fluxo do produto, a IA parece ser tratada como recurso principal, não como um complemento.
+
+---
+
+## 3. ANÁLISE DO LACALLE LIFE V2
+
+### 3.1 Identidade visual
+Tema claro por padrão, com alternância clara/escuro/sistema funcional e bem executada nos dois modos. Tipografia monoespaçada em praticamente toda a interface — decisão forte e pouco comum em apps de fitness, que dá uma sensação de precisão/"ferramenta de dados" em vez de "app de bem-estar". Bordas finas, quase nenhuma sombra, paleta neutra com verde reservado só para ações primárias e barras de progresso. Não há ilustrações, emojis ou elementos decorativos.
+
+Isso transmite confiabilidade e "seriedade" de dados, e parece moderno em um sentido minimalista/técnico, mas comunica pouco a respeito de fitness/saúde por si só — se alguém visse uma tela isolada sem contexto, poderia confundir com uma planilha financeira. Não é genérico (a tipografia monoespaçada é uma escolha de identidade forte), mas também não parece "jovem" ou energético da forma que apps de treino costumam ser.
+
+### 3.2 Layout
+Sem sidebar: navegação horizontal simples de texto no topo. Isso libera bastante espaço horizontal e deixa o conteúdo centrado em uma coluna de largura controlada, o que funciona muito bem para leitura e edição de listas. A densidade de informação é mais alta que no Original (mais números visíveis por tela, especialmente em Alimentos e Evolução), mas a tipografia monoespaçada com alinhamento tabular compensa isso e mantém a leitura organizada. O que funciona muito bem: os cards de refeição (Diário e Dietas), que concentram edição, macros e ações em um espaço compacto sem parecer apertado. O que parece pouco resolvido: a ausência de qualquer navegação secundária ou breadcrumb quando se entra em um treino ao vivo ou em uma dieta específica — só o link "← Sair sem finalizar" ou "← Dietas" no topo, sem indicação visual mais forte de contexto.
+
+### 3.3 Navegação
+Fácil entender onde se está (item ativo com destaque sutil) e fácil chegar a qualquer seção (tudo está a um clique, sem sub-menus). É consistente em todas as páginas. Não encontrei, porém, nenhum atalho de "voltar ao topo/início" — porque **não existe uma tela de início/dashboard**: o item mais à esquerda do menu é "Diário", que funciona como a página padrão, mas ele não agrega treino, progresso e alertas em um resumo único. Isso é a lacuna mais importante do V2 como um todo.
+
+### 3.4 Dashboard
+Não existe. O que mais se aproxima é a tela de Diário, que mostra apenas a parte alimentar do dia (macros e refeições), sem nenhuma referência ao treino do dia, sem alertas, sem atalhos para as outras áreas do produto. Um usuário que abre o app pela manhã não tem, em nenhuma tela, uma resposta rápida para "como estou indo hoje, no geral". Isso é exatamente o que o Original resolve bem — e é o principal ponto onde o V2 deveria importar a decisão do Original.
+
+### 3.5 Alimentação
+Este é o ponto mais forte do V2. O Diário mostra o resumo de macros do dia no topo e, abaixo, cards de refeição com alça de arrastar (reordenar), totais de macro por refeição, e itens de alimento com campo de quantidade **editável diretamente na lista** — ao digitar um novo valor e sair do campo, calorias e macros recalculam instantaneamente, sem modal, sem botão de salvar. Adicionar alimento é um campo de busca inline que já lista sugestões imediatamente (mesmo sem digitar) e adiciona ao clicar em um resultado, direto na refeição, com 100g como padrão para depois ajustar. Isso reduz o fluxo de registrar um alimento de "4-5 toques + modal" (Original) para essencialmente "2 toques" (V2). Cada refeição também tem duplicar, mover para cima/baixo, excluir e campo de observações.
+
+A tela de Dietas (equivalente ao Plano Alimentar) reaproveita exatamente o mesmo componente de cartão de refeição do Diário — mesma edição inline, mesmos totais — e permite ter várias dietas nomeadas (ex.: "Corte - dias de treino", "Descanso - low carb") que podem ser duplicadas ou apagadas. Não há geração por IA; tudo é montado manualmente, o que é coerente com a proposta do V2, mas exige mais trabalho inicial do usuário para montar uma dieta do zero.
+
+Vale registrar um problema de qualidade de dados (não de design): o banco de alimentos do V2 contém entradas de teste/lixo (como uma linha "0123456789..." e outra "AAAAAAA...") misturadas com alimentos reais nas listas não filtradas — isso não é um problema de UI, mas precisa ser limpo antes de qualquer lançamento.
+
+Respostas às duas perguntas centrais: registrar uma refeição é visivelmente mais rápido no V2. Entender a alimentação do dia também é mais claro no V2, porque o mesmo cartão mostra quantidade, calorias e os três macros lado a lado por item, e o total por refeição e por dia está sempre visível no topo, sem precisar abrir nada.
+
+### 3.6 Treinos
+A lista de rotinas mostra contagem de exercícios e séries diretamente no card, com ações de duplicar e excluir. Quando existe uma sessão em andamento, ela aparece destacada no topo com tempo decorrido e um botão "Continuar" — e o estado da sessão persiste mesmo saindo da tela ("Sair sem finalizar"), o que é essencial para uso real na academia (interrupções, chamadas, trocar de aba).
+
+A tela de execução ao vivo é o melhor material de UX encontrado nas duas plataformas: cada exercício mostra uma foto/thumbnail, o texto "Última vez, 08 de ago.: 9×24 · 8×22" com o desempenho anterior, e os campos de peso/reps já vêm pré-preenchidos como valores fantasma a partir dessa última sessão — o usuário só precisa confirmar (tocar no check) ou ajustar um número, quase nunca digitar do zero. O RPE é um seletor com descrições completas ("8 · Poderia ter feito +2 repetições"), o que ensina a escala em vez de assumir que o usuário já a conhece. Há também "Série extra" para séries não planejadas e um campo de observações por exercício. O cabeçalho com tempo e contagem de séries permanece fixo ao rolar a tela.
+
+Resposta à pergunta central — "qual projeto tem a melhor experiência durante um treino real, com uma mão, cansado, entre séries": **o V2, com margem considerável**, principalmente pelo pré-preenchimento com a última sessão e pela persistência de estado ao saltar entre abas/telas.
+
+### 3.7 Progresso
+A tela "Evolução" é a mais completa das duas plataformas: peso atual com variação desde a última medição, alternância entre Peso e Gordura corporal, um gráfico com eixo de datas corretamente ordenado cronologicamente e uma linha de tendência mais clara sobreposta à linha real, lista de medições com edição e exclusão por item (mostrando peso e % de gordura juntos), e, abaixo, uma seção "Treinos" com volume semanal e mensal em gráfico de barras e uma tabela de "Recordes" com a melhor série e o 1RM estimado por exercício. Nenhum gráfico vazio, nenhuma inconsistência de datas.
+
+Resposta às perguntas centrais: o V2 comunica progresso melhor, tem gráficos corretos e sem bugs, e tem melhor hierarquia (peso corporal separado de desempenho de treino, cada um com sua seção). Não há excesso de informação — cada gráfico tem um propósito claro.
+
+### 3.8 Configurações/Perfil
+Extremamente simples: um card com as metas calculadas (kcal, macros, TMB, TDEE, referência de fibra e explicação do déficit em texto simples), e um botão "Editar dados" que revela um formulário curto (sexo, idade, altura, peso, nível de atividade, objetivo, % de gordura opcional, ritmo de kg/semana opcional) com um botão "Calcular metas". Há também "Apagar dados". A tela parece simples e técnica, no bom sentido — é rápida de entender —, mas é claramente mais pobre em funcionalidade do que a do Original: não encontrei preferências alimentares (gosta/não gosta), nem restrições alimentares (vegano, sem lactose etc.), nem um controle visível de logout/conta nesta tela — não posso confirmar se essa função existe em outro lugar do V2, então deixo isso como não verificado.
+
+---
+
+## 4. COMPARAÇÃO DIRETA
+
+| Critério | LaCalle Original | LaCalle V2 | Vencedor | Por quê |
+|---|---|---|---|---|
+| Identidade visual | Dark, verde, cards translúcidos, "Made with Manus" visível | Claro/escuro, monoespaçado, minimalista | V2 | Mais consistente e sem marcas de plataforma de terceiros, mas ambos são válidos — o Original é mais "fitness", o V2 mais "ferramenta" |
+| Paleta | Verde-esmeralda sobre preto, boa mas repetitiva | Neutra com verde reservado a ações | Original | Comunica fitness/saúde de forma mais imediata |
+| Tipografia | Sans-serif padrão | Monoespaçada, ótima para números | V2 | Alinhamento tabular ajuda leitura de dados nutricionais e de treino |
+| Cards | Bonitos, mas todos parecidos entre si | Funcionais, componente único reaproveitado em Diário/Dietas | V2 | Consistência e reuso reduzem carga cognitiva |
+| Navegação | Sidebar com ícones, clara | Menu horizontal simples, clara | Empate | Ambos são fáceis de usar; nenhum tem breadcrumbs |
+| Dashboard | Existe e é bom | Não existe | Original | V2 não tem tela equivalente — perda real de produto |
+| Alimentação | Modal multi-etapas, sem edição de quantidade pós-registro | Edição inline instantânea, adição em 1 clique | V2 | Fluxo objetivamente mais rápido e sem retrabalho |
+| Treinos | Boa base, sem histórico pré-preenchido, sem persistência clara de sessão | Pré-preenchimento com última sessão, RPE educativo, sessão persistente | V2 | Muito mais adequado ao uso real na academia |
+| Progresso | Gráfico de peso com eixo invertido, dois gráficos vazios | Datas corretas, PRs, volume de treino | V2 | Original tem bugs de dados que comprometem confiança |
+| Configurações | Completo (preferências, restrições), mas denso | Simples, mas incompleto (sem preferências/restrições visíveis) | Original | Mais completo, mesmo que precise de melhor organização |
+| Mobile | Não testável neste ambiente | Não testável neste ambiente | Não avaliado | Resize de janela não refletiu nas capturas; nenhuma conclusão confiável pode ser dada |
+| Hierarquia | Boa no Dashboard, fraca em Progresso/Configurações | Boa e consistente na maioria das telas | V2 | Mais previsível tela a tela |
+| Consistência | Cada tela tem um padrão de card diferente | Mesmo componente de refeição reaproveitado em duas telas | V2 | Reuso de componente é uma decisão de produto superior |
+| Clareza | Boa, prejudicada por bugs de gráfico/plano | Alta, números sempre visíveis e recalculados ao vivo | V2 | Feedback instantâneo ao editar quantidades |
+| Modernidade | Visualmente "app de fitness" convencional | Visualmente diferenciado, estilo "dev tool" | Empate | Depende do público-alvo desejado |
+| Experiência geral | Boa ideia, execução com falhas visíveis | Execução mais madura, falta uma visão geral do dia | V2 | Vence em quase todas as telas testáveis, exceto Dashboard |
+
+---
+
+## 5. O QUE DEVEMOS ROUBAR DE CADA PROJETO
+
+### Do LaCalle Original devemos manter:
+- A tela de Dashboard inteira como conceito: anel de calorias, macros ao lado, treino do dia e refeições do dia em cards paralelos, alertas contextuais e atalhos de ação rápida no rodapé.
+- O card de "Metas Calculadas" com TMB/TDEE explicados visualmente (o V2 tem o conteúdo, mas o Original apresenta melhor visualmente, em destaque).
+- O modal de finalização de treino com seleção de intensidade (Leve/Moderado/Pesado) e o cálculo de kcal associado — essa ponte entre treino e orçamento calórico do dia não existe no V2.
+- A ideia de preferências alimentares (gosta/não gosta) e restrições (vegano, sem lactose etc.) na configuração de perfil.
+
+### Do LaCalle V2 devemos manter:
+- A edição inline de quantidade de alimento com recálculo instantâneo, sem modal.
+- A adição de alimento em um clique a partir de busca com sugestões imediatas.
+- O reaproveitamento do mesmo componente de "cartão de refeição" tanto no Diário quanto nas Dietas.
+- A tela de treino ao vivo com pré-preenchimento baseado na última sessão, RPE com descrição educativa, e persistência de sessão ("Sair sem finalizar" e retomar depois).
+- A tela de Evolução completa: peso + gordura corporal, tendência, volume de treino semanal/mensal e tabela de recordes (1RM).
+- As bibliotecas dedicadas de Exercícios e Alimentos como páginas navegáveis e pesquisáveis, não escondidas dentro de modais.
+- O empty state do Diário (mensagem clara + duas ações possíveis + atalho "Hoje").
+- O toggle de tema claro/escuro/sistema funcional.
+
+### Do Original NÃO devemos levar para o V2:
+- O fluxo de adicionar alimento em modal de múltiplas etapas.
+- A impossibilidade de editar quantidade sem excluir e readicionar o item.
+- A dependência de geração por IA para o plano alimentar ter conteúdo visível (fragilidade de produto).
+- O selo "Made with Manus" e qualquer marca de plataforma de prototipagem.
+- Os bugs de gráfico (eixo de datas invertido, gráficos vazios sem explicação).
+
+### Do V2 NÃO devemos levar para uma versão final:
+- A ausência total de uma tela de visão geral do dia (Dashboard).
+- Os dados de teste/lixo no banco de alimentos ("0123456789...", "AAAA...").
+- A tela de Perfil sem preferências e restrições alimentares.
+- A falta de qualquer indicação visual de "fitness/saúde" na identidade — o tom pode ser mantido mais técnico do que o Original, mas precisa de pelo menos um elemento de cor/energia que sinalize o propósito do produto para um novo usuário.
+
+---
+
+## 6. PROPOSTA DO "LACALLE LIFE IDEAL"
+
+### Identidade
+Personalidade: uma ferramenta de precisão para quem já treina e já conta macro, mas que ainda parece "de fitness" à primeira vista — não uma planilha genérica. Sensação desejada: confiança e controle ("meus números, meu progresso, sem fricção"). Público percebido: praticantes intermediários/avançados de treino de força com foco em nutrição, não o público casual de apps de dieta genéricos. Nível de modernidade: alto, mas sóbrio. Nível de minimalismo: alto, herdado do V2, mas com pontos de cor herdados do Original para orientar a leitura rápida (calorias, macros, alertas).
+
+### Cores
+Mantendo a identidade verde já reconhecível do LaCalle Life e aplicando-a sobre a base neutra/clara do V2:
+
+Segue a continuação e conclusão do relatório (a mensagem anterior cobriu os itens 1 a 5 — resumo executivo, análise do Original, análise do V2, comparação direta e "o que roubar de cada um"). Abaixo fecho os itens 6 a 12.
+
+## 6. PROPOSTA DO "LACALLE LIFE IDEAL" (continuação)
+
+### Cores
+
+Preservando o verde já reconhecível do LaCalle Life sobre a base neutra e as bordas finas do V2:
+
+**Modo claro**
+- Primary: `#16A34A`
+- Secondary: `#0D9488`
+- Background: `#FAFAFA`
+- Surface: `#FFFFFF`
+- Card: `#FFFFFF` (borda `#E5E7EB`, sem sombra)
+- Text primary: `#111827`
+- Text secondary: `#6B7280`
+- Border: `#E5E7EB`
+- Success: `#16A34A`
+- Warning: `#D97706`
+- Error: `#DC2626`
+- Info: `#2563EB`
+
+**Modo escuro**
+- Primary: `#22C55E`
+- Secondary: `#14B8A6`
+- Background: `#0B0F0D`
+- Surface: `#151A18`
+- Card: `#161B1A` (borda `#26302B`)
+- Text primary: `#F3F4F6`
+- Text secondary: `#9CA3AF`
+- Border: `#26302B`
+- Success: `#22C55E`
+- Warning: `#F59E0B`
+- Error: `#EF4444`
+- Info: `#3B82F6`
+
+### Tipografia
+Uma sans-serif neutra (ex.: Inter) para textos de interface, e uma monoespaçada (ex.: JetBrains Mono/IBM Plex Mono) exclusivamente para números — calorias, macros, peso, reps, datas — para herdar a legibilidade tabular do V2 sem tornar a interface inteira "fria".
+
+- H1: Inter SemiBold, 28–32px
+- H2: Inter SemiBold, 20–22px
+- H3: Inter Medium, 16–18px
+- Body: Inter Regular, 14–15px
+- Caption: Inter Regular, 12–13px, cor secundária
+- Button: Inter SemiBold, 14px
+- Números/dados: Mono Medium, tabular-nums, 14–24px conforme contexto
+
+### Componentes
+Botões primários sólidos em verde, secundários com contorno, ghost para ações terciárias, altura mínima de 44px. Cards com borda fina de 1px e raio de 12px, sem sombra por padrão. Inputs numéricos editáveis inline (padrão do V2) com fonte monoespaçada e estado de foco em contorno verde de 2px. Modais reservados só para ações raras ou destrutivas (excluir dieta, apagar dados) — nunca para adicionar alimento ou marcar série, que devem permanecer inline. Bottom sheets substituem modais desktop em mobile. Tabs em formato pílula para alternâncias como Peso/Gordura ou filtros de macro. Chips para restrições alimentares e tags de exercício. Badges coloridos por status semântico ("Em andamento", "Moderado"). Barras de progresso lineares para macros; anel circular reservado apenas para a métrica mais importante do dia (calorias restantes) no Dashboard. Gráficos sempre ordenados cronologicamente da esquerda para a direita. Toasts curtos para confirmar edições inline (hoje ausentes no V2, o que gera dúvida se a ação foi salva). Empty states com mensagem, explicação e uma ou duas ações claras, no padrão já usado no Diário do V2. Loading states com skeleton cinza discreto — nunca blocos coloridos sólidos como o bug visual encontrado no Original.
+
+---
+
+## 7. DESIGN SYSTEM
+
+**Spacing:** 4px (gap ícone-texto) · 8px (padding interno pequeno) · 12px (entre campos de um formulário) · 16px (padding padrão de card) · 24px (gap entre cards) · 32px (separação entre seções) · 48px (margem superior de página).
+
+**Border radius:** cards 12px · botões 8px · inputs 8px · modais/bottom sheets 16px (cantos superiores no bottom sheet) · pills/badges/chips totalmente arredondados (999px).
+
+**Sombras:** usar somente em elementos flutuantes/sobrepostos — dropdowns, modais, bottom sheets, cabeçalho fixo quando a página é rolada. Nunca em cards estáticos apoiados no fundo da página; ali, borda fina substitui sombra, como no V2. Isso mantém a leitura calma em telas densas de dados e evita custo de renderização desnecessário.
+
+**Ícones:** estilo outline (não preenchido), 20–24px, traço de 1.5–2px, um único conjunto consistente em toda a navegação, botões e cards. Emoji pode continuar em saudações pontuais (como o "👋" do Original), mas não deve se misturar ao conjunto de ícones funcionais.
+
+---
+
+## 8. MOBILE-FIRST
+
+**Usuário na academia:** botões e checkmarks de série com no mínimo 44×44px de área de toque (idealmente 48px), espaçamento mínimo de 8px entre elementos tocáveis vizinhos para evitar toques acidentais entre séries, inputs de peso/reps grandes com teclado numérico automático, navegação inferior fixa com no máximo cinco itens principais (Hoje, Treinos, Dietas, Evolução, Perfil — Exercícios e Alimentos tornam-se sub-telas acessíveis a partir de Treinos e Dietas para não sobrecarregar a barra), ação primária sempre alcançável pelo polegar, e apenas um exercício expandido por vez durante o treino (formato acordeão) em vez de rolar uma lista longa com tudo aberto.
+
+**Usuário registrando alimentação:** manter a velocidade de um único toque do V2 para adicionar alimento, edição de quantidade inline com confirmação automática ao fechar o teclado, cores fixas por macro (proteína/carboidrato/gordura) para reconhecimento imediato sem precisar ler o rótulo, e abas horizontais deslizáveis por refeição no topo da tela em vez de rolagem vertical longa por todas as refeições do dia.
+
+---
+
+## 9. UX: FLUXOS CRÍTICOS
+
+| Fluxo | Melhor projeto | Problema principal | Como combinar |
+|---|---|---|---|
+| 1. Abrir app → entender situação → decidir | Original | V2 não tem tela de resumo | Usar o Dashboard do Original como tela inicial, acrescentando o banner de sessão de treino em andamento do V2 |
+| 2. Registrar alimento | V2 | Original exige modal de 4–5 toques | Adotar a adição inline em 1 clique do V2 |
+| 3. Editar quantidade | V2 | Original exige excluir e readicionar | Adotar a edição direta no campo do V2 |
+| 4. Criar dieta | V2 | Original depende de IA sem fallback visível | Manter a montagem manual do V2 como padrão, com "Gerar sugestão com IA" como atalho opcional que preenche os cards manuais |
+| 5. Criar treino | V2 | Original não expõe biblioteca de exercícios pesquisável no fluxo | Adotar a biblioteca de 183 exercícios do V2 |
+| 6. Executar treino | V2, com folga | Original não pré-preenche com a última sessão | Usar o sistema de execução do V2 (histórico prévio, RPE educativo, sessão persistente) |
+| 7. Finalizar treino | Original | V2 não tem estimativa de intensidade/kcal | Usar a execução do V2 + o modal de intensidade do Original no fechamento |
+| 8. Consultar histórico | Original | V2 não mostra um histórico set a set isolado e navegável | Manter o detalhe de sessão passada do Original, integrado à navegação do V2 |
+| 9. Ver evolução | V2, com folga | Original tem eixo de datas invertido e gráficos vazios | Usar a tela de Evolução do V2 integralmente |
+
+---
+
+## 10. ERROS DE DESIGN QUE DEVEMOS EVITAR
+
+- Depender de geração por IA como único caminho para conteúdo essencial, sem fallback manual visível ao usuário.
+- Loading states mal estilizados que parecem elementos quebrados, como os blocos laranja sólidos observados no Original.
+- Gráficos com eixo de tempo fora de ordem cronológica.
+- Gráficos vazios exibidos sem nenhuma explicação ou empty state.
+- Exigir excluir e recriar um item só para editar um valor simples.
+- Ausência de uma tela única de visão geral do dia.
+- Inconsistência de idioma dentro do mesmo conteúdo (ex.: "Breakfast" ao lado de "Almoço").
+- Contadores desatualizados em cards de lista (rotina exibindo "0 exercícios" quando na verdade contém exercícios).
+- Dados de teste vazando para listas em produção (itens como "AAAA..." no banco de alimentos).
+- Exercícios duplicados por erro de dados dentro da mesma sessão de treino.
+- Marca de plataforma de prototipagem visível em uma tela de produto final.
+- Uso de modal para ações de altíssima frequência, como registrar alimento ou marcar série — modais devem ficar restritos a ações raras ou destrutivas.
+- Falta de confirmação visual (toast) após edições inline, o que deixa dúvida sobre se a alteração foi salva.
+
+---
+
+## 11. SCORE
+
+**LaCalle Original** — Visual: 7 · UX: 5 · UI: 6,5 · Mobile: não testável neste ambiente (estimativa indireta 6, com base no tamanho de elementos observado em desktop) · Consistência: 5,5 · Hierarquia: 7 · Clareza: 6 · Fitness/Health feel: 8 · Modernidade: 6,5 · Experiência geral: 6
+
+**LaCalle V2** — Visual: 7 · UX: 8,5 · UI: 8 · Mobile: não testável neste ambiente (estimativa indireta 7,5) · Consistência: 8,5 · Hierarquia: 7,5 · Clareza: 8,5 · Fitness/Health feel: 5,5 · Modernidade: 8 · Experiência geral: 8
+
+### Nota do LaCalle Original: 6,3/10
+Perde pontos por bugs reais de dados/gráfico (eixo invertido, gráficos vazios), pelo fluxo lento e sem edição de alimento, e pela marca de plataforma visível. Ganha pontos por ter um Dashboard sólido e uma identidade visual mais claramente "fitness".
+
+### Nota do LaCalle V2: 7,7/10
+Ganha pontos por consistência de componentes, velocidade de registro, execução de treino madura e uma tela de evolução completa e correta. Perde pontos por não ter nenhuma tela de visão geral do dia e por uma identidade visual que comunica pouco sobre fitness/saúde à primeira vista.
+
+---
+
+## 12. DECISÃO FINAL — SE FÔSSEMOS LANÇAR O LACALLE LIFE 3.0 AMANHÃ
+
+1. **Identidade visual:** a base neutra e a tipografia monoespaçada para números do V2, com o verde de identidade e um ponto de energia visual (o anel de calorias) herdados do Original.
+2. **Navegação:** o menu simples do V2, adaptado para uma barra inferior fixa em mobile, com uma primeira aba de "Hoje" fazendo o papel de Dashboard.
+3. **Dashboard:** o do Original, integralmente, redesenhado com a paleta neutra do V2.
+4. **Alimentação:** o sistema de edição inline e adição em um clique do V2, aplicado tanto ao Diário quanto às Dietas.
+5. **Treino:** o sistema de execução ao vivo do V2 (histórico prévio pré-preenchido, RPE educativo, sessão persistente), com o modal de intensidade e estimativa de kcal do Original no momento de finalizar.
+6. **Progresso:** a tela de Evolução do V2 na íntegra — peso, gordura corporal, volume de treino e recordes — sem nenhum dos bugs de eixo do Original.
+7. **Do Original, copiaria conceitualmente:** o anel de calorias, o card de metas com TMB/TDEE, o modal de intensidade pós-treino, e as preferências/restrições alimentares no perfil.
+8. **Do V2, copiaria conceitualmente:** o cartão de refeição unificado (reaproveitado em Diário e Dietas), a busca inline de alimentos, as bibliotecas de exercícios e alimentos como páginas próprias, a tela de evolução completa e o toggle de tema.
+9. **Descartaria dos dois:** a dependência total de IA sem fallback manual (Original), a ausência de Dashboard (V2), a marca "Made with Manus" (Original), os dados de teste no banco de alimentos (V2), e os bugs de gráfico/contagem (Original).
+10. **Arquitetura visual final:** o design system do V2 (cores neutras, espaçamento, tipografia mono para dados, bordas finas em vez de sombra) como fundação, com o Dashboard e os toques de identidade fitness do Original aplicados por cima, unificados por um único conjunto de componentes (cards, botões, inputs, modais) usado de forma idêntica em todas as telas — sem depender de IA como caminho único para nenhuma funcionalidade essencial.
+
+Nenhuma alteração de código, refatoração ou nova tela foi feita nesta etapa — apenas navegação e leitura das duas interfaces existentes. Fico à disposição para detalhar qualquer seção, revisar pontos específicos, ou já começar a transformar alguma destas recomendações em especificação de implementação, quando você decidir.

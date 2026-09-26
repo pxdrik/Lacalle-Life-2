@@ -34,6 +34,7 @@ import {
   addSessionExercise,
   completeSet,
   finishSession,
+  moveSessionExercise,
   removePerformedSet,
   replaceSessionExercise,
   setSessionExerciseNotes,
@@ -369,10 +370,12 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
         </div>
       ) : (
         <div className="mt-4 space-y-3">
-          {session.exercises.map((exercise) => (
+          {session.exercises.map((exercise, index) => (
             <SessionExerciseCard
               key={exercise.id}
               exercise={exercise}
+              position={index}
+              total={session.exercises.length}
               catalogue={catalogue.get(exercise.exerciseId)}
               onOpenDetail={detail.show}
               nextSetId={next?.exerciseId === exercise.id ? next.setId : null}
@@ -432,6 +435,11 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
               onSwap={() => {
                 setPicking(false);
                 setSwappingId(exercise.id);
+              }}
+              onMove={(offset) => {
+                apply((current) =>
+                  moveSessionExercise(current, exercise.id, offset),
+                );
               }}
             />
           ))}

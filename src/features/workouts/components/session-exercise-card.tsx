@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Repeat } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Repeat } from "lucide-react";
 
 import { formatDecimal } from "@/core/format/decimal";
 
@@ -32,6 +32,15 @@ interface Props {
    * exercise it was.
    */
   readonly onSwap?: (() => void) | undefined;
+  /** This exercise's place in the session, for the arrows' end states. */
+  readonly position: number;
+  readonly total: number;
+  /**
+   * Moves the exercise by `offset`. Absent in `SessionEditor` for the same
+   * reason `onSwap` is: the order of a finished workout is a record of the
+   * sequence it was done in, not something to rearrange afterwards.
+   */
+  readonly onMove?: ((offset: number) => void) | undefined;
 }
 
 export function SessionExerciseCard({
@@ -46,6 +55,9 @@ export function SessionExerciseCard({
   onAddSet,
   onNotesChange,
   onSwap,
+  position,
+  total,
+  onMove,
 }: Props) {
   const isCardio = catalogue?.movementPattern === "cardio";
   const done = exercise.sets.filter((set) => set.isCompleted).length;
@@ -73,7 +85,16 @@ export function SessionExerciseCard({
             ? null
             : `Descanso de ${String(exercise.restSeconds)}s`}
         </ExerciseIdentity>
-        <div className="flex shrink-0 items-center gap-1">
+        {/* `gap-3`, não `gap-1`: cada `IconButton` desenha 32px e o
+            utilitário `touch-44` estende a área de toque para 44px **fora do
+            layout**. Com 4px de intervalo os centros ficam a 36px e os alvos
+            se sobrepõem 8px, e sem `z-index` quem vence é o último do DOM —
+            tocar na borda direita de "Trocar" dispararia "Mover para cima".
+            Medido em `routine-exercise-card.tsx`, que tem a mesma fileira sem
+            intervalo nenhum: os ~19% da direita de cada ícone disparam o
+            vizinho. 12px é o que põe os centros a 44px e faz os alvos
+            ladrilharem em vez de se empilharem. */}
+        <div className="flex shrink-0 items-center gap-3">
           <span className="text-xs tabular-nums text-ink-subtle">
             {done}/{exercise.sets.length}
             {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}
@@ -86,6 +107,33 @@ export function SessionExerciseCard({
             >
               <Repeat aria-hidden className="size-4" />
             </IconButton>
+          )}
+          {/* As mesmas setas do editor de rotina, agora durante o treino:
+              decidir no meio da sessão fazer o próximo exercício antes deste
+              é reordenar o que falta, não corrigir o que já foi feito. Setas
+              e não arrastar, pelo mesmo motivo que lá — uma tela usada com
+              uma mão só, de pé. */}
+          {onMove !== undefined && (
+            <>
+              <IconButton
+                label={`Mover ${exercise.name} para cima`}
+                disabled={position === 0}
+                onClick={() => {
+                  onMove(-1);
+                }}
+              >
+                <ChevronUp aria-hidden className="size-4" />
+              </IconButton>
+              <IconButton
+                label={`Mover ${exercise.name} para baixo`}
+                disabled={position === total - 1}
+                onClick={() => {
+                  onMove(1);
+                }}
+              >
+                <ChevronDown aria-hidden className="size-4" />
+              </IconButton>
+            </>
           )}
         </div>
       </header>
@@ -113,7 +161,13 @@ export function SessionExerciseCard({
         aria-hidden
         className="mt-3 flex items-center justify-between gap-px border-b border-line border-l-[3px] border-l-transparent px-1 pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
       >
-        <span className="w-4 text-center">Série</span>
+        {/* Sem rótulo, só a coluna reservada. "Série" não cabia em `w-4` —
+            medido, 37,7px de texto numa caixa de 18,4px — e transbordava por
+            cima de "PESO", que é o "texto série" que aparecia na tela. A
+            coluna é a do **número** da série, dimensionada para um dígito, e
+            uma coluna de números 1, 2, 3 à esquerda de "PESO" não precisa se
+            apresentar. */}
+        <span className="w-4" />
         {isCardio ? (
           <span className="w-24 text-center">Duração (min)</span>
         ) : (

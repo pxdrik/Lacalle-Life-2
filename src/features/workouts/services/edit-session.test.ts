@@ -7,6 +7,7 @@ import {
   addSessionExercise,
   completeSet,
   finishSession,
+  moveSessionExercise,
   moveSessionToDay,
   removePerformedSet,
   reopenSession,
@@ -233,6 +234,80 @@ describe("addSessionExercise", () => {
 
     expect(after.exercises[0]?.id).toBe(exerciseId);
     expect(after.exercises[0]?.sets).toHaveLength(3);
+  });
+});
+
+describe("moveSessionExercise", () => {
+  /** Uma sessão de três, para haver um meio de verdade para onde mover. */
+  function threeExercises() {
+    let session = runningSession().session;
+    session = addSessionExercise(session, {
+      exerciseId: "rosca-direta",
+      name: "Rosca Direta",
+    });
+    session = addSessionExercise(session, {
+      exerciseId: "remada-curvada",
+      name: "Remada Curvada",
+    });
+
+    return { session, names: session.exercises.map((item) => item.name) };
+  }
+
+  it("desce um exercício uma posição", () => {
+    const { session } = threeExercises();
+    const after = moveSessionExercise(session, session.exercises[0]!.id, 1);
+
+    expect(after.exercises.map((item) => item.name)).toEqual([
+      "Rosca Direta",
+      "Supino Reto com Barra",
+      "Remada Curvada",
+    ]);
+  });
+
+  it("sobe um exercício uma posição", () => {
+    const { session } = threeExercises();
+    const after = moveSessionExercise(session, session.exercises[2]!.id, -1);
+
+    expect(after.exercises.map((item) => item.name)).toEqual([
+      "Supino Reto com Barra",
+      "Remada Curvada",
+      "Rosca Direta",
+    ]);
+  });
+
+  it("nas pontas não faz nada, e devolve a mesma sessão", () => {
+    const { session } = threeExercises();
+
+    expect(moveSessionExercise(session, session.exercises[0]!.id, -1)).toBe(
+      session,
+    );
+    expect(moveSessionExercise(session, session.exercises[2]!.id, 1)).toBe(
+      session,
+    );
+  });
+
+  it("um id que já não existe é no-op, não erro", () => {
+    const { session } = threeExercises();
+    expect(moveSessionExercise(session, "sumiu", 1)).toBe(session);
+  });
+
+  it("reordenar não mexe em nenhuma série já concluída", () => {
+    const { session, names } = threeExercises();
+    const first = session.exercises[0]!;
+    const done = completeSet(session, first.id, first.sets[0]!.id);
+
+    const after = moveSessionExercise(done, first.id, 1);
+    const moved = after.exercises.find((item) => item.id === first.id)!;
+
+    expect(moved.sets[0]!.isCompleted).toBe(true);
+    expect(after.exercises).toHaveLength(names.length);
+  });
+
+  it("carimba updatedAt, porque a ordem é parte do que se salva", () => {
+    const { session } = threeExercises();
+    const after = moveSessionExercise(session, session.exercises[0]!.id, 1);
+
+    expect(after.updatedAt).toBeGreaterThan(session.updatedAt);
   });
 });
 

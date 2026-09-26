@@ -119,10 +119,12 @@ export function SessionEditor({ session, apply, onDone }: Props) {
       </div>
 
       <div className="mt-4 space-y-3">
-        {session.exercises.map((exercise) => (
+        {session.exercises.map((exercise, index) => (
           <SessionExerciseCard
             key={exercise.id}
             exercise={exercise}
+            position={index}
+            total={session.exercises.length}
             catalogue={catalogue.get(exercise.exerciseId)}
             onOpenDetail={detail.show}
             nextSetId={null}

@@ -1,3 +1,4 @@
+import { shiftById } from "@/core/domain/collection";
 import { createEntityId, revise, type EntityId } from "@/core/domain/entity";
 
 import type { PerformedSet, Session, SessionExercise } from "../types/session";
@@ -191,6 +192,27 @@ export function replaceSessionExercise(
     exerciseId: replacement.exerciseId,
     name: replacement.name,
   }));
+}
+
+/**
+ * Moves an exercise by `offset`, clamped. What the arrow buttons report.
+ *
+ * Same `shiftById` the routine editor's `moveExercise` already uses, so the
+ * two screens cannot disagree about what "mover para cima" does at the ends
+ * of the list. The order here is the order of the workout being done, not a
+ * record of what happened: reordering while training is deciding to do the
+ * remaining exercises in another sequence, which is why nothing about
+ * completed sets blocks it the way `replaceSessionExercise` blocks a swap.
+ */
+export function moveSessionExercise(
+  session: Session,
+  exerciseId: EntityId,
+  offset: number,
+): Session {
+  const exercises = shiftById(session.exercises, exerciseId, offset);
+  if (exercises === session.exercises) return session;
+
+  return revise(session, { exercises });
 }
 
 /**

@@ -1,0 +1,162 @@
+Auditoria — Lacalle Life V2
+
+Antes do conteúdo: não tenho acesso ao sistema de arquivos do projeto (só ferramentas de navegador), então não consegui ler src/features/*/types/ nem gravar docs/auditoria.md em disco. Inferi os formatos de dados direto do IndexedDB (lacalle-life, v7, stores profile, diets, routines, sessions, bodyEntries, foods, foodLogs, exercises) e da própria UI. O conteúdo abaixo é o texto completo para você colar em docs/auditoria.md. Também não consegui redimensionar a janela real neste ambiente (resize_window não teve efeito — window.innerWidth continuou 1534/1920 em todas as tentativas), então a avaliação mobile é parcial e isso está declarado onde relevante.
+
+0. Dados semeados
+
+Ao abrir o app a base já não estava vazia: profile (1), diets (2 — "Corte - dias de treino" com 3 refeições, "Descanso - low carb" com 1), routines (2 — "Upper" 4 exercícios/8 séries, "Lower" 3 exercícios/9 séries), sessions (6, de 17/07 a 07/08/2026), bodyEntries (6, semanais de 03/07 a 07/08/2026), foods (216) e exercises (183). Completei o que faltava: registrei uma refeição avulsa e um dia inteiro a partir de uma dieta no Diário (foodLogs estava zerado), executei e finalizei uma sessão de treino nova, criei e depois removi um alimento customizado. Todo teste destrutivo (excluir, duplicar) foi revertido para não distorcer os dados de partida.
+
+1. Auditoria por tela
+/ — Home
+
+Objetivo: portal de entrada. O que faz: exibe nav, um título estático ("Monte dietas. Monte treinos. Acompanhe sua evolução.") e o subtítulo "Nada além disso." Nenhum outro elemento, com ou sem dados.
+Bom: a frase resume bem o produto e reforça a filosofia "menos é mais" logo de cara — funciona como manifesto.
+Ruim: é 100% estática. Testei com 2 dietas, 2 treinos, 6 sessões e 6 pesagens já gravados, e a tela é idêntica à de um banco vazio. Não há nenhum atalho ("continuar treino", "registrar refeição de hoje"), nem um único número (peso atual, kcal de hoje, próximo treino).
+Confunde: nada — é simples demais para confundir, mas por isso mesmo entrega zero valor de continuidade.
+Falta: algum reflexo do estado real do usuário. Isso não é pedir um "Dashboard" no sentido SaaS (não estou recomendando contra a decisão de não ter um); é notar que a home, hoje, não cumpre nem a função mínima de portal — ela nem linka para as 3 funções centrais com CTAs, depende 100% da nav superior.
+Remover: nada.
+Simplificar: já é o mínimo possível.
+Automatizar: nada aqui — é conteúdo estático por natureza.
+Argumento para "/" mudar de figura: os fundadores vetaram Dashboard e Chat como conceitos de produto, não vetaram que a home reflita dado real. Uma home com 3 blocos determinísticos — "peso mais recente + variação", "próximo treino da rotina ativa", "kcal de hoje vs. meta se houver perfil" — continua sendo só "montar dieta, montar treino, acompanhar evolução", só que resumidos, sem virar um dashboard analítico. Hoje a home é a tela mais fraca do produto porque é a única que dado nenhum muda.
+Nota UX/Design/Produto: 4 / 8 / 3 — visualmente impecável e no tom certo, mas como produto é uma oportunidade desperdiçada.
+
+/diario — Diário (fora da lista oficial de rotas, mas é item de nav de primeira classe)
+
+Objetivo: registrar o que foi de fato comido em cada dia. O que faz: navegação por dia (setas + input date + "Hoje"), totais do dia, refeições editáveis com busca de alimento, e dois atalhos no estado vazio: "Começar de uma dieta" (clona as refeições de uma dieta salva para aquele dia) e "Adicionar refeição" (monta do zero).
+Bom: "Começar de uma dieta" é a melhor decisão de produto que vi no app — em 2 cliques o usuário tem o dia inteiro populado e editável, sem re-digitar nada. O total de macros recalcula em tempo real e por refeição.
+Ruim: não existe nenhuma comparação com meta (kcal/macros restantes) — ver B2. O nome padrão da refeição é genérico ("Refeição 1") mesmo quando vem de uma dieta com nomes reais ("Almoço", "Jantar") — na verdade aqui funcionou certo quando clonado da dieta, o problema é só no fluxo "do zero".
+Confunde: o campo de horário do input nativo mostrou "08:00 PM" (formato 12h em inglês) num app 100% em português — ver B5. O input de data mostra "08/07/2026" (formato do input nativo) ao lado de texto que diz "07/08/2026" (formato por extenso em pt-BR) — mesma data, dois formatos visíveis ao mesmo tempo — ver B6.
+Falta: barra de progresso vs. meta (existe na tela de Dieta, mas não aqui, que é onde mais importa); campo de fibra; opção de registrar por unidade caseira em vez de só gramas.
+Remover: nada.
+Simplificar: nada — fluxo enxuto.
+Automatizar: sugestão de refeição repetida ("copiar refeição de ontem") seria puramente mecânica (não é IA), mas não é crítico.
+Nota UX/Design/Produto: 8 / 8 / 6 (o 6 de produto é puxado pela ausência da meta, que é a peça central de um diário alimentar).
+
+/treinos — Lista de treinos
+
+Objetivo: gerenciar rotinas. O que faz: cria, lista, duplica e exclui rotinas; mostra contagem de exercícios/séries por rotina.
+Bom: direto ao ponto, sem fricção para criar ("Treino A" como placeholder de exemplo é um toque simpático).
+Ruim: nenhuma indicação de quando a rotina foi treinada pela última vez nem atalho "iniciar" direto da lista — é preciso entrar na rotina primeiro.
+Confunde: nada.
+Falta: "última vez" por rotina (dado que já existe em sessions, só não é exposto aqui).
+Remover: nada. Simplificar: já é mínimo.
+Nota: 8 / 8 / 7
+
+/treinos/[id] — Detalhe da rotina
+
+Objetivo: montar/editar a rotina. O que faz: lista exercícios com séries (reps/peso/RPE planejados), descanso e observações; permite reordenar (mouse e teclado), duplicar, adicionar exercício, "Iniciar treino".
+Bom: o dropdown de RPE não é um número solto — cada opção vem com a tradução em linguagem de treino ("Poderia ter feito +2 repetições"), o que substitui bem a explicação que muitos apps deixam para um "assistente". A reordenação por teclado (Tab até a alça, Espaço para pegar, setas para mover, Espaço para soltar) funciona de verdade — testei e o estado persistiu.
+Ruim: miniaturas de exercícios sem foto cadastrada caem num ícone genérico — correto, mas o contraste entre foto real (que é escura/de baixa qualidade em alguns casos) e ícone genérico pode parecer inconsistência de qualidade de fotos.
+Confunde: nada de grave.
+Falta: volume total planejado da rotina (soma de reps × peso) para o usuário comparar antes de treinar.
+Nota: 8 / 7 / 8
+
+/sessao/[id] — Execução (e histórico) de treino
+
+Objetivo: registrar o treino em tempo real e revisar treinos passados. O que faz: durante a sessão mostra cronômetro, série a série com "última vez" pré-carregada, timer de descanso automático com ±15s, checkbox de conclusão; ao finalizar, vira um resumo (duração, séries, volume, editável).
+Bom: o "Última vez, 02 de ago.: 9×22.5 · 8×20.5" ao lado de cada exercício é sobrecarga progressiva sem IA nenhuma — é exatamente o tipo de coisa que outros apps venderiam como "insight inteligente" e aqui é só o dado anterior bem exposto. O timer de descanso aparece sozinho ao marcar uma série. "Editar" depois de finalizado permite corrigir uma sessão encerrada cedo demais — isso mitiga a falta de confirmação ao clicar "Finalizar" (ver B13).
+Ruim: "Finalizar" encerra a sessão instantaneamente, mesmo com 1 de 8 séries feitas, sem nenhum aviso.
+Confunde: nada.
+Falta: indicação de tempo total de descanso acumulado na sessão; comparação de volume desta sessão vs. a anterior da mesma rotina (dado que a tela de Evolução já calcula volume por sessão).
+Nota: 8 / 8 / 7
+
+/dietas — Lista de dietas
+
+Objetivo: gerenciar planos alimentares. O que faz: cria, lista, duplica, exclui; mostra kcal/macros totais por dieta.
+Bom: mesmíssima UX limpa do /treinos, consistência de padrão entre os dois módulos.
+Ruim: nada de errado; Falta: nada crítico.
+Nota: 8 / 8 / 7
+
+/dietas/[id] — Detalhe da dieta
+
+Objetivo: montar o plano alimentar. O que faz: refeições com horário, alimentos com gramas editáveis e busca, mover/copiar item entre refeições, e — só aqui — barra de progresso contra a meta calculada no Perfil (kcal, proteína, carboidrato, gordura, cada um com "atual/meta").
+Bom: a barra de meta é muito bem feita e some graciosamente quando não há perfil preenchido (não testei esse caminho a fundo, mas o texto do Perfil confirma que é opcional por design).
+Ruim: essa é a única tela com a meta visível — e é a tela errada para o uso diário, porque é o plano, não o realizado (ver B2). O menu "⋯" ao lado de cada item parece, à primeira vista, uma ação de "substituir/equivaler", mas é só mover/copiar para outra refeição — não existe troca de alimento por outro com macros equivalentes.
+Confunde: o rótulo "⋯" sem tooltip não deixa óbvio que é um seletor de mover/copiar até abrir.
+Falta: substituição por equivalência nutricional (ex.: trocar 100g de arroz por batata-doce mantendo carboidrato aproximado) — ver B10.
+Nota: 8 / 8 / 7
+
+/alimentos — Banco de alimentos
+
+Objetivo: catálogo de referência para montar dietas. O que faz: 216 alimentos com categoria e macros por 100g, busca, filtro por categoria, favoritos, criação de alimento customizado.
+Bom: base curada em português, com categorização sensata (Proteínas, Carboidratos, Gorduras, Laticínios, Vegetais, Frutas) — dá pra montar uma dieta completa sem nunca precisar de IA para "estimar calorias de X".
+Ruim: sem paginação/virtualização visível numa lista de 216+ itens — não é grave localmente, mas se a base crescer via alimentos customizados por anos de uso, pode pesar.
+Confunde: nada.
+Falta: fibra e sódio (pelo menos fibra, já que o Perfil calcula uma meta de fibra que não existe em lugar nenhum pra comparar — ver B9); alternativa de porção em unidade caseira.
+Nota: 8 / 7 / 7
+
+/alimentos/novo — Criar alimento
+
+Objetivo: cadastrar item fora do catálogo. O que faz: nome, categoria, proteína/carboidrato/gordura/kcal por 100g.
+Bom: formulário mínimo e objetivo, com o texto de ajuda certo ("copie do rótulo").
+Ruim: ao submeter vazio, a validação devolve "Invalid input: expected number, received NaN" — texto de erro de biblioteca (Zod), em inglês, num app 100% pt-BR — ver B1, é o bug mais nítido que encontrei.
+Confunde: não alerta se você está criando um alimento quase idêntico a um já existente na base (criei "Whey Protein Concentrado" com os mesmos macros de "Whey protein", que já existia, e não houve aviso) — ver B15.
+Falta: opção de "por porção" (comum em rótulos de suplemento) além de "por 100g".
+Nota: 6 / 7 / 6
+
+/exercicios — Catálogo de exercícios
+
+Objetivo: referência para montar treinos. O que faz: 183 exercícios com músculo, equipamento, padrão de movimento, dificuldade, favoritos, filtros combináveis, e um modal por exercício com imagens de início/fim e créditos de licença (CC BY-SA, wger/free-exercise-db).
+Bom: é o painel de filtros mais completo do app (músculo × equipamento × movimento × dificuldade) e é exatamente o tipo de ferramenta que substitui "me monta um treino de perna com halteres" de um chat de IA por cliques determinísticos. Fechar o modal com Esc devolve o foco ao card de origem — acessibilidade de teclado correta.
+Ruim: nada de grave.
+Falta: nada essencial às 3 funções centrais — está completo para o que se propõe.
+Nota: 9 / 9 / 8
+
+/evolucao — Evolução
+
+Objetivo: acompanhar corpo e treino ao longo do tempo. O que faz: peso e % gordura com gráfico (linha real + linha de tendência entre primeiro e último ponto), tabela de medições, volume semanal/mensal de treino, recordes (peso × reps e 1RM estimado), histórico completo de sessões.
+Bom: o cálculo de 1RM confere exatamente com a fórmula de Epley (peso × (1 + reps/30) — validei manualmente com vários exercícios) — é uma estimativa de 1RM séria, determinística, sem "IA que chuta". O bloco de Recordes e o Histórico de sessões colocam esta tela em pé de igualdade com Strong/Hevy em profundidade analítica.
+Ruim: a "linha de tendência" no gráfico é uma reta ligando só o primeiro e o último ponto — não é uma média móvel/suavização real (tipo a que a MacroFactor usa para peso). Funciona como referência visual, mas é bem mais simples do que parece à primeira vista.
+Confunde: nada.
+Falta: qualquer trilha de nutrição (kcal/macros ao longo do tempo) — a tela chama-se "Evolução" mas cobre só corpo e treino, nunca dieta. Ver B12.
+Nota: 9 / 8 / 7
+
+/perfil — Perfil
+
+Objetivo: calcular metas nutricionais opcionais. O que faz: sexo, idade, altura, peso, nível de atividade, objetivo, %gordura opcional, ritmo opcional → calcula kcal, macros, TMB, TDEE e fibra, com disclaimer de que não substitui nutricionista.
+Bom: é o melhor exemplo do app de "onde outro produto usaria IA para calcular sua meta calórica, aqui é fórmula (Mifflin-St Jeor + multiplicador de atividade) exposta e auditável". O texto "montar dieta funciona igual sem isso" no topo é a materialização mais clara da regra "perfil é opcional" — testei sem perfil e montar dieta de fato não trava em nada.
+Ruim: a meta de fibra (31g, que bate com 14g/1000kcal — fórmula padrão) não tem onde ser comparada, porque nenhum alimento tem fibra cadastrada — dado morto. Ver B9.
+Confunde: nada.
+Nota: 8 / 8 / 7
+
+2. Avaliação visual
+
+Paleta: verde-menta como cor de ação sobre fundo quase-preto (dark) ou quase-branco (light), com azul/laranja/roxo reservados para proteína/carboidrato/gordura — esquema consistente em todas as telas, inclusive nos dois temas. Espaçamento generoso, tipografia monoespaçada para números (reforça a sensação de "painel de controle" e ajuda a escanear tabelas de séries/macros) e uma serifada/grotesca de peso alto para títulos — hierarquia clara. Contraste testado nos dois temas por inspeção visual: bom em ambos, sem texto cinza-sobre-cinza ilegível. Dark e light são espelhos fiéis um do outro, não há tela "esquecida" só num dos temas. Ícones minimalistas e coerentes (mesma família em toda parte). Cards com bordas sutis, sem sombra pesada — combina com a estética "ferramenta", não "app de consumo". Gráficos (linha de peso, barras de volume) são simples e sem excesso de decoração. Botões primários sempre verde-menta, secundários outline — padrão respeitado em todas as telas que visitei. Inputs com foco visível (testado via Tab). Loading: não observei nenhum spinner ou skeleton em nenhuma tela — como é IndexedDB local, a resposta é praticamente instantânea, então a ausência de estado de carregamento não chega a ser um problema hoje, mas é um risco se o volume de dados crescer muito (ex.: milhares de sessões). Estados vazios: o único que vi de fato (Diário sem registro) tem CTA dupla clara ("Começar de uma dieta" / "Adicionar refeição") — bom exemplo a ser replicado se /treinos e /dietas алgum dia estiverem vazios (não testei esse caso para não apagar dados reais, mas a lista com "+Criar" já no topo sugere que o padrão se sustenta). Erros: o único erro de validação que vi (B1) quebra o padrão visual do resto do app ao expor texto de biblioteca em inglês. Feedback: a exclusão "arma e confirma" (ícone fica vermelho, um segundo clique confirma) é sutil demais — não há texto explicando o que vai acontecer, e o tempo até o estado reverter pareceu curto (reverteu depois de uma pausa de poucos segundos entre cliques).
+
+Responsividade: não pude validar com uma viewport mobile real — a ferramenta de redimensionar janela não teve efeito neste ambiente (confirmei via window.innerWidth, que permaneceu no valor desktop mesmo depois de pedir 390×844 e 414×896 em duas abas diferentes). O app tem <meta viewport> correto e os layouts observados são de coluna única com containers centralizados, o que é um bom sinal, mas não é prova de que não há overflow horizontal em tabelas (ex.: a tabela de séries com 4 colunas, ou a lista de 216 alimentos) em telas estreitas. Isso deveria ser validado manualmente num dispositivo real antes de qualquer lançamento.
+
+3. Comparação com concorrentes
+
+MyFitnessPal resolve melhor o registro rápido por escaneamento de código de barras e por base de alimentos de marcas comerciais reais — o Lacalle Life não tem (nem deveria ter, dado o escopo local-first sem serviço de terceiros) esse volume de SKUs de produtos industrializados, só a base curada por 100g.
+Cronometer resolve melhor micronutrientes (vitaminas, minerais, fibra, sódio) com metas individuais — é exatamente o buraco de fibra que identifiquei aqui (B9): o Perfil calcula uma meta de fibra que o resto do app não consegue nem medir.
+MacroFactor resolve melhor a suavização de peso (algoritmo de tendência real, não uma reta entre dois pontos) e o ajuste dinâmico de meta calórica com base na adesão observada — a "linha de tendência" da tela de Evolução é visualmente parecida mas estruturalmente mais simples.
+Hevy resolve melhor o compartilhamento social de treinos e a biblioteca de templates prontos da comunidade — fora de escopo aqui por design (sem backend), mas o Hevy também tem paridade com o Lacalle Life em "última vez" e RPE, então nesse núcleo o Lacalle Life já compete de igual para igual.
+Strong resolve melhor gráficos de progressão por exercício individual (peso×tempo por movimento específico) — a tela de Evolução aqui mostra recordes agregados, mas não um gráfico de evolução de carga exercício a exercício ao longo dos meses.
+Fitbod resolve melhor a geração automática de treino do dia com base em recuperação muscular estimada — isso é justamente território de "IA/heurística automática" que o AGENTS.md exclui por decisão de produto, então não é lacuna, é escopo.
+Apple Health resolve melhor a agregação de múltiplas fontes (relógio, balança conectada, sono) num único perfil de saúde — fora de escopo para um app local-first sem integrações externas.
+
+4. Fluxo do usuário novo
+
+Primeira refeição registrada: Home → Diário (1 clique) → "Começar de uma dieta" (2) → escolher uma dieta salva (3) = 3 cliques até o dia inteiro estar preenchido e editável. Sem dieta salva ainda, o caminho é Home → Diário (1) → "Adicionar refeição" (2) → "Adicionar alimento" (3) → digitar busca → clicar no resultado (4) = 4 cliques + digitação até o primeiro alimento registrado. Isso é enxuto.
+Primeiro treino executado: Home → Treinos (1) → abrir uma rotina (2) → "Iniciar treino" (3) → marcar 1ª série (4) → "Finalizar" (5) = 5 cliques até ter uma sessão registrada (mínimo, marcando 1 de N séries). É comparável a Hevy/Strong em número de toques.
+Atrito real: não está nesses fluxos — está antes deles. Um usuário que abre o app pela primeira vez cai na home estática (seção 1) sem nenhuma pista de que precisa ir a /treinos ou /dietas primeiro para ter algo com que trabalhar no Diário/Evolução. Sem dado nenhum, /evolucao mostraria só zeros e /diario mostraria "Nada registrado" com um botão "Começar de uma dieta" que não leva a lugar nenhum enquanto não existir nenhuma dieta salva — ou seja, a ordem ideal de primeiro uso (Alimentos/Exercícios já vêm prontos → Dietas ou Treinos → Diário/Sessão → Evolução) não é comunicada em lugar nenhum da interface.
+Tela que passa menos confiança: o erro de validação em inglês (B1) é o único momento em que o produto "quebra a ilusão" de ser um app pt-BR bem cuidado — é pontual, mas é exatamente o tipo de detalhe que um usuário técnico nota e generaliza ("será que o resto também foi mal traduzido?").
+Nenhuma tela pareceu inacabada no sentido de faltar funcionalidade básica — o inacabado aqui é mais de composição (a home não reflete progresso, o diário não mostra meta) do que de telas quebradas.
+
+5. Nutrição e treino
+
+Nutrição — o que um nutricionista esperaria e não encontra: fibra rastreável (existe meta, não existe dado — B9); sódio, ao menos como aviso para hipertensos; equivalência/substituição de alimentos por grupo (ex.: lista de substitutos de carboidrato) — B10; porções em medida caseira além de gramas — B11; relatório de aderência (quantos dias da semana o usuário bateu a meta) — B12; e, mais importante, a meta comparada ao realizado no Diário, não só ao planejado na Dieta — B2. O cálculo de TMB/TDEE/macros em si é correto e transparente, o que muitos nutricionistas vão preferir a uma "caixa preta" de IA.
+
+Treino — comparado a Hevy/Strong: cadastro e execução estão no nível esperado (séries, reps, peso, RPE, descanso, "última vez"). Progressão está presente via "última vez" pré-carregada, mas falta um gráfico de carga por exercício individual ao longo do tempo (Strong tem isso como recurso central). Volume semanal/mensal existe e está correto. PRs (peso×reps e 1RM via Epley) existem e são calculados corretamente — validei a fórmula manualmente em 3 exercícios diferentes. Descanso tem timer automático com ajuste ±15s, no nível de Hevy. O que falta mesmo é a série "extra" e o volume acumulado por grupo muscular (útil para quem segue princípios de volume semanal por músculo, ex. MEV/MRV) — isso seria um cálculo determinístico a mais, não uma feature de IA.
+
+6. No lugar da seção de IA
+Pedido comum a um "assistente de IA" em apps concorrentes	Como resolver aqui de forma determinística
+"Monta um treino de perna pra mim"	Filtro combinável em /exercicios por músculo × equipamento × dificuldade já resolve a curadoria manual em poucos cliques — feito.
+"Quantas calorias eu preciso comer?"	Fórmula de Mifflin-St Jeor + multiplicador de atividade em /perfil, com todos os números expostos (TMB, TDEE, déficit/superávit) — feito e transparente.
+"Qual meu 1RM estimado?"	Fórmula de Epley aplicada ao histórico real de séries em /evolucao — feito e verificável.
+"Sugere uma substituição pra esse alimento"	Não existe hoje. É resolvível com uma tabela curada de grupos de equivalência (ex.: 1 grupo "carboidrato" com gramagens que batem ±10% de kcal/carbo) e um botão "substituir" que filtra dentro do grupo — puramente dado curado + regra, sem IA. Ver B10.
+"Monta minha dieta da semana"	Fora do escopo determinístico razoável sem virar um gerador automático (que esbarraria na regra de "nada de IA" e também mudaria o produto de "ferramenta" para "gerador"). Aqui a resposta correta é reforçar o "Começar de uma dieta" que já existe, não tentar recriá-lo automaticamente.
+"Como estou evoluindo, no geral?"	Um resumo textual fixo tipo "5,6% do peso perdido em 5 semanas, ritmo de -0,5kg/semana, dentro da meta" pode ser gerado por template + interpolação de dados, sem LLM — não implementado hoje, mas é 100% viável como regra.
+"Meu treino está estagnado?"	Regra determinística possível: comparar volume da última sessão de uma rotina com a média das 3 anteriores e sinalizar "-12% de volume" — dado já existe em sessions, só falta o cálculo e um rótulo. Não implementado hoje.
+
+Nenhum desses pedidos exige um LLM — todos são cálculo, regra ou dado curado, e a maioria já está resolvida ou é uma extensão nat
