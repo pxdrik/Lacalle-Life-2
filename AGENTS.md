@@ -36,7 +36,16 @@ conhecimento de modelos:
    reportá-lo; é por isso que o filtro de exercícios mostra a contagem viva. O
    raciocínio completo está no comentário de `design-system/components/dialog.tsx`.
 7. **Portão.** `npm run verify` precisa passar. Não avance com ele vermelho.
+   Quando a mudança toca layout ou interação, `npm run test:browser` também.
 8. **Tamanho.** Arquivos até ~250 linhas.
+9. **Geometria tem uma fonte só.** Quando a interface é uma tabela, linha ou
+   estrutura de colunas, cabeçalho e conteúdo derivam as colunas da mesma
+   lógica. Duas listas de largura escritas à mão divergem — a aba Treino
+   chegou a ter quatro para a mesma tabela. Se uma alteração exigir duplicar
+   valores de largura, ela está no lugar errado.
+10. **O data layer não muda por causa de UI.** Supabase, RLS, sincronização,
+    concorrência otimista, `entityTimestamp` e persistência são a área madura
+    do projeto. Problema visual não se resolve ali.
 
 O processo de trabalho — como implementar, o que verificar antes de dizer
 "pronto" e os erros que já custaram tempo neste projeto — está em
