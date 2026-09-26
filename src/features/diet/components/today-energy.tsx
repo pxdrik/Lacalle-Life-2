@@ -64,19 +64,24 @@ export function TodayEnergy({ day }: { readonly day: string }) {
     // way to record, the screen would state a problem and offer nothing. A
     // test holds this — it caught the link going missing when the shared
     // header was removed.
+    //
+    // **Sprint 1 — o convite a preencher o perfil saiu daqui, a constatação
+    // ficou.** `ProfileIncompleteNotice`, logo acima nesta mesma tela, já é
+    // o dono dessa ação: é ele que lê `useProfile`, que some sozinho quando
+    // o perfil existe, e que carrega o botão. Os dois juntos punham dois
+    // links para `/perfil` colados um no outro, no primeiro terço da tela
+    // mais importante do app.
+    //
+    // A frase não virou silêncio junto com o link, e a diferença importa:
+    // `targets === null` tem **três** causas (ver `useNutritionTargets`), e
+    // `ProfileIncompleteNotice` cobre só uma delas — `status === "empty"`.
+    // Um perfil salvo que o motor recusa como inseguro deixa esta tela sem
+    // anel e com o aviso de cima ausente. Sem esta linha, o herói ficaria
+    // mudo sobre a própria falta.
     return (
       <Card as="section" tone="hero" className="min-w-0 text-center lg:col-span-2">
         <MacroSummary macros={totals} size="lg" />
-        <p className="mt-3 text-xs text-ink-subtle">
-          Sem meta para comparar.{" "}
-          <Link
-            href="/perfil"
-            className="underline underline-offset-4 hover:text-ink"
-          >
-            Preencha o perfil
-          </Link>{" "}
-          se quiser ver quanto ainda cabe no dia.
-        </p>
+        <p className="mt-3 text-xs text-ink-subtle">Sem meta para comparar.</p>
         <Link
           href="/diario"
           className="mt-4 inline-block text-sm text-ink-muted underline underline-offset-4 transition-colors duration-150 ease-out hover:text-ink"
@@ -176,7 +181,15 @@ function CalorieRing({
   // porque este número tem seu próprio tamanho e recorte, não o de
   // `Metric`. Compara o texto já formatado: 2.067,4 arredondando pra
   // "2.067" duas vezes seguidas não deve piscar.
-  const displayed = formatDecimal(Math.abs(remaining));
+  //
+  // O `Math.round` é o que faz essa frase ser verdade. `formatDecimal` sem
+  // `fractionDigits` só troca separadores — mantém os dígitos que chegarem —
+  // e `eatenMacros` soma `per100g.kcal * gramas / 100`, que é fracionário.
+  // O herói exibia "646,63 kcal restantes", e o piscar que o comentário diz
+  // evitar acontecia a cada centésimo. Apresentação, não cálculo: `remaining`
+  // continua `target - consumed`, e é o mesmo arredondamento que a lista de
+  // refeições (`today-meals.tsx`) já usa para kcal.
+  const displayed = formatDecimal(Math.round(Math.abs(remaining)));
   const [seen, setSeen] = useState(displayed);
   const [changes, setChanges] = useState(0);
   if (displayed !== seen) {
@@ -185,71 +198,102 @@ function CalorieRing({
   }
 
   return (
-    <div className="flex shrink-0 items-center gap-4">
-      {/* O degradê continua fora — pág. 46 do brandbook, "gradiente é recurso
-          de superfície, nunca de identidade", e a lista onde ele é proibido
-          nomeia barras de progresso (um arco é uma barra curvada) junto com
-          botões, inputs e séries de gráfico. */}
-      <svg
-        aria-hidden
-        viewBox="0 0 120 70"
-        className="h-11 w-19 shrink-0"
-        role="presentation"
-      >
-        {/* Trilho contínuo em todo estado — nunca tracejado num dia vazio.
-            Um dia sem nada registrado não é um dia quebrado; ver o motivo
-            completo na versão anterior deste comentário, preservada no
-            histórico do git. */}
-        <path
-          d={GAUGE_PATH}
-          fill="none"
-          strokeWidth="9"
-          className="stroke-muted"
-        />
-        <path
-          d={GAUGE_PATH}
-          fill="none"
-          strokeWidth="9"
-          strokeDasharray={GAUGE_ARC_LENGTH}
-          strokeDashoffset={
-            GAUGE_ARC_LENGTH * (1 - Math.min(Math.max(ratio, 0), 1))
-          }
-          className={cn(
-            "transition-[stroke-dashoffset] duration-(--duration-data) ease-out",
-            over ? "stroke-warning" : "stroke-accent",
-          )}
-        />
-        {/* Marcações de escala — início, meta (50%), fim — o traço que faz o
-            arco ler como instrumento de medição em vez de anel decorativo. */}
-        <g strokeWidth="2" className="stroke-ink-subtle">
-          <line x1="10" y1="65" x2="15.5" y2="56.5" />
-          <line x1="60" y1="15" x2="60" y2="23" />
-          <line x1="110" y1="65" x2="104.5" y2="56.5" />
-        </g>
-      </svg>
-
-      <div className="min-w-0">
-        <p
-          key={changes}
-          className={cn(
-            "text-2xl font-semibold tracking-tight tabular-nums",
-            over ? "text-warning" : "text-ink",
-            changes > 0 && "animate-value-change motion-reduce:animate-none",
-          )}
+    <div className="min-w-0">
+      <div className="flex items-center gap-4">
+        {/* O degradê continua fora — pág. 46 do brandbook, "gradiente é
+            recurso de superfície, nunca de identidade", e a lista onde ele é
+            proibido nomeia barras de progresso (um arco é uma barra curvada)
+            junto com botões, inputs e séries de gráfico. */}
+        <svg
+          aria-hidden
+          viewBox="0 0 120 70"
+          className="h-11 w-19 shrink-0"
+          role="presentation"
         >
-          {displayed}
-        </p>
-        {/* "Restantes" implies something was eaten. On an empty day nothing
-            was, and the same 2.067 is the budget rather than a remainder —
-            the honest caption for the same true number. */}
-        <p className="text-xs leading-tight text-ink-subtle">
-          {over
-            ? "kcal acima da meta"
-            : nothingYet
-              ? "kcal para hoje"
-              : "kcal restantes"}
-        </p>
+          {/* Trilho contínuo em todo estado — nunca tracejado num dia vazio.
+              Um dia sem nada registrado não é um dia quebrado; ver o motivo
+              completo na versão anterior deste comentário, preservada no
+              histórico do git. */}
+          <path
+            d={GAUGE_PATH}
+            fill="none"
+            strokeWidth="9"
+            className="stroke-muted"
+          />
+          <path
+            d={GAUGE_PATH}
+            fill="none"
+            strokeWidth="9"
+            strokeDasharray={GAUGE_ARC_LENGTH}
+            strokeDashoffset={
+              GAUGE_ARC_LENGTH * (1 - Math.min(Math.max(ratio, 0), 1))
+            }
+            className={cn(
+              "transition-[stroke-dashoffset] duration-(--duration-data) ease-out",
+              over ? "stroke-warning" : "stroke-accent",
+            )}
+          />
+          {/* Marcações de escala — início, meta (50%), fim — o traço que faz
+              o arco ler como instrumento de medição em vez de anel
+              decorativo. */}
+          <g strokeWidth="2" className="stroke-ink-subtle">
+            <line x1="10" y1="65" x2="15.5" y2="56.5" />
+            <line x1="60" y1="15" x2="60" y2="23" />
+            <line x1="110" y1="65" x2="104.5" y2="56.5" />
+          </g>
+        </svg>
+
+        <div className="min-w-0">
+          {/* `text-metric` — 28px/110%/−2%, tabular — em vez do `text-2xl`
+              que estava aqui. A auditoria mediu o motivo: o `<h1>` da página
+              é `text-h2` (24px) no telefone e `text-h1` (32px) no desktop, e
+              o número do dia era 24px nos dois. A tela que existe para
+              responder "quanto ainda cabe hoje" empatava com o próprio nome
+              no telefone e perdia para ele no desktop.
+
+              O token não é novo e não foi inventado aqui: `tokens.css` já o
+              define como "o número de destaque… a linha que o cartão existe
+              para mostrar" (pág. 24). Até agora o único uso no repositório
+              era um card decorativo da Landing. O tracking e o line-height
+              vêm do próprio token, por isso o `tracking-tight` saiu. */}
+          <p
+            key={changes}
+            className={cn(
+              "text-metric font-semibold tabular-nums",
+              over ? "text-warning" : "text-ink",
+              changes > 0 && "animate-value-change motion-reduce:animate-none",
+            )}
+          >
+            {displayed}
+          </p>
+          {/* "Restantes" implies something was eaten. On an empty day nothing
+              was, and the same 2.067 is the budget rather than a remainder —
+              the honest caption for the same true number. */}
+          <p className="text-xs leading-tight text-ink-subtle">
+            {over
+              ? "kcal acima da meta"
+              : nothingYet
+                ? "kcal para hoje"
+                : "kcal restantes"}
+          </p>
+        </div>
       </div>
+
+      {/* Os outros dois números da pergunta. O herói respondia só "quanto
+          resta"; "quanto consumi" e "qual é a meta" exigiam abrir o diário ou
+          lembrar a meta de cor.
+
+          Fora da linha do medidor, e não ao lado dele, por medida: a 320px na
+          densidade Confortável o conteúdo do card tem ~233px, e o medidor
+          (76px) mais o intervalo já consomem 92 deles. Aqui a linha recebe a
+          largura inteira do card e cabe sem quebrar em qualquer viewport
+          suportado — o teste de navegador mede isso, não confia nisto.
+
+          Nada de meta nova: `consumed` e `target` são os mesmos valores que o
+          arco já recebe, e a conta continua sendo `target - consumed`. */}
+      <p className="mt-2 text-xs tabular-nums text-ink-subtle">
+        {`${formatDecimal(Math.round(consumed))} consumidas · ${formatDecimal(Math.round(target))} meta`}
+      </p>
     </div>
   );
 }

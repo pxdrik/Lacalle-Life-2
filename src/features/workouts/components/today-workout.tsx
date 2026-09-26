@@ -103,9 +103,18 @@ function Empty() {
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <ICONS.workouts aria-hidden className="size-8 text-ink-subtle" />
-      <p className="text-sm text-ink-muted">Nada registrado hoje.</p>
+      <div>
+        <p className="text-sm text-ink-muted">Nenhum treino registrado.</p>
+        {/* Sprint 1: esta linha e a irmã em `today-meals.tsx` diziam ambas
+            "Nada registrado hoje", com um "ainda" de diferença — duas frases
+            quase idênticas empilhadas para dois fatos distintos. Cada uma
+            agora nomeia o que falta e o que registrar ali resolve. */}
+        <p className="mt-1 text-xs text-ink-subtle">
+          Ao finalizar, volume e duração aparecem aqui.
+        </p>
+      </div>
       <Link href="/treinos" className={buttonClasses("secondary", "sm")}>
-        Começar
+        Começar treino
       </Link>
     </div>
   );

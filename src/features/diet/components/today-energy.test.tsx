@@ -96,13 +96,39 @@ function mount(log: FoodLog | null, profile: Profile | null) {
 }
 
 describe("without a profile", () => {
-  it("still shows what was eaten, and offers the profile instead of demanding it", async () => {
+  it("still shows what was eaten, and says why there is no target", async () => {
     mount(logOf(600, 40), null);
 
     expect(await screen.findByText("600")).toBeInTheDocument();
     expect(screen.getByText(/Sem meta para comparar/)).toBeInTheDocument();
+  });
+
+  /**
+   * Sprint 1, TODAY-04 — a duplicação saiu na origem, e este teste é o que
+   * impede que ela volte.
+   *
+   * `ProfileIncompleteNotice` e este card punham dois links para `/perfil`
+   * colados um no outro no topo de `/hoje`. O convite é do `Notice`: é ele
+   * que lê `useProfile`, some sozinho quando o perfil existe e carrega o
+   * botão. Aqui ficou só a constatação, **sem link** — e ela fica porque
+   * `targets === null` tem três causas e o `Notice` cobre uma
+   * (ver `useNutritionTargets`).
+   *
+   * O caminho para o diário continua obrigatório: sem meta *e* sem forma de
+   * registrar, o card declararia um problema e não ofereceria nada. Era o
+   * que o teste abaixo já protegia antes desta sprint.
+   */
+  it("does not offer a second way into the profile", async () => {
+    mount(logOf(600, 40), null);
+    await screen.findByText(/Sem meta para comparar/);
+
+    const toProfile = screen
+      .queryAllByRole("link")
+      .filter((link) => link.getAttribute("href") === "/perfil");
+
+    expect(toProfile).toHaveLength(0);
     expect(
-      screen.getByRole("link", { name: "Preencha o perfil" }),
+      screen.getByRole("link", { name: "Abrir diário" }),
     ).toBeInTheDocument();
   });
 
@@ -127,6 +153,43 @@ describe("with a profile", () => {
     mount(logOf(9000, 40), PROFILE);
 
     expect(await screen.findByText(/kcal acima da meta/)).toBeInTheDocument();
+  });
+
+  /**
+   * Sprint 1 — o herói respondia uma das três perguntas.
+   *
+   * "Quanto resta" estava na tela; "quanto consumi" e "qual é a meta"
+   * exigiam abrir o diário ou lembrar a meta de cor. Os dois números já
+   * chegavam ao componente — são os mesmos que o arco recebe — e eram
+   * descartados depois de virarem uma subtração.
+   */
+  it("names consumed and target beside what is left", async () => {
+    mount(logOf(600, 40), PROFILE);
+    await screen.findByText(/kcal restantes/);
+
+    expect(
+      screen.getByText(/^600 consumidas · [\d.]+ meta$/),
+    ).toBeInTheDocument();
+  });
+
+  /**
+   * `eatenMacros` soma `per100g.kcal * gramas / 100`, que é fracionário, e
+   * `formatDecimal` sem `fractionDigits` preserva os dígitos que chegarem.
+   * O herói exibia "646,63 kcal restantes".
+   *
+   * Arredondar é apresentação: `remaining` continua `target - consumed`.
+   * Este teste existe porque é fácil "simplificar" o `Math.round` para fora
+   * num refactor futuro sem perceber o que ele segura — inclusive a promessa
+   * do comentário de "Number Update", que diz que dois centésimos seguidos
+   * não devem fazer o número piscar.
+   */
+  it("shows whole calories, never the fraction the sum produces", async () => {
+    mount(logOf(600.4, 40), PROFILE);
+    await screen.findByText(/kcal restantes/);
+
+    expect(screen.getByText(/^600 consumidas /)).toBeInTheDocument();
+    expect(screen.queryByText(/600,4/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/,\d/)).not.toBeInTheDocument();
   });
 });
 

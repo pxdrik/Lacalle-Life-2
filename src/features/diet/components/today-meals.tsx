@@ -107,12 +107,24 @@ export function TodayMeals({ day }: { readonly day: string }) {
  * Icon, a sentence, and the way out — the shape every empty state in the app
  * uses. An empty day is the normal state of every morning, so this one says
  * what happens next rather than apologising for having nothing.
+ *
+ * **Sprint 1 — estado, contexto, ação.** Dizia só "Nada registrado hoje
+ * ainda.", e o bloco de Treino ao lado dizia "Nada registrado hoje." — duas
+ * frases quase iguais, lado a lado, na mesma linha de leitura, para dois
+ * fatos diferentes. Agora cada uma nomeia o que falta ("refeição" / "treino")
+ * e diz o que registrar ali muda. Uma linha cada; o estado vazio de uma manhã
+ * comum não merece um parágrafo.
  */
 function Empty() {
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <ICONS.diary aria-hidden className="size-8 text-ink-subtle" />
-      <p className="text-sm text-ink-muted">Nada registrado hoje ainda.</p>
+      <div>
+        <p className="text-sm text-ink-muted">Nenhuma refeição registrada.</p>
+        <p className="mt-1 text-xs text-ink-subtle">
+          O que entrar no diário soma no total do dia.
+        </p>
+      </div>
       <Link href="/diario" className={buttonClasses("secondary", "sm")}>
         <Plus aria-hidden className="size-4" />
         Registrar refeição

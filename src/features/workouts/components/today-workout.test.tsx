@@ -96,7 +96,7 @@ describe("TodayWorkout", () => {
     ]);
 
     expect(
-      await screen.findByText("Nada registrado hoje."),
+      await screen.findByText("Nenhum treino registrado."),
     ).toBeInTheDocument();
     expect(screen.queryByText("Costas")).not.toBeInTheDocument();
   });
@@ -118,14 +118,14 @@ describe("TodayWorkout", () => {
 
     expect(await screen.findByText("Pernas")).toBeInTheDocument();
     expect(screen.getByText(/Em andamento/)).toBeInTheDocument();
-    expect(screen.queryByText("Nada registrado hoje.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nenhum treino registrado.")).not.toBeInTheDocument();
   });
 
   it("offers a way to start when the day is still empty", async () => {
     mount([]);
 
     expect(
-      await screen.findByRole("link", { name: "Começar" }),
+      await screen.findByRole("link", { name: "Começar treino" }),
     ).toBeInTheDocument();
   });
 

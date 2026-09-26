@@ -3,6 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { BRAND_FONT_SIZES, cn } from "./cn";
+
 // Read from disk, not imported: Vitest short-circuits CSS imports to an empty
 // string, and `?raw` goes through the same path.
 const css = readFileSync(
@@ -352,5 +354,47 @@ describe("brand system values", () => {
     expect(hex(light!, "data-positive")).toBe("#059669");
     expect(hex(light!, "data-positive-text")).toBe("#065f46");
     expect(hex(dark!, "data-positive")).toBe("#34d399");
+  });
+});
+
+/**
+ * O `tailwind-merge` não lê CSS — ele decide conflito pelo nome da classe.
+ *
+ * `cn("text-metric", "text-ink")` devolvia só `text-ink`: um `text-<algo>`
+ * que o `tailwind-merge` não conhece é classificado como cor, e duas cores
+ * são um conflito onde a última vence. O herói de `/hoje` ficou com 16px
+ * herdados durante toda a Sprint 1 até isto aparecer numa medição de
+ * navegador — a classe certa estava escrita no componente e não chegava ao
+ * DOM.
+ *
+ * `cn.ts` repete os nomes da escala por necessidade. Este bloco é o que
+ * impede a cópia de envelhecer: um passo novo em `tokens.css` sem o par em
+ * `cn.ts` fica vermelho aqui, em vez de sumir em silêncio no próximo
+ * componente que usar `cn`.
+ */
+describe("brand type scale is known to tailwind-merge", () => {
+  /** Os `--text-<nome>` do bloco `@theme`, menos os modificadores
+   * (`--text-h1--line-height` e afins, que não geram utilitário). */
+  const declared = [
+    ...new Set(
+      [...css.matchAll(/^\s*--text-([a-z0-9]+):/gm)].map((match) => match[1]!),
+    ),
+  ].sort();
+
+  it("lists every step declared in tokens.css", () => {
+    expect([...BRAND_FONT_SIZES].sort()).toEqual(declared);
+  });
+
+  it.each(declared)("keeps text-%s alive beside a colour", (step) => {
+    expect(cn(`text-${step}`, "text-ink")).toBe(`text-${step} text-ink`);
+  });
+
+  it("still lets one brand size replace another", () => {
+    expect(cn("text-h2", "text-metric")).toBe("text-metric");
+  });
+
+  it("still lets a brand size replace a Tailwind size", () => {
+    expect(cn("text-2xl", "text-metric")).toBe("text-metric");
+    expect(cn("text-metric", "text-2xl")).toBe("text-2xl");
   });
 });
