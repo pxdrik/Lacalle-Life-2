@@ -109,18 +109,25 @@ produção.
 ## Comandos
 
 ```bash
-npm run dev        # servidor de desenvolvimento
-npm run build      # build de produção
-npm run verify     # typecheck + lint + testes
-npm test           # apenas testes
+npm run dev          # servidor de desenvolvimento
+npm run build        # build de produção
+npm run verify       # typecheck + lint + testes unitários + testes de navegador
+npm test             # só os testes unitários (jsdom)
+npm run test:browser # só os testes de geometria (Chromium via Playwright)
 ```
 
 `npm run verify` é o portão. Nada avança com ele vermelho.
 
+Os testes de navegador precisam do Chromium baixado uma vez:
+`npx playwright install chromium`. Eles medem o que o jsdom não vê —
+alinhamento de coluna, transbordo, área de toque — em seis larguras e três
+densidades.
+
 ## CI
 
-`.github/workflows/ci.yml` roda `npm ci`, `npm run verify` e `npm run build`
-em todo `pull_request` e em todo push para `main`. **Branch protection
+`.github/workflows/ci.yml` roda `npm ci`, `npx playwright install --with-deps
+chromium`, `npm run verify` e `npm run build` em todo `pull_request` e em todo
+push para `main`. **Branch protection
 exigindo esse workflow como status check obrigatório ainda precisa ser
 habilitada manualmente** em Settings → Branches no GitHub — o workflow por
 si só audita, não bloqueia merge sem essa configuração.

@@ -28,19 +28,21 @@ Depois:
 
 > Como eu provo que não quebrou?
 
-A fase termina quando `npm run test:browser` estiver verde e puder entrar no
-`verify` e na CI. Até lá, a linha de base vermelha dele é a lista de trabalho.
+A primeira etapa da fase fechou em 26/09/2026: a geometria da aba Treino
+passou a ter uma fonte única de colunas, as 112 medições de navegador ficaram
+verdes, e **`npm run test:browser` entrou no `verify` e na CI**. A partir daí,
+quebrar alinhamento, transbordo ou área de toque derruba o portão do mesmo
+jeito que quebrar um teste unitário sempre derrubou.
 
 ---
 
 ## Ao terminar, sempre
 
-1. `npm run verify` verde (typecheck, lint, testes unitários).
-2. `npm run test:browser` quando a mudança tocar layout, geometria,
-   responsividade, interação, hitbox, overflow, scroll, posicionamento,
-   inputs, botões, RPE, arrasto/toque ou elemento fixo. `verify` **não**
-   cobre nada disso, e nunca vai cobrir: jsdom não tem motor de layout.
-3. `npm run build` passando.
+1. `npm run verify` verde. São quatro coisas, nesta ordem: typecheck, lint,
+   testes unitários (`--project unit`) e testes de navegador
+   (`--project browser`). Layout, geometria, transbordo, hitbox e viewport
+   estão cobertos pelo último, e só por ele — jsdom não tem motor de layout.
+2. `npm run build` passando.
 4. **Commit e push.** Toda entrega termina no GitHub, sem precisar ser pedido.
    Trabalho que existe só na máquina não existe. `.github/workflows/ci.yml`
    roda os mesmos comandos em todo push/PR — não substitui rodar local antes
@@ -122,9 +124,9 @@ Para mudança pequena isso é um parágrafo, não um relatório. Mas existe.
 ### Depois
 
 9. Testar a funcionalidade alterada.
-10. Rodar os testes relacionados, e o Browser Mode quando houver impacto
-    visual ou de interação.
-11. `npm run verify`.
+10. Rodar os testes relacionados. Durante o trabalho vale rodar um projeto de
+    cada vez (`npm run test`, `npm run test:browser`), que é mais rápido.
+11. `npm run verify`, que roda os dois e é o que a CI roda.
 12. Verificar se outros componentes foram afetados.
 13. Comparar desktop e mobile.
 
@@ -254,6 +256,9 @@ DOM.
 ---
 
 ## Testes: duas camadas, e a régua certa para cada coisa
+
+`npm run verify` roda as duas, e é o que a CI roda. Os comandos abaixo são
+para rodar uma de cada vez enquanto se trabalha.
 
 ### `npm run test` — Vitest sobre jsdom
 

@@ -34,7 +34,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify (typecheck + lint + test)
+      # `npm ci` instala o pacote `playwright`, não o navegador: o binário do
+      # Chromium é baixado à parte, para um cache fora de node_modules. Sem
+      # este passo, `npm run verify` chegaria verde no typecheck, no lint e
+      # nos testes unitários e morreria no projeto `browser` por não achar
+      # navegador nenhum — falha de ambiente disfarçada de falha de teste.
+      #
+      # `--with-deps` traz também as bibliotecas de sistema que o Chromium
+      # headless precisa no Ubuntu, que uma imagem limpa não tem. Só
+      # `chromium` porque é o único navegador que `vitest.config.ts` declara.
+      - name: Install Chromium for Browser Mode
+        run: npx playwright install --with-deps chromium
+
+      # Um comando só, o mesmo que CLAUDE.md pede antes de qualquer entrega:
+      # typecheck, lint, testes unitários e testes de navegador. Chamar os
+      # quatro separadamente aqui criaria um segundo lugar onde a composição
+      # do portão está escrita, e os dois só podem divergir.
+      - name: Verify (typecheck + lint + unit + browser)
         run: npm run verify
 
       - name: Build
