@@ -152,13 +152,30 @@ export function VolumeChart({
           fica visível — o vizinho vazio dá o espaço que a fatia sozinha não
           tem. Com 6 pontos ou menos (o mensal) `labelStep` é 1 e nada muda. O
           período ativo sempre aparece, mesmo fora do passo, porque é o que a
-          linha de resumo acima está descrevendo. */}
+          linha de resumo acima está descrevendo.
+
+          **`min-w-0` (Sprint 4).** A estratégia acima só funciona se a fatia
+          puder encolher, e item de flex tem `min-width: auto` — ele se recusa
+          a ficar menor que o próprio min-content, que aqui é a largura
+          inteira de "29/06" por causa do `whitespace-nowrap`. As doze fatias
+          travavam num piso de 281px **qualquer que fosse a largura
+          disponível** (medido), e o gráfico semanal transbordava 52px a 320px
+          em Confortável. É a mesma lição que `hoje/page.tsx` já documenta;
+          aqui faltava. Com a fatia livre para encolher, o rótulo transborda a
+          própria fatia e ocupa o vizinho vazio — que é exatamente o desenho
+          descrito acima, e que `min-width: auto` impedia de acontecer.
+
+          Sobram 3px a 320px/Confortável e 1px a 360px/Confortável, de rótulo
+          que transborda um pouco mais do que o vizinho vazio comporta.
+          Fechá-los exige escolher quantos rótulos cabem medindo a largura em
+          tempo de execução, o que é trabalho próprio — registrado, não
+          remendado. */}
       <ul aria-hidden className="mt-2 flex gap-1.5">
         {chronological.map((point, index) => (
           <li
             key={point.startsAt}
             className={cn(
-              "flex-1 text-center text-xs tabular-nums",
+              "min-w-0 flex-1 text-center text-xs tabular-nums",
               index === activeIndex ? "font-medium text-ink" : "text-ink-subtle",
             )}
           >

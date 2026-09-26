@@ -160,22 +160,32 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
     >
       <RpeDialPicker value={value} label={label} onChange={onChange} />
 
+      {/* Sprint 4, Parte F. "Sem RPE" era um `<button>` à mão com `h-11`
+          fixo, ao lado de um `Button size="lg"` que lê `--control-h-lg`.
+          Dois botões irmãos, mesma linha, mesmo peso de decisão, alturas
+          diferentes — e a diferença **crescia com a densidade**, que é o
+          sinal de que um lê o token e o outro não: 44 contra 48 em Compacto,
+          51 contra 64 em Padrão, 57 contra 83 em Confortável (medido).
+
+          Agora é o mesmo componente e o mesmo tamanho. O estado "é este o
+          valor atual" fica por conta das duas classes de acento, que o `cn`
+          resolve por cima do `secondary` — mesma técnica de qualquer
+          consumidor que precisa marcar seleção sem inventar uma variante. */}
       <div className="mt-4 flex gap-2">
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="lg"
+          className={cn(
+            "flex-1",
+            value === null && "border-accent bg-accent/10",
+          )}
           onClick={() => {
             onChange(null);
             setOpen(false);
           }}
-          className={cn(
-            "flex h-11 flex-1 items-center justify-center rounded-md border text-sm transition-colors duration-150 ease-out",
-            value === null
-              ? "border-accent bg-accent/10 text-ink"
-              : "border-line-strong text-ink-muted hover:border-ink-subtle hover:bg-muted",
-          )}
         >
           Sem RPE
-        </button>
+        </Button>
         <Button
           size="lg"
           className="flex-1"
@@ -394,7 +404,22 @@ function RpeDialPicker({
       {/* Marcas de escala — as mesmas oito paradas que a grade de botões
           mostrava, agora equidistantes de verdade, porque a posição vem do
           índice e não do valor. Antes elas se amontoavam no meio do arco,
-          que é o desenho do defeito C2. */}
+          que é o desenho do defeito C2.
+
+          **Sprint 4, achado D1.** Elas eram `stroke-canvas`, que é a cor do
+          fundo da página — a ideia era "entalhe no trilho", e funciona
+          enquanto o trilho está preenchido. Sobre a parte vazia não: medido
+          no navegador, `canvas` sobre `muted` dá **1,05:1 no tema claro**
+          (#f8fafc sobre #f3f4f6) e 1,29:1 no escuro. Invisível. É por isso
+          que o sintoma era "os marcadores somem conforme o RPE cai" e não
+          "o seletor está quebrado": sobre o arco preenchido elas medem
+          3,77:1 e 8,38:1, e ali sempre apareceram.
+
+          `line-strong` é o token que o brandbook já reserva para separação
+          forte, e é o único da paleta neutra que tem contraste contra
+          `muted` nos **dois** temas sem virar texto. Não engrossei o traço
+          nem inventei cor: a marca continua secundária ao arco e mais
+          discreta que o ponteiro, que é `ink`. */}
       {RPE_SCALE.map((step, tickIndex) => {
         const tickAngle = angleForFraction(fractionForIndex(tickIndex));
         return (
@@ -405,7 +430,7 @@ function RpeDialPicker({
             x2={PICKER_CX}
             y2={PICKER_CY - PICKER_R + 28}
             strokeWidth="2"
-            className="stroke-canvas"
+            className="stroke-ink-subtle"
             transform={`rotate(${String(tickAngle)} ${String(PICKER_CX)} ${String(PICKER_CY)})`}
           />
         );

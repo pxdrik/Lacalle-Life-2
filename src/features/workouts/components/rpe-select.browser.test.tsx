@@ -1,7 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { setViewport } from "@/test/geometry";
+import {
+  DENSITIES,
+  PHONE_WIDTHS,
+  setDensity,
+  setViewport,
+} from "@/test/geometry";
 
 import { RPE_SCALE } from "../taxonomy/rpe";
 import { RpeSelect } from "./rpe-select";
@@ -359,4 +364,163 @@ describe("o portal não deixa nada para trás no consumidor", () => {
       expect(screen.queryByRole("slider")).not.toBeInTheDocument();
     });
   });
+});
+
+/**
+ * UI-01 / UI-02 — as marcas da escala, medidas contra o que está atrás delas.
+ *
+ * Achado D1 da auditoria: as marcas eram `stroke-canvas`, a cor do fundo da
+ * página. A ideia era "entalhe no trilho", e ela funciona enquanto o trilho
+ * está preenchido — sobre a parte vazia, `canvas` sobre `muted` mede 1,05:1
+ * no tema claro. Invisível, e o sintoma relatado ("os marcadores somem
+ * conforme o RPE cai") é exatamente o desenho desse defeito.
+ *
+ * A régua tem que ser a cor resolvida, não a classe: `stroke-canvas` é um
+ * token legítimo, e um teste que conferisse o nome da classe passaria com o
+ * bug inteiro no lugar.
+ */
+describe("UI-01 e UI-02 — contraste das marcas da escala", () => {
+  function srgb(channel: number): number {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }
+
+  function luminance(color: string): number {
+    const [r, g, b] = color.match(/\d+(\.\d+)?/g)!.map(Number) as [
+      number,
+      number,
+      number,
+    ];
+    return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+  }
+
+  function ratio(a: string, b: string): number {
+    const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (light! + 0.05) / (dark! + 0.05);
+  }
+
+  async function marks(theme: "light" | "dark") {
+    document.documentElement.setAttribute("data-theme", theme);
+    const { slider } = await openPicker(8);
+
+    // O ponteiro também é uma `<line>` com `transform`; as marcas são as que
+    // têm `strokeWidth="2"`.
+    const ticks = [...slider.querySelectorAll("line")].filter(
+      (line) => line.getAttribute("stroke-width") === "2",
+    );
+    const paths = slider.querySelectorAll("path");
+
+    return {
+      tick: getComputedStyle(ticks[0]!).stroke,
+      track: getComputedStyle(paths[0]!).stroke,
+      arc: getComputedStyle(paths[1]!).stroke,
+      count: ticks.length,
+    };
+  }
+
+  it.each(["light", "dark"] as const)(
+    "desenha as oito marcas visíveis sobre o trilho vazio (%s)",
+    async (theme) => {
+      const { tick, track, count } = await marks(theme);
+
+      expect(count).toBe(RPE_SCALE.length);
+      // 1,05:1 era o valor do defeito. Três é o piso do WCAG para objeto
+      // gráfico, e é o que `ink-subtle` entrega nos dois temas.
+      expect(ratio(tick, track)).toBeGreaterThanOrEqual(3);
+    },
+  );
+
+  it.each(["light", "dark"] as const)(
+    "mantém a marca secundária ao arco e ao ponteiro (%s)",
+    async (theme) => {
+      document.documentElement.setAttribute("data-theme", theme);
+      const { slider } = await openPicker(8);
+
+      const lines = [...slider.querySelectorAll("line")];
+      const tick = getComputedStyle(
+        lines.find((line) => line.getAttribute("stroke-width") === "2")!,
+      ).stroke;
+      const needle = getComputedStyle(
+        lines.find((line) => line.getAttribute("stroke-width") === "4")!,
+      ).stroke;
+      const track = getComputedStyle(slider.querySelector("path")!).stroke;
+      const arc = getComputedStyle(slider.querySelectorAll("path")[1]!).stroke;
+
+      // Contra o arco preenchido a marca é discreta de propósito: ali a
+      // posição já está dita pelo próprio arco, pelo ponteiro e pelo número.
+      // O que não pode é gritar mais que o dado.
+      expect(ratio(tick, arc)).toBeLessThan(ratio(tick, track));
+
+      // E nunca mais forte que o ponteiro, que é `ink`.
+      expect(ratio(needle, track)).toBeGreaterThan(ratio(tick, track));
+    },
+  );
+});
+
+/**
+ * UI-03 e UI-04 — a folha, medida em vez de presumida.
+ *
+ * A Sprint 4 abriu com a suspeita de que número, descrição, ponteiro e arco
+ * ficavam apertados ou sobrepostos. **Medido nas quinze combinações abaixo,
+ * não ficam**: zero transbordo, zero elemento fora da viewport, e os dois
+ * textos nunca se tocam. A suspeita não se reproduziu, e este bloco existe
+ * para que ela não precise ser reaberta por impressão — e para que deixe de
+ * ser verdade em voz alta, se um dia deixar.
+ */
+describe("UI-03 e UI-04 — a folha do RPE cabe e não se sobrepõe", () => {
+  for (const width of PHONE_WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px, densidade ${density}`, async () => {
+        await setViewport(width, 720);
+        setDensity(density);
+        const { slider } = await openPicker(8);
+        const dialog = slider.closest("dialog")!;
+        const limit = document.documentElement.clientWidth;
+
+        expect(dialog.scrollWidth - dialog.clientWidth).toBeLessThanOrEqual(0);
+
+        for (const element of dialog.querySelectorAll("*")) {
+          const box = element.getBoundingClientRect();
+          if (box.width === 0) continue;
+          expect(box.right).toBeLessThanOrEqual(limit + 0.5);
+          expect(box.left).toBeGreaterThanOrEqual(-0.5);
+        }
+
+        // O número e a descrição, empilhados sob o arco.
+        const [figure, caption] = [...slider.querySelectorAll("text")].map(
+          (text) => text.getBoundingClientRect(),
+        );
+        expect(caption).toBeDefined();
+        expect(figure!.bottom).toBeLessThanOrEqual(caption!.top + 0.5);
+      });
+    }
+  }
+
+  /**
+   * Parte F — os dois botões da folha decidem a mesma coisa e tinham alturas
+   * diferentes, com a diferença **crescendo com a densidade**: 44 contra 48
+   * em Compacto, 51 contra 64 em Padrão, 57 contra 83 em Confortável. É o
+   * sinal de um lê `--control-h-lg` e o outro carregava um `h-11` à mão.
+   */
+  it.each(DENSITIES)(
+    "dá a mesma altura a 'Sem RPE' e 'Confirmar' (%s)",
+    async (density) => {
+      await setViewport(390, 720);
+      setDensity(density);
+      const { slider } = await openPicker(8);
+      const dialog = slider.closest("dialog")!;
+
+      const semRpe = [...dialog.querySelectorAll("button")].find(
+        (button) => button.textContent?.trim() === "Sem RPE",
+      )!;
+      const confirmar = [...dialog.querySelectorAll("button")].find(
+        (button) => button.textContent?.trim() === "Confirmar",
+      )!;
+
+      expect(semRpe.getBoundingClientRect().height).toBeCloseTo(
+        confirmar.getBoundingClientRect().height,
+        1,
+      );
+    },
+  );
 });
