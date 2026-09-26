@@ -252,3 +252,79 @@ export function volumeByPeriod(
     }))
     .sort((a, b) => b.startsAt - a.startsAt);
 }
+
+/** Quantas semanas a Evolução resume antes do primeiro gráfico, e contra
+ * quantas ela compara. Uma constante e não um número solto em dois lugares:
+ * a janela atual e a anterior têm que ter o mesmo tamanho ou a comparação
+ * não quer dizer nada. */
+export const SUMMARY_WEEKS = 4;
+
+export interface RecentProgress {
+  readonly weeks: number;
+  readonly sessions: number;
+  readonly volumeKg: number;
+  readonly durationMs: number;
+  /**
+   * A variação de volume contra a janela anterior de mesmo tamanho, como
+   * fração (`0.12` é +12%) — ou `null` quando não há contra o que comparar.
+   *
+   * `null` não é erro: é a resposta honesta para quem treina há três
+   * semanas. Ver `recentProgress`.
+   */
+  readonly volumeChange: number | null;
+}
+
+/**
+ * O que aconteceu nas últimas semanas, e se mudou.
+ *
+ * A tela de Evolução respondia "quais dados existem" — abria num controle de
+ * métrica e num eixo, e deixava a comparação por conta da cabeça de quem
+ * lia. Tudo que falta para responder "o que mudou" já estava calculado:
+ * `volumeByPeriod` devolve `volumeKg`, `sets`, `sessions` e `durationMs` por
+ * semana, e a tela já chamava essa função. Isto só soma os baldes que ela já
+ * tinha na mão — nenhuma métrica nova, nenhuma entidade nova, nenhuma
+ * segunda leitura do histórico.
+ *
+ * Recebe os pontos prontos em vez das sessões de propósito: se calculasse os
+ * próprios baldes, o número do resumo e o número do gráfico poderiam
+ * divergir, e divergiriam no dia em que um dos dois mudasse de janela.
+ *
+ * **`volumeChange` é `null` sempre que a divisão mentiria**, e é aqui que
+ * mora a única regra deste arquivo que não é uma soma:
+ *
+ * - menos baldes do que duas janelas inteiras — não há período anterior;
+ * - volume zero na janela anterior — não há denominador, e é exatamente o
+ *   caso de quem começou a treinar agora: `volumeByPeriod` semeia as doze
+ *   semanas com zero, então o balde *existe* mesmo sem nenhum treino dentro.
+ *   Sem esta guarda, a primeira semana de alguém renderia "+∞%" ou um
+ *   "+100%" que descreve o nada.
+ *
+ * Omitir é a mesma escolha que `TodayProgress` já faz quando só há uma
+ * pesagem: um número que exige nota de rodapé não é contexto, é ruído.
+ */
+export function recentProgress(
+  points: readonly VolumePoint[],
+  weeks = SUMMARY_WEEKS,
+): RecentProgress {
+  // `volumeByPeriod` devolve do mais recente para o mais antigo.
+  const current = points.slice(0, weeks);
+  const previous = points.slice(weeks, weeks * 2);
+
+  const sum = (window: readonly VolumePoint[], pick: (p: VolumePoint) => number) =>
+    window.reduce((total, point) => total + pick(point), 0);
+
+  const volumeKg = sum(current, (point) => point.volumeKg);
+  const previousVolumeKg = sum(previous, (point) => point.volumeKg);
+
+  const comparable = previous.length === weeks && previousVolumeKg > 0;
+
+  return {
+    weeks,
+    sessions: sum(current, (point) => point.sessions),
+    volumeKg,
+    durationMs: sum(current, (point) => point.durationMs),
+    volumeChange: comparable
+      ? (volumeKg - previousVolumeKg) / previousVolumeKg
+      : null,
+  };
+}

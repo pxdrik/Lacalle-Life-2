@@ -1,14 +1,37 @@
 import type { LucideIcon } from "lucide-react";
+import Link from "next/link";
 
-import { Button } from "@/design-system/components/button";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { cn } from "@/design-system/cn";
 
-interface Action {
-  readonly label: string;
-  readonly onClick: () => void;
-  readonly icon?: LucideIcon | undefined;
-}
+/**
+ * A saída, que é um botão ou um link — e a diferença não é estética.
+ *
+ * Metade dos estados vazios do app tem como saída **ir para outra tela**
+ * ("Ir para os treinos", "Ir para as dietas"), e um `<button>` que navega
+ * não abre em nova aba, não aparece no menu de contexto e não diz ao leitor
+ * de tela que é um destino. Era exatamente por isso que esses dois
+ * desenhavam o próprio estado vazio à mão, com um link sublinhado solto,
+ * enquanto os que agem na própria tela usavam este componente com um botão
+ * de verdade: a diferença de anatomia vinha de uma diferença real que o
+ * componente não sabia expressar.
+ *
+ * `href` e `onClick` são mutuamente exclusivos pelo tipo, não por convenção.
+ */
+type Action =
+  | {
+      readonly label: string;
+      readonly onClick: () => void;
+      readonly href?: undefined;
+      readonly icon?: LucideIcon | undefined;
+    }
+  | {
+      readonly label: string;
+      readonly href: string;
+      readonly onClick?: undefined;
+      readonly icon?: LucideIcon | undefined;
+    };
 
 interface Props {
   /** Contained, never decorative — the one visual the empty state gets. */
@@ -46,14 +69,25 @@ export function EmptyState({ icon: Icon, title, caption, action, className }: Pr
           {caption}
         </p>
       )}
-      {action !== undefined && (
-        <Button className="mt-5" onClick={action.onClick}>
-          {ActionIcon !== undefined && (
-            <ActionIcon aria-hidden className="size-4" />
-          )}
-          {action.label}
-        </Button>
-      )}
+      {action !== undefined &&
+        (action.href === undefined ? (
+          <Button className="mt-5" onClick={action.onClick}>
+            {ActionIcon !== undefined && (
+              <ActionIcon aria-hidden className="size-4" />
+            )}
+            {action.label}
+          </Button>
+        ) : (
+          <Link
+            href={action.href}
+            className={cn(buttonClasses(), "mt-5")}
+          >
+            {ActionIcon !== undefined && (
+              <ActionIcon aria-hidden className="size-4" />
+            )}
+            {action.label}
+          </Link>
+        ))}
     </Card>
   );
 }

@@ -8,12 +8,19 @@ import { useState } from "react";
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Card, cardSurface } from "@/design-system/components/card";
+import { Button } from "@/design-system/components/button";
+import { Comparison } from "@/design-system/components/comparison";
+import { EmptyState } from "@/design-system/components/empty-state";
+import { Metric } from "@/design-system/components/metric";
+import { Section } from "@/design-system/components/section";
 import { Tabs } from "@/design-system/components/tabs";
+import { ICONS } from "@/design-system/icons";
 
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
   finishedSessions,
   personalRecords,
+  recentProgress,
   startOfMonth,
   startOfWeek,
   volumeByPeriod,
@@ -28,11 +35,15 @@ import {
 import type { Session } from "../types/session";
 import { VolumeChart } from "./volume-chart";
 
+/** O mesmo corte que `Recordes` já usa — ver o comentário no Histórico. */
+const HISTORY_PAGE = 12;
+
 export function EvolutionScreen() {
   const state = useSessionHistory();
   const [chartMetric, setChartMetric] = useState<"volume" | "duration">(
     "volume",
   );
+  const [showingAllHistory, setShowingAllHistory] = useState(false);
 
   if (state.status === "loading") {
     return (
@@ -55,26 +66,26 @@ export function EvolutionScreen() {
   const history = finishedSessions(state.sessions);
 
   if (history.length === 0) {
+    // Sprint 3, achado C4 — este bloco desenhava o próprio estado vazio, sem
+    // ícone e com um link sublinhado solto, enquanto o bloco de Peso logo
+    // acima na mesma rolagem usava `EmptyState` com ícone e botão. Mesma
+    // pergunta ("ainda não há nada aqui"), duas respostas visuais, uma tela.
     return (
-      <Card tone="quiet" className="text-center">
-        <p className="text-ink">Nenhum treino concluído ainda.</p>
-        <p className="mt-1.5 text-sm text-ink-subtle">
-          Assim que você finalizar um treino, ele aparece aqui com volume,
-          recordes e histórico.
-        </p>
-        <Link
-          href="/treinos"
-          className="mt-5 inline-block text-sm text-ink underline underline-offset-4"
-        >
-          Ir para os treinos
-        </Link>
-      </Card>
+      <EmptyState
+        icon={ICONS.workouts}
+        title="Nenhum treino concluído ainda."
+        caption="Assim que você finalizar um treino, ele aparece aqui com volume, recordes e histórico."
+        action={{ label: "Ir para os treinos", href: "/treinos" }}
+      />
     );
   }
 
   const weekly = volumeByPeriod(history, 12, startOfWeek);
   const monthly = volumeByPeriod(history, 6, startOfMonth);
   const records = personalRecords(history);
+  // Dos mesmos baldes que o gráfico semanal desenha, não de uma segunda
+  // leitura do histórico — ver o comentário de `recentProgress`.
+  const summary = recentProgress(weekly);
 
   const isDuration = chartMetric === "duration";
   const metric = isDuration
@@ -86,6 +97,65 @@ export function EvolutionScreen() {
 
   return (
     <div className="space-y-8">
+      {/* Sprint 3, achado C1 — a tela abria num controle de métrica e num
+          eixo. A primeira coisa que ela oferecia era uma pergunta ("volume ou
+          duração?") e a segunda era um gráfico; a comparação ficava por conta
+          da cabeça de quem lia.
+
+          Três números e uma variação, todos somados dos mesmos baldes que o
+          gráfico abaixo já usa (`recentProgress` recebe `weekly`, não o
+          histórico cru, justamente para que resumo e gráfico não possam
+          divergir). Nenhuma métrica nova, nenhum score, nenhum nível: a
+          direção da variação é desenhada porque é fato, e a cor fica neutra
+          porque "subiu" não é elogio — o mesmo raciocínio que `Comparison`
+          documenta e que `TodayProgress` já aplica ao peso.
+
+          O período é dito em palavras, no título, porque um "+25%" sem
+          denominador visível é pior que nenhum número. */}
+      <Section title={`Últimas ${String(summary.weeks)} semanas`} size="compact">
+        <div className="grid grid-cols-3 gap-3">
+          <Metric
+            value={formatDecimal(summary.sessions)}
+            label={summary.sessions === 1 ? "treino" : "treinos"}
+          />
+          <Metric
+            value={formatDecimal(summary.volumeKg)}
+            unit="kg"
+            label="movidos"
+          />
+          {/* Horas, não `formatDuration`. Aquele formato é de cronômetro de
+              uma sessão ("55:00"), e num total de quatro semanas devolvia
+              "12:50:00" — 99px de largura, que estourava a terceira coluna
+              em 320px nas densidades largas (medido: a caixa ia a 323 num
+              limite de 320). Encolher a fonte ou pôr `min-w-0` esconderia o
+              sintoma: o defeito é usar formato de sessão para um agregado.
+
+              Hora é a unidade que esta tela já usa para duração somada — o
+              próprio gráfico se legenda "horas treinadas". Uma casa decimal
+              porque zerar 20 minutos para "0 h" apagaria o único treino de
+              quem está começando. */}
+          <Metric
+            value={formatDecimal(summary.durationMs / 3_600_000, 1)}
+            unit="h"
+            label="treinando"
+          />
+        </div>
+
+        {/* Ausente, e não zerado, quando a janela anterior não tem volume —
+            é o caso de quem começou a treinar agora, e `volumeByPeriod`
+            semeia aquelas semanas com zero de qualquer jeito. Ver a guarda
+            em `recentProgress`. */}
+        {summary.volumeChange !== null && (
+          <Comparison
+            className="mt-3"
+            delta={Math.round(summary.volumeChange * 100)}
+            formatMagnitude={(magnitude) => `${formatDecimal(magnitude)}%`}
+            label={`de volume vs. as ${String(summary.weeks)} semanas anteriores`}
+            whenZero="mesmo volume"
+          />
+        )}
+      </Section>
+
       {/* `Tabs` de verdade, não dois botões com `aria-pressed` — achado
           real, 17/09/2026: o componente de aba do design system, com o
           indicador animado e a semântica de `role="tab"`, existia e nunca
@@ -150,34 +220,89 @@ export function EvolutionScreen() {
             padded={false}
             className="mt-3 divide-y divide-line overflow-hidden"
           >
+            {/* Sprint 3, achado C2 — `heaviestAt` já era calculado por
+                `personalRecords` e jogado fora aqui. "80 kg" sem data não diz
+                se é de ontem ou de um ano atrás, que é metade do que faz um
+                recorde significar alguma coisa.
+
+                A data é a de `heaviestAt`, não a de `bestOneRepMaxAt`: a
+                linha mostra `reps × carga`, e a data tem que ser a daquela
+                série, não a de outra. As duas quase sempre são séries
+                diferentes — é por isso que o domínio guarda os dois carimbos
+                separados — e imprimir as duas seria pedir que alguém
+                descubra qual pertence a qual número.
+
+                Três colunas viraram duas de duas linhas. Não é preferência:
+                a data como quarta coluna não cabe em 320px ao lado de nome,
+                `reps × kg` e 1RM, e o jeito de fazer caber seria truncar o
+                nome do exercício. `SessionRow` logo abaixo já empilha data
+                sob o nome pelo mesmo motivo. */}
             {records.slice(0, 12).map((record) => (
               <li
                 key={record.exerciseId}
-                className="flex items-center gap-3 px-4 py-3"
+                className="flex items-baseline gap-3 px-4 py-3"
               >
-                <span className="min-w-0 flex-1 truncate text-sm text-ink">
-                  {record.name}
-                </span>
-                <span className="shrink-0 text-sm tabular-nums text-ink">
-                  {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)}{" "}
-                  kg
-                </span>
-                <span className="w-20 shrink-0 text-right text-xs tabular-nums text-ink-muted">
-                  1RM {formatDecimal(record.bestOneRepMax)}
-                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-ink">{record.name}</p>
+                  <p className="mt-0.5 text-xs text-ink-subtle">
+                    {formatDate(record.heaviestAt)}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm tabular-nums text-ink">
+                    {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)}{" "}
+                    kg
+                  </p>
+                  <p className="mt-0.5 text-xs tabular-nums text-ink-subtle">
+                    1RM {formatDecimal(record.bestOneRepMax)}
+                  </p>
+                </div>
               </li>
             ))}
           </Card>
         </section>
       )}
 
+      {/* Sprint 3, achado C3 — a lista renderizava todas as sessões
+          concluídas, desde sempre, a cada abertura da tela.
+
+          Medido em Browser Mode antes de decidir qualquer coisa, porque o
+          brief proibiu (com razão) chutar um `.slice`: **180 sessões — cerca
+          de catorze meses a três treinos por semana — dão 17.319px de lista,
+          vinte viewports de rolagem**, e crescem sem teto. Cinco anos seriam
+          uns sessenta.
+
+          O que *não* é o problema: encontrar treino recente.
+          `finishedSessions` já ordena do mais novo para o mais antigo, então
+          o que importa sempre esteve no topo. O problema é só o tamanho.
+
+          Por isso a correção revela em vez de esconder: nada sai da tela,
+          nada é julgado "velho demais", nenhuma regra nova sobre relevância
+          é inventada. Só o primeiro lote é montado, e o botão traz o resto.
+          Doze é o número que `Recordes` logo acima já usa — convenção da
+          própria página, não um palpite novo. */}
       <section>
         <h2 className="text-sm font-medium text-ink">Histórico</h2>
         <ul className="mt-3 space-y-2">
-          {history.map((session) => (
-            <SessionRow key={session.id} session={session} />
-          ))}
+          {(showingAllHistory ? history : history.slice(0, HISTORY_PAGE)).map(
+            (session) => (
+              <SessionRow key={session.id} session={session} />
+            ),
+          )}
         </ul>
+
+        {!showingAllHistory && history.length > HISTORY_PAGE && (
+          <Button
+            variant="secondary"
+            className="mt-3 w-full"
+            onClick={() => {
+              setShowingAllHistory(true);
+            }}
+          >
+            Mostrar os outros {formatDecimal(history.length - HISTORY_PAGE)}{" "}
+            treinos
+          </Button>
+        )}
       </section>
     </div>
   );

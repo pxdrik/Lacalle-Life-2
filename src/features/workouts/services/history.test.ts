@@ -9,7 +9,9 @@ import {
   personalRecords,
   startOfMonth,
   startOfWeek,
+  recentProgress,
   volumeByPeriod,
+  type VolumePoint,
 } from "./history";
 
 const DAY = 86_400_000;
@@ -301,5 +303,127 @@ describe("volumeByPeriod", () => {
     // August holds one session, July the other.
     expect(points[0]?.sessions).toBe(1);
     expect(points[1]?.sessions).toBe(1);
+  });
+});
+
+/**
+ * `recentProgress` — o resumo que responde "o que mudou" antes do gráfico.
+ *
+ * Os pontos são construídos à mão em vez de saírem de `volumeByPeriod`: um
+ * teste que alimenta a função com a saída da função ao lado prova que as
+ * duas concordam, não que a conta está certa. Aqui os números de entrada são
+ * escolhidos para que a resposta seja conferível de cabeça.
+ */
+describe("recentProgress", () => {
+  const point = (
+    weeksAgo: number,
+    volumeKg: number,
+    sessions = 1,
+    durationMs = 3_600_000,
+  ): VolumePoint => ({
+    startsAt: -weeksAgo * 7 * DAY,
+    volumeKg,
+    sets: sessions * 3,
+    sessions,
+    durationMs,
+  });
+
+  /** Doze semanas, como a tela pede — as quatro recentes e as quatro
+   * anteriores com o dobro/metade exatos, para a fração ser óbvia. */
+  const twelveWeeks = [
+    point(0, 300),
+    point(1, 300),
+    point(2, 200),
+    point(3, 200),
+    // janela anterior: 800 no total, contra 1000 da atual → +25%
+    point(4, 200),
+    point(5, 200),
+    point(6, 200),
+    point(7, 200),
+    point(8, 0, 0, 0),
+    point(9, 0, 0, 0),
+    point(10, 0, 0, 0),
+    point(11, 0, 0, 0),
+  ];
+
+  it("soma treinos, volume e duração só da janela atual", () => {
+    const summary = recentProgress(twelveWeeks);
+
+    expect(summary.weeks).toBe(4);
+    expect(summary.volumeKg).toBe(1000);
+    expect(summary.sessions).toBe(4);
+    expect(summary.durationMs).toBe(4 * 3_600_000);
+  });
+
+  it("compara contra a janela anterior de mesmo tamanho", () => {
+    // 1000 contra 800.
+    expect(recentProgress(twelveWeeks).volumeChange).toBeCloseTo(0.25, 10);
+  });
+
+  it("devolve queda como fração negativa", () => {
+    const falling = [
+      point(0, 100),
+      point(1, 100),
+      point(2, 100),
+      point(3, 100),
+      point(4, 200),
+      point(5, 200),
+      point(6, 200),
+      point(7, 200),
+    ];
+
+    // 400 contra 800.
+    expect(recentProgress(falling).volumeChange).toBeCloseTo(-0.5, 10);
+  });
+
+  /**
+   * A guarda que importa. `volumeByPeriod` semeia todas as doze semanas com
+   * zero, então o balde anterior **existe** mesmo para quem treina há duas
+   * semanas — e dividir por ele daria "+∞%" ou um "+100%" que descreve o
+   * nada. Este é o caso de todo usuário novo, não uma borda rara.
+   */
+  it("não compara quando não houve volume na janela anterior", () => {
+    const brandNew = [
+      point(0, 300),
+      point(1, 200),
+      point(2, 0, 0, 0),
+      point(3, 0, 0, 0),
+      point(4, 0, 0, 0),
+      point(5, 0, 0, 0),
+      point(6, 0, 0, 0),
+      point(7, 0, 0, 0),
+    ];
+
+    const summary = recentProgress(brandNew);
+
+    expect(summary.volumeChange).toBeNull();
+    // …mas o que aconteceu continua sendo dito.
+    expect(summary.volumeKg).toBe(500);
+    expect(summary.sessions).toBe(2);
+  });
+
+  it("não compara quando não há duas janelas inteiras de pontos", () => {
+    const short = [point(0, 300), point(1, 200), point(2, 100), point(3, 100)];
+
+    expect(recentProgress(short).volumeChange).toBeNull();
+    expect(recentProgress(short).volumeKg).toBe(700);
+  });
+
+  it("chama de −100% parar de treinar, em vez de omitir", () => {
+    const stopped = [
+      point(0, 0, 0, 0),
+      point(1, 0, 0, 0),
+      point(2, 0, 0, 0),
+      point(3, 0, 0, 0),
+      point(4, 200),
+      point(5, 200),
+      point(6, 200),
+      point(7, 200),
+    ];
+
+    const summary = recentProgress(stopped);
+
+    expect(summary.volumeChange).toBe(-1);
+    expect(summary.sessions).toBe(0);
   });
 });
