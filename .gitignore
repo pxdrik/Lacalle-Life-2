@@ -48,3 +48,15 @@ scripts/.cache-wger.json
 
 .vercel
 .env*
+
+# capturas que o Browser Mode grava quando uma medição falha. São diagnóstico
+# da rodada, regeneráveis, e mudam de conteúdo a cada execução — versioná-las
+# encheria o histórico de PNG sem acrescentar nada ao que a mensagem de erro
+# já diz em números.
+**/__screenshots__/
+
+# artefatos de build do shell Capacitor. Não são fonte, e o `native-bridge.js`
+# gerado lá dentro é o que deixa `npm run lint` vermelho sem nenhuma relação
+# com o código do app.
+android/app/build/
+.vitest-attachments/

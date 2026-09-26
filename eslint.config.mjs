@@ -133,6 +133,13 @@ export default defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    // O shell do Capacitor: `android/` é projeto Gradle e `capacitor-shell/`
+    // é andaime gerado. O `native-bridge.js` que o build copia para
+    // `android/app/build/` sozinho produzia 10 erros de lint sem nenhuma
+    // relação com o código do app — bastava rodar o shell uma vez para o
+    // portão `npm run verify` ficar vermelho.
+    "android/**",
+    "capacitor-shell/**",
     "next-env.d.ts",
     "_Anteriores/**",
     "_docs/**",
