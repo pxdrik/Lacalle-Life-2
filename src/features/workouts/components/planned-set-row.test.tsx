@@ -64,6 +64,13 @@ describe("Delete/Collapse — removing a set shrinks before it goes", () => {
       </ul>,
     );
 
+    // Remover saiu da linha em 26/09/2026, para a folha que o número da série
+    // abre — mesma decisão que a linha executada, para planejar e executar não
+    // discordarem de onde fica a ação. O contrato sob teste é o mesmo: a
+    // remoção espera o encolhimento terminar.
+    await userEvent.click(
+      screen.getByRole("button", { name: "Ações da série 1 de Esteira" }),
+    );
     await userEvent.click(
       screen.getByRole("button", { name: "Remover série 1 de Esteira" }),
     );

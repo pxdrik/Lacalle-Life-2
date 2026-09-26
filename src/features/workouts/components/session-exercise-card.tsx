@@ -165,9 +165,15 @@ export function SessionExerciseCard({
       <div
         style={
           {
+            // A primeira coluna é `minmax` pelo alvo de toque, não pelo
+            // desenho: o número ocupa 24px, mas a coluna cresce até 44 onde
+            // há espaço, e aí o gatilho das ações tem o alvo inteiro dentro
+            // da própria coluna. Em 320px, onde a folga é exatamente zero,
+            // ela fica nos 24 e o alvo sobra para a esquerda, sobre o padding
+            // vazio do card. Medido: 360px para cima sobram de 19 a 92px.
             "--set-cols": isCardio
-              ? "24px minmax(72px, 112px) 44px"
-              : "24px minmax(52px, 68px) minmax(44px, 56px) 44px 44px",
+              ? "minmax(24px, 44px) minmax(72px, 112px) 44px"
+              : "minmax(24px, 44px) minmax(52px, 68px) minmax(44px, 56px) 44px 44px",
           } as React.CSSProperties
         }
       >

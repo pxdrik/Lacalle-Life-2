@@ -181,43 +181,60 @@ export function RoutineExerciseCard({
             </div>
           </header>
 
-          <div
-            aria-hidden
-            className="mt-3 flex items-center gap-2 border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
-          >
-            {/* Mesmo rótulo, mesmo transbordo: 37,7px de texto em `w-6`
-                (24px), por cima de "PESO". Ver a nota em
-                `session-exercise-card.tsx`. */}
-            <span className="w-6" />
-            {isCardio ? (
-              <span className="flex-[2] text-center">Duração (min)</span>
-            ) : (
-              <>
-                <span className="flex-1 text-center">Peso</span>
-                <span className="flex-1 text-center">Reps</span>
-              </>
-            )}
-            {!isCardio && <span className="w-16 text-center">RPE</span>}
-            <span className="w-7" />
-          </div>
+          {/* As colunas do editor de rotina, declaradas uma vez. Mesma
+              mecânica da sessão (`set-grid`, `globals.css`), números próprios:
+              esta tela planeja em vez de executar, não tem a coluna de
+              concluir, e as células são mais baixas (`h-8`) porque a rotina
+              inteira precisa caber na tela enquanto é montada.
 
-          <ul className="mt-1">
-            {exercise.sets.map((set, index) => (
-              <PlannedSetRow
-                key={set.id}
-                set={set}
-                index={index}
-                exerciseName={exercise.name}
-                isCardio={isCardio}
-                onChange={(changes) => {
-                  onSetChange(set.id, changes);
-                }}
-                onRemove={() => {
-                  onRemoveSet(set.id);
-                }}
-              />
-            ))}
-          </ul>
+              O cabeçalho tinha `w-16` para um controle `size-8` e `w-7` para
+              um botão de 44px no celular: 32px e 16px de erro duro, os
+              maiores do projeto. Agora nenhum dos dois declara largura. */}
+          <div
+            style={
+              {
+                "--set-cols": isCardio
+                  ? "minmax(24px, 44px) minmax(72px, 140px)"
+                  : "minmax(24px, 44px) minmax(52px, 96px) minmax(44px, 72px) 44px",
+              } as React.CSSProperties
+            }
+          >
+            <div
+              aria-hidden
+              className="mt-3 set-grid items-center border-b border-line pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
+            >
+              {/* "Série" saiu: 37,7px de texto numa caixa de 24px transbordava
+                  por cima de "PESO". Ver a nota em `session-exercise-card`. */}
+              <span />
+              {isCardio ? (
+                <span className="text-center">Duração (min)</span>
+              ) : (
+                <>
+                  <span className="text-center">Peso</span>
+                  <span className="text-center">Reps</span>
+                </>
+              )}
+              {!isCardio && <span className="text-center">RPE</span>}
+            </div>
+
+            <ul className="mt-1">
+              {exercise.sets.map((set, index) => (
+                <PlannedSetRow
+                  key={set.id}
+                  set={set}
+                  index={index}
+                  exerciseName={exercise.name}
+                  isCardio={isCardio}
+                  onChange={(changes) => {
+                    onSetChange(set.id, changes);
+                  }}
+                  onRemove={() => {
+                    onRemoveSet(set.id);
+                  }}
+                />
+              ))}
+            </ul>
+          </div>
 
           <button
             type="button"

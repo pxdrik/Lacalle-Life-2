@@ -7,11 +7,13 @@ import {
   PHONE_WIDTHS,
   overflowX,
   centerX,
+  hitTargetsAcross,
   setDensity,
   setViewport,
   type Density,
 } from "@/test/geometry";
 
+import type { Exercise } from "../types/exercise";
 import type { SessionExercise } from "../types/session";
 import { SessionExerciseCard } from "./session-exercise-card";
 
@@ -65,14 +67,39 @@ const EXERCISE: SessionExercise = {
  * no celular, e é essa a largura que sobra de verdade. Medir o card colado
  * na borda da janela mediria um card que ninguém vê.
  */
-function renderCard(exercise: SessionExercise = EXERCISE) {
+/** Só o que o card lê: `movementPattern` decide cardio contra força. */
+const CARDIO_ENTRY = {
+  id: "cat1",
+  name: "Esteira",
+  aliases: [],
+  primaryMuscles: [],
+  secondaryMuscles: [],
+  stabilizerMuscles: [],
+  equipment: [],
+  movementPattern: "cardio",
+  movementPlanes: [],
+  technicalDifficulty: null,
+  isUnilateral: null,
+  isCompound: null,
+  media: null,
+  classification: "catalogue",
+  isCustom: false,
+  isFavorite: false,
+  createdAt: 1,
+  updatedAt: 1,
+} as unknown as Exercise;
+
+function renderCard(
+  exercise: SessionExercise = EXERCISE,
+  catalogue: Exercise | undefined = undefined,
+) {
   const { container } = render(
     <main className="mx-auto w-full max-w-(--content-max) px-4 md:px-6 lg:px-12">
       <SessionExerciseCard
         exercise={exercise}
         position={0}
         total={2}
-        catalogue={undefined}
+        catalogue={catalogue}
         onOpenDetail={vi.fn()}
         nextSetId={null}
         lastTime={undefined}
@@ -179,6 +206,78 @@ describe("TRAINING-021/022 — o cabeçalho fica em cima da coluna que rotula", 
 
     for (const row of rows) assertAligned(header, row);
   });
+});
+
+describe("cardio tem outra grade, e ela também tem que fechar", () => {
+  /**
+   * Exercício medido por tempo troca peso/reps/RPE por uma coluna de duração
+   * — três faixas em vez de cinco, declaradas no mesmo `--set-cols`. É um
+   * caminho de renderização inteiro do componente que a grade mudou, e sem
+   * isto ficaria sem nenhuma medição.
+   */
+  for (const width of PHONE_WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px, densidade ${density}`, async () => {
+        await setViewport(width);
+        setDensity(density);
+        const { header, rows } = renderCard(EXERCISE, CARDIO_ENTRY);
+
+        for (const row of rows) {
+          expect(overflowX(row)).toBeLessThanOrEqual(0);
+          expect([...row.children]).toHaveLength(header.children.length);
+
+          for (const [index, column] of [...row.children].entries()) {
+            const head = header.children[index];
+            if (head === undefined) continue;
+            expect
+              .soft(
+                Math.abs(centerX(head) - centerX(column)),
+                `coluna ${String(index)} desalinhada`,
+              )
+              .toBeLessThanOrEqual(1);
+          }
+        }
+      });
+    }
+  }
+});
+
+describe("TRAINING-023/024 — cada controle recebe o próprio toque", () => {
+  /**
+   * A grade aproximou os controles, e `touch-44` estende alvo **fora do
+   * layout**: o gatilho das ações desenha 24px de coluna e tem 44px de alvo,
+   * então ele transborda 10px para cada lado e encosta no campo de peso.
+   * Encostar não é problema; roubar é. Esta é a mesma classe do defeito
+   * medido na barra de ações do exercício, onde os ~19% da direita de cada
+   * ícone disparavam o vizinho.
+   */
+  for (const density of DENSITIES) {
+    it(`390px, densidade ${density}`, async () => {
+      await setViewport(390);
+      setDensity(density);
+      const { rows } = renderCard();
+      const row = rows[0];
+      if (row === undefined) throw new Error("sem linha");
+
+      // `dialog:not([open])` fica no DOM com os próprios botões dentro. Eles
+      // não estão na tela, então `elementFromPoint` nunca os devolve e medi-los
+      // seria medir o nada.
+      const controls = [...row.querySelectorAll("button, input")].filter(
+        (element) => element.closest("dialog:not([open])") === null,
+      );
+
+      for (const control of controls) {
+        for (const [index, hit] of hitTargetsAcross(control).entries()) {
+          expect
+            .soft(
+              hit === control || control.contains(hit),
+              `parada ${String(index)} de "${control.getAttribute("aria-label") ?? control.tagName}" foi para outro elemento`,
+            )
+            .toBe(true);
+        }
+      }
+    });
+  }
 });
 
 describe("nenhuma coluna é recortada, e remover a série continua alcançável", () => {

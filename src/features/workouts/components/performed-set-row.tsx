@@ -48,7 +48,7 @@ interface Props {
  * conteúdo, e o contra-zoom agora é do contêiner, não do campo.
  */
 const FIELD =
-  "h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums transition-colors duration-150 ease-out";
+  "relative h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -136,7 +136,7 @@ export function PerformedSetRow({
                 setShowingActions(true);
               }}
               aria-label={`Ações da série ${String(number)} de ${exerciseName}`}
-              className="flex h-6 items-center justify-center touch-44 self-center rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              className="flex h-6 w-full items-center justify-center touch-44 self-center rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
             >
               {number}
             </button>
@@ -212,16 +212,20 @@ export function PerformedSetRow({
                 neither, so there is nothing here for it to rate. */}
             {!isCardio && (
               <div>
-                {/* `size-11`, não `h-11 w-14`: o mostrador é um meio círculo, e
-                    largo-e-baixo achatava o arco. Quadrado é a forma que sobra
-                    espaço igual dos dois lados pro arco respirar. */}
+                {/* `w-full`, não `size-11`: 44px aqui seria a largura da
+                    coluna escrita uma segunda vez, que é precisamente o que
+                    esta fase existe para acabar. A altura continua sendo
+                    `h-11`, a mesma de `FIELD` — altura de controle é do
+                    controle, largura é da coluna. O mostrador é um meio
+                    círculo e largo-e-baixo achatava o arco, então a coluna é
+                    quadrada de propósito. */}
                 <RpeSelect
                   value={set.rpe}
                   label={`RPE da série ${String(number)} de ${exerciseName}`}
                   onChange={(rpe) => {
                     onChange({ rpe });
                   }}
-                  className="size-11"
+                  className="h-11 w-full"
                 />
                 <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
               </div>
@@ -242,7 +246,7 @@ export function PerformedSetRow({
                   : `Concluir série ${String(number)} de ${exerciseName}`
               }
               className={cn(
-                "flex size-11 items-center justify-center rounded-lg border",
+                "flex h-11 w-full items-center justify-center rounded-lg border",
                 // The scale-on-press itself is now the same global
                 // `--press-scale` every `<button>` in the app gets
                 // (`globals.css`, 17/09/2026) — this class used to hand-carry

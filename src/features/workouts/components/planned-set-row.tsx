@@ -1,7 +1,8 @@
 "use client";
 
-import { X } from "lucide-react";
+import { useState } from "react";
 
+import { Dialog } from "@/design-system/components/dialog";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import type { PlannedSet } from "../types/routine";
@@ -20,8 +21,19 @@ interface Props {
   readonly onRemove: () => void;
 }
 
+/**
+ * Sem `flex-1`: a coluna da grade define a largura (`set-grid`,
+ * `globals.css`) e a célula ocupa a coluna inteira.
+ *
+ * O `w-full` dentro de `flex-1` que estava aqui é exatamente o padrão que
+ * `performed-set-row.tsx` mediu renderizando a 21,86px em 17/09/2026, abaixo
+ * do próprio padding: a porcentagem resolvia contra uma largura calculada
+ * pelo `flex-grow`, num elemento com `zoom` próprio. A linha executada foi
+ * corrigida na época e esta ficou com o defeito. Numa coluna de grade não há
+ * porcentagem contra largura calculada: a faixa existe antes do conteúdo.
+ */
 const CELL =
-  "h-8 w-full rounded-md border border-line bg-surface px-2 text-center text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
+  "h-8 w-full rounded-md border border-line bg-surface px-1.5 text-center text-sm tabular-nums transition-colors duration-150 ease-out hover:border-line-strong";
 
 export function PlannedSetRow({
   set,
@@ -32,6 +44,7 @@ export function PlannedSetRow({
   onRemove,
 }: Props) {
   const number = index + 1;
+  const [showingActions, setShowingActions] = useState(false);
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
   return (
@@ -42,74 +55,112 @@ export function PlannedSetRow({
       className="grid transition-[grid-template-rows] duration-(--duration-standard) ease-out"
       {...collapseProps}
     >
-      <div className="group flex items-center gap-2 overflow-hidden py-1">
-        <span className="w-6 shrink-0 text-center text-xs tabular-nums text-ink-subtle">
-          {number}
-        </span>
-
-        {isCardio ? (
-          <DurationField
-            value={set.durationSeconds}
-            label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
-            onChange={(durationSeconds) => {
-              onChange({ durationSeconds });
+      <div className="overflow-hidden py-1">
+        <div className="set-grid items-center">
+          {/* Mesmo movimento da linha executada: o número é o gatilho das
+              ações da série, e não custa coluna nova porque já era a primeira.
+              Manter o X aqui e não lá reabriria a divergência entre planejar e
+              executar que esta fase existe para fechar. */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowingActions(true);
             }}
-            className={`${CELL} flex-[2]`}
-          />
-        ) : (
-          // Peso primeiro, Repetição em segundo (17/09/2026, pedido do Pedro)
-          // — mesma ordem em `performed-set-row.tsx`, `session-exercise-card.tsx`
-          // e `routine-exercise-card.tsx`.
-          <>
-            <WeightField
-              value={set.weightKg}
-              label={`Peso da série ${String(number)} de ${exerciseName}`}
-              onChange={(weightKg) => {
-                onChange({ weightKg });
+            aria-label={`Ações da série ${String(number)} de ${exerciseName}`}
+            className="flex h-6 w-full items-center justify-center touch-44 rounded-md text-xs tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          >
+            {number}
+          </button>
+
+          {isCardio ? (
+            <DurationField
+              value={set.durationSeconds}
+              label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
+              onChange={(durationSeconds) => {
+                onChange({ durationSeconds });
               }}
-              className={`${CELL} flex-1`}
+              className={CELL}
             />
+          ) : (
+            // Peso primeiro, Repetição em segundo (17/09/2026, pedido do Pedro)
+            // — mesma ordem em `performed-set-row.tsx`, `session-exercise-card.tsx`
+            // e `routine-exercise-card.tsx`.
+            <>
+              <WeightField
+                value={set.weightKg}
+                label={`Peso da série ${String(number)} de ${exerciseName}`}
+                onChange={(weightKg) => {
+                  onChange({ weightKg });
+                }}
+                className={CELL}
+              />
 
-            <input
-              type="text"
-              inputMode="numeric"
-              value={set.reps === null ? "" : String(set.reps)}
-              aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
-              placeholder="—"
-              onChange={(event) => {
-                onChange({ reps: toWholeNumber(event.target.value) });
-              }}
-              className={`${CELL} flex-1`}
-            />
-          </>
-        )}
+              <input
+                type="text"
+                inputMode="numeric"
+                value={set.reps === null ? "" : String(set.reps)}
+                aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
+                placeholder="—"
+                onChange={(event) => {
+                  onChange({ reps: toWholeNumber(event.target.value) });
+                }}
+                className={CELL}
+              />
+            </>
+          )}
 
-        {/* RPE reports effort against a rep/weight target — a treadmill has
-            neither, so there is nothing here for it to rate. */}
-        {!isCardio && (
-          // `size-8`, não só `w-16`: sem altura própria o mostrador herdava a
-          // altura da linha e achatava — um meio círculo pede espaço igual
-          // dos dois lados (Pedro, 17/09/2026: "mais quadradinho e não tão
-          // retangular"). `size-8` casa com a altura de `CELL` nesta tela.
-          <RpeSelect
-            value={set.rpe}
-            label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
-            onChange={(rpe) => {
-              onChange({ rpe });
-            }}
-            className="size-8 shrink-0"
-          />
-        )}
+          {/* RPE reports effort against a rep/weight target — a treadmill has
+              neither, so there is nothing here for it to rate. */}
+          {/* O wrapper não é decorativo: `RpeSelect` renderiza o gatilho **e**
+              o `<dialog>` da folha como irmãos, então posto direto na grade
+              ele ocupa **duas** faixas, a segunda invisível e de largura zero.
+              A linha executada nunca viu isso porque lá o controle já vinha
+              embrulhado junto com a legenda `<Planned>`. Corrigido aqui no
+              consumidor porque `rpe-select.tsx` está congelado nesta fase; a
+              correção na origem é da Fase 3. */}
+          {!isCardio && (
+            <div className="justify-self-center">
+              {/* `size-8` continua sendo o **desenho** — sem altura própria o
+                  mostrador herdava a altura da linha e achatava, e um meio
+                  círculo pede espaço igual dos dois lados (Pedro, 17/09/2026:
+                  "mais quadradinho e não tão retangular"). A coluna é de 44px
+                  e o desenho centraliza nela; `touch-44` põe o alvo de toque
+                  em 44px sem crescer o desenho, o mesmo acordo que o catálogo
+                  de exercícios já faz com a estrela de favorito. */}
+              <RpeSelect
+                value={set.rpe}
+                label={`RPE alvo da série ${String(number)} de ${exerciseName}`}
+                onChange={(rpe) => {
+                  onChange({ rpe });
+                }}
+                className="size-8 touch-44"
+              />
+            </div>
+          )}
+        </div>
+      </div>
 
+      {/* Mesma folha da linha executada, mesmas palavras. */}
+      <Dialog
+        open={showingActions}
+        title={`Série ${String(number)} de ${exerciseName}`}
+        onClose={() => {
+          setShowingActions(false);
+        }}
+        placement="sheet-bottom"
+      >
         <button
           type="button"
-          onClick={requestRemove}
+          onClick={() => {
+            setShowingActions(false);
+            requestRemove();
+          }}
           aria-label={`Remover série ${String(number)} de ${exerciseName}`}
-          className="flex size-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:size-7 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
+          className="flex h-11 w-full items-center rounded-md px-3 text-sm text-danger transition-colors duration-150 ease-out hover:bg-danger/10"
         >
-          <X aria-hidden className="size-3.5" />
+          Remover série
         </button>
-      </div>
+      </Dialog>
     </li>
   );
 }
