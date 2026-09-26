@@ -150,58 +150,75 @@ export function SessionExerciseCard({
         </p>
       )}
 
-      {/* Same header the routine editor already shows — the column labels
-          shouldn't only exist where a set is being planned, not where it's
-          being done. `border-l-[3px] border-transparent px-1` and `gap-px`
-          mirror `PerformedSetRow`'s own row exactly (its focus-highlight
-          border added 17/09/2026, never carried up here) — without them the
-          header sat ~7px left of every column it labels, a misalignment
-          found reviewing RM04/RM08 (23/09/2026). */}
-      <div
-        aria-hidden
-        className="mt-3 flex items-center justify-between gap-px border-b border-line border-l-[3px] border-l-transparent px-1 pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
-      >
-        {/* Sem rótulo, só a coluna reservada. "Série" não cabia em `w-4` —
-            medido, 37,7px de texto numa caixa de 18,4px — e transbordava por
-            cima de "PESO", que é o "texto série" que aparecia na tela. A
-            coluna é a do **número** da série, dimensionada para um dígito, e
-            uma coluna de números 1, 2, 3 à esquerda de "PESO" não precisa se
-            apresentar. */}
-        <span className="w-4" />
-        {isCardio ? (
-          <span className="w-24 text-center">Duração (min)</span>
-        ) : (
-          <>
-            <span className="w-16 text-center">Peso</span>
-            <span className="w-14 text-center">Reps</span>
-          </>
-        )}
-        {!isCardio && <span className="w-14 text-center">RPE</span>}
-        <span className="w-11 shrink-0" />
-        <span className="w-11 shrink-0 sm:w-7" />
-      </div>
+      {/* As colunas, declaradas **uma vez**, aqui. O cabeçalho logo abaixo e
+          todas as linhas de série herdam `--set-cols` deste elemento e não
+          declaram largura nenhuma — é isso que torna a divergência entre eles
+          impossível por construção, em vez de por disciplina. O porquê inteiro
+          está em `@utility set-grid`, em `globals.css`.
 
-      <ul className="mt-1">
-        {exercise.sets.map((set, index) => (
-          <PerformedSetRow
-            key={set.id}
-            set={set}
-            index={index}
-            exerciseName={exercise.name}
-            isNext={set.id === nextSetId}
-            isCardio={isCardio}
-            onChange={(changes) => {
-              onSetChange(set.id, changes);
-            }}
-            onToggleComplete={() => {
-              onToggleComplete(set.id);
-            }}
-            onRemove={() => {
-              onRemoveSet(set.id);
-            }}
-          />
-        ))}
-      </ul>
+          Os números são físicos (a grade cancela o zoom da página), e o
+          orçamento foi fechado pelo pior caso real, 320px na densidade
+          Confortável, onde a linha tem 231px: as faixas fixas somam 112 e os
+          dois campos pegam o que sobra dentro do seu `minmax`. O `max` existe
+          para a tela larga não esticar campo numérico — o que sobra fica
+          sobrando (`justify-content: start`). */}
+      <div
+        style={
+          {
+            "--set-cols": isCardio
+              ? "24px minmax(72px, 112px) 44px"
+              : "24px minmax(52px, 68px) minmax(44px, 56px) 44px 44px",
+          } as React.CSSProperties
+        }
+      >
+        {/* `border-l-[3px] border-transparent` continua, agora só pelo que ele
+            é: a calha onde a barra de foco de `PerformedSetRow` chega sem
+            deslocar nada. O `px-1` que o acompanhava saiu — ele era offset
+            copiado da linha para compensar 7px de desalinhamento, e a grade
+            tornou a compensação desnecessária. */}
+        <div
+          aria-hidden
+          className="mt-3 set-grid border-b border-line border-l-[3px] border-l-transparent pb-1.5 text-[0.6875rem] font-medium tracking-wide text-ink-subtle uppercase"
+        >
+          {/* Sem rótulo, só a coluna reservada. "Série" não cabia — medido,
+              37,7px de texto numa caixa de 18,4px — e transbordava por cima de
+              "PESO", que é o "texto série" que aparecia na tela. Uma coluna de
+              números 1, 2, 3 à esquerda de "PESO" não precisa se apresentar. */}
+          <span />
+          {isCardio ? (
+            <span className="text-center">Duração (min)</span>
+          ) : (
+            <>
+              <span className="text-center">Peso</span>
+              <span className="text-center">Reps</span>
+            </>
+          )}
+          {!isCardio && <span className="text-center">RPE</span>}
+          <span />
+        </div>
+
+        <ul className="mt-1">
+          {exercise.sets.map((set, index) => (
+            <PerformedSetRow
+              key={set.id}
+              set={set}
+              index={index}
+              exerciseName={exercise.name}
+              isNext={set.id === nextSetId}
+              isCardio={isCardio}
+              onChange={(changes) => {
+                onSetChange(set.id, changes);
+              }}
+              onToggleComplete={() => {
+                onToggleComplete(set.id);
+              }}
+              onRemove={() => {
+                onRemoveSet(set.id);
+              }}
+            />
+          ))}
+        </ul>
+      </div>
 
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2">
         <button

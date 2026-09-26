@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
+import { Dialog } from "@/design-system/components/dialog";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import type { PerformedSetChanges } from "../services/edit-session";
@@ -36,27 +37,18 @@ interface Props {
 }
 
 /**
- * Fixed width, not `w-full` inside a `flex-1` column.
+ * O campo não declara mais largura: a coluna da grade declara (`set-grid`,
+ * `globals.css`), e o campo ocupa a coluna inteira.
  *
- * **Measured live (17/09/2026): `w-full` here rendered at 21.86px** — under
- * its own left+right padding combined — instead of the ~58px its `flex-1`
- * column actually had available. The field is counter-zoomed against the
- * page's `--ui-scale` (see `tokens.css`, `input, select, textarea { zoom:
- * calc(1 / var(--ui-scale)) }`, kept for the real reason: a field's text has
- * to render at true 16px or iOS Safari zooms the viewport on focus) — and a
- * percentage width resolved against a *flex-grow-computed* parent width,
- * on an element with its own `zoom`, does not resolve correctly. `RpeSelect`
- * never hit this: its wrapper is a plain `w-16`, an **authored** fixed width,
- * not one flex-grow hands it — and percentage-against-fixed resolved fine.
- * That mismatch is also why RPE read as a different size than reps/peso.
- *
- * The fix follows the same working pattern: an authored fixed width instead
- * of a percentage of a computed one. It is also, separately, closer to the
- * reference apps Pedro pointed at (Hevy, MacroFactor) — a set row of a few
- * fixed pills, not fields stretched to fill whatever space is left.
+ * Isto substitui a largura fixa de 17/09/2026, que existia para fugir de um
+ * `w-full` dentro de `flex-1` medido renderizando a 21,86px. A causa real
+ * daquele número era a porcentagem resolvida contra uma largura que o
+ * `flex-grow` calculava, num elemento com `zoom` próprio. Dentro de uma
+ * coluna de grade não há nada disso: a faixa tem largura definida antes do
+ * conteúdo, e o contra-zoom agora é do contêiner, não do campo.
  */
 const FIELD =
-  "h-11 rounded-md border bg-surface px-2 text-center text-base tabular-nums transition-colors duration-150 ease-out";
+  "h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -74,6 +66,7 @@ export function PerformedSetRow({
   // How many times *this* button has been pressed in this mount. Only used to
   // key the check so the confirmation replays per tap — never read as data.
   const [taps, setTaps] = useState(0);
+  const [showingActions, setShowingActions] = useState(false);
 
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
 
@@ -99,7 +92,10 @@ export function PerformedSetRow({
       <div className="overflow-hidden">
         <div
           className={cn(
-            "group rounded-sm border border-l-[3px] border-transparent px-1 py-1.5",
+            // Sem `px-1`: ele era o outro lado do offset que o cabeçalho
+            // copiava para compensar 7px de desalinhamento. Com a grade, os
+            // dois lados começam na mesma coluna sem ninguém compensar nada.
+            "group rounded-sm border border-l-[3px] border-transparent py-1.5",
             // `--duration-standard`, não `--duration-micro` — achado real,
             // 17/09/2026: a barra de foco chegando em 150ms lia como "sem
             // animação" mesmo com `prefers-reduced-motion` confirmadamente
@@ -119,22 +115,36 @@ export function PerformedSetRow({
             set.isCompleted && "border-line bg-muted",
           )}
         >
-          {/* `items-start`, não `items-center`: os campos carregam uma legenda
-              "planejado" abaixo (`<Planned>`), então o bloco deles é mais alto
-              que o botão de concluir/remover — centralizar pela altura total
-              empurrava o campo pra cima do centro do botão, visivelmente
-              desalinhado (achado real, 17/09/2026). Alinhando pelo topo, campo e
-              botão começam na mesma linha; só o número da série (sem legenda)
-              pede `self-center` de volta pra não subir junto. */}
-          <div className="flex items-start justify-between gap-px">
-            <span className="w-4 shrink-0 self-center text-center text-sm tabular-nums text-ink-subtle">
+          {/* `set-grid` declara as colunas a partir do `--set-cols` que o card
+              define uma vez; esta linha não sabe largura nenhuma. `items-start`
+              (na própria utilidade) porque os campos carregam a legenda
+              "planejado" abaixo (`<Planned>`) e o bloco deles é mais alto que
+              os botões: alinhar pelo topo põe campo e botão começando na mesma
+              linha, e só o número da série, que não tem legenda, pede
+              `self-center` de volta. */}
+          <div className="set-grid">
+            {/* O número é o gatilho das ações da série, e não custa uma coluna
+                a mais: ele já era a primeira coluna. O X dedicado saiu daqui em
+                26/09/2026 porque seis alvos da classe 44px não cabem em 360px,
+                que é largura obrigatória — a conta não fecha com ou sem grade.
+                Mesma decisão estrutural que a dieta tomou em `meal-item-row`,
+                onde as ações por alimento foram para trás de um `⋮` pelo mesmo
+                motivo medido. `touch-44` dá o alvo de 44px sem ocupar layout. */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowingActions(true);
+              }}
+              aria-label={`Ações da série ${String(number)} de ${exerciseName}`}
+              className="flex h-6 items-center justify-center touch-44 self-center rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+            >
               {number}
-            </span>
+            </button>
 
             {/* What was planned, sitting under the field it refers to — a target you
               have to remember is a target you ignore. */}
             {isCardio ? (
-              <div className="shrink-0">
+              <div>
                 <DurationField
                   value={set.durationSeconds}
                   label={`Duração da série ${String(number)} de ${exerciseName}, em minutos`}
@@ -143,7 +153,6 @@ export function PerformedSetRow({
                   }}
                   className={cn(
                     FIELD,
-                    "w-24",
                     set.isCompleted ? "border-line" : "border-line-strong",
                   )}
                 />
@@ -164,7 +173,7 @@ export function PerformedSetRow({
                     `planned-set-row.tsx` e `routine-exercise-card.tsx`, pra
                     planejar e executar o treino não discordarem sobre qual
                     coluna vem primeiro. */}
-                <div className="shrink-0">
+                <div>
                   <WeightField
                     value={set.weightKg}
                     label={`Peso da série ${String(number)} de ${exerciseName}`}
@@ -173,14 +182,13 @@ export function PerformedSetRow({
                     }}
                     className={cn(
                       FIELD,
-                      "w-16",
                       set.isCompleted ? "border-line" : "border-line-strong",
                     )}
                   />
                   <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
                 </div>
 
-                <div className="shrink-0">
+                <div>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -192,7 +200,6 @@ export function PerformedSetRow({
                     }}
                     className={cn(
                       FIELD,
-                      "w-14",
                       set.isCompleted ? "border-line" : "border-line-strong",
                     )}
                   />
@@ -204,7 +211,7 @@ export function PerformedSetRow({
             {/* RPE reports effort against a rep/weight target — a treadmill has
                 neither, so there is nothing here for it to rate. */}
             {!isCardio && (
-              <div className="shrink-0">
+              <div>
                 {/* `size-11`, não `h-11 w-14`: o mostrador é um meio círculo, e
                     largo-e-baixo achatava o arco. Quadrado é a forma que sobra
                     espaço igual dos dois lados pro arco respirar. */}
@@ -235,7 +242,7 @@ export function PerformedSetRow({
                   : `Concluir série ${String(number)} de ${exerciseName}`
               }
               className={cn(
-                "flex size-11 shrink-0 items-center justify-center rounded-lg border",
+                "flex size-11 items-center justify-center rounded-lg border",
                 // The scale-on-press itself is now the same global
                 // `--press-scale` every `<button>` in the app gets
                 // (`globals.css`, 17/09/2026) — this class used to hand-carry
@@ -268,18 +275,34 @@ export function PerformedSetRow({
                 )}
               />
             </button>
-
-            <button
-              type="button"
-              onClick={requestRemove}
-              aria-label={`Remover série ${String(number)} de ${exerciseName}`}
-              className="flex size-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-danger/10 hover:text-danger sm:size-7 sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-            >
-              <X aria-hidden className="size-3.5" />
-            </button>
           </div>
         </div>
       </div>
+
+      {/* Mesma folha que a dieta usa para as ações por alimento. Sem
+          `ConfirmButton`: remover uma série nunca pediu confirmação aqui, e
+          esta fase move a ação de lugar, não muda o que ela faz. O desfazer
+          continua sendo o "Série extra" logo abaixo. */}
+      <Dialog
+        open={showingActions}
+        title={`Série ${String(number)} de ${exerciseName}`}
+        onClose={() => {
+          setShowingActions(false);
+        }}
+        placement="sheet-bottom"
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setShowingActions(false);
+            requestRemove();
+          }}
+          aria-label={`Remover série ${String(number)} de ${exerciseName}`}
+          className="flex h-11 w-full items-center rounded-md px-3 text-sm text-danger transition-colors duration-150 ease-out hover:bg-danger/10"
+        >
+          Remover série
+        </button>
+      </Dialog>
     </li>
   );
 }

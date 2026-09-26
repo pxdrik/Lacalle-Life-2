@@ -87,11 +87,12 @@ function renderCard(exercise: SessionExercise = EXERCISE) {
     </main>,
   );
 
-  // O cabeçalho é `aria-hidden`, então nenhuma consulta por papel o alcança.
-  // `uppercase` é a classe que só ele tem dentro do card.
-  const header = container.querySelector<HTMLElement>("div.uppercase");
+  // Cabeçalho e linhas são o **mesmo** `.set-grid`, que é exatamente a
+  // propriedade sob teste. O cabeçalho é `aria-hidden` e nenhuma consulta por
+  // papel o alcança; `uppercase` é a classe que só ele tem dentro do card.
+  const header = container.querySelector<HTMLElement>(".set-grid.uppercase");
   const rows = [
-    ...container.querySelectorAll<HTMLElement>("li > div > div > div.flex"),
+    ...container.querySelectorAll<HTMLElement>("li .set-grid"),
   ];
 
   if (header === null) throw new Error("cabeçalho de colunas não encontrado");
@@ -100,8 +101,8 @@ function renderCard(exercise: SessionExercise = EXERCISE) {
   return { container, header, rows };
 }
 
-/** Os nomes das colunas, na ordem em que cabeçalho e linha as declaram. */
-const COLUMNS = ["série", "peso", "reps", "rpe", "concluir", "remover"];
+/** Os nomes das colunas, na ordem em que a grade as declara. */
+const COLUMNS = ["série", "peso", "reps", "rpe", "concluir"];
 
 beforeEach(async () => {
   await setViewport(390);
@@ -180,25 +181,32 @@ describe("TRAINING-021/022 — o cabeçalho fica em cima da coluna que rotula", 
   });
 });
 
-describe("o X de remover a série é alcançável, não só renderizado", () => {
+describe("nenhuma coluna é recortada, e remover a série continua alcançável", () => {
   /**
-   * Renderizado e alcançável são coisas diferentes, e esta é a diferença
-   * que o jsdom não vê: o botão existe na árvore, tem rótulo acessível, e
-   * está inteiramente fora da parte visível do pai que o recorta.
+   * Renderizado e alcançável são coisas diferentes, e esta é a diferença que
+   * o jsdom não vê: o elemento existe na árvore, tem rótulo acessível, e está
+   * fora da parte visível do pai que o recorta.
+   *
+   * O alvo mudou em 26/09/2026 junto com a grade. Antes era o X de remover,
+   * que era a última coluna e por isso a primeira a ser cortada; ele saiu da
+   * linha porque seis alvos da classe 44px não cabem em 360px. A asserção
+   * ficou mais forte, não mais fraca: agora **nenhuma** coluna pode passar da
+   * borda, e o gatilho das ações da série (que é onde remover foi parar)
+   * também é verificado.
    */
   function assertInsideClip(row: HTMLElement) {
-    const button = row.lastElementChild;
     const clip = row.closest<HTMLElement>(".overflow-hidden");
-    if (button === null || clip === null) throw new Error("estrutura mudou");
-
-    const x = button.getBoundingClientRect();
+    if (clip === null) throw new Error("estrutura mudou");
     const box = clip.getBoundingClientRect();
 
-    expect(
-      x.right,
-      `o X passa ${(x.right - box.right).toFixed(1)}px da borda que recorta`,
-    ).toBeLessThanOrEqual(box.right + 0.5);
-    expect(x.width).toBeGreaterThan(0);
+    for (const [index, column] of [...row.children].entries()) {
+      const cell = column.getBoundingClientRect();
+      expect(
+        cell.right,
+        `coluna ${String(index)} passa ${(cell.right - box.right).toFixed(1)}px da borda que recorta`,
+      ).toBeLessThanOrEqual(box.right + 0.5);
+      expect(cell.width).toBeGreaterThan(0);
+    }
   }
 
   for (const width of PHONE_WIDTHS) {

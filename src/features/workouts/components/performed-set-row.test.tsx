@@ -142,6 +142,13 @@ describe("Delete/Collapse — removing a set shrinks before it goes", () => {
       </ul>,
     );
 
+    // Remover saiu da linha em 26/09/2026 e foi para a folha de ações que o
+    // número da série abre — seis alvos da classe 44px não cabiam em 360px.
+    // O contrato sob teste não mudou: a remoção continua esperando o
+    // encolhimento terminar, só o caminho até ela é outro.
+    await userEvent.click(
+      screen.getByRole("button", { name: "Ações da série 1 de Supino" }),
+    );
     await userEvent.click(
       screen.getByRole("button", { name: "Remover série 1 de Supino" }),
     );

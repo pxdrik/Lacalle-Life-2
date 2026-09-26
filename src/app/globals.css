@@ -68,6 +68,55 @@
   background-repeat: no-repeat;
 }
 
+/**
+ * A grade da linha de série: uma fonte de verdade para as colunas.
+ *
+ * **Por que existe.** A aba Treino chegou a ter quatro listas de largura
+ * escritas à mão para a mesma tabela: o cabeçalho da sessão, a linha
+ * executada, o cabeçalho da rotina e a linha planejada. Elas divergiam (o
+ * cabeçalho reservava `w-14` para um controle `size-11`) e, pior, reagiam de
+ * forma oposta à pressão — os `span` do cabeçalho encolhiam por não terem
+ * `shrink-0`, a linha estourava por tê-lo em tudo. Medido em 320px, a coluna
+ * "série" do cabeçalho valia 12,5px em Compacto e 5,2px em Confortável,
+ * contra 16,0 e 20,8 da linha. O alinhamento que existia era coincidência do
+ * `flex-shrink` compensando, não uma regra, e é por isso que ele "voltava" a
+ * quebrar a cada mudança.
+ *
+ * Aqui ninguém declara largura. O card declara `--set-cols` uma vez, num
+ * ancestral do cabeçalho e de todas as linhas, e os dois herdam. Divergir
+ * deixa de ser possível por construção, em vez de por disciplina.
+ *
+ * **O contra-zoom é a outra metade.** `tokens.css` aplica `zoom` na página e
+ * o cancela só nos campos, então `w-16` num `<span>` e `w-16` num `<input>`
+ * nunca tiveram a mesma largura na tela: na mesma linha, os campos eram
+ * invariantes à densidade (64px sempre) e todo o resto crescia (44 → 50,6 →
+ * 57,2). Duas leis de escala numa tabela só, que nenhum ajuste de número
+ * conserta. Cancelando o zoom no contêiner, a linha inteira passa a medir em
+ * pixels físicos, igual ao que `--input-h: 44px` já faz de propósito.
+ *
+ * `input { zoom: 1 }` não é redundância: sem ele o contra-zoom global de
+ * `tokens.css` aplica **uma segunda vez** dentro deste contêiner e o campo
+ * encolhe (medido: 56 → 48,7 → 43,1). Com ele, o campo mede 64px e renderiza
+ * fonte de 16px reais nas três densidades — que é o limite que existe para o
+ * Safari do iOS não dar zoom no viewport ao focar.
+ *
+ * `justify-content: start` porque as colunas têm largura máxima: o que sobra
+ * numa tela larga fica sobrando, em vez de esticar os campos. Uma linha de
+ * pílulas, que é a referência que o Pedro apontou (Hevy, MacroFactor).
+ */
+@utility set-grid {
+  display: grid;
+  grid-template-columns: var(--set-cols);
+  gap: var(--set-gap, 4px);
+  justify-content: start;
+  align-items: start;
+  zoom: calc(1 / var(--ui-scale));
+
+  & input {
+    zoom: 1;
+  }
+}
+
 @layer base {
   /**
    * O traço do ícone afina conforme ele cresce — pág. 28.
