@@ -462,6 +462,35 @@ export function MealCard({
               centraliza contra a largura certa. */}
           <div className="mt-2">
             <MacroSummary macros={macros} layout="stacked" />
+
+            {/* Sprint 2, achado B1 — a única coisa nesta tela que precisa ser
+                dita, e ela mora aqui porque é aqui que a confusão acontece.
+                Um card planejado e um comido eram idênticos fora de um ícone
+                de 32px, **com o mesmo total de kcal na mesma tipografia**,
+                enquanto o total do topo conta só o comido. Quem importa uma
+                dieta pro dia vê "731 kcal" em cada refeição e um total que
+                não bate, e lê isso como importação quebrada.
+                (`food-log-screen.tsx` carregava um parágrafo explicando
+                justamente isso — o sintoma escrito por extenso, uma vez por
+                dia, longe dos números que discordavam. Saiu; esta linha é a
+                substituta, e ela fica colada no número que ela explica.)
+
+                **Só o estado excepcional é marcado, de propósito.** Comida é
+                o caso comum e já não carrega marcação nenhuma hoje — uma
+                refeição montada à mão nunca teve check e sempre contou. Pôr
+                "Consumido" em quase todo card seria ruído em nome de
+                simetria, e a auditoria já pediu o menor conjunto de mudanças
+                que resolve.
+
+                `checkState === "unchecked"` nunca acontece no `DietEditor`:
+                ele não passa a prop, e lá `undefined` significa "esta tela
+                não é um dia, é um plano". Por isso não há variante nova nem
+                prop nova — a distinção que faltava já estava no tipo. */}
+            {checkState === "unchecked" && (
+              <p className="mt-1.5 text-center text-xs text-ink-subtle">
+                Planejado · ainda não somado no total do dia
+              </p>
+            )}
           </div>
 
           {/* Atrás do ⋮ em vez de quatro botões soltos no cabeçalho — achado de

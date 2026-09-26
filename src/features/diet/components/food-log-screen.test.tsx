@@ -401,13 +401,24 @@ describe("a day already started from a diet", () => {
   // Achado por um agente sem contexto do app (25/09/2026): importar uma
   // dieta pro dia deixa os totais lá em cima em zero até cada refeição ser
   // marcada — sem aviso nenhum, isso lê como "a importação falhou".
+  /**
+   * O mesmo comportamento que este teste sempre protegeu — a tela explica
+   * por que o total lê zero, e para de explicar quando não há mais o que
+   * explicar — só que num lugar melhor.
+   *
+   * Até a Sprint 2 a frase era um parágrafo no topo, contando refeições
+   * ("1 refeição planejada ainda não foi marcada..."), longe dos números com
+   * que ela discordava. Agora é uma linha em cada card planejado, colada no
+   * total daquela refeição. Diz mais (qual refeição) e é lida onde a dúvida
+   * nasce.
+   */
   it("explains why the totals read zero, and stops once everything is checked", async () => {
     const diet = dietForToday();
     mount(seededUnchecked(diet), diet);
     await screen.findByDisplayValue("Refeição 1");
 
     expect(
-      screen.getByText(/1 refeição planejada ainda não foi marcada como comida/),
+      screen.getByText(/Planejado · ainda não somado no total do dia/),
     ).toBeInTheDocument();
 
     await userEvent.click(
@@ -416,8 +427,43 @@ describe("a day already started from a diet", () => {
 
     await waitFor(() => {
       expect(
-        screen.queryByText(/ainda não foi marcada como comida/),
+        screen.queryByText(/ainda não somado no total do dia/),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  /**
+   * DIARY-03 — a matemática não mudou, e este teste é o que garante isso
+   * enquanto a apresentação ao redor dela muda.
+   *
+   * O total do topo conta `eatenMacros`, nunca `log.meals`. Uma refeição
+   * planejada é visível, editável e rotulada — e continua fora da soma.
+   */
+  it("keeps the day's total on what was eaten, never on what is planned", async () => {
+    const diet = dietForToday();
+    mount(seededUnchecked(diet), diet);
+    await screen.findByDisplayValue("Refeição 1");
+
+    // A refeição planejada mostra o próprio total no card…
+    expect(
+      screen.getByText(/Planejado · ainda não somado no total do dia/),
+    ).toBeInTheDocument();
+
+    // …e o resumo fixo do topo continua zerado até o check. É o primeiro
+    // `<dl>` da tela por construção: o bloco `sticky` é renderizado antes de
+    // "Planejado" (que é `ul`) e antes da lista de cards. Buscar por texto
+    // não serve aqui — "kcal" aparece no topo *e* em cada card, e é
+    // justamente essa repetição que o achado B1 trata.
+    const totals = () => document.querySelectorAll("dl")[0]?.textContent ?? "";
+
+    expect(totals()).toMatch(/^0\s*kcal/);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+    );
+
+    await waitFor(() => {
+      expect(totals()).not.toMatch(/^0\s*kcal/);
     });
   });
 });

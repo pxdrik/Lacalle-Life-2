@@ -13,6 +13,7 @@ import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { DateField } from "@/design-system/components/date-field";
 import { ReorderSheet } from "@/design-system/components/reorder-sheet";
+import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { useNutritionTargets } from "@/features/profile";
 
@@ -52,14 +53,6 @@ import { MacroSummary } from "./macro-summary";
 import { MealCard } from "./meal-card";
 
 /** Shifts a `YYYY-MM-DD` day by whole days, without dragging a clock along. */
-/** Meals seeded by `startDayFromDiet` that nobody has checked as eaten yet —
- * `meal.eaten === false` specifically, not just falsy: a hand-typed meal has
- * no `sourceDietId` and no `eaten` field at all, and counts as eaten by
- * default (`isEaten` in `meal-execution.ts`), not as one of these. */
-function plannedNotEatenCount(log: FoodLog): number {
-  return log.meals.filter((meal) => meal.eaten === false).length;
-}
-
 function shiftDay(day: string, offset: number): string {
   const [year, month, date] = day.split("-").map(Number);
   if (year === undefined || month === undefined || date === undefined)
@@ -207,22 +200,23 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
               />
             )}
 
-            {/* Achado por um agente sem contexto nenhum do app (25/09/2026):
-                importar uma dieta pro dia mostra as refeições com os totais
-                certos nos cards, mas o total daqui em cima fica zerado até
-                cada uma ser marcada com o ✓ — sem esta linha, isso lê como
-                "a importação falhou", não como "nada foi marcado ainda
-                comido". O ✓ em si continua só ícone (Pedro, 17/09/2026:
-                "não precisa de escrita") — o texto mora aqui, uma vez por
-                dia, não repetido em cada card. */}
-            {plannedNotEatenCount(state.log) > 0 && (
-              <p className="mt-1 text-xs text-ink-subtle">
-                {plannedNotEatenCount(state.log) === 1
-                  ? "1 refeição planejada ainda não foi marcada como comida"
-                  : `${String(plannedNotEatenCount(state.log))} refeições planejadas ainda não foram marcadas como comidas`}{" "}
-                — os totais acima contam só o que já foi.
-              </p>
-            )}
+            {/* O parágrafo que explicava a discordância saiu daqui na Sprint
+                2, e o motivo é o mesmo que o trouxe.
+
+                Ele nasceu de um achado real (25/09/2026): importar uma dieta
+                mostra cada refeição com o total certo no card e o total daqui
+                de cima zerado até alguém marcar o ✓, o que lê como
+                "a importação falhou". A correção de então foi explicar em
+                texto, uma vez por dia, **longe dos números que discordavam**.
+
+                Isso é um parágrafo compensando um layout que não dizia a
+                verdade — e o critério da Sprint 2 é justamente que a tela se
+                entenda sem ele. A explicação agora está em cada card
+                planejado (`meal-card.tsx`, "Planejado · ainda não somado no
+                total do dia"), colada no número que ela explica, e some
+                sozinha junto com o card quando a refeição é marcada. Uma
+                mensagem por refeição em vez de uma contagem por dia: diz mais
+                e é lida onde a dúvida aparece. */}
           </div>
 
           {saveError !== null && (
@@ -631,11 +625,17 @@ function PlannedMeals({
   if (pending.length === 0) return null;
 
   return (
-    <div className="mt-4">
-      <h2 className="text-xs font-medium tracking-wide text-ink-subtle uppercase">
-        Planejado para {formatDay(log.day)}
-      </h2>
-      <ul className="mt-2 space-y-1.5">
+    // Sprint 2, achado B2 — o título era escrito à mão com as classes de
+    // `Section size="compact"`, byte por byte iguais. Duas listas que
+    // representam o mesmo estado ("planejado") não podem desenhar o próprio
+    // cabeçalho cada uma: a primeira vez que uma das duas mudar, elas
+    // divergem sem ninguém perceber. Mesmo resultado visual, uma origem só.
+    <Section
+      title={`Planejado para ${formatDay(log.day)}`}
+      size="compact"
+      className="mt-4"
+    >
+      <ul className="space-y-1.5">
         {pending.map((meal) => (
           <li
             key={meal.id}
@@ -669,6 +669,6 @@ function PlannedMeals({
           </li>
         ))}
       </ul>
-    </div>
+    </Section>
   );
 }

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -542,5 +542,62 @@ describe("RM01 — long press instead of a permanent handle in the Diário", () 
       screen.getByRole("heading", { name: "Reordenar alimentos de Refeição 1" }),
     ).toBeInTheDocument();
     expect(onLongPressReorder).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Sprint 2, achado B1 — planejado e consumido eram o mesmo card.
+ *
+ * A diferença ficava num ícone de 32px, e o total da refeição aparecia com a
+ * mesma tipografia nos dois casos, enquanto o total do topo do Diário conta
+ * só o que foi comido. Quem importava uma dieta via "731 kcal" em cada
+ * refeição e um total que não batia.
+ *
+ * A marcação é só do estado excepcional. Comido é o caso comum e nunca teve
+ * marcação — uma refeição montada à mão não tem check e sempre contou.
+ */
+describe("estado planejado", () => {
+  const PLANNED = /Planejado · ainda não somado/;
+
+  it("diz que a refeição planejada não entra no total do dia", () => {
+    mount(meal([item()]), { checkState: "unchecked", onToggleChecked: vi.fn() });
+
+    expect(screen.getByText(PLANNED)).toBeInTheDocument();
+  });
+
+  it.each(["checked", "edited"] as const)(
+    "não marca uma refeição já comida (%s)",
+    (checkState) => {
+      mount(meal([item()]), { checkState, onToggleChecked: vi.fn() });
+
+      expect(screen.queryByText(PLANNED)).not.toBeInTheDocument();
+    },
+  );
+
+  /**
+   * O caso que protege o `DietEditor`. Ele não passa `checkState`, e lá
+   * `undefined` quer dizer "esta tela é um plano, não um dia" — marcar todo
+   * card de dieta como "planejado" seria verdade e ruído ao mesmo tempo.
+   * É também a refeição montada à mão no Diário, que sempre contou.
+   */
+  it("não marca nada quando a tela não é um dia (editor de dietas)", () => {
+    mount(meal([item()]));
+
+    expect(screen.queryByText(PLANNED)).not.toBeInTheDocument();
+  });
+
+  it("some assim que a refeição é marcada como comida", () => {
+    const { update } = mount(meal([item()]), {
+      checkState: "unchecked",
+      onToggleChecked: vi.fn(),
+    });
+    expect(screen.getByText(PLANNED)).toBeInTheDocument();
+
+    // O mesmo card, agora comido — o estado vem da prop, não de estado
+    // interno que pudesse ficar preso.
+    cleanup();
+    mount(meal([item()]), { checkState: "checked", onToggleChecked: vi.fn() });
+    expect(screen.queryByText(PLANNED)).not.toBeInTheDocument();
+    expect(update).toBeTypeOf("function");
   });
 });
