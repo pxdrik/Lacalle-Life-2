@@ -3070,6 +3070,31 @@ Descartados na própria pesquisa, coerentes com as restrições do projeto:
 reconhecimento por foto ou voz, score, streak, feed social, prontidão baseada
 em sono ou sinais vitais.
 
+**Critérios de escopo** (do PDF de evidências visuais do Manus, 29/09/2026,
+guardado fora do repositório em `Downloads/Lacalle-Life-evidencias-visuais.pdf`):
+
+- **Recentes:** separado de Favoritos; só o que a pessoa registrou.
+- **Igual a ontem:** cópia explícita da refeição equivalente para a data
+  selecionada; preserva gramas, deixa editar, nunca grava alimento no
+  catálogo. Referência visual: Lifesum, "Same as yesterday?" e "Recent" na
+  tela de refeição.
+- **Histórico por exercício:** por movimento, com as medidas que já existem
+  (reps, peso, duração); sem dado mostra vazio, nunca zero; "última vez" na
+  sessão ao vivo continua como está. Referência visual: biblioteca de
+  estatísticas por exercício do Hevy.
+- **Descanso marcado:** escolha reversível da pessoa; ausência de sessão nunca
+  vira descanso automático. O Gentler Streak distingue atividade, doença,
+  lesão e pausa, sempre escolhidos por quem usa.
+- **Tipo de série:** aparece no menu da série; drop set não inicia pausa
+  automática.
+- **Tema escuro:** sem trocar `--accent` nem o Verdant; a hierarquia vem dos
+  degraus neutros (canvas, surface, elevated, muted) e o acento fica em ação e
+  estado. Perdeu urgência em 29/09/2026, quando o claro virou o padrão (ver o
+  topo deste documento), mas continua válido para quem escolhe o escuro.
+
+O PDF não tem captura do Lacalle: o Manus tentou subir o app com `pnpm`, e o
+projeto usa `npm`.
+
 ## Sprint 2 — Schema real ✅ entregue em 25/08/2026
 
 As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
