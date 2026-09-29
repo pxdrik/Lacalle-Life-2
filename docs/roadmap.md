@@ -3044,7 +3044,30 @@ dados de exemplo; nada disso está no código. A implementação parte dele:
   rascunho, Dietas, Evolução, Biblioteca. Configurações ficou fora da
   navegação.
 
-### 7. Candidatos vindos de referência de mercado (Manus, 29/09/2026)
+### 7. Sete novidades vindas de referência de mercado: aprovadas para implementar (29/09/2026)
+
+**Aprovadas pelo Pedro em 29/09/2026, as sete**, depois de ver os protótipos:
+https://claude.ai/artifact/79uasBrqa6rpXmiBk7Xxeg. Cada protótipo copia os
+componentes reais da tela que muda; a implementação parte dele.
+
+| # | Novidade | Esforço | Decisão tomada no protótipo |
+| --- | --- | --- | --- |
+| 7.1 | Série concluída em verde suave | P | **Nos dois temas**, não só no escuro (pedido do Pedro ao ver o protótipo). Botão de concluir feito passa de `bg-accent` a `accent-surface` + `accent-text`; o próximo passo e a ação principal continuam em verde cheio. Revisar as outras telas com preenchimento verde repetido pela mesma regra. |
+| 7.2 | Recentes no seletor de alimentos | M | Seção acima da lista quando a busca está vazia, com a quantidade usada da última vez. Fonte: registros do diário. |
+| 7.3 | Igual a ontem | M | Faixa dentro da refeição vazia; "Copiar" traz alimentos e gramas; toast com Desfazer. Refeição equivalente = mesmo nome no dia anterior. Some se ontem ela estava vazia. |
+| 7.4 | Histórico por exercício | M | Seção "Seu histórico" no detalhe do exercício: melhor série, 1RM estimado, linha da carga da melhor série por treino, últimos treinos. Vazio quando não há dado. |
+| 7.5 | Dia de descanso | M | Botão "Hoje é descanso" no card de treino vazio do Hoje; desfazível. Só "descanso" por enquanto (doença e lesão ficam para depois, se fizer falta). |
+| 7.6 | Tipo de série | G | Menu da série ganha Normal, Aquecimento, Drop set, Até a falha; o número vira A, D, F. **Aquecimento sai do volume e dos recordes**: é a regra que muda números da Evolução, confirmar com o Pedro antes de fechar. |
+| 7.7 | Registro rápido | G | Ação no rodapé da refeição; calorias obrigatórias, macros opcionais; item "Avulso" sem catálogo; macro em branco fica em branco no total. |
+
+**Ordem sugerida:** 7.1 (menor e mais visível), depois 7.2 e 7.3 (atrito
+diário no Diário), 7.4, 7.5, e por último 7.6 e 7.7, que mudam dado salvo e
+sincronizado. Um commit por novidade, cada uma fechando o `verify` antes da
+próxima, como pede a fase de estabilização.
+
+Origem e conferência das lacunas no código, abaixo.
+
+#### Pesquisa de origem (Manus, 29/09/2026)
 
 Pesquisa feita pelo Manus sobre quatro apps do Mobbin (MyFitnessPal, Lifesum,
 Hevy, Gentler Streak), com as lacunas **conferidas contra o código do `main`
@@ -3052,9 +3075,6 @@ em 29/09/2026**. A primeira rodada dele leu a auditoria de UI de 26/09 como
 estado atual (o herói do Hoje já tinha sido corrigido em `f5c0884`) e chamou a
 cor de "esmeralda", que saiu em 11/09. A segunda rodada, abaixo, foi pedida
 contra o código.
-
-**Nenhum item está priorizado.** É lista de candidatos para o Pedro escolher,
-e o projeto está em fase de estabilização.
 
 | Candidato | Referência | Confirmado no código | Onde entraria | Esforço |
 | --- | --- | --- | --- | --- |
