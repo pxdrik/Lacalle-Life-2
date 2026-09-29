@@ -3018,6 +3018,32 @@ dados de exemplo; nada disso está no código. A implementação parte dele:
   rascunho, Dietas, Evolução, Biblioteca. Configurações ficou fora da
   navegação.
 
+### 7. Candidatos vindos de referência de mercado (Manus, 29/09/2026)
+
+Pesquisa feita pelo Manus sobre quatro apps do Mobbin (MyFitnessPal, Lifesum,
+Hevy, Gentler Streak), com as lacunas **conferidas contra o código do `main`
+em 29/09/2026**. A primeira rodada dele leu a auditoria de UI de 26/09 como
+estado atual (o herói do Hoje já tinha sido corrigido em `f5c0884`) e chamou a
+cor de "esmeralda", que saiu em 11/09. A segunda rodada, abaixo, foi pedida
+contra o código.
+
+**Nenhum item está priorizado.** É lista de candidatos para o Pedro escolher,
+e o projeto está em fase de estabilização.
+
+| Candidato | Referência | Confirmado no código | Onde entraria | Esforço |
+| --- | --- | --- | --- | --- |
+| Distribuição do verde no tema escuro | todos | O escuro é `#0B0D0F` com Verdant `#4FBE86`; os degraus neutros já existem em `tokens.css`. No protótipo do Life Pro, a "cara de IA" sumiu no tema claro. | Uso do acento nas telas, sem trocar a cor da marca nem os tokens | M |
+| Alimentos recentes no seletor | Lifesum | Não existe nada de recentes em `features/foods` | `food-picker.tsx` | M |
+| Trazer o dia anterior para o diário | Lifesum | Não existe. Parente: dia vazio já oferece começar a partir de uma dieta (`EmptyDay`), e `copyItemToMeal` copia dentro do mesmo dia | `food-log-screen.tsx` | M |
+| Histórico e gráfico por exercício | Hevy | Não existe. `exercise-detail.tsx` mostra só catálogo; "última vez" existe só dentro da sessão | `exercise-detail.tsx`, `services/history.ts` | M |
+| Dia de descanso marcado, neutro | Gentler Streak | Não existe | `today-workout.tsx`, mais um estado diário persistido | M |
+| Tipo de série (aquecimento, drop, falha) | Hevy | Não existe. `PerformedSet` não tem campo de tipo | `types/session.ts`, `performed-set-row.tsx` | G |
+| Registro avulso de calorias | MyFitnessPal, Lifesum | Não existe | `types/food-log.ts`, modelo do diário | G |
+
+Descartados na própria pesquisa, coerentes com as restrições do projeto:
+reconhecimento por foto ou voz, score, streak, feed social, prontidão baseada
+em sono ou sinais vitais.
+
 ## Sprint 2 — Schema real ✅ entregue em 25/08/2026
 
 As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
