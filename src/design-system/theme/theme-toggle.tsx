@@ -12,7 +12,7 @@ import { useTheme } from "./theme-provider";
  * Era um grupo de 3 rádios (Claro/Escuro/Sistema) — pequeno demais pro que
  * carregava, e "Sistema" como uma terceira opção ao lado das outras duas
  * pesava mais do que valia: a tela já abre no tema escolhido (`DEFAULT_THEME`
- * é `"dark"`, nunca `"system"`), então seguir o SO nunca foi o caminho comum.
+ * é `"light"`, nunca `"system"`), então seguir o SO nunca foi o caminho comum.
  * Um alguém que tinha `"system"` salvo de antes continua resolvendo
  * normalmente por `resolveTheme` — só não tem mais como escolher esse
  * terceiro estado de novo por aqui.

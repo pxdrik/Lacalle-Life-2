@@ -41,21 +41,14 @@ afterEach(() => {
 const theme = () => document.documentElement.getAttribute(THEME_ATTRIBUTE);
 
 describe("theme script", () => {
-  it("follows the OS when nothing is stored", () => {
+  it("paints light before anyone has chosen, even on a dark OS", () => {
+    // The default is a product decision, not a deference to the OS: light is
+    // the main theme since 29/09/2026, and this script is what decides the
+    // very first paint.
     stubSystemPrefersDark(true);
     runThemeScript();
 
-    expect(theme()).toBe("dark");
-  });
-
-  it("paints dark before anyone has chosen, whatever the OS says", () => {
-    // The default is a product decision, not a deference to the OS: the
-    // emerald identity was designed on a dark ground, and this script is what
-    // decides the very first paint.
-    stubSystemPrefersDark(false);
-    runThemeScript();
-
-    expect(theme()).toBe("dark");
+    expect(theme()).toBe("light");
   });
 
   it.each([
@@ -85,11 +78,12 @@ describe("theme script", () => {
     stubSystemPrefersDark(true);
     runThemeScript();
 
-    expect(theme()).toBe("dark");
+    expect(theme()).toBe("light");
   });
 
   it("sets color-scheme so native controls and scrollbars match", () => {
-    stubSystemPrefersDark(true);
+    window.localStorage.setItem(THEME_STORAGE_KEY, "dark");
+    stubSystemPrefersDark(false);
     runThemeScript();
 
     expect(document.documentElement.style.colorScheme).toBe("dark");

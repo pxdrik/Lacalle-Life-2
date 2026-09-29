@@ -16,11 +16,11 @@ describe("parseThemePreference", () => {
     },
   );
 
-  it("defaults to dark, because the identity was designed on a dark ground", () => {
+  it("defaults to light, the main theme since 29/09/2026", () => {
     // Asserted as a literal rather than through the constant: this is the
     // product decision itself, and a test that reads the constant back would
     // agree with any value someone typed there.
-    expect(DEFAULT_THEME).toBe("dark");
+    expect(DEFAULT_THEME).toBe("light");
   });
 });
 

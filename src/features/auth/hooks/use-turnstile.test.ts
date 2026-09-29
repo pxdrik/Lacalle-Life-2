@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/design-system/theme/theme-provider";
+import { setPreference } from "@/design-system/theme/theme-store";
 
 const getTurnstileSiteKey = vi.fn();
 
@@ -11,7 +12,7 @@ vi.mock("@/core/auth/env", () => ({
 
 // `useTurnstile` agora lê o tema atual (achado de auditoria de design,
 // 02/09/2026 — o widget nascia sempre no tema claro da Cloudflare, quebrando
-// a identidade visual escura do app), então todo `renderHook` daqui em
+// o tema escuro do app), então todo `renderHook` daqui em
 // diante precisa de um `ThemeProvider` por perto — e `ThemeProvider` precisa
 // de um `matchMedia`, que o jsdom não tem.
 beforeEach(() => {
@@ -82,12 +83,15 @@ describe("useTurnstile", () => {
   /**
    * Achado de auditoria de design (02/09/2026): o widget sempre nascia no
    * tema claro padrão da Cloudflare — cinza-claro com o logotipo laranja —
-   * quebrando a identidade escura das telas de Entrar/Criar conta. O tema
-   * padrão do app é escuro (`DEFAULT_THEME`, resolvido por `ThemeProvider`
-   * sem preferência salva), então é isso que o widget deve receber.
+   * quebrando o tema escuro das telas de Entrar/Criar conta.
+   *
+   * O teste escolhe o escuro de propósito: desde 29/09/2026 o padrão do app é
+   * claro, que também é o padrão da Cloudflare, e esperar "light" passaria
+   * mesmo se o hook ignorasse o tema do app.
    */
   it("passa o tema atual da aplicação para o widget", async () => {
     getTurnstileSiteKey.mockReturnValue("site-key-de-teste");
+    setPreference("dark");
     const render = vi.fn().mockReturnValue("widget-1");
     const { useTurnstile } = await import("./use-turnstile");
     const { result } = renderHook(() => useTurnstile(), {

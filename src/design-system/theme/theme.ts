@@ -24,16 +24,18 @@ export const THEME_PREFERENCES: readonly ThemePreference[] = [
 /**
  * The theme somebody gets before they have chosen one.
  *
- * `dark`, not `system`: this is a product decision, not a technical default.
- * The emerald identity was designed on a dark ground and is what the app is
- * supposed to look like the first time you see it — following the OS instead
- * means half the visitors meet a version nobody chose for them.
+ * `light`, not `system`: this is a product decision, not a technical default.
+ * It was `dark` until 29/09/2026, when Pedro made light the main theme and
+ * dark the option: prototyping the professional area showed that near-black
+ * with a single bright green is what read as "made by AI", and the same
+ * screens on the light ground did not. Following the OS instead would still
+ * mean half the visitors meet a version nobody chose for them.
  *
  * Three places have to agree on this value — here, `getServerPreference`, and
  * the pre-hydration script. If they diverge the page paints one theme and
  * then swaps to the other.
  */
-export const DEFAULT_THEME: ThemePreference = "dark";
+export const DEFAULT_THEME: ThemePreference = "light";
 
 /**
  * Storage is user-writable and survives across app versions, so anything read

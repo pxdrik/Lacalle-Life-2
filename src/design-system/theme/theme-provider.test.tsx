@@ -61,12 +61,12 @@ afterEach(() => {
 });
 
 describe("ThemeProvider", () => {
-  it("starts dark when no preference was ever chosen, even on a light OS", () => {
-    installMatchMedia(false);
+  it("starts light when no preference was ever chosen, even on a dark OS", () => {
+    installMatchMedia(true);
     renderToggle();
 
-    expect(theme()).toBe("dark");
-    expect(toggleButton()).toHaveAccessibleName("Mudar para tema claro");
+    expect(theme()).toBe("light");
+    expect(toggleButton()).toHaveAccessibleName("Mudar para tema escuro");
   });
 
   it("applies a stored preference over the OS setting", () => {
@@ -109,10 +109,10 @@ describe("ThemeProvider", () => {
     installMatchMedia(false);
     renderToggle();
 
-    // Starts dark by default, so one tap picks light.
+    // Starts light by default, so one tap picks dark.
     await userEvent.click(toggleButton());
 
-    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
   });
 
   it("sets color-scheme alongside the attribute", async () => {
@@ -121,7 +121,7 @@ describe("ThemeProvider", () => {
 
     await userEvent.click(toggleButton());
 
-    expect(document.documentElement.style.colorScheme).toBe("light");
+    expect(document.documentElement.style.colorScheme).toBe("dark");
   });
 
   it("recovers when storage is blocked entirely", async () => {
@@ -134,7 +134,7 @@ describe("ThemeProvider", () => {
     await userEvent.click(toggleButton());
 
     // The choice cannot be persisted, but it must still take effect.
-    expect(theme()).toBe("light");
+    expect(theme()).toBe("dark");
     vi.restoreAllMocks();
   });
 });
@@ -152,15 +152,15 @@ describe("ThemeToggle", () => {
     installMatchMedia(false);
     renderToggle();
 
-    expect(theme()).toBe("dark");
-
-    await userEvent.click(toggleButton());
     expect(theme()).toBe("light");
-    expect(toggleButton()).toHaveAccessibleName("Mudar para tema escuro");
 
     await userEvent.click(toggleButton());
     expect(theme()).toBe("dark");
     expect(toggleButton()).toHaveAccessibleName("Mudar para tema claro");
+
+    await userEvent.click(toggleButton());
+    expect(theme()).toBe("light");
+    expect(toggleButton()).toHaveAccessibleName("Mudar para tema escuro");
   });
 
   it("is operable by keyboard alone", async () => {
@@ -172,6 +172,6 @@ describe("ThemeToggle", () => {
 
     await userEvent.keyboard("{Enter}");
 
-    expect(theme()).toBe("light");
+    expect(theme()).toBe("dark");
   });
 });

@@ -5,6 +5,32 @@ depender da memória de nenhuma conversa.
 
 ---
 
+## ✅ Tema claro vira o principal, escuro vira opção — 29/09/2026
+
+Decisão do Pedro depois do protótipo do Life Pro: no tema escuro (fundo quase
+preto com um único verde vivo) as telas liam como "feitas por IA"; as mesmas
+telas no claro não. Não é troca de cor da marca: Verdant e todos os tokens
+continuam iguais nos dois temas.
+
+- `DEFAULT_THEME` passou de `"dark"` para `"light"` (`design-system/theme/theme.ts`).
+  Script de pré-hidratação e servidor leem a mesma constante, então não há
+  troca de tema no primeiro paint.
+- **Quem é afetado:** só quem nunca tocou no botão de tema. A preferência vive
+  no `localStorage` do aparelho e não sincroniza com a conta; quem já escolheu
+  escuro continua no escuro.
+- O botão continua alternando claro/escuro.
+- Testes: os que fixavam o padrão escuro passaram a fixar o claro. Revertido o
+  padrão para `"dark"`, 9 caem. O do Turnstile passou a escolher o escuro
+  explicitamente: esperar `"light"` passaria mesmo se o widget ignorasse o tema
+  do app, porque claro também é o padrão da Cloudflare.
+- Conferido no navegador: build de produção, perfil limpo, SO simulado em modo
+  escuro: abre no claro.
+
+**Pendência conhecida, não tratada aqui:** o `themeColor` do `app/layout.tsx`
+segue o tema do sistema, não o do app. Quem está com o SO no escuro e o app no
+claro vê a barra do navegador escura. O desencontro já existia no sentido
+oposto com o padrão anterior.
+
 ## ✅ Trocar de aba esperava a rede — mesmo já em cache — 25/09/2026
 
 Pedro: "tem vezes que a minha ação demora mto pra contabilizar... quando eu
