@@ -327,6 +327,47 @@ achou nada no brandbook que tenha deixado de fazer sentido.
 
 ---
 
+## Largura e escala em tela larga: área profissional
+
+Proposta de 28/09/2026, decidida pelo Pedro ao ver o protótipo da Visão ADM
+(`docs/visao-adm-pro.md`, protótipo em
+https://claude.ai/artifact/EYmbA15HyK99R7NrbiZxUA): num monitor grande, os
+blocos ficavam pequenos no meio da tela, com margem vazia dos dois lados. Ainda
+precisa entrar no Brandbook V2 (o artifact dele não estava acessível nesta
+sessão). Até lá, vale este registro.
+
+**O problema.** `--content-max: 1280px` foi pensado para o app pessoal, que é
+uma coluna de leitura. A área profissional é superfície de trabalho: tabelas de
+pacientes, plano alimentar, diário da semana. Em 1920px, sobram mais de 180px
+vazios de cada lado e o texto de 14px fica pequeno para a distância de um
+monitor.
+
+**A regra.**
+
+| Faixa | Largura do conteúdo | Escala |
+| --- | --- | --- |
+| Até 1439px | até 1600px, margem 48px | a atual: corpo 14, linha de tabela 48, card 20, controle 40 |
+| 1440px ou mais | até 1600px, margem 48px | corpo 15, linha de tabela 56, card 24, controle 44, métrica 24, legenda 13, rótulo 12, badge 12 |
+
+- **O conteúdo acompanha a tela até 1600px.** Acima disso centraliza: linha de
+  tabela mais longa que isso fica difícil de seguir com o olho.
+- **A escala sobe junto com a largura.** Bloco maior com texto do mesmo tamanho
+  continua parecendo pequeno. Sobem os tokens (`--card-p`, altura de linha,
+  `--control-h`, tamanho da métrica), nunca valores soltos por componente.
+- **Coluna de tabela em proporção, não em pixel fixo**, quando a tabela ocupa a
+  largura toda. Com largura fixa, a primeira coluna engole a sobra e as outras
+  cortam o texto (aconteceu no protótipo: "Última atividade" truncado a 1920px).
+  Colunas numéricas de largura previsível (kcal, macros, quantidade) continuam
+  em pixel, alinhadas à direita.
+- **Continua valendo tudo o resto:** raios 8/12/16, um primário por tela,
+  cabeçalho e linha na mesma grade.
+
+**Escopo.** Só a área profissional. O app pessoal continua em 1280px: é
+mobile-first, e a coluna de leitura mais estreita é deliberada. Se um dia o
+Pedro quiser a mesma regra no app pessoal, é decisão nova.
+
+---
+
 ## Conflitos internos do brandbook, e como foram lidos
 
 Nenhum destes é divergência da aplicação: são duas páginas do documento pedindo
