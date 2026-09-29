@@ -2974,6 +2974,33 @@ domínio existir de verdade.
 
 Com isso, a Sprint 1 está fechada.
 
+### 6. Visão ADM: LaCalle Life Pro (B2B / B2B2C)
+
+**Registrado em 28/09/2026, não iniciado.** Especificação completa em
+[`docs/visao-adm-pro.md`](visao-adm-pro.md).
+
+Área profissional para nutricionistas (treinadores depois): painel, gestão
+de pacientes por convite, criação e publicação de planos alimentares com
+histórico de versões, leitura do diário e da evolução autorizados, biblioteca
+de modelos. O B2C continua funcionando como hoje; ninguém é obrigado a ter
+profissional.
+
+Pontos que pesam antes de qualquer código:
+
+- **Começa por auditoria, não por implementação.** A Etapa 1 da spec é um
+  diagnóstico da arquitetura atual (sync, RLS, JSONB, auth) e um plano; nada
+  de migração antes disso.
+- **Mexe no data layer**, que o `CLAUDE.md` pede para não tocar fora de
+  necessidade real. Aqui a necessidade é real: vínculo
+  profissional/paciente com revogação é um modelo de acesso novo, e as
+  políticas RLS precisam ser revistas contra ele.
+- **Conflita com a fase de estabilização** (decidida em 25/09/2026). Entrar
+  nesta frente é decisão de quando, não só de como.
+- **Nada de IA** na prescrição, coerente com a restrição fundadora.
+
+Fora do escopo desta primeira versão: sistema completo de treinadores,
+cobrança, marketplace, chat, IA, marca por clínica, app separado.
+
 ## Sprint 2 — Schema real ✅ entregue em 25/08/2026
 
 As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
