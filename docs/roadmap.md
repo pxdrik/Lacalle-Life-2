@@ -3001,6 +3001,23 @@ Pontos que pesam antes de qualquer código:
 Fora do escopo desta primeira versão: sistema completo de treinadores,
 cobrança, marketplace, chat, IA, marca por clínica, app separado.
 
+**Protótipo visual aprovado como base, 28/09/2026:**
+https://claude.ai/artifact/EYmbA15HyK99R7NrbiZxUA (versão 3). Navegável, com
+dados de exemplo; nada disso está no código. A implementação parte dele:
+
+- A anatomia é a dos componentes reais (`Sidebar`, `PageHeader`, `Card`,
+  `Badge`, `Metric`, `Button`), não um visual novo. A primeira versão, com
+  visual próprio, foi rejeitada por "cara de IA".
+- Tabelas com uma grade só: no editor, todas as refeições numa tabela, com
+  subtotal e total nas mesmas colunas de kcal e macros.
+- Largura e escala em tela larga (até 1600px, escala maior a partir de
+  1440px) registradas em `docs/brandbook.md`, seção "Largura e escala em tela
+  larga: área profissional". Só para a área profissional.
+- Telas cobertas: Visão geral, Pacientes (com convite), perfil do paciente
+  (Plano, Diário, Evolução, Histórico), editor de plano com versão em
+  rascunho, Dietas, Evolução, Biblioteca. Configurações ficou fora da
+  navegação.
+
 ## Sprint 2 — Schema real ✅ entregue em 25/08/2026
 
 As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
