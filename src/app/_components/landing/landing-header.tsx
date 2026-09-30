@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Signature } from "@/design-system/brand/signature";
+import { cn } from "@/design-system/cn";
 import { buttonClasses } from "@/design-system/components/button";
 
 /**
@@ -11,6 +12,15 @@ import { buttonClasses } from "@/design-system/components/button";
  * que o resto do app usa em `--header-h` na faixa acima do celular — uma
  * visitante que cria conta e cai em `/hoje` vê o mesmo símbolo no mesmo
  * lugar, não uma segunda marca.
+ *
+ * **No celular, só "Entrar"** (roadmap 8.19, 30/09/2026). Marca e os dois
+ * botões não cabiam: a página rolava de lado em 10 das 15 combinações de
+ * celular, 17px em 390px Padrão e 172px em 320px Confortável. Medido em
+ * 320px, marca + "Entrar" ocupa no máximo 261 dos 288px (Confortável), e
+ * nenhuma versão com os dois cabe. "Criar minha conta" continua logo abaixo,
+ * como botão principal do hero e no fim da página, e volta aqui a partir de
+ * `sm`: no celular a primeira dobra tinha dois botões principais, e o
+ * brandbook pede um por tela.
  */
 export function LandingHeader() {
   return (
@@ -24,7 +34,10 @@ export function LandingHeader() {
           <Link href="/entrar" className={buttonClasses("ghost", "sm")}>
             Entrar
           </Link>
-          <Link href="/cadastro" className={buttonClasses("primary", "sm")}>
+          <Link
+            href="/cadastro"
+            className={cn(buttonClasses("primary", "sm"), "hidden sm:inline-flex")}
+          >
             Criar minha conta
           </Link>
         </div>

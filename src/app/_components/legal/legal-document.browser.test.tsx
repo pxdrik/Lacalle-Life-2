@@ -42,22 +42,6 @@ function pageOverflow(): number {
   return document.documentElement.scrollWidth - document.documentElement.clientWidth;
 }
 
-/**
- * O documento em si, sem o cabeçalho da landing: o cabeçalho já estourava a
- * tela antes desta tarefa (até 172px em 320px Confortável, 17px em 390px
- * Padrão), e isso é o roadmap 8.19, com teste próprio quando for corrigido.
- */
-function articleOverflow(): number {
-  const main = document.querySelector("main")!;
-  return Math.max(
-    overflowX(main),
-    main.getBoundingClientRect().right - document.documentElement.clientWidth,
-    ...[...main.querySelectorAll("*")].map(
-      (element) => element.getBoundingClientRect().right - main.getBoundingClientRect().right,
-    ),
-  );
-}
-
 describe("8.4 — documentos legais", () => {
   for (const width of [...PHONE_WIDTHS, DESKTOP_WIDTH]) {
     for (const density of DENSITIES) {
@@ -75,7 +59,8 @@ describe("8.4 — documentos legais", () => {
               "mailto:lacallepm@gmail.com",
             );
           }
-          expect(articleOverflow(), `${title} passa da página`).toBeLessThanOrEqual(0.5);
+          // A página inteira, cabeçalho incluído: desde o 8.19 ele cabe.
+          expect(pageOverflow(), `${title} rola para o lado`).toBeLessThanOrEqual(0);
           for (const link of screen.getByRole("navigation", { name: "Outros documentos" }).querySelectorAll("a")) {
             // No fim de uma página longa: fora da tela, `elementFromPoint` não vê nada.
             link.scrollIntoView({ block: "center" });
