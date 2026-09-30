@@ -92,6 +92,7 @@ describe("Button", () => {
      */
     const classes = [...screen.getByRole("button").classList];
     expect(classes).toContain("bg-danger");
-    expect(classes).not.toContain("bg-accent");
+    // O fundo do primário é `bg-accent-fill` desde 30/09/2026 (roadmap 8.10).
+    expect(classes).not.toContain("bg-accent-fill");
   });
 });

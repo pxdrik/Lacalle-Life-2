@@ -135,6 +135,11 @@ const PAIRS = [
   ["accent-ink", "accent-hover", 4.5, "primary button label, hovered"],
   ["accent", "canvas", 3, "Verdant as a chart line or filled control"],
   ["accent", "surface", 3, "Verdant as a filled control on a card"],
+  // Roadmap 8.10 (30/09/2026): o botão principal tem fundo próprio, mais claro.
+  // Só a etiqueta é asserida: o botão se identifica pelo texto, e o 3:1 de
+  // objeto gráfico fica com o `accent`, que é quem desenha o resto.
+  ["accent-ink", "accent-fill", 4.5, "primary button label on the lighter fill"],
+  ["accent-ink", "accent-fill-hover", 4.5, "primary button label, hovered"],
   ["accent-text", "canvas", 4.5, "Verdant used as text on the page"],
   ["accent-text", "surface", 4.5, "Verdant used as text on a card"],
   ["accent-text", "elevated", 4.5, "Verdant as text on a raised surface"],
@@ -282,6 +287,9 @@ describe("brand system values", () => {
     ["accent-500", "#2a9162"],
     ["accent-700", "#1f7049"],
     ["accent-900", "#135334"],
+    // Roadmap 8.10 (30/09/2026, decisão do Pedro): só o botão principal clareia.
+    ["accent-fill", "#31aa73"],
+    ["accent-fill-hover", "#2a9162"],
     // Page 27 — UI states and product data colours.
     ["success", "#059669"],
     ["warning", "#d97706"],

@@ -173,6 +173,21 @@
    * com Ink (4,62, com margem de segurança, não no limite exato).
    */
   --accent-hover: #298e60;
+  /**
+   * O preenchimento do botão principal, mais claro que o acento — roadmap
+   * 8.10, decisão do Pedro em 30/09/2026. Em área grande, com texto preto em
+   * cima, o #2A9162 lia escuro demais sobre o fundo claro; o #31AA73 foi
+   * escolhido comparando tons lado a lado num protótipo. **Só o botão**: logo,
+   * anel de foco, meio círculo, bordas e marcadores seguem no `--accent`.
+   *
+   * Contraste: Ink mede 6,41:1 sobre ele e 4,79:1 sobre o hover (o Verdant
+   * 500, um passo mais escuro). Como elemento gráfico o #31AA73 mede 2,95:1
+   * contra `surface`, abaixo dos 3:1 de um objeto que carrega sentido sozinho
+   * — e é por isso que ele fica restrito ao botão, que se identifica pelo
+   * próprio texto, e não vira o acento geral.
+   */
+  --accent-fill: #31aa73;
+  --accent-fill-hover: #2a9162;
   /* Ver a divergência 1 no topo. Ink mede 4,79:1 aqui; branco mede 3,94. */
   --accent-ink: #111111;
   /* O acento como texto pede 4,5:1; o 700 já cumpre com folga (5,78:1 contra
@@ -376,6 +391,10 @@
      de antes ("sobe" em vez de "desce"), só que agora dentro da própria
      escala escura, sem precisar pegar emprestado um tom do tema claro. */
   --accent-hover: var(--accent-700);
+  /* No escuro o botão segue o acento: o Verdant escuro já é claro o bastante
+     (8.38:1 como gráfico), e a mudança de 8.10 é só do tema claro. */
+  --accent-fill: var(--accent);
+  --accent-fill-hover: var(--accent-hover);
   --accent-ink: #0b0d0f;
   /* No escuro o acento já cumpre 4,5:1 como texto sobre todas as superfícies
      (6,97 no pior caso, sobre `elevated`), então aqui ele é a própria base —
@@ -739,6 +758,8 @@ html {
 
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
+  --color-accent-fill: var(--accent-fill);
+  --color-accent-fill-hover: var(--accent-fill-hover);
   --color-accent-ink: var(--accent-ink);
   --color-accent-text: var(--accent-text);
   --color-accent-surface: var(--accent-surface);

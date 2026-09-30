@@ -21,7 +21,9 @@ export type ButtonSize = "sm" | "md" | "lg";
  * não custa nada em tempo de execução.
  */
 const VARIANTS = {
-  primary: "bg-accent text-accent-ink hover:bg-accent-hover",
+  // `accent-fill`, não `accent` (roadmap 8.10, 30/09/2026): o botão principal
+  // usa um Verdant mais claro que o resto do acento. Ver `tokens.css`.
+  primary: "bg-accent-fill text-accent-ink hover:bg-accent-fill-hover",
   secondary:
     "bg-surface text-ink border border-line-strong hover:bg-muted",
   ghost: "text-ink-muted hover:bg-muted hover:text-ink",

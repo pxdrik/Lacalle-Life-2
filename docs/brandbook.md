@@ -327,6 +327,28 @@ achou nada no brandbook que tenha deixado de fazer sentido.
 
 ---
 
+## Botão principal em Verdant mais claro, só no tema claro
+
+Decisão do Pedro em 30/09/2026 (roadmap 8.10). Em área grande, com o texto
+preto em cima, o Verdant `#2A9162` lia escuro demais sobre o fundo claro.
+Foi escolhido `#31AA73` comparando tons lado a lado num protótipo
+(https://claude.ai/artifact/XcN4CAVxMfnWzw867XbZ1W).
+
+- **Só o preenchimento do botão principal** muda, por um token próprio,
+  `--accent-fill` (hover `--accent-fill-hover` = `#2A9162`). O acento
+  geral (`--accent`, `#2A9162`) continua no logo, no anel de foco, no meio
+  círculo, em bordas, marcadores, chips e gráficos.
+- **Contraste:** tinta sobre o botão mede 6,41:1 (4,79:1 no hover). Como
+  objeto gráfico o `#31AA73` mede 2,95:1 contra `surface`, abaixo dos
+  3:1 de um elemento que carrega sentido sozinho. É por isso que ele fica
+  restrito ao botão, que se identifica pelo próprio texto, e não vira o
+  acento: o tom mais claro que ainda passaria era `#30A46F`.
+- **Tema escuro:** sem mudança; o botão segue o acento escuro `#4FBE86`.
+- **Pendente:** levar ao Brand System V2 (o artifact dele não estava
+  acessível nesta sessão).
+
+---
+
 ## Largura e escala em tela larga: área profissional
 
 Proposta de 28/09/2026, decidida pelo Pedro ao ver o protótipo da Visão ADM
