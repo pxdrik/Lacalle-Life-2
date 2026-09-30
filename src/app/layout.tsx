@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/design-system/theme/theme-provider";
 import { ThemeScript } from "@/design-system/theme/theme-script";
 
 import { ServiceWorker } from "./_components/service-worker";
+import { viewportFor } from "./viewport";
 
 import "./globals.css";
 
@@ -43,21 +44,10 @@ export const metadata: Metadata = {
   description: "Monte dietas, monte treinos, acompanhe sua evolução.",
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  // Lets content reach into the safe areas on notched phones — the workout
-  // screen wants every pixel.
-  viewportFit: "cover",
-  // Matches `--canvas` in each theme, so the mobile browser chrome blends
-  // into the page instead of framing it. Both are brand system values — the
-  // Background of page 18 and the dark canvas of page 33 — and the light one
-  // was white here, which framed every card against a paler chrome.
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b0d0f" },
-  ],
-};
+/** Por requisição: `maximumScale` só em iOS. Ver `viewport.ts`. */
+export async function generateViewport(): Promise<Viewport> {
+  return viewportFor((await headers()).get("user-agent"));
+}
 
 /**
  * Async because `headers()` is: `middleware.ts` mints a fresh nonce every
