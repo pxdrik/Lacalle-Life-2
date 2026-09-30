@@ -2,6 +2,31 @@ import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING, type MacroKey } from "@/design-system/macros";
 
+/** Espaço em volta do anel para os percentuais: cabe "100%" em 11px. */
+const LABEL_PAD = 26;
+
+/**
+ * Onde o percentual fica, do lado de fora do anel. À direita o texto começa
+ * junto do anel, à esquerda termina junto dele, em cima e embaixo fica
+ * centrado. A distância cresce com o seno do ângulo: quanto mais para cima ou
+ * para baixo, mais da meia altura do texto (~6 em 11px) aponta para o centro,
+ * e sem essa folga o canto do texto encostava no traço nas diagonais.
+ */
+function labelPlacement(
+  center: number,
+  labelRadius: number,
+  angle: number,
+): { x: number; y: number; textAnchor: "start" | "middle" | "end" } {
+  const cos = Math.cos(angle);
+  const textAnchor = cos > 0.35 ? "start" : cos < -0.35 ? "end" : "middle";
+  const distance = labelRadius + 6 * Math.abs(Math.sin(angle));
+  return {
+    x: center + distance * cos,
+    y: center + distance * Math.sin(angle),
+    textAnchor,
+  };
+}
+
 const STROKE_CLASS: Record<MacroKey, string> = {
   proteinG: "stroke-protein",
   carbsG: "stroke-carbs",
@@ -37,9 +62,16 @@ export function MacroDonut({
   readonly showLabels?: boolean;
   readonly className?: string;
 }) {
-  const center = size / 2;
+  // Roadmap 8.8 (29/09/2026): os percentuais ficam **fora** do anel, numa
+  // margem em volta dele. Em cima do anel, "25%" era mais largo que a
+  // espessura do traço (~10px em 64px), e duas fatias pequenas vizinhas
+  // punham os rótulos um em cima do outro. `size` continua sendo o anel.
+  const pad = showLabels ? LABEL_PAD : 0;
+  const box = size + pad * 2;
+  const center = box / 2;
   const stroke = Math.max(4, Math.round(size * 0.16));
-  const radius = center - stroke / 2 - 2;
+  const radius = size / 2 - stroke / 2 - 2;
+  const labelRadius = radius + stroke / 2 + 4;
   const circumference = 2 * Math.PI * radius;
 
   const total = MACRO_CODING.reduce((sum, macro) => sum + shares[macro.key], 0);
@@ -66,9 +98,9 @@ export function MacroDonut({
   return (
     <svg
       aria-hidden
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
+      width={box}
+      height={box}
+      viewBox={`0 0 ${String(box)} ${String(box)}`}
       className={cn("shrink-0", className)}
     >
       <circle
@@ -104,11 +136,9 @@ export function MacroDonut({
             fraction >= 0.08 && (
               <text
                 key={macro.key}
-                x={center + radius * Math.cos(midAngleRad)}
-                y={center + radius * Math.sin(midAngleRad)}
-                textAnchor="middle"
+                {...labelPlacement(center, labelRadius, midAngleRad)}
                 dominantBaseline="central"
-                className="fill-white text-[11px] font-semibold tabular-nums"
+                className="fill-ink text-[11px] font-semibold tabular-nums"
               >
                 {formatDecimal(Math.round(fraction * 100))}%
               </text>
