@@ -658,7 +658,11 @@ export function MealCard({
           {/* Adicionar alimento e Observações na mesma linha — dividir em duas
               era espaço parado embaixo de toda refeição, a maior parte das
               vezes vazio. `InlineText` já é discreto (borda transparente até
-              foco/hover), então não briga por atenção com o botão ao lado. */}
+              foco/hover), então não briga por atenção com o botão ao lado.
+              `min-w-32` e não `min-w-0` (8.16): com base e mínimo zero o
+              `flex-wrap` nunca desce o campo, e em 320px ele era espremido
+              até "Ob". Com um mínimo, sem espaço ele vai para a linha de
+              baixo inteira. */}
           <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
             <div className="flex flex-wrap items-center gap-1">
               <button
@@ -701,7 +705,7 @@ export function MealCard({
               }}
               label={`Observações de ${meal.name}`}
               placeholder="Observações"
-              className="min-w-0 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
+              className="min-w-32 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
             />
           </div>
 

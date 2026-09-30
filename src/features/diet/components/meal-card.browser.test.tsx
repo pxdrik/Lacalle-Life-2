@@ -49,7 +49,7 @@ function meal(name: string, items: readonly MealItem[]): Meal {
 
 type CheckState = "unchecked" | "checked" | "edited";
 
-function mount(theMeal: Meal, checkState?: CheckState) {
+function mount(theMeal: Meal, checkState?: CheckState, fromDiet = false) {
   render(
     <MealCard
       meal={theMeal}
@@ -67,6 +67,7 @@ function mount(theMeal: Meal, checkState?: CheckState) {
       onSendItem={vi.fn()}
       checkState={checkState}
       onToggleChecked={checkState === undefined ? undefined : vi.fn()}
+      onApplyAlternative={fromDiet ? vi.fn() : undefined}
     />,
   );
 }
@@ -180,4 +181,32 @@ describe("DIARY-06 — registrar continua alcançável", () => {
       document.documentElement.clientWidth + 1,
     );
   });
+});
+
+/**
+ * Roadmap 8.16 (30/09/2026): em 320px, Confortável, o campo de Observações
+ * do rodapé era espremido até mostrar "Ob". O `flex-1` com `min-w-0` tem
+ * base e mínimo zero, então o `flex-wrap` nunca o mandava para a linha de
+ * baixo: ele "cabia" em qualquer sobra.
+ *
+ * O texto mede-se como valor, não como placeholder: é a mesma fonte na mesma
+ * caixa, e só o valor aparece em `scrollWidth`.
+ */
+describe("8.16 — Observações não é cortado no rodapé", () => {
+  for (const fromDiet of [false, true]) {
+    for (const width of [...PHONE_WIDTHS, DESKTOP_WIDTH]) {
+      for (const density of DENSITIES) {
+        it(`${fromDiet ? "Dieta" : "Diário"}, ${String(width)}px, ${density}`, async () => {
+          await setViewport(width, 900);
+          setDensity(density);
+          mount({ ...meal(LONG_NAME, [item()]), notes: "Observações" }, "unchecked", fromDiet);
+
+          const notes = screen.getByRole("textbox", { name: `Observações de ${LONG_NAME}` });
+
+          expect(overflowX(notes), "o texto passa da caixa").toBeLessThanOrEqual(0);
+          expect(overflowX(document.querySelector("section")!)).toBeLessThanOrEqual(0);
+        });
+      }
+    }
+  }
 });
