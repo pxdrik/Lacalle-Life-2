@@ -17,7 +17,11 @@ import type { Exercise } from "../types/exercise";
  * The numbers below are the same measurements in pixels, which `next/image`
  * needs as intrinsic dimensions to build its srcset.
  */
-export const THUMBNAIL_BOX = "h-11 w-16";
+// Abaixo de 360px encolhe para 48×32 (roadmap 8.1, 29/09/2026): em 320px na
+// densidade Confortável a foto de 64px deixava o nome do exercício cortado
+// mesmo com as ações numa linha própria. Mesma proporção, então nada é
+// recortado, e o esqueleto de carregamento encolhe junto porque lê daqui.
+export const THUMBNAIL_BOX = "h-11 w-16 max-[359px]:h-8 max-[359px]:w-12";
 const WIDTH = 64;
 const HEIGHT = 44;
 

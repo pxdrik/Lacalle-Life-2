@@ -75,7 +75,12 @@ export function SessionExerciseCard({
       {/* Thumbnail-sized and no larger. This card is read standing up between
           sets: a big photo here would push the set rows off the screen, which
           costs more than the photo adds. Tapping it opens the detail. */}
-      <header className="flex items-center justify-between gap-3">
+      {/* Quebra no celular, como `routine-exercise-card.tsx` desde 09/08. As
+          setas de ordem (25/09) deixaram a miniatura, o contador e três
+          botões na mesma linha do nome, e em 375px sobrava ~60px para ele:
+          "Puxada Frontal" chegava como "Pu F..". Abaixo de `sm` as ações
+          descem para uma linha própria e o nome fica com a primeira. */}
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 sm:flex-nowrap">
         <ExerciseIdentity
           name={exercise.name}
           catalogue={catalogue}
@@ -94,7 +99,7 @@ export function SessionExerciseCard({
             intervalo nenhum: os ~19% da direita de cada ícone disparam o
             vizinho. 12px é o que põe os centros a 44px e faz os alvos
             ladrilharem em vez de se empilharem. */}
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex w-full shrink-0 items-center justify-end gap-3 sm:w-auto">
           <span className="text-xs tabular-nums text-ink-subtle">
             {done}/{exercise.sets.length}
             {isComplete && <span className="ml-1.5 text-accent-text">✓</span>}

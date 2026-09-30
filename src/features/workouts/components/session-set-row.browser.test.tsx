@@ -376,3 +376,52 @@ describe("7.1 — série feita não é bloco verde cheio", () => {
     }
   });
 });
+
+/**
+ * Roadmap 8.1 (29/09/2026): o nome do exercício cortado no celular.
+ *
+ * Relatado pelo Pedro num iPhone de 375px: "Puxada Frontal Pronada" aparecia
+ * como "Pu F..". As setas de ordem (25/09) deixaram miniatura, contador e três
+ * botões na mesma linha do nome. A régua é o próprio corte: `line-clamp-2`
+ * esconde o excesso, então `scrollHeight` maior que `clientHeight` é nome
+ * cortado na tela.
+ */
+describe("8.1 — o nome do exercício aparece inteiro no celular", () => {
+  const WITH_PHOTO = {
+    ...CARDIO_ENTRY,
+    name: "Puxada Frontal Pronada",
+    movementPattern: "vertical-pull",
+  } as unknown as Exercise;
+
+  for (const width of PHONE_WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px, densidade ${density}`, async () => {
+        await setViewport(width);
+        setDensity(density);
+        const { container } = renderCard(EXERCISE, WITH_PHOTO);
+        const header = container.querySelector<HTMLElement>("header");
+        const name = header?.querySelector<HTMLElement>(".line-clamp-2");
+        if (header === null || name === null || name === undefined) {
+          throw new Error("cabeçalho do exercício não encontrado");
+        }
+
+        expect(
+          name.scrollHeight,
+          `nome cortado: ${String(name.clientWidth)}px de largura`,
+        ).toBeLessThanOrEqual(name.clientHeight + 1);
+
+        // A quebra de linha não pode desfazer os 12px entre os botões.
+        for (const control of header.querySelectorAll("button")) {
+          for (const [index, hit] of hitTargetsAcross(control).entries()) {
+            expect
+              .soft(
+                hit === control || control.contains(hit),
+                `parada ${String(index)} de "${control.getAttribute("aria-label") ?? ""}" foi para outro elemento`,
+              )
+              .toBe(true);
+          }
+        }
+      });
+    }
+  }
+});

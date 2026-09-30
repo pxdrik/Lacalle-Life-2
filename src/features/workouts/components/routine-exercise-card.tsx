@@ -132,8 +132,10 @@ export function RoutineExerciseCard({
               catalogue={catalogue}
               onOpenDetail={onOpenDetail}
             >
-              {exercise.sets.length}{" "}
-              {exercise.sets.length === 1 ? "série" : "séries"}
+              {/* Sem "N séries" embaixo do nome (roadmap 8.1, pedido do Pedro
+                  em 29/09/2026): as séries já estão listadas logo abaixo, e sem
+                  a legenda o nome centraliza na altura da miniatura. */}
+              {null}
             </ExerciseIdentity>
 
             {/* The arrows stay. Dragging a card with one thumb at the gym is worse
