@@ -85,7 +85,11 @@ export function Signature({
         gap: "calc(var(--signature-h) * 0.5)",
       }}
     >
-      <Mark className="h-(--signature-h) w-auto shrink-0 text-ink" />
+      {/* Símbolo em Verdant (roadmap 8.11, pedido do Pedro em 30/09/2026):
+          o Brand System V2 define a Proposta 01 em Verdant para o Life. Token,
+          não hex: se o acento mudar (8.10), o logo acompanha. Como elemento
+          gráfico pede 3:1, e `accent` mede 3,94:1 sobre `surface` no claro. */}
+      <Mark className="h-(--signature-h) w-auto shrink-0 text-accent" />
 
       {/* `leading-none` para que o centro óptico do texto case com o do
           símbolo: com line-height herdado, a caixa da linha é mais alta que as
