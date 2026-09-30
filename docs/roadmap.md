@@ -3129,7 +3129,6 @@ confirmada por reprodução.
 | 8.3 | ✅ **Voltou o erro na seleção do RPE** no celular, **entregue em 29/09/2026, falta confirmar no iPhone** | O RPE já teve três correções (`962f04c`, `65579c0`, `f8ac8cc`), com teste de navegador. Se voltou, ou é caso que o teste não cobre (toque real, arrasto, iOS) ou a correção regrediu. **Precisa de reprodução primeiro:** qual valor, tocando ou arrastando, o que aconteceu. **Reprodução do Pedro:** o quadradinho abre normal; tocar no meio círculo não escolhe nada, e ele não achou ponto que funcionasse. Pediu que a escolha funcione só pela linha. **Investigado com WebKit (motor do Safari), instalado em 29/09/2026:** a conta de posição fecha no Chromium e no WebKit com emulação de celular e toque real; o bug do iPhone **não se reproduziu** fora dele. **Entregue:** a faixa da linha virou um arco invisível por cima do mostrador, e é o navegador quem decide se o dedo acertou; o ângulo vem de `getScreenCTM`. Os testes passaram a tocar no elemento sob o ponto e a esperar a folha terminar de subir (antes disparavam direto no SVG, com a mesma conta do componente, e não pegariam erro nela). | Regressão; investigar |
 | 8.4 | **Contrato de uso** (termos de uso) | Não existe nenhuma página de termos nem de política de privacidade no app. O app tem conta e sincroniza dado de saúde (dieta, peso), então a política de privacidade provavelmente vem junto. **O texto jurídico é do Pedro** (ou de quem ele indicar); o código é a página, o link no rodapé/criação de conta e, se for o caso, o aceite registrado. | Novo; depende de texto |
 | 8.5 | ✅ **Última semana como dica no campo vazio** (padrão do Hevy), **entregue em 29/09/2026** | Hoje o campo vazio mostra `placeholder="—"` (`performed-set-row.tsx`) e a "última vez" aparece só como uma linha de texto acima da grade (`session-exercise-card.tsx`, `lastTime`). Proposta: o placeholder de peso e reps da série N passa a ser o valor da série N da última vez, em tom mais claro. Cuidado: quando há meta planejada ela já aparece embaixo do campo ("60 kg"); dica e meta não podem se confundir. **Entregue** (o Pedro dispensou o protótipo): cada linha recebe a própria série da última vez (`last`), e peso e reps vazios mostram esse valor como placeholder, em `ink-subtle`; sem última vez, "—". Só dica: nada é preenchido. A meta continua embaixo do campo. Cardio (duração) não entrou. | Novo; M |
-
 | 8.6 | ✅ **Zoom automático ao tocar num campo**, **entregue em 29/09/2026, falta confirmar no iPhone** (peso), sempre, no app da tela inicial, densidade Padrão | O iPhone amplia campo com letra abaixo de 16px. O Padrão aplica `zoom: 1.15` na página e o campo compensa com `zoom: 1/1.15`; se o iPhone olhar só o zoom do campo, vê ~13,9px. No WebKit do PC a letra sai 16px; o zoom automático em si não é emulável. **Achado em 29/09/2026 (8.13):** no Padrão a fonte real dos campos da série era 13,9px por causa da regra de zoom fora de camada, a causa clássica desse zoom; corrigida. Não explica o zoom no Compacto, então o `maximum-scale=1` fica. **Teste do Pedro (29/09/2026): no Compacto o zoom continua**, então a hipótese do `zoom` da densidade caiu. O campo de peso (`weight-field.tsx`) usa `text-base` (16px), e no Compacto nada no caminho altera isso: pela regra documentada do iOS ele não deveria ampliar. Causa não identificada; inspecionar o Safari do aparelho exigiria um Mac. **Entregue (decisão do Pedro):** `maximum-scale=1` **só em iOS**, decidido no servidor pelo `user-agent` (`src/app/viewport.ts`, `generateViewport` em `layout.tsx`). No iOS a pinça continua (a Apple ignora a linha para ela); o Android recebe o `viewport` de antes. Conferido no HTML servido pelo build para iPhone e Android. Limite: iPad com iPadOS se apresenta como Mac e não é detectado. Atalho conhecido (`maximum-scale=1`) pode travar a pinça no app instalado, que o Pedro quis manter. | Regressão; investigar |
 | 8.8 | ✅ **Percentuais do donut de macros amontoados**, **entregue em 29/09/2026** (resumo do plano no Perfil, print do Pedro) | `macro-donut.tsx` desenha cada percentual **em cima do anel**, no meio da fatia. Em `plan-summary.tsx` o donut tem 64px e o anel ~10px de espessura: "25%" é mais largo que o anel, e duas fatias pequenas vizinhas (proteína 25%, gordura 25%) põem os rótulos a poucos pixels um do outro. Não depende de celular. **Entregue** (decisão do Pedro: fora do anel, em preto): percentuais numa margem em volta do anel, alinhados pelo lado, distância que cresce nas diagonais; cor `fill-ink` (era `fill-white`, de contraste baixo sobre as cores). O donut do Perfil passa de 64 para ~116px de altura. Teste de navegador mede a caixa de cada rótulo em 5 divisões × 2 tamanhos; com o código anterior os 10 casos falham. | Bug visual; P |
 | 8.9 | ✅ **Dica da última vez ainda mais clara**, **entregue em 29/09/2026** (refinamento do 8.5, pedido do Pedro em 29/09/2026: "ficou bom, mas acho que podemos deixar mais claro ainda") | A dica já usa `ink-subtle`, o cinza mais claro que ainda mede 4,5:1 como texto. Mais claro que isso fica ilegível e quebra o contraste que o `tokens.test.ts` exige. Caminhos que não dependem de clarear: um marcador ("sem."/ícone de relógio) junto do número, itálico, ou a dica menor que o valor digitado. **Revertido pelo Pedro no mesmo dia: texto normal, sem itálico.** Antes, decisão dele de itálico, entregue: `placeholder:italic` nos campos da série; o valor digitado continua reto. O "—" das séries sem última vez também fica em itálico (mesmo placeholder). Teste de navegador confere o itálico na dica e a ausência dele no valor. | Refinamento; P |
@@ -3142,6 +3141,33 @@ confirmada por reprodução.
 | 8.7 | **Seis testes de layout da folha do RPE falham só no WebKit**, na densidade Padrão (UI-03/UI-04 nas 5 larguras e "RPE 8,5 não toca número nem descrição") | Achado ao rodar a suíte do RPE no WebKit em 29/09/2026. Já falhavam antes do 8.3 (conferido com o código anterior). Mais um sinal de que o `zoom` da densidade se comporta diferente no motor do iPhone; pode ter a mesma raiz do 8.6. | Investigar |
 
 **Confirmado pelo Pedro no iPhone em 29/09/2026** ("Deu certo!!!"), depois da lista de conferência de 8.1, 8.2, 8.3, 8.6 e 8.8.
+
+### Placar dos itens 7 e 8 (atualizado em 30/09/2026)
+
+✅ entregue · ⬜ falta
+
+- ✅ 7.1 Série concluída em verde suave
+- ⬜ 7.2 Recentes no seletor de alimentos
+- ⬜ 7.3 Igual a ontem
+- ⬜ 7.4 Histórico por exercício
+- ⬜ 7.5 Dia de descanso
+- ⬜ 7.6 Tipo de série (falta decisão do Pedro sobre o aquecimento)
+- ⬜ 7.7 Registro rápido de calorias
+- ✅ 8.1 Nome do exercício cortado
+- ✅ 8.2 Sem zoom de toque duplo
+- ✅ 8.3 RPE pela linha do meio círculo
+- ⬜ 8.4 Contrato de uso (bloqueado: depende do texto)
+- ✅ 8.5 Última vez como dica no campo vazio
+- ✅ 8.6 Sem zoom ao tocar num campo no iPhone
+- ⬜ 8.7 Falhas de layout só no WebKit
+- ✅ 8.8 Percentuais do donut fora do anel
+- ✅ 8.9 Dica da última vez (itálico testado e revertido; texto normal)
+- ⬜ 8.10 Verdant mais claro nos botões (falta o protótipo de tons)
+- ⬜ 8.11 Logo verde no cabeçalho
+- ⬜ 8.12 Transição de entrada ao abrir uma aba
+- ✅ 8.13 Campos da série com 44px e número alinhado
+- ✅ 8.14 "Última vez" só com a data
+- ✅ 8.15 Campos no meio da faixa da série
 
 ### Ordem de prioridade do que falta (29/09/2026)
 
