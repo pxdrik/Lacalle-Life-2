@@ -2,8 +2,9 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { dayKey, formatDay } from "@/core/format/day";
+import { dayKey, formatDay, shiftDay } from "@/core/format/day";
 import { MemoryStore } from "@/core/storage/memory-store";
+import { ToastProvider } from "@/design-system/components/toast";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { LocalFoodRepository } from "@/features/foods/data/local-food-repository";
@@ -620,5 +621,113 @@ describe("RM01 — long press on a meal opens the day's reorder sheet", () => {
     expect(
       screen.queryByRole("button", { name: /^Reordenar /u }),
     ).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Roadmap 7.3 (30/09/2026): "Igual a ontem?" na refeição vazia, com o
+ * "Desfazer" do aviso. Ponta a ponta: repositório de verdade, aviso de
+ * verdade, e o que foi salvo conferido no repositório, não só na tela.
+ */
+describe("FoodLogScreen — Igual a ontem", () => {
+  const YESTERDAY = shiftDay(TODAY, -1);
+  const PER_100G = { kcal: 128, proteinG: 2.5, carbsG: 28, fatG: 0.2 };
+
+  function yesterdayLog(): FoodLog {
+    return {
+      id: YESTERDAY,
+      day: YESTERDAY,
+      dietId: null,
+      meals: [
+        {
+          id: "y1",
+          name: "Almoço",
+          time: null,
+          notes: "",
+          eaten: true,
+          items: [
+            { id: "yi1", foodId: "arroz", name: "Arroz", grams: 150, unit: "g", per100g: PER_100G },
+            { id: "yi2", foodId: "feijao", name: "Feijão", grams: 100, unit: "g", per100g: PER_100G },
+          ],
+        },
+      ],
+      createdAt: 1,
+      updatedAt: 1,
+    };
+  }
+
+  function todayWithEmptyLunch(): FoodLog {
+    return {
+      id: TODAY,
+      day: TODAY,
+      dietId: null,
+      meals: [{ id: "m2", name: "Almoço", time: null, notes: "", items: [] }],
+      createdAt: 1,
+      updatedAt: 1,
+    };
+  }
+
+  function mountWithYesterday(today: FoodLog) {
+    const logs = new LocalFoodLogRepository(new MemoryStore<FoodLog>(FOOD_LOGS_STORE));
+    const diets = new LocalDietRepository(new MemoryStore<Diet>(DIETS_STORE));
+    const foods = new LocalFoodRepository(new MemoryStore<Food>(FOODS_STORE));
+    const profile = new LocalProfileRepository(new MemoryStore(PROFILE_STORE));
+    const ready = Promise.all([logs.save(today, null), logs.save(yesterdayLog(), null)]);
+    render(
+      <ToastProvider>
+        <FoodLogRepositoryProvider repository={ready.then(() => logs)}>
+          <DietRepositoryProvider repository={ready.then(() => diets)}>
+            <FoodRepositoryProvider repository={ready.then(() => foods)}>
+              <ProfileRepositoryProvider repository={ready.then(() => profile)}>
+                <FoodLogScreen day={TODAY} />
+              </ProfileRepositoryProvider>
+            </FoodRepositoryProvider>
+          </DietRepositoryProvider>
+        </FoodLogRepositoryProvider>
+      </ToastProvider>,
+    );
+    return { logs };
+  }
+
+  it("oferece o almoço de ontem, copia com as mesmas gramas, e o Desfazer tira", async () => {
+    const { logs } = mountWithYesterday(todayWithEmptyLunch());
+
+    expect(await screen.findByText("Igual a ontem?")).toBeInTheDocument();
+    expect(screen.getByText(/Arroz, Feijão/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Copiar Almoço de ontem" }));
+
+    await waitFor(async () => {
+      const saved = await logs.getByDay(TODAY);
+      expect(saved?.meals[0]?.items.map((item) => [item.foodId, item.grams])).toEqual([
+        ["arroz", 150],
+        ["feijao", 100],
+      ]);
+    });
+    expect(screen.queryByText("Igual a ontem?")).not.toBeInTheDocument();
+
+    await userEvent.click(await screen.findByRole("button", { name: "Desfazer" }));
+
+    await waitFor(async () => {
+      const saved = await logs.getByDay(TODAY);
+      expect(saved?.meals[0]?.items).toEqual([]);
+    });
+    expect(await screen.findByText("Igual a ontem?")).toBeInTheDocument();
+  });
+
+  it("não oferece nada num almoço que já tem alimento", async () => {
+    const today = todayWithEmptyLunch();
+    mountWithYesterday({
+      ...today,
+      meals: [
+        {
+          ...today.meals[0]!,
+          items: [{ id: "t1", foodId: "salada", name: "Salada", grams: 80, unit: "g", per100g: PER_100G }],
+        },
+      ],
+    });
+
+    expect((await screen.findAllByText("Salada")).length).toBeGreaterThan(0);
+    expect(screen.queryByText("Igual a ontem?")).not.toBeInTheDocument();
   });
 });

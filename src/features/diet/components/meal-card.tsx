@@ -8,6 +8,7 @@ import {
   Combine,
   Copy,
   GripVertical,
+  History,
   MoreVertical,
   Pencil,
   Plus,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
@@ -156,6 +158,19 @@ interface Props {
    * `onConsolidate` acima em qualquer tela que não passa nenhum dos dois.
    */
   readonly onUndoConsolidate?: (() => void) | undefined;
+  /**
+   * "Igual a ontem?" (roadmap 7.3, 30/09/2026): o que esta refeição teve
+   * ontem, oferecido enquanto ela está vazia. Só o Diário passa; o editor de
+   * dieta não tem "ontem" e fica como sempre foi.
+   */
+  readonly fromYesterday?:
+    | {
+        /** "Arroz, feijão, frango": os nomes, na ordem. */
+        readonly summary: string;
+        readonly kcal: number;
+        readonly onCopy: () => void;
+      }
+    | undefined;
 }
 
 export function MealCard({
@@ -184,6 +199,7 @@ export function MealCard({
   onLongPressReorder,
   onConsolidate,
   onUndoConsolidate,
+  fromYesterday,
 }: Props) {
   const [showingAlternatives, setShowingAlternatives] = useState(false);
   const [showingActions, setShowingActions] = useState(false);
@@ -584,6 +600,34 @@ export function MealCard({
               </ConfirmButton>
             </div>
           </Dialog>
+
+          {/* "Igual a ontem?" — só com a refeição vazia, e só se ontem ela
+              teve alguma coisa (quem decide é o Diário). Copiar traz os
+              mesmos alimentos e gramas; o Diário mostra o "Desfazer". */}
+          {/* Título e botão numa linha que quebra quando não cabe (o botão
+              desce, em 320px na densidade Confortável); o resumo embaixo
+              começa pelas kcal, para elas nunca sumirem no corte. */}
+          {meal.items.length === 0 && fromYesterday !== undefined && (
+            <div className="mt-3 rounded-md bg-muted px-3 py-2.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span className="flex flex-1 items-center gap-2 whitespace-nowrap text-sm font-medium text-ink">
+                  <History aria-hidden className="size-4 shrink-0 text-ink-subtle" />
+                  Igual a ontem?
+                </span>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={fromYesterday.onCopy}
+                  aria-label={`Copiar ${meal.name} de ontem`}
+                >
+                  Copiar
+                </Button>
+              </div>
+              <p className="mt-1 line-clamp-2 text-xs text-ink-subtle">
+                {formatDecimal(fromYesterday.kcal, 0)} kcal · {fromYesterday.summary}
+              </p>
+            </div>
+          )}
 
           {meal.items.length > 0 &&
             (dragHandle === undefined ? (

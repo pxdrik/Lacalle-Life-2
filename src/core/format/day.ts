@@ -29,6 +29,20 @@ export function dayKey(date: Date): string {
 }
 
 /**
+ * Shifts a `YYYY-MM-DD` day by whole days, without dragging a clock along.
+ *
+ * Movida de `food-log-screen.tsx` em 30/09/2026 (roadmap 7.3), quando o
+ * "igual a ontem" também passou a precisar do dia anterior.
+ */
+export function shiftDay(day: string, offset: number): string {
+  const [year, month, date] = day.split("-").map(Number);
+  if (year === undefined || month === undefined || date === undefined)
+    return day;
+
+  return dayKey(new Date(year, month - 1, date + offset));
+}
+
+/**
  * `2026-08-07` → `07/08/2026`. Returns anything unparseable unchanged.
  *
  * `day` is typed as `string`, but a record read from IndexedDB does not

@@ -3054,7 +3054,7 @@ componentes reais da tela que muda; a implementação parte dele.
 | --- | --- | --- | --- |
 | 7.1 | ✅ Série concluída em verde suave, **entregue em 29/09/2026** | P | **Nos dois temas**, não só no escuro (pedido do Pedro ao ver o protótipo). Botão de concluir feito passa de `bg-accent` a `accent-surface` + `accent-text`; o próximo passo e a ação principal continuam em verde cheio. Revisar as outras telas com preenchimento verde repetido pela mesma regra. **Entregue:** só a linha de série (`performed-set-row.tsx`); a borda `border-accent` ficou sólida porque, no claro, `accent-surface` quase some sobre o `bg-muted` da linha feita. Teste de navegador mede a cor resolvida nos dois temas. O check da refeição no Diário e a landing continuam com verde cheio, ainda não revisados. |
 | 7.2 | ✅ Recentes no seletor de alimentos, **entregue em 30/09/2026** | M | Seção acima da lista quando a busca está vazia, com a quantidade usada da última vez. Fonte: registros do diário. **Entregue:** `recentFoods` (`diet/services`) percorre os últimos 60 dias, só refeições comidas (`eatenMeals`), primeira ocorrência de cada alimento do catálogo, até 6, com "Ontem · Almoço · 150 g". `useRecentFoods` lê o diário; a página `/alimentos/selecionar` junta diário e seletor (`diet` importa `foods`, nunca o contrário). O `FoodPicker` mostra "Recentes" com busca vazia e sem filtro, só o que ainda existe no catálogo, com kcal e macros na quantidade da última vez; tocar abre a quantidade já nas gramas da última vez. Linha de resultado extraída para `PickRow`, sem duplicar. |
-| 7.3 | Igual a ontem | M | Faixa dentro da refeição vazia; "Copiar" traz alimentos e gramas; toast com Desfazer. Refeição equivalente = mesmo nome no dia anterior. Some se ontem ela estava vazia. |
+| 7.3 | ✅ Igual a ontem, **entregue em 30/09/2026** | M | Faixa dentro da refeição vazia; "Copiar" traz alimentos e gramas; toast com Desfazer. Refeição equivalente = mesmo nome no dia anterior. Some se ontem ela estava vazia. **Entregue:** `yesterday-meal.ts` (mesmo nome ignorando maiúsculas e espaços, só refeição comida e com itens; cópias com ids novos e mesmas gramas; desfazer tira só o copiado), `useYesterdayLog(day)`, faixa opcional `fromYesterday` no `MealCard` (só o Diário passa; a dieta não muda) e aviso "Almoço copiado de ontem." com Desfazer. `shiftDay` foi movida de `food-log-screen.tsx` para `core/format/day.ts`. Teste de ponta a ponta com repositório e aviso de verdade; teste de navegador da faixa em 6 larguras × 3 densidades (a primeira versão cortava o título em 320px Confortável e escondia as kcal). |
 | 7.4 | Histórico por exercício | M | Seção "Seu histórico" no detalhe do exercício: melhor série, 1RM estimado, linha da carga da melhor série por treino, últimos treinos. Vazio quando não há dado. |
 | 7.5 | Dia de descanso | M | Botão "Hoje é descanso" no card de treino vazio do Hoje; desfazível. Só "descanso" por enquanto (doença e lesão ficam para depois, se fizer falta). |
 | 7.6 | Tipo de série | G | Menu da série ganha Normal, Aquecimento, Drop set, Até a falha; o número vira A, D, F. **Aquecimento sai do volume e dos recordes**: é a regra que muda números da Evolução, confirmar com o Pedro antes de fechar. |
@@ -3139,6 +3139,7 @@ confirmada por reprodução.
 | 8.13 | ✅ **Número da série desalinhado com peso e reps** (print do Pedro, rotina sem meta), **entregue em 29/09/2026** | **Duas causas.** (1) O número usava `self-center` e centrava no bloco campo + legenda da meta (que ocupa altura mesmo vazia), ~10px abaixo do campo; veio de `b4595c9` (26/09). Agora `h-11 self-start`. (2) **Causa de fundo, aprovada pelo Pedro:** a regra global `input { zoom: 1/ui-scale }` do `tokens.css` estava **fora de camada**, e estilo fora de camada vence qualquer estilo de camada: a correção da grade (`.set-grid input { zoom: 1 }`) nunca teve efeito. No Padrão os campos da série tinham 38px e fonte de 13,9px reais (34px no Confortável), abaixo dos 44px de toque e dos 16px do iOS. A regra foi para `@layer base`; medido depois: 44px e 16px reais nas três densidades, e campo fora da grade continua 16px reais. Teste de navegador: centro do número a ≤1px do centro do campo e campo com 44px, 5 larguras × 3 densidades, com e sem meta; sem a camada, 20 dos 30 casos falham. As 6 falhas do WebKit (8.7) **não** mudaram. | Regressão de layout |
 | 8.14 | ✅ **Linha "Última vez" só com a data**, **entregue em 29/09/2026** | Pedido do Pedro: os números já estão na dica de cada campo (8.5). A linha vira "Última vez realizado em 29 de set."; `describeSet` saiu. Consequência: no cardio, a duração da última vez deixou de aparecer (ele não tem dica no campo). | Visual; P |
 | 8.15 | ✅ **Campos altos dentro da faixa da série** (print do Pedro: não alinhados com a caixa de borda verde), **entregue em 30/09/2026** | A linha da meta embaixo dos campos (`<Planned>`, `mt-1 h-4`) era desenhada mesmo vazia: numa rotina sem meta sobravam 20px embaixo dos campos. Agora ela só existe quando a série tem alguma meta (peso, reps, RPE ou duração); com meta, nada muda. Teste de navegador: sem meta, centro do campo a ≤1px do centro da faixa, 5 larguras × 3 densidades; sem a correção, os 15 casos falham com 10px. | Visual; P |
+| 8.16 | **"Observações" cortado no rodapé da refeição** em 320px na densidade Confortável ("Ob") | Achado no print da 7.3, e acontece também sem a faixa "Igual a ontem?": é do rodapé do `MealCard` ("Adicionar alimento" + "Observações"), que já existia assim. Não tratado na 7.3 por ser anterior a ela. | Bug visual; P |
 
 **Confirmado pelo Pedro no iPhone em 29/09/2026** ("Deu certo!!!"), depois da lista de conferência de 8.1, 8.2, 8.3, 8.6 e 8.8.
 
@@ -3148,7 +3149,7 @@ confirmada por reprodução.
 
 - ✅ 7.1 Série concluída em verde suave
 - ✅ 7.2 Recentes no seletor de alimentos
-- ⬜ 7.3 Igual a ontem
+- ✅ 7.3 Igual a ontem
 - ⬜ 7.4 Histórico por exercício
 - ⬜ 7.5 Dia de descanso
 - ⬜ 7.6 Tipo de série (falta decisão do Pedro sobre o aquecimento)
@@ -3168,6 +3169,7 @@ confirmada por reprodução.
 - ✅ 8.13 Campos da série com 44px e número alinhado
 - ✅ 8.14 "Última vez" só com a data
 - ✅ 8.15 Campos no meio da faixa da série
+- ⬜ 8.16 "Observações" cortado no rodapé da refeição (320px Confortável)
 
 ### Ordem de prioridade do que falta (29/09/2026)
 
@@ -3177,7 +3179,7 @@ Critério: facilidade (o dado já existe? mexe no que é salvo e sincronizado?) 
 | --- | --- | --- | --- | --- |
 | 1 | ✅ **8.5** Semana passada como dica no campo vazio (entregue 29/09/2026) | O dado já existe (`LastPerformance` guarda cada série da última vez); muda o placeholder em `performed-set-row.tsx`. Protótipo rápido antes, e cuidar para não confundir com a meta planejada. | Não | P |
 | 2 | ✅ **7.2** Recentes no seletor de alimentos (entregue 30/09/2026) | Sai dos registros do diário que já existem (cada item guarda `foodId` e gramas). Protótipo já aprovado. | Não, só leitura | M |
-| 3 | **7.3** Igual a ontem | Lê o dia anterior e copia com as funções de edição que já existem. Protótipo aprovado. Vizinho da 7.2 (mesma tela). | Não além de copiar itens | M |
+| 3 | ✅ **7.3** Igual a ontem (entregue 30/09/2026) | Lê o dia anterior e copia com as funções de edição que já existem. Protótipo aprovado. Vizinho da 7.2 (mesma tela). | Não além de copiar itens | M |
 | 4 | **7.4** Histórico por exercício | Tudo sai dos treinos já salvos (`services/history.ts`); tela nova no detalhe do exercício. | Não, só leitura | M |
 | 5 | **8.7** Falhas de layout só no WebKit | Investigação com o WebKit já instalado, reproduzível no PC. Sem mudança de dado; reduz risco de bug de iPhone nas próximas entregas. | Não | M |
 | 6 | **7.5** Dia de descanso | Não existe onde guardar "hoje é descanso": pede campo novo, persistido e sincronizado. | **Sim** | M |

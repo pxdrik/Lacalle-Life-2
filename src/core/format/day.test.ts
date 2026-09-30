@@ -6,6 +6,7 @@ import {
   formatLongDay,
   formatShortDay,
   isFutureDay,
+  shiftDay,
 } from "./day";
 
 describe("dayKey", () => {
@@ -102,5 +103,18 @@ describe("formatLongDay", () => {
   it("does not throw when day is not a string", () => {
     // @ts-expect-error — see the same case in `formatDay`.
     expect(() => formatLongDay(undefined)).not.toThrow();
+  });
+});
+
+describe("shiftDay", () => {
+  it("anda dias inteiros, atravessando mês e ano", () => {
+    expect(shiftDay("2026-09-30", -1)).toBe("2026-09-29");
+    expect(shiftDay("2026-10-01", -1)).toBe("2026-09-30");
+    expect(shiftDay("2026-01-01", -1)).toBe("2025-12-31");
+    expect(shiftDay("2026-09-30", 1)).toBe("2026-10-01");
+  });
+
+  it("devolve o texto como veio quando não é um dia", () => {
+    expect(shiftDay("ontem", -1)).toBe("ontem");
   });
 });

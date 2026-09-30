@@ -8,19 +8,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { dayKey, formatDay } from "@/core/format/day";
+import { dayKey, formatDay, shiftDay } from "@/core/format/day";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { DateField } from "@/design-system/components/date-field";
 import { ReorderSheet } from "@/design-system/components/reorder-sheet";
 import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { useToast } from "@/design-system/components/toast";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useApplyPickedFood } from "../hooks/use-apply-picked-food";
 import { useConsolidateMeal } from "../hooks/use-consolidate-meal";
 import { useDietList } from "../hooks/use-diet-list";
 import { useFoodLogDay } from "../hooks/use-food-log";
+import { useYesterdayLog } from "../hooks/use-yesterday-log";
+import { mealMacros } from "../services/diet-macros";
+import {
+  addItems,
+  copiesOf,
+  removeItems,
+  sameMealYesterday,
+} from "../services/yesterday-meal";
 import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
 import {
   addMeal,
@@ -51,15 +60,6 @@ import type { FoodLog } from "../types/food-log";
 import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 import { MealCard } from "./meal-card";
-
-/** Shifts a `YYYY-MM-DD` day by whole days, without dragging a clock along. */
-function shiftDay(day: string, offset: number): string {
-  const [year, month, date] = day.split("-").map(Number);
-  if (year === undefined || month === undefined || date === undefined)
-    return day;
-
-  return dayKey(new Date(year, month - 1, date + offset));
-}
 
 /** The same local-parts construction `shiftDay` uses, for reading a weekday
  * out of a `YYYY-MM-DD` string without `new Date(string)`'s UTC parsing —
@@ -94,6 +94,40 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   const [showingMealReorder, setShowingMealReorder] = useState(false);
   useApplyPickedFood(apply);
   const consolidateMeal = useConsolidateMeal(apply);
+  const yesterdayLog = useYesterdayLog(day);
+  const toast = useToast();
+
+  /**
+   * "Igual a ontem?" (roadmap 7.3, 30/09/2026): a mesma refeição de ontem,
+   * oferecida enquanto a de hoje está vazia. As cópias ganham ids aqui, fora
+   * do `apply`, para o "Desfazer" do aviso tirar exatamente o que entrou.
+   */
+  function yesterdayOffer(meal: Meal) {
+    if (meal.items.length > 0) return undefined;
+    const source = sameMealYesterday(yesterdayLog, meal.name);
+    if (source === undefined) return undefined;
+
+    return {
+      summary: source.items.map((item) => item.name).join(", "),
+      kcal: mealMacros(source).kcal,
+      onCopy: () => {
+        const copies = copiesOf(source.items);
+        apply((current) => addItems(current, meal.id, copies));
+        toast(`${meal.name} copiado de ontem.`, {
+          label: "Desfazer",
+          onAction: () => {
+            apply((current) =>
+              removeItems(
+                current,
+                meal.id,
+                copies.map((item) => item.id),
+              ),
+            );
+          },
+        });
+      },
+    };
+  }
 
   const today = dayKey(new Date());
 
@@ -363,6 +397,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         undoConsolidateMealItems(current, meal.id),
                       );
                     }}
+                    fromYesterday={yesterdayOffer(meal)}
                     // Só aparece numa refeição que veio da dieta — de um
                     // check individual ou de "Começar de X" — uma refeição
                     // montada aqui à mão não tem `sourceDietId`/
