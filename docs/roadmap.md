@@ -3115,6 +3115,24 @@ guardado fora do repositório em `Downloads/Lacalle-Life-evidencias-visuais.pdf`
 O PDF não tem captura do Lacalle: o Manus tentou subir o app com `pnpm`, e o
 projeto usa `npm`.
 
+### 8. Achados no celular do Pedro (29/09/2026)
+
+Relatados em uso real, no iPhone, na noite de 29/09/2026. Cada um passa pelas
+6 fases (inspeção, plano, implementação, validação, regressão, relatório)
+antes de fechar. A causa abaixo é a da primeira leitura do código, ainda não
+confirmada por reprodução.
+
+| # | Achado | Primeira leitura do código | Tipo |
+| --- | --- | --- | --- |
+| 8.1 | **Nome do exercício cortado** no card do treino ("Pu F..", print do Pedro em 375px) | O cabeçalho do `session-exercise-card.tsx` põe na mesma linha a miniatura (64px), o nome (`line-clamp-2` em `exercise-identity.tsx`) e um bloco `shrink-0` com "0/2" e três botões de 32px separados por 12px (o intervalo que evita toque sobreposto). Sobram ~60px para o nome. `routine-exercise-card.tsx` usa a mesma identidade e deve ter o mesmo problema. | Regressão de layout; P0 de uso |
+| 8.2 | **Proibir zoom no app instalado (PWA)** | `viewport` em `app/layout.tsx` não limita escala. Duas coisas diferentes: o zoom de pinça (acessibilidade, WCAG 1.4.4, e o iOS ignora `user-scalable=no` no Safari) e o zoom de toque duplo e de foco em campo, que é o que costuma incomodar. O segundo sai com `touch-action: manipulation` e campo em 16px (este já existe, ver `docs/brandbook.md`, divergência 6). **Decisão do Pedro antes de codar:** bloquear também a pinça, ou só o toque duplo. | Decisão + P |
+| 8.3 | **Voltou o erro na seleção do RPE** no celular | O RPE já teve três correções (`962f04c`, `65579c0`, `f8ac8cc`), com teste de navegador. Se voltou, ou é caso que o teste não cobre (toque real, arrasto, iOS) ou a correção regrediu. **Precisa de reprodução primeiro:** qual valor, tocando ou arrastando, o que aconteceu. | Regressão; investigar |
+| 8.4 | **Contrato de uso** (termos de uso) | Não existe nenhuma página de termos nem de política de privacidade no app. O app tem conta e sincroniza dado de saúde (dieta, peso), então a política de privacidade provavelmente vem junto. **O texto jurídico é do Pedro** (ou de quem ele indicar); o código é a página, o link no rodapé/criação de conta e, se for o caso, o aceite registrado. | Novo; depende de texto |
+| 8.5 | **Última semana como dica no campo vazio** (padrão do Hevy) | Hoje o campo vazio mostra `placeholder="—"` (`performed-set-row.tsx`) e a "última vez" aparece só como uma linha de texto acima da grade (`session-exercise-card.tsx`, `lastTime`). Proposta: o placeholder de peso e reps da série N passa a ser o valor da série N da última vez, em tom mais claro. Cuidado: quando há meta planejada ela já aparece embaixo do campo ("60 kg"); dica e meta não podem se confundir. Precisa de protótipo. | Novo; M |
+
+**Ordem sugerida:** 8.1 e 8.3 primeiro (quebram o treino em uso), 8.2
+depois da decisão, 8.5 com protótipo, 8.4 quando houver texto.
+
 ## Sprint 2 — Schema real ✅ entregue em 25/08/2026
 
 As 20 migrations de `supabase/migrations/` (`docs/arquitetura-sincronizacao.md`
