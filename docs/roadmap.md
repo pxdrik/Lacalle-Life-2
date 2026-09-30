@@ -2815,7 +2815,8 @@ moderno de saúde, nutrição e treino?"** Se a resposta for "parece SaaS",
 ### 1. Refinamentos restantes de `/exercicios`
 
 Levantados na auditoria de UX. O detalhe do exercício saiu daqui e foi
-entregue; o resto continua adiado:
+entregue. **Os quatro abaixo foram trazidos para o bloco atual em
+30/09/2026, como item 10** (pedido do Pedro); a lista fica aqui só como origem:
 
 - Navegação por grupo muscular na primeira dobra
 - Agrupar os 19 chips de músculo em 6 regiões
@@ -3172,7 +3173,18 @@ confirmada por reprodução.
 - acha importar, exportar e apagar dados sem confundir com ações do dia a dia;
 - toda ação destrutiva continua pedindo confirmação e dizendo o alcance.
 
-### Placar dos itens 7, 8 e 9 (atualizado em 30/09/2026)
+### 10. Refinamentos da tela Exercícios (trazidos da seção 1 em 30/09/2026)
+
+Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de `/exercicios` entram no bloco atual. Só a tela Exercícios muda; nenhum dado novo (os recentes saem dos treinos já salvos). Cada um começa por protótipo, como toda novidade.
+
+| # | Item | O que muda | Hoje no código |
+| --- | --- | --- | --- |
+| 10.1 | **Grupos musculares logo no topo** | Atalhos por grupo (Peito, Costas, Pernas...) visíveis ao abrir a tela, sem rolar nem abrir filtro. | A lista abre direto; o grupo só pelo filtro. |
+| 10.2 | **19 músculos agrupados em 6 regiões** | O filtro de músculo passa a mostrar regiões (algo como Peito, Costas, Ombros, Braços, Core, Pernas), com os músculos finos dentro de cada uma. | 19 botões soltos em `exercise-filter-bar.tsx` (`MUSCLE_GROUPS`), com "Deltoide anterior", "Adutores", "Abdutores"... |
+| 10.3 | **Menos texto em cada linha** | Embaixo do nome, só o essencial (por exemplo, o músculo principal). | `exercise-row.tsx` mostra todos os músculos e todos os equipamentos: "Peito · Tríceps | Barra · Banco". |
+| 10.4 | **Recentes e mais usados** | Seção com o que foi feito por último e o que mais se faz, como os recentes do seletor de alimentos (7.2). | Só Favoritos. |
+
+### Placar dos itens 7, 8, 9 e 10 (atualizado em 30/09/2026)
 
 ✅ entregue · ⬜ falta
 
@@ -3204,6 +3216,10 @@ confirmada por reprodução.
 - ⬜ 8.19 Cabeçalho da landing estoura a tela no celular (até 172px)
 - ⬜ 8.20 A CI do GitHub nunca passou (provável: Node 20.9 na CI, Vite 8 exige 20.19+)
 - ⬜ 9.1 Reorganização e resumo da aba Perfil (só a aba Perfil; protótipo antes do código)
+- ⬜ 10.1 Exercícios: grupos musculares logo no topo
+- ⬜ 10.2 Exercícios: 19 músculos agrupados em 6 regiões
+- ⬜ 10.3 Exercícios: menos texto em cada linha
+- ⬜ 10.4 Exercícios: recentes e mais usados
 
 ### Ordem de prioridade do que falta (29/09/2026)
 
