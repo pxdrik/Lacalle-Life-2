@@ -498,6 +498,31 @@ describe("UI-01 e UI-02 — contraste das marcas da escala", () => {
  * para que ela não precise ser reaberta por impressão — e para que deixe de
  * ser verdade em voz alta, se um dia deixar.
  */
+/**
+ * Quem rola e quem passa da borda dele, para a mensagem de erro. Existe
+ * porque a falha que motivou isto (roadmap 8.20) só acontecia na CI, em
+ * Linux, e a mensagem só dizia "rola 2,3px": sem dizer onde, não havia como
+ * investigar sem uma máquina Linux.
+ */
+function culprit(scroller: HTMLElement): string {
+  const describe = (element: Element) => {
+    const label = element.getAttribute("aria-label");
+    return `<${element.tagName.toLowerCase()} class="${element.getAttribute("class") ?? ""}"${
+      label === null ? "" : ` aria-label="${label}"`
+    }>`;
+  };
+  const edge = scroller.getBoundingClientRect().right;
+  const past = [...scroller.querySelectorAll("*")]
+    .map((element) => ({ element, over: element.getBoundingClientRect().right - edge }))
+    .filter(({ over }) => over > 0.5)
+    .sort((x, y) => y.over - x.over)
+    .slice(0, 3)
+    .map(({ element, over }) => `${describe(element)} +${over.toFixed(2)}px`);
+  return `rola ${describe(scroller)} (scrollWidth ${String(scroller.scrollWidth)}, clientWidth ${String(
+    scroller.clientWidth,
+  )}); passam da borda: ${past.join(" ; ") || "nenhum filho (pseudo-elemento?)"}`;
+}
+
 describe("UI-03 e UI-04 — a folha do RPE cabe e não se sobrepõe", () => {
   for (const width of PHONE_WIDTHS) {
     for (const density of DENSITIES) {
@@ -517,7 +542,7 @@ describe("UI-03 e UI-04 — a folha do RPE cabe e não se sobrepõe", () => {
         for (const scroller of [dialog, ...dialog.querySelectorAll<HTMLElement>("*")]) {
           const before = scroller.scrollLeft;
           scroller.scrollLeft = 50;
-          expect(scroller.scrollLeft, "a folha rola na horizontal").toBe(before);
+          expect(scroller.scrollLeft, `a folha rola na horizontal: ${culprit(scroller)}`).toBe(before);
           scroller.scrollLeft = before;
         }
 
