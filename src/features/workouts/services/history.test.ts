@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PerformedSet, Session, SessionExercise } from "../types/session";
 import {
   estimateOneRepMax,
+  exerciseHistory,
   finishedSessions,
   lastPerformance,
   lastPerformanceByExercise,
@@ -425,5 +426,62 @@ describe("recentProgress", () => {
 
     expect(summary.volumeChange).toBe(-1);
     expect(summary.sessions).toBe(0);
+  });
+});
+
+/** Roadmap 7.4 (30/09/2026): o histórico de um exercício. */
+describe("exerciseHistory", () => {
+  it("do treino mais recente para o mais antigo, só séries concluídas", () => {
+    const sessions = [
+      session(1 * DAY, [exercise(SUPINO, "Supino", [set(8, 57.5), set(8, 57.5)])]),
+      session(8 * DAY, [exercise(SUPINO, "Supino", [set(8, 60), set(6, 60, false)])]),
+    ];
+
+    const history = exerciseHistory(sessions, SUPINO);
+
+    expect(history.map((entry) => entry.performedAt)).toEqual([8 * DAY, 1 * DAY]);
+    expect(history[0]?.sets).toHaveLength(1);
+  });
+
+  it("a melhor série é a de maior carga; empate vai para mais repetições", () => {
+    const sessions = [
+      session(1 * DAY, [exercise(SUPINO, "Supino", [set(10, 40), set(8, 60), set(9, 60), set(12, 50)])]),
+    ];
+
+    expect(exerciseHistory(sessions, SUPINO)[0]?.topSet).toEqual({ weightKg: 60, reps: 9 });
+  });
+
+  it("sem carga (peso do corpo, cardio), não há melhor série — nunca um zero", () => {
+    const sessions = [session(1 * DAY, [exercise("barra-fixa", "Barra fixa", [set(10, null), set(8, 0)])])];
+
+    const history = exerciseHistory(sessions, "barra-fixa");
+
+    expect(history).toHaveLength(1);
+    expect(history[0]?.topSet).toBeNull();
+  });
+
+  it("ignora treino em andamento, outro exercício, e treino sem série concluída", () => {
+    const sessions = [
+      session(1 * DAY, [exercise(SUPINO, "Supino", [set(8, 60)])], false),
+      session(2 * DAY, [exercise(AGACHAMENTO, "Agachamento", [set(5, 100)])]),
+      session(3 * DAY, [exercise(SUPINO, "Supino", [set(8, 60, false)])]),
+    ];
+
+    expect(exerciseHistory(sessions, SUPINO)).toEqual([]);
+  });
+
+  it("o mesmo exercício duas vezes no treino soma as séries num registro só", () => {
+    const sessions = [
+      session(1 * DAY, [
+        exercise(SUPINO, "Supino", [set(8, 60)]),
+        exercise(SUPINO, "Supino", [set(6, 65)]),
+      ]),
+    ];
+
+    const history = exerciseHistory(sessions, SUPINO);
+
+    expect(history).toHaveLength(1);
+    expect(history[0]?.sets).toHaveLength(2);
+    expect(history[0]?.topSet).toEqual({ weightKg: 65, reps: 6 });
   });
 });

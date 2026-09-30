@@ -2,8 +2,16 @@ import { Card } from "@/design-system/components/card";
 
 import { formatShortDay } from "@/core/format/day";
 
-import type { TrendPoint } from "../services/body-log";
 import { formatDecimal } from "@/core/format/decimal";
+
+/**
+ * Um ponto da linha: o dia e o valor. Estruturalmente igual ao `TrendPoint`
+ * de `features/body`, que continua passando os seus sem conversão.
+ */
+export interface TrendPoint {
+  readonly day: string;
+  readonly value: number;
+}
 
 interface Props {
   readonly points: readonly TrendPoint[];
@@ -18,6 +26,11 @@ const WIDTH = 600;
 const PAD = 8;
 
 /**
+ * Movido de `features/body` para o design system em 30/09/2026 (roadmap 7.4),
+ * quando o histórico por exercício passou a precisar da mesma linha. A chave
+ * de cada ponto deixou de ser só o dia: dois treinos do mesmo exercício no
+ * mesmo dia são dois pontos.
+ *
  * A line, not bars.
  *
  * Bars start at zero and body weight does not: a run from 82 to 78 kg is a
@@ -100,7 +113,7 @@ export function TrendChart({ points, average, unit, label }: Props) {
 
         {points.map((point, index) => (
           <circle
-            key={point.day}
+            key={`${point.day}-${String(index)}`}
             cx={x(index)}
             cy={y(point.value)}
             r={3}
@@ -131,8 +144,8 @@ export function TrendChart({ points, average, unit, label }: Props) {
             </tr>
           </thead>
           <tbody>
-            {points.map((point) => (
-              <tr key={point.day}>
+            {points.map((point, index) => (
+              <tr key={`${point.day}-${String(index)}`}>
                 <th scope="row">{formatShortDay(point.day)}</th>
                 <td>
                   {formatDecimal(point.value)} {unit}

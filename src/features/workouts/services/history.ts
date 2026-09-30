@@ -79,6 +79,66 @@ export function lastPerformanceByExercise(
   return found;
 }
 
+/** Um treino de um exercício, para o histórico dele (roadmap 7.4). */
+export interface ExerciseSession {
+  readonly performedAt: number;
+  readonly sessionId: EntityId;
+  /** Só as séries concluídas, na ordem feita. */
+  readonly sets: readonly PerformedSet[];
+  /**
+   * A série de maior carga do treino (desempate: mais repetições), ou
+   * `null` quando nenhuma série teve carga — peso do corpo, cardio. É o
+   * ponto do gráfico; sem carga, não há ponto, e nunca um zero inventado.
+   */
+  readonly topSet: { readonly weightKg: number; readonly reps: number } | null;
+}
+
+/**
+ * Todo treino finalizado em que este exercício foi feito, do mais recente
+ * para o mais antigo (roadmap 7.4, 30/09/2026, padrão do Hevy).
+ *
+ * As mesmas regras de `lastPerformance`: só treino finalizado, só série
+ * concluída, e um treino em que nenhuma série foi concluída não conta —
+ * abrir o exercício e não fazer nada não é histórico.
+ */
+export function exerciseHistory(
+  sessions: readonly Session[],
+  exerciseId: EntityId,
+): readonly ExerciseSession[] {
+  const history: ExerciseSession[] = [];
+  for (const session of finishedSessions(sessions)) {
+    const sets = session.exercises
+      .filter((exercise) => exercise.exerciseId === exerciseId)
+      .flatMap((exercise) => exercise.sets.filter(isDone));
+    if (sets.length === 0) continue;
+    history.push({
+      performedAt: session.startedAt,
+      sessionId: session.id,
+      sets,
+      topSet: topSetOf(sets),
+    });
+  }
+  return history;
+}
+
+function topSetOf(
+  sets: readonly PerformedSet[],
+): { readonly weightKg: number; readonly reps: number } | null {
+  let top: { weightKg: number; reps: number } | null = null;
+  for (const set of sets) {
+    if (set.weightKg === null || set.weightKg <= 0) continue;
+    const reps = set.reps ?? 0;
+    if (
+      top === null ||
+      set.weightKg > top.weightKg ||
+      (set.weightKg === top.weightKg && reps > top.reps)
+    ) {
+      top = { weightKg: set.weightKg, reps };
+    }
+  }
+  return top;
+}
+
 /**
  * Estimated one-rep max, Epley.
  *

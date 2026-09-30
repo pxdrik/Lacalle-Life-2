@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { ExerciseDataProvider } from "@/composition/data-providers";
+import { WorkoutDataProvider } from "@/composition/data-providers";
 import { ExerciseBrowser } from "@/features/workouts";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
@@ -24,9 +24,9 @@ export default function ExercisesPage() {
         {/* The browser reads filters from the URL, and `useSearchParams`
             requires a boundary so the shell can still be prerendered. */}
         <Suspense fallback={null}>
-          <ExerciseDataProvider>
+          <WorkoutDataProvider>
             <ExerciseBrowser />
-          </ExerciseDataProvider>
+          </WorkoutDataProvider>
         </Suspense>
       </div>
     </PageShell>

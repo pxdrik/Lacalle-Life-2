@@ -9,6 +9,7 @@ import {
 import { MUSCLE_LABELS } from "../taxonomy/muscles";
 import type { MuscleGroup } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
+import { ExerciseHistory } from "./exercise-history";
 import { ExercisePhotos } from "./exercise-photos";
 import { MediaAttribution } from "./media-attribution";
 
@@ -92,6 +93,11 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
           <Row label="Outros nomes" values={[...exercise.aliases]} />
         </dl>
       </div>
+
+      {/* Roadmap 7.4 (30/09/2026): o histórico da própria pessoa neste
+          exercício, embaixo das fotos e da ficha, em largura inteira. Antes
+          da atribuição das fotos, que é o rodapé do diálogo. */}
+      <ExerciseHistory exerciseId={exercise.id} />
 
       {exercise.isCustom && (
         <p className="rounded-lg border border-line bg-muted px-4 py-3 text-xs text-ink-muted">

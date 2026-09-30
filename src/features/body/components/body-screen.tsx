@@ -28,7 +28,7 @@ import {
 import type { BodyEntry } from "../types/body-entry";
 import { BodyEntryForm } from "./body-entry-form";
 import { BodyHistory } from "./body-history";
-import { TrendChart } from "./trend-chart";
+import { TrendChart } from "@/design-system/components/trend-chart";
 
 type Metric =
   | { readonly kind: "weight" }
