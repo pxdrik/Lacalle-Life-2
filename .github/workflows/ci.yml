@@ -28,7 +28,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20.9.0"
+          # 24, não 20.9.0 (roadmap 8.20, 30/09/2026): o Vite 8 exige
+          # `^20.19.0 || >=22.12.0`, e com 20.9.0 o verify morria na CI desde o
+          # primeiro dia. 24 é o que roda no desenvolvimento e na Vercel.
+          node-version: "24"
           cache: "npm"
 
       - name: Install dependencies
