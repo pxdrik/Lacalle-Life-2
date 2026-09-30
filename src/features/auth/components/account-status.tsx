@@ -26,17 +26,26 @@ export function AccountStatus() {
   }
 
   if (state.status === "anonymous") {
+    // Roadmap 9.1 (30/09/2026): diz o que muda sem conta, em vez de só
+    // "Você não está logado". "Entrar" é o botão verde, a pedido do Pedro;
+    // sem perfil preenchido a tela tem dois botões principais, esta exceção
+    // está registrada em docs/brandbook.md.
     return (
-      <Notice tone="info" title="Você não está logado">
-        <Link href="/entrar" className="text-ink hover:underline">
-          Entrar
-        </Link>{" "}
-        ou{" "}
-        <Link href="/cadastro" className="text-ink hover:underline">
-          criar conta
-        </Link>
-        .
-      </Notice>
+      <div className="rounded-lg border border-line bg-surface p-4">
+        <p className="text-sm font-medium text-ink">Você está usando sem conta</p>
+        <p className="mt-1.5 text-sm text-ink-muted">
+          Seus dados ficam só neste aparelho. Com uma conta, eles aparecem nos
+          seus outros aparelhos.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/entrar" className={buttonClasses("primary")}>
+            Entrar
+          </Link>
+          <Link href="/cadastro" className={buttonClasses("secondary")}>
+            Criar conta
+          </Link>
+        </div>
+      </div>
     );
   }
 

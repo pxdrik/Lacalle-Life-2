@@ -3162,7 +3162,7 @@ confirmada por reprodução.
 
 | # | Item | Situação | Nota |
 | --- | --- | --- | --- |
-| 9.1 | **Reorganização da aba e resumo dos dados do Perfil** | ⬜ A fazer | **Escopo confirmado pelo Pedro (30/09/2026): só a aba Perfil muda.** Nenhuma outra tela, fluxo ou dado entra junto. Reorganizar o que já existe (conta e sincronização, dados pessoais e meta, resultado do plano, aparência, backup e dados) em grupos claros, seguindo a tabela acima e os critérios abaixo, com protótipo antes do código. "Já em andamento" no PDF queria dizer que o Pedro já tinha decidido fazer, não que havia código. |
+| 9.1 | ✅ **Reorganização da aba e resumo dos dados do Perfil**, **entregue em 30/09/2026** | Feito | **Escopo confirmado pelo Pedro (30/09/2026): só a aba Perfil muda.** Nenhuma outra tela, fluxo ou dado entra junto. Reorganizar o que já existe (conta e sincronização, dados pessoais e meta, resultado do plano, aparência, backup e dados) em grupos claros, seguindo a tabela acima e os critérios abaixo, com protótipo antes do código. "Já em andamento" no PDF queria dizer que o Pedro já tinha decidido fazer, não que havia código. **Entregue**, pelo protótipo aprovado (https://claude.ai/artifact/Ca8EGZSxpjXQ3xmzhby78L): grupos com título, Seu plano → Seus dados → Aparência → Conta e sincronização → Dados e privacidade; **sem conta, a conta vem primeiro** (pedido do Pedro), com o cartão "Você está usando sem conta" e **Entrar em verde** (exceção de dois primários registrada em `docs/brandbook.md`). "Seus dados" (`ProfileDataSummary`) mostra o que foi informado, uma linha por dado, com etiqueta "opcional" e "Não informado" em branco; Manter não tem ritmo. O formulário ganhou os grupos "Sobre você", "Rotina e objetivo" e "Opcional". "Dados e privacidade" fica aberto (era o `<details>` "Dados e segurança") com o backup, "Apagar dados do perfil" (saiu de perto de "Editar dados") e os links legais. "Sincronizar dados" só com conta. A ordem mora em `app/(app)/perfil/profile-tab.tsx`, que junta conta e perfil. Diferença do protótipo: o painel de backup manteve o próprio layout (exportar, importar e esquecer), em vez das linhas com ícone, para não reescrever um fluxo com prévia e confirmação. |
 | 9.2 | **Preferências alimentares e alergias** | Fora do escopo | Não entra: o Pedro quer mudar só a aba Perfil (30/09/2026), e esta preferência só faria sentido com efeito noutro fluxo (o app não gera dieta; a pessoa monta a dela). Sem esse efeito, um campo no Perfil prometeria uma proteção que o app não entrega. Fica registrado para não voltar como checkbox solto. |
 
 **Critérios de qualidade para qualquer mudança no Perfil:**
@@ -3215,7 +3215,7 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 - ✅ 8.18 Água chega nos outros aparelhos (sync na abertura; conflito não trava)
 - ✅ 8.19 Cabeçalho da landing cabe no celular (só "Entrar" abaixo de 640px)
 - ✅ 8.20 CI do GitHub verde pela primeira vez (Node 24 + folha do RPE com fonte do Linux)
-- ⬜ 9.1 Reorganização e resumo da aba Perfil (só a aba Perfil; protótipo antes do código)
+- ✅ 9.1 Reorganização e resumo da aba Perfil (sem conta, a conta vem primeiro)
 - ⬜ 10.1 Exercícios: grupos musculares logo no topo
 - ⬜ 10.2 Exercícios: 19 músculos agrupados em 6 regiões
 - ⬜ 10.3 Exercícios: menos texto em cada linha

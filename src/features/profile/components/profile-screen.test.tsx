@@ -77,7 +77,10 @@ beforeEach(() => {
   }));
 });
 
-function mount(repository: LocalProfileRepository) {
+function mount(
+  repository: LocalProfileRepository,
+  props: { readonly account?: React.ReactNode; readonly accountFirst?: boolean } = {},
+) {
   const bodyRepository = new LocalBodyRepository(
     new MemoryStore<BodyEntry>(BODY_ENTRIES_STORE),
   );
@@ -88,7 +91,7 @@ function mount(repository: LocalProfileRepository) {
         <ProfileRepositoryProvider repository={Promise.resolve(repository)}>
           <BodyRepositoryProvider repository={Promise.resolve(bodyRepository)}>
             <BackupRepositoryProvider repository={Promise.resolve(noopBackup)}>
-              <ProfileScreen />
+              <ProfileScreen {...props} />
             </BackupRepositoryProvider>
           </BodyRepositoryProvider>
         </ProfileRepositoryProvider>
@@ -178,11 +181,12 @@ describe("ProfileScreen — conflict recovery", () => {
  * External audit (27/08/2026): "Dados e segurança" closed itself partway
  * through choosing a backup file to import — right when the preview,
  * confirmation and any error that follows are what someone most needs to
- * see. `open` used to be the native uncontrolled default; these tests fail
- * on that regression and pass only once it stays open through a state
- * change the `<details>` itself did not request.
+ * see. Since 9.1 (30/09/2026) the section is "Dados e privacidade" and is
+ * never collapsed, so there is nothing left to close; what these tests keep
+ * guaranteeing is that the import preview is on screen and stays there
+ * through the re-renders choosing a file causes.
  */
-describe("ProfileScreen — Dados e segurança stays open", () => {
+describe("ProfileScreen — Dados e privacidade", () => {
   function chooseFile(contents: string, name = "backup.json") {
     const input = document.querySelector('input[type="file"]');
     if (input === null) throw new Error("file input not found");
@@ -192,43 +196,101 @@ describe("ProfileScreen — Dados e segurança stays open", () => {
     input.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  it("stays open across the several re-renders choosing a backup file causes", async () => {
-    const user = userEvent.setup();
+  it("is always open, with nothing to collapse, and keeps the import preview on screen", async () => {
     const store = new MemoryStore<Profile>(PROFILE_STORE);
     const repository = new LocalProfileRepository(store);
     await repository.save(profile(INITIAL, 1), null);
 
     mount(repository);
 
-    const summary = await screen.findByText("Dados e segurança");
-    await user.click(summary);
-
-    const details = summary.closest("details");
-    expect(details).not.toBeNull();
-    expect(details?.open).toBe(true);
+    const heading = await screen.findByRole("heading", { name: "Dados e privacidade" });
+    expect(heading.closest("details")).toBeNull();
 
     chooseFile('{"schemaVersion":1}');
-    await screen.findByText("Este arquivo contém 0 registros.");
-
-    expect(details?.open).toBe(true);
+    expect(await screen.findByText("Este arquivo contém 0 registros.")).toBeVisible();
   });
 
-  it("still opens and closes normally on the person's own click", async () => {
-    const user = userEvent.setup();
+  it("holds the profile's own delete, away from Editar dados", async () => {
     const store = new MemoryStore<Profile>(PROFILE_STORE);
     const repository = new LocalProfileRepository(store);
     await repository.save(profile(INITIAL, 1), null);
 
     mount(repository);
 
-    const summary = await screen.findByText("Dados e segurança");
-    const details = summary.closest("details");
-    expect(details?.open).toBe(false);
+    const section = (await screen.findByRole("heading", { name: "Dados e privacidade" })).closest("section")!;
+    const remove = await screen.findByRole("button", { name: "Apagar dados do perfil" });
+    expect(section.contains(remove)).toBe(true);
 
-    await user.click(summary);
-    expect(details?.open).toBe(true);
+    const edit = screen.getByRole("button", { name: "Editar dados" });
+    expect(section.contains(edit)).toBe(false);
+  });
+});
 
-    await user.click(summary);
-    expect(details?.open).toBe(false);
+/** Roadmap 9.1 (30/09/2026): a aba reorganizada, como no protótipo aprovado. */
+describe("ProfileScreen — reorganização (9.1)", () => {
+  const ACCOUNT = <section><h2>Conta e sincronização</h2></section>;
+
+  async function headings() {
+    await screen.findByRole("heading", { name: "Seus dados" });
+    return screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+  }
+
+  async function filled(nutrition: NutritionProfile = INITIAL) {
+    const repository = new LocalProfileRepository(new MemoryStore<Profile>(PROFILE_STORE));
+    await repository.save(profile(nutrition, 1), null);
+    return repository;
+  }
+
+  it("com conta: plano, dados, aparência, conta, dados e privacidade", async () => {
+    mount(await filled(), { account: ACCOUNT });
+
+    await screen.findByRole("heading", { name: "Seu plano" });
+    // Na ordem; o painel de backup traz o próprio título ("Backup") dentro
+    // de "Dados e privacidade", depois dele.
+    const order = ["Seu plano", "Seus dados", "Aparência", "Conta e sincronização", "Dados e privacidade"];
+    const found = await headings();
+    expect(order.map((name) => found.indexOf(name))).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it("sem conta: a conta vem antes de tudo", async () => {
+    mount(await filled(), { account: ACCOUNT, accountFirst: true });
+
+    await screen.findByRole("heading", { name: "Seu plano" });
+    expect((await headings())[0]).toBe("Conta e sincronização");
+  });
+
+  it("sem perfil: não há plano, e Seus dados é o formulário em três grupos", async () => {
+    mount(new LocalProfileRepository(new MemoryStore<Profile>(PROFILE_STORE)));
+
+    expect(await headings()).not.toContain("Seu plano");
+    expect(screen.getByText(/Preencha para ver suas metas/)).toBeInTheDocument();
+    for (const group of ["Sobre você", "Rotina e objetivo", "Opcional"]) {
+      expect(screen.getByRole("heading", { name: group })).toBeInTheDocument();
+    }
+    expect(screen.getByRole("button", { name: "Calcular metas" })).toBeInTheDocument();
+  });
+
+  it("o resumo mostra o que foi informado; opcional em branco é Não informado, e Manter não tem ritmo", async () => {
+    mount(await filled());
+
+    const summary = (await screen.findByRole("heading", { name: "Seus dados" })).closest("section")!;
+    const row = (label: RegExp) => [...summary.querySelectorAll("dl > div")].find((div) => label.test(div.querySelector("dt")?.textContent ?? ""))?.querySelector("dd")?.textContent;
+
+    expect(row(/^Sexo/)).toBe("Masculino");
+    expect(row(/^Idade/)).toBe("30 anos");
+    expect(row(/^Altura/)).toBe("175 cm");
+    expect(row(/^Peso/)).toBe("70 kg");
+    expect(row(/^Atividade/)).toBe("Moderado");
+    expect(row(/^Objetivo/)).toBe("Manter");
+    expect(row(/^Gordura corporal/)).toBe("Não informado");
+    expect(row(/^Ritmo/)).toBeUndefined();
+  });
+
+  it("com objetivo de perder gordura, o ritmo aparece", async () => {
+    mount(await filled({ ...INITIAL, goal: "cut", weeklyChangeKg: 0.5, bodyFatPercent: 18 }));
+
+    const summary = (await screen.findByRole("heading", { name: "Seus dados" })).closest("section")!;
+    expect(summary.textContent).toContain("0,5 kg/semana");
+    expect(summary.textContent).toContain("18%");
   });
 });

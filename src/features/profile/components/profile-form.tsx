@@ -86,7 +86,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
           of the data (identidade vs. objetivo vs. nutrição) and just was not
           said out loud. Nothing about validation, submission or the fields
           themselves changed — only the labels around them. */}
-      <Section title="Identidade" size="compact">
+      <Section title="Sobre você" size="compact">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Sexo" id="sex">
             {({ id }) => (
@@ -156,7 +156,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
         </div>
       </Section>
 
-      <Section title="Objetivo" size="compact">
+      <Section title="Rotina e objetivo" size="compact">
         <div className="space-y-3">
           <Field label="Nível de atividade" id="activityLevel">
             {({ id }) => (
@@ -199,7 +199,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
         </div>
       </Section>
 
-      <Section title="Nutrição" size="compact">
+      <Section title="Opcional" size="compact">
         <div className="grid grid-cols-2 gap-3">
           <Field
             label="Gordura corporal (%)"

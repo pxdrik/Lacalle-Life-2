@@ -35,12 +35,17 @@ function mount(overrides: Partial<AuthRepository> = {}) {
 }
 
 describe("AccountStatus", () => {
-  it("shows the anonymous notice when there is no session", async () => {
+  // Roadmap 9.1 (30/09/2026): sem conta, diz o que isso significa e
+  // oferece Entrar (o botão verde) e Criar conta.
+  it("explains what using without an account means, and offers both ways in", async () => {
     mount();
 
-    expect(
-      await screen.findByText("Você não está logado"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Você está usando sem conta")).toBeInTheDocument();
+    expect(screen.getByText(/Seus dados ficam só neste aparelho/)).toBeInTheDocument();
+    const signIn = screen.getByRole("link", { name: "Entrar" });
+    expect(signIn).toHaveAttribute("href", "/entrar");
+    expect(signIn.className).toContain("bg-accent-fill");
+    expect(screen.getByRole("link", { name: "Criar conta" })).toHaveAttribute("href", "/cadastro");
   });
 
   it("shows the user's email when a session exists", async () => {
@@ -77,7 +82,7 @@ describe("AccountStatus", () => {
       }),
     });
 
-    expect(await screen.findByText("Você não está logado")).toBeInTheDocument();
+    expect(await screen.findByText("Você está usando sem conta")).toBeInTheDocument();
 
     notify(USER);
 

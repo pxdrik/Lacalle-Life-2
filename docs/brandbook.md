@@ -509,6 +509,15 @@ sobrevive é o feedback de hover, foco e confirmação, que a pág. 40 manda man
 Escritas porque uma auditoria futura vai encontrá-las, e é melhor que encontre a
 razão junto.
 
+### Dois botões principais no Perfil sem conta e sem perfil
+
+Decisão do Pedro, 30/09/2026 (roadmap 9.1). Sem conta, "Conta e
+sincronização" vem no topo do Perfil com **Entrar em verde**; sem perfil
+preenchido, o formulário termina em **Calcular metas**, também verde. A
+regra de um primário por tela cede aqui porque os dois ficam em pontas
+opostas da página e quase nunca aparecem juntos na tela do celular. Com conta
+ou com perfil, volta a haver um só.
+
 ### O grid de 12 colunas não está aplicado literalmente
 
 O brandbook define 12 colunas no desktop, 8 no tablet e 4 no celular, com margem

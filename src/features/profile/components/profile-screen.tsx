@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { noticeClasses } from "@/design-system/components/notice";
 import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
@@ -16,34 +15,68 @@ import { useProfile } from "../hooks/use-profile";
 import { BackupPanel } from "./backup-panel";
 import { MacroSplitDialog } from "./macro-split-dialog";
 import { PlanSummary } from "./plan-summary";
+import { ProfileDataSummary } from "./profile-data-summary";
 import { ProfileForm } from "./profile-form";
 import { StaleWeightNotice } from "./stale-weight-notice";
 
-export function ProfileScreen() {
+interface Props {
+  /**
+   * "Conta e sincronização", pronta. Vem de fora porque `features/profile`
+   * não importa `features/auth` (AGENTS.md); quem compõe as duas é `app/`.
+   */
+  readonly account?: React.ReactNode;
+  /**
+   * Sem conta, a conta vem antes de tudo (Pedro, 30/09/2026): o que mais
+   * importa a quem não entrou é saber que os dados ficam só no aparelho.
+   * Com conta, ela desce para depois de Aparência.
+   */
+  readonly accountFirst?: boolean;
+}
+
+/**
+ * A aba Perfil, reorganizada em 30/09/2026 (roadmap 9.1, protótipo aprovado):
+ * um painel privado em grupos com título, na ordem do que mais se usa.
+ *
+ * Seu plano → Seus dados → Aparência → Conta e sincronização → Dados e
+ * privacidade. Sem conta, a conta sobe para o topo. Sem perfil, "Seu plano"
+ * não existe e "Seus dados" é o formulário.
+ */
+export function ProfileScreen({ account, accountFirst = false }: Props) {
   const { state, writeError, hasConflict, save, clear, reload } = useProfile();
   const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [backupOpen, setBackupOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
 
+  // A conta aparece mesmo com o perfil carregando ou em erro: antes desta
+  // reorganização ela ficava fora desta tela, e continuava lá nesses casos.
+  const withAccount = (content: React.ReactNode) => (
+    <div className="space-y-10">
+      {accountFirst && account}
+      {content}
+      {!accountFirst && account}
+    </div>
+  );
+
   if (state.status === "loading") {
-    return <Skeleton className="h-72 rounded-lg" />;
+    return withAccount(<Skeleton className="h-72 rounded-lg" />);
   }
 
   if (state.status === "error") {
-    return (
+    return withAccount(
       <div role="alert" className={noticeClasses("danger", "block")}>
         <p className="text-ink">Não foi possível carregar seu perfil.</p>
         <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
-      </div>
+      </div>,
     );
   }
 
   const showForm = editing || state.status === "empty";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
+      {accountFirst && account}
+
       {writeError !== null && (
         <div role="alert" className={noticeClasses()}>
           <p>{writeError}</p>
@@ -59,9 +92,97 @@ export function ProfileScreen() {
         </div>
       )}
 
-      {/* Independent of the nutrition profile below — a display preference
-          applies whether or not the person has ever filled out a goal. */}
-      <Section size="sub" title="Aparência">
+      {!showForm && state.status === "ready" && (
+        <Section
+          title="Seu plano"
+          subtitle="Calculado a partir dos seus dados, logo abaixo."
+        >
+          <div className="space-y-4">
+            {/* Above the targets, because it is the reason to doubt them. */}
+            <StaleWeightNotice
+              profile={state.profile.nutrition}
+              pending={saving}
+              onApply={(weightKg) => {
+                setSaving(true);
+                void save({ ...state.profile.nutrition, weightKg }).then((ok) => {
+                  setSaving(false);
+                  if (ok) toast("Peso atualizado e metas recalculadas.");
+                });
+              }}
+            />
+
+            <PlanSummary
+              result={state.result}
+              goal={state.profile.nutrition.goal}
+              macroSplit={state.profile.nutrition.macroSplit}
+              onEditSplit={() => {
+                setSplitOpen(true);
+              }}
+            />
+          </div>
+
+          <MacroSplitDialog
+            open={splitOpen}
+            onClose={() => {
+              setSplitOpen(false);
+            }}
+            current={state.profile.nutrition.macroSplit}
+            onSelect={(macroSplit) => {
+              void save({ ...state.profile.nutrition, macroSplit }).then((ok) => {
+                if (ok) toast("Distribuição de macros atualizada.");
+              });
+            }}
+          />
+        </Section>
+      )}
+
+      <Section
+        title="Seus dados"
+        {...(state.status === "empty"
+          ? {
+              subtitle:
+                "Preencha para ver suas metas de calorias e macros. Montar dieta funciona igual sem isso.",
+            }
+          : {})}
+        {...(!showForm
+          ? {
+              action: (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEditing(true);
+                  }}
+                >
+                  Editar dados
+                </Button>
+              ),
+            }
+          : {})}
+      >
+        {showForm ? (
+          <ProfileForm
+            key={state.status === "ready" ? state.profile.updatedAt : "empty"}
+            initial={state.status === "ready" ? state.profile.nutrition : null}
+            pending={saving}
+            onSubmit={(nutrition) => {
+              setSaving(true);
+              void save(nutrition).then((ok) => {
+                setSaving(false);
+                if (!ok) return;
+                setEditing(false);
+                toast("Metas recalculadas.");
+              });
+            }}
+          />
+        ) : (
+          state.status === "ready" && <ProfileDataSummary profile={state.profile.nutrition} />
+        )}
+      </Section>
+
+      {/* Independent of the nutrition profile — a display preference applies
+          whether or not the person has ever filled out a goal. */}
+      <Section title="Aparência">
         <div className="flex flex-wrap items-center gap-4">
           <div>
             <p className="mb-1.5 text-xs text-ink-subtle">Tema</p>
@@ -74,142 +195,40 @@ export function ProfileScreen() {
         </div>
       </Section>
 
-      {showForm ? (
-        <ProfileForm
-          // Forces a remount whenever the stored version changes — a
-          // successful save of course, but critically also `reload()` after
-          // a conflict. `ProfileForm` seeds its draft from `initial` only
-          // once, in a lazy `useState` initializer; without a `key` tied to
-          // the version, a conflict-then-reload left the form showing the
-          // same stale draft it had before, and a second "Salvar" would
-          // then silently succeed and overwrite whatever the other tab had
-          // just saved — the 2026-08-24 pre-deploy review caught this
-          // exact sequence. See `useProfile`'s doc comment on `reload`.
-          key={state.status === "ready" ? state.profile.updatedAt : "empty"}
-          initial={state.status === "ready" ? state.profile.nutrition : null}
-          pending={saving}
-          onSubmit={(nutrition) => {
-            setSaving(true);
-            void save(nutrition).then((ok) => {
-              setSaving(false);
-              if (!ok) return;
-              setEditing(false);
-              toast("Metas recalculadas.");
-            });
-          }}
-        />
-      ) : (
-        <>
-          {/* Above the targets, because it is the reason to doubt them. */}
-          {state.status === "ready" && (
-            <StaleWeightNotice
-              profile={state.profile.nutrition}
-              pending={saving}
-              onApply={(weightKg) => {
-                setSaving(true);
-                void save({ ...state.profile.nutrition, weightKg }).then(
-                  (ok) => {
-                    setSaving(false);
-                    if (ok) toast("Peso atualizado e metas recalculadas.");
-                  },
-                );
-              }}
-            />
-          )}
+      {!accountFirst && account}
 
-          <PlanSummary
-            result={state.result}
-            goal={state.profile.nutrition.goal}
-            macroSplit={state.profile.nutrition.macroSplit}
-            onEditSplit={() => {
-              setSplitOpen(true);
-            }}
-          />
-
-          <MacroSplitDialog
-            open={splitOpen}
-            onClose={() => {
-              setSplitOpen(false);
-            }}
-            current={state.profile.nutrition.macroSplit}
-            onSelect={(macroSplit) => {
-              void save({ ...state.profile.nutrition, macroSplit }).then(
-                (ok) => {
-                  if (ok) toast("Distribuição de macros atualizada.");
-                },
-              );
-            }}
-          />
-
-          <div className="flex gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setEditing(true);
-              }}
-            >
-              Editar dados
-            </Button>
-            {/* Two taps, and the word says what happens.
-                "Desativar" promised a switch and delivered a delete: one
-                click erased sex, age, height, weight, activity and goal with
-                no confirmation and no undo, from a ghost button sitting
-                beside "Editar dados". Every other destructive action in the
-                app already went through `ConfirmButton`; the one that
-                destroyed the most did not. */}
-            <ConfirmButton
-              onConfirm={() => {
-                void clear();
-              }}
-              label="Apagar dados do perfil"
-              confirmLabel="Apagar tudo?"
-              className="h-(--control-h) px-4 text-sm"
-            >
-              Apagar dados
-            </ConfirmButton>
-          </div>
-
-          <p className="text-xs text-ink-subtle">
-            Apagar remove seus dados e as metas junto. Montar dieta continua
-            funcionando igual.
-          </p>
-        </>
-      )}
-
-      {/* Independent of the nutrition form and of `state`: a backup exists
-          whether or not a profile does, and covers every domain, not just
-          this one. Moved to a secondary, collapsed area (H.1): it used to
-          be the first card on the screen, ahead of the profile fields
-          someone actually came here to fill in. Collapsed, not hidden —
-          reachable to a screen reader and to find-in-page either way.
-          `open` is controlled, not the native uncontrolled default: an
-          external audit (27/08/2026) found this section closing itself
-          partway through choosing a backup file to import, right when
-          seeing the preview/confirmation/error that follows matters most.
-          No re-render anywhere in this file's own state should ever be able
-          to close `<details>` out from under the person reading it — an
-          explicit `open`, only ever changed by the person's own click on
-          `<summary>` (`onToggle`, the native event for exactly that),
-          removes the possibility regardless of what triggered the
-          re-render. */}
-      <details
-        className="group rounded-lg border border-line"
-        open={backupOpen}
-        onToggle={(event) => {
-          setBackupOpen(event.currentTarget.open);
-        }}
-      >
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
-          Dados e segurança
-          <ChevronDown
-            aria-hidden
-            className="size-4 text-ink-subtle transition-transform duration-150 ease-out group-open:rotate-180"
-          />
-        </summary>
-        <div className="border-t border-line p-4">
+      {/* Aberto e por último (9.1). Era um `<details>` recolhido, "Dados e
+          segurança", e um auditor já o viu se fechar sozinho no meio de uma
+          importação; aberto não tem o que fechar. Fica no fim para não se
+          confundir com o que se faz todo dia. "Apagar dados do perfil" veio
+          para cá: morava ao lado de "Editar dados", a um toque errado dele. */}
+      <Section title="Dados e privacidade">
+        <div className="space-y-6">
           <BackupPanel />
+
+          {state.status === "ready" && (
+            <div className="space-y-2 border-t border-line pt-4">
+              <h3 className="text-xs font-semibold text-ink">Apagar dados do perfil</h3>
+              <p className="text-xs text-ink-subtle">
+                Remove seus dados e as metas. Dietas, treinos e o diário ficam como estão.
+              </p>
+              {/* Two taps, and the word says what happens. "Desativar" once
+                  promised a switch and delivered a delete, with no
+                  confirmation and no undo. */}
+              <ConfirmButton
+                onConfirm={() => {
+                  void clear();
+                }}
+                label="Apagar dados do perfil"
+                confirmLabel="Apagar tudo?"
+                className="h-(--control-h) px-4 text-sm"
+              >
+                Apagar dados do perfil
+              </ConfirmButton>
+            </div>
+          )}
         </div>
-      </details>
+      </Section>
     </div>
   );
 }
