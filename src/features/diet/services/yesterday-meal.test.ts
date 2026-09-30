@@ -79,3 +79,10 @@ describe("copiar e desfazer", () => {
     expect(undone.meals[0]!.items.map((item) => item.foodId)).toEqual(["salada"]);
   });
 });
+
+describe("sameMealYesterday — acento", () => {
+  it("acha o café da manhã de ontem mesmo escrito sem acento", () => {
+    const yesterday = day("2026-09-29", [meal("Café da manhã", [["aveia", 40]], true)]);
+    expect(sameMealYesterday(yesterday, "cafe da manha")?.name).toBe("Café da manhã");
+  });
+});

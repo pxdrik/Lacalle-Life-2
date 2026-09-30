@@ -221,7 +221,7 @@ describe("planned meals waiting to be checked", () => {
     expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
     expect(screen.getByText("Peito de frango")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+      screen.getByRole("button", { name: "Marcar Café da manhã como comida" }),
     ).toBeInTheDocument();
   });
 
@@ -242,7 +242,7 @@ describe("planned meals waiting to be checked", () => {
   it("checking a planned meal snapshots it into the diary and drops it from the list", async () => {
     const { logs } = mount(emptyLog(), dietForToday());
     const check = await screen.findByRole("button", {
-      name: "Marcar Refeição 1 como comida",
+      name: "Marcar Café da manhã como comida",
     });
 
     await userEvent.click(check);
@@ -256,7 +256,7 @@ describe("planned meals waiting to be checked", () => {
       });
     });
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
-    expect(await screen.findByDisplayValue("Refeição 1")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("Café da manhã")).toBeInTheDocument();
   });
 
   it("tapping the row opens the meal unchecked, without claiming it was eaten", async () => {
@@ -266,7 +266,7 @@ describe("planned meals waiting to be checked", () => {
     // card cheio sem responder "comi isto" no lugar da pessoa.
     const { logs } = mount(emptyLog(), dietForToday());
     const row = await screen.findByRole("button", {
-      name: "Abrir Refeição 1",
+      name: "Abrir Café da manhã",
     });
 
     await userEvent.click(row);
@@ -279,7 +279,7 @@ describe("planned meals waiting to be checked", () => {
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
     expect(
       await screen.findByRole("button", {
-        name: "Marcar Refeição 1 como comida",
+        name: "Marcar Café da manhã como comida",
       }),
     ).toHaveAttribute("aria-pressed", "false");
   });
@@ -291,9 +291,9 @@ describe("planned meals waiting to be checked", () => {
     // do ⋮.
     const { logs } = mount(emptyLog(), dietForToday());
     await userEvent.click(
-      await screen.findByRole("button", { name: "Abrir Refeição 1" }),
+      await screen.findByRole("button", { name: "Abrir Café da manhã" }),
     );
-    await screen.findByDisplayValue("Refeição 1");
+    await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(
       screen.getByRole("button", { name: "Fechar refeição" }),
@@ -301,7 +301,7 @@ describe("planned meals waiting to be checked", () => {
 
     expect(await screen.findByText(/^Planejado para/)).toBeInTheDocument();
     expect(
-      screen.queryByDisplayValue("Refeição 1"),
+      screen.queryByDisplayValue("Café da manhã"),
     ).not.toBeInTheDocument();
     // Sem refeições, o dia inteiro é apagado do armazenamento em vez de
     // salvo vazio — a mesma regra de sempre (`isEmptyLog`), não algo novo
@@ -315,7 +315,7 @@ describe("planned meals waiting to be checked", () => {
     const { logs } = mount(emptyLog(), dietForToday());
     await userEvent.click(
       await screen.findByRole("button", {
-        name: "Marcar Refeição 1 como comida",
+        name: "Marcar Café da manhã como comida",
       }),
     );
     await waitFor(async () => {
@@ -342,7 +342,7 @@ describe("planned meals waiting to be checked", () => {
     };
     mount(seeded, diet);
 
-    await screen.findByDisplayValue("Refeição 1");
+    await screen.findByDisplayValue("Café da manhã");
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
   });
 });
@@ -371,9 +371,9 @@ describe("a day already started from a diet", () => {
     const diet = dietForToday();
     mount(seededUnchecked(diet), diet);
 
-    expect(await screen.findByDisplayValue("Refeição 1")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("Café da manhã")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+      screen.getByRole("button", { name: "Marcar Café da manhã como comida" }),
     ).toHaveAttribute("aria-pressed", "false");
     expect(screen.queryByText(/^Planejado para/)).not.toBeInTheDocument();
   });
@@ -381,15 +381,15 @@ describe("a day already started from a diet", () => {
   it("checking it in place keeps it as the same entry, now marked eaten", async () => {
     const diet = dietForToday();
     const { logs } = mount(seededUnchecked(diet), diet);
-    await screen.findByDisplayValue("Refeição 1");
+    await screen.findByDisplayValue("Café da manhã");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+      screen.getByRole("button", { name: "Marcar Café da manhã como comida" }),
     );
 
     expect(
       await screen.findByRole("button", {
-        name: "Desmarcar Refeição 1 como comida",
+        name: "Desmarcar Café da manhã como comida",
       }),
     ).toHaveAttribute("aria-pressed", "true");
     await waitFor(async () => {
@@ -416,14 +416,14 @@ describe("a day already started from a diet", () => {
   it("explains why the totals read zero, and stops once everything is checked", async () => {
     const diet = dietForToday();
     mount(seededUnchecked(diet), diet);
-    await screen.findByDisplayValue("Refeição 1");
+    await screen.findByDisplayValue("Café da manhã");
 
     expect(
       screen.getByText(/Planejado · ainda não somado no total do dia/),
     ).toBeInTheDocument();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+      screen.getByRole("button", { name: "Marcar Café da manhã como comida" }),
     );
 
     await waitFor(() => {
@@ -443,7 +443,7 @@ describe("a day already started from a diet", () => {
   it("keeps the day's total on what was eaten, never on what is planned", async () => {
     const diet = dietForToday();
     mount(seededUnchecked(diet), diet);
-    await screen.findByDisplayValue("Refeição 1");
+    await screen.findByDisplayValue("Café da manhã");
 
     // A refeição planejada mostra o próprio total no card…
     expect(
@@ -460,7 +460,7 @@ describe("a day already started from a diet", () => {
     expect(totals()).toMatch(/^0\s*kcal/);
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Marcar Refeição 1 como comida" }),
+      screen.getByRole("button", { name: "Marcar Café da manhã como comida" }),
     );
 
     await waitFor(() => {

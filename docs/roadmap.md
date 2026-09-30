@@ -3140,6 +3140,7 @@ confirmada por reprodução.
 | 8.14 | ✅ **Linha "Última vez" só com a data**, **entregue em 29/09/2026** | Pedido do Pedro: os números já estão na dica de cada campo (8.5). A linha vira "Última vez realizado em 29 de set."; `describeSet` saiu. Consequência: no cardio, a duração da última vez deixou de aparecer (ele não tem dica no campo). | Visual; P |
 | 8.15 | ✅ **Campos altos dentro da faixa da série** (print do Pedro: não alinhados com a caixa de borda verde), **entregue em 30/09/2026** | A linha da meta embaixo dos campos (`<Planned>`, `mt-1 h-4`) era desenhada mesmo vazia: numa rotina sem meta sobravam 20px embaixo dos campos. Agora ela só existe quando a série tem alguma meta (peso, reps, RPE ou duração); com meta, nada muda. Teste de navegador: sem meta, centro do campo a ≤1px do centro da faixa, 5 larguras × 3 densidades; sem a correção, os 15 casos falham com 10px. | Visual; P |
 | 8.16 | **"Observações" cortado no rodapé da refeição** em 320px na densidade Confortável ("Ob") | Achado no print da 7.3, e acontece também sem a faixa "Igual a ontem?": é do rodapé do `MealCard` ("Adicionar alimento" + "Observações"), que já existia assim. Não tratado na 7.3 por ser anterior a ela. | Bug visual; P |
+| 8.17 | ✅ **Refeição nova com nome padrão, e "Igual a ontem" sem depender de acento**, **entregue em 30/09/2026** | Ideia do Pedro: quem escreve "cafe da manha" num dia e "Café da manhã" no outro não acharia o de ontem. Duas partes: (1) "Adicionar refeição" usa o primeiro nome livre de Café da manhã, Almoço, Lanche da tarde, Jantar (depois dos quatro, "Refeição N"); dieta nova começa com Café da manhã em vez de "Refeição 1"; vale para Diário e dieta (mesmo `addMeal`). Nunca repete um nome existente. (2) `normalizeMealName` ignora acento, maiúsculas e espaço sobrando, usado pelo "Igual a ontem" e pelo `addMeal`. Refeições já salvas não mudam. 16 testes que conferiam o nome gerado antigo foram atualizados; sabotando cada parte, os testes novos falham. | Melhoria; P |
 
 **Confirmado pelo Pedro no iPhone em 29/09/2026** ("Deu certo!!!"), depois da lista de conferência de 8.1, 8.2, 8.3, 8.6 e 8.8.
 
@@ -3170,6 +3171,7 @@ confirmada por reprodução.
 - ✅ 8.14 "Última vez" só com a data
 - ✅ 8.15 Campos no meio da faixa da série
 - ⬜ 8.16 "Observações" cortado no rodapé da refeição (320px Confortável)
+- ✅ 8.17 Refeição nova com nome padrão; "Igual a ontem" sem depender de acento
 
 ### Ordem de prioridade do que falta (29/09/2026)
 

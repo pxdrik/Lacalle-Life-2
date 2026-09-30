@@ -68,7 +68,7 @@ describe("meals", () => {
     const diet = addMeal(createDiet("Cutting"));
 
     expect(diet.meals).toHaveLength(2);
-    expect(diet.meals[1]?.name).toBe("Refeição 2");
+    expect(diet.meals[1]?.name).toBe("Almoço");
   });
 
   it("gives an appended meal an order after every meal already there", () => {
@@ -91,7 +91,7 @@ describe("meals", () => {
     const updated = updateMeal(diet, diet.meals[0]!.id, { name: "Café" });
 
     expect(updated.meals[0]?.name).toBe("Café");
-    expect(updated.meals[1]?.name).toBe("Refeição 2");
+    expect(updated.meals[1]?.name).toBe("Almoço");
   });
 
   it("distinguishes no fixed time from midnight", () => {

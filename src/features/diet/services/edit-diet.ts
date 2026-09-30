@@ -14,7 +14,7 @@ import type {
   MealItem,
   MealOwner,
 } from "../types/diet";
-import { copyMeal, createMeal } from "./create-diet";
+import { copyMeal, createMeal, nextMealName } from "./create-diet";
 
 /**
  * Every edit is a pure function from one meal owner to the next.
@@ -51,7 +51,11 @@ export function renameDiet(diet: Diet, name: string): Diet {
 }
 
 export function addMeal<T extends MealOwner>(diet: T): T {
-  return withMeals(diet, [...diet.meals, createMeal(diet.meals.length + 1)]);
+  const position = diet.meals.length + 1;
+  return withMeals(diet, [
+    ...diet.meals,
+    createMeal(position, nextMealName(diet.meals, position)),
+  ]);
 }
 
 export function removeMeal<T extends MealOwner>(diet: T, mealId: EntityId): T {

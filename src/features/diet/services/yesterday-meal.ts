@@ -2,6 +2,7 @@ import { createEntityId, type EntityId } from "@/core/domain/entity";
 
 import type { Meal, MealItem, MealOwner } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
+import { normalizeMealName } from "./create-diet";
 import { addItem, removeItem } from "./edit-diet";
 import { eatenMeals } from "./meal-execution";
 
@@ -9,19 +10,19 @@ import { eatenMeals } from "./meal-execution";
  * "Igual a ontem?" — roadmap 7.3 (30/09/2026), padrão do Lifesum.
  *
  * A refeição equivalente de ontem é a que tem o **mesmo nome**, ignorando
- * maiúsculas e espaços nas pontas ("Almoço" e "almoço " são a mesma). Com
- * as mesmas regras dos recentes (7.2): só refeição comida, e só se ela tinha
+ * maiúsculas, espaços e acentos (`normalizeMealName`: "Café da manhã" e
+ * "cafe da manha " são a mesma). Com as mesmas regras dos recentes (7.2): só refeição comida, e só se ela tinha
  * alguma coisa — oferecer copiar uma refeição vazia não ajuda ninguém.
  */
 export function sameMealYesterday(
   yesterday: FoodLog | undefined,
   mealName: string,
 ): Meal | undefined {
-  const key = normalize(mealName);
+  const key = normalizeMealName(mealName);
   if (yesterday === undefined || key === "") return undefined;
 
   return eatenMeals(yesterday).find(
-    (meal) => normalize(meal.name) === key && meal.items.length > 0,
+    (meal) => normalizeMealName(meal.name) === key && meal.items.length > 0,
   );
 }
 
@@ -52,6 +53,3 @@ export function removeItems<T extends MealOwner>(
   return itemIds.reduce((current, id) => removeItem(current, mealId, id), owner);
 }
 
-function normalize(name: string): string {
-  return name.trim().toLocaleLowerCase("pt-BR");
-}

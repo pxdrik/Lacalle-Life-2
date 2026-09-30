@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createMealItem } from "./create-diet";
+import { createMealItem, createDiet, nextMealName, normalizeMealName } from "./create-diet";
+import { addMeal } from "./edit-diet";
 
 /**
  * `practicalUnit` follows the exact same copy-not-lookup rule `per100g`
@@ -72,5 +73,38 @@ describe("createMealItem", () => {
     expect(item.sodiumMg).toBeUndefined();
     expect(item.fiberG).toBeUndefined();
     expect(item.sugarG).toBeUndefined();
+  });
+});
+
+/**
+ * Pedro, 30/09/2026 (roadmap 7.3): refeição nova nasce com o nome do dia a dia,
+ * na ordem, para "Igual a ontem?" achar a mesma refeição escrita igual.
+ */
+describe("nomes de refeição", () => {
+  it("uma dieta nova começa com Café da manhã", () => {
+    expect(createDiet("Cutting").meals.map((meal) => meal.name)).toEqual(["Café da manhã"]);
+  });
+
+  it("adicionar segue a ordem: Almoço, Lanche da tarde, Jantar, e depois Refeição N", () => {
+    let diet = createDiet("Cutting");
+    for (let i = 0; i < 4; i += 1) diet = addMeal(diet);
+
+    expect(diet.meals.map((meal) => meal.name)).toEqual([
+      "Café da manhã",
+      "Almoço",
+      "Lanche da tarde",
+      "Jantar",
+      "Refeição 5",
+    ]);
+  });
+
+  it("nunca repete: pula o que já existe, mesmo escrito sem acento", () => {
+    expect(nextMealName([{ name: "cafe da manha" }], 2)).toBe("Almoço");
+    expect(nextMealName([{ name: "Pré-treino" }], 2)).toBe("Café da manhã");
+  });
+
+  it("compara sem acento, sem maiúsculas e sem espaço sobrando", () => {
+    expect(normalizeMealName("  Café  da Manhã ")).toBe(normalizeMealName("cafe da manha"));
+    expect(normalizeMealName("Almoço")).not.toBe(normalizeMealName("Jantar"));
   });
 });

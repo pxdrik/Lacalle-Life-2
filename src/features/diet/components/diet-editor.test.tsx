@@ -121,7 +121,7 @@ describe("DietEditor", () => {
     expect(await screen.findByLabelText("Nome da dieta")).toHaveValue(
       "Cutting",
     );
-    expect(screen.getByLabelText("Nome da refeição")).toHaveValue("Refeição 1");
+    expect(screen.getByLabelText("Nome da refeição")).toHaveValue("Café da manhã");
   });
 
   it("persists a rename", async () => {
@@ -156,10 +156,10 @@ describe("DietEditor", () => {
     await screen.findByLabelText("Nome da dieta");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+      screen.getByRole("button", { name: "Mais ações para Café da manhã" }),
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Excluir Refeição 1" }),
+      screen.getByRole("button", { name: "Excluir Café da manhã" }),
     );
 
     expect(screen.getByLabelText("Nome da refeição")).toBeInTheDocument();
@@ -171,20 +171,20 @@ describe("DietEditor", () => {
     await screen.findByLabelText("Nome da dieta");
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Mais ações para Refeição 1" }),
+      screen.getByRole("button", { name: "Mais ações para Café da manhã" }),
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Excluir Refeição 1" }),
+      screen.getByRole("button", { name: "Excluir Café da manhã" }),
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Excluir?: Excluir Refeição 1" }),
+      screen.getByRole("button", { name: "Excluir?: Excluir Café da manhã" }),
     );
 
     // Delete/Collapse: confirming only starts the shrink; the name field
     // stays until the card's own collapse transition ends.
     fireEvent.transitionEnd(
       screen
-        .getByRole("button", { name: "Mais ações para Refeição 1" })
+        .getByRole("button", { name: "Mais ações para Café da manhã" })
         .closest(".grid")!,
       { propertyName: "grid-template-rows" },
     );
@@ -200,7 +200,7 @@ describe("DietEditor", () => {
     const { diets } = mount(diet.id, diet);
     await screen.findByLabelText("Nome da dieta");
 
-    const time = screen.getByLabelText("Horário de Refeição 1");
+    const time = screen.getByLabelText("Horário de Café da manhã");
     expect(time).toHaveValue("");
 
     await userEvent.type(time, "07:30");

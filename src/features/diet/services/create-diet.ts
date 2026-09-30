@@ -11,6 +11,11 @@ import type { Diet, Meal, MealItem } from "../types/diet";
  * user did not ask for, and someone eating five times a day would start by
  * deleting things. One meal is the smallest structure that lets the next click
  * be "add a food" rather than "add a meal, then add a food".
+ *
+ * Still one meal — but since 30/09/2026 it is *named* like the first of
+ * `DEFAULT_MEAL_NAMES` instead of "Refeição 1" (Pedro, roadmap 7.3): the same
+ * name written the same way every day is what lets "Igual a ontem?" find the
+ * meal it is looking for.
  */
 export function createDiet(name: string): Diet {
   const now = entityTimestamp();
@@ -18,7 +23,7 @@ export function createDiet(name: string): Diet {
   return {
     id: createEntityId(),
     name: name.trim(),
-    meals: [createMeal(1)],
+    meals: [createMeal(1, DEFAULT_MEAL_NAMES[0])],
     weekdays: [],
     createdAt: now,
     updatedAt: now,
@@ -32,10 +37,55 @@ export function createDiet(name: string): Diet {
  */
 export const DEFAULT_GRAMS = 100;
 
-export function createMeal(position: number): Meal {
+/**
+ * Os nomes que uma refeição nova recebe, nesta ordem (Pedro, 30/09/2026,
+ * roadmap 7.3). Quem não faz essas refeições renomeia; depois dos quatro, as
+ * seguintes voltam a "Refeição N".
+ */
+export const DEFAULT_MEAL_NAMES = [
+  "Café da manhã",
+  "Almoço",
+  "Lanche da tarde",
+  "Jantar",
+] as const;
+
+/**
+ * Um nome de refeição comparável: sem acento, sem maiúsculas, sem espaço
+ * sobrando. "cafe da manha" e "Café da  manhã " são a mesma refeição — é o
+ * que deixa "Igual a ontem?" achar a de ontem mesmo escrita de outro jeito.
+ */
+export function normalizeMealName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase("pt-BR");
+}
+
+/**
+ * O nome da próxima refeição: o primeiro de `DEFAULT_MEAL_NAMES` que ainda
+ * não existe (comparando por `normalizeMealName`), senão "Refeição N". Nunca
+ * repete um nome que já está lá.
+ */
+export function nextMealName(
+  existing: readonly { readonly name: string }[],
+  position: number,
+): string {
+  const used = new Set(existing.map((meal) => normalizeMealName(meal.name)));
+  return (
+    DEFAULT_MEAL_NAMES.find((name) => !used.has(normalizeMealName(name))) ??
+    `Refeição ${String(position)}`
+  );
+}
+
+export function createMeal(
+  position: number,
+  name = `Refeição ${String(position)}`,
+): Meal {
   return {
     id: createEntityId(),
-    name: `Refeição ${position}`,
+    name,
     time: null,
     notes: "",
     items: [],
