@@ -3145,7 +3145,32 @@ confirmada por reprodução.
 
 **Confirmado pelo Pedro no iPhone em 29/09/2026** ("Deu certo!!!"), depois da lista de conferência de 8.1, 8.2, 8.3, 8.6 e 8.8.
 
-### Placar dos itens 7 e 8 (atualizado em 30/09/2026)
+### 9. Aba Perfil: escopo e limites (handoff de 30/09/2026)
+
+**Origem:** PDF "Lacalle Life — Perfil: escopo, referências visuais e limites de produto", entregue pelo Pedro em 30/09/2026, com baseline em `main @ af91581`. Referências: MyFitnessPal (Goals separado do diário), Lifesum (objetivo e dados pessoais no Perfil), Gentler Streak (assuntos separados em linhas claras) e Hevy como **contraexemplo** (perfil público e social).
+
+**Decisão central:** o Perfil é um **painel privado** de dados pessoais, metas, preferências do app e controle da conta e dos dados. Não é identidade pública, nem um segundo painel de atividade. Visual com os tokens e componentes que já existem: sem trocar a cor da marca, sem gradiente decorativo, sem linguagem de feed ou de gamificação.
+
+| Fica no Perfil | Fica fora do Perfil | Regra para qualquer novidade |
+| --- | --- | --- |
+| Dados que explicam o plano, objetivo nutricional, aparência, conta e gestão dos próprios dados. | Registro diário de comida e água (Hoje e Diário); histórico e evolução de peso, dieta e treino (Evolução); feed social, seguidores, desafios, streaks, badges, placar, comparação pública; avatar, bio pública, fotos de treino; IA ou reconhecimento automático; seletor de unidades sem decisão de ampliar mercado. | Só entra um controle que mude um comportamento real do app e tenha efeito verificável no fluxo correspondente. Nada entra para "parecer completo". |
+
+**O que o Perfil já tem (conferido no código em 30/09/2026):** conta (entrar ou criar conta, email, trocar senha, sair) e sincronização em `perfil/page.tsx` e `account-status.tsx`; dados pessoais e meta (sexo, idade, altura, peso, atividade, objetivo; gordura e ritmo semanal opcionais) em `profile-form.tsx`; resultado do plano, divisão de macros e aviso de peso desatualizado em `plan-summary.tsx`, `macro-donut.tsx`, `stale-weight-notice.tsx`; aparência em `profile-screen.tsx`; backup, importação e esquecer o aparelho em `backup-panel.tsx`.
+
+| # | Item | Situação | Nota |
+| --- | --- | --- | --- |
+| 9.1 | **Reorganização da aba e resumo dos dados do Perfil** | ⬜ Confirmar com o Pedro | O PDF trata como "já em andamento", mas não há item no roadmap nem mudança no código do Perfil até `af91581`. Se for trabalho feito fora daqui, registrar onde; se não começou, entra aqui como tarefa, seguindo a tabela acima e os critérios abaixo. Não abrir uma segunda tarefa com a mesma finalidade. |
+| 9.2 | **Preferências alimentares e alergias** | Descoberta, não implementação | Não existe campo de alergia, intolerância ou restrição em Perfil, Dieta ou nutrição. **Não vira checkbox solto no Perfil:** a tela prometeria uma proteção que o app não entrega. O PDF condiciona ao "gerador de dieta", mas **o app não gera dieta**: a pessoa monta a própria, e as sugestões são as alternativas de refeição que ela mesma salva. Então, se um dia entrar, o efeito verificável tem que estar noutro fluxo (por exemplo, sinalizar alimento incompatível no seletor), com o dado salvo e sincronizado, e teste provando que o alimento incompatível é sinalizado. Decisão de produto do Pedro antes de qualquer código. |
+
+**Critérios de qualidade para qualquer mudança no Perfil:**
+
+- a pessoa distingue o que é obrigatório do que é opcional no formulário;
+- entende que os números do plano saem dos dados do formulário;
+- distingue conta e sincronização das preferências do app;
+- acha importar, exportar e apagar dados sem confundir com ações do dia a dia;
+- toda ação destrutiva continua pedindo confirmação e dizendo o alcance.
+
+### Placar dos itens 7, 8 e 9 (atualizado em 30/09/2026)
 
 ✅ entregue · ⬜ falta
 
@@ -3174,6 +3199,8 @@ confirmada por reprodução.
 - ✅ 8.16 "Observações" cortado no rodapé da refeição (320px Confortável)
 - ✅ 8.17 Refeição nova com nome padrão; "Igual a ontem" sem depender de acento
 - ⬜ 8.18 Água não chega nos outros aparelhos (sync só envia)
+- ⬜ 9.1 Reorganização e resumo do Perfil (confirmar se já está em andamento, e onde)
+- ⬜ 9.2 Preferências alimentares e alergias (descoberta: decisão de produto antes de código)
 
 ### Ordem de prioridade do que falta (29/09/2026)
 
