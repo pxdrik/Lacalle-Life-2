@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -64,11 +64,17 @@ function mount(overrides: Partial<AuthRepository> = {}) {
 
 async function fillAndSubmit(
   user: ReturnType<typeof userEvent.setup>,
-  { email, password, confirm }: { email: string; password: string; confirm: string },
+  {
+    email,
+    password,
+    confirm,
+    accept = true,
+  }: { email: string; password: string; confirm: string; accept?: boolean },
 ) {
   await user.type(screen.getByLabelText("E-mail"), email);
   await user.type(screen.getByLabelText("Senha"), password);
   await user.type(screen.getByLabelText("Confirme a senha"), confirm);
+  if (accept) await user.click(screen.getByRole("checkbox", { name: /Li e aceito/ }));
   await user.click(screen.getByRole("button", { name: "Criar conta" }));
 }
 
@@ -210,5 +216,46 @@ describe("SignupForm — CAPTCHA", () => {
       "senha-forte-1",
       undefined,
     );
+  });
+});
+
+/** Roadmap 8.4 (30/09/2026): sem aceite dos Termos e da Política, não há conta. */
+describe("SignupForm — aceite dos Termos e da Política", () => {
+  it("começa desmarcado, com o botão desabilitado e os dois documentos em link", async () => {
+    mount();
+
+    expect(screen.getByRole("checkbox", { name: /Li e aceito/ })).not.toBeChecked();
+    expect(screen.getByRole("button", { name: "Criar conta" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Termos de Uso" })).toHaveAttribute("href", "/termos-de-uso");
+    expect(screen.getByRole("link", { name: "Política de Privacidade" })).toHaveAttribute(
+      "href",
+      "/politica-de-privacidade",
+    );
+  });
+
+  it("não cria conta sem aceite nem por um envio que não passa pelo botão", async () => {
+    const user = userEvent.setup();
+    const repository = mount();
+
+    await user.type(screen.getByLabelText("E-mail"), "a@b.com");
+    await user.type(screen.getByLabelText("Senha"), "12345678");
+    await user.type(screen.getByLabelText("Confirme a senha"), "12345678");
+    // O Enter já não envia (o HTML bloqueia com o botão desabilitado); um
+    // submit direto do formulário é o que só a guarda do handleSubmit segura.
+    fireEvent.submit(screen.getByRole("button", { name: "Criar conta" }).closest("form")!);
+
+    expect(repository.signUp).not.toHaveBeenCalled();
+    expect(
+      await screen.findByText("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade."),
+    ).toBeInTheDocument();
+  });
+
+  it("com aceite, cria a conta", async () => {
+    const user = userEvent.setup();
+    const repository = mount();
+
+    await fillAndSubmit(user, { email: "a@b.com", password: "12345678", confirm: "12345678" });
+
+    expect(repository.signUp).toHaveBeenCalledOnce();
   });
 });

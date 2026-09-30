@@ -5,6 +5,7 @@ import { PageTransition } from "@/design-system/components/page-transition";
 import { AccountSection } from "./_components/landing/account-section";
 import { Features } from "./_components/landing/features";
 import { FinalCta } from "./_components/landing/final-cta";
+import { HealthNotice } from "./_components/landing/health-notice";
 import { Hero } from "./_components/landing/hero";
 import { LandingFooter } from "./_components/landing/landing-footer";
 import { LandingHeader } from "./_components/landing/landing-header";
@@ -51,6 +52,7 @@ export default function LandingPage() {
         <Features />
         <AccountSection />
         <FinalCta />
+        <HealthNotice />
       </main>
       <LandingFooter />
     </PageTransition>

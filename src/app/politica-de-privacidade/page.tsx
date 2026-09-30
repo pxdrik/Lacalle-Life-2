@@ -1,0 +1,110 @@
+import type { Metadata } from "next";
+
+import { ContactLine, LegalDocument, type LegalSection } from "../_components/legal/legal-document";
+
+export const metadata: Metadata = {
+  title: "Política de Privacidade · LaCalle Life",
+  description: "Quais dados o LaCalle Life trata, para quê, onde ficam e quais são os seus direitos.",
+};
+
+const SECTIONS: readonly LegalSection[] = [
+  {
+    heading: "1. Objetivo",
+    body: [
+      "Esta Política explica quais dados o LaCalle Life trata, para quais finalidades, onde eles ficam, com quem podem ser compartilhados e quais são os seus direitos. Ela descreve o que o aplicativo faz hoje e será atualizada antes de qualquer recurso novo que mude isso.",
+    ],
+  },
+  {
+    heading: "2. Responsável",
+    body: [
+      "O responsável pelo tratamento é Pedro Macedo Funes, pessoa física, responsável pelo projeto. O projeto ainda não tem CNPJ próprio.",
+    ],
+  },
+  {
+    heading: "3. Dados tratados",
+    body: [
+      "Cadastro e acesso: e-mail e senha. A senha é processada pelo fornecedor de autenticação e não fica disponível ao responsável em forma legível.",
+      "O que você registra: perfil (sexo, idade, altura, peso, nível de atividade, objetivo e, se informar, percentual de gordura e ritmo semanal), dietas e refeições, diário alimentar, água, alimentos e exercícios personalizados, rotinas, treinos com cargas, repetições e percepção de esforço, dias de descanso, peso, medidas e anotações de evolução.",
+      "Dados técnicos: informações necessárias à segurança e ao funcionamento, como endereço IP e dados do navegador, tratados pelos fornecedores de hospedagem e de proteção contra robôs.",
+    ],
+  },
+  {
+    heading: "4. Dados de saúde",
+    body: [
+      "Informações de alimentação, peso, medidas, exercício e evolução podem revelar aspectos da sua saúde. A Lei Geral de Proteção de Dados (LGPD) trata dados de saúde como dados pessoais sensíveis, com proteção especial. O LaCalle Life usa esses dados só para as finalidades desta Política, e não os vende, não os usa para publicidade e não os compartilha com profissionais ou empresas de saúde.",
+    ],
+  },
+  {
+    heading: "5. Para que os dados são usados",
+    body: [
+      "Para criar e manter a conta, autenticar o acesso, mostrar e organizar os seus registros, calcular metas e evolução, sincronizar os dados entre os seus aparelhos, manter a segurança, prevenir abuso e fraude, responder aos seus pedidos e cumprir obrigações legais.",
+    ],
+  },
+  {
+    heading: "6. Onde os dados ficam",
+    body: [
+      "Sem conta, os seus registros ficam só no navegador ou aparelho em que foram feitos, no armazenamento local (IndexedDB). Nada disso é enviado ao servidor.",
+      "Com conta, os registros também são guardados no banco de dados do fornecedor de infraestrutura, em servidores na região de São Paulo, Brasil, para sincronizar entre os seus aparelhos. Cada conta só consegue ler os próprios dados.",
+      "O aplicativo também guarda no aparelho as suas preferências (como tema e densidade da tela) e, com o service worker, uma cópia da interface para abrir sem conexão. Essa cópia não contém os seus registros.",
+    ],
+  },
+  {
+    heading: "7. Cookies e tecnologias semelhantes",
+    body: [
+      "O aplicativo usa cookies de sessão necessários para manter você conectado à sua conta. Não usa cookies de publicidade, pixels de rastreamento nem ferramentas de análise de uso (analytics). Por isso não há uma política de cookies separada.",
+    ],
+  },
+  {
+    heading: "8. Fornecedores",
+    body: [
+      "Supabase: autenticação e banco de dados, com os dados da conta em servidores na região de São Paulo, Brasil.",
+      "Vercel: hospedagem do aplicativo. Ao acessar o site, dados técnicos da conexão, como o endereço IP, são processados por essa empresa, inclusive fora do Brasil.",
+      "Cloudflare Turnstile: verificação contra robôs no cadastro e no acesso. Processa dados técnicos do navegador, inclusive fora do Brasil.",
+      "Cada fornecedor recebe só o necessário para a sua função e trata os dados conforme os próprios contratos e políticas.",
+    ],
+  },
+  {
+    heading: "9. Recursos futuros",
+    body: [
+      "Se o LaCalle Life passar a usar análise de uso, publicidade, compartilhamento com nutricionistas ou treinadores, ou qualquer tecnologia que mude o que está descrito aqui, esta Política será atualizada antes, dizendo quais dados, para quê, com quem e, quando for o caso, como dar ou retirar o consentimento.",
+    ],
+  },
+  {
+    heading: "10. Por quanto tempo",
+    body: [
+      "Os dados da conta ficam guardados enquanto a conta existir e forem necessários às finalidades desta Política, ou enquanto a lei exigir. Os dados guardados só no aparelho ficam até você apagá-los, por exemplo com \"Esquecer este dispositivo\" no Perfil ou limpando os dados do navegador.",
+    ],
+  },
+  {
+    heading: "11. Segurança",
+    body: [
+      "O acesso é protegido por senha e por regras no banco de dados que impedem uma conta de ler os dados de outra, e toda comunicação usa conexão criptografada. Nenhum sistema na internet nem aparelho é totalmente imune a incidentes; se houver um que possa causar risco relevante, você será avisado.",
+    ],
+  },
+  {
+    heading: "12. Os seus direitos",
+    body: [
+      "Pela LGPD, você pode pedir a confirmação de que os seus dados são tratados, acesso a eles, correção, informações sobre uso e compartilhamento, exclusão, e os demais direitos previstos em lei. Boa parte você já faz no próprio aplicativo: ver e corrigir os registros, exportar um backup no Perfil e apagar os dados do aparelho. Para a exclusão da conta e dos dados no servidor, use o canal de contato abaixo.",
+    ],
+  },
+  {
+    heading: "13. Atualizações",
+    body: [
+      "Esta Política pode mudar quando o aplicativo, os fornecedores, as finalidades ou a lei mudarem. A versão vigente fica sempre nesta página, com a data da última atualização.",
+    ],
+  },
+  {
+    heading: "14. Contato",
+    body: [<ContactLine key="contato" subject="assuntos de privacidade e pedidos sobre os seus dados" />],
+  },
+];
+
+export default function PrivacyPage() {
+  return (
+    <LegalDocument
+      title="Política de Privacidade"
+      intro="Quais dados o LaCalle Life trata, para quê, onde eles ficam e quais são os seus direitos."
+      sections={SECTIONS}
+    />
+  );
+}

@@ -23,6 +23,8 @@ export function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  // Roadmap 8.4: sem aceite dos Termos e da Política, não há conta.
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmationSent, setConfirmationSent] = useState(false);
@@ -38,6 +40,13 @@ export function SignupForm() {
     }
     if (password !== confirmPassword) {
       setError("As senhas não são iguais.");
+      return;
+    }
+    // Também aqui, não só no `disabled` do botão: um envio que não passa
+    // pelo botão (Enter num campo, um evento disparado por fora) não cria
+    // conta sem aceite.
+    if (!acceptedTerms) {
+      setError("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
       return;
     }
     // Só uma conveniência de UX — poupa uma volta ao servidor quando o
@@ -159,12 +168,33 @@ export function SignupForm() {
         </Link>
       </p>
 
+      <label className="flex items-start gap-3 text-sm text-ink-muted">
+        <input
+          type="checkbox"
+          checked={acceptedTerms}
+          onChange={(event) => setAcceptedTerms(event.target.checked)}
+          className="mt-0.5 size-5 shrink-0 accent-(--accent)"
+        />
+        <span>
+          Li e aceito os{" "}
+          {/* Outra aba: abrir o documento não pode custar o formulário preenchido. */}
+          <Link href="/termos-de-uso" target="_blank" rel="noopener" className="text-ink underline underline-offset-4">
+            Termos de Uso
+          </Link>{" "}
+          e a{" "}
+          <Link href="/politica-de-privacidade" target="_blank" rel="noopener" className="text-ink underline underline-offset-4">
+            Política de Privacidade
+          </Link>{" "}
+          do LaCalle Life.
+        </span>
+      </label>
+
       <TurnstileWidget captcha={captcha} />
 
       <Button
         type="submit"
         pending={pending}
-        disabled={captcha.siteKey !== undefined && captcha.token === ""}
+        disabled={!acceptedTerms || (captcha.siteKey !== undefined && captcha.token === "")}
         className="w-full"
       >
         Criar conta
