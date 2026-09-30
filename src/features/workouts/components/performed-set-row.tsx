@@ -254,8 +254,13 @@ export function PerformedSetRow({
                 // overridden anyway (higher specificity), so it stayed as
                 // dead code lying about the real number.
                 "transition-colors duration-150 ease-out",
+                // Feito é tom suave, não bloco cheio (roadmap 7.1, 29/09/2026):
+                // quatro séries feitas eram quatro blocos verdes por card, e o
+                // verde cheio passa a ser só do próximo passo e da ação
+                // principal. A borda sólida fica porque, no claro,
+                // `accent-surface` quase some sobre o `bg-muted` da linha feita.
                 set.isCompleted
-                  ? "border-accent bg-accent text-accent-ink"
+                  ? "border-accent bg-accent-surface text-accent-text"
                   : "border-line-strong text-ink-subtle hover:border-accent hover:text-ink",
               )}
             >

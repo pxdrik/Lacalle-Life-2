@@ -3052,7 +3052,7 @@ componentes reais da tela que muda; a implementação parte dele.
 
 | # | Novidade | Esforço | Decisão tomada no protótipo |
 | --- | --- | --- | --- |
-| 7.1 | Série concluída em verde suave | P | **Nos dois temas**, não só no escuro (pedido do Pedro ao ver o protótipo). Botão de concluir feito passa de `bg-accent` a `accent-surface` + `accent-text`; o próximo passo e a ação principal continuam em verde cheio. Revisar as outras telas com preenchimento verde repetido pela mesma regra. |
+| 7.1 | ✅ Série concluída em verde suave, **entregue em 29/09/2026** | P | **Nos dois temas**, não só no escuro (pedido do Pedro ao ver o protótipo). Botão de concluir feito passa de `bg-accent` a `accent-surface` + `accent-text`; o próximo passo e a ação principal continuam em verde cheio. Revisar as outras telas com preenchimento verde repetido pela mesma regra. **Entregue:** só a linha de série (`performed-set-row.tsx`); a borda `border-accent` ficou sólida porque, no claro, `accent-surface` quase some sobre o `bg-muted` da linha feita. Teste de navegador mede a cor resolvida nos dois temas. O check da refeição no Diário e a landing continuam com verde cheio, ainda não revisados. |
 | 7.2 | Recentes no seletor de alimentos | M | Seção acima da lista quando a busca está vazia, com a quantidade usada da última vez. Fonte: registros do diário. |
 | 7.3 | Igual a ontem | M | Faixa dentro da refeição vazia; "Copiar" traz alimentos e gramas; toast com Desfazer. Refeição equivalente = mesmo nome no dia anterior. Some se ontem ela estava vazia. |
 | 7.4 | Histórico por exercício | M | Seção "Seu histórico" no detalhe do exercício: melhor série, 1RM estimado, linha da carga da melhor série por treino, últimos treinos. Vazio quando não há dado. |

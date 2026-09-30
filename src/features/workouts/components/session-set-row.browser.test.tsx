@@ -316,3 +316,63 @@ describe("nenhuma coluna é recortada, e remover a série continua alcançável"
     }
   }
 });
+
+/**
+ * Roadmap 7.1 (29/09/2026): série feita é tom suave, não bloco verde.
+ *
+ * Com `bg-accent`, cada série feita era um bloco verde cheio, quatro por card
+ * num treino comum, e era isso que pesava no tema escuro. O verde cheio fica
+ * para o próximo passo e a ação principal.
+ *
+ * A régua é a cor resolvida, não a classe (mesmo motivo de UI-01/UI-02 em
+ * `rpe-select.browser.test.tsx`): o fundo do botão feito tem que ficar perto
+ * do fundo da linha, e o check tem que continuar legível sobre ele.
+ */
+describe("7.1 — série feita não é bloco verde cheio", () => {
+  function srgb(channel: number): number {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  }
+
+  function luminance(color: string): number {
+    const [r, g, b] = color.match(/\d+(\.\d+)?/g)!.map(Number) as [
+      number,
+      number,
+      number,
+    ];
+    return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+  }
+
+  function ratio(a: string, b: string): number {
+    const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (light! + 0.05) / (dark! + 0.05);
+  }
+
+  const DONE: SessionExercise = {
+    ...EXERCISE,
+    sets: [{ ...EXERCISE.sets[0]!, isCompleted: true }, EXERCISE.sets[1]!],
+  };
+
+  it.each(["light", "dark"] as const)("%s", (theme) => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      const { container } = renderCard(DONE);
+      const done = container.querySelector<HTMLElement>(
+        'button[aria-pressed="true"]',
+      );
+      if (done === null) throw new Error("botão de série feita não encontrado");
+      const row = done.closest<HTMLElement>(".group");
+      if (row === null) throw new Error("linha da série não encontrada");
+
+      const button = getComputedStyle(done).backgroundColor;
+      const behind = getComputedStyle(row).backgroundColor;
+
+      // Com `bg-accent` isto media ~3,6 no claro e ~7 no escuro.
+      expect(ratio(button, behind)).toBeLessThan(1.5);
+      // O check é o sinal de "feito": piso do WCAG para objeto gráfico.
+      expect(ratio(getComputedStyle(done).color, button)).toBeGreaterThanOrEqual(3);
+    } finally {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  });
+});
