@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -729,5 +729,61 @@ describe("FoodLogScreen — Igual a ontem", () => {
 
     expect((await screen.findAllByText("Salada")).length).toBeGreaterThan(0);
     expect(screen.queryByText("Igual a ontem?")).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * Roadmap 7.7 (30/09/2026): registro rápido no Diário de verdade, com
+ * repositório. Registrar grava um avulso no dia; o total do dia avisa o que
+ * ficou em branco; editar troca o mesmo item.
+ */
+describe("FoodLogScreen — registro rápido", () => {
+  function todayWithEmptyLunch(): FoodLog {
+    return {
+      id: TODAY,
+      day: TODAY,
+      dietId: null,
+      meals: [{ id: "m1", name: "Almoço", time: null, notes: "", items: [] }],
+      createdAt: 1,
+      updatedAt: 1,
+    };
+  }
+
+  it("grava o avulso no dia, o total avisa o que falta, e editar mantém o mesmo item", async () => {
+    const user = userEvent.setup();
+    const { logs } = mount(todayWithEmptyLunch());
+
+    await user.click(await screen.findByRole("button", { name: "Registro rápido" }));
+    const sheet = screen.getByRole("dialog", { name: "Registro rápido no Almoço" });
+    await user.type(within(sheet).getByLabelText("Calorias"), "850");
+    await user.type(within(sheet).getByLabelText("Prot. (g)"), "40");
+    await user.click(within(sheet).getByRole("button", { name: "Registrar" }));
+
+    let stored = await waitFor(async () => {
+      const item = (await logs.getByDay(TODAY))?.meals[0]?.items[0];
+      expect(item).toBeDefined();
+      return item!;
+    });
+    expect(stored.foodId).toBeNull();
+    expect(stored.quick?.unknownMacros).toEqual(["carbsG", "fatG"]);
+    expect(stored.per100g.kcal).toBe(850);
+
+    // O card da refeição e o total do dia dizem que falta.
+    expect(await screen.findAllByText("* Sem o carboidrato e a gordura de 1 item avulso.")).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Editar Avulso" }));
+    const edit = screen.getByRole("dialog", { name: "Editar registro rápido" });
+    await user.clear(within(edit).getByLabelText("Calorias"));
+    await user.type(within(edit).getByLabelText("Calorias"), "900");
+    await user.click(within(edit).getByRole("button", { name: "Salvar" }));
+
+    const id = stored.id;
+    stored = await waitFor(async () => {
+      const item = (await logs.getByDay(TODAY))?.meals[0]?.items[0];
+      expect(item?.per100g.kcal).toBe(900);
+      return item!;
+    });
+    expect(stored.id).toBe(id);
+    expect((await logs.getByDay(TODAY))?.meals[0]?.items).toHaveLength(1);
   });
 });

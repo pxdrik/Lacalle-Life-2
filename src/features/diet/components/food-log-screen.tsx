@@ -32,6 +32,7 @@ import {
 } from "../services/yesterday-meal";
 import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
 import {
+  addItem,
   addMeal,
   copyItemToMeal,
   duplicateMeal,
@@ -40,15 +41,24 @@ import {
   removeItem,
   removeMeal,
   reorderMealItems,
+  replaceItem,
   reorderMeals,
   setItemGrams,
   undoConsolidateMealItems,
   updateMeal,
 } from "../services/edit-diet";
 import {
+  createQuickItem,
+  editQuickItem,
+  incompleteQuickCount,
+  quickGaps,
+} from "../services/quick-item";
+import { partialGaps, QuickGapNote } from "./macro-gap";
+import {
   checkMeal,
   closeMeal,
   eatenMacros,
+  eatenMeals,
   isMealLogged,
   mealCheckState,
   openMeal,
@@ -96,6 +106,11 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   const consolidateMeal = useConsolidateMeal(apply);
   const yesterdayLog = useYesterdayLog(day);
   const toast = useToast();
+  // Registro rápido (7.7): o que falta no total do dia, contado sobre o
+  // mesmo recorte do total (só o que foi comido).
+  const eatenItems = state.status === "ready" ? eatenMeals(state.log).flatMap((meal) => meal.items) : [];
+  const dayGaps = quickGaps(eatenItems);
+  const dayIncomplete = incompleteQuickCount(eatenItems);
 
   /**
    * "Igual a ontem?" (roadmap 7.3, 30/09/2026): a mesma refeição de ontem,
@@ -226,13 +241,16 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             )}
           >
             {targets === null ? (
-              <MacroSummary macros={eatenMacros(state.log)} size="lg" />
+              <MacroSummary macros={eatenMacros(state.log)} size="lg" gaps={partialGaps(dayGaps)} />
             ) : (
               <MacroProgress
                 totals={eatenMacros(state.log)}
                 targets={targets}
+                gaps={partialGaps(dayGaps)}
               />
             )}
+            {/* Registro rápido (7.7): o total do dia soma o que se sabe. */}
+            <QuickGapNote gaps={dayGaps} count={dayIncomplete} className="mt-2 text-xs text-ink-subtle" />
 
             {/* O parágrafo que explicava a discordância saiu daqui na Sprint
                 2, e o motivo é o mesmo que o trouxe.
@@ -380,6 +398,14 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                       router.push(
                         `/diario/alimento?dia=${day}&mealId=${meal.id}&itemId=${itemId}`,
                       );
+                    }}
+                    onQuickLog={(input) => {
+                      apply((current) => addItem(current, meal.id, createQuickItem(input)));
+                    }}
+                    onEditQuickItem={(itemId, input) => {
+                      const item = meal.items.find((candidate) => candidate.id === itemId);
+                      if (item === undefined) return;
+                      apply((current) => replaceItem(current, meal.id, editQuickItem(item, input)));
                     }}
                     onItemGramsChange={(itemId, grams) => {
                       apply((current) =>

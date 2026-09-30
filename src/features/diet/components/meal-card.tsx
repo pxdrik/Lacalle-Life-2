@@ -15,6 +15,7 @@ import {
   Shuffle,
   Trash2,
   Undo2,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -41,11 +42,20 @@ import {
 } from "@/features/foods";
 
 import { mealMacros } from "../services/diet-macros";
+import {
+  incompleteQuickCount,
+  isQuickItem,
+  quickGaps,
+  quickInputOf,
+  type QuickInput,
+} from "../services/quick-item";
 import type { Meal, MealItem } from "../types/diet";
 import { InlineText } from "./inline-text";
+import { partialGaps, QuickGapNote } from "./macro-gap";
 import { MacroSummary } from "./macro-summary";
 import { MealAlternativesDialog } from "./meal-alternatives-dialog";
 import { MealItemRow } from "./meal-item-row";
+import { QuickLogDialog } from "./quick-log-dialog";
 import { Card } from "@/design-system/components/card";
 
 interface Props {
@@ -131,6 +141,14 @@ interface Props {
    */
   readonly onOpenItemDetail?: ((itemId: string) => void) | undefined;
   /**
+   * Registro rápido (roadmap 7.7, 30/09/2026): um item "Avulso", só com
+   * calorias e, se souber, macros. Só o Diário passa: uma dieta é um plano
+   * de alimentos, e um avulso é o registro de algo que já foi comido.
+   */
+  readonly onQuickLog?: ((input: QuickInput) => void) | undefined;
+  /** Editar um avulso já registrado, pela mesma folha. Só o Diário. */
+  readonly onEditQuickItem?: ((itemId: string, input: QuickInput) => void) | undefined;
+  /**
    * RM01 — holding the header opens the day's "reorder refeições" sheet.
    * `undefined` in `DietEditor`, the same as `dragHandle` above — the two
    * are mutually exclusive, never both given for the same card.
@@ -196,6 +214,8 @@ export function MealCard({
   onRenameAlternative,
   onRemoveAlternative,
   onOpenItemDetail,
+  onQuickLog,
+  onEditQuickItem,
   onLongPressReorder,
   onConsolidate,
   onUndoConsolidate,
@@ -221,6 +241,17 @@ export function MealCard({
   // foi lida do banco já concluída.
   const [taps, setTaps] = useState(0);
   const macros = mealMacros(meal);
+  // Registro rápido: o total soma o que se sabe e marca o que falta.
+  const gaps = quickGaps(meal.items);
+  const incompleteCount = incompleteQuickCount(meal.items);
+  // A folha do registro rápido: `null` fechada; `itemId: null` é um novo.
+  // `key` remonta a folha a cada abertura, para ela começar do valor certo.
+  const [quickSheet, setQuickSheet] = useState<{
+    readonly itemId: string | null;
+    readonly key: number;
+  } | null>(null);
+  const quickItemOpen =
+    quickSheet?.itemId == null ? undefined : meal.items.find((item) => item.id === quickSheet.itemId);
 
   // O item mais novo entra com --animate-rise — o "Entry Insert" que dá
   // continuidade ao registro, não um efeito por si. Mesma técnica de
@@ -272,6 +303,13 @@ export function MealCard({
             ? undefined
             : () => {
                 onOpenItemDetail(item.id);
+              }
+        }
+        onEditQuick={
+          onEditQuickItem === undefined
+            ? undefined
+            : () => {
+                setQuickSheet({ itemId: item.id, key: Date.now() });
               }
         }
         onGramsChange={(grams) => {
@@ -477,7 +515,12 @@ export function MealCard({
               (só o padding do `Card` de fora), e `grid-cols-4` finalmente
               centraliza contra a largura certa. */}
           <div className="mt-2">
-            <MacroSummary macros={macros} layout="stacked" />
+            <MacroSummary macros={macros} layout="stacked" gaps={partialGaps(gaps)} />
+            <QuickGapNote
+              gaps={gaps}
+              count={incompleteCount}
+              className="mt-1 text-center text-xs text-ink-subtle"
+            />
 
             {/* Sprint 2, achado B1 — a única coisa nesta tela que precisa ser
                 dita, e ela mora aqui porque é aqui que a confusão acontece.
@@ -558,7 +601,11 @@ export function MealCard({
                   carne'" — só aparece com 2+ alimentos (nada a combinar com
                   0 ou 1) e só no Diário (`onConsolidate` indefinido no
                   editor de dieta, ver a doc da prop). */}
-              {onConsolidate !== undefined && meal.items.length >= 2 && (
+              {/* Não com avulso (7.7): ele não tem gramas de verdade, e
+                  juntar criaria um alimento com peso inventado. */}
+              {onConsolidate !== undefined &&
+                meal.items.length >= 2 &&
+                !meal.items.some(isQuickItem) && (
                 <MenuRow
                   label="Transformar em 1 alimento"
                   onClick={() => {
@@ -674,6 +721,21 @@ export function MealCard({
                 Adicionar alimento
               </button>
 
+              {/* Só no Diário (ver `onQuickLog`). Mesmo peso de "Adicionar
+                  alimento": é outra forma de registrar, não uma ação à parte. */}
+              {onQuickLog !== undefined && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuickSheet({ itemId: null, key: Date.now() });
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+                >
+                  <Zap aria-hidden className="size-4" />
+                  Registro rápido
+                </button>
+              )}
+
               {/* Só existe vindo da Dieta (ver a doc de `onApplyAlternative`
                   na prop) — pedido real: "vai que ele pede marmita, ele vai
                   ter a marmita de macarrão e de arroz", pra trocar sem editar
@@ -708,6 +770,23 @@ export function MealCard({
               className="min-w-32 flex-1 text-sm text-ink-muted sm:max-w-56 sm:flex-none"
             />
           </div>
+
+          {quickSheet !== null && (
+            <QuickLogDialog
+              key={quickSheet.key}
+              open
+              mealName={meal.name}
+              initial={quickItemOpen === undefined ? null : quickInputOf(quickItemOpen)}
+              onClose={() => {
+                setQuickSheet(null);
+              }}
+              onSave={(input) => {
+                if (quickSheet.itemId === null) onQuickLog?.(input);
+                else onEditQuickItem?.(quickSheet.itemId, input);
+                setQuickSheet(null);
+              }}
+            />
+          )}
 
           {onApplyAlternative !== undefined && (
             <MealAlternativesDialog

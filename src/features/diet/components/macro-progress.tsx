@@ -3,6 +3,8 @@ import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 
+import { MacroNumber, type MacroGaps } from "./macro-gap";
+
 /**
  * Calories lead, then the three macros in the app's coding.
  *
@@ -54,6 +56,8 @@ interface Props {
    */
   readonly figures?: readonly (typeof BARS)[number]["key"][];
   readonly layout?: MacroLayout;
+  /** Registro rápido (7.7): total incompleto ganha "*"; a nota fica com quem mostra. */
+  readonly gaps?: MacroGaps | undefined;
 }
 
 /**
@@ -71,6 +75,7 @@ export function MacroProgress({
   targets,
   figures,
   layout = "grid",
+  gaps,
 }: Props) {
   const bars =
     figures === undefined
@@ -133,7 +138,9 @@ export function MacroProgress({
             </dt>
             <dd className={cn(rows && "lg:mt-1")}>
               <div className="flex items-baseline gap-1 text-sm tabular-nums">
-                <span className="text-ink">{formatDecimal(value)}</span>
+                <span className="text-ink">
+                  <MacroNumber value={value} gap={key === "kcal" ? undefined : gaps?.[key]} />
+                </span>
                 <span className="text-ink-subtle">
                   /{formatDecimal(target)}
                   {unit}

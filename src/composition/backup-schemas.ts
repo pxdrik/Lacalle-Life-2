@@ -335,6 +335,11 @@ const mealItemSchema = z
     sodiumMg: bounded("sódio inválido.", 0, 40_000).optional(),
     fiberG: bounded("fibras inválidas.", 0, 100).optional(),
     sugarG: bounded("açúcares inválidos.", 0, 100).optional(),
+    // Registro rápido (roadmap 7.7): só nos itens avulsos. Ver `MealItem.quick`.
+    quick: z
+      .object({ unknownMacros: z.array(z.enum(["proteinG", "carbsG", "fatG"])).max(3) })
+      .strict()
+      .optional(),
   })
   .strict();
 

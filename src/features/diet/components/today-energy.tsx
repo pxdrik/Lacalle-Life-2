@@ -13,7 +13,9 @@ import { MACRO_CODING } from "@/design-system/macros";
 import { useNutritionTargets } from "@/features/profile";
 
 import { useFoodLogDay } from "../hooks/use-food-log";
-import { eatenMacros } from "../services/meal-execution";
+import { eatenMacros, eatenMeals } from "../services/meal-execution";
+import { incompleteQuickCount, quickGaps } from "../services/quick-item";
+import { partialGaps, QuickGapNote } from "./macro-gap";
 import { MacroSummary } from "./macro-summary";
 
 /**
@@ -56,6 +58,10 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   }
 
   const totals = eatenMacros(state.log);
+  // Registro rápido (7.7): o total soma o que se sabe e marca o que falta.
+  const eatenItems = eatenMeals(state.log).flatMap((meal) => meal.items);
+  const gaps = quickGaps(eatenItems);
+  const incomplete = incompleteQuickCount(eatenItems);
   const nothingYet = totals.kcal === 0;
 
   if (targets === null) {
@@ -80,7 +86,8 @@ export function TodayEnergy({ day }: { readonly day: string }) {
     // mudo sobre a própria falta.
     return (
       <Card as="section" tone="hero" className="min-w-0 text-center lg:col-span-2">
-        <MacroSummary macros={totals} size="lg" />
+        <MacroSummary macros={totals} size="lg" gaps={partialGaps(gaps)} />
+        <QuickGapNote gaps={gaps} count={incomplete} className="mt-2 text-xs text-ink-subtle" />
         <p className="mt-3 text-xs text-ink-subtle">Sem meta para comparar.</p>
         <Link
           href="/diario"
@@ -115,7 +122,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
             // número sozinho exigia lembrar a meta de cor ou abrir o
             // perfil. Só aparece aqui porque este ramo já garantiu
             // `targets !== null`; nunca inventa uma meta que não existe.
-            value={`${formatDecimal(totals[key])} / ${formatDecimal(targets[key])}`}
+            value={`${formatDecimal(totals[key])}${gaps[key] > 0 ? "*" : ""} / ${formatDecimal(targets[key])}`}
             unit="g"
             label={short}
             size="sm"
@@ -135,6 +142,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
           número (Pedro, 27/08/2026): a apresentação enxuta já basta, e
           nunca é uma recomendação médica personalizada nem comparada a
           nada. */}
+      <QuickGapNote gaps={gaps} count={incomplete} className="mt-2 text-xs text-ink-subtle" />
       <p className="mt-2 text-xs text-ink-subtle">
         Fibra · {FIBER_REFERENCE_G} g/dia
       </p>

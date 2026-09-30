@@ -40,6 +40,11 @@ interface Props {
   /** RM02 — the food's own detail page. `undefined` outside the Diário; see `MealCard.onOpenItemDetail`. */
   readonly onOpenDetail?: (() => void) | undefined;
   /**
+   * Registro rápido (7.7): num item avulso, tocar no nome abre a folha para
+   * editar, no lugar do detalhe do alimento, que ele não tem.
+   */
+  readonly onEditQuick?: (() => void) | undefined;
+  /**
    * RM01 — holding the row opens the meal's "reorder alimentos" sheet.
    * `undefined` when `dragHandle` is given (`DietEditor`): the two are
    * mutually exclusive, one meal-owner mode never gives both.
@@ -95,6 +100,7 @@ export function MealItemRow({
   dragHandle,
   otherMeals,
   onOpenDetail,
+  onEditQuick,
   onLongPressReorder,
   onGramsChange,
   onRemove,
@@ -103,6 +109,8 @@ export function MealItemRow({
   onEntranceEnd,
 }: Props) {
   const macros = itemMacros(item);
+  const quick = item.quick;
+  const openName = quick === undefined ? onOpenDetail : onEditQuick;
   const [showingActions, setShowingActions] = useState(false);
   const { requestRemove, collapseProps } = useCollapsibleRemove(onRemove);
   const { isPressing, ...longPress } = useLongPress(
@@ -146,7 +154,7 @@ export function MealItemRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            {onOpenDetail === undefined ? (
+            {openName === undefined ? (
               <span className="min-w-0 flex-1 truncate text-sm text-ink">
                 {item.name}
               </span>
@@ -155,7 +163,8 @@ export function MealItemRow({
               // continuam clicáveis pelo que já eram, sem competir com isto.
               <button
                 type="button"
-                onClick={onOpenDetail}
+                onClick={openName}
+                aria-label={quick === undefined ? undefined : `Editar ${item.name}`}
                 className="min-w-0 flex-1 truncate text-left text-sm text-ink underline-offset-2 hover:underline"
               >
                 {item.name}
@@ -174,6 +183,13 @@ export function MealItemRow({
           </div>
 
           <div className="mt-1 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            {quick !== undefined ? (
+              // Um avulso não tem gramas: o valor é o total, digitado. A
+              // etiqueta diz isso no lugar do campo (protótipo, 29/09/2026).
+              <span className="rounded-full border border-line px-2 py-0.5 text-xs text-ink-subtle">
+                Avulso
+              </span>
+            ) : (
             <div className="flex items-center gap-1.5">
               <GramsField
                 grams={item.grams}
@@ -196,8 +212,12 @@ export function MealItemRow({
                 </span>
               )}
             </div>
+            )}
 
-            <MacroSummary macros={macros} />
+            <MacroSummary
+              macros={macros}
+              gaps={Object.fromEntries((quick?.unknownMacros ?? []).map((key) => [key, "unknown"]))}
+            />
           </div>
         </div>
 

@@ -3,6 +3,8 @@ import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 
+import { MacroNumber, type MacroGaps } from "./macro-gap";
+
 interface Props {
   readonly macros: Macros;
   readonly size?: "sm" | "lg";
@@ -23,6 +25,8 @@ interface Props {
    * not by fighting a `flex-wrap` block that might break mid-row.
    */
   readonly layout?: "inline" | "stacked";
+  /** Registro rápido (7.7): macro não informado ("—") ou total incompleto ("*"). */
+  readonly gaps?: MacroGaps | undefined;
 }
 
 /**
@@ -31,7 +35,7 @@ interface Props {
  * Calories lead and carry no colour: they are the number people check first,
  * and the macros beside them are what the colours distinguish.
  */
-export function MacroSummary({ macros, size = "sm", layout = "inline" }: Props) {
+export function MacroSummary({ macros, size = "sm", layout = "inline", gaps }: Props) {
   const large = size === "lg";
 
   if (layout === "stacked") {
@@ -47,7 +51,7 @@ export function MacroSummary({ macros, size = "sm", layout = "inline" }: Props) 
         {MACRO_CODING.map(({ key, short, text }) => (
           <div key={key} className="text-center">
             <dd className={cn("text-xl font-semibold", text)}>
-              {formatDecimal(macros[key])}
+              <MacroNumber value={macros[key]} gap={gaps?.[key]} />
             </dd>
             <dt className="mt-0.5 text-[0.6875rem] text-ink-subtle">{short}</dt>
           </div>
@@ -86,7 +90,7 @@ export function MacroSummary({ macros, size = "sm", layout = "inline" }: Props) 
       {MACRO_CODING.map(({ key, short, text }) => (
         <div key={key} className="flex items-baseline gap-1">
           <dd className={cn(text, large ? "text-xl font-medium" : "text-sm")}>
-            {formatDecimal(macros[key])}
+            <MacroNumber value={macros[key]} gap={gaps?.[key]} />
           </dd>
           <dt
             className={cn(

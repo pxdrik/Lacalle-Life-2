@@ -56,7 +56,26 @@ export interface MealItem {
   readonly sodiumMg?: number | undefined;
   readonly fiberG?: number | undefined;
   readonly sugarG?: number | undefined;
+  /**
+   * Registro rápido (roadmap 7.7, 30/09/2026): um item "Avulso", sem
+   * alimento do catálogo, para quando se sabe as calorias e não os
+   * alimentos (almoço fora de casa). Só existe nesses itens; num item comum
+   * o campo nem aparece, e é isso que mantém o dia legível por versões do app
+   * anteriores a ele (a sincronização e o backup validam o item com esquema
+   * estrito).
+   *
+   * Um avulso tem `foodId: null`, `grams: 100` e o total em `per100g`: com
+   * isso `itemMacros` devolve os valores como foram digitados, e toda soma do
+   * app continua a mesma conta. O que não foi informado fica em
+   * `unknownMacros` e vale 0 em `per100g`, mas **nunca aparece como zero**:
+   * a linha mostra "—" e o total, a marca de incompleto
+   * (ver `quickGaps`).
+   */
+  readonly quick?: { readonly unknownMacros: readonly QuickMacro[] } | undefined;
 }
+
+/** Os macros que um registro rápido pode deixar em branco. Calorias, não. */
+export type QuickMacro = Exclude<keyof Macros, "kcal">;
 
 /**
  * One other way to eat a meal — a marmita's rice version beside its pasta

@@ -116,6 +116,21 @@ export function addItem<T extends MealOwner>(
   }));
 }
 
+/**
+ * Troca um item pelo mesmo id, na mesma posição. Hoje só o registro rápido
+ * (7.7) usa: editar um avulso é mudar os valores dele, não remover e criar.
+ */
+export function replaceItem<T extends MealOwner>(
+  diet: T,
+  mealId: EntityId,
+  item: MealItem,
+): T {
+  return mapMeal(diet, mealId, (meal) => ({
+    ...meal,
+    items: meal.items.map((current) => (current.id === item.id ? item : current)),
+  }));
+}
+
 export function removeItem<T extends MealOwner>(
   diet: T,
   mealId: EntityId,
