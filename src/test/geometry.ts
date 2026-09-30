@@ -49,9 +49,18 @@ export function setDensity(density: Density): void {
  * quebrar. Positivo significa que alguma coisa está fora da vista, e num
  * pai com `overflow: hidden` significa que está **recortada** — foi assim
  * que o X de remover série sumia em 360px.
+ *
+ * **Desconta 1px de arredondamento** (roadmap 8.7, 30/09/2026).
+ * `scrollWidth` e `clientWidth` são inteiros, e com o `zoom` da densidade a
+ * caixa tem largura fracionária (390px de tela são 339,13 de CSS no Padrão).
+ * O Chromium arredonda os dois igual; o WebKit, motor do Safari, arredonda
+ * `scrollWidth` para cima e `clientWidth` para baixo, e acusava 1px que não
+ * existe — conferido: nenhum elemento passava da borda, e a caixa não rolava.
+ * Transbordo real de 2px ou mais continua positivo; os que estes testes
+ * pegaram mediam 21 e 22px.
  */
 export function overflowX(element: Element): number {
-  return element.scrollWidth - element.clientWidth;
+  return element.scrollWidth - element.clientWidth - 1;
 }
 
 /** O centro horizontal de um elemento, em pixels da viewport. */

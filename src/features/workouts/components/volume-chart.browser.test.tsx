@@ -2,7 +2,13 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { formatDecimal } from "@/core/format/decimal";
-import { DENSITIES, PHONE_WIDTHS, setDensity, setViewport } from "@/test/geometry";
+import {
+  DENSITIES,
+  PHONE_WIDTHS,
+  overflowX,
+  setDensity,
+  setViewport,
+} from "@/test/geometry";
 
 import type { VolumePoint } from "../services/history";
 import { VolumeChart } from "./volume-chart";
@@ -58,7 +64,7 @@ describe("UI-07 — o gráfico semanal", () => {
         setDensity(density);
         const { bars } = mount(POINTS);
 
-        expect(bars.scrollWidth - bars.clientWidth).toBeLessThanOrEqual(0);
+        expect(overflowX(bars)).toBeLessThanOrEqual(0);
       });
 
       it(`o card não piora além do medido em ${String(width)}px/${density}`, async () => {
@@ -69,7 +75,8 @@ describe("UI-07 — o gráfico semanal", () => {
         // Antes do `min-w-0`: 52px no pior caso (320/Confortável). Depois: 3.
         // O teto aqui é o defeito residual conhecido, não uma tolerância
         // escolhida para passar — se voltar a 52, isto fica vermelho.
-        expect(card.scrollWidth - card.clientWidth).toBeLessThanOrEqual(4);
+        // 4px no bruto = 3 no `overflowX`, que já desconta 1px (8.7).
+        expect(overflowX(card)).toBeLessThanOrEqual(3);
       });
     }
   }
@@ -89,7 +96,7 @@ describe("UI-07 — o gráfico semanal", () => {
     setDensity("comfortable");
     const { card } = mount(POINTS.slice(0, 6));
 
-    expect(card.scrollWidth - card.clientWidth).toBeLessThanOrEqual(0);
+    expect(overflowX(card)).toBeLessThanOrEqual(0);
   });
 });
 

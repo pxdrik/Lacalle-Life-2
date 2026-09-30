@@ -508,7 +508,18 @@ describe("UI-03 e UI-04 — a folha do RPE cabe e não se sobrepõe", () => {
         const dialog = slider.closest("dialog")!;
         const limit = document.documentElement.clientWidth;
 
-        expect(dialog.scrollWidth - dialog.clientWidth).toBeLessThanOrEqual(0);
+        // Rolagem de verdade, não `scrollWidth` contra `clientWidth` (8.7,
+        // 30/09/2026): com o `zoom` da densidade Padrão, a folha mede
+        // 339,13 pixels de CSS, e o WebKit arredonda `scrollWidth` para cima
+        // (340) e `clientWidth` para baixo (339) — um "transbordo" de 1px
+        // que não rola. O que importa para quem usa é se dá para arrastar a
+        // folha de lado; é isso que se pergunta.
+        for (const scroller of [dialog, ...dialog.querySelectorAll<HTMLElement>("*")]) {
+          const before = scroller.scrollLeft;
+          scroller.scrollLeft = 50;
+          expect(scroller.scrollLeft, "a folha rola na horizontal").toBe(before);
+          scroller.scrollLeft = before;
+        }
 
         for (const element of dialog.querySelectorAll("*")) {
           const box = element.getBoundingClientRect();
@@ -609,6 +620,16 @@ describe("FINAL-RPE-01 — o ponteiro fica fora da leitura", () => {
     };
   }
 
+  /**
+   * Quanto do ponteiro pode cair na caixa do texto sem ser defeito (8.7,
+   * 30/09/2026). A caixa de `getBoundingClientRect` num `<text>` inclui o
+   * espaço vazio de ascendente e descendente, e a do WebKit é 0,4px mais alta
+   * que a do Chromium: em RPE 8,5 o ponteiro entrava 1,2% nessa folga sem
+   * encostar no número (conferido em print). Os defeitos reais que este teste
+   * pegou mediam de 18% a 43%; 2% continua pegando todos eles.
+   */
+  const PAD_TOLERANCE = 0.02;
+
   for (const step of RPE_SCALE) {
     it(`RPE ${step.label} não toca número nem descrição`, async () => {
       const { slider } = await openPicker(step.value);
@@ -625,7 +646,7 @@ describe("FINAL-RPE-01 — o ponteiro fica fora da leitura", () => {
         expect(
           fractionInside(a, b, text.getBoundingClientRect()),
           `o ponteiro cruza "${text.textContent ?? ""}" em RPE ${step.label}`,
-        ).toBe(0);
+        ).toBeLessThanOrEqual(PAD_TOLERANCE);
       }
     });
   }

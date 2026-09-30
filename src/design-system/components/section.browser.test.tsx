@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { DENSITIES, PHONE_WIDTHS, setDensity, setViewport } from "@/test/geometry";
+import {
+  DENSITIES,
+  PHONE_WIDTHS,
+  overflowX,
+  setDensity,
+  setViewport,
+} from "@/test/geometry";
 
 import { Section } from "./section";
 
@@ -93,11 +99,9 @@ describe("FINAL-UI-01 — hierarquia dos tamanhos", () => {
 
         const section = document.querySelector("section")!;
 
-        expect(section.scrollWidth - section.clientWidth).toBeLessThanOrEqual(0);
-        expect(
-          document.documentElement.scrollWidth -
-            document.documentElement.clientWidth,
-        ).toBeLessThanOrEqual(0);
+        // `overflowX` desconta 1px de arredondamento do WebKit com `zoom` (8.7).
+        expect(overflowX(section)).toBeLessThanOrEqual(0);
+        expect(overflowX(document.documentElement)).toBeLessThanOrEqual(0);
       });
     }
   }
