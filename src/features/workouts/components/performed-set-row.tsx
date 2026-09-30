@@ -9,7 +9,7 @@ import { Dialog } from "@/design-system/components/dialog";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import type { PerformedSetChanges } from "../services/edit-session";
-import type { PerformedSet } from "../types/session";
+import { SET_KIND_LETTER, type PerformedSet, type SetKind } from "../types/session";
 import { DurationField } from "./duration-field";
 import { RpeSelect } from "./rpe-select";
 import { WeightField } from "./weight-field";
@@ -40,7 +40,27 @@ interface Props {
   readonly onChange: (changes: PerformedSetChanges) => void;
   readonly onToggleComplete: () => void;
   readonly onRemove: () => void;
+  /** Roadmap 7.6. `null` volta a série para normal. */
+  readonly onKindChange: (kind: SetKind | null) => void;
 }
+
+/** As opções da folha, na ordem do protótipo aprovado (29/09/2026). */
+const KINDS: readonly {
+  readonly kind: SetKind | null;
+  readonly label: string;
+  readonly hint: string;
+}[] = [
+  { kind: null, label: "Normal", hint: "Conta no volume." },
+  { kind: "warmup", label: "Aquecimento", hint: "Fica fora do volume e dos recordes." },
+  { kind: "drop", label: "Drop set", hint: "Sem pausa depois." },
+  { kind: "failure", label: "Até a falha", hint: "Conta no volume." },
+];
+
+const KIND_COLOR: Readonly<Record<SetKind, string>> = {
+  warmup: "text-warning-text",
+  drop: "text-protein-text",
+  failure: "text-danger-text",
+};
 
 /**
  * O campo não declara mais largura: a coluna da grade declara (`set-grid`,
@@ -66,9 +86,12 @@ export function PerformedSetRow({
   onChange,
   onToggleComplete,
   onRemove,
+  onKindChange,
 }: Props) {
   const row = useRef<HTMLLIElement>(null);
   const number = index + 1;
+  const kind = set.kind ?? null;
+  const kindLabel = KINDS.find((option) => option.kind === kind)?.label ?? "";
   // A linha da meta embaixo dos campos só existe quando a série tem meta
   // (roadmap 8.15, 29/09/2026). Vazia, ela ainda ocupava 20px embaixo dos
   // campos, e numa rotina sem meta o conjunto ficava alto dentro da faixa.
@@ -152,10 +175,18 @@ export function PerformedSetRow({
               onClick={() => {
                 setShowingActions(true);
               }}
-              aria-label={`Ações da série ${String(number)} de ${exerciseName}`}
-              className="flex h-11 w-full items-center justify-center touch-44 self-start rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              aria-label={
+                kind === null
+                  ? `Ações da série ${String(number)} de ${exerciseName}`
+                  : `Ações da série ${String(number)} (${kindLabel}) de ${exerciseName}`
+              }
+              className={cn(
+                "flex h-11 w-full items-center justify-center touch-44 self-start rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink",
+                // A letra no lugar do número (roadmap 7.6): A, D, F.
+                kind !== null && cn("font-bold", KIND_COLOR[kind]),
+              )}
             >
-              {number}
+              {kind === null ? number : SET_KIND_LETTER[kind]}
             </button>
 
             {/* What was planned, sitting under the field it refers to — a target you
@@ -318,6 +349,32 @@ export function PerformedSetRow({
         }}
         placement="sheet-bottom"
       >
+        <p className="px-3 pb-1 text-xs uppercase tracking-wide text-ink-subtle">Tipo</p>
+        {KINDS.map((option) => {
+          const selected = option.kind === kind;
+          return (
+            <button
+              key={option.label}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => {
+                setShowingActions(false);
+                if (!selected) onKindChange(option.kind);
+              }}
+              className={cn(
+                "flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-1.5 text-left text-sm transition-colors duration-150 ease-out",
+                selected ? "bg-accent-surface text-accent-text" : "text-ink hover:bg-muted",
+              )}
+            >
+              <Check aria-hidden className={cn("size-4 shrink-0", !selected && "invisible")} />
+              <span className="min-w-0">
+                <span className={cn("block", selected && "font-medium")}>{option.label}</span>
+                <span className="block text-xs text-ink-subtle">{option.hint}</span>
+              </span>
+            </button>
+          );
+        })}
+        <div className="my-2 border-t border-line" />
         <button
           type="button"
           onClick={() => {

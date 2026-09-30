@@ -32,6 +32,7 @@ function mount(value: PerformedSet, isNext = true, isCardio = false) {
         onChange={onChange}
         onToggleComplete={vi.fn()}
         onRemove={vi.fn()}
+        onKindChange={vi.fn()}
       />
     </ul>,
   );
@@ -138,6 +139,7 @@ describe("Delete/Collapse — removing a set shrinks before it goes", () => {
           onChange={vi.fn()}
           onToggleComplete={vi.fn()}
           onRemove={onRemove}
+          onKindChange={vi.fn()}
         />
       </ul>,
     );
@@ -287,6 +289,7 @@ describe("8.5 — a última vez como dica no campo vazio", () => {
           onChange={vi.fn()}
           onToggleComplete={vi.fn()}
           onRemove={vi.fn()}
+          onKindChange={vi.fn()}
         />
       </ul>,
     );

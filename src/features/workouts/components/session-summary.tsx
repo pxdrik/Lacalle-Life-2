@@ -16,7 +16,7 @@ import {
   sessionProgress,
   sessionVolumeKg,
 } from "../services/session-stats";
-import type { Session } from "../types/session";
+import { SET_KIND_LETTER, type Session } from "../types/session";
 import { Card } from "@/design-system/components/card";
 
 interface Props {
@@ -119,7 +119,10 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                     key={set.id}
                     className="flex items-baseline gap-3 text-sm tabular-nums"
                   >
-                    <span className="w-5 text-ink-subtle">{index + 1}</span>
+                    {/* A letra do tipo no lugar do número (roadmap 7.6). */}
+                    <span className="w-5 text-ink-subtle">
+                      {set.kind === undefined ? index + 1 : SET_KIND_LETTER[set.kind]}
+                    </span>
 
                     {set.isCompleted ? (
                       <span className="text-ink">

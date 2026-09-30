@@ -37,6 +37,7 @@ import {
   moveSessionExercise,
   removePerformedSet,
   replaceSessionExercise,
+  setPerformedSetKind,
   setSessionExerciseNotes,
   setSessionStartedAt,
   uncompleteSet,
@@ -167,6 +168,11 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
     restSeconds: number | null,
   ) {
     apply((current) => completeSet(current, exerciseId, setId));
+    // Drop set emenda na próxima série sem pausa (roadmap 7.6).
+    const kind = session.exercises
+      .find((exercise) => exercise.id === exerciseId)
+      ?.sets.find((set) => set.id === setId)?.kind;
+    if (kind === "drop") return;
     if (restSeconds !== null && restSeconds > 0) timer.start(restSeconds);
   }
 
@@ -408,7 +414,13 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
                   return;
                 }
 
-                if (set !== undefined && set.weightKg !== null && set.reps !== null) {
+                // Aquecimento não é recorde (roadmap 7.6).
+                if (
+                  set !== undefined &&
+                  set.kind !== "warmup" &&
+                  set.weightKg !== null &&
+                  set.reps !== null
+                ) {
                   announceIfRecord(
                     exercise.exerciseId,
                     exercise.name,
@@ -422,6 +434,11 @@ export function SessionRunner({ sessionId }: { readonly sessionId: string }) {
               onRemoveSet={(setId) => {
                 apply((current) =>
                   removePerformedSet(current, exercise.id, setId),
+                );
+              }}
+              onSetKindChange={(setId, kind) => {
+                apply((current) =>
+                  setPerformedSetKind(current, exercise.id, setId, kind),
                 );
               }}
               onAddSet={() => {

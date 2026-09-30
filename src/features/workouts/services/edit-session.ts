@@ -1,7 +1,7 @@
 import { shiftById } from "@/core/domain/collection";
 import { createEntityId, revise, type EntityId } from "@/core/domain/entity";
 
-import type { PerformedSet, Session, SessionExercise } from "../types/session";
+import type { PerformedSet, Session, SessionExercise, SetKind } from "../types/session";
 
 /**
  * Every edit is a pure function from one session to the next.
@@ -34,6 +34,22 @@ export function uncompleteSet(
     ...set,
     isCompleted: false,
   }));
+}
+
+/**
+ * Muda o tipo da série (roadmap 7.6). `null` é normal, e tira o campo em vez
+ * de gravar um valor: ver `SetKind`.
+ */
+export function setPerformedSetKind(
+  session: Session,
+  exerciseId: EntityId,
+  setId: EntityId,
+  kind: SetKind | null,
+): Session {
+  return mapSet(session, exerciseId, setId, (set) => {
+    const { kind: _previous, ...rest } = set;
+    return kind === null ? rest : { ...rest, kind };
+  });
 }
 
 export type PerformedSetChanges = Partial<

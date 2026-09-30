@@ -1,6 +1,6 @@
 import { dayKey } from "@/core/format/day";
 
-import type { PerformedSet, Session } from "../types/session";
+import { isWarmup, type PerformedSet, type Session } from "../types/session";
 
 export interface SessionProgress {
   readonly completed: number;
@@ -52,7 +52,8 @@ export function sessionVolumeKg(session: Session): SessionVolume {
 
   for (const exercise of session.exercises) {
     for (const set of exercise.sets) {
-      if (!set.isCompleted) continue;
+      // Aquecimento fica fora do volume (roadmap 7.6, decisão do Pedro).
+      if (!set.isCompleted || isWarmup(set)) continue;
 
       // Peso presente, repetições ausentes — ver o comentário em
       // `SessionVolume.excludedSets`. Contado antes da checagem geral de

@@ -506,6 +506,8 @@ const performedSetSchema = z
       .optional(),
     isCompleted: z.boolean(),
     planned: plannedTargetSchema.nullable(),
+    // Roadmap 7.6: ausente é série normal.
+    kind: z.enum(["warmup", "drop", "failure"]).optional(),
   })
   .strict();
 

@@ -1,7 +1,7 @@
 import type { EntityId } from "@/core/domain/entity";
 
 import { sessionDurationMs } from "./session-stats";
-import type { PerformedSet, Session, SessionExercise } from "../types/session";
+import { isWarmup, type PerformedSet, type Session, type SessionExercise } from "../types/session";
 
 /**
  * Reading the past.
@@ -16,6 +16,9 @@ import type { PerformedSet, Session, SessionExercise } from "../types/session";
  */
 
 const isDone = (set: PerformedSet) => set.isCompleted;
+
+/** Concluída e de trabalho: é o que conta para volume e recordes (7.6). */
+const isWork = (set: PerformedSet) => set.isCompleted && !isWarmup(set);
 
 /** Only finished workouts count as history. One in progress is not a fact yet. */
 export function finishedSessions(
@@ -115,7 +118,7 @@ export function exerciseHistory(
       performedAt: session.startedAt,
       sessionId: session.id,
       sets,
-      topSet: topSetOf(sets),
+      topSet: topSetOf(sets.filter(isWork)),
     });
   }
   return history;
@@ -180,7 +183,7 @@ export function personalRecords(
   for (const session of finishedSessions(sessions)) {
     for (const exercise of session.exercises) {
       for (const set of exercise.sets) {
-        if (!isDone(set)) continue;
+        if (!isWork(set)) continue;
         if (set.weightKg === null || set.reps === null) continue;
         if (set.weightKg <= 0 || set.reps <= 0) continue;
 
@@ -252,13 +255,13 @@ export function startOfMonth(timestamp: number): number {
 }
 
 function setVolume(set: PerformedSet): number {
-  if (!isDone(set)) return 0;
+  if (!isWork(set)) return 0;
   if (set.reps === null || set.weightKg === null) return 0;
   return set.reps * set.weightKg;
 }
 
 function countSets(exercise: SessionExercise): number {
-  return exercise.sets.filter(isDone).length;
+  return exercise.sets.filter(isWork).length;
 }
 
 /**

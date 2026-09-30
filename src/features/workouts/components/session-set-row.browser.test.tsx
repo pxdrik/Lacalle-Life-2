@@ -108,6 +108,7 @@ function renderCard(
         onSetChange={vi.fn()}
         onToggleComplete={vi.fn()}
         onRemoveSet={vi.fn()}
+        onSetKindChange={vi.fn()}
         onAddSet={vi.fn()}
         onNotesChange={vi.fn()}
         onSwap={vi.fn()}

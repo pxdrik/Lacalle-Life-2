@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp, Plus, Repeat } from "lucide-react";
 import type { PerformedSetChanges } from "../services/edit-session";
 import type { LastPerformance } from "../services/history";
 import type { Exercise } from "../types/exercise";
-import type { SessionExercise } from "../types/session";
+import type { SessionExercise, SetKind } from "../types/session";
 import { ExerciseIdentity } from "./exercise-identity";
 import { PerformedSetRow } from "./performed-set-row";
 import { Card } from "@/design-system/components/card";
@@ -21,6 +21,8 @@ interface Props {
   readonly onSetChange: (setId: string, changes: PerformedSetChanges) => void;
   readonly onToggleComplete: (setId: string) => void;
   readonly onRemoveSet: (setId: string) => void;
+  /** Tipo da série, pela folha de ações (roadmap 7.6). `null` é normal. */
+  readonly onSetKindChange: (setId: string, kind: SetKind | null) => void;
   readonly onAddSet: () => void;
   readonly onNotesChange: (notes: string) => void;
   /**
@@ -50,6 +52,7 @@ export function SessionExerciseCard({
   onSetChange,
   onToggleComplete,
   onRemoveSet,
+  onSetKindChange,
   onAddSet,
   onNotesChange,
   onSwap,
@@ -221,6 +224,9 @@ export function SessionExerciseCard({
               }}
               onRemove={() => {
                 onRemoveSet(set.id);
+              }}
+              onKindChange={(kind) => {
+                onSetKindChange(set.id, kind);
               }}
             />
           ))}

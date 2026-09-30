@@ -15,6 +15,29 @@ export interface PlannedTarget {
   readonly durationSeconds: number | null;
 }
 
+/**
+ * O tipo de uma série fora do comum (roadmap 7.6, 30/09/2026). Normal é a
+ * ausência do campo, não um valor: série de antes disso, e toda série normal,
+ * continua no formato que qualquer versão do app já sabe ler.
+ *
+ * - `warmup`: aquecimento. Fica fora do volume e dos recordes (Pedro).
+ * - `drop`: drop set. Não dispara a pausa depois de concluída.
+ * - `failure`: até a falha. Só rótulo; conta como qualquer outra.
+ */
+export type SetKind = "warmup" | "drop" | "failure";
+
+/** A letra que substitui o número da série: A, D, F. */
+export const SET_KIND_LETTER: Readonly<Record<SetKind, string>> = {
+  warmup: "A",
+  drop: "D",
+  failure: "F",
+};
+
+/** Aquecimento não é trabalho: fica fora do volume e dos recordes. */
+export function isWarmup(set: PerformedSet): boolean {
+  return set.kind === "warmup";
+}
+
 export interface PerformedSet {
   readonly id: EntityId;
   readonly reps: number | null;
@@ -26,6 +49,8 @@ export interface PerformedSet {
   readonly isCompleted: boolean;
   /** `null` for a set added mid-workout, which nothing planned. */
   readonly planned: PlannedTarget | null;
+  /** Ausente é série normal — ver `SetKind`. */
+  readonly kind?: SetKind | undefined;
 }
 
 export interface SessionExercise {

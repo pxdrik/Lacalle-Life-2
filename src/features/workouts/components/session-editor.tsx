@@ -15,6 +15,7 @@ import {
   removePerformedSet,
   renameSession,
   setSessionDuration,
+  setPerformedSetKind,
   setSessionExerciseNotes,
   uncompleteSet,
   updatePerformedSet,
@@ -145,6 +146,11 @@ export function SessionEditor({ session, apply, onDone }: Props) {
             onRemoveSet={(setId) => {
               apply((current) =>
                 removePerformedSet(current, exercise.id, setId),
+              );
+            }}
+            onSetKindChange={(setId, kind) => {
+              apply((current) =>
+                setPerformedSetKind(current, exercise.id, setId, kind),
               );
             }}
             onAddSet={() => {

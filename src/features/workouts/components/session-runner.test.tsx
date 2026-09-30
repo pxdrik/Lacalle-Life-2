@@ -511,3 +511,71 @@ describe("personal record toast", () => {
     expect(screen.queryByText(/Recorde batido/)).not.toBeInTheDocument();
   });
 });
+
+/** Roadmap 7.6 (30/09/2026): tipo de série, pela folha de ações do número. */
+describe("tipo de série", () => {
+  function withKind(kind: "warmup" | "drop" | undefined, restSeconds: number | null): Session {
+    const base = sessionWith(0, 2);
+    const [exercise] = base.exercises;
+    return {
+      ...base,
+      exercises: [
+        {
+          ...exercise!,
+          restSeconds,
+          sets: exercise!.sets.map((set, index) =>
+            index === 0 && kind !== undefined ? { ...set, kind } : set,
+          ),
+        },
+      ],
+    };
+  }
+
+  it("tocar no número e escolher Aquecimento grava o tipo e troca o número pela letra", async () => {
+    const sessions = mount(sessionWith(0, 1));
+    await waitForRunner();
+
+    await userEvent.click(screen.getByRole("button", { name: "Ações da série 1 de Supino reto" }));
+    await userEvent.click(await screen.findByRole("button", { name: /Aquecimento/ }));
+
+    const trigger = await screen.findByRole("button", {
+      name: "Ações da série 1 (Aquecimento) de Supino reto",
+    });
+    expect(trigger).toHaveTextContent("A");
+    await waitFor(async () => {
+      expect((await sessions.getById("s1"))?.exercises[0]?.sets[0]?.kind).toBe("warmup");
+    });
+
+    await userEvent.click(trigger);
+    await userEvent.click(await screen.findByRole("button", { name: /Normal/ }));
+    await waitFor(async () => {
+      expect((await sessions.getById("s1"))?.exercises[0]?.sets[0]).not.toHaveProperty("kind");
+    });
+  });
+
+  it("drop set não dispara a pausa; série normal dispara", async () => {
+    mount(withKind("drop", 90));
+    await waitForRunner();
+
+    await userEvent.click(screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }));
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Desmarcar série 1 de Supino reto" })).toBeInTheDocument();
+    });
+    expect(screen.queryByRole("button", { name: "Encerrar descanso" })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Concluir série 2 de Supino reto" }));
+    expect(await screen.findByRole("button", { name: "Encerrar descanso" })).toBeInTheDocument();
+  });
+
+  it("aquecimento acima do recorde não anuncia recorde", async () => {
+    const sessions = mountWithHistory(withKind("warmup", null), finishedSessionWithSet(50, 5));
+    await waitForRunner();
+
+    await userEvent.click(screen.getByRole("button", { name: "Concluir série 1 de Supino reto" }));
+
+    await waitFor(async () => {
+      expect((await sessions.getById("s1"))?.exercises[0]?.sets[0]).toMatchObject({ isCompleted: true });
+    });
+    expect(screen.queryByText(/Recorde batido/)).not.toBeInTheDocument();
+  });
+});
