@@ -69,6 +69,15 @@ export function PerformedSetRow({
 }: Props) {
   const row = useRef<HTMLLIElement>(null);
   const number = index + 1;
+  // A linha da meta embaixo dos campos só existe quando a série tem meta
+  // (roadmap 8.15, 29/09/2026). Vazia, ela ainda ocupava 20px embaixo dos
+  // campos, e numa rotina sem meta o conjunto ficava alto dentro da faixa.
+  const hasPlan =
+    set.planned !== null &&
+    (set.planned.weightKg !== null ||
+      set.planned.reps !== null ||
+      set.planned.rpe !== null ||
+      set.planned.durationSeconds !== null);
 
   // How many times *this* button has been pressed in this mount. Only used to
   // key the check so the confirmation replays per tap — never read as data.
@@ -164,7 +173,7 @@ export function PerformedSetRow({
                     set.isCompleted ? "border-line" : "border-line-strong",
                   )}
                 />
-                <Planned
+                <Planned show={hasPlan}
                   value={
                     set.planned?.durationSeconds === undefined ||
                     set.planned.durationSeconds === null
@@ -194,7 +203,7 @@ export function PerformedSetRow({
                       set.isCompleted ? "border-line" : "border-line-strong",
                     )}
                   />
-                  <Planned value={set.planned?.weightKg ?? null} suffix="kg" />
+                  <Planned show={hasPlan} value={set.planned?.weightKg ?? null} suffix="kg" />
                 </div>
 
                 <div>
@@ -212,7 +221,7 @@ export function PerformedSetRow({
                       set.isCompleted ? "border-line" : "border-line-strong",
                     )}
                   />
-                  <Planned value={set.planned?.reps ?? null} suffix="reps" />
+                  <Planned show={hasPlan} value={set.planned?.reps ?? null} suffix="reps" />
                 </div>
               </>
             )}
@@ -236,7 +245,7 @@ export function PerformedSetRow({
                   }}
                   className="h-11 w-full"
                 />
-                <Planned value={set.planned?.rpe ?? null} suffix="RPE" />
+                <Planned show={hasPlan} value={set.planned?.rpe ?? null} suffix="RPE" />
               </div>
             )}
 
@@ -326,12 +335,16 @@ export function PerformedSetRow({
 }
 
 function Planned({
+  show,
   value,
   suffix,
 }: {
+  readonly show: boolean;
   readonly value: number | null;
   readonly suffix: string;
 }) {
+  if (!show) return null;
+
   return (
     <p className="mt-1 h-4 text-center text-xs tabular-nums text-ink-subtle">
       {value === null ? "" : `${formatDecimal(value)} ${suffix}`}

@@ -531,3 +531,40 @@ describe("a linha da última vez mostra só a data", () => {
     expect(line?.textContent).not.toContain("×");
   });
 });
+
+/**
+ * Roadmap 8.15 (29/09/2026): numa rotina sem meta, os campos ficavam altos
+ * dentro da faixa da série (a que ganha a borda verde). A linha da meta
+ * embaixo deles ocupava 20px mesmo vazia.
+ */
+describe("8.15 — sem meta, os campos ficam no meio da faixa da série", () => {
+  const NO_PLAN: SessionExercise = {
+    ...EXERCISE,
+    sets: EXERCISE.sets.map((s) => ({ ...s, planned: null })),
+  };
+  const centerY = (element: Element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.top + rect.height / 2;
+  };
+
+  for (const width of PHONE_WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px, densidade ${density}`, async () => {
+        await setViewport(width);
+        setDensity(density);
+        const { rows } = renderCard(NO_PLAN);
+        for (const row of rows) {
+          const band = row.closest(".group");
+          const weight = row.querySelector('input[aria-label^="Peso da série"]');
+          if (band === null || weight === null) throw new Error("linha incompleta");
+          expect(Math.abs(centerY(weight) - centerY(band))).toBeLessThanOrEqual(1);
+        }
+      });
+    }
+  }
+
+  it("com meta, a linha da meta continua embaixo dos campos", () => {
+    const { rows } = renderCard(EXERCISE);
+    expect(rows[0]!.textContent).toContain("52,6 kg");
+  });
+});
