@@ -278,60 +278,53 @@ const PICKER_PATH = arcPath(PICKER_CX, PICKER_CY, PICKER_R);
 const PICKER_ARC_LENGTH = Math.PI * PICKER_R;
 
 /**
- * Até onde, para fora do arco, um toque ainda conta como "no mostrador".
+ * A faixa que aceita o toque: **só em volta da linha do arco** (roadmap 8.3,
+ * pedido do Pedro em 29/09/2026), de 35 unidades para dentro a 22 para fora
+ * — cerca de 57px na tela, folgado para um dedo. Antes valia a metade de cima
+ * do disco inteiro, e tocar no número ou no ponteiro também escolhia.
  *
- * O traço do arco tem 14 de largura, então esta folga é generosa de
- * propósito: o alvo tem que ser fácil. O que ela exclui são os cantos
- * superiores da caixa do SVG, que estão visualmente desligados do
- * instrumento — tocar lá não deve escolher RPE nenhum só porque o ângulo
- * daquele ponto é calculável.
+ * Desenhada como um arco invisível de traço grosso, por cima de tudo, para
+ * que **o navegador** decida se o dedo acertou, com a mesma geometria que usa
+ * para pintar. A versão anterior decidia com uma conta à mão (centro tirado
+ * de `getBoundingClientRect`), e no iPhone o toque na linha não registrava,
+ * embora a conta fechasse no Chromium e no WebKit do Playwright.
+ *
+ * Termina na horizontal do centro (`butt`), então continua valendo a correção
+ * de C1: nada abaixo do centro começa uma escolha.
  */
-const PICKER_R_OUTER = PICKER_R + 22;
+const PICKER_HIT_INNER = PICKER_R - 35;
+const PICKER_HIT_OUTER = PICKER_R + 22;
+const PICKER_HIT_PATH = arcPath(
+  PICKER_CX,
+  PICKER_CY,
+  (PICKER_HIT_INNER + PICKER_HIT_OUTER) / 2,
+);
+const PICKER_HIT_WIDTH = PICKER_HIT_OUTER - PICKER_HIT_INNER;
 
 /**
- * O que o ponteiro está apontando, em coordenadas de tela.
+ * O ângulo que um ponto de tela faz com o centro do mostrador. 0 aponta para
+ * cima, negativo para a esquerda.
  *
- * **Sem `svg.viewBox.baseVal`.** A versão anterior lia o viewBox do elemento
- * para converter cliente → unidades do SVG, e o jsdom não implementa essa
- * propriedade — foi por isso que o teste antigo precisava falsificar
- * `getBoundingClientRect` **e** `viewBox`, e a partir dali ele media o
- * próprio fixture. Aqui a escala sai do retângulo e das constantes do
- * desenho, que é a mesma conta, funciona em qualquer tamanho, e é medível
- * num navegador de verdade.
+ * A conversão tela → unidades do desenho é a do próprio SVG
+ * (`getScreenCTM`), que já inclui escala, `viewBox` e o `zoom` da densidade
+ * do jeito que o navegador em execução os aplica. `null` onde não há layout
+ * (jsdom).
  *
- * `xMidYMid meet` (o padrão) escala uniformemente e centra o conteúdo na
- * caixa, então o centro do mostrador é derivável mesmo quando sobra faixa
- * preta de um dos lados.
- *
- * `onDial` é a correção de C1. O mostrador é um **semicírculo**: só o
- * semiplano acima do centro tem ângulo com significado. Abaixo dele,
- * `atan2` devolve módulo maior que 90, e a versão anterior **truncava** esse
- * resultado em ±90 — o que dobrava a metade de baixo inteira sobre as duas
- * pontas da escala, dividida pela vertical do meio. Medido: 14,3% do
- * retângulo clicável só produzia 6 ou 10, e `(140, 127)` dava 8 enquanto
- * `(140, 129)` dava 10. Dois pixels entre o meio da escala e o máximo.
+ * Abaixo do centro `atan2` devolve módulo maior que 90, e `indexForAngle`
+ * prende no extremo: é o que faz arrastar além da ponta parar na ponta.
  */
-function readPointer(
+function angleAt(
   svg: SVGSVGElement,
   clientX: number,
   clientY: number,
-): { readonly angle: number; readonly onDial: boolean } | null {
-  const rect = svg.getBoundingClientRect();
-  if (rect.width === 0 || rect.height === 0) return null;
+): number | null {
+  const ctm = typeof svg.getScreenCTM === "function" ? svg.getScreenCTM() : null;
+  if (ctm === null) return null;
 
-  const scale = Math.min(rect.width / VIEWBOX_W, rect.height / VIEWBOX_H);
-  const cx =
-    rect.left + (rect.width - VIEWBOX_W * scale) / 2 + PICKER_CX * scale;
-  const cy =
-    rect.top + (rect.height - VIEWBOX_H * scale) / 2 + PICKER_CY * scale;
-
-  const dx = clientX - cx;
-  const dy = clientY - cy;
-
-  return {
-    angle: Math.atan2(dx, -dy) * (180 / Math.PI),
-    onDial: dy <= 0 && Math.hypot(dx, dy) <= PICKER_R_OUTER * scale,
-  };
+  const point = new DOMPoint(clientX, clientY).matrixTransform(ctm.inverse());
+  return (
+    Math.atan2(point.x - PICKER_CX, -(point.y - PICKER_CY)) * (180 / Math.PI)
+  );
 }
 
 function RpeDialPicker({
@@ -352,10 +345,10 @@ function RpeDialPicker({
     const svg = svgRef.current;
     if (svg === null) return;
 
-    const pointer = readPointer(svg, clientX, clientY);
-    if (pointer === null) return;
+    const pointerAngle = angleAt(svg, clientX, clientY);
+    if (pointerAngle === null) return;
 
-    onChange(RPE_SCALE[indexForAngle(pointer.angle)]!.value);
+    onChange(RPE_SCALE[indexForAngle(pointerAngle)]!.value);
   }
 
   return (
@@ -378,15 +371,21 @@ function RpeDialPicker({
         const svg = svgRef.current;
         if (svg === null) return;
 
-        // Um toque fora do mostrador não escolhe nada. É o que impede o bug
-        // relatado de voltar: antes, qualquer ponto do retângulo escolhia um
-        // valor, e a faixa de baixo escolhia sempre um dos extremos.
-        const pointer = readPointer(svg, event.clientX, event.clientY);
-        if (pointer === null || !pointer.onDial) return;
+        // Só um toque na faixa da linha começa a escolha, e quem decide se o
+        // dedo caiu nela é o navegador (ver `PICKER_HIT_PATH`). Número,
+        // ponteiro, centro e cantos não escolhem nada.
+        if (
+          !(event.target instanceof Element) ||
+          !event.target.hasAttribute("data-dial-hit")
+        ) {
+          return;
+        }
+        const pointerAngle = angleAt(svg, event.clientX, event.clientY);
+        if (pointerAngle === null) return;
 
         draggingRef.current = true;
         event.currentTarget.setPointerCapture(event.pointerId);
-        onChange(RPE_SCALE[indexForAngle(pointer.angle)]!.value);
+        onChange(RPE_SCALE[indexForAngle(pointerAngle)]!.value);
       }}
       onPointerMove={(event) => {
         // Só continua um arrasto que começou sobre o mostrador. Daí em
@@ -518,6 +517,17 @@ function RpeDialPicker({
           {describeRpe(value)}
         </text>
       )}
+      {/* Por último, para ficar por cima de marcas e ponteiro: é o alvo do
+          toque, não um desenho. `pointerEvents="stroke"` faz o traço
+          transparente receber o toque mesmo sem cor. */}
+      <path
+        data-dial-hit=""
+        d={PICKER_HIT_PATH}
+        fill="none"
+        stroke="transparent"
+        strokeWidth={PICKER_HIT_WIDTH}
+        pointerEvents="stroke"
+      />
     </svg>
   );
 }

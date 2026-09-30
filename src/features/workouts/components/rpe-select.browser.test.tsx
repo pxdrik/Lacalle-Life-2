@@ -46,8 +46,21 @@ async function openPicker(value: number | null = null) {
   );
   screen.getByRole("button", { name: LABEL }).click();
   const slider = await screen.findByRole("slider", { name: LABEL });
+  // O toque agora vai para o elemento sob o ponto (`press`), e fora da tela
+  // não há elemento nenhum. A folha sobe animada e, logo depois de abrir,
+  // ainda está abaixo da borda da janela: espera a subida terminar, como
+  // quem usa espera.
+  await settle(slider);
 
   return { onChange, slider };
+}
+
+async function settle(slider: Element) {
+  const dialog = slider.closest("dialog");
+  if (dialog === null) return;
+  await Promise.all(
+    dialog.getAnimations({ subtree: true }).map((animation) => animation.finished),
+  );
 }
 
 /**
@@ -88,8 +101,15 @@ function pointAtAngle(
   );
 }
 
+/**
+ * Dispara o toque **no elemento que o navegador põe sob o ponto**, como num
+ * toque de verdade, e não no SVG inteiro. Desde o 8.3 (29/09/2026) é o
+ * navegador quem decide se o dedo acertou a faixa da linha; disparar sempre
+ * no `slider` pularia exatamente essa decisão.
+ */
 function press(slider: Element, point: { clientX: number; clientY: number }) {
-  slider.dispatchEvent(
+  const target = document.elementFromPoint(point.clientX, point.clientY);
+  (target !== null && slider.contains(target) ? target : slider).dispatchEvent(
     new PointerEvent("pointerdown", {
       bubbles: true,
       pointerId: 1,
@@ -110,12 +130,25 @@ function angleForIndex(index: number): number {
   return (index / LAST - 0.5) * 180;
 }
 
+/**
+ * Onde o dedo toca para escolher o degrau. Igual à marca, menos nas pontas
+ * (6 e 10): metade do degrau delas fica abaixo do centro, fora da faixa de
+ * toque (C1), e a marca cai exatamente na borda da faixa. O toque vai no meio
+ * da metade que o dedo alcança.
+ */
+function tapAngle(index: number): number {
+  const quarter = 180 / LAST / 4;
+  if (index === 0) return angleForIndex(0) + quarter;
+  if (index === LAST) return angleForIndex(LAST) - quarter;
+  return angleForIndex(index);
+}
+
 describe("cada um dos oito valores da escala pode ser escolhido", () => {
   for (const [index, step] of RPE_SCALE.entries()) {
     it(`RPE ${step.label}`, async () => {
       const { onChange, slider } = await openPicker();
 
-      press(slider, pointAtAngle(slider, angleForIndex(index)));
+      press(slider, pointAtAngle(slider, tapAngle(index)));
 
       expect(onChange).toHaveBeenCalledWith(step.value);
     });
@@ -166,15 +199,12 @@ describe("C2 — as bandas do meio têm a mesma largura", () => {
 });
 
 describe("C1 — a região abaixo do centro não escolhe mais nada", () => {
-  it("um pixel acima do centro escolhe o meio da escala; um abaixo não escolhe nada", async () => {
+  it("o centro não escolhe nada, nem um pixel acima nem um abaixo", async () => {
     const { onChange, slider } = await openPicker();
 
-    // O par exato que o código antigo transformava em 8 contra 10.
+    // O par exato que o código antigo transformava em 8 contra 10. Desde o
+    // 8.3 (29/09/2026) só a faixa da linha escolhe, e o centro fica fora dela.
     press(slider, toClient(slider, CENTRE.x, CENTRE.y - 1));
-    const above = onChange.mock.calls.at(-1)?.[0] as number | undefined;
-    expect(above).toBe(RPE_SCALE[Math.round(LAST / 2)]!.value);
-
-    onChange.mockClear();
     press(slider, toClient(slider, CENTRE.x, CENTRE.y + 1));
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -216,9 +246,9 @@ describe("a região válida do mostrador responde inteira", () => {
     const { onChange, slider } = await openPicker();
 
     const cases = [
-      { name: "esquerda", angle: -90, expected: RPE_SCALE[0]!.value },
+      { name: "esquerda", angle: tapAngle(0), expected: RPE_SCALE[0]!.value },
       { name: "cima", angle: 0, expected: RPE_SCALE[Math.round(LAST / 2)]!.value },
-      { name: "direita", angle: 90, expected: RPE_SCALE[LAST]!.value },
+      { name: "direita", angle: tapAngle(LAST), expected: RPE_SCALE[LAST]!.value },
     ];
 
     for (const testCase of cases) {
@@ -314,10 +344,11 @@ describe("o mapeamento não depende do tamanho do componente", () => {
       );
       screen.getByRole("button", { name: LABEL }).click();
       const slider = await screen.findByRole("slider", { name: LABEL });
+      await settle(slider);
 
       for (const [index] of RPE_SCALE.entries()) {
         onChange.mockClear();
-        press(slider, pointAtAngle(slider, angleForIndex(index)));
+        press(slider, pointAtAngle(slider, tapAngle(index)));
         expect(
           onChange.mock.calls.at(-1)?.[0],
           `largura ${String(width)}, índice ${String(index)}`,
@@ -624,4 +655,29 @@ describe("FINAL-RPE-01 — o ponteiro fica fora da leitura", () => {
       expect(box.bottom).toBeLessThanOrEqual(svg.bottom + 0.5);
     },
   );
+});
+
+/**
+ * Roadmap 8.3 (29/09/2026): só a linha do meio círculo aceita o toque.
+ *
+ * Relatado no iPhone: tocar no meio círculo não escolhia nada. O pedido do
+ * Pedro foi que a escolha funcione **pela linha**. O toque vai para o
+ * elemento sob o ponto (`press`), então é a faixa desenhada que decide, não
+ * uma conta à parte.
+ */
+describe("8.3 — só a linha do meio círculo escolhe", () => {
+  it("na linha escolhe; no meio do disco e além da borda, não", async () => {
+    const { onChange, slider } = await openPicker();
+
+    press(slider, pointAtAngle(slider, 0, 1));
+    expect(onChange.mock.calls.at(-1)?.[0], "em cima da linha").toBe(
+      RPE_SCALE[Math.round(LAST / 2)]!.value,
+    );
+
+    for (const [name, factor] of [["meio do disco", 0.4], ["além da borda", 1.3]] as const) {
+      onChange.mockClear();
+      press(slider, pointAtAngle(slider, 0, factor));
+      expect(onChange, name).not.toHaveBeenCalled();
+    }
+  });
 });
