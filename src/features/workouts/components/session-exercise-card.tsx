@@ -217,6 +217,7 @@ export function SessionExerciseCard({
               exerciseName={exercise.name}
               isNext={set.id === nextSetId}
               isCardio={isCardio}
+              last={lastTime?.sets[index]}
               onChange={(changes) => {
                 onSetChange(set.id, changes);
               }}

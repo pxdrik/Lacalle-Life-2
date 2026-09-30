@@ -14,6 +14,7 @@ import {
 } from "@/test/geometry";
 
 import type { Exercise } from "../types/exercise";
+import type { LastPerformance } from "../services/history";
 import type { SessionExercise } from "../types/session";
 import { SessionExerciseCard } from "./session-exercise-card";
 
@@ -92,6 +93,7 @@ const CARDIO_ENTRY = {
 function renderCard(
   exercise: SessionExercise = EXERCISE,
   catalogue: Exercise | undefined = undefined,
+  lastTime: LastPerformance | undefined = undefined,
 ) {
   const { container } = render(
     <main className="mx-auto w-full max-w-(--content-max) px-4 md:px-6 lg:px-12">
@@ -102,7 +104,7 @@ function renderCard(
         catalogue={catalogue}
         onOpenDetail={vi.fn()}
         nextSetId={null}
-        lastTime={undefined}
+        lastTime={lastTime}
         onSetChange={vi.fn()}
         onToggleComplete={vi.fn()}
         onRemoveSet={vi.fn()}
@@ -424,4 +426,45 @@ describe("8.1 — o nome do exercício aparece inteiro no celular", () => {
       });
     }
   }
+});
+
+/**
+ * Roadmap 8.5 (29/09/2026): cada linha recebe a **sua** série da última vez
+ * como dica, e a dica sai no tom claro do design system (`ink-subtle`), não
+ * no cinza padrão do navegador.
+ */
+describe("8.5 — a última vez aparece como dica na linha certa", () => {
+  const LAST: LastPerformance = {
+    performedAt: Date.UTC(2026, 8, 22),
+    sessionId: "old",
+    sets: [
+      { ...EXERCISE.sets[0]!, weightKg: 50, reps: 12, isCompleted: true },
+      { ...EXERCISE.sets[1]!, weightKg: 55, reps: 9, isCompleted: true },
+    ],
+  };
+  const EMPTY: SessionExercise = {
+    ...EXERCISE,
+    sets: EXERCISE.sets.map((s) => ({ ...s, weightKg: null, reps: null })),
+  };
+
+  it.each(["light", "dark"] as const)("%s", (theme) => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      const { container } = renderCard(EMPTY, undefined, LAST);
+      const weights = [...container.querySelectorAll<HTMLInputElement>('input[aria-label^="Peso da série"]')];
+      const reps = [...container.querySelectorAll<HTMLInputElement>('input[aria-label^="Repetições da série"]')];
+
+      expect(weights.map((i) => i.placeholder)).toEqual(["50", "55"]);
+      expect(reps.map((i) => i.placeholder)).toEqual(["12", "9"]);
+
+      const probe = document.createElement("span");
+      probe.className = "text-ink-subtle";
+      document.body.append(probe);
+      const subtle = getComputedStyle(probe).color;
+      probe.remove();
+      expect(getComputedStyle(weights[0]!, "::placeholder").color).toBe(subtle);
+    } finally {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  });
 });

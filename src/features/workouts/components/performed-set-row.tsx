@@ -31,6 +31,12 @@ interface Props {
   readonly isNext: boolean;
   /** Whether this exercise is measured by time rather than reps × weight. */
   readonly isCardio: boolean;
+  /**
+   * A mesma série (pela posição) na última vez que este exercício foi feito.
+   * Vira a dica dentro do campo vazio de peso e de repetições, em tom claro,
+   * como no Hevy (roadmap 8.5, 29/09/2026). Só dica: não preenche nada.
+   */
+  readonly last?: PerformedSet | undefined;
   readonly onChange: (changes: PerformedSetChanges) => void;
   readonly onToggleComplete: () => void;
   readonly onRemove: () => void;
@@ -48,7 +54,7 @@ interface Props {
  * conteúdo, e o contra-zoom agora é do contêiner, não do campo.
  */
 const FIELD =
-  "relative h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums transition-colors duration-150 ease-out";
+  "relative h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums placeholder:text-ink-subtle transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,
@@ -56,6 +62,7 @@ export function PerformedSetRow({
   exerciseName,
   isNext,
   isCardio,
+  last,
   onChange,
   onToggleComplete,
   onRemove,
@@ -177,6 +184,7 @@ export function PerformedSetRow({
                   <WeightField
                     value={set.weightKg}
                     label={`Peso da série ${String(number)} de ${exerciseName}`}
+                    placeholder={hint(last?.weightKg)}
                     onChange={(weightKg) => {
                       onChange({ weightKg });
                     }}
@@ -194,7 +202,7 @@ export function PerformedSetRow({
                     inputMode="numeric"
                     value={set.reps === null ? "" : String(set.reps)}
                     aria-label={`Repetições da série ${String(number)} de ${exerciseName}`}
-                    placeholder="—"
+                    placeholder={hint(last?.reps)}
                     onChange={(event) => {
                       onChange({ reps: toWholeNumber(event.target.value) });
                     }}
@@ -335,4 +343,11 @@ function toWholeNumber(input: string): number | null {
   if (digits === "") return null;
 
   return Math.min(Number(digits), 1000);
+}
+
+/** O valor da última vez como dica, com vírgula decimal; "—" se não houver. */
+function hint(value: number | null | undefined): string {
+  return value === null || value === undefined
+    ? "—"
+    : String(value).replace(".", ",");
 }

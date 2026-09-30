@@ -9,6 +9,8 @@ interface Props {
   readonly label: string;
   readonly onChange: (value: number | null) => void;
   readonly className?: string | undefined;
+  /** O que o campo vazio mostra. Padrão "—"; a sessão passa o peso da última vez. */
+  readonly placeholder?: string | undefined;
 }
 
 /**
@@ -23,7 +25,13 @@ interface Props {
  * still receives every keystroke as a number, because the workout screen saves
  * as you go and there is no submit to wait for.
  */
-export function WeightField({ value, label, onChange, className }: Props) {
+export function WeightField({
+  value,
+  label,
+  onChange,
+  className,
+  placeholder = "—",
+}: Props) {
   const [draft, setDraft] = useState(() => text(value));
   const [seen, setSeen] = useState(value);
 
@@ -48,7 +56,7 @@ export function WeightField({ value, label, onChange, className }: Props) {
       inputMode="decimal"
       value={draft}
       aria-label={label}
-      placeholder="—"
+      placeholder={placeholder}
       onChange={(event) => {
         const next = readWeight(event.target.value);
         setDraft(next.text);

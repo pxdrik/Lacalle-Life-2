@@ -267,3 +267,56 @@ describe("a cardio exercise", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+/**
+ * Roadmap 8.5 (29/09/2026): o peso e as repetições da última vez aparecem
+ * como dica no campo vazio, em tom claro, como no Hevy. Só dica: o valor da
+ * série continua vazio até a pessoa digitar.
+ */
+describe("8.5 — a última vez como dica no campo vazio", () => {
+  function mountWithLast(last: PerformedSet | undefined) {
+    render(
+      <ul>
+        <PerformedSetRow
+          set={set({ weightKg: null, reps: null })}
+          index={0}
+          exerciseName="Supino"
+          isNext
+          isCardio={false}
+          last={last}
+          onChange={vi.fn()}
+          onToggleComplete={vi.fn()}
+          onRemove={vi.fn()}
+        />
+      </ul>,
+    );
+    return {
+      weight: screen.getByRole("textbox", { name: /^Peso da série 1/ }),
+      reps: screen.getByRole("textbox", { name: /^Repetições da série 1/ }),
+    };
+  }
+
+  it("mostra o peso e as repetições da última vez, com vírgula decimal", () => {
+    const { weight, reps } = mountWithLast(set({ weightKg: 57.5, reps: 8 }));
+
+    expect(weight).toHaveAttribute("placeholder", "57,5");
+    expect(reps).toHaveAttribute("placeholder", "8");
+    // Dica, não valor: nada é preenchido.
+    expect(weight).toHaveValue("");
+    expect(reps).toHaveValue("");
+  });
+
+  it("sem última vez, continua o travessão", () => {
+    const { weight, reps } = mountWithLast(undefined);
+
+    expect(weight).toHaveAttribute("placeholder", "—");
+    expect(reps).toHaveAttribute("placeholder", "—");
+  });
+
+  it("um campo que ficou vazio da última vez também fica no travessão", () => {
+    const { weight, reps } = mountWithLast(set({ weightKg: 40, reps: null }));
+
+    expect(weight).toHaveAttribute("placeholder", "40");
+    expect(reps).toHaveAttribute("placeholder", "—");
+  });
+});
