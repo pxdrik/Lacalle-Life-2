@@ -22,6 +22,8 @@ import type { BodyEntry } from "@/features/body/types/body-entry";
 import { LocalWaterRepository } from "@/features/hydration/data/local-water-repository";
 import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import type { WaterEntry } from "@/features/hydration/types/water-entry";
+import { LocalRestDayRepository, REST_DAYS_STORE } from "@/features/workouts/data/rest-day-repository";
+import type { RestDay } from "@/features/workouts/types/rest-day";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
@@ -66,6 +68,7 @@ import type {
   PullBodyEntriesResult,
   PushBodyEntriesResult,
 } from "./body-entry-sync";
+import { pullAllRestDays, pushAllRestDays, type PullRestDaysResult, type PushRestDaysResult } from "./rest-day-sync";
 import { pullAllWaterEntries, pushAllWaterEntries, resolveWaterEntryConflict } from "./water-entry-sync";
 import type {
   WaterEntryConflictResolution,
@@ -458,4 +461,31 @@ export async function resolveWaterEntryConflictAndSync(
   const { tracker, localOnly } = await openWaterEntrySyncStores();
   await resolveWaterEntryConflict(tracker, localOnly, day, resolution, remote);
   return runWaterEntrySync();
+}
+
+export interface RestDaySyncOutcome {
+  readonly push: PushRestDaysResult;
+  readonly pull: PullRestDaysResult;
+}
+
+/**
+ * Sincroniza todos os dias de descanso (roadmap 7.5). Push antes do pull, e é
+ * isso que resolve o conflito: o pull do mesmo ciclo aplica o servidor em
+ * qualquer dia que o push deixou em `"conflict"` — ver `rest-day-sync.ts`.
+ * Abre o repositório local **puro**, nunca o `SyncingRestDayRepository`.
+ */
+export async function runRestDaySync(): Promise<RestDaySyncOutcome> {
+  const supabase = getSupabaseBrowserClient();
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const localOnly = new LocalRestDayRepository(
+    new IndexedDbStore<RestDay>(db, REST_DAYS_STORE.name),
+  );
+  await backfillUntracked(tracker, "restDays", (await localOnly.listAll()).map((restDay) => restDay.id));
+
+  const push = await pushAllRestDays(supabase, tracker, localOnly);
+  const pull = await pullAllRestDays(supabase, tracker, localOnly);
+  notifyStoreChanged("restDays");
+
+  return { push, pull };
 }

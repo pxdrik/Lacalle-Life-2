@@ -1,15 +1,17 @@
 "use client";
 
+import { Undo2 } from "lucide-react";
 import Link from "next/link";
 
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
-import { buttonClasses } from "@/design-system/components/button";
+import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
+import { useRestDay, type RestDayControl } from "../hooks/use-rest-day";
 import { useSessionHistory } from "../hooks/use-session-history";
 import {
   formatDuration,
@@ -37,8 +39,9 @@ import { InProgressBanner } from "./in-progress-banner";
  */
 export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
+  const rest = useRestDay(day);
 
-  if (state.status === "loading") {
+  if (state.status === "loading" || rest.state.status === "loading") {
     return <Skeleton className="h-40 w-full rounded-lg" />;
   }
 
@@ -75,7 +78,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
     >
       <Card tone="default">
         {nothingYet ? (
-          <Empty />
+          <Empty rest={rest} />
         ) : (
           <ul className="space-y-2">
             {today.map((session) => (
@@ -99,7 +102,33 @@ export function TodayWorkout({ day }: { readonly day: string }) {
  * `Começar` is the same link to the same route it has always been; it moved
  * out of the header and put on the button the other block already wore.
  */
-function Empty() {
+function Empty({ rest }: { readonly rest: RestDayControl }) {
+  // Descanso marcado (roadmap 7.5): diz isso sem cobrar nada, e desfaz.
+  if (rest.state.status === "ready" && rest.state.isRest) {
+    return (
+      <div className="flex flex-col items-center gap-3 py-6 text-center">
+        <ICONS.rest aria-hidden className="size-8 text-ink-subtle" />
+        <div>
+          <p className="text-sm text-ink">Dia de descanso.</p>
+          <p className="mt-1 text-xs text-ink-subtle">
+            Você marcou hoje como descanso. Nada muda na Evolução.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            rest.setRest(false);
+          }}
+        >
+          <Undo2 aria-hidden className="size-4" />
+          Desfazer
+        </Button>
+        <SaveError message={rest.saveError} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <ICONS.workouts aria-hidden className="size-8 text-ink-subtle" />
@@ -113,10 +142,37 @@ function Empty() {
           Ao finalizar, volume e duração aparecem aqui.
         </p>
       </div>
-      <Link href="/treinos" className={buttonClasses("secondary", "sm")}>
-        Começar treino
-      </Link>
+      <div className="flex flex-wrap justify-center gap-2">
+        <Link href="/treinos" className={buttonClasses("secondary", "sm")}>
+          Começar treino
+        </Link>
+        {/* Nunca automático: dia sem treino continua "Nenhum treino
+            registrado" até a pessoa escolher. Sem o dado (erro de leitura),
+            o botão não aparece. */}
+        {rest.state.status === "ready" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              rest.setRest(true);
+            }}
+          >
+            <ICONS.rest aria-hidden className="size-4" />
+            Hoje é descanso
+          </Button>
+        )}
+      </div>
+      <SaveError message={rest.saveError} />
     </div>
+  );
+}
+
+function SaveError({ message }: { readonly message: string | null }) {
+  if (message === null) return null;
+  return (
+    <p role="alert" className="text-xs text-danger">
+      {message}
+    </p>
   );
 }
 

@@ -1,6 +1,7 @@
 import {
   Activity,
   Apple,
+  Bed,
   CalendarDays,
   ClipboardList,
   Droplet,
@@ -48,4 +49,5 @@ export const ICONS = {
   foods: Apple,
   profile: User,
   water: Droplet,
+  rest: Bed,
 } satisfies Record<string, LucideIcon>;

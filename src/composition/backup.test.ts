@@ -11,6 +11,7 @@ import { PROFILE_ID, type Profile } from "@/features/profile/types/profile";
 import { createRoutine } from "@/features/workouts/services/create-routine";
 import { startSession } from "@/features/workouts/services/start-session";
 import type { Exercise } from "@/features/workouts/types/exercise";
+import { createRestDay } from "@/features/workouts/types/rest-day";
 import type { Routine } from "@/features/workouts/types/routine";
 import type { Session } from "@/features/workouts/types/session";
 
@@ -175,6 +176,24 @@ describe("exportAll / importAll", () => {
     await expect(repositories.profile.get()).resolves.toMatchObject({
       id: PROFILE_ID,
     });
+  });
+
+  it("round-trips rest days (roadmap 7.5), and reads a backup from before them", async () => {
+    const repositories = await getRepositories();
+    await repositories.restDays.save(createRestDay("2026-09-30"), null);
+
+    const backup = await exportAll();
+    expect(backup.stores.restDays).toMatchObject([{ day: "2026-09-30" }]);
+
+    await clearAllStores();
+    expect(await importAll(JSON.stringify(backup))).toMatchObject({ ok: true });
+    await expect(repositories.restDays.getByDay("2026-09-30")).resolves.toMatchObject({
+      id: "2026-09-30",
+    });
+
+    const { restDays: _omitted, ...older } = backup.stores;
+    expect(await importAll({ ...backup, stores: older })).toMatchObject({ ok: true });
+    await expect(repositories.restDays.listAll()).resolves.toEqual([]);
   });
 
   it("round-trips through JSON.stringify/parse, not just the in-memory object", async () => {

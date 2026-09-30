@@ -7,6 +7,7 @@ import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
+import { REST_DAYS_STORE } from "@/features/workouts/data/rest-day-repository";
 import { ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
 import { SESSIONS_STORE } from "@/features/workouts/data/session-repository";
 
@@ -78,5 +79,11 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Water log: mL logged per day, indexed by day, kept apart from macros.",
     createStores: [WATER_ENTRIES_STORE],
+  },
+  {
+    version: 10,
+    description:
+      "Rest days: one record per day the person marked as rest, indexed by day.",
+    createStores: [REST_DAYS_STORE],
   },
 ];

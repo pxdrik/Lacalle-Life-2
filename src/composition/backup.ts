@@ -21,6 +21,8 @@ import { FOODS_STORE } from "@/features/foods/data/food-store";
 import type { Food } from "@/features/foods/types/food";
 import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import type { WaterEntry } from "@/features/hydration/types/water-entry";
+import { REST_DAYS_STORE } from "@/features/workouts/data/rest-day-repository";
+import type { RestDay } from "@/features/workouts/types/rest-day";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import type { Profile } from "@/features/profile/types/profile";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
@@ -60,6 +62,7 @@ const STORE_NAMES = [
   ROUTINES_STORE.name,
   SESSIONS_STORE.name,
   WATER_ENTRIES_STORE.name,
+  REST_DAYS_STORE.name,
 ] as const;
 
 export interface BackupFile {
@@ -75,6 +78,7 @@ export interface BackupFile {
     readonly routines: readonly Routine[];
     readonly sessions: readonly Session[];
     readonly water: readonly WaterEntry[];
+    readonly restDays: readonly RestDay[];
   };
 }
 
@@ -87,7 +91,7 @@ export interface BackupFile {
 async function exportFrom(repositories: Repositories): Promise<BackupFile> {
   const profile = await repositories.profile.get();
 
-  const [body, foodLogs, foods, diets, exercises, routines, sessions, water] =
+  const [body, foodLogs, foods, diets, exercises, routines, sessions, water, restDays] =
     await Promise.all([
       repositories.body.listAll(),
       repositories.foodLogs.listAll(),
@@ -97,6 +101,7 @@ async function exportFrom(repositories: Repositories): Promise<BackupFile> {
       repositories.routines.listAll(),
       repositories.sessions.listAll(),
       repositories.water.listAll(),
+      repositories.restDays.listAll(),
     ]);
 
   return {
@@ -112,6 +117,7 @@ async function exportFrom(repositories: Repositories): Promise<BackupFile> {
       routines,
       sessions,
       water,
+      restDays,
     },
   };
 }
@@ -206,6 +212,8 @@ const backupEnvelopeSchema = z.object({
     // same "old shape stays readable" contract `BACKUP_FORMAT_VERSION`'s own
     // doc comment describes for a field, extended to a whole new store.
     water: z.array(z.unknown()).optional(),
+    // Opcional pelo mesmo motivo da água: backups de antes do 7.5 não têm.
+    restDays: z.array(z.unknown()).optional(),
   }),
 });
 
@@ -252,6 +260,7 @@ interface StoresResult {
   readonly routines: readonly z.infer<typeof RECORD_SCHEMAS.routines>[];
   readonly sessions: readonly z.infer<typeof RECORD_SCHEMAS.sessions>[];
   readonly water: readonly z.infer<typeof RECORD_SCHEMAS.water>[];
+  readonly restDays: readonly z.infer<typeof RECORD_SCHEMAS.restDays>[];
 }
 
 /**
@@ -392,6 +401,7 @@ function parseBackupFile(raw: unknown): ParsedBackup {
   // `stores.water` itself, not just its contents, is optional — see the
   // envelope schema's comment.
   const water = processStore(RECORD_SCHEMAS.water, stores.water ?? []);
+  const restDays = processStore(RECORD_SCHEMAS.restDays, stores.restDays ?? []);
 
   const outcomes = [
     body,
@@ -403,6 +413,7 @@ function parseBackupFile(raw: unknown): ParsedBackup {
     routines,
     sessions,
     water,
+    restDays,
   ];
 
   return {
@@ -417,6 +428,7 @@ function parseBackupFile(raw: unknown): ParsedBackup {
       routines: routines.records,
       sessions: sessions.records,
       water: water.records,
+      restDays: restDays.records,
     },
     recordCount: outcomes.reduce((sum, o) => sum + o.records.length, 0),
     sanitizedCount: outcomes.reduce((sum, o) => sum + o.sanitizedCount, 0),
@@ -476,6 +488,7 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
       writeStore(tx.objectStore(ROUTINES_STORE.name), stores.routines),
       writeStore(tx.objectStore(SESSIONS_STORE.name), stores.sessions),
       writeStore(tx.objectStore(WATER_ENTRIES_STORE.name), stores.water),
+      writeStore(tx.objectStore(REST_DAYS_STORE.name), stores.restDays),
     ];
 
     await Promise.all([...writes, tx.done]);
@@ -514,7 +527,7 @@ export async function importAll(raw: unknown): Promise<ImportResult> {
  * `writeStore` (compartilhado com o resto do arquivo) a saber sobre sync.
  *
  * Dois casos, por store sincronizada (`bodyEntries`, `foodLog`, `diets`,
- * `profile`, `routines`, `sessions`, `waterEntries` — as mesmas sete chaves
+ * `profile`, `routines`, `sessions`, `waterEntries`, `restDays` — as mesmas oito chaves
  * de `sync-engine.ts`; `foods`/`exercises` ainda não têm sync na camada de
  * app, ver auditoria):
  *
@@ -552,6 +565,7 @@ async function reconcileSyncTrackerAfterImport(
       .filter((session) => session.finishedAt !== null)
       .map((session) => session.id),
     waterEntries: stores.water.map((entry) => entry.id),
+    restDays: stores.restDays.map((restDay) => restDay.id),
   };
 
   for (const [store, restoredIds] of Object.entries(restoredIdsByStore)) {

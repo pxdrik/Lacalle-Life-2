@@ -2180,3 +2180,15 @@ empate exato como único conflito restante.
 pull de sync em segundo plano) tinha escrito no mesmo store; corrigido de
 forma central para todo o app, não só o Diário. Detalhe em
 `docs/roadmap.md`.
+
+## 27. Dia de descanso: sem conflito visível, o servidor vence (30/09/2026)
+
+`RestDay` (roadmap 7.5) é a coleção mais simples do app: o registro é só o dia, e existir é a marca. Tabela `rest_days` e RPCs `save_rest_day`/`delete_rest_day` são cópia de `water_entries` (migração 0032) sem nenhuma coluna de conteúdo.
+
+**Diferente de §26, não há tela de conflito nem para o empate.** A única divergência possível é "marcado num aparelho, desmarcado no outro", quase sempre com um lado apagado, que é justamente o caso que §26 deixa em conflito visível. Sem tela, esse conflito ficaria travado para sempre (é o que acontece hoje com a água, ver roadmap 8.18). Então `runRestDaySync` faz push e depois pull, e o pull resolve tudo:
+
+- pendente local sobre a versão do servidor que ele conhece: espera o push;
+- os dois lados concordam (marcado e marcado, ou os dois apagados): limpo;
+- discordam: aplica o servidor.
+
+O que se perde, no pior caso, é um toque para marcar de novo. Coberto em `rest-day-sync.test.ts` com dois aparelhos e um servidor falso das mesmas duas ramificações da migração, e as RPCs reais foram conferidas em produção dentro de uma transação desfeita.

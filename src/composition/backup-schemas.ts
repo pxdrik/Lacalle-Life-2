@@ -183,6 +183,18 @@ export const waterRecordSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// rest days
+// ---------------------------------------------------------------------------
+
+/** Roadmap 7.5: o registro é só o dia — existir é a marca. */
+export const restDayRecordSchema = z
+  .object({
+    ...entityEnvelope,
+    day: dayString,
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
 // foods
 // ---------------------------------------------------------------------------
 
@@ -546,4 +558,5 @@ export const RECORD_SCHEMAS = {
   routines: routineRecordSchema,
   sessions: sessionRecordSchema,
   water: waterRecordSchema,
+  restDays: restDayRecordSchema,
 } as const;

@@ -14,6 +14,9 @@ import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { WaterRepositoryProvider } from "@/features/hydration/data/water-repository-context";
 import type { WaterRepository } from "@/features/hydration/data/water-repository";
 import { SyncingWaterRepository } from "@/features/hydration/data/syncing-water-repository";
+import type { RestDayRepository } from "@/features/workouts/data/rest-day-repository";
+import { RestDayRepositoryProvider } from "@/features/workouts/data/rest-day-repository-context";
+import { SyncingRestDayRepository } from "@/features/workouts/data/syncing-rest-day-repository";
 import { BackupRepositoryProvider } from "@/features/profile/data/backup-repository-context";
 import type {
   BackupRepository,
@@ -53,6 +56,7 @@ import { pushProfile } from "./sync/profile-sync";
 import { pushAllRoutines } from "./sync/routine-sync";
 import { pushAllSessions } from "./sync/session-sync";
 import { pushAllBodyEntries } from "./sync/body-entry-sync";
+import { pushAllRestDays } from "./sync/rest-day-sync";
 import { pushAllWaterEntries } from "./sync/water-entry-sync";
 
 /**
@@ -164,6 +168,21 @@ export function WaterDataProvider({
     </WaterRepositoryProvider>
   );
 }
+
+/** Dias de descanso (roadmap 7.5), mesmo desenho do `waterRepository` acima. */
+const restDayRepository = once<RestDayRepository>(async () => {
+  const local = (await getRepositories()).restDays;
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const tracker = new IndexedDbStore<SyncTracker>(db, SYNC_TRACKER_STORE.name);
+  const existing = await local.listAll();
+  await backfillUntracked(tracker, "restDays", existing.map((restDay) => restDay.id));
+  const pushSoon = debouncedTrigger(() => {
+    pushAllRestDays(getSupabaseBrowserClient(), tracker, local).catch(() => {
+      // Silencioso de propósito — ver `foodLogRepository` abaixo.
+    });
+  }, PUSH_DEBOUNCE_MS);
+  return new SyncingRestDayRepository(local, tracker, pushSoon);
+});
 
 const foodRepository = once<FoodRepository>(async () => {
   return (await getRepositories()).foods;
@@ -464,7 +483,7 @@ export function DietAdherenceDataProvider({
  *
  * The body log joined the list when the screen grew a weight card, and water
  * joined it the same way — `TodayHydration`, a quiet row right after the
- * hero card. Both were excluded here on the grounds that nothing read them,
+ * hero card. Rest days too (roadmap 7.5): `TodayWorkout` marks one. Both were excluded here on the grounds that nothing read them,
  * and that stopped being true — which is the whole point of stating the
  * reason rather than the rule.
  */
@@ -478,7 +497,9 @@ export function HomeDataProvider({
       <ProfileRepositoryProvider repository={profileRepository()}>
         <WorkoutRepositoryProvider repositories={workoutRepositories()}>
           <BodyRepositoryProvider repository={bodyRepository()}>
-            <WaterDataProvider>{children}</WaterDataProvider>
+            <RestDayRepositoryProvider repository={restDayRepository()}>
+              <WaterDataProvider>{children}</WaterDataProvider>
+            </RestDayRepositoryProvider>
           </BodyRepositoryProvider>
         </WorkoutRepositoryProvider>
       </ProfileRepositoryProvider>

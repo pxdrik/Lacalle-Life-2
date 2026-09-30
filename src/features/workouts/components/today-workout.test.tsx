@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
@@ -8,10 +9,16 @@ import {
   ROUTINES_STORE,
 } from "../data/routine-repository";
 import {
+  LocalRestDayRepository,
+  REST_DAYS_STORE,
+} from "../data/rest-day-repository";
+import { RestDayRepositoryProvider } from "../data/rest-day-repository-context";
+import {
   LocalSessionRepository,
   SESSIONS_STORE,
 } from "../data/session-repository";
 import { WorkoutRepositoryProvider } from "../data/workout-repository-context";
+import { createRestDay, type RestDay } from "../types/rest-day";
 import type { Routine } from "../types/routine";
 import type { Session } from "../types/session";
 import { TodayWorkout } from "./today-workout";
@@ -64,7 +71,7 @@ function session(overrides: Partial<Session> & { id: string }): Session {
   };
 }
 
-function mount(sessions: readonly Session[]) {
+function mount(sessions: readonly Session[], restDays: readonly string[] = []) {
   const store = new LocalSessionRepository(
     new MemoryStore<Session>(SESSIONS_STORE),
   );
@@ -72,15 +79,22 @@ function mount(sessions: readonly Session[]) {
     new MemoryStore<Routine>(ROUTINES_STORE),
   );
 
+  const rest = new LocalRestDayRepository(new MemoryStore<RestDay>(REST_DAYS_STORE));
+
   const ready = Promise.all(sessions.map((s) => store.save(s, null)));
+  const restReady = Promise.all(restDays.map((day) => rest.save(createRestDay(day), null)));
 
   render(
     <WorkoutRepositoryProvider
       repositories={ready.then(() => ({ routines, sessions: store }))}
     >
-      <TodayWorkout day={TODAY} />
+      <RestDayRepositoryProvider repository={restReady.then(() => rest)}>
+        <TodayWorkout day={TODAY} />
+      </RestDayRepositoryProvider>
     </WorkoutRepositoryProvider>,
   );
+
+  return rest;
 }
 
 describe("TodayWorkout", () => {
@@ -143,5 +157,55 @@ describe("TodayWorkout", () => {
         name: "Ver treino Peito e tríceps, 45:00, 600 kg movidos",
       }),
     ).toBeInTheDocument();
+  });
+});
+
+/** Roadmap 7.5 (30/09/2026): dia de descanso, sempre escolhido pela pessoa. */
+describe("TodayWorkout — dia de descanso", () => {
+  it("nunca marca sozinho: dia vazio oferece, não afirma", async () => {
+    mount([]);
+
+    expect(await screen.findByText("Nenhum treino registrado.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hoje é descanso" })).toBeInTheDocument();
+    expect(screen.queryByText("Dia de descanso.")).not.toBeInTheDocument();
+  });
+
+  it("marca, grava, e desfaz apagando o registro", async () => {
+    const user = userEvent.setup();
+    const rest = mount([]);
+
+    await user.click(await screen.findByRole("button", { name: "Hoje é descanso" }));
+
+    expect(await screen.findByText("Dia de descanso.")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Começar treino" })).not.toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await rest.getByDay(TODAY)).toBeDefined();
+    });
+
+    await user.click(screen.getByRole("button", { name: "Desfazer" }));
+
+    expect(await screen.findByText("Nenhum treino registrado.")).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(await rest.getByDay(TODAY)).toBeUndefined();
+    });
+  });
+
+  it("abre já marcado quando o dia foi marcado antes", async () => {
+    mount([], [TODAY]);
+
+    expect(await screen.findByText("Dia de descanso.")).toBeInTheDocument();
+  });
+
+  it("não vale para outro dia", async () => {
+    mount([], ["2026-08-06"]);
+
+    expect(await screen.findByText("Nenhum treino registrado.")).toBeInTheDocument();
+  });
+
+  it("treino feito vence a marca: mostra o treino", async () => {
+    mount([session({ id: "a", name: "Peito e tríceps" })], [TODAY]);
+
+    expect(await screen.findByText("Peito e tríceps")).toBeInTheDocument();
+    expect(screen.queryByText("Dia de descanso.")).not.toBeInTheDocument();
   });
 });

@@ -32,6 +32,12 @@ import {
   type WaterRepository,
 } from "@/features/hydration/data/water-repository";
 import type { WaterEntry } from "@/features/hydration/types/water-entry";
+import {
+  LocalRestDayRepository,
+  REST_DAYS_STORE,
+  type RestDayRepository,
+} from "@/features/workouts/data/rest-day-repository";
+import type { RestDay } from "@/features/workouts/types/rest-day";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
 import {
   PROFILE_STORE,
@@ -85,6 +91,7 @@ export interface Repositories {
   readonly routines: RoutineRepository;
   readonly sessions: SessionRepository;
   readonly water: WaterRepository;
+  readonly restDays: RestDayRepository;
 }
 
 export function createRepositories(db: IDBPDatabase): Repositories {
@@ -115,6 +122,9 @@ export function createRepositories(db: IDBPDatabase): Repositories {
     ),
     water: new LocalWaterRepository(
       new IndexedDbStore<WaterEntry>(db, WATER_ENTRIES_STORE.name),
+    ),
+    restDays: new LocalRestDayRepository(
+      new IndexedDbStore<RestDay>(db, REST_DAYS_STORE.name),
     ),
   };
 }

@@ -12,6 +12,7 @@ import {
   runDietSync,
   runFoodLogSync,
   runProfileSync,
+  runRestDaySync,
   runRoutineSync,
   runSessionSync,
 } from "@/composition/sync/sync-engine";
@@ -42,7 +43,7 @@ import { dayKey } from "@/core/format/day";
  * silenciosamente se este componente um dia sumisse.
  *
  * O pull de sincronização entra pela mesma porta, uma vez, ao montar: perfil,
- * dietas, rotinas, sessões, corpo (cada um cobre todo o histórico) e o
+ * dietas, rotinas, sessões, corpo, descanso (cada um cobre todo o histórico) e o
  * diário do dia de hoje — o único que a abertura do app pode adivinhar, já
  * que o diário é por dia. Silencioso de propósito, mesma convenção do push
  * debounçado em `data-providers.tsx`: uma falha aqui (rede fora, sem sessão)
@@ -63,6 +64,7 @@ export function AppDataBoot({
     runRoutineSync().catch(() => undefined);
     runSessionSync().catch(() => undefined);
     runBodyEntrySync().catch(() => undefined);
+    runRestDaySync().catch(() => undefined);
     runFoodLogSync(dayKey(new Date())).catch(() => undefined);
   }, []);
 

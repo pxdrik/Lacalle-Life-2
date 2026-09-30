@@ -20,6 +20,7 @@ const runRoutineSync = vi.fn();
 const runSessionSync = vi.fn();
 const runBodyEntrySync = vi.fn();
 const runFoodLogSync = vi.fn();
+const runRestDaySync = vi.fn();
 
 vi.mock("@/composition/sync/sync-engine", () => ({
   runProfileSync: () => runProfileSync(),
@@ -28,6 +29,7 @@ vi.mock("@/composition/sync/sync-engine", () => ({
   runSessionSync: () => runSessionSync(),
   runBodyEntrySync: () => runBodyEntrySync(),
   runFoodLogSync: (day: string) => runFoodLogSync(day),
+  runRestDaySync: () => runRestDaySync(),
 }));
 
 const isSupabaseConfigured = vi.fn();
@@ -50,6 +52,7 @@ describe("AppDataBoot", () => {
       runSessionSync,
       runBodyEntrySync,
       runFoodLogSync,
+      runRestDaySync,
     ]) {
       sync.mockResolvedValue({ push: { status: "ok" }, pull: { status: "ok" } });
     }
@@ -80,6 +83,7 @@ describe("AppDataBoot", () => {
       expect(runRoutineSync).toHaveBeenCalledOnce();
       expect(runSessionSync).toHaveBeenCalledOnce();
       expect(runBodyEntrySync).toHaveBeenCalledOnce();
+      expect(runRestDaySync).toHaveBeenCalledOnce();
     });
     expect(runFoodLogSync).toHaveBeenCalledExactlyOnceWith(today);
   });
@@ -100,6 +104,7 @@ describe("AppDataBoot", () => {
     expect(runSessionSync).not.toHaveBeenCalled();
     expect(runBodyEntrySync).not.toHaveBeenCalled();
     expect(runFoodLogSync).not.toHaveBeenCalled();
+    expect(runRestDaySync).not.toHaveBeenCalled();
   });
 
   it("never throws when a domain sync rejects — silent, the real screen retries", async () => {
