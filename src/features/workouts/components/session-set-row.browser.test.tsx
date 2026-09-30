@@ -471,3 +471,46 @@ describe("8.5 — a última vez aparece como dica na linha certa", () => {
     }
   });
 });
+
+/**
+ * Roadmap 8.13 (29/09/2026): o número da série ficava abaixo dos campos.
+ *
+ * Print do Pedro no iPhone, rotina sem meta: "1" e "2" ~10px abaixo do centro
+ * dos campos de peso e reps. Os campos alinham pelo topo e carregam embaixo a
+ * legenda da meta, que ocupa altura mesmo vazia; o número usava
+ * `self-center` e centrava no bloco campo + legenda, não no campo.
+ */
+describe("8.13 — o número da série fica na altura dos campos", () => {
+  const NO_PLAN: SessionExercise = {
+    ...EXERCISE,
+    sets: EXERCISE.sets.map((s) => ({ ...s, planned: null })),
+  };
+  const centerY = (element: Element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.top + rect.height / 2;
+  };
+
+  for (const [name, exercise] of [
+    ["com meta", EXERCISE],
+    ["sem meta", NO_PLAN],
+  ] as const) {
+    for (const width of PHONE_WIDTHS) {
+      for (const density of DENSITIES) {
+        it(`${name}, ${String(width)}px, densidade ${density}`, async () => {
+          await setViewport(width);
+          setDensity(density);
+          const { rows } = renderCard(exercise);
+          for (const row of rows) {
+            const number = row.querySelector('button[aria-label^="Ações da série"]');
+            const weight = row.querySelector('input[aria-label^="Peso da série"]');
+            if (number === null || weight === null) throw new Error("linha incompleta");
+            expect(Math.abs(centerY(number) - centerY(weight))).toBeLessThanOrEqual(1);
+            // A causa de fundo: a regra global de zoom dos campos vencia a da
+            // grade, e o campo saía com 38px no Padrão e 34px no Confortável.
+            expect(weight.getBoundingClientRect().height).toBeCloseTo(44, 0);
+          }
+        });
+      }
+    }
+  }
+});

@@ -649,10 +649,22 @@ html {
   zoom: var(--ui-scale);
 }
 
-input,
-select,
-textarea {
-  zoom: calc(1 / var(--ui-scale));
+/*
+ * Em `@layer base` (roadmap 8.13, 29/09/2026). Fora de camada, esta regra
+ * vencia qualquer estilo de camada, independente de especificidade — e a
+ * correção da grade da série (`.set-grid input { zoom: 1 }`, em
+ * `globals.css`, camada de utilitários) nunca teve efeito: no Padrão os
+ * campos de peso e reps saíam com 38px de altura e fonte de 13,9px reais,
+ * abaixo dos 44px de toque e dos 16px que evitam o zoom do iOS. Medido no
+ * navegador. Na camada `base` ela continua valendo para todo campo do app e
+ * perde só para quem declara outro `zoom` de propósito.
+ */
+@layer base {
+  input,
+  select,
+  textarea {
+    zoom: calc(1 / var(--ui-scale));
+  }
 }
 
 /**

@@ -127,8 +127,9 @@ export function PerformedSetRow({
               (na própria utilidade) porque os campos carregam a legenda
               "planejado" abaixo (`<Planned>`) e o bloco deles é mais alto que
               os botões: alinhar pelo topo põe campo e botão começando na mesma
-              linha, e só o número da série, que não tem legenda, pede
-              `self-center` de volta. */}
+              linha. O número da série também alinha pelo topo, com a altura do campo
+              (`h-11`): com `self-center` ele centrava no bloco campo + legenda
+              e ficava ~10px abaixo do campo (roadmap 8.13, 29/09/2026). */}
           <div className="set-grid">
             {/* O número é o gatilho das ações da série, e não custa uma coluna
                 a mais: ele já era a primeira coluna. O X dedicado saiu daqui em
@@ -143,7 +144,7 @@ export function PerformedSetRow({
                 setShowingActions(true);
               }}
               aria-label={`Ações da série ${String(number)} de ${exerciseName}`}
-              className="flex h-6 w-full items-center justify-center touch-44 self-center rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              className="flex h-11 w-full items-center justify-center touch-44 self-start rounded-md text-sm tabular-nums text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
             >
               {number}
             </button>
