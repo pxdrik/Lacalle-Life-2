@@ -69,7 +69,7 @@ import type {
   PushBodyEntriesResult,
 } from "./body-entry-sync";
 import { pullAllRestDays, pushAllRestDays, type PullRestDaysResult, type PushRestDaysResult } from "./rest-day-sync";
-import { pullAllWaterEntries, pushAllWaterEntries, resolveWaterEntryConflict } from "./water-entry-sync";
+import { resolveWaterEntryConflict, syncWaterEntries } from "./water-entry-sync";
 import type {
   WaterEntryConflictResolution,
   PullWaterEntriesResult,
@@ -437,16 +437,20 @@ async function openWaterEntrySyncStores() {
  * `BodyEntry`), então não precisa da granularidade por dia que `FoodLog`
  * precisa. Abre o `LocalWaterRepository` **puro**, nunca o
  * `SyncingWaterRepository` que a UI usa.
+ *
+ * Até 30/09/2026 ninguém chamava esta função: a água só subia, pelo push do
+ * repositório, e nenhum outro aparelho a recebia (roadmap 8.18). Agora roda
+ * na abertura do app (`AppDataBoot`), e conflito não trava: ver
+ * `syncWaterEntries`.
  */
 export async function runWaterEntrySync(): Promise<WaterEntrySyncOutcome> {
   const supabase = getSupabaseBrowserClient();
   const { tracker, localOnly } = await openWaterEntrySyncStores();
 
-  const push = await pushAllWaterEntries(supabase, tracker, localOnly);
-  const pull = await pullAllWaterEntries(supabase, tracker, localOnly);
+  const outcome = await syncWaterEntries(supabase, tracker, localOnly);
   notifyStoreChanged("waterEntries");
 
-  return { push, pull };
+  return outcome;
 }
 
 /**

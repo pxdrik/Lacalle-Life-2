@@ -278,3 +278,31 @@ export async function resolveWaterEntryConflict(
 
   await forcePendingAfterResolution(tracker, STORE_NAME, day);
 }
+
+/**
+ * O ciclo completo da água: envia, recebe, e resolve o que sobrou em
+ * conflito — roadmap 8.18 (30/09/2026).
+ *
+ * **O que sobra em conflito depois do pull é só "apagou de um lado, editou
+ * do outro"** (ver docs/arquitetura-sincronizacao.md §26): o resto o próprio
+ * pull já resolve pelo mais recente. A água não tem tela de conflito, e um dia
+ * em `"conflict"` parava de sincronizar para sempre. Então vale o servidor,
+ * a mesma regra do dia de descanso (§27): no pior caso, o registro de água
+ * daquele dia volta ao que o outro aparelho gravou.
+ */
+export async function syncWaterEntries(
+  client: SyncSupabaseClient,
+  tracker: Store<SyncTracker>,
+  localOnly: WaterRepository,
+): Promise<{ readonly push: PushWaterEntriesResult; readonly pull: PullWaterEntriesResult }> {
+  const push = await pushAllWaterEntries(client, tracker, localOnly);
+  const pull = await pullAllWaterEntries(client, tracker, localOnly);
+
+  if (pull.status === "done") {
+    for (const conflict of pull.conflicts) {
+      await resolveWaterEntryConflict(tracker, localOnly, conflict.day, "use-server", conflict.remote);
+    }
+  }
+
+  return { push, pull };
+}

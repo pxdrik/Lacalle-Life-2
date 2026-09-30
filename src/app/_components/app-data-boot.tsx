@@ -15,6 +15,7 @@ import {
   runRestDaySync,
   runRoutineSync,
   runSessionSync,
+  runWaterEntrySync,
 } from "@/composition/sync/sync-engine";
 import { isSupabaseConfigured } from "@/core/auth/env";
 import { dayKey } from "@/core/format/day";
@@ -43,7 +44,7 @@ import { dayKey } from "@/core/format/day";
  * silenciosamente se este componente um dia sumisse.
  *
  * O pull de sincronização entra pela mesma porta, uma vez, ao montar: perfil,
- * dietas, rotinas, sessões, corpo, descanso (cada um cobre todo o histórico) e o
+ * dietas, rotinas, sessões, corpo, descanso, água (cada um cobre todo o histórico) e o
  * diário do dia de hoje — o único que a abertura do app pode adivinhar, já
  * que o diário é por dia. Silencioso de propósito, mesma convenção do push
  * debounçado em `data-providers.tsx`: uma falha aqui (rede fora, sem sessão)
@@ -65,6 +66,8 @@ export function AppDataBoot({
     runSessionSync().catch(() => undefined);
     runBodyEntrySync().catch(() => undefined);
     runRestDaySync().catch(() => undefined);
+    // Roadmap 8.18: sem esta linha a água nunca descia para outro aparelho.
+    runWaterEntrySync().catch(() => undefined);
     runFoodLogSync(dayKey(new Date())).catch(() => undefined);
   }, []);
 

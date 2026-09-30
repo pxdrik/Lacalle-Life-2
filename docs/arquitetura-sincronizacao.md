@@ -2192,3 +2192,5 @@ forma central para todo o app, não só o Diário. Detalhe em
 - discordam: aplica o servidor.
 
 O que se perde, no pior caso, é um toque para marcar de novo. Coberto em `rest-day-sync.test.ts` com dois aparelhos e um servidor falso das mesmas duas ramificações da migração, e as RPCs reais foram conferidas em produção dentro de uma transação desfeita.
+
+**A água passou a seguir a mesma regra (roadmap 8.18, 30/09/2026).** Até então `runWaterEntrySync` não era chamada em lugar nenhum: a água só subia, pelo push do repositório. Agora roda na abertura do app, e `syncWaterEntries` resolve pelo servidor o que o pull devolve em conflito. Para a água isso só acontece em "apagou de um lado, editou do outro", porque o resto o pull já resolve pelo `updatedAt` mais recente (§26).
