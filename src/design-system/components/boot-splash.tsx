@@ -102,6 +102,7 @@ export function BootSplash() {
     return (
       <div
         aria-hidden
+        data-boot-splash=""
         className={cn(
           "pointer-events-none fixed inset-0 z-[60] transition-opacity duration-[120ms] ease-linear",
           phase === "out" ? "opacity-0" : "opacity-100",
@@ -122,6 +123,7 @@ export function BootSplash() {
   return (
     <div
       aria-hidden
+      data-boot-splash=""
       className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center"
       style={{
         background: SPLASH_BACKGROUND,

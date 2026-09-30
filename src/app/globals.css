@@ -10,6 +10,16 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 /**
+ * A transição de entrada não aparece num recarregamento no meio da sessão
+ * (roadmap 8.12). `BootSplashScript` marca `data-splash="skip"` antes do
+ * primeiro paint; fora de camada de propósito, para vencer o `flex` do
+ * utilitário e esconder a transição que já vem no HTML do servidor.
+ */
+html[data-splash="skip"] [data-boot-splash] {
+  display: none;
+}
+
+/**
  * A 44px touch target on a control that draws smaller than 44px.
  *
  * **Visual size is not touch size.** Measured at 388px on `/exercicios`, 183

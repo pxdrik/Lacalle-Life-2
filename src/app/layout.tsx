@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { IBM_Plex_Sans } from "next/font/google";
 
 import { BootSplash } from "@/design-system/components/boot-splash";
+import { BootSplashScript } from "@/design-system/components/boot-splash-script";
 import { ToastProvider } from "@/design-system/components/toast";
 import { DensityProvider } from "@/design-system/density/density-provider";
 import { DensityScript } from "@/design-system/density/density-script";
@@ -74,6 +75,7 @@ export default async function RootLayout({
       <body>
         <ThemeScript nonce={nonce} />
         <DensityScript nonce={nonce} />
+        <BootSplashScript nonce={nonce} />
         <ThemeProvider>
           <DensityProvider>
             <ToastProvider>
