@@ -79,7 +79,7 @@ export function ExerciseHistory({ exerciseId }: { readonly exerciseId: EntityId 
           <div className="grid grid-cols-2 gap-3">
             <Metric
               value={`${formatDecimal(record.heaviestKg)} × ${formatDecimal(record.repsAtHeaviest)}`}
-              label="Série mais pesada (kg × reps)"
+              label="Série mais pesada"
             />
             <Metric
               value={formatDecimal(record.bestOneRepMax)}

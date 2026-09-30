@@ -182,7 +182,7 @@ describe("ExerciseDetail — Seu histórico", () => {
       trained(ex.id, 21, [done(8, 60)]),
     ]);
 
-    expect(await screen.findByText("Série mais pesada (kg × reps)")).toBeInTheDocument();
+    expect(await screen.findByText("Série mais pesada")).toBeInTheDocument();
     expect(screen.getByText("60 × 8")).toBeInTheDocument();
     expect(screen.getByText("1RM estimado")).toBeInTheDocument();
     expect(screen.getByRole("figure")).toBeInTheDocument();

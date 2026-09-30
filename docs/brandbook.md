@@ -327,6 +327,27 @@ achou nada no brandbook que tenha deixado de fazer sentido.
 
 ---
 
+## Texto curto não quebra linha
+
+Regra do Pedro, 30/09/2026. Rótulo, título de seção, legenda de número,
+nome de botão, título de faixa: **cabem numa linha**. Quando não cabem, o
+texto é que se ajusta (mais curto), não a linha que quebra.
+
+- **Primeiro encurtar o texto.** Ex.: "Série mais pesada (kg × reps)"
+  virou "Série mais pesada" no histórico do exercício; a unidade já está
+  no próprio número ("60 × 8").
+- **Depois reorganizar o layout**, sem quebrar o texto: o botão desce para
+  a linha de baixo, o texto fica inteiro (como na faixa "Igual a ontem?",
+  em 320px na densidade Confortável).
+- **Duas linhas só em pontos bem pontuais**, onde o conteúdo é do usuário e
+  não dá para prever o tamanho: nome de exercício (`line-clamp-2`), nome de
+  alimento, resumo de uma lista de alimentos. Texto nosso, escrito por nós,
+  não entra nessa exceção.
+- **Conferir no pior caso:** 320px na densidade Confortável. É onde a regra
+  quebra primeiro.
+
+---
+
 ## Botão principal em Verdant mais claro, só no tema claro
 
 Decisão do Pedro em 30/09/2026 (roadmap 8.10). Em área grande, com o texto
