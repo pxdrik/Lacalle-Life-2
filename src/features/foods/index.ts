@@ -16,5 +16,6 @@ export {
   type FoodCategory,
   type FoodUnit,
   type PracticalUnit,
+  type RecentFood,
 } from "./types/food";
 export { customFoodSchema, type CustomFoodInput } from "./validation/food-schema";

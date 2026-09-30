@@ -14,14 +14,24 @@ import { MACRO_CODING } from "@/design-system/macros";
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { useFoodEditor } from "../hooks/use-food-editor";
 import { searchFoods } from "../services/search-foods";
-import type { Food, FoodCategory } from "../types/food";
+import type { Food, FoodCategory, RecentFood } from "../types/food";
 import { FOOD_CATEGORY_LABELS } from "../types/food";
 import { CustomFoodForm } from "./custom-food-form";
 import { FoodFilters } from "./food-filters";
 
 interface Props {
-  readonly onPick: (food: Food) => void;
+  /**
+   * `grams` vem só de um recente (a quantidade da última vez, roadmap 7.2);
+   * das outras linhas é `undefined`, e quem recebe usa a porção de referência.
+   */
+  readonly onPick: (food: Food, grams?: number) => void;
   readonly onCancel: () => void;
+  /**
+   * O que a pessoa comeu por último, montado pelo diário (`useRecentFoods`).
+   * Aparece acima da lista quando a busca está vazia e sem filtro. Opcional:
+   * sem ele o seletor é exatamente o de antes.
+   */
+  readonly recents?: readonly RecentFood[] | undefined;
   /**
    * `true` (default): the inline panel that opens inside a meal card — its
    * own bordered surface, scrolled into view above the bottom nav, results
@@ -61,7 +71,7 @@ interface Props {
  */
 const RESULT_PAGE_SIZE = 20;
 
-export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
+export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Props) {
   const { state } = useFoodCatalogue();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
@@ -88,6 +98,18 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
     RESULT_PAGE_SIZE,
   );
   const visible = results.slice(0, count);
+
+  // Recentes só com a busca vazia e sem filtro: digitar ou filtrar é procurar
+  // outra coisa. E só o que ainda existe no catálogo — um alimento apagado
+  // depois de registrado não tem para onde voltar.
+  const browsing = text.trim() === "" && category === null && !favoritesOnly;
+  const recentRows =
+    state.status === "ready" && browsing
+      ? recents.flatMap((recent) => {
+          const food = state.foods.find((candidate) => candidate.id === recent.foodId);
+          return food === undefined ? [] : [{ food, recent }];
+        })
+      : [];
 
   // The inline panel opens inside the meal it belongs to — no navigation,
   // no scroll of its own. Found real (17/09/2026): on a meal card already
@@ -244,6 +266,38 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
         </button>
       )}
 
+      {recentRows.length > 0 && (
+        <section aria-labelledby="food-picker-recents">
+          <h3
+            id="food-picker-recents"
+            className="px-2 pt-2 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase"
+          >
+            Recentes
+          </h3>
+          <ul>
+            {recentRows.map(({ food, recent }) => (
+              <li key={`recent-${food.id}`}>
+                <PickRow
+                  food={food}
+                  grams={recent.grams}
+                  detail={recent.detail}
+                  onClick={() => {
+                    onPick(food, recent.grams);
+                    setText("");
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {recentRows.length > 0 && results.length > 0 && (
+        <h3 className="px-2 pt-3 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
+          Todos os alimentos
+        </h3>
+      )}
+
       {state.status === "ready" && results.length === 0 && (
         <p className="px-2 py-3 text-sm text-ink-subtle">
           Nenhum alimento encontrado.
@@ -254,12 +308,13 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
         <ul className={chrome ? "max-h-72 overflow-y-auto" : undefined}>
           {visible.map((food) => {
             const portion = referencePortion(food);
-            const macros = roundMacros(scaleMacros(food.per100g, portion.grams));
 
             return (
               <li key={food.id}>
-                <button
-                  type="button"
+                <PickRow
+                  food={food}
+                  grams={portion.grams}
+                  detail={`${FOOD_CATEGORY_LABELS[food.category]} · ${portion.label}`}
                   onClick={() => {
                     onPick(food);
                     // Cleared so the next food can be typed straight away.
@@ -269,46 +324,7 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
                     // category is exactly what they are for.
                     setText("");
                   }}
-                  className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
-                >
-                  {/* The name used to be a single truncated line, squeezed
-                      between the category and the kcal column — unreadable
-                      for anything longer than a few letters at a phone
-                      width. It wraps now (category moved below it) instead
-                      of cutting off; the row is a real button end to end
-                      either way. */}
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm text-ink">{food.name}</span>
-                    <span className="mt-0.5 block text-xs text-ink-subtle">
-                      {FOOD_CATEGORY_LABELS[food.category]}
-                      {" · "}
-                      {portion.label}
-                    </span>
-                  </span>
-
-                  {/* Achado de teste manual real: um número solto de kcal,
-                      sem dizer se é por 100 g ou pela porção, obrigava a
-                      abrir o alimento pra saber o que ele realmente traz — o
-                      mesmo problema que a referência do app Macros resolve
-                      mostrando nome, porção, kcal e os três macros juntos
-                      numa linha só. Os valores aqui já vêm na porção de
-                      referência (a medida caseira, quando existe — senão os
-                      mesmos 100 g do resto do catálogo), e os macros usam a
-                      cor que o app já usa em toda outra tela — nunca uma cor
-                      nova só pra esta lista. */}
-                  <span className="shrink-0 text-right text-xs tabular-nums">
-                    <span className="block text-ink-muted">
-                      {formatDecimal(macros.kcal)} kcal
-                    </span>
-                    <span className="mt-0.5 flex items-baseline justify-end gap-1.5">
-                      {MACRO_CODING.map(({ key, text }) => (
-                        <span key={key} className={text}>
-                          {formatDecimal(macros[key], 1)}
-                        </span>
-                      ))}
-                    </span>
-                  </span>
-                </button>
+                />
               </li>
             );
           })}
@@ -317,6 +333,62 @@ export function FoodPicker({ onPick, onCancel, chrome = true }: Props) {
         </ul>
       )}
     </div>
+  );
+}
+
+/**
+ * Uma linha do seletor: nome, detalhe, e kcal e macros na quantidade dada.
+ *
+ * Extraída quando os recentes (roadmap 7.2) passaram a precisar da mesma
+ * linha com outra quantidade e outro detalhe. A lista normal mostra a porção
+ * de referência; um recente mostra a quantidade da última vez.
+ *
+ * The name used to be a single truncated line, squeezed between the category
+ * and the kcal column — unreadable for anything longer than a few letters at a
+ * phone width. It wraps now (category moved below it) instead of cutting off;
+ * the row is a real button end to end either way.
+ *
+ * Achado de teste manual real: um número solto de kcal, sem dizer se é por
+ * 100 g ou pela porção, obrigava a abrir o alimento pra saber o que ele
+ * realmente traz — o mesmo problema que a referência do app Macros resolve
+ * mostrando nome, porção, kcal e os três macros juntos numa linha só. Os
+ * macros usam a cor que o app já usa em toda outra tela — nunca uma cor nova
+ * só pra esta lista.
+ */
+function PickRow({
+  food,
+  grams,
+  detail,
+  onClick,
+}: {
+  readonly food: Food;
+  readonly grams: number;
+  readonly detail: string;
+  readonly onClick: () => void;
+}) {
+  const macros = roundMacros(scaleMacros(food.per100g, grams));
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
+    >
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm text-ink">{food.name}</span>
+        <span className="mt-0.5 block text-xs text-ink-subtle">{detail}</span>
+      </span>
+      <span className="shrink-0 text-right text-xs tabular-nums">
+        <span className="block text-ink-muted">{formatDecimal(macros.kcal)} kcal</span>
+        <span className="mt-0.5 flex items-baseline justify-end gap-1.5">
+          {MACRO_CODING.map(({ key, text }) => (
+            <span key={key} className={text}>
+              {formatDecimal(macros[key], 1)}
+            </span>
+          ))}
+        </span>
+      </span>
+    </button>
   );
 }
 

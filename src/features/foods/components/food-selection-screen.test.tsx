@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -7,7 +7,7 @@ import { MemoryStore } from "@/core/storage/memory-store";
 import { FoodRepositoryProvider } from "../data/food-repository-context";
 import { FOODS_STORE } from "../data/food-store";
 import { LocalFoodRepository } from "../data/local-food-repository";
-import type { Food } from "../types/food";
+import type { Food, RecentFood } from "../types/food";
 import { FoodSelectionScreen } from "./food-selection-screen";
 
 const mockPush = vi.fn();
@@ -46,7 +46,7 @@ async function afterLoad() {
   });
 }
 
-function mount(foods: readonly Food[] = []) {
+function mount(foods: readonly Food[] = [], recents?: readonly RecentFood[]) {
   const repository = new LocalFoodRepository(
     new MemoryStore<Food>(FOODS_STORE),
   );
@@ -57,7 +57,7 @@ function mount(foods: readonly Food[] = []) {
         foods.map((item) => repository.save(item, null)),
       ).then(() => repository)}
     >
-      <FoodSelectionScreen />
+      <FoodSelectionScreen recents={recents} />
     </FoodRepositoryProvider>,
   );
 }
@@ -238,5 +238,21 @@ describe("FoodSelectionScreen", () => {
     expect(
       screen.getByRole("button", { name: "Adicionar à refeição" }),
     ).toBeDisabled();
+  });
+});
+
+/** Roadmap 7.2 (30/09/2026): um recente abre a quantidade na da última vez. */
+describe("FoodSelectionScreen — Recentes", () => {
+  it("começa nas gramas da última vez, não na porção de referência", async () => {
+    mockSearchParams.mockReturnValue(new URLSearchParams({ mealId: "m1", returnTo: "/diario" }));
+    const pao = food("Pão francês", { practicalUnit: { label: "1 unidade", grams: 50 } });
+    mount([pao], [{ foodId: pao.id, grams: 120, detail: "Ontem · Café · 120 g" }]);
+    await afterLoad();
+
+    await userEvent.click(
+      within(screen.getByRole("region", { name: "Recentes" })).getByRole("button", { name: /Pão francês/ }),
+    );
+
+    expect(screen.getByLabelText("Gramas")).toHaveValue("120");
   });
 });

@@ -278,3 +278,81 @@ describe("creating a food without leaving the picker", () => {
     ).toBeInTheDocument();
   });
 });
+
+/**
+ * Roadmap 7.2 (30/09/2026): "Recentes" acima da lista, com a busca vazia.
+ * É o histórico da própria pessoa, montado pelo diário; o seletor só mostra.
+ */
+describe("FoodPicker — Recentes", () => {
+  const arroz = food("Arroz");
+  const feijao = food("Feijão");
+  const frango = food("Frango");
+  const RECENTS = [
+    { foodId: feijao.id, grams: 120, detail: "Ontem · Almoço · 120 g" },
+    { foodId: "apagado", grams: 50, detail: "Ontem · Almoço · 50 g" },
+    { foodId: arroz.id, grams: 200, detail: "Ontem · Almoço · 200 g" },
+  ];
+
+  function mountWithRecents(onPick = vi.fn()) {
+    const repository: FoodRepository = {
+      listAll: vi.fn().mockResolvedValue([arroz, feijao, frango]),
+      getById: vi.fn(),
+      save: vi.fn(),
+      saveMany: vi.fn(),
+      remove: vi.fn(),
+      isEmpty: vi.fn().mockResolvedValue(false),
+    };
+    render(
+      <FoodRepositoryProvider repository={Promise.resolve(repository)}>
+        <FoodPicker onPick={onPick} onCancel={vi.fn()} recents={RECENTS} />
+      </FoodRepositoryProvider>,
+    );
+    return onPick;
+  }
+
+  const recentsList = () =>
+    screen.queryByRole("region", { name: "Recentes" });
+
+  it("mostra os recentes na ordem, e só os que ainda existem no catálogo", async () => {
+    mountWithRecents();
+    await afterLoad();
+
+    const region = recentsList();
+    expect(region).not.toBeNull();
+    const rows = [...region!.querySelectorAll("button")].map((b) => b.textContent);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toContain("Feijão");
+    expect(rows[0]).toContain("Ontem · Almoço · 120 g");
+    expect(rows[1]).toContain("Arroz");
+  });
+
+  it("tocar num recente entrega o alimento com a quantidade da última vez", async () => {
+    const onPick = mountWithRecents();
+    await afterLoad();
+
+    await userEvent.click(
+      [...recentsList()!.querySelectorAll("button")].find((b) =>
+        b.textContent?.includes("Feijão"),
+      )!,
+    );
+
+    expect(onPick).toHaveBeenCalledWith(feijao, 120);
+  });
+
+  it("some ao digitar, porque buscar é procurar outra coisa", async () => {
+    mountWithRecents();
+    await afterLoad();
+
+    await userEvent.type(screen.getByLabelText("Buscar alimento para adicionar"), "fr");
+
+    expect(recentsList()).toBeNull();
+  });
+
+  it("sem recentes, o seletor é o de antes", async () => {
+    mount([arroz, feijao]);
+    await afterLoad();
+
+    expect(recentsList()).toBeNull();
+    expect(screen.queryByText("Todos os alimentos")).toBeNull();
+  });
+});

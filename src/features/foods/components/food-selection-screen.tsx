@@ -14,7 +14,7 @@ import { ICONS } from "@/design-system/icons";
 import { MACRO_CODING } from "@/design-system/macros";
 
 import { FOOD_CATEGORY_LABELS } from "../types/food";
-import type { Food } from "../types/food";
+import type { Food, RecentFood } from "../types/food";
 import { FoodPicker, referencePortion } from "./food-picker";
 
 /**
@@ -35,13 +35,22 @@ import { FoodPicker, referencePortion } from "./food-picker";
  * to that address before navigating back. The screen that reads them is on
  * the other side of a feature boundary this one does not cross.
  */
-export function FoodSelectionScreen() {
+export function FoodSelectionScreen({
+  recents,
+}: {
+  /** Montado pelo diário e entregue pela página (roadmap 7.2). */
+  readonly recents?: readonly RecentFood[] | undefined;
+} = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mealId = searchParams.get("mealId");
   const returnTo = safeReturnTo(searchParams.get("returnTo"));
 
-  const [picked, setPicked] = useState<Food | null>(null);
+  const [picked, setPicked] = useState<{
+    readonly food: Food;
+    /** Só de um recente: a quantidade da última vez (roadmap 7.2). */
+    readonly grams: number | undefined;
+  } | null>(null);
 
   function goBack() {
     router.push(returnTo);
@@ -69,15 +78,16 @@ export function FoodSelectionScreen() {
         />
         <PageHeader
           icon={ICONS.foods}
-          title={picked.name}
-          subtitle={FOOD_CATEGORY_LABELS[picked.category]}
+          title={picked.food.name}
+          subtitle={FOOD_CATEGORY_LABELS[picked.food.category]}
           className="mt-4"
         />
         <div className="mt-6">
           <QuantityConfirm
-            food={picked}
+            food={picked.food}
+            initialGrams={picked.grams}
             onConfirm={(grams) => {
-              router.push(buildReturnUrl(returnTo, picked.id, mealId, grams));
+              router.push(buildReturnUrl(returnTo, picked.food.id, mealId, grams));
             }}
           />
         </div>
@@ -92,8 +102,11 @@ export function FoodSelectionScreen() {
       <div className="mt-6">
         <FoodPicker
           chrome={false}
-          onPick={setPicked}
+          onPick={(food, grams) => {
+            setPicked({ food, grams });
+          }}
           onCancel={goBack}
+          recents={recents}
         />
       </div>
     </>
@@ -121,13 +134,16 @@ function BackLink({
 
 function QuantityConfirm({
   food,
+  initialGrams,
   onConfirm,
 }: {
   readonly food: Food;
+  /** A quantidade da última vez, quando veio de um recente. */
+  readonly initialGrams: number | undefined;
   readonly onConfirm: (grams: number) => void;
 }) {
   const initial = referencePortion(food);
-  const [draft, setDraft] = useState(() => text(initial.grams));
+  const [draft, setDraft] = useState(() => text(initialGrams ?? initial.grams));
   const grams = parseDecimal(draft) ?? 0;
   const macros = roundMacros(scaleMacros(food.per100g, grams));
   const unitLabel = food.unit === "ml" ? "Mililitros" : "Gramas";

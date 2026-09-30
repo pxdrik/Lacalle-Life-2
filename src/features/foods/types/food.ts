@@ -108,3 +108,19 @@ export interface Food extends Entity {
    */
   readonly isFavorite: boolean;
 }
+
+/**
+ * Um alimento que a pessoa já registrou, para a seção "Recentes" do seletor
+ * (roadmap 7.2, 30/09/2026).
+ *
+ * Quem monta é o diário (`features/diet/services/recent-foods.ts`), que é
+ * quem conhece os registros; `foods` só mostra. É histórico da própria
+ * pessoa, nunca sugestão: nada entra aqui que ela não tenha comido.
+ */
+export interface RecentFood {
+  readonly foodId: Food["id"];
+  /** A quantidade da última vez, que vira o ponto de partida ao escolher. */
+  readonly grams: number;
+  /** "Ontem · Almoço · 150 g": quando e quanto. */
+  readonly detail: string;
+}

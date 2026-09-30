@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-import { FoodDataProvider } from "@/composition/data-providers";
-import { FoodSelectionScreen } from "@/features/foods/components/food-selection-screen";
+import { FoodLogDataProvider } from "@/composition/data-providers";
+import { SelectFoodRoute } from "./select-food-route";
 import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
@@ -21,9 +21,10 @@ export default function SelectFoodPage() {
   return (
     <PageShell>
       <Suspense fallback={null}>
-        <FoodDataProvider>
-          <FoodSelectionScreen />
-        </FoodDataProvider>
+        {/* O diário também (roadmap 7.2): os recentes vêm dele. */}
+        <FoodLogDataProvider>
+          <SelectFoodRoute />
+        </FoodLogDataProvider>
       </Suspense>
     </PageShell>
   );

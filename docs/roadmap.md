@@ -3053,7 +3053,7 @@ componentes reais da tela que muda; a implementação parte dele.
 | # | Novidade | Esforço | Decisão tomada no protótipo |
 | --- | --- | --- | --- |
 | 7.1 | ✅ Série concluída em verde suave, **entregue em 29/09/2026** | P | **Nos dois temas**, não só no escuro (pedido do Pedro ao ver o protótipo). Botão de concluir feito passa de `bg-accent` a `accent-surface` + `accent-text`; o próximo passo e a ação principal continuam em verde cheio. Revisar as outras telas com preenchimento verde repetido pela mesma regra. **Entregue:** só a linha de série (`performed-set-row.tsx`); a borda `border-accent` ficou sólida porque, no claro, `accent-surface` quase some sobre o `bg-muted` da linha feita. Teste de navegador mede a cor resolvida nos dois temas. O check da refeição no Diário e a landing continuam com verde cheio, ainda não revisados. |
-| 7.2 | Recentes no seletor de alimentos | M | Seção acima da lista quando a busca está vazia, com a quantidade usada da última vez. Fonte: registros do diário. |
+| 7.2 | ✅ Recentes no seletor de alimentos, **entregue em 30/09/2026** | M | Seção acima da lista quando a busca está vazia, com a quantidade usada da última vez. Fonte: registros do diário. **Entregue:** `recentFoods` (`diet/services`) percorre os últimos 60 dias, só refeições comidas (`eatenMeals`), primeira ocorrência de cada alimento do catálogo, até 6, com "Ontem · Almoço · 150 g". `useRecentFoods` lê o diário; a página `/alimentos/selecionar` junta diário e seletor (`diet` importa `foods`, nunca o contrário). O `FoodPicker` mostra "Recentes" com busca vazia e sem filtro, só o que ainda existe no catálogo, com kcal e macros na quantidade da última vez; tocar abre a quantidade já nas gramas da última vez. Linha de resultado extraída para `PickRow`, sem duplicar. |
 | 7.3 | Igual a ontem | M | Faixa dentro da refeição vazia; "Copiar" traz alimentos e gramas; toast com Desfazer. Refeição equivalente = mesmo nome no dia anterior. Some se ontem ela estava vazia. |
 | 7.4 | Histórico por exercício | M | Seção "Seu histórico" no detalhe do exercício: melhor série, 1RM estimado, linha da carga da melhor série por treino, últimos treinos. Vazio quando não há dado. |
 | 7.5 | Dia de descanso | M | Botão "Hoje é descanso" no card de treino vazio do Hoje; desfazível. Só "descanso" por enquanto (doença e lesão ficam para depois, se fizer falta). |
@@ -3147,7 +3147,7 @@ confirmada por reprodução.
 ✅ entregue · ⬜ falta
 
 - ✅ 7.1 Série concluída em verde suave
-- ⬜ 7.2 Recentes no seletor de alimentos
+- ✅ 7.2 Recentes no seletor de alimentos
 - ⬜ 7.3 Igual a ontem
 - ⬜ 7.4 Histórico por exercício
 - ⬜ 7.5 Dia de descanso
@@ -3176,7 +3176,7 @@ Critério: facilidade (o dado já existe? mexe no que é salvo e sincronizado?) 
 | Ordem | Item | Por que nesta posição | Mexe no dado salvo? | Esforço |
 | --- | --- | --- | --- | --- |
 | 1 | ✅ **8.5** Semana passada como dica no campo vazio (entregue 29/09/2026) | O dado já existe (`LastPerformance` guarda cada série da última vez); muda o placeholder em `performed-set-row.tsx`. Protótipo rápido antes, e cuidar para não confundir com a meta planejada. | Não | P |
-| 2 | **7.2** Recentes no seletor de alimentos | Sai dos registros do diário que já existem (cada item guarda `foodId` e gramas). Protótipo já aprovado. | Não, só leitura | M |
+| 2 | ✅ **7.2** Recentes no seletor de alimentos (entregue 30/09/2026) | Sai dos registros do diário que já existem (cada item guarda `foodId` e gramas). Protótipo já aprovado. | Não, só leitura | M |
 | 3 | **7.3** Igual a ontem | Lê o dia anterior e copia com as funções de edição que já existem. Protótipo aprovado. Vizinho da 7.2 (mesma tela). | Não além de copiar itens | M |
 | 4 | **7.4** Histórico por exercício | Tudo sai dos treinos já salvos (`services/history.ts`); tela nova no detalhe do exercício. | Não, só leitura | M |
 | 5 | **8.7** Falhas de layout só no WebKit | Investigação com o WebKit já instalado, reproduzível no PC. Sem mudança de dado; reduz risco de bug de iPhone nas próximas entregas. | Não | M |
