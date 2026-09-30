@@ -182,12 +182,13 @@ describe("ExerciseDetail — Seu histórico", () => {
       trained(ex.id, 21, [done(8, 60)]),
     ]);
 
-    expect(await screen.findByText("Série mais pesada")).toBeInTheDocument();
+    expect(await screen.findByText("Série mais pesada (kg × reps)")).toBeInTheDocument();
+    expect(screen.getByText("60 × 8")).toBeInTheDocument();
     expect(screen.getByText("1RM estimado")).toBeInTheDocument();
     expect(screen.getByRole("figure")).toBeInTheDocument();
     const rows = screen.getAllByRole("listitem").map((row) => row.textContent);
-    expect(rows[0]).toContain("8×60");
-    expect(rows[1]).toContain("10×40 · 8×60");
+    expect(rows[0]).toContain("60×8");
+    expect(rows[1]).toContain("40×10 · 60×8");
     expect(screen.getByRole("button", { name: "Ver o outro treino" })).toBeInTheDocument();
   });
 
@@ -201,5 +202,18 @@ describe("ExerciseDetail — Seu histórico", () => {
     expect(await screen.findByText("12")).toBeInTheDocument();
     expect(screen.queryByText("1RM estimado")).not.toBeInTheDocument();
     expect(screen.queryByRole("figure")).not.toBeInTheDocument();
+  });
+});
+
+describe("ExerciseDetail — ordem", () => {
+  it("o histórico vem antes da ficha do exercício (Pedro, 30/09/2026)", async () => {
+    render(<ExerciseDetail exercise={exercise()} />);
+
+    const history = await screen.findByText("Seu histórico");
+    const definitions = screen.getByText("Músculos principais");
+
+    expect(
+      history.compareDocumentPosition(definitions) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 });

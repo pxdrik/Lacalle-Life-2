@@ -78,9 +78,8 @@ export function ExerciseHistory({ exerciseId }: { readonly exerciseId: EntityId 
         {record !== undefined && (
           <div className="grid grid-cols-2 gap-3">
             <Metric
-              value={`${formatDecimal(record.repsAtHeaviest)} × ${formatDecimal(record.heaviestKg)}`}
-              unit="kg"
-              label="Série mais pesada"
+              value={`${formatDecimal(record.heaviestKg)} × ${formatDecimal(record.repsAtHeaviest)}`}
+              label="Série mais pesada (kg × reps)"
             />
             <Metric
               value={formatDecimal(record.bestOneRepMax)}
@@ -132,7 +131,7 @@ export function ExerciseHistory({ exerciseId }: { readonly exerciseId: EntityId 
   );
 }
 
-/** "8×60", "12" (sem carga) ou "10 min" (cardio). */
+/** "60×8" (kg × reps, 30/09/2026), "12" (sem carga) ou "10 min" (cardio). */
 function describeSet(set: PerformedSet): string {
   if (set.durationSeconds !== null) {
     return `${formatDecimal(Math.round((set.durationSeconds / 60) * 10) / 10)} min`;
@@ -140,5 +139,5 @@ function describeSet(set: PerformedSet): string {
   const reps = set.reps === null ? "—" : formatDecimal(set.reps);
   return set.weightKg === null || set.weightKg <= 0
     ? reps
-    : `${reps}×${formatDecimal(set.weightKg)}`;
+    : `${formatDecimal(set.weightKg)}×${reps}`;
 }

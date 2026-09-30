@@ -123,11 +123,10 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
 
                     {set.isCompleted ? (
                       <span className="text-ink">
-                        {set.reps ?? "—"} ×{" "}
                         {set.weightKg === null
                           ? "—"
                           : formatDecimal(set.weightKg)}{" "}
-                        kg
+                        kg × {set.reps ?? "—"}
                         {set.rpe !== null && (
                           <span className="text-ink-muted">
                             {" "}
@@ -142,11 +141,11 @@ export function SessionSummary({ session, onEdit, onDelete }: Props) {
                       // continua salvo, `isCompleted` só controla a marcação)
                       // desaparecia da tela como se tivesse sido descartado.
                       <span className="text-ink-subtle">
-                        {set.reps ?? "—"} ×{" "}
                         {set.weightKg === null
                           ? "—"
                           : formatDecimal(set.weightKg)}{" "}
-                        kg <span className="italic">(não confirmada)</span>
+                        kg × {set.reps ?? "—"}{" "}
+                        <span className="italic">(não confirmada)</span>
                       </span>
                     ) : (
                       <span className="text-ink-subtle">não realizada</span>

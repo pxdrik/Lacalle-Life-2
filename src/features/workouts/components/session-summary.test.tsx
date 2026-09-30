@@ -97,7 +97,7 @@ describe("SessionSummary", () => {
     // digitou, como se tivesse sido descartado.
     mount(sessionWith([{ reps: 10, weightKg: 20, isCompleted: false }]));
 
-    expect(screen.getByText(/10 × 20 kg/)).toBeInTheDocument();
+    expect(screen.getByText(/20 kg × 10/)).toBeInTheDocument();
     expect(screen.getByText("(não confirmada)")).toBeInTheDocument();
     expect(screen.queryByText("não realizada")).not.toBeInTheDocument();
   });

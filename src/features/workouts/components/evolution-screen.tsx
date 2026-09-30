@@ -224,7 +224,7 @@ export function EvolutionScreen() {
                 recorde significar alguma coisa.
 
                 A data é a de `heaviestAt`, não a de `bestOneRepMaxAt`: a
-                linha mostra `reps × carga`, e a data tem que ser a daquela
+                linha mostra `carga × reps`, e a data tem que ser a daquela
                 série, não a de outra. As duas quase sempre são séries
                 diferentes — é por isso que o domínio guarda os dois carimbos
                 separados — e imprimir as duas seria pedir que alguém
@@ -232,7 +232,7 @@ export function EvolutionScreen() {
 
                 Três colunas viraram duas de duas linhas. Não é preferência:
                 a data como quarta coluna não cabe em 320px ao lado de nome,
-                `reps × kg` e 1RM, e o jeito de fazer caber seria truncar o
+                `kg × reps` e 1RM, e o jeito de fazer caber seria truncar o
                 nome do exercício. `SessionRow` logo abaixo já empilha data
                 sob o nome pelo mesmo motivo. */}
             {records.slice(0, 12).map((record) => (
@@ -248,8 +248,8 @@ export function EvolutionScreen() {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-sm tabular-nums text-ink">
-                    {record.repsAtHeaviest} × {formatDecimal(record.heaviestKg)}{" "}
-                    kg
+                    {formatDecimal(record.heaviestKg)} kg ×{" "}
+                    {record.repsAtHeaviest}
                   </p>
                   <p className="mt-0.5 text-xs tabular-nums text-ink-subtle">
                     1RM {formatDecimal(record.bestOneRepMax)}

@@ -33,7 +33,13 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
           curation is readable without scrolling past it. Stacked below that,
           where a column each would leave both too narrow to be worth it. */}
       <div className="grid gap-6 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        <ExercisePhotos exercise={exercise} />
+        {/* O histórico vem antes da ficha (Pedro, 30/09/2026, roadmap 7.4):
+            no celular fica foto, histórico, ficha; no desktop, embaixo da
+            foto, na coluna da esquerda. */}
+        <div className="space-y-6">
+          <ExercisePhotos exercise={exercise} />
+          <ExerciseHistory exerciseId={exercise.id} />
+        </div>
 
         {/* A description list, because that is what this is: terms and their
             values. `dl > div > dt + dd` is the grouping form. */}
@@ -93,11 +99,6 @@ export function ExerciseDetail({ exercise }: { readonly exercise: Exercise }) {
           <Row label="Outros nomes" values={[...exercise.aliases]} />
         </dl>
       </div>
-
-      {/* Roadmap 7.4 (30/09/2026): o histórico da própria pessoa neste
-          exercício, embaixo das fotos e da ficha, em largura inteira. Antes
-          da atribuição das fotos, que é o rodapé do diálogo. */}
-      <ExerciseHistory exerciseId={exercise.id} />
 
       {exercise.isCustom && (
         <p className="rounded-lg border border-line bg-muted px-4 py-3 text-xs text-ink-muted">
