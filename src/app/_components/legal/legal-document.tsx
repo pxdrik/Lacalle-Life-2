@@ -20,11 +20,11 @@ import { LEGAL_LINKS } from "./legal-links";
 export const LEGAL_UPDATED_AT = "30 de setembro de 2026";
 
 /**
- * O canal oficial para contato e para os pedidos de titular (LGPD). `null`
- * até o Pedro definir: os documentos dizem que ele ainda será publicado, e
- * nunca mostram um e-mail inventado. Preencher aqui atualiza os três.
+ * O canal oficial para contato e para os pedidos de titular (LGPD), criado
+ * pelo Pedro em 30/09/2026. Mudar aqui atualiza os três documentos; `null`
+ * volta a dizer que o canal ainda será publicado, nunca um e-mail inventado.
  */
-export const LEGAL_CONTACT_EMAIL: string | null = null;
+export const LEGAL_CONTACT_EMAIL: string | null = "lacallepm@gmail.com";
 
 export interface LegalSection {
   readonly heading: string;

@@ -68,6 +68,13 @@ describe("8.4 — documentos legais", () => {
         for (const [title, Page] of PAGES) {
           render(<Page />);
           expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument();
+          if (title !== "Aviso de Saúde") {
+            // O canal de contato da LGPD, clicável.
+            expect(screen.getByRole("link", { name: "lacallepm@gmail.com" })).toHaveAttribute(
+              "href",
+              "mailto:lacallepm@gmail.com",
+            );
+          }
           expect(articleOverflow(), `${title} passa da página`).toBeLessThanOrEqual(0.5);
           for (const link of screen.getByRole("navigation", { name: "Outros documentos" }).querySelectorAll("a")) {
             // No fim de uma página longa: fora da tela, `elementFromPoint` não vê nada.
