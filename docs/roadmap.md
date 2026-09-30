@@ -3159,8 +3159,8 @@ confirmada por reprodução.
 
 | # | Item | Situação | Nota |
 | --- | --- | --- | --- |
-| 9.1 | **Reorganização da aba e resumo dos dados do Perfil** | ⬜ Confirmar com o Pedro | O PDF trata como "já em andamento", mas não há item no roadmap nem mudança no código do Perfil até `af91581`. Se for trabalho feito fora daqui, registrar onde; se não começou, entra aqui como tarefa, seguindo a tabela acima e os critérios abaixo. Não abrir uma segunda tarefa com a mesma finalidade. |
-| 9.2 | **Preferências alimentares e alergias** | Descoberta, não implementação | Não existe campo de alergia, intolerância ou restrição em Perfil, Dieta ou nutrição. **Não vira checkbox solto no Perfil:** a tela prometeria uma proteção que o app não entrega. O PDF condiciona ao "gerador de dieta", mas **o app não gera dieta**: a pessoa monta a própria, e as sugestões são as alternativas de refeição que ela mesma salva. Então, se um dia entrar, o efeito verificável tem que estar noutro fluxo (por exemplo, sinalizar alimento incompatível no seletor), com o dado salvo e sincronizado, e teste provando que o alimento incompatível é sinalizado. Decisão de produto do Pedro antes de qualquer código. |
+| 9.1 | **Reorganização da aba e resumo dos dados do Perfil** | ⬜ A fazer | **Escopo confirmado pelo Pedro (30/09/2026): só a aba Perfil muda.** Nenhuma outra tela, fluxo ou dado entra junto. Reorganizar o que já existe (conta e sincronização, dados pessoais e meta, resultado do plano, aparência, backup e dados) em grupos claros, seguindo a tabela acima e os critérios abaixo, com protótipo antes do código. "Já em andamento" no PDF queria dizer que o Pedro já tinha decidido fazer, não que havia código. |
+| 9.2 | **Preferências alimentares e alergias** | Fora do escopo | Não entra: o Pedro quer mudar só a aba Perfil (30/09/2026), e esta preferência só faria sentido com efeito noutro fluxo (o app não gera dieta; a pessoa monta a dela). Sem esse efeito, um campo no Perfil prometeria uma proteção que o app não entrega. Fica registrado para não voltar como checkbox solto. |
 
 **Critérios de qualidade para qualquer mudança no Perfil:**
 
@@ -3199,8 +3199,7 @@ confirmada por reprodução.
 - ✅ 8.16 "Observações" cortado no rodapé da refeição (320px Confortável)
 - ✅ 8.17 Refeição nova com nome padrão; "Igual a ontem" sem depender de acento
 - ⬜ 8.18 Água não chega nos outros aparelhos (sync só envia)
-- ⬜ 9.1 Reorganização e resumo do Perfil (confirmar se já está em andamento, e onde)
-- ⬜ 9.2 Preferências alimentares e alergias (descoberta: decisão de produto antes de código)
+- ⬜ 9.1 Reorganização e resumo da aba Perfil (só a aba Perfil; protótipo antes do código)
 
 ### Ordem de prioridade do que falta (29/09/2026)
 
