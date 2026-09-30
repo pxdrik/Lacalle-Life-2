@@ -54,7 +54,7 @@ interface Props {
  * conteúdo, e o contra-zoom agora é do contêiner, não do campo.
  */
 const FIELD =
-  "relative h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums placeholder:text-ink-subtle placeholder:italic transition-colors duration-150 ease-out";
+  "relative h-11 w-full rounded-md border bg-surface px-1.5 text-center text-base tabular-nums placeholder:text-ink-subtle transition-colors duration-150 ease-out";
 
 export function PerformedSetRow({
   set,

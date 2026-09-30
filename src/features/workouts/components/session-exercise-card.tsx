@@ -2,8 +2,6 @@
 
 import { ChevronDown, ChevronUp, Plus, Repeat } from "lucide-react";
 
-import { formatDecimal } from "@/core/format/decimal";
-
 import type { PerformedSetChanges } from "../services/edit-session";
 import type { LastPerformance } from "../services/history";
 import type { Exercise } from "../types/exercise";
@@ -143,15 +141,12 @@ export function SessionExerciseCard({
         </div>
       </header>
 
-      {/* The question this app is opened to answer: what did I do last time.
-          One compact line, above the sets, so it is read before the first rep
-          and not hunted for afterwards. */}
+      {/* Só a data (pedido do Pedro, 29/09/2026). Os números da última vez
+          passaram a ser a dica dentro de cada campo (roadmap 8.5), e repeti-los
+          aqui era a mesma informação duas vezes. */}
       {lastTime !== undefined && (
-        <p className="mt-1 truncate text-xs tabular-nums text-ink-muted">
-          <span className="font-sans text-ink-subtle">
-            Última vez, {formatShortDate(lastTime.performedAt)}:{" "}
-          </span>
-          {lastTime.sets.map(describeSet).join(" · ")}
+        <p className="mt-1 truncate text-xs text-ink-subtle">
+          Última vez realizado em {formatShortDate(lastTime.performedAt)}
         </p>
       )}
 
@@ -288,19 +283,4 @@ const shortDate = new Intl.DateTimeFormat("pt-BR", {
 
 function formatShortDate(timestamp: number): string {
   return shortDate.format(new Date(timestamp));
-}
-
-function describeSet(set: {
-  reps: number | null;
-  weightKg: number | null;
-  durationSeconds: number | null;
-}): string {
-  if (set.durationSeconds !== null) {
-    return `${formatDecimal(Math.round((set.durationSeconds / 60) * 10) / 10)} min`;
-  }
-
-  const reps = set.reps ?? "—";
-  return set.weightKg === null
-    ? `${String(reps)}`
-    : `${String(reps)}×${formatDecimal(set.weightKg)}`;
 }

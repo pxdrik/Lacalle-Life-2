@@ -463,9 +463,6 @@ describe("8.5 — a última vez aparece como dica na linha certa", () => {
       const subtle = getComputedStyle(probe).color;
       probe.remove();
       expect(getComputedStyle(weights[0]!, "::placeholder").color).toBe(subtle);
-      // 8.9 (29/09/2026, pedido do Pedro): a dica em itálico, o valor digitado não.
-      expect(getComputedStyle(weights[0]!, "::placeholder").fontStyle).toBe("italic");
-      expect(getComputedStyle(weights[0]!).fontStyle).toBe("normal");
     } finally {
       document.documentElement.removeAttribute("data-theme");
     }
@@ -513,4 +510,24 @@ describe("8.13 — o número da série fica na altura dos campos", () => {
       }
     }
   }
+});
+
+/**
+ * 29/09/2026 (pedido do Pedro): a linha acima das séries diz só quando foi a
+ * última vez. Os números passaram a ser a dica de cada campo (8.5).
+ */
+describe("a linha da última vez mostra só a data", () => {
+  it("sem séries, com a data", () => {
+    const { container } = renderCard(EXERCISE, undefined, {
+      performedAt: Date.UTC(2026, 8, 22, 12),
+      sessionId: "old",
+      sets: [{ ...EXERCISE.sets[0]!, weightKg: 50, reps: 12, isCompleted: true }],
+    });
+    const line = [...container.querySelectorAll("p")].find((p) =>
+      p.textContent?.startsWith("Última vez"),
+    );
+
+    expect(line?.textContent).toMatch(/^Última vez realizado em 22 de set.?$/);
+    expect(line?.textContent).not.toContain("×");
+  });
 });
