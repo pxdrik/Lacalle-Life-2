@@ -170,13 +170,19 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
           Agora é o mesmo componente e o mesmo tamanho. O estado "é este o
           valor atual" fica por conta das duas classes de acento, que o `cn`
           resolve por cima do `secondary` — mesma técnica de qualquer
-          consumidor que precisa marcar seleção sem inventar uma variante. */}
-      <div className="mt-4 flex gap-2">
+          consumidor que precisa marcar seleção sem inventar uma variante.
+
+          `flex-wrap` e `flex-auto`, não `flex-1` (roadmap 8.20, 30/09/2026):
+          na Confortável os dois cabiam com folga zero, e com a fonte do
+          Linux (a da CI, e a família da do Android) a linha passava 3px da
+          folha e ela rolava de lado. `flex-1` tem base zero e nunca quebra;
+          com a base na largura do texto, se não couber, um desce. */}
+      <div className="mt-4 flex flex-wrap gap-2">
         <Button
           variant="secondary"
           size="lg"
           className={cn(
-            "flex-1",
+            "flex-auto",
             value === null && "border-accent bg-accent/10",
           )}
           onClick={() => {
@@ -188,7 +194,7 @@ export function RpeSelect({ value, onChange, label, className }: Props) {
         </Button>
         <Button
           size="lg"
-          className="flex-1"
+          className="flex-auto"
           onClick={() => {
             setOpen(false);
           }}

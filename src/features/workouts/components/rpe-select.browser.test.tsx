@@ -727,3 +727,34 @@ describe("8.3 — só a linha do meio círculo escolhe", () => {
     }
   });
 });
+
+/**
+ * Roadmap 8.20 (30/09/2026): a folha rolava 2,31px de lado na Confortável,
+ * só na CI. A fonte do Linux é um pouco mais larga que a do Windows, e a
+ * linha "Sem RPE / Confirmar" cabia com folga zero. Aqui a fonte mais larga
+ * é simulada, para o defeito aparecer em qualquer máquina, não só no Linux
+ * (nem só no celular Android, que usa a mesma família de fontes).
+ */
+describe("8.20 — a folha do RPE aguenta uma fonte mais larga", () => {
+  for (const density of DENSITIES) {
+    it(`390px, densidade ${density}`, async () => {
+      setDensity(density);
+      const wider = document.createElement("style");
+      wider.textContent = "dialog { letter-spacing: 0.04em; }";
+      document.head.append(wider);
+      try {
+        const { slider } = await openPicker(8);
+        const dialog = slider.closest("dialog")!;
+
+        for (const scroller of [dialog, ...dialog.querySelectorAll<HTMLElement>("*")]) {
+          const before = scroller.scrollLeft;
+          scroller.scrollLeft = 50;
+          expect(scroller.scrollLeft, `a folha rola na horizontal: ${culprit(scroller)}`).toBe(before);
+          scroller.scrollLeft = before;
+        }
+      } finally {
+        wider.remove();
+      }
+    });
+  }
+});
