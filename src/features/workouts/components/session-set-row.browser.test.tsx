@@ -463,6 +463,9 @@ describe("8.5 — a última vez aparece como dica na linha certa", () => {
       const subtle = getComputedStyle(probe).color;
       probe.remove();
       expect(getComputedStyle(weights[0]!, "::placeholder").color).toBe(subtle);
+      // 8.9 (29/09/2026, pedido do Pedro): a dica em itálico, o valor digitado não.
+      expect(getComputedStyle(weights[0]!, "::placeholder").fontStyle).toBe("italic");
+      expect(getComputedStyle(weights[0]!).fontStyle).toBe("normal");
     } finally {
       document.documentElement.removeAttribute("data-theme");
     }
