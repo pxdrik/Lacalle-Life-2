@@ -2,6 +2,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
+import { CareRepositoryProvider } from "../data/care-repository-context";
+import { fakeCareRepository } from "../data/fake-care-repository.test-helper";
 import { fakeProRepository } from "../data/fake-pro-repository.test-helper";
 import { ProRepositoryProvider } from "../data/pro-repository-context";
 import type { MyAccess, OwnProfessional } from "../types/professional";
@@ -11,7 +13,9 @@ function mount(access: MyAccess | null) {
   const repository = fakeProRepository({ access });
   render(
     <ProRepositoryProvider repository={repository}>
-      <ProAccessSections />
+      <CareRepositoryProvider repository={fakeCareRepository({})}>
+        <ProAccessSections />
+      </CareRepositoryProvider>
     </ProRepositoryProvider>,
   );
   return repository;
@@ -30,7 +34,9 @@ describe("Área profissional no Perfil", () => {
   it("sem conta não mostra nada", async () => {
     const { container } = render(
       <ProRepositoryProvider repository={fakeProRepository({ access: null })}>
-        <ProAccessSections />
+        <CareRepositoryProvider repository={fakeCareRepository({})}>
+          <ProAccessSections />
+        </CareRepositoryProvider>
       </ProRepositoryProvider>,
     );
     await waitFor(() => {

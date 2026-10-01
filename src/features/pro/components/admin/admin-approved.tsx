@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight, UserCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/design-system/components/badge";
 import { Button } from "@/design-system/components/button";
@@ -10,7 +10,9 @@ import { Dialog } from "@/design-system/components/dialog";
 import { EmptyState } from "@/design-system/components/empty-state";
 import { PageHeader } from "@/design-system/components/page-header";
 
+import { useCareRepository } from "../../data/care-repository-context";
 import { useAdminData } from "../../hooks/admin-context";
+import { describeSharing, type PatientLink } from "../../types/care";
 import type { AuditEntry, ProfessionalRecord } from "../../types/professional";
 import { AdminLoadState } from "./admin-load-state";
 import { AuditList } from "./admin-history";
@@ -20,8 +22,8 @@ import { Person } from "./person";
 /**
  * Quem pode usar o Life Pro, e quem está suspenso. Tocar abre os detalhes:
  * registro, conta, quando foi aprovado, o histórico daquela pessoa e
- * suspender ou reativar. Os pacientes de cada profissional entram aqui com os
- * vínculos (Etapa 4), e mesmo então só o vínculo, nunca o conteúdo.
+ * suspender ou reativar, e os pacientes: só o vínculo (quem, o que liberou,
+ * a situação), nunca o conteúdo.
  */
 export function AdminApproved() {
   const admin = useAdminData();
@@ -85,6 +87,53 @@ export function AdminApproved() {
   );
 }
 
+const SHORT = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
+
+/** Os vínculos de um profissional (0034): quem, o que liberou, a situação. */
+function useLinksOf(professionalId: string): readonly PatientLink[] | null {
+  const care = useCareRepository();
+  const [links, setLinks] = useState<readonly PatientLink[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    care
+      .listLinksOf(professionalId)
+      .then((list) => {
+        if (active) setLinks(list);
+      })
+      .catch(() => {
+        if (active) setLinks([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [care, professionalId]);
+  return links;
+}
+
+function PatientLinks({ links }: { readonly links: readonly PatientLink[] | null }) {
+  if (links === null) return <p className="text-sm text-ink-subtle">Carregando…</p>;
+  if (links.length === 0) return <p className="text-sm text-ink-subtle">Nenhum paciente ainda.</p>;
+  return (
+    <ul className="divide-y divide-line">
+      {links.map((link) => (
+        <li key={link.id} className="flex items-start justify-between gap-3 py-2.5">
+          <Person
+            name={link.label}
+            detail={link.status === "active" ? describeSharing(link.sharing) : "Sem acesso"}
+          />
+          <span className="flex shrink-0 flex-col items-end gap-1">
+            {link.status === "active" ? <Badge state="concluido">Ativo</Badge> : <Badge state="neutro">Encerrado</Badge>}
+            <span className="text-xs text-ink-subtle tabular-nums">
+              {link.status === "active" ? "desde" : "encerrado em"}{" "}
+              {SHORT.format(new Date(link.status === "active" ? link.createdAt : (link.endedAt ?? link.createdAt)))}
+            </span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function StatusBadge({ record }: { readonly record: ProfessionalRecord }) {
   return record.status === "approved" ? (
     <Badge state="concluido">Ativo</Badge>
@@ -107,6 +156,7 @@ function ProfessionalSheet({
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
   const approval = audit.find((entry) => entry.action === "approve");
+  const links = useLinksOf(record.userId);
 
   async function change(suspended: boolean) {
     setPending(true);
@@ -144,6 +194,15 @@ function ProfessionalSheet({
             </>
           )}
         </dl>
+
+        <section className="space-y-2 rounded-lg border border-line p-4">
+          <h3 className="text-sm font-semibold text-ink">Pacientes</h3>
+          <PatientLinks links={links} />
+          <p className="text-xs text-ink-subtle">
+            Você vê com quem ela tem vínculo e o que cada pessoa liberou. Diário, evolução e planos não aparecem aqui:
+            são dos pacientes.
+          </p>
+        </section>
 
         <section className="space-y-2 rounded-lg border border-line p-4">
           <h3 className="text-sm font-semibold text-ink">Histórico</h3>

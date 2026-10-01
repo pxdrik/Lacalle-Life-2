@@ -2,6 +2,8 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
+import { CareRepositoryProvider } from "../../data/care-repository-context";
+import { fakeCareRepository } from "../../data/fake-care-repository.test-helper";
 import { fakeProRepository, record } from "../../data/fake-pro-repository.test-helper";
 import { ProRepositoryProvider } from "../../data/pro-repository-context";
 import type { MyAccess, ProfessionalRecord } from "../../types/professional";
@@ -22,7 +24,9 @@ function mount(
   const repository = fakeProRepository({ access, professionals });
   render(
     <ProRepositoryProvider repository={repository}>
-      <AdminShell>{page}</AdminShell>
+      <CareRepositoryProvider repository={fakeCareRepository({})}>
+        <AdminShell>{page}</AdminShell>
+      </CareRepositoryProvider>
     </ProRepositoryProvider>,
   );
   return repository;

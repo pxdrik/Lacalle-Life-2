@@ -12,6 +12,8 @@ import {
   setViewport,
 } from "@/test/geometry";
 
+import { CareRepositoryProvider } from "../../data/care-repository-context";
+import { fakeCareRepository } from "../../data/fake-care-repository.test-helper";
 import { fakeProRepository, record } from "../../data/fake-pro-repository.test-helper";
 import { ProRepositoryProvider } from "../../data/pro-repository-context";
 import { AdminApproved } from "./admin-approved";
@@ -37,7 +39,9 @@ function mount(page: React.ReactNode, people = PEOPLE) {
   render(
     <ThemeProvider>
       <ProRepositoryProvider repository={fakeProRepository({ access: { isAdmin: true, professional: null }, professionals: people })}>
+        <CareRepositoryProvider repository={fakeCareRepository({})}>
         <AdminShell>{page}</AdminShell>
+      </CareRepositoryProvider>
       </ProRepositoryProvider>
     </ThemeProvider>,
   );

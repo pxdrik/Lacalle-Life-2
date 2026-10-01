@@ -11,12 +11,14 @@ import { Section } from "@/design-system/components/section";
 import { useProRepository } from "../data/pro-repository-context";
 import { useMyAccess } from "../hooks/use-my-access";
 import { REJECTION_REASON_MESSAGES, type OwnProfessional } from "../types/professional";
+import { CareSection } from "./care/care-section";
 import { RequestAccessDialog } from "./request-access-dialog";
 
 /**
- * No Perfil, logo depois de "Conta e sincronização" (protótipo aprovado em
- * 30/09/2026): a "Área profissional", para quem tem conta, e a
- * "Administração", só para o administrador. Sem conta não aparece nada:
+ * No Perfil, logo depois de "Conta e sincronização" (protótipos aprovados em
+ * 30/09/2026): "Acompanhamento", para quem tem ou teve uma profissional; a
+ * "Área profissional", para quem tem conta; e a "Administração", só para o
+ * administrador. Sem conta não aparece nada:
  * pedido e administração moram na conta, não no aparelho.
  *
  * Esconder a seção não protege nada; quem decide é o banco (0033). Aqui só se
@@ -33,6 +35,8 @@ export function ProAccessSections() {
 
   return (
     <>
+      <CareSection />
+
       <Section title="Área profissional">
         <ProfessionalCard
           professional={professional}
@@ -157,6 +161,9 @@ function ProfessionalCard({
           <p className="text-sm text-ink-muted">
             Funciona melhor no computador ou no tablet. Sua dieta e seu diário continuam aqui, como sempre.
           </p>
+          <Link href="/pro" className={buttonClasses("primary", "sm")}>
+            Abrir Life Pro
+          </Link>
         </Card>
       );
     case "suspended":

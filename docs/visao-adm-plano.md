@@ -206,3 +206,15 @@ antes de o Life Pro estar completo).
   Histórico. Os pacientes de cada profissional entram nos detalhes com os
   vínculos (Etapa 4). Testes de navegador em 320 a 1600px, nas três
   densidades.
+- **Etapas 3 e 4, entregues 01/10/2026.** Migração 0034 aplicada em produção
+  (`20261001035939`). `/pro` só para profissional aprovado, na mesma casca da
+  administração: Visão geral (só números reais: pacientes ativos e convites
+  esperando) e Pacientes (convidar por link, cancelar convite, encerrar
+  vínculo). `/convite/[código]`: com conta, escolhe o que libera (já marcado,
+  como no protótipo) e aceita; sem conta, entrar ou criar conta volta para o
+  convite (`?next=`). Perfil: "Acompanhamento" (mudar o que libera, encerrar
+  em dois toques) e "Abrir Life Pro" para quem foi aprovado. Administração:
+  pacientes de cada profissional nos detalhes, só o vínculo. Dietas, Evolução
+  e Biblioteca entram na navegação do Life Pro com as Etapas 5 e 6.
+  Limite conhecido: quem cria conta pelo convite e precisa confirmar o e-mail
+  volta para `/hoje` depois da confirmação, e reabre o link do convite.
