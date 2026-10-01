@@ -3005,8 +3005,9 @@ Com isso, a Sprint 1 está fechada.
 
 ### 6. Visão ADM: LaCalle Life Pro (B2B / B2B2C)
 
-**Registrado em 28/09/2026, não iniciado.** Especificação completa em
-[`docs/visao-adm-pro.md`](visao-adm-pro.md).
+**Registrado em 28/09/2026. Em implementação desde 01/10/2026.** Especificação completa em
+[`docs/visao-adm-pro.md`](visao-adm-pro.md); diagnóstico e plano em etapas em
+[`docs/visao-adm-plano.md`](visao-adm-plano.md).
 
 Área profissional para nutricionistas (treinadores depois): painel, gestão
 de pacientes por convite, criação e publicação de planos alimentares com
