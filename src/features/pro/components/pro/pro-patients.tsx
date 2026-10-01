@@ -1,6 +1,8 @@
 "use client";
 
 import { Plus, Users } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/design-system/components/badge";
@@ -21,8 +23,8 @@ const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit"
 /**
  * Pacientes (protótipo v3): quem tem vínculo ativo, os convites esperando
  * resposta e os vínculos encerrados. "Adicionar paciente" gera o link do
- * convite. O perfil de cada paciente (plano, diário, evolução) chega com as
- * Etapas 5 e 6.
+ * convite. O nome abre a página do paciente, com o plano (Etapa 5); diário e
+ * evolução chegam com a Etapa 6.
  */
 export function ProPatients() {
   const patients = usePatients();
@@ -120,7 +122,11 @@ function Lists({
           {active.map((link) => (
             <Row
               key={link.id}
-              person={<Person name={link.label} detail={`Vê: ${describeSharing(link.sharing)} · desde ${DATE.format(new Date(link.createdAt))}`} />}
+              person={
+                <PatientLinkTo id={link.id}>
+                  <Person name={link.label} detail={`Vê: ${describeSharing(link.sharing)} · desde ${DATE.format(new Date(link.createdAt))}`} />
+                </PatientLinkTo>
+              }
               badge={<Badge state="concluido">Ativo</Badge>}
               action={
                 <ConfirmButton
@@ -167,7 +173,11 @@ function Lists({
           {ended.map((link) => (
             <Row
               key={link.id}
-              person={<Person name={link.label} detail={`Encerrado em ${DATE.format(new Date(link.endedAt ?? link.createdAt))}`} />}
+              person={
+                <PatientLinkTo id={link.id}>
+                  <Person name={link.label} detail={`Encerrado em ${DATE.format(new Date(link.endedAt ?? link.createdAt))}`} />
+                </PatientLinkTo>
+              }
               badge={<Badge state="neutro">Encerrado</Badge>}
             />
           ))}
@@ -178,6 +188,18 @@ function Lists({
         Com o vínculo encerrado, você mantém os planos que publicou. Diário e evolução do paciente deixam de aparecer.
       </p>
     </>
+  );
+}
+
+/** Encerrado também abre: os planos publicados continuam lá, só para leitura. */
+function PatientLinkTo({ id, children }: { readonly id: string; readonly children: React.ReactNode }) {
+  return (
+    <Link
+      href={`/pro/pacientes/${id}` as Route}
+      className="-m-1 block rounded-md p-1 transition-colors duration-150 ease-out hover:bg-muted"
+    >
+      {children}
+    </Link>
   );
 }
 

@@ -30,7 +30,9 @@ export interface WorkspaceLink {
  *   `data-area="pro"` sobe para 1600px (`tokens.css`, regra de tela larga do
  *   `docs/brandbook.md`, só nestas áreas).
  * - Abaixo de `lg`: cabeçalho no topo, com a mesma lista em linha que rola
- *   para o lado se não couber (como o protótipo v3).
+ *   para o lado se não couber (como o protótipo v3). Ele rola com a página,
+ *   como o do app: grudado no topo, cobria a barra de totais do editor do
+ *   plano, que também gruda no topo (medido, `plan-editor.browser.test.tsx`).
  *
  * "Voltar para o app" fica sempre à mão: é a mesma conta, e a pessoa alterna
  * entre a própria dieta e o trabalho.
@@ -81,7 +83,7 @@ export function WorkspaceShell({
         </div>
       </aside>
 
-      <header className="sticky top-0 z-20 border-b border-line bg-surface lg:hidden">
+      <header className="border-b border-line bg-surface lg:hidden">
         <div className="flex h-(--header-h) items-center gap-2 px-4">
           <Link href="/hoje" aria-label="LaCalle Life, voltar para o app">
             <Signature />

@@ -7,6 +7,7 @@ import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Plus } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -42,10 +43,35 @@ import { InlineText } from "./inline-text";
 import { MacroProgress } from "./macro-progress";
 import { MacroSummary } from "./macro-summary";
 
-export function DietEditor({ dietId }: { readonly dietId: string }) {
+/**
+ * O editor de dieta. Também edita o plano que a nutricionista monta no Life
+ * Pro (01/10/2026): mesmo editor, outro repositório por trás, e por isso os
+ * pontos que dependem de onde ele está aberto vêm por prop.
+ */
+export function DietEditor({
+  dietId,
+  backHref = "/dietas",
+  backLabel = "Dietas",
+  editorPath,
+  nameLabel = "Nome da dieta",
+  showTargets = true,
+}: {
+  readonly dietId: string;
+  readonly backHref?: Route;
+  readonly backLabel?: string;
+  /** Para onde o seletor de alimentos volta. Padrão: `/dietas/<id>`. */
+  readonly editorPath?: string;
+  readonly nameLabel?: string;
+  /**
+   * As metas da conta aberta. No Life Pro ficam de fora: seriam as metas da
+   * nutricionista, não as do paciente.
+   */
+  readonly showTargets?: boolean;
+}) {
   const { state, saveError, hasConflict, apply, reload } = useDietEditor(dietId);
   // `null` whenever no profile is filled in, which is the normal case.
-  const targets = useNutritionTargets();
+  const ownTargets = useNutritionTargets();
+  const targets = showTargets ? ownTargets : null;
   const router = useRouter();
   useApplyPickedFood(apply);
 
@@ -71,11 +97,11 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
   return (
     <div>
       <Link
-        href="/dietas"
+        href={backHref}
         className="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
       >
         <ArrowLeft aria-hidden className="size-4" />
-        Dietas
+        {backLabel}
       </Link>
 
       <InlineText
@@ -83,7 +109,7 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
         onChange={(name) => {
           apply((current) => renameDiet(current, name));
         }}
-        label="Nome da dieta"
+        label={nameLabel}
         placeholder="Dieta sem nome"
         className="mt-3 w-full text-2xl font-medium tracking-normal"
       />
@@ -169,7 +195,7 @@ export function DietEditor({ dietId }: { readonly dietId: string }) {
                     );
                   }}
                   onAddFoodClick={() => {
-                    const returnTo = encodeURIComponent(`/dietas/${dietId}`);
+                    const returnTo = encodeURIComponent(editorPath ?? `/dietas/${dietId}`);
                     router.push(
                       `/alimentos/selecionar?returnTo=${returnTo}&mealId=${meal.id}`,
                     );

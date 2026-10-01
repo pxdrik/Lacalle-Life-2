@@ -218,3 +218,19 @@ antes de o Life Pro estar completo).
   e Biblioteca entram na navegação do Life Pro com as Etapas 5 e 6.
   Limite conhecido: quem cria conta pelo convite e precisa confirmar o e-mail
   volta para `/hoje` depois da confirmação, e reabre o link do convite.
+- **Etapa 5, em andamento.** Banco (migração 0035) aplicado em produção
+  (`20261001043336`). Feito do lado da profissional (5a, 01/10/2026): a
+  página do paciente (`/pro/pacientes/[id]`, aberta pelo nome em Pacientes),
+  com o plano e as versões publicadas; criar plano; o editor de dieta do app
+  editando o rascunho no Supabase (`/pro/pacientes/[id]/plano/[planId]`), com
+  orientação e outras opções por refeição; publicar versão nova com nota.
+  Publicar espera a última edição chegar ao banco, e a ida ao seletor de
+  alimentos não perde edição a caminho (os dois vistos vermelhos). O
+  cabeçalho do Life Pro no celular passou a rolar com a página, como o do
+  app: grudado no topo, cobria a barra de totais do editor (medido).
+  Falta: o lado do paciente (5b: Dietas, leitura, cópia; 5c: dias da semana,
+  Diário com "Opção de hoje", aviso de versão nova) e a Biblioteca (5d).
+  Pendente de antes: `/pro` e `/admin` ainda entram no cache do service
+  worker (o risco da seção 4 previa que não). As páginas não levam dado de
+  paciente, que só chega pelo navegador, então o risco é baixo, mas a
+  promessa da seção 4 ainda não vale.
