@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, SlidersHorizontal, X } from "lucide-react";
+import { Plus, Star, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
@@ -15,9 +15,9 @@ import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { useFoodEditor } from "../hooks/use-food-editor";
 import { searchFoods } from "../services/search-foods";
 import type { Food, FoodCategory, RecentFood } from "../types/food";
-import { FOOD_CATEGORY_LABELS } from "../types/food";
+import { FOOD_CATEGORIES, FOOD_CATEGORY_LABELS } from "../types/food";
 import { CustomFoodForm } from "./custom-food-form";
-import { FoodFilters } from "./food-filters";
+import { FoodCategoryCards } from "./food-category-cards";
 
 interface Props {
   /**
@@ -76,8 +76,6 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const activeFilterCount = (category === null ? 0 : 1) + (favoritesOnly ? 1 : 0);
 
   // The same create/edit machinery `/alimentos/novo` uses — `id: null` means
   // creating. Reusing it here, instead of a second write path, is the whole
@@ -89,6 +87,13 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
     state.status === "ready"
       ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
+  // Quantos cada cartão de categoria mostraria, com a busca e a estrela como estão.
+  const categoryCounts = Object.fromEntries(
+    FOOD_CATEGORIES.map((option) => [
+      option,
+      state.status === "ready" ? searchFoods(state.foods, { text, category: option, favoritesOnly }).length : 0,
+    ]),
+  ) as Record<FoodCategory, number>;
 
   // Called unconditionally, above the `creating` branch below — hooks can't
   // follow an early return, even one that never needs this value.
@@ -199,25 +204,25 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
+        {/* Favoritos direto na linha da busca (roadmap 10.5): as categorias
+            subiram para os cartões abaixo, e "Filtros" ficaria com a estrela
+            sozinha. Mesmo botão da tela Alimentos. */}
         <button
           type="button"
-          aria-label="Filtros"
-          aria-expanded={showFilters}
+          aria-pressed={favoritesOnly}
+          aria-label="Só favoritos"
           onClick={() => {
-            setShowFilters((open) => !open);
+            setFavoritesOnly(!favoritesOnly);
           }}
           className={cn(
             "shrink-0",
-            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
+            buttonClasses(favoritesOnly ? "primary" : "secondary"),
             // Matches the field beside it: `--control-h` varies with density,
             // `--input-h` stays fixed at 44px on purpose (input.tsx).
             "h-(--input-h)",
           )}
         >
-          <SlidersHorizontal aria-hidden className="size-4" />
-          {activeFilterCount > 0 && (
-            <span className="tabular-nums">{activeFilterCount}</span>
-          )}
+          <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
         </button>
         {/* Escape closes it too, but a touch keyboard has no Escape — leaving
             only that would strand every phone. */}
@@ -231,15 +236,16 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
         </button>
       </div>
 
-      {showFilters && (
-        <div className="rounded-md border border-line bg-surface p-2">
-          <FoodFilters
-            category={category}
-            favoritesOnly={favoritesOnly}
-            onCategoryChange={setCategory}
-            onFavoritesOnlyChange={setFavoritesOnly}
-          />
-        </div>
+      {/* As categorias como atalho, entre a busca e os Recentes (roadmap
+          10.5): o Pedro escolheu os cartões aqui também, sabendo que empurram
+          os Recentes para baixo. */}
+      {state.status === "ready" && (
+        <FoodCategoryCards
+          counts={categoryCounts}
+          total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
+          active={category}
+          onSelect={setCategory}
+        />
       )}
 
       {state.status === "error" && (

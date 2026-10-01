@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -87,15 +87,17 @@ describe("FoodPicker", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("filters by category through the same Filtros control as the full browser", async () => {
+  // Roadmap 10.5 (30/09/2026): as categorias são cartões no topo, as mesmas
+  // da tela Alimentos; não há mais "Filtros" para abrir.
+  it("filters by category through the same category cards as the full browser", async () => {
     mount([
       food("Frango grelhado", { category: "protein" }),
       food("Arroz branco", { category: "carb" }),
     ]);
     await afterLoad();
 
-    await userEvent.click(screen.getByRole("button", { name: "Filtros" }));
-    await userEvent.click(screen.getByRole("button", { name: "Carboidratos" }));
+    const cards = screen.getByRole("group", { name: "Categorias" });
+    await userEvent.click(within(cards).getByRole("button", { name: /^Carboidratos/ }));
 
     expect(
       await screen.findByRole("button", { name: /Arroz branco/ }),
@@ -112,8 +114,8 @@ describe("FoodPicker", () => {
     ]);
     await afterLoad();
 
-    await userEvent.click(screen.getByRole("button", { name: "Filtros" }));
-    await userEvent.click(screen.getByRole("button", { name: "Favoritos" }));
+    // A estrela direto na linha da busca (10.5).
+    await userEvent.click(screen.getByRole("button", { name: "Só favoritos" }));
 
     expect(await screen.findByRole("button", { name: /Ovo/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Tofu/ })).not.toBeInTheDocument();
@@ -126,8 +128,8 @@ describe("FoodPicker", () => {
     ]);
     await afterLoad();
 
-    await userEvent.click(screen.getByRole("button", { name: "Filtros" }));
-    await userEvent.click(screen.getByRole("button", { name: "Proteínas" }));
+    const cards = screen.getByRole("group", { name: "Categorias" });
+    await userEvent.click(within(cards).getByRole("button", { name: /^Proteínas/ }));
     await userEvent.click(
       await screen.findByRole("button", { name: /Frango grelhado/ }),
     );
@@ -354,5 +356,40 @@ describe("FoodPicker — Recentes", () => {
 
     expect(recentsList()).toBeNull();
     expect(screen.queryByText("Todos os alimentos")).toBeNull();
+  });
+});
+
+/** Roadmap 10.5 (30/09/2026): os cartões de categoria e a estrela. */
+describe("FoodPicker — cartões de categoria", () => {
+  it("contam por categoria, marcam a escolhida, e Todos volta", async () => {
+    mount([
+      food("Frango grelhado", { category: "protein" }),
+      food("Peixe assado", { category: "protein" }),
+      food("Arroz branco", { category: "carb" }),
+    ]);
+    await afterLoad();
+
+    const cards = screen.getByRole("group", { name: "Categorias" });
+    const proteins = within(cards).getByRole("button", { name: /^Proteínas/ });
+    expect(proteins).toHaveTextContent("2");
+    expect(within(cards).getByRole("button", { name: /^Todos/ })).toHaveTextContent("3");
+
+    await userEvent.click(proteins);
+    expect(proteins).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: /Arroz branco/ })).not.toBeInTheDocument();
+
+    await userEvent.click(within(cards).getByRole("button", { name: /^Todos/ }));
+    expect(await screen.findByRole("button", { name: /Arroz branco/ })).toBeInTheDocument();
+  });
+
+  it("a estrela mostra só favoritos e diz quando está ligada", async () => {
+    mount([food("Ovo", { isFavorite: true }), food("Tofu")]);
+    await afterLoad();
+
+    const star = screen.getByRole("button", { name: "Só favoritos" });
+    expect(star).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(star);
+    expect(star).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: /Tofu/ })).not.toBeInTheDocument();
   });
 });

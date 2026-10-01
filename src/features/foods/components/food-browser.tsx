@@ -1,21 +1,20 @@
 "use client";
 
 import { noticeClasses } from "@/design-system/components/notice";
-import { Plus, SlidersHorizontal } from "lucide-react";
+import { Plus, Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
-import { Button, buttonClasses } from "@/design-system/components/button";
-import { Dialog } from "@/design-system/components/dialog";
+import { buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
 
 import { useFoodCatalogue } from "../hooks/use-food-catalogue";
 import { searchFoods } from "../services/search-foods";
-import type { FoodCategory } from "../types/food";
-import { FoodFilters } from "./food-filters";
+import { FOOD_CATEGORIES, type FoodCategory } from "../types/food";
+import { FoodCategoryCards } from "./food-category-cards";
 import { FoodList } from "./food-list";
 import { FoodListSkeleton } from "./food-list-skeleton";
 
@@ -24,11 +23,6 @@ export function FoodBrowser() {
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-
-  // What the button has to report while the sheet is closed.
-  const activeFilterCount = (category === null ? 0 : 1) + (favoritesOnly ? 1 : 0);
-
   // Filtering runs on every render rather than living in state. The catalogue
   // is a few hundred rows, so it costs microseconds — and derived state that
   // can fall out of sync with its inputs is a bug waiting to happen.
@@ -36,6 +30,13 @@ export function FoodBrowser() {
     state.status === "ready"
       ? searchFoods(state.foods, { text, category, favoritesOnly })
       : [];
+  // Quantos cada cartão mostraria, com a busca e a estrela como estão.
+  const categoryCounts = Object.fromEntries(
+    FOOD_CATEGORIES.map((option) => [
+      option,
+      state.status === "ready" ? searchFoods(state.foods, { text, category: option, favoritesOnly }).length : 0,
+    ]),
+  ) as Record<FoodCategory, number>;
 
   // Bounds how many rows exist in the DOM at once, so 580 catalogue foods —
   // already unpaginated on this screen, unlike the picker's old 8-result
@@ -61,39 +62,27 @@ export function FoodBrowser() {
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
-        {/* Collapsed behind a control, as `/exercicios` already does. Left
-            open, the chips wrapped to three rows and cost ~200px on every
-            visit — measured — pushing the table to 444px on a phone. Filtering
-            is the secondary action here; searching 580 foods is the primary
-            one, so the field stays and the chips fold away.
-
-            The count rides on the button so a filter left on from last time is
-            visible without opening anything. */}
+        {/* Favoritos direto na linha da busca (roadmap 10.5, 30/09/2026).
+            Era um botão "Filtros" que abria uma folha com as categorias e a
+            estrela; as categorias subiram para os cartões, e uma folha para
+            um botão só não se justifica. Ativo é `primary`, como era o
+            Filtros com algo marcado. */}
         <button
           type="button"
+          aria-pressed={favoritesOnly}
+          aria-label="Só favoritos"
           onClick={() => {
-            setShowFilters(true);
+            setFavoritesOnly(!favoritesOnly);
           }}
-          aria-label="Filtros"
-          aria-haspopup="dialog"
-          aria-expanded={showFilters}
           className={cn(
-            // Same control, same recipe, on both screens. Active is the
-            // system's `primary` rather than `secondary` patched with an
-            // accent border: the filled variant already carries the right
-            // hover and active opacity, where overriding `secondary` would
-            // leave `hover:bg-muted` behind and wash the state out on hover.
-            buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
+            buttonClasses(favoritesOnly ? "primary" : "secondary"),
             // Matches the field beside it: `--control-h` varies with density,
             // `--input-h` stays fixed at 44px on purpose (input.tsx).
             "h-(--input-h)",
           )}
         >
-          <SlidersHorizontal aria-hidden className="size-4" />
-          <span className="hidden sm:inline">Filtros</span>
-          {activeFilterCount > 0 && (
-            <span className="tabular-nums">{activeFilterCount}</span>
-          )}
+          <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
+          <span className="hidden sm:inline">Favoritos</span>
         </button>
 
         <Link
@@ -117,40 +106,18 @@ export function FoodBrowser() {
         </Link>
       </div>
 
-      {/* A sheet rather than a panel that grows in place: expanding inline is
-          the 200px this change exists to remove. The live count is the payoff,
-          so it sits at the bottom and moves as chips are chosen. */}
-      <Dialog
-        open={showFilters}
-        title="Filtros"
-        onClose={() => {
-          setShowFilters(false);
-        }}
-        className="max-sm:inset-x-0 max-sm:top-auto max-sm:bottom-0 max-sm:m-0 max-sm:w-full max-sm:max-w-none max-sm:rounded-b-none"
-      >
-        <FoodFilters
-          category={category}
-          favoritesOnly={favoritesOnly}
-          onCategoryChange={setCategory}
-          onFavoritesOnlyChange={setFavoritesOnly}
+      {/* As categorias como atalho (roadmap 10.5, decisão do Pedro em
+          30/09/2026). Antes ficavam numa folha atrás de "Filtros" porque,
+          abertas como pílulas, custavam ~200px em toda visita; o Pedro
+          escolheu os cartões no topo sabendo desse custo. */}
+      {state.status === "ready" && (
+        <FoodCategoryCards
+          counts={categoryCounts}
+          total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
+          active={category}
+          onSelect={setCategory}
         />
-
-        <div className="sticky -bottom-5 -mx-5 -mb-5 mt-5 flex items-center justify-between gap-3 border-t border-line bg-surface px-5 py-4">
-          <p aria-live="polite" className="text-sm text-ink-muted">
-            <span className="tabular-nums text-ink">{results.length}</span>{" "}
-            {results.length === 1 ? "alimento" : "alimentos"}
-          </p>
-
-          <Button
-            size="sm"
-            onClick={() => {
-              setShowFilters(false);
-            }}
-          >
-            Ver resultados
-          </Button>
-        </div>
-      </Dialog>
+      )}
 
       {writeError !== null && (
         <p role="alert" className={noticeClasses()}>
