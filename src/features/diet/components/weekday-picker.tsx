@@ -24,7 +24,18 @@ interface Props {
   readonly selected: readonly Weekday[];
   readonly onSave: (weekdays: readonly Weekday[]) => void;
   readonly onClose: () => void;
+  /** O texto de cima. Padrão: o das dietas da pessoa. */
+  readonly description?: string;
+  /**
+   * Os atalhos de "dias de treino" leem os dias guardados neste aparelho, que
+   * são de quem está usando o app. No Life Pro seriam os da nutricionista,
+   * não os do paciente, e ficam de fora.
+   */
+  readonly trainingShortcuts?: boolean;
 }
+
+const OWN_DIET_DESCRIPTION =
+  "O Diário sugere essa dieta nos dias marcados. Um dia só pode apontar para uma dieta: marcar aqui desmarca de qualquer outra.";
 
 /**
  * Which days of the week a diet is the plan for.
@@ -39,6 +50,8 @@ export function WeekdayPicker({
   selected,
   onSave,
   onClose,
+  description = OWN_DIET_DESCRIPTION,
+  trainingShortcuts = true,
 }: Props) {
   const [draft, setDraft] = useState<readonly Weekday[]>(selected);
   // Read fresh each time the dialog opens rather than once at mount, so
@@ -71,10 +84,7 @@ export function WeekdayPicker({
   return (
     <Dialog open={open} title={`Dias de "${dietName}"`} onClose={onClose}>
       <div className="space-y-5">
-        <p className="text-sm text-ink-subtle">
-          O Diário sugere essa dieta nos dias marcados. Um dia só pode
-          apontar para uma dieta: marcar aqui desmarca de qualquer outra.
-        </p>
+        <p className="text-sm text-ink-subtle">{description}</p>
 
         <div className="flex flex-wrap gap-1.5">
           {WEEKDAYS.map((day) => {
@@ -111,7 +121,7 @@ export function WeekdayPicker({
               setDraft(WEEKEND_DAYS);
             }}
           />
-          {trainingDays.length > 0 && (
+          {trainingShortcuts && trainingDays.length > 0 && (
             <>
               <ShortcutButton
                 label="Dias de treino"
@@ -129,6 +139,7 @@ export function WeekdayPicker({
           )}
         </div>
 
+        {trainingShortcuts && (
         <button
           type="button"
           onClick={() => {
@@ -140,6 +151,7 @@ export function WeekdayPicker({
         >
           Salvar seleção atual como &quot;dias de treino&quot;
         </button>
+        )}
 
         <div className="flex justify-end gap-2 border-t border-line pt-4">
           <Button variant="secondary" onClick={onClose}>

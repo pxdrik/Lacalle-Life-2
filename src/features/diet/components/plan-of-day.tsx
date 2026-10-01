@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronRight, ClipboardList } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -10,9 +9,8 @@ import { Dialog } from "@/design-system/components/dialog";
 import { useToast } from "@/design-system/components/toast";
 
 import { mealMacros } from "../services/diet-macros";
-import { WEEKDAY_SHORT_LABELS, type Weekday } from "../services/diet-schedule";
 import { currentOption, type MealOption, mealOptions } from "../services/plan-option";
-import type { Meal } from "../types/diet";
+import type { Diet, Meal } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 import { MacroSummary } from "./macro-summary";
 
@@ -32,33 +30,57 @@ export function PlanOfDay({ plan }: { readonly plan: PrescribedPlan }) {
 }
 
 /**
- * Quando a dieta da própria pessoa toma o dia de um plano (a regra que o
- * Pedro escolheu), o Diário diz isso e mostra onde o plano vale, em vez de
- * o plano simplesmente não aparecer.
+ * Num dia do plano que também é de uma dieta da pessoa (Etapa 5e, decisão do
+ * Pedro, 01/10/2026): o plano é o padrão, e ela escolhe qual vale hoje. A
+ * escolha fica no próprio dia (`FoodLog.dietId`); as refeições já marcadas
+ * não mudam, só o que falta passa a vir da outra.
  */
-export function PlanBehindOwnDiet({
+export function DayChoice({
   plan,
-  dietName,
-  planDays,
+  own,
+  chosenId,
+  onChoose,
 }: {
   readonly plan: PrescribedPlan;
-  readonly dietName: string;
-  /** Os dias em que o plano vale de fato (`planDays`). */
-  readonly planDays: readonly Weekday[];
+  readonly own: Diet;
+  /** A dieta que vale hoje (`dietOfDay`). */
+  readonly chosenId: string;
+  readonly onChoose: (dietId: string) => void;
 }) {
+  const options = [
+    { id: plan.id, label: `Plano de ${plan.professionalName}`, name: plan.name },
+    { id: own.id, label: "Minha dieta", name: own.name },
+  ];
+
   return (
-    <p className="mt-4 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-sm text-ink-muted">
-      <ClipboardList aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-subtle" />
-      <span className="min-w-0 break-words">
-        Hoje vale a sua dieta <span className="font-medium text-ink">{dietName}</span>.{" "}
-        {planDays.length === 0
-          ? `O plano de ${plan.professionalName} está sem dias, porque todos são das suas dietas.`
-          : `O plano de ${plan.professionalName} vale em ${planDays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")}.`}{" "}
-        <Link href="/dietas" className="inline-flex min-h-11 items-center font-medium text-accent-text underline-offset-4 hover:underline">
-          Mudar os dias em Dietas
-        </Link>
-      </span>
-    </p>
+    <div className="mt-4 rounded-lg bg-accent-surface px-3 py-2">
+      <p id="escolha-do-dia" className="flex items-start gap-2 text-sm text-ink-muted">
+        <ClipboardList aria-hidden className="mt-0.5 size-4 shrink-0 text-accent-text" />
+        <span className="min-w-0 break-words">Hoje é dia do seu plano e também de uma dieta sua. Qual vale hoje?</span>
+      </p>
+      <div role="group" aria-labelledby="escolha-do-dia" className="mt-2 grid grid-cols-2 gap-2">
+        {options.map((option) => {
+          const selected = option.id === chosenId;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => {
+                if (!selected) onChoose(option.id);
+              }}
+              className={cn(
+                "flex min-h-11 min-w-0 flex-col justify-center rounded-md border px-3 py-1.5 text-left transition-colors duration-150 ease-out",
+                selected ? "border-accent bg-surface" : "border-line hover:border-line-strong",
+              )}
+            >
+              <span className="text-xs break-words text-ink-subtle">{option.label}</span>
+              <span className="text-sm font-medium break-words text-ink">{option.name}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

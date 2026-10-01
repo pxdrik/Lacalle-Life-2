@@ -1,7 +1,6 @@
 import type { StoreDefinition } from "@/core/storage/schema";
 import type { Store } from "@/core/storage/store";
 
-import type { Weekday } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 
 /** Fora do backup: o plano é da profissional e volta pela sincronização. */
@@ -20,8 +19,6 @@ export interface PrescribedPlanRepository {
   listAll(): Promise<readonly PrescribedPlan[]>;
   getById(id: string): Promise<PrescribedPlan | undefined>;
   markSeen(id: string, version: number): Promise<void>;
-  /** Os dias em que o paciente segue o plano. Vai ao servidor: é dele, e vale nos outros aparelhos. */
-  setWeekdays(id: string, weekdays: readonly Weekday[]): Promise<void>;
 }
 
 export class LocalPrescribedPlanRepository implements PrescribedPlanRepository {
@@ -44,13 +41,6 @@ export class LocalPrescribedPlanRepository implements PrescribedPlanRepository {
     const plan = await this.#store.get(id);
     if (plan === undefined || plan.seenVersion >= version) return;
     await this.#store.put({ ...plan, seenVersion: version });
-  }
-
-  /** Só o aparelho; quem chama já gravou no servidor (`composition`). */
-  async setWeekdays(id: string, weekdays: readonly Weekday[]): Promise<void> {
-    const plan = await this.#store.get(id);
-    if (plan === undefined) return;
-    await this.#store.put({ ...plan, weekdays: [...weekdays] });
   }
 
   /**

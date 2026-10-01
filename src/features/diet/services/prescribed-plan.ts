@@ -4,7 +4,8 @@ import type { PrescribedPlan } from "../types/prescribed-plan";
 /**
  * O plano no formato de dieta, para o que o app já sabe fazer com uma:
  * somar (`dietMacros`) e copiar (`duplicateDiet`). Sem dias da semana: os
- * dias do plano são escolha do paciente e não viajam para a cópia.
+ * dias do plano são da nutricionista e não viajam para a cópia, que vira uma
+ * dieta da pessoa, com os dias que ela quiser.
  */
 export function planAsDiet(plan: PrescribedPlan): Diet {
   return {

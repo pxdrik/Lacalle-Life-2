@@ -50,7 +50,12 @@ export interface FoodLog extends Entity {
  * The old rule was right about a day with no structure and wrong about a day
  * being built. Declaring a meal is a record of intent, and the app asked for
  * it.
+ *
+ * Escolher de qual dieta é o dia também é (Life Pro, Etapa 5e): num dia do
+ * plano que também é de uma dieta da pessoa, a escolha dela fica em
+ * `dietId`, muitas vezes antes de qualquer refeição. Apagar o dia por não ter
+ * refeição desfaria a escolha no próximo carregamento.
  */
 export function isEmptyLog(log: FoodLog): boolean {
-  return log.meals.length === 0;
+  return log.meals.length === 0 && log.dietId === null;
 }

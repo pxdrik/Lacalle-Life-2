@@ -1,4 +1,4 @@
-import type { Meal, MealItem } from "../types/diet";
+import type { Meal, MealItem, Weekday } from "../types/diet";
 import { mealMacros } from "./diet-macros";
 
 /**
@@ -10,6 +10,8 @@ import { mealMacros } from "./diet-macros";
  * As refeições se reconhecem pelo id: o editor do Life Pro edita o mesmo
  * rascunho, então uma refeição mantém o id de uma versão para a outra. Os
  * alimentos, pelo alimento do catálogo (`foodId`), ou pelo nome num avulso.
+ * Os dias (Etapa 5e) são da nutricionista e mudar os dias também é mudar o
+ * plano; sem os dias da versão anterior, não se diz nada sobre eles.
  */
 export type PlanChange =
   | { readonly kind: "meal-added"; readonly meal: string }
@@ -26,7 +28,8 @@ export type PlanChange =
       readonly unit: string;
     }
   | { readonly kind: "notes"; readonly meal: string }
-  | { readonly kind: "options"; readonly meal: string; readonly from: number; readonly to: number };
+  | { readonly kind: "options"; readonly meal: string; readonly from: number; readonly to: number }
+  | { readonly kind: "days"; readonly from: readonly Weekday[]; readonly to: readonly Weekday[] };
 
 export interface PlanComparison {
   readonly changes: readonly PlanChange[];
@@ -34,10 +37,18 @@ export interface PlanComparison {
   readonly kcalAfter: number;
 }
 
-export function comparePlans(previous: readonly Meal[], current: readonly Meal[]): PlanComparison {
+export function comparePlans(
+  previous: readonly Meal[],
+  current: readonly Meal[],
+  days?: { readonly before: readonly Weekday[] | undefined; readonly after: readonly Weekday[] },
+): PlanComparison {
   const before = new Map(previous.map((meal) => [meal.id, meal]));
   const after = new Set(current.map((meal) => meal.id));
   const changes: PlanChange[] = [];
+
+  if (days?.before !== undefined && !sameDays(days.before, days.after)) {
+    changes.push({ kind: "days", from: days.before, to: days.after });
+  }
 
   for (const meal of current) {
     const old = before.get(meal.id);
@@ -77,6 +88,10 @@ function compareItems(meal: string, before: readonly MealItem[], after: readonly
     if (!now.has(key(item))) changes.push({ kind: "item-removed", meal, item: item.name, grams: item.grams, unit: item.unit });
   }
   return changes;
+}
+
+function sameDays(a: readonly Weekday[], b: readonly Weekday[]): boolean {
+  return a.length === b.length && a.every((day) => b.includes(day));
 }
 
 function totalKcal(meals: readonly Meal[]): number {

@@ -172,14 +172,25 @@ Life Pro para qualquer profissional.
 Fora desta versão (como a especificação pede): treinadores, cobrança, e-mail
 automático (o convite é por link), chat, IA.
 
-**Próxima etapa, pedida pelo Pedro (01/10/2026): o profissional também monta
-o treino.** Mesmo desenho do plano alimentar: rotina prescrita só de leitura
-para o paciente, com versões e cópia, usando o editor de rotina do app. A
-especificação já pedia a estrutura pronta para fichas de treino. Ponto a
-decidir antes: quem pode prescrever. No Brasil a prescrição de exercício é
-do profissional de Educação Física (CREF); o protótipo previa "educador
-físico entra depois, com as fichas de treino". Se for também a
-nutricionista, vale o Pedro confirmar com quem faz a revisão jurídica.
+**Decidido pelo Pedro em 01/10/2026, depois de testar a prévia:**
+
+- **Etapa 5e. Os dias do plano são da nutricionista.** Ela escolhe os dias
+  ao montar o plano (padrão: todos); os dias entram no rascunho e em cada
+  versão, e mudar os dias aparece no "o que mudou". O paciente não muda os
+  dias do plano. No Diário, num dia do plano, o plano é o padrão; se o dia
+  também for de uma dieta do paciente, ele escolhe qual usar, e a escolha
+  fica no próprio dia (`dietId` do registro), à vista da profissional no
+  acompanhamento (Etapa 6). Vínculo encerrado: o plano sai do Diário e
+  fica só para leitura. A aderência conta o que o paciente escolheu.
+- **Etapa 8. Treino prescrito.** Um perfil profissional só monta dieta e
+  treino, e o nome passa de "nutricionista" a "treinador" no app. Cada
+  prescrição de treino é uma rotina (no formato das rotinas do app), com
+  versões, "o que mudou" e cópia, como o plano alimentar. Dias da semana
+  opcionais: o profissional escolhe ou não; sem dias, o paciente faz quando
+  quiser. Registro, uma vez: dieta é atribuição de quem tem CRN e
+  prescrição de exercício de quem tem CREF; com um perfil só, o pedido de
+  acesso passa a aceitar os dois conselhos, e vale confirmar com a revisão
+  jurídica antes de abrir para profissionais.
 
 ## 6. Decisões em aberto (com o padrão que vou usar se ninguém mudar)
 
@@ -262,6 +273,19 @@ antes de o Life Pro estar completo).
   (refeição nova, saiu, renomeada; alimento que entrou, saiu ou mudou de
   quantidade; orientação; outras opções; total do dia antes e depois). As
   refeições se reconhecem pelo id, não pelo nome. Abrir conta como visto.
+  Dias da nutricionista (5e, 01/10/2026; migração 0036): os dias entram no
+  rascunho e em cada versão, e o paciente perde `set_plan_schedule`
+  (`plan_schedules` fica, sem uso; as versões já publicadas herdaram os dias
+  dela). No editor do Life Pro, "Dias do plano" (o seletor de Dietas, sem
+  os atalhos de treino, que seriam os da nutricionista). Em Dietas, os dias
+  aparecem só para leitura. No Diário, num dia do plano, o plano é o padrão;
+  se o dia também for de uma dieta do paciente, "Qual vale hoje?", e a
+  escolha fica no dia (`dietId`; um dia com escolha e sem refeição deixou
+  de ser apagado, visto vermelho). Vínculo encerrado tira o plano do
+  Diário, mas o dia feito por ele continua dele. A Evolução conta o que o
+  paciente escolheu, e mudar os dias aparece no "o que mudou". Isso substitui
+  a regra da 5c (a dieta da pessoa mandava no dia dela). Mostrar a escolha
+  para a profissional fica para o acompanhamento (Etapa 6).
   Falta: a Biblioteca (5d).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio

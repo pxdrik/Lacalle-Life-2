@@ -19,6 +19,15 @@ describe("o que mudou entre duas versões do plano", () => {
     expect(comparePlans([lunch, dinner], [lunch, dinner])).toEqual({ changes: [], kcalBefore: 410, kcalAfter: 410 });
   });
 
+  it("dias mudados viram uma linha; mesma escolha em outra ordem, não; sem os dias de antes, nada se diz", () => {
+    const same = [lunch, dinner];
+    expect(comparePlans(same, same, { before: ["mon", "tue", "wed"], after: ["mon", "wed"] }).changes).toEqual([
+      { kind: "days", from: ["mon", "tue", "wed"], to: ["mon", "wed"] },
+    ]);
+    expect(comparePlans(same, same, { before: ["wed", "mon"], after: ["mon", "wed"] }).changes).toEqual([]);
+    expect(comparePlans(same, same, { before: undefined, after: ["mon"] }).changes, "plano guardado antes da 0036").toEqual([]);
+  });
+
   it("alimento trocado, quantidade mudada, orientação e refeição nova", () => {
     const snack: Meal = { ...createMeal(3, "Lanche"), items: [food("Iogurte", 170)] };
     const next: Meal[] = [

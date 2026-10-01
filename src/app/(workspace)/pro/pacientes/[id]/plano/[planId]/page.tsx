@@ -26,6 +26,7 @@ export default async function ProPlanEditorPage({
         editorPath={`/pro/pacientes/${id}/plano/${planId}`}
         nameLabel="Nome do plano"
         showTargets={false}
+        showWeekdays
       />
       <PlanPublishPanel linkId={id} planId={planId} patientHref={patientHref} />
     </PlanEditorDataProvider>

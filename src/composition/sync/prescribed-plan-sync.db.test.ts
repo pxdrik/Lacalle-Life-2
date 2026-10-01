@@ -50,10 +50,15 @@ describe("planos recebidos pela sincronização", () => {
     planId = await createSupabasePlanRepository(clientAs(t, marina)).createPlan(link!.id, "Recomposição");
   });
 
-  async function saveDraft(meals: Meal[]) {
+  async function saveDraft(meals: Meal[], weekdays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]) {
     const [link] = (await createSupabaseCareRepository(clientAs(t, marina)).listMyPatients()).links;
     await t.as(marina, (tx) =>
-      tx.query("select public.save_plan_draft($1, $2, 'Recomposição', $3::jsonb)", [planId, link!.id, JSON.stringify(meals)]),
+      tx.query("select public.save_plan_draft($1, $2, 'Recomposição', $3::jsonb, $4::text[])", [
+        planId,
+        link!.id,
+        JSON.stringify(meals),
+        weekdays,
+      ]),
     );
   }
 
@@ -82,7 +87,7 @@ describe("planos recebidos pela sincronização", () => {
       changeNote: "Jantar novo",
       linkEnded: false,
       seenVersion: 1,
-      // A primeira publicação dá todos os dias ao plano; o paciente muda.
+      // Sem escolha da profissional, todos os dias (0036).
       weekdays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       previous: { version: 1 },
     });
@@ -99,15 +104,14 @@ describe("planos recebidos pela sincronização", () => {
     }
   });
 
-  it("os dias do plano são do paciente: ele muda, e ninguém mais muda", async () => {
-    await t.as(ana, (tx) => tx.query("select public.set_plan_schedule($1, array['mon','wed']::text[])", [planId]));
+  it("os dias descem da versão publicada, escolhidos pela profissional (0036)", async () => {
+    await saveDraft([meal("Almoço")], ["mon", "wed"]);
+    await createSupabasePlanRepository(clientAs(t, marina)).publish(planId, "Só segunda e quarta");
     const repo = local();
     await pullPrescribedPlans(sync(ana), repo);
-    expect((await repo.getById(planId))!.weekdays).toEqual(["mon", "wed"]);
-
-    await expect(
-      t.as(marina, (tx) => tx.query("select public.set_plan_schedule($1, array['sun']::text[])", [planId])),
-      "a profissional mudou os dias do paciente",
-    ).rejects.toThrow();
+    const plan = (await repo.getById(planId))!;
+    expect(plan.weekdays).toEqual(["mon", "wed"]);
+    // A anterior desce com os dias dela, para o "o que mudou" comparar.
+    expect(plan.previous!.weekdays).toEqual(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
   });
 });

@@ -20,13 +20,11 @@ const versionRow = z.object({
   meals: z.unknown(),
   change_note: z.string(),
   published_at: z.string(),
+  // Os dias são da profissional e moram na versão (0036).
+  weekdays: z.array(z.enum(WEEKDAYS as [Weekday, ...Weekday[]])),
 });
 const linkRow = z.object({ link_id: z.string(), professional_name: z.string(), status: z.string() });
 const meals = z.array(mealSchema);
-const scheduleRow = z.object({
-  plan_id: z.string(),
-  weekdays: z.array(z.enum(WEEKDAYS as [Weekday, ...Weekday[]])),
-});
 
 /**
  * Os planos que a nutricionista publicou para esta conta (0035). Só desce:
@@ -49,17 +47,12 @@ export async function pullPrescribedPlans(
   const uid = userData.user?.id;
   if (uid === undefined) return { status: "not-authenticated" };
 
-  const [plans, links, schedules] = await Promise.all([
+  const [plans, links] = await Promise.all([
     client.from("prescribed_plans").select("id,link_id,name,created_at").eq("patient_id", uid),
     client.rpc("my_care_links", {}),
-    client.from("plan_schedules").select("plan_id,weekdays").eq("patient_id", uid),
   ]);
   if (plans.error !== null) return { status: "error", message: plans.error.message };
   if (links.error !== null) return { status: "error", message: links.error.message };
-  if (schedules.error !== null) return { status: "error", message: schedules.error.message };
-  const weekdaysOf = new Map(
-    z.array(scheduleRow).parse(schedules.data ?? []).map((row) => [row.plan_id, row.weekdays]),
-  );
 
   const linkById = new Map(z.array(linkRow).parse(links.data ?? []).map((link) => [link.link_id, link]));
   const received: Omit<PrescribedPlan, "seenVersion">[] = [];
@@ -67,7 +60,7 @@ export async function pullPrescribedPlans(
   for (const plan of z.array(planRow).parse(plans.data ?? [])) {
     const versions = await client
       .from("prescribed_plan_versions")
-      .select("version,name,meals,change_note,published_at")
+      .select("version,name,meals,change_note,published_at,weekdays")
       .eq("plan_id", plan.id);
     if (versions.error !== null) return { status: "error", message: versions.error.message };
 
@@ -91,11 +84,9 @@ export async function pullPrescribedPlans(
       meals: latestMeals.data,
       previous:
         previous !== undefined && previousMeals?.success === true
-          ? { version: previous.version, meals: previousMeals.data }
+          ? { version: previous.version, meals: previousMeals.data, weekdays: previous.weekdays }
           : null,
-      // Sem linha de dias (não deveria acontecer: a primeira publicação cria),
-      // nenhum dia: o plano aparece em Dietas, mas não toma o Diário de ninguém.
-      weekdays: weekdaysOf.get(plan.id) ?? [],
+      weekdays: latest.weekdays,
       linkEnded: link?.status !== "active",
       createdAt: Date.parse(plan.created_at),
       updatedAt: Date.parse(latest.published_at),

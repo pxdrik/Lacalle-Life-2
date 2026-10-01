@@ -12,11 +12,11 @@ import { DIETS_STORE } from "../data/diet-store";
 import { LocalDietRepository } from "../data/local-diet-repository";
 import { LocalPrescribedPlanRepository, PRESCRIBED_PLANS_STORE } from "../data/prescribed-plan-repository";
 import { PrescribedPlanRepositoryProvider } from "../data/prescribed-plan-repository-context";
-import { createMeal, createMealItem } from "../services/create-diet";
+import { createDiet, createMeal, createMealItem } from "../services/create-diet";
 import type { Diet } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 import { DietList } from "./diet-list";
-import { PlanBehindOwnDiet, PlanOfDay, TodayOption } from "./plan-of-day";
+import { DayChoice, PlanOfDay, TodayOption } from "./plan-of-day";
 import { PrescribedPlanScreen } from "./prescribed-plan-screen";
 
 vi.mock("next/navigation", () => ({
@@ -113,9 +113,11 @@ describe("Dietas: da sua nutricionista", () => {
           expect(badge.getBoundingClientRect().right).toBeLessThanOrEqual(card.getBoundingClientRect().right + 0.5);
         }
         const copy = within(card).getByRole("button", { name: "Fazer uma cópia" });
-        const days = within(card).getByRole("button", { name: /Dias do plano/ });
+        // Os dias são da nutricionista (Etapa 5e): texto, não botão.
+        const days = within(card).getByText("Dias do plano:").parentElement!;
+        expect(within(card).queryByRole("button", { name: /Dias do plano/ })).toBeNull();
+        expectWhole(days, card);
         expectTouchable(copy);
-        expectTouchable(days);
         // A versão nova: o aviso quebra linha, e a folha do que mudou cabe na tela.
         const notice = within(card).getByText(/atualizou seu plano/);
         expectWhole(notice, card);
@@ -175,8 +177,9 @@ describe("o plano aberto para leitura", () => {
   }
 });
 
-describe("no Diário: plano de hoje e opção de hoje", () => {
+describe("no Diário: plano de hoje, escolha do dia e opção de hoje", () => {
   const meal = PLAN.meals[0]!;
+  const OWN: Diet = { ...createDiet("Cutting de verão com refeição livre"), weekdays: ["tue"] };
   for (const width of WIDTHS) {
     for (const density of DENSITIES) {
       it(`${String(width)}px, ${density}`, async () => {
@@ -185,7 +188,7 @@ describe("no Diário: plano de hoje e opção de hoje", () => {
         await mount(
           <>
             <PlanOfDay plan={PLAN} />
-            <PlanBehindOwnDiet plan={PLAN} dietName="Cutting de verão com refeição livre" planDays={["mon", "tue", "wed", "fri", "sat", "sun"]} />
+            <DayChoice plan={PLAN} own={OWN} chosenId={PLAN.id} onChoose={() => undefined} />
             <TodayOption meal={{ ...meal, plannedSnapshot: meal.items }} planMeal={meal} onChoose={() => undefined} />
           </>,
         );
@@ -194,8 +197,17 @@ describe("no Diário: plano de hoje e opção de hoje", () => {
         const main = document.querySelector("main")!;
         expect(overflow(), "a página rola de lado").toBeLessThanOrEqual(0);
         expectWhole(source, main);
-        expectWhole(screen.getByText(/Hoje vale a sua dieta/), main);
-        expectTouchable(screen.getByRole("link", { name: "Mudar os dias em Dietas" }));
+        // Os dois lados da escolha: inteiros, tocáveis e sem encavalar.
+        const dayChoice = screen.getByRole("group", { name: /Qual vale hoje\?/ });
+        expectWhole(dayChoice, main);
+        const [planSide, ownSide] = within(dayChoice).getAllByRole("button");
+        for (const side of [planSide!, ownSide!]) {
+          for (const line of side.querySelectorAll("span")) expectWhole(line as HTMLElement, side);
+          expectTouchable(side);
+        }
+        const p = planSide!.getBoundingClientRect();
+        const o = ownSide!.getBoundingClientRect();
+        expect(p.right <= o.left + 0.5 || p.bottom <= o.top + 0.5, "plano e dieta encavalados").toBe(true);
         const option = screen.getByRole("button", { name: /opção de hoje: Principal/ });
         expectWhole(option.querySelector("span")!, option);
         expectTouchable(option);

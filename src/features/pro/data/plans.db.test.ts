@@ -64,7 +64,7 @@ describe("planos (0035)", () => {
     expect(await q(ana, "select 1 from public.prescribed_plan_versions where plan_id = $1", [plan])).toEqual([]);
   });
 
-  it("publicar cria versões novas sem sobrescrever; o paciente lê; dias vêm todos", async () => {
+  it("publicar cria versões novas sem sobrescrever; o paciente lê; sem dias escolhidos, todos", async () => {
     const plan = await draft(null);
     await q(marina, "select public.publish_plan($1, '')", [plan]);
     await draft(plan, "Recomposição", [{ ...MEALS[0], notes: "Agora com mamão." }]);
@@ -80,7 +80,11 @@ describe("planos (0035)", () => {
       [1, "", "A banana pode ser trocada por mamão."],
       [2, "Troquei a fruta", "Agora com mamão."],
     ]);
-    expect(await q(ana, "select weekdays from public.plan_schedules where plan_id = $1", [plan])).toEqual([
+    // Os dias moram na versão desde a 0036; sem escolha, todos.
+    expect(
+      await q(ana, "select weekdays from public.prescribed_plan_versions where plan_id = $1 order by version", [plan]),
+    ).toEqual([
+      { weekdays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
       { weekdays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] },
     ]);
     // publicar consumiu o rascunho
@@ -98,19 +102,23 @@ describe("planos (0035)", () => {
     );
   });
 
-  it("só o paciente escolhe os dias, com os dias do app", async () => {
-    const plan = await draft(null);
+  it("os dias são da profissional (0036): vão no rascunho e na versão, e o paciente não muda", async () => {
+    const [row] = await q<{ save_plan_draft: string }>(
+      marina,
+      "select public.save_plan_draft(null, $1, 'Recomposição', $2, array['mon', 'wed', 'fri']::text[])",
+      [link, JSON.stringify(MEALS)],
+    );
+    const plan = row!.save_plan_draft;
     await q(marina, "select public.publish_plan($1, '')", [plan]);
-    await expect(q(marina, "select public.set_plan_schedule($1, array['mon']::text[])", [plan])).rejects.toThrow(
-      /not found/,
-    );
-    await q(ana, "select public.set_plan_schedule($1, array['mon', 'wed']::text[])", [plan]);
-    expect(await q(ana, "select weekdays from public.plan_schedules where plan_id = $1", [plan])).toEqual([
-      { weekdays: ["mon", "wed"] },
+    expect(await q(ana, "select weekdays from public.prescribed_plan_versions where plan_id = $1", [plan])).toEqual([
+      { weekdays: ["mon", "wed", "fri"] },
     ]);
-    await expect(q(ana, "select public.set_plan_schedule($1, array['domingo']::text[])", [plan])).rejects.toThrow(
-      /check constraint/,
+    await expect(q(ana, "select public.set_plan_schedule($1, array['sun']::text[])", [plan])).rejects.toThrow(
+      /permission denied/,
     );
+    await expect(
+      q(marina, "select public.save_plan_draft($1, $2, 'X', '[]', array['domingo']::text[])", [plan, link]),
+    ).rejects.toThrow(/invalid weekdays/);
   });
 
   it("outra pessoa não vê nem publica o plano; profissional sem vínculo não cria", async () => {

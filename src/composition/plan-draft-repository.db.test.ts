@@ -66,4 +66,18 @@ describe("rascunho do plano pelo editor de dieta", () => {
     const repo = createPlanDraftDietRepository(clientAs(t, marina), { planId, linkId });
     expect((await repo.getById(planId))!.meals.map((m) => m.name)).toEqual(["Café da manhã leve"]);
   });
+
+  it("os dias vão com o rascunho e com a versão, e reabrem com ela (0036)", async () => {
+    const repo = createPlanDraftDietRepository(clientAs(t, marina), { planId, linkId });
+    const opened = (await repo.getById(planId))!;
+    expect(opened.weekdays, "sem escolha, todos").toEqual(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
+
+    await repo.save({ ...opened, weekdays: ["mon", "wed"], updatedAt: opened.updatedAt + 1 }, null);
+    const draft = createPlanDraftDietRepository(clientAs(t, marina), { planId, linkId });
+    expect((await draft.getById(planId))!.weekdays).toEqual(["mon", "wed"]);
+
+    await t.as(marina, (tx) => tx.query("select public.publish_plan($1, 'Só segunda e quarta')", [planId]));
+    const published = createPlanDraftDietRepository(clientAs(t, marina), { planId, linkId });
+    expect((await published.getById(planId))!.weekdays).toEqual(["mon", "wed"]);
+  });
 });

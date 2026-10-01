@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 import type { DietRepository } from "@/features/diet/data/diet-repository";
-import type { Diet } from "@/features/diet/types/diet";
+import { WEEKDAYS } from "@/features/diet/services/diet-schedule";
+import type { Diet, Weekday } from "@/features/diet/types/diet";
 import type { ProSupabaseClient } from "@/features/pro/data/supabase-pro-repository";
 
 import { mealSchema } from "./backup-schemas";
@@ -25,6 +26,8 @@ import { mealSchema } from "./backup-schemas";
  * publicado nunca mexe nele, cria um rascunho novo.
  */
 const meals = z.array(mealSchema);
+// Os dias são da profissional e viajam com o rascunho e a versão (0036).
+const weekdays = z.array(z.enum(WEEKDAYS as [Weekday, ...Weekday[]]));
 
 export function createPlanDraftDietRepository(
   client: ProSupabaseClient,
@@ -39,6 +42,7 @@ export function createPlanDraftDietRepository(
       p_link_id: plan.linkId,
       p_name: diet.name.trim() === "" ? "Plano alimentar" : diet.name,
       p_meals: diet.meals,
+      p_weekdays: diet.weekdays,
     });
     if (error !== null) throw new Error(error.message);
   }
@@ -46,29 +50,33 @@ export function createPlanDraftDietRepository(
   async function load(): Promise<Diet | undefined> {
     const draft = await client
       .from("prescribed_plan_drafts")
-      .select("name,meals,updated_at")
+      .select("name,meals,weekdays,updated_at")
       .eq("plan_id", plan.planId);
     if (draft.error !== null) throw new Error(draft.error.message);
     const [row] = z
-      .array(z.object({ name: z.string(), meals: z.unknown(), updated_at: z.string() }))
+      .array(z.object({ name: z.string(), meals: z.unknown(), weekdays, updated_at: z.string() }))
       .parse(draft.data);
-    if (row !== undefined) return toDiet(row.name, row.meals, Date.parse(row.updated_at));
+    if (row !== undefined) return toDiet(row.name, row.meals, row.weekdays, Date.parse(row.updated_at));
 
     const versions = await client
       .from("prescribed_plan_versions")
-      .select("name,meals,version,published_at")
+      .select("name,meals,weekdays,version,published_at")
       .eq("plan_id", plan.planId);
     if (versions.error !== null) throw new Error(versions.error.message);
     const published = z
-      .array(z.object({ name: z.string(), meals: z.unknown(), version: z.number(), published_at: z.string() }))
+      .array(
+        z.object({ name: z.string(), meals: z.unknown(), weekdays, version: z.number(), published_at: z.string() }),
+      )
       .parse(versions.data)
       .sort((a, b) => b.version - a.version)[0];
-    if (published !== undefined) return toDiet(published.name, published.meals, Date.parse(published.published_at));
+    if (published !== undefined) {
+      return toDiet(published.name, published.meals, published.weekdays, Date.parse(published.published_at));
+    }
     return undefined;
   }
 
-  function toDiet(name: string, raw: unknown, updatedAt: number): Diet {
-    return { id: plan.planId, name, meals: meals.parse(raw), weekdays: [], createdAt: updatedAt, updatedAt };
+  function toDiet(name: string, raw: unknown, days: Weekday[], updatedAt: number): Diet {
+    return { id: plan.planId, name, meals: meals.parse(raw), weekdays: days, createdAt: updatedAt, updatedAt };
   }
 
   return {

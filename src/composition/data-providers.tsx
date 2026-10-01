@@ -44,7 +44,6 @@ import {
 import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
-import { notifyStoreChanged } from "@/core/storage/store-events";
 import {
   backfillUntracked,
   SYNC_TRACKER_STORE,
@@ -480,17 +479,6 @@ export const prescribedPlanRepository = once<PrescribedPlanRepository>(async () 
     listAll: () => local.listAll(),
     getById: (id) => local.getById(id),
     markSeen: (id, version) => local.markSeen(id, version),
-    // Servidor primeiro: sem rede, a escolha falha na tela em vez de ficar
-    // só neste aparelho e sumir no próximo pull.
-    setWeekdays: async (id, weekdays) => {
-      const { error } = await getSupabaseBrowserClient().rpc("set_plan_schedule", {
-        p_plan_id: id,
-        p_weekdays: weekdays,
-      });
-      if (error !== null) throw new Error(error.message);
-      await local.setWeekdays(id, weekdays);
-      notifyStoreChanged(PRESCRIBED_PLANS_STORE.name);
-    },
   };
 });
 

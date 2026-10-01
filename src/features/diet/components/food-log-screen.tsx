@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { revise } from "@/core/domain/entity";
 import { dayKey, formatDay, shiftDay } from "@/core/format/day";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
@@ -30,10 +31,10 @@ import {
   removeItems,
   sameMealYesterday,
 } from "../services/yesterday-meal";
-import { dietOfDay, planBehindOwnDiet, planDays } from "../services/diet-schedule";
+import { dayChoice, dietOfDay } from "../services/diet-schedule";
 import { chooseMealOption } from "../services/plan-option";
 import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
-import { PlanBehindOwnDiet, PlanOfDay, TodayOption } from "./plan-of-day";
+import { DayChoice, PlanOfDay, TodayOption } from "./plan-of-day";
 import {
   addItem,
   addMeal,
@@ -153,17 +154,19 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
 
   // The diet scheduled for this weekday, if any — `undefined` while diets
   // are still loading, same as "no link" for the empty state's purposes.
-  // A dieta da pessoa para este dia da semana, ou, se não houver, o plano
-  // da nutricionista (Life Pro: decisão do Pedro, 01/10/2026; `dietOfDay`).
+  // O plano da nutricionista nos dias dele, a dieta da pessoa nos outros; num
+  // dia dos dois, o que ela escolheu, gravado no dia (Life Pro, Etapa 5e:
+  // decisão do Pedro, 01/10/2026; `dietOfDay`).
   const parsedDay = parseDayLocal(day);
+  const chosenId = state.status === "ready" ? state.log.dietId : null;
   const linkedDiet =
     dietList.status === "ready" && parsedDay !== null
-      ? dietOfDay(dietList.diets, plans, parsedDay)
+      ? dietOfDay(dietList.diets, plans, parsedDay, chosenId)
       : undefined;
   const planOfDay = plans.find((plan) => plan.id === linkedDiet?.id);
-  const hiddenPlan =
+  const choice =
     dietList.status === "ready" && parsedDay !== null
-      ? planBehindOwnDiet(dietList.diets, plans, parsedDay)
+      ? dayChoice(dietList.diets, plans, parsedDay)
       : undefined;
 
   /**
@@ -299,13 +302,17 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             </div>
           )}
 
-          {planOfDay !== undefined && <PlanOfDay plan={planOfDay} />}
-          {hiddenPlan !== undefined && linkedDiet !== undefined && dietList.status === "ready" && (
-            <PlanBehindOwnDiet
-              plan={hiddenPlan}
-              dietName={linkedDiet.name}
-              planDays={planDays(hiddenPlan, dietList.diets)}
+          {choice !== undefined && linkedDiet !== undefined ? (
+            <DayChoice
+              plan={choice.plan}
+              own={choice.own}
+              chosenId={linkedDiet.id}
+              onChoose={(dietId) => {
+                apply((current) => revise(current, { dietId }));
+              }}
             />
+          ) : (
+            planOfDay !== undefined && <PlanOfDay plan={planOfDay} />
           )}
 
           {/* O check mora aqui, não na tela da Dieta — é o Diário que se

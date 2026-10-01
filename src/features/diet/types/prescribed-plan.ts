@@ -20,12 +20,20 @@ export interface PrescribedPlan {
   readonly changeNote: string;
   readonly publishedAt: string;
   readonly meals: readonly Meal[];
-  /** A versão anterior, para mostrar o que mudou. `null` na primeira. */
-  readonly previous: { readonly version: number; readonly meals: readonly Meal[] } | null;
   /**
-   * Os dias em que o paciente segue o plano (`plan_schedules`, escolha dele;
-   * na primeira publicação, todos). Num dia que também é de uma dieta dele,
-   * vale a dieta dele (decisão do Pedro, 01/10/2026): ver `dietOfWeekday`.
+   * A versão anterior, para mostrar o que mudou. `null` na primeira. Os dias
+   * só existem a partir da 0036: um plano guardado antes no aparelho não os
+   * tem até a próxima sincronização.
+   */
+  readonly previous: {
+    readonly version: number;
+    readonly meals: readonly Meal[];
+    readonly weekdays?: readonly Weekday[];
+  } | null;
+  /**
+   * Os dias do plano, escolhidos pela nutricionista e publicados com a versão
+   * (0036; padrão, todos). Num dia que também é de uma dieta do paciente, ele
+   * escolhe qual vale no Diário (Etapa 5e): ver `dietOfDay` e `dayChoice`.
    */
   readonly weekdays: readonly Weekday[];
   /** Encerrado o vínculo, o plano fica como leitura, sem versões novas. */

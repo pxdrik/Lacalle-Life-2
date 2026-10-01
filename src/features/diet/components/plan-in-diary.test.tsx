@@ -23,8 +23,8 @@ import {
 } from "../data/prescribed-plan-repository";
 import { PrescribedPlanRepositoryProvider } from "../data/prescribed-plan-repository-context";
 import { createDiet, createMeal, createMealItem } from "../services/create-diet";
-import { WEEKDAY_LABELS, WEEKDAY_SHORT_LABELS, weekdayOf, WEEKDAYS } from "../services/diet-schedule";
-import type { Diet, Weekday } from "../types/diet";
+import { weekdayOf, WEEKDAYS } from "../services/diet-schedule";
+import type { Diet } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 import { DietList } from "./diet-list";
@@ -37,10 +37,11 @@ vi.mock("next/navigation", () => ({
 }));
 
 /**
- * O plano da nutricionista nas telas do paciente (Life Pro, Etapa 5c): no
- * Diário, o plano é o dia quando nenhuma dieta da pessoa é; a "Opção de
- * hoje" troca os alimentos do dia e some depois de marcar como comida. Em
- * Dietas, dar dias ao plano tira esses dias das dietas da pessoa.
+ * O plano da nutricionista nas telas do paciente (Life Pro, Etapas 5c e 5e):
+ * no Diário, o plano é o padrão nos dias dele; num dia que também é de uma
+ * dieta da pessoa, ela escolhe, e a escolha fica no dia. A "Opção de hoje"
+ * troca os alimentos do dia e some depois de marcar como comida. Em Dietas,
+ * os dias do plano são da nutricionista e aparecem só para leitura.
  */
 const TODAY = dayKey(new Date());
 const TODAY_WEEKDAY = weekdayOf(new Date());
@@ -76,15 +77,10 @@ async function mount(page: React.ReactNode, ownDiet?: Diet) {
   if (ownDiet !== undefined) await diets.save(ownDiet, null);
   const local = new LocalPrescribedPlanRepository(new MemoryStore<PrescribedPlan>(PRESCRIBED_PLANS_STORE));
   await local.replaceAll([PLAN]);
-  const scheduled: (readonly Weekday[])[] = [];
   const plans: PrescribedPlanRepository = {
     listAll: () => local.listAll(),
     getById: (id) => local.getById(id),
     markSeen: (id, version) => local.markSeen(id, version),
-    setWeekdays: async (id, weekdays) => {
-      scheduled.push(weekdays);
-      await local.setWeekdays(id, weekdays);
-    },
   };
   render(
     <ToastProvider>
@@ -97,7 +93,7 @@ async function mount(page: React.ReactNode, ownDiet?: Diet) {
       </FoodLogRepositoryProvider>
     </ToastProvider>,
   );
-  return { logs, diets, scheduled };
+  return { logs, diets };
 }
 
 describe("o plano no Diário", () => {
@@ -126,37 +122,33 @@ describe("o plano no Diário", () => {
     });
   });
 
-  it("no dia de uma dieta da pessoa, vale a dieta dela", async () => {
+  it("no dia do plano e de uma dieta da pessoa, o plano é o padrão, e a escolha dela fica no dia", async () => {
     const own = { ...createDiet("Minha dieta"), weekdays: [TODAY_WEEKDAY] };
-    await mount(<FoodLogScreen day={TODAY} />, own);
+    const { logs } = await mount(<FoodLogScreen day={TODAY} />, own);
+
+    const choice = await screen.findByRole("group", { name: /Qual vale hoje\?/ });
+    expect(within(choice).getByRole("button", { name: /Plano de Marina Faria/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: 'Começar de "Recomposição"' })).toBeInTheDocument();
+
+    await userEvent.click(within(choice).getByRole("button", { name: /Minha dieta/ }));
     expect(await screen.findByRole("button", { name: 'Começar de "Minha dieta"' })).toBeInTheDocument();
-    expect(screen.queryByText(/Plano de hoje:/)).not.toBeInTheDocument();
-    // E diz por quê, em vez de o plano sumir sem explicação (relato do Pedro).
-    const notice = screen.getByText(/Hoje vale a sua dieta/);
-    expect(notice).toHaveTextContent(/Minha dieta\. O plano de Marina Faria vale em /);
-    expect(notice).not.toHaveTextContent(WEEKDAY_SHORT_LABELS[TODAY_WEEKDAY]);
-    expect(screen.getByRole("link", { name: "Mudar os dias em Dietas" })).toHaveAttribute("href", "/dietas");
+    expect(within(choice).getByRole("button", { name: /Minha dieta/ })).toHaveAttribute("aria-pressed", "true");
+    // Gravada antes de qualquer refeição: um dia vazio seria apagado, e a
+    // escolha sumiria no próximo carregamento.
+    await waitFor(async () => {
+      expect((await logs.getByDay(TODAY))?.dietId).toBe(own.id);
+    });
   });
 });
 
 describe("os dias do plano em Dietas", () => {
-  it("mostra só os dias em que o plano vale, e dar um dia ao plano o tira da dieta da pessoa", async () => {
+  it("são os da nutricionista, só para leitura, e não mexem nos dias das dietas da pessoa", async () => {
     const own = { ...createDiet("Minha dieta"), weekdays: [OTHER_DAY] };
-    const { diets, scheduled } = await mount(<DietList />, own);
+    const { diets } = await mount(<DietList />, own);
 
-    const days = await screen.findByRole("button", { name: /Dias do plano:/ });
-    expect(days).not.toHaveTextContent("Todos os dias");
-
-    await userEvent.click(days);
-    const dialog = await screen.findByRole("dialog");
-    // O único dia que faltava ao plano era o da dieta da pessoa.
-    await userEvent.click(within(dialog).getByRole("button", { name: WEEKDAY_LABELS[OTHER_DAY] }));
-    await userEvent.click(within(dialog).getByRole("button", { name: "Salvar" }));
-
-    await waitFor(async () => {
-      expect((await diets.listAll())[0]!.weekdays).toEqual([]);
-    });
-    expect(scheduled.at(-1)).toEqual(WEEKDAYS);
-    expect(await screen.findByRole("button", { name: "Dias do plano: Todos os dias" })).toBeInTheDocument();
+    expect(await screen.findByText("Dias do plano:")).toBeInTheDocument();
+    expect(screen.getByText("Dias do plano:").parentElement).toHaveTextContent("Todos os dias");
+    expect(screen.queryByRole("button", { name: /Dias do plano/ })).not.toBeInTheDocument();
+    expect((await diets.listAll())[0]!.weekdays).toEqual([OTHER_DAY]);
   });
 });

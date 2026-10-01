@@ -67,7 +67,8 @@ export function adherenceByWeek(
   logs: readonly FoodLog[],
   weeks: number,
   now = Date.now(),
-  // O plano da nutricionista conta nos dias dele (Life Pro, `dietOfDay`).
+  // O plano da nutricionista conta nos dias dele, e num dia que também é de
+  // uma dieta da pessoa conta o que ela escolheu (Life Pro, `dietOfDay`).
   plans: readonly PrescribedPlan[] = [],
 ): readonly AdherencePoint[] {
   const logByDay = new Map(logs.map((log) => [log.day, log]));
@@ -94,10 +95,10 @@ export function adherenceByWeek(
     if (bucket === undefined) continue;
 
     const date = new Date(timestamp);
-    const diet = dietOfDay(diets, plans, date);
+    const log = logByDay.get(dayKey(date));
+    const diet = dietOfDay(diets, plans, date, log?.dietId ?? null);
     if (diet === undefined || diet.meals.length === 0) continue;
 
-    const log = logByDay.get(dayKey(date));
     const checked =
       log === undefined
         ? 0

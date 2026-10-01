@@ -6,6 +6,7 @@ import { useState } from "react";
 import { formatDecimal } from "@/core/format/decimal";
 import { Dialog } from "@/design-system/components/dialog";
 
+import { describeWeekdays } from "../services/diet-schedule";
 import { comparePlans, type PlanChange } from "../services/plan-changes";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 
@@ -17,7 +18,10 @@ import type { PrescribedPlan } from "../types/prescribed-plan";
  */
 export function PlanChangesNotice({ plan, onSeen }: { readonly plan: PrescribedPlan; readonly onSeen: () => void }) {
   const [open, setOpen] = useState(false);
-  const comparison = plan.previous === null ? null : comparePlans(plan.previous.meals, plan.meals);
+  const comparison =
+    plan.previous === null
+      ? null
+      : comparePlans(plan.previous.meals, plan.meals, { before: plan.previous.weekdays, after: plan.weekdays });
 
   return (
     <div className="px-4 pb-3">
@@ -57,7 +61,9 @@ export function PlanChangesNotice({ plan, onSeen }: { readonly plan: PrescribedP
           <p className="mt-3 text-sm text-ink-muted">A versão anterior não está neste aparelho para comparar.</p>
         ) : (
           <ul className="mt-3 divide-y divide-line">
-            {comparison.changes.length === 0 && <li className="py-2.5 text-sm text-ink-muted">Os alimentos e as quantidades não mudaram.</li>}
+            {comparison.changes.every((change) => change.kind === "days") && (
+              <li className="py-2.5 text-sm text-ink-muted">Os alimentos e as quantidades não mudaram.</li>
+            )}
             {comparison.changes.map((change, index) => (
               // A comparação devolve uma lista fixa, sem reordenar: o índice é estável.
               <li key={index} className="py-2.5 text-sm break-words text-ink">
@@ -94,5 +100,7 @@ function describe(change: PlanChange): string {
       return `${change.meal}: a orientação mudou`;
     case "options":
       return `${change.meal}: de ${String(change.from)} para ${String(change.to)} ${change.to === 1 ? "outra opção" : "outras opções"}`;
+    case "days":
+      return `Dias do plano: de ${describeWeekdays(change.from)} para ${describeWeekdays(change.to)}`;
   }
 }

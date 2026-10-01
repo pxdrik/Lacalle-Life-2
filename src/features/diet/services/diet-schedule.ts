@@ -54,6 +54,14 @@ export function weekdayOf(date: Date): Weekday {
   return FROM_JS_DAY[date.getDay()]!;
 }
 
+/** "Todos os dias", "Nenhum dia" ou "Seg, Qua, Sex", na ordem da semana. */
+export function describeWeekdays(days: readonly Weekday[]): string {
+  if (WEEKDAYS.every((day) => days.includes(day))) return "Todos os dias";
+  const inOrder = WEEKDAYS.filter((day) => days.includes(day));
+  if (inOrder.length === 0) return "Nenhum dia";
+  return inOrder.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ");
+}
+
 /**
  * Reassigns a set of weekdays to `dietId`, taking them away from any other
  * diet that currently holds them.
@@ -97,54 +105,55 @@ export function dietForWeekday(
 }
 
 /**
- * Os dias em que o plano da nutricionista vale de fato: os escolhidos para
- * ele, menos os que já são de uma dieta da própria pessoa. Decisão do Pedro
- * (01/10/2026): a dieta dela manda nos dias que ela escolheu, e nada do que
- * ela configurou muda sozinho quando um plano chega.
- */
-export function planDays(
-  plan: Pick<PrescribedPlan, "weekdays">,
-  diets: readonly Diet[],
-): readonly Weekday[] {
-  const own = new Set(diets.flatMap((diet) => diet.weekdays));
-  return WEEKDAYS.filter((day) => plan.weekdays.includes(day) && !own.has(day));
-}
-
-/**
- * O que está planejado para uma data: a dieta da pessoa vinculada ao dia da
- * semana, se houver; senão, o plano da nutricionista desse dia, no formato de
- * dieta. O plano só vale a partir do dia em que existe: a Evolução não cobra
- * de ninguém, no passado, um plano que ainda não tinha chegado.
+ * O que está planejado para uma data. Etapa 5e (decisão do Pedro,
+ * 01/10/2026): os dias do plano são da nutricionista, e num dia dele o plano
+ * é o padrão. Se o dia também for de uma dieta da pessoa, ela escolhe qual
+ * usar (`dayChoice`), e a escolha fica no próprio dia (`FoodLog.dietId`,
+ * passado aqui como `chosenId`), à vista da profissional no acompanhamento.
+ *
+ * - O plano só vale a partir do dia em que existe: a Evolução não cobra de
+ *   ninguém, no passado, um plano que ainda não tinha chegado.
+ * - Vínculo encerrado: o plano sai do Diário. Um dia que já tinha sido feito
+ *   pelo plano (`chosenId`) continua contando como dele.
  */
 export function dietOfDay(
   diets: readonly Diet[],
   plans: readonly PrescribedPlan[],
   date: Date,
+  chosenId: string | null = null,
 ): Diet | undefined {
   const weekday = weekdayOf(date);
   const own = dietForWeekday(diets, weekday);
-  if (own !== undefined) return own;
-  const plan = plans.find(
-    (candidate) => candidate.weekdays.includes(weekday) && endOfDay(date) >= candidate.createdAt,
-  );
+  const plan = planOfWeekday(plans, date, chosenId);
+  if (own !== undefined && (plan === undefined || chosenId === own.id)) return own;
   return plan === undefined ? undefined : planAsDiet(plan);
 }
 
 /**
- * O plano que valeria nesta data se o dia não fosse de uma dieta da pessoa.
- * Pela regra do Pedro a dieta dela ganha, e o Diário precisa dizer isso:
- * sem aviso, quem tem nutricionista acha que o plano não chegou (relato
- * dele, 01/10/2026).
+ * Um dia do plano que também é de uma dieta da pessoa: as duas opções, para
+ * o Diário perguntar qual vale hoje. `undefined` quando não há o que escolher.
  */
-export function planBehindOwnDiet(
+export function dayChoice(
   diets: readonly Diet[],
   plans: readonly PrescribedPlan[],
   date: Date,
+): { readonly plan: PrescribedPlan; readonly own: Diet } | undefined {
+  const own = dietForWeekday(diets, weekdayOf(date));
+  const plan = planOfWeekday(plans, date, null);
+  return own === undefined || plan === undefined ? undefined : { plan, own };
+}
+
+function planOfWeekday(
+  plans: readonly PrescribedPlan[],
+  date: Date,
+  chosenId: string | null,
 ): PrescribedPlan | undefined {
   const weekday = weekdayOf(date);
-  if (dietForWeekday(diets, weekday) === undefined) return undefined;
   return plans.find(
-    (plan) => plan.weekdays.includes(weekday) && endOfDay(date) >= plan.createdAt,
+    (plan) =>
+      (!plan.linkEnded || plan.id === chosenId) &&
+      plan.weekdays.includes(weekday) &&
+      endOfDay(date) >= plan.createdAt,
   );
 }
 

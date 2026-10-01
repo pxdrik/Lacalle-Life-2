@@ -101,8 +101,6 @@ export function DietList() {
         <>
           <PrescribedPlansSection
             plans={plans}
-            diets={state.status === "ready" ? state.diets : []}
-            onClaimDays={(planId, weekdays) => setWeekdays(planId, weekdays)}
             onCopy={(diet) => {
               void duplicate(diet).then((copied) => {
                 if (copied) toast("Cópia criada em Suas dietas. O plano continua igual.");
