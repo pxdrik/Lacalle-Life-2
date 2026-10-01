@@ -23,6 +23,8 @@ interface Props {
    * that never turned multi-select on in the first place.
    */
   readonly selected?: boolean | undefined;
+  /** "Ontem", "18 treinos": o porquê da linha nas seções do topo (10.4). */
+  readonly note?: string | undefined;
 }
 
 export function ExerciseRow({
@@ -31,12 +33,20 @@ export function ExerciseRow({
   onSelect,
   onOpenDetail,
   selected,
+  note,
 }: Props) {
-  const muscles = exercise.primaryMuscles
-    .map((m) => MUSCLE_LABELS[m])
-    .join(" · ");
-  const equipment = exercise.equipment
-    .map((e) => EQUIPMENT_LABELS[e])
+  // Um músculo e um equipamento, o principal de cada (roadmap 10.3,
+  // 30/09/2026): o resto está no detalhe, a um toque. A lista inteira por
+  // linha ("Abdômen · Oblíquos | Peso corporal") lia como um paredão cinza.
+  const firstMuscle = exercise.primaryMuscles[0];
+  const firstEquipment = exercise.equipment[0];
+  const subtitle = [
+    firstMuscle === undefined ? null : MUSCLE_LABELS[firstMuscle],
+    firstEquipment === undefined ? null : EQUIPMENT_LABELS[firstEquipment],
+    exercise.isCustom ? "seu exercício" : null,
+    note ?? null,
+  ]
+    .filter((part) => part !== null)
     .join(" · ");
 
   // How many times *this* star has been pressed in this mount — same
@@ -71,10 +81,7 @@ export function ExerciseRow({
             {exercise.name}
           </span>
           <span className="mt-0.5 block truncate text-xs text-ink-subtle">
-            {muscles}
-            <span className="mx-1.5 text-line-strong">|</span>
-            {equipment}
-            {exercise.isCustom && " · seu exercício"}
+            {subtitle}
           </span>
         </span>
       </button>

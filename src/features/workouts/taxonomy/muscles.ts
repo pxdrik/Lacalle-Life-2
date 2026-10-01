@@ -73,6 +73,17 @@ export const REGIONS = [
 
 export type Region = (typeof REGIONS)[number];
 
+/** Os nomes dos grupos, como aparecem nos cartões do topo de Exercícios (10.1). */
+export const REGION_LABELS: Readonly<Record<Region, string>> = {
+  peito: "Peito",
+  costas: "Costas",
+  ombros: "Ombros",
+  bracos: "Braços",
+  pernas: "Pernas",
+  core: "Core",
+  cardio: "Cardio",
+};
+
 export const MUSCLE_REGION: Readonly<Record<MuscleGroup, Region>> = {
   chest: "peito",
   lats: "costas",

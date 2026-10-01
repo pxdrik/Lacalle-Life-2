@@ -108,6 +108,8 @@ describe("round trip", () => {
         patterns: new Set(["isolation"]),
         difficulties: new Set(["beginner", "intermediate"]),
         favoritesOnly: true,
+        // O grupo dos cartões do topo (10.1) também vai e volta pela URL.
+        region: "bracos",
       },
     };
 

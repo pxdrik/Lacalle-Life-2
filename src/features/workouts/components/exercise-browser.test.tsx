@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -7,6 +7,11 @@ import { MemoryStore } from "@/core/storage/memory-store";
 import { EXERCISES_STORE } from "../data/exercise-repository";
 import { ExerciseRepositoryProvider } from "../data/exercise-repository-context";
 import { LocalExerciseRepository } from "../data/local-exercise-repository";
+import { LocalRoutineRepository, ROUTINES_STORE } from "../data/routine-repository";
+import { LocalSessionRepository, SESSIONS_STORE } from "../data/session-repository";
+import { WorkoutRepositoryProvider } from "../data/workout-repository-context";
+import type { Routine } from "../types/routine";
+import type { Session } from "../types/session";
 import type { Exercise } from "../types/exercise";
 import { ExerciseBrowser } from "./exercise-browser";
 
@@ -53,6 +58,7 @@ function exercise(id: string, name: string): Exercise {
 function mount(
   catalogue: readonly Exercise[],
   props: Partial<React.ComponentProps<typeof ExerciseBrowser>> = {},
+  sessions: readonly Session[] = [],
 ) {
   const repository = new LocalExerciseRepository(
     new MemoryStore<Exercise>(EXERCISES_STORE),
@@ -61,10 +67,18 @@ function mount(
     catalogue.map((item) => repository.save(item, null)),
   );
 
+  // Todo lugar real que mostra esta tela tem os treinos por perto (os
+  // recentes e mais feitos, 10.4, saem deles).
+  const sessionStore = new LocalSessionRepository(new MemoryStore<Session>(SESSIONS_STORE));
+  const routines = new LocalRoutineRepository(new MemoryStore<Routine>(ROUTINES_STORE));
+  const sessionsReady = Promise.all(sessions.map((item) => sessionStore.save(item, null)));
+
   render(
-    <ExerciseRepositoryProvider repository={ready.then(() => repository)}>
-      <ExerciseBrowser persistQuery={false} {...props} />
-    </ExerciseRepositoryProvider>,
+    <WorkoutRepositoryProvider repositories={sessionsReady.then(() => ({ routines, sessions: sessionStore }))}>
+      <ExerciseRepositoryProvider repository={ready.then(() => repository)}>
+        <ExerciseBrowser persistQuery={false} {...props} />
+      </ExerciseRepositoryProvider>
+    </WorkoutRepositoryProvider>,
   );
 }
 
@@ -261,5 +275,106 @@ describe("multiple selection (building a routine)", () => {
     await screen.findByText("Supino Reto com Barra");
 
     expect(screen.getByRole("button", { name: "Adicionar" })).toBeDisabled();
+  });
+});
+
+/**
+ * Roadmap 10.1 a 10.4 (30/09/2026), pelo protótipo aprovado: cartões de
+ * grupo no topo, recentes e mais feitos, a linha enxuta e as 6 regiões no
+ * filtro de músculo.
+ */
+describe("refinamentos da tela Exercícios", () => {
+  const GROUPED = [
+    exercise("supino", "Supino Reto com Barra"),
+    { ...exercise("rosca", "Rosca Direta"), primaryMuscles: ["biceps" as const], equipment: ["dumbbell" as const] },
+    { ...exercise("esteira", "Esteira"), primaryMuscles: ["quads" as const], movementPattern: "cardio" as const, equipment: ["cardio-machine" as const] },
+    // Peito como secundário: o grupo é pelo principal, então não entra em Peito.
+    { ...exercise("triceps", "Tríceps Testa"), primaryMuscles: ["triceps" as const], secondaryMuscles: ["chest" as const] },
+  ];
+
+  function session(id: string, startedAt: number, ids: readonly string[]): Session {
+    return {
+      id,
+      routineId: null,
+      name: "Treino",
+      startedAt,
+      finishedAt: startedAt + 3_600_000,
+      exercises: ids.map((exerciseId) => ({
+        id: `${id}-${exerciseId}`,
+        exerciseId,
+        name: exerciseId,
+        restSeconds: null,
+        notes: "",
+        sets: [{ id: "s", reps: 8, weightKg: 60, rpe: null, durationSeconds: null, isCompleted: true, planned: null }],
+      })),
+      createdAt: startedAt,
+      updatedAt: startedAt,
+    };
+  }
+
+  it("os cartões contam pelo grupo do catálogo, e tocar filtra; Todos volta", async () => {
+    const user = userEvent.setup();
+    mount(GROUPED);
+
+    const peito = await screen.findByRole("button", { name: /^Peito/ });
+    expect(peito).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /^Cardio/ })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /^Todos/ })).toHaveTextContent("4");
+
+    await user.click(peito);
+    expect(peito).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("Supino Reto com Barra")).toBeInTheDocument();
+    expect(screen.queryByText("Tríceps Testa")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Todos/ }));
+    expect(await screen.findByText("Tríceps Testa")).toBeInTheDocument();
+  });
+
+  it("a linha mostra um músculo e um equipamento, com ponto", async () => {
+    // Dois músculos e dois equipamentos: o caso que antes virava paredão.
+    mount([
+      { ...exercise("bicicleta", "Abdominal Bicicleta"), primaryMuscles: ["abs", "obliques"], equipment: ["bodyweight", "band"] },
+    ]);
+    expect(await screen.findByText("Abdômen · Peso corporal")).toBeInTheDocument();
+  });
+
+  it("recentes e mais feitos aparecem com a lista em repouso, e somem com busca ou grupo", async () => {
+    const user = userEvent.setup();
+    const today = new Date();
+    today.setHours(9, 0, 0, 0);
+    const DAY = 86_400_000;
+    mount(GROUPED, {}, [
+      session("a", today.getTime() - 5 * DAY, ["supino"]),
+      session("b", today.getTime() - DAY, ["supino", "rosca"]),
+    ]);
+
+    expect(await screen.findByRole("heading", { name: "Feitos recentemente" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mais feitos" })).toBeInTheDocument();
+    expect(screen.getAllByText("Peito · Barra · Ontem")).toHaveLength(1);
+    expect(screen.getByText("Peito · Barra · 2 treinos")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Braços/ }));
+    expect(screen.queryByRole("heading", { name: "Feitos recentemente" })).not.toBeInTheDocument();
+  });
+
+  it("o filtro de músculo abre por região; Peito escolhe direto", async () => {
+    const user = userEvent.setup();
+    mount(GROUPED);
+
+    await user.click(await screen.findByRole("button", { name: "Filtros" }));
+    const filterSheet = screen.getByRole("group", { name: "Músculo" });
+    const ombros = within(filterSheet).getByRole("button", { name: /^Ombros/ });
+    expect(ombros).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: "Deltoide lateral" })).not.toBeInTheDocument();
+
+    await user.click(ombros);
+    const group = screen.getByRole("group", { name: "Músculos de Ombros" });
+    await user.click(within(group).getByRole("button", { name: "Todos" }));
+    for (const name of ["Deltoide anterior", "Deltoide lateral", "Deltoide posterior"]) {
+      expect(within(group).getByRole("button", { name })).toHaveAttribute("aria-pressed", "true");
+    }
+    expect(ombros).toHaveTextContent("3");
+
+    expect(within(filterSheet).getByRole("button", { name: "Peito" })).toHaveAttribute("aria-pressed", "false");
   });
 });

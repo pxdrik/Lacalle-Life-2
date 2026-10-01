@@ -5,6 +5,7 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import { Plus, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { dayKey, formatShortDay, shiftDay } from "@/core/format/day";
 import { cn } from "@/design-system/cn";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
@@ -14,7 +15,10 @@ import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reve
 
 import { useExerciseCatalogue } from "../hooks/use-exercise-catalogue";
 import { useExerciseQuery } from "../hooks/use-exercise-query";
+import { useSessionHistory } from "../hooks/use-session-history";
+import { exerciseUsage, mostUsed, recentlyUsed, type ExerciseUse } from "../services/exercise-usage";
 import { filterExercises } from "../services/filter-exercises";
+import { REGIONS, type Region } from "../taxonomy/muscles";
 import { serializeExerciseQuery } from "../services/filter-url";
 import { searchExercises } from "../services/search-exercises";
 import type { Exercise } from "../types/exercise";
@@ -24,6 +28,7 @@ import {
   useExerciseDetail,
 } from "./exercise-detail-dialog";
 import { ExerciseFilterBar } from "./exercise-filter-bar";
+import { ExerciseGroupCards } from "./exercise-group-cards";
 import { ExerciseRow } from "./exercise-row";
 import { THUMBNAIL_BOX } from "./exercise-thumbnail";
 import { MediaAttribution } from "./media-attribution";
@@ -131,10 +136,37 @@ export function ExerciseBrowser({
   // Search then filter, both on every render. The catalogue is a few hundred
   // rows over a prepared index, so this costs microseconds — and derived state
   // that can fall out of sync with its inputs is a bug waiting to happen.
-  const results =
-    state.status === "ready"
-      ? filterExercises(searchExercises(state.index, query.text), query.filters)
-      : [];
+  const searched = state.status === "ready" ? searchExercises(state.index, query.text) : [];
+  const results = filterExercises(searched, query.filters);
+
+  // Os cartões de grupo (10.1): quantos cada grupo mostraria, com a busca e
+  // os outros filtros como estão. Contado pelo próprio filtro, nunca copiado
+  // do catálogo, para o número sempre bater com a lista.
+  const groupCounts = Object.fromEntries(
+    REGIONS.map((region) => [region, filterExercises(searched, { ...query.filters, region }).length]),
+  ) as Record<Region, number>;
+  const groupTotal = filterExercises(searched, { ...query.filters, region: null }).length;
+
+  // "Feitos recentemente" e "Mais feitos" (10.4): só com a lista em repouso,
+  // sem busca, filtro nem grupo, como os Recentes dos alimentos (7.2).
+  const history = useSessionHistory();
+  const idle = query.text.trim() === "" && activeFilterCount === 0 && query.filters.region === null;
+  const uses = history.status === "ready" && idle ? exerciseUsage(history.sessions) : [];
+  const byId = new Map(state.status === "ready" ? state.exercises.map((exercise) => [exercise.id, exercise]) : []);
+  const today = dayKey(new Date());
+  const usageRows = (picked: readonly ExerciseUse[], note: (use: ExerciseUse) => string) =>
+    picked.flatMap((use) => {
+      const exercise = byId.get(use.exerciseId);
+      return exercise === undefined ? [] : [{ exercise, note: note(use) }];
+    });
+  const recent = usageRows(recentlyUsed(uses), (use) => {
+    const day = dayKey(new Date(use.lastAt));
+    // O mesmo jeito de dizer a data dos Recentes de alimentos (7.2).
+    return day === today ? "Hoje" : day === shiftDay(today, -1) ? "Ontem" : formatShortDay(day);
+  });
+  const frequent = usageRows(mostUsed(uses), (use) =>
+    use.sessions === 1 ? "1 treino" : `${String(use.sessions)} treinos`,
+  );
 
   // Bounds how many rows exist in the DOM at once — see `useIncrementalReveal`.
   // 183 curated exercises already render uncapped today; this is what keeps
@@ -214,6 +246,17 @@ export function ExerciseBrowser({
           <span className="hidden sm:inline">Novo exercício</span>
         </button>
       </div>
+
+      {state.status === "ready" && (
+        <ExerciseGroupCards
+          counts={groupCounts}
+          total={groupTotal}
+          active={query.filters.region}
+          onSelect={(region) => {
+            setFilters({ ...query.filters, region });
+          }}
+        />
+      )}
 
       {/* A sheet, not a panel that grows in place.
           Expanding inline pushed the whole catalogue down by the height of
@@ -299,6 +342,33 @@ export function ExerciseBrowser({
           <p className="mt-1.5 text-sm text-ink-muted">{state.message}</p>
         </div>
       )}
+
+      {state.status === "ready" &&
+        [
+          { title: "Feitos recentemente", rows: recent },
+          { title: "Mais feitos", rows: frequent },
+        ]
+          .filter((section) => section.rows.length > 0)
+          .map((section) => (
+            <section key={section.title} className="space-y-2">
+              <h2 className="text-xs font-medium tracking-wide text-ink-subtle uppercase">{section.title}</h2>
+              <Card padded={false} className="overflow-hidden">
+                <ul className="divide-y divide-line">
+                  {section.rows.map(({ exercise, note }) => (
+                    <ExerciseRow
+                      key={exercise.id}
+                      exercise={exercise}
+                      note={note}
+                      onToggleFavorite={(item) => void toggleFavorite(item)}
+                      onSelect={onSelect !== undefined || multiple ? handleRowSelect : undefined}
+                      selected={multiple ? selectedIds.includes(exercise.id) : undefined}
+                      onOpenDetail={detail.show}
+                    />
+                  ))}
+                </ul>
+              </Card>
+            </section>
+          ))}
 
       {state.status === "ready" && (
         <>

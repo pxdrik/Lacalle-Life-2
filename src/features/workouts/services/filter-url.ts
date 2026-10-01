@@ -5,7 +5,7 @@ import {
   type MovementPattern,
   type TechnicalDifficulty,
 } from "../taxonomy/movement";
-import { MUSCLE_GROUPS, type MuscleGroup } from "../taxonomy/muscles";
+import { MUSCLE_GROUPS, REGIONS, type MuscleGroup, type Region } from "../taxonomy/muscles";
 import { EMPTY_FILTERS, type ExerciseFilters } from "./filter-exercises";
 
 /**
@@ -25,6 +25,7 @@ export const FILTER_PARAMS = {
   patterns: "p",
   difficulties: "d",
   favorites: "fav",
+  region: "g",
 } as const;
 
 function parseSet<T extends string>(
@@ -65,6 +66,7 @@ export function parseExerciseQuery(params: URLSearchParams): ExerciseQuery {
         TECHNICAL_DIFFICULTIES,
       ),
       favoritesOnly: params.get(FILTER_PARAMS.favorites) === "1",
+      region: parseRegion(params.get(FILTER_PARAMS.region)),
     },
   };
 }
@@ -109,12 +111,18 @@ export function serializeExerciseQuery(query: ExerciseQuery): string {
   );
 
   if (filters.favoritesOnly) params.set(FILTER_PARAMS.favorites, "1");
+  if (filters.region !== null) params.set(FILTER_PARAMS.region, filters.region);
 
   // `URLSearchParams` percent-encodes the separator, turning a readable
   // `m=chest,triceps` into `m=chest%2Ctriceps`. A comma is a legal sub-delimiter
   // in a query string, and the whole point of the short keys is a URL someone
   // can read and edit.
   return params.toString().replace(/%2C/g, ",");
+}
+
+/** Um grupo desconhecido na URL vira nenhum, sem quebrar a tela. */
+function parseRegion(raw: string | null): Region | null {
+  return (REGIONS as readonly string[]).includes(raw ?? "") ? (raw as Region) : null;
 }
 
 export const EMPTY_QUERY: ExerciseQuery = { text: "", filters: EMPTY_FILTERS };

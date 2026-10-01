@@ -3179,12 +3179,17 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 
 | # | Item | O que muda | Hoje no código |
 | --- | --- | --- | --- |
-| 10.1 | **Grupos musculares logo no topo** | Atalhos por grupo (Peito, Costas, Pernas...) visíveis ao abrir a tela, sem rolar nem abrir filtro. | A lista abre direto; o grupo só pelo filtro. |
-| 10.2 | **19 músculos agrupados em 6 regiões** | O filtro de músculo passa a mostrar regiões (algo como Peito, Costas, Ombros, Braços, Core, Pernas), com os músculos finos dentro de cada uma. | 19 botões soltos em `exercise-filter-bar.tsx` (`MUSCLE_GROUPS`), com "Deltoide anterior", "Adutores", "Abdutores"... |
-| 10.3 | **Menos texto em cada linha** | Embaixo do nome, só o essencial (por exemplo, o músculo principal). | `exercise-row.tsx` mostra todos os músculos e todos os equipamentos: "Peito · Tríceps | Barra · Banco". |
-| 10.4 | **Recentes e mais usados** | Seção com o que foi feito por último e o que mais se faz, como os recentes do seletor de alimentos (7.2). | Só Favoritos. |
+| 10.1 | ✅ **Grupos musculares logo no topo**, **entregue em 30/09/2026** | Atalhos por grupo (Peito, Costas, Pernas...) visíveis ao abrir a tela, sem rolar nem abrir filtro. | A lista abre direto; o grupo só pelo filtro. |
+| 10.2 | ✅ **19 músculos agrupados em 6 regiões**, **entregue em 30/09/2026** | O filtro de músculo passa a mostrar regiões (algo como Peito, Costas, Ombros, Braços, Core, Pernas), com os músculos finos dentro de cada uma. | 19 botões soltos em `exercise-filter-bar.tsx` (`MUSCLE_GROUPS`), com "Deltoide anterior", "Adutores", "Abdutores"... |
+| 10.3 | ✅ **Menos texto em cada linha**, **entregue em 30/09/2026** | Embaixo do nome, só o essencial (por exemplo, o músculo principal). | `exercise-row.tsx` mostra todos os músculos e todos os equipamentos: "Peito · Tríceps | Barra · Banco". |
+| 10.4 | ✅ **Recentes e mais usados**, **entregue em 30/09/2026** | Seção com o que foi feito por último e o que mais se faz, como os recentes do seletor de alimentos (7.2). | Só Favoritos. |
 
 **Conferido pelo Pedro no celular em 30/09/2026:** a transição só na abertura (8.12), o dia de descanso marcado no celular aparecendo no PC (7.5), o treino com aquecimento (7.6), a água chegando no outro aparelho (8.18), a aba Perfil (9.1) e o registro rápido (7.7). **Ajuste pedido depois (30/09/2026, 7.7):** as calorias também podem ficar em branco (pelo menos um valor preenchido), com o mesmo "*" no total, inclusive no número de calorias do Hoje; e o "*" passa a ser verde (`text-accent-text`), para chamar atenção.
+
+**10.1 a 10.4 entregues em 30/09/2026**, pelo protótipo aprovado (https://claude.ai/artifact/D49jx8uRxMNa1Ygzpj95sY). Pedro escolheu **cartões 4 + 4 com "Todos"** para os grupos (não pílulas): nome em cima do número cabe na coluna estreita, o alvo é mais alto, e separa "ir para um grupo" das pílulas de filtro. O grupo é o filtro novo `region` (na URL como `g`), pela regra que já organiza o catálogo (`MUSCLE_REGION`: cardio pelo movimento, o resto pelo primeiro músculo principal), então os números batem com o catálogo; o filtro de músculo da folha continua pegando principal ou secundário. A folha mostra 6 regiões; uma região de vários músculos abre e mostra "Todos" e os músculos dela; Peito escolhe direto. "Feitos recentemente" e "Mais feitos" (3 cada, `exercise-usage.ts`) só com a lista em repouso, com a data como os Recentes de alimentos ("Hoje", "Ontem", "25/09"). A linha mostra um músculo e um equipamento ("Abdômen · Peso corporal"). O teste de navegador pegou "Ombros" cortado em 320px Confortável duas vezes: a primeira resolvida com container query (12px só no cartão estreito); a segunda, de folga zero que a régua inteira não via, com a régua passando a medir a largura real do texto e o cartão sem respiro lateral. Regra combinada: **cartão = ir para um grupo do catálogo; pílula = filtrar ou escolher.**
+
+| 10.5 | **Categorias de alimento em cartões** | ⬜ A fazer | Mesmo papel dos grupos de exercício: 7 categorias, uma escolhida para navegar, + "Todos" = grade de 8. Em Alimentos e no seletor do Diário (`food-filters.tsx`). As outras pílulas (filtros de exercício, formulários de novo exercício e alimento, presets de ritmo) ficam como estão. |
+| 8.21 | **Busca espremida em Exercícios na Confortável** | ⬜ Bug | Achado no 10.x (30/09/2026), anterior a ele: em 320px Confortável o campo "Buscar exercício" fica com ~40px ("Bı…"), porque Filtros e Novo exercício ficam largos ao lado. |
 
 ### Placar dos itens 7, 8, 9 e 10 (atualizado em 30/09/2026)
 
@@ -3218,10 +3223,12 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 - ✅ 8.19 Cabeçalho da landing cabe no celular (só "Entrar" abaixo de 640px)
 - ✅ 8.20 CI do GitHub verde pela primeira vez (Node 24 + folha do RPE com fonte do Linux)
 - ✅ 9.1 Reorganização e resumo da aba Perfil (sem conta, a conta vem primeiro)
-- ⬜ 10.1 Exercícios: grupos musculares logo no topo
-- ⬜ 10.2 Exercícios: 19 músculos agrupados em 6 regiões
-- ⬜ 10.3 Exercícios: menos texto em cada linha
-- ⬜ 10.4 Exercícios: recentes e mais usados
+- ✅ 10.1 Exercícios: grupos em cartões no topo
+- ✅ 10.2 Exercícios: 19 músculos em 6 regiões no filtro
+- ✅ 10.3 Exercícios: um músculo e um equipamento por linha
+- ✅ 10.4 Exercícios: feitos recentemente e mais feitos
+- ⬜ 10.5 Categorias de alimento em cartões
+- ⬜ 8.21 Busca espremida em Exercícios na Confortável (320px)
 
 ### Ordem de prioridade do que falta (29/09/2026)
 

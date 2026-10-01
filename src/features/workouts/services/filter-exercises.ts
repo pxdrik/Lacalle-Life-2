@@ -3,7 +3,7 @@ import type {
   MovementPattern,
   TechnicalDifficulty,
 } from "../taxonomy/movement";
-import type { MuscleGroup } from "../taxonomy/muscles";
+import { MUSCLE_REGION, type MuscleGroup, type Region } from "../taxonomy/muscles";
 import type { Exercise } from "../types/exercise";
 
 /**
@@ -24,6 +24,14 @@ export interface ExerciseFilters {
   readonly patterns: ReadonlySet<MovementPattern>;
   readonly difficulties: ReadonlySet<TechnicalDifficulty>;
   readonly favoritesOnly: boolean;
+  /**
+   * O grupo escolhido nos cartões do topo (roadmap 10.1, 30/09/2026), ou
+   * `null`. Diferente de `muscles`, que pega músculo principal ou secundário:
+   * o grupo é a região do catálogo, pela mesma regra dos arquivos (ver
+   * `exerciseRegion`), e por isso os números dos cartões batem com o catálogo.
+   * Fica fora de `countActiveFilters`: os cartões já mostram que está ativo.
+   */
+  readonly region: Region | null;
 }
 
 export const EMPTY_FILTERS: ExerciseFilters = {
@@ -32,7 +40,19 @@ export const EMPTY_FILTERS: ExerciseFilters = {
   patterns: new Set(),
   difficulties: new Set(),
   favoritesOnly: false,
+  region: null,
 };
+
+/**
+ * A região de um exercício, pela regra do catálogo (`catalogue-integrity`):
+ * cardio pelo padrão de movimento, o resto pelo primeiro músculo principal.
+ * `null` para um exercício sem músculo (criado sem).
+ */
+export function exerciseRegion(exercise: Exercise): Region | null {
+  if (exercise.movementPattern === "cardio") return "cardio";
+  const first = exercise.primaryMuscles[0];
+  return first === undefined ? null : MUSCLE_REGION[first];
+}
 
 export function countActiveFilters(filters: ExerciseFilters): number {
   return (
@@ -63,9 +83,11 @@ export function filterExercises(
   exercises: readonly Exercise[],
   filters: ExerciseFilters,
 ): readonly Exercise[] {
-  if (countActiveFilters(filters) === 0) return exercises;
+  if (countActiveFilters(filters) === 0 && filters.region === null) return exercises;
 
   return exercises.filter((exercise) => {
+    if (filters.region !== null && exerciseRegion(exercise) !== filters.region) return false;
+
     if (filters.favoritesOnly && !exercise.isFavorite) return false;
 
     if (
