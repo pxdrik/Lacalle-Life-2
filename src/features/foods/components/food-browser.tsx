@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
-import { BESIDE_SEARCH, buttonClasses } from "@/design-system/components/button";
+import { BESIDE_FIELD, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
@@ -76,7 +76,7 @@ export function FoodBrowser() {
           }}
           className={cn(
             buttonClasses(favoritesOnly ? "primary" : "secondary"),
-            BESIDE_SEARCH,
+            BESIDE_FIELD,
           )}
         >
           <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
@@ -94,7 +94,7 @@ export function FoodBrowser() {
             // catálogo curado — "convidaria duplicata" — e 580 alimentos já
             // curados são o mesmo caso, só que maior.
             buttonClasses("secondary"),
-            BESIDE_SEARCH,
+            BESIDE_FIELD,
           )}
         >
           <Plus aria-hidden className="size-4" />

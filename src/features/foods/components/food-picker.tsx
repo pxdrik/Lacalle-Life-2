@@ -218,7 +218,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
             "shrink-0",
             buttonClasses(favoritesOnly ? "primary" : "secondary"),
             // Quadrado e da altura do campo, como "Fechar busca": aqui nunca
-            // há rótulo, então não usa `BESIDE_SEARCH` (que o devolve em `sm`).
+            // há rótulo, então não usa `BESIDE_FIELD` (que o devolve em `sm`).
             "size-(--input-h-beside) px-0",
           )}
         >

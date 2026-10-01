@@ -101,9 +101,10 @@ export function buttonClasses(
 }
 
 /**
- * Para somar a `buttonClasses()` num botão ao lado do campo de busca, cujo
- * rótulo some no celular (`hidden sm:inline`). Duas coisas, as duas medidas
- * em 320px Confortável (roadmap 8.21, 30/09/2026):
+ * Para somar a `buttonClasses()` num botão ao lado de um campo, cujo rótulo
+ * some no celular (`hidden sm:inline`): a busca de Exercícios e Alimentos
+ * (8.21) e o "Criar" de Dietas e Treinos (8.22, protótipo A aprovado pelo
+ * Pedro). Duas coisas, as duas medidas em 320px Confortável (30/09/2026):
  *
  * - **A altura do campo**, por `--input-h-beside` (`tokens.css`).
  *   `h-(--input-h)` dava 57px ao botão e 44 ao campo na mesma linha.
@@ -111,7 +112,7 @@ export function buttonClasses(
  *   30px de cada lado, e um botão só com a estrela media 100px. Dois deles
  *   deixavam o campo com 56px ("Bu…").
  */
-export const BESIDE_SEARCH =
+export const BESIDE_FIELD =
   "h-(--input-h-beside) min-w-(--input-h-beside) px-0 sm:px-(--control-px)";
 
 export interface ButtonProps extends Omit<

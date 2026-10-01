@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button } from "@/design-system/components/button";
+import { BESIDE_FIELD, Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
@@ -72,16 +72,17 @@ export function RoutineList() {
           aria-label="Nome do novo treino"
           autoComplete="off"
         />
-        {/* Same pairing as `/dietas`: the field sets the height, not the
-            button. See the note there. */}
+        {/* Same pairing as `/dietas`: the field's height, and only the "+"
+            on a phone. See the note there. */}
         <Button
           type="submit"
           pending={creating}
           disabled={name.trim() === ""}
-          className="h-(--input-h-beside)"
+          aria-label="Criar treino"
+          className={BESIDE_FIELD}
         >
           <Plus aria-hidden className="size-4" />
-          Criar
+          <span className="hidden sm:inline">Criar</span>
         </Button>
       </form>
 

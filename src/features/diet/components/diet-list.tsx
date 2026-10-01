@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Button } from "@/design-system/components/button";
+import { BESIDE_FIELD, Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
@@ -63,21 +63,19 @@ export function DietList() {
           aria-label="Nome da nova dieta"
           autoComplete="off"
         />
-        {/* The field's height, not the density-driven default: this button
-            is half of a pair with the field beside it, and `--control-h`
-            varies with the density preference (40/48/56px) while `Input`
-            stays fixed at 44px on purpose (see input.tsx). `--input-h-beside`
-            rather than `--input-h`: the field cancels the density zoom and
-            the button does not, so `--input-h` measured 57px here against
-            the field's 44 in Confortável (roadmap 8.21, tokens.css). */}
+        {/* The field's height and, on a phone, only the "+" (roadmap 8.22,
+            30/09/2026): with the label, "Criar" took ~155px in 320px
+            Confortável and the field showed "Nome da no". See
+            `BESIDE_FIELD`. `aria-label` names it at every width. */}
         <Button
           type="submit"
           pending={creating}
           disabled={name.trim() === ""}
-          className="h-(--input-h-beside)"
+          aria-label="Criar dieta"
+          className={BESIDE_FIELD}
         >
           <Plus aria-hidden className="size-4" />
-          Criar
+          <span className="hidden sm:inline">Criar</span>
         </Button>
       </form>
 
