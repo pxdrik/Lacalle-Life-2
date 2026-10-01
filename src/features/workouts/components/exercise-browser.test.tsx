@@ -378,3 +378,31 @@ describe("refinamentos da tela Exercícios", () => {
     expect(within(filterSheet).getByRole("button", { name: "Peito" })).toHaveAttribute("aria-pressed", "false");
   });
 });
+
+describe("só o catálogo (Life Pro, Etapa 8c)", () => {
+  // Exercício criado nunca sincroniza: um criado pelo treinador chegaria ao
+  // paciente sem foto, sem músculo e sem cardio.
+  const mine: Exercise = { ...exercise("meu-supino", "Supino da Minha Academia"), isCustom: true, classification: "user" };
+
+  it("esconde o exercício criado por quem usa e os três jeitos de criar", async () => {
+    mount([...CATALOGUE, mine], { catalogueOnly: true, onSelect: vi.fn() });
+    expect(await screen.findByText("Supino Reto com Barra")).toBeInTheDocument();
+    expect(screen.queryByText("Supino da Minha Academia")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Novo exercício" })).not.toBeInTheDocument();
+
+    await userEvent.type(search(), "supino");
+    expect(createRow()).not.toBeInTheDocument();
+
+    await userEvent.clear(search());
+    await userEvent.type(search(), "remada cavalinho");
+    expect(await screen.findByText("Nenhum exercício corresponde à busca.")).toBeInTheDocument();
+    expect(createRow()).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Limpar busca e filtros" })).toBeInTheDocument();
+  });
+
+  it("sem a opção, o exercício criado aparece, como sempre", async () => {
+    mount([...CATALOGUE, mine], { onSelect: vi.fn() });
+    expect(await screen.findByText("Supino da Minha Academia")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Novo exercício" })).toBeInTheDocument();
+  });
+});

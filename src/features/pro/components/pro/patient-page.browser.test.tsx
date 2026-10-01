@@ -8,7 +8,10 @@ import { CareRepositoryProvider } from "../../data/care-repository-context";
 import { fakeCareRepository, patientLink } from "../../data/fake-care-repository.test-helper";
 import type { PlanRepository } from "../../data/plan-repository";
 import { PlanRepositoryProvider } from "../../data/plan-repository-context";
+import type { ProRoutineRepository } from "../../data/routine-repository";
+import { ProRoutineRepositoryProvider } from "../../data/routine-repository-context";
 import type { PlanSummary } from "../../types/plan";
+import type { RoutineSummary } from "../../types/routine";
 import { PatientPage } from "./patient-page";
 import { ProPatients } from "./pro-patients";
 
@@ -38,7 +41,19 @@ const PLAN: PlanSummary = {
   })),
 };
 
+const ROUTINE: RoutineSummary = {
+  id: "r",
+  name: "Treino A, inferiores com ênfase em posterior de coxa e glúteos",
+  hasDraft: true,
+  versions: [{ version: 2, name: "Treino A", changeNote: "", publishedAt: "2026-09-30T12:00:00Z", weekdays: ["mon", "wed", "fri"] }],
+};
+
 function mount(page: React.ReactNode) {
+  const routines: ProRoutineRepository = {
+    listRoutines: () => Promise.resolve([ROUTINE, { id: "b", name: "Treino B", hasDraft: false, versions: [] }]),
+    createRoutine: () => Promise.resolve("r"),
+    publish: () => Promise.resolve(3),
+  };
   const plans: PlanRepository = {
     listPlans: () => Promise.resolve([PLAN]),
     createPlan: () => Promise.resolve("p"),
@@ -47,7 +62,9 @@ function mount(page: React.ReactNode) {
   render(
     <ThemeProvider>
       <CareRepositoryProvider repository={fakeCareRepository({ links: LINKS })}>
-        <PlanRepositoryProvider repository={plans}>{page}</PlanRepositoryProvider>
+        <PlanRepositoryProvider repository={plans}>
+          <ProRoutineRepositoryProvider repository={routines}>{page}</ProRoutineRepositoryProvider>
+        </PlanRepositoryProvider>
       </CareRepositoryProvider>
     </ThemeProvider>,
   );
@@ -81,10 +98,22 @@ describe("página do paciente no Life Pro", () => {
           expect(textWidth(text), "texto cortado").toBeLessThanOrEqual(text.getBoundingClientRect().width + 0.5);
           expect(text.getBoundingClientRect().right, "texto passa da borda").toBeLessThanOrEqual(list.getBoundingClientRect().right + 0.5);
         }
-        const box = edit.getBoundingClientRect();
-        expect(box.right, "Editar plano fora da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
-        for (const hit of hitTargetsAcross(edit)) {
-          expect(edit.contains(hit), "toque fora do botão").toBe(true);
+        // A seção Treino (Etapa 8c): nome longo quebra, os dias aparecem, e
+        // "Editar treino" e "Novo treino" são tocáveis onde aparecem.
+        const routineName = await screen.findByText(ROUTINE.name);
+        const routineCard = routineName.closest("[class*='rounded']")!;
+        expect(textWidth(routineName), "nome do treino cortado").toBeLessThanOrEqual(routineName.getBoundingClientRect().width + 0.5);
+        expect(routineName.getBoundingClientRect().right).toBeLessThanOrEqual(routineCard.getBoundingClientRect().right + 0.5);
+        expect(screen.getByText(/Seg, Qua, Sex/)).toBeInTheDocument();
+        const [editRoutine] = screen.getAllByRole("link", { name: "Editar treino" });
+        const create = screen.getByRole("button", { name: "Novo treino" });
+        for (const control of [edit, editRoutine!, create]) {
+          control.scrollIntoView({ block: "center" });
+          const box = control.getBoundingClientRect();
+          expect(box.right, `${control.textContent ?? ""} fora da tela`).toBeLessThanOrEqual(window.innerWidth + 0.5);
+          for (const hit of hitTargetsAcross(control)) {
+            expect(control.contains(hit), `toque fora de ${control.textContent ?? ""}`).toBe(true);
+          }
         }
         cleanup();
       });

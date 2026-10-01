@@ -5,6 +5,7 @@ import { noticeClasses } from "@/design-system/components/notice";
 import { PAGE_SHELL_BLEED } from "@/design-system/components/page-shell";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ArrowLeft, Play, Plus } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -38,7 +39,32 @@ import {
 } from "./exercise-detail-dialog";
 import { RoutineExerciseCard } from "./routine-exercise-card";
 
-export function RoutineEditor({ routineId }: { readonly routineId: string }) {
+/**
+ * O editor de treino. Também edita o treino que o treinador monta no Life Pro
+ * (Etapa 8c): mesmo editor, outro repositório por trás, e por isso os pontos
+ * que dependem de onde ele está aberto vêm por prop, como no `DietEditor`.
+ */
+export function RoutineEditor({
+  routineId,
+  backHref = "/treinos",
+  backLabel = "Treinos",
+  backText = "Voltar para os treinos",
+  showStart = true,
+  catalogueOnly = false,
+  belowName,
+}: {
+  readonly routineId: string;
+  readonly backHref?: Route;
+  readonly backLabel?: string;
+  /** O link do aviso de treino que não existe ou não abriu. */
+  readonly backText?: string;
+  /** "Iniciar treino". No Life Pro fica de fora: a sessão é do paciente. */
+  readonly showStart?: boolean;
+  /** Só exercícios do catálogo, sem criar (ver `ExerciseBrowser`). */
+  readonly catalogueOnly?: boolean;
+  /** Logo abaixo do nome: no Life Pro, os dias do treino. */
+  readonly belowName?: React.ReactNode;
+}) {
   const router = useRouter();
   const { state, saveError, apply, start } = useRoutineEditor(routineId);
   const catalogue = useExerciseLookup();
@@ -78,7 +104,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
 
   if (state.status === "missing") {
     return (
-      <Notice title="Este treino não existe.">
+      <Notice title="Este treino não existe." backHref={backHref} backText={backText}>
         Ele pode ter sido excluído, ou o link pode estar errado.
       </Notice>
     );
@@ -86,7 +112,9 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
 
   if (state.status === "error") {
     return (
-      <Notice title="Não foi possível abrir o treino.">{state.message}</Notice>
+      <Notice title="Não foi possível abrir o treino." backHref={backHref} backText={backText}>
+        {state.message}
+      </Notice>
     );
   }
 
@@ -99,11 +127,11 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
   return (
     <div>
       <Link
-        href="/treinos"
+        href={backHref}
         className="inline-flex items-center gap-1.5 text-sm text-ink-muted transition-colors duration-150 ease-out hover:text-ink"
       >
         <ArrowLeft aria-hidden className="size-4" />
-        Treinos
+        {backLabel}
       </Link>
 
       <input
@@ -116,6 +144,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
         }}
         className="-mx-1.5 mt-3 w-full rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-2xl font-medium tracking-normal transition-colors duration-150 ease-out placeholder:text-ink-subtle hover:border-line focus:border-line-strong focus:bg-surface"
       />
+      {belowName}
 
       <div
         className={cn(
@@ -130,21 +159,23 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           {totalSets} {totalSets === 1 ? "série" : "séries"}
         </p>
 
-        <Button
-          size="sm"
-          pending={starting}
-          disabled={routine.exercises.length === 0}
-          onClick={() => {
-            setStarting(true);
-            void start().then((sessionId) => {
-              setStarting(false);
-              if (sessionId !== null) router.push(`/sessao/${sessionId}`);
-            });
-          }}
-        >
-          <Play aria-hidden className="size-4" />
-          Iniciar treino
-        </Button>
+        {showStart && (
+          <Button
+            size="sm"
+            pending={starting}
+            disabled={routine.exercises.length === 0}
+            onClick={() => {
+              setStarting(true);
+              void start().then((sessionId) => {
+                setStarting(false);
+                if (sessionId !== null) router.push(`/sessao/${sessionId}`);
+              });
+            }}
+          >
+            <Play aria-hidden className="size-4" />
+            Iniciar treino
+          </Button>
+        )}
       </div>
 
       {saveError !== null && (
@@ -276,6 +307,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           <ExerciseBrowser
             persistQuery={false}
             autoFocus
+            catalogueOnly={catalogueOnly}
             selectionMode="multiple"
             onSelectionChange={setPendingSelection}
             onConfirmSelection={(exercises) => {
@@ -318,6 +350,7 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
           <ExerciseBrowser
             persistQuery={false}
             autoFocus
+            catalogueOnly={catalogueOnly}
             onSelect={(exercise) => {
               apply((current) =>
                 replaceExercise(current, swappingId, {
@@ -338,9 +371,13 @@ export function RoutineEditor({ routineId }: { readonly routineId: string }) {
 
 function Notice({
   title,
+  backHref,
+  backText,
   children,
 }: {
   readonly title: string;
+  readonly backHref: Route;
+  readonly backText: string;
   readonly children: React.ReactNode;
 }) {
   return (
@@ -348,10 +385,10 @@ function Notice({
       <p className="text-ink">{title}</p>
       <p className="mt-1.5 text-sm text-ink-subtle">{children}</p>
       <Link
-        href="/treinos"
+        href={backHref}
         className="mt-5 inline-block text-sm text-ink underline underline-offset-4"
       >
-        Voltar para os treinos
+        {backText}
       </Link>
     </div>
   );

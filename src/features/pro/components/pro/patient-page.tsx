@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ClipboardList, Plus, Users } from "lucide-react";
+import { ArrowLeft, ClipboardList, Dumbbell, Plus, Users } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -15,17 +15,21 @@ import { noticeClasses } from "@/design-system/components/notice";
 import { PageHeader } from "@/design-system/components/page-header";
 import { Skeleton } from "@/design-system/components/skeleton";
 
+import { describeWeekdays, type Weekday } from "@/core/domain/weekday";
+
 import { usePatientPlans } from "../../hooks/use-patient-plans";
+import { usePatientRoutines } from "../../hooks/use-patient-routines";
 import { usePatients } from "../../hooks/use-patients";
 import { describeSharing, type PatientLink } from "../../types/care";
 import type { PlanSummary } from "../../types/plan";
+import type { RoutineSummary } from "../../types/routine";
 
 const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const formatDate = (iso: string) => DATE.format(new Date(iso));
 
 /**
- * Um paciente no Life Pro (protótipo v3): o plano alimentar e as versões
- * publicadas. Diário e Evolução entram com a Etapa 6, quando houver dado real
+ * Um paciente no Life Pro (protótipo v3): o plano alimentar e os treinos
+ * (Etapa 8, protótipo de 01/10/2026), com as versões publicadas. Diário e Evolução entram com a Etapa 6, quando houver dado real
  * para mostrar (nada de aba de mentira).
  */
 export function PatientPage({ linkId }: { readonly linkId: string }) {
@@ -83,6 +87,7 @@ export function PatientPage({ linkId }: { readonly linkId: string }) {
         </Badge>
       </PageHeader>
       <Plans link={link} />
+      <Routines link={link} />
     </>
   );
 }
@@ -198,4 +203,114 @@ function PlanCard({ plan, link }: { readonly plan: PlanSummary; readonly link: P
 
 export function editorHref(linkId: string, planId: string): Route {
   return `/pro/pacientes/${linkId}/plano/${planId}` as Route;
+}
+
+/** Sem dias, o paciente faz quando quiser (0038). */
+const routineDays = (days: readonly Weekday[]) => (days.length === 0 ? "Quando quiser" : describeWeekdays(days));
+
+function Routines({ link }: { readonly link: PatientLink }) {
+  const { state, createRoutine } = usePatientRoutines(link.id);
+  const router = useRouter();
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(false);
+  const active = link.status === "active";
+
+  const create = () => {
+    setCreating(true);
+    setCreateError(false);
+    const count = state.status === "ready" ? state.routines.length : 0;
+    createRoutine(`Treino ${String.fromCharCode(65 + Math.min(count, 25))}`)
+      .then((routineId) => {
+        router.push(routineEditorHref(link.id, routineId));
+      })
+      .catch(() => {
+        setCreating(false);
+        setCreateError(true);
+      });
+  };
+
+  return (
+    <section aria-labelledby="treino" className="mt-10 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="treino" className="text-lg font-semibold text-ink">
+          Treino
+        </h2>
+        {active && state.status === "ready" && state.routines.length > 0 && (
+          <button
+            type="button"
+            disabled={creating}
+            onClick={create}
+            className={buttonClasses("secondary", "sm")}
+          >
+            <Plus aria-hidden className="size-4" />
+            Novo treino
+          </button>
+        )}
+      </div>
+
+      {state.status === "loading" && <Skeleton className="h-32" />}
+      {state.status === "error" && (
+        <div role="alert" className={noticeClasses("danger", "block")}>
+          <p className="text-ink">Não foi possível carregar os treinos.</p>
+          <p className="mt-1.5 text-sm text-ink-muted">Confira a conexão e recarregue a página.</p>
+        </div>
+      )}
+      {createError && (
+        <div role="alert" className={noticeClasses("danger", "block")}>
+          <p className="text-ink">Não foi possível criar o treino. Confira a conexão e tente de novo.</p>
+        </div>
+      )}
+      {state.status === "ready" &&
+        (state.routines.length === 0 ? (
+          <EmptyState
+            icon={Dumbbell}
+            title="Nenhum treino ainda."
+            caption={
+              active
+                ? "Monte a rotina com os exercícios do catálogo do app. Para A, B e C, crie um treino para cada. O paciente só vê depois que você publicar."
+                : "Com o vínculo encerrado, não dá para publicar treinos."
+            }
+            action={active && !creating ? { label: "Criar treino", onClick: create, icon: Plus } : undefined}
+          />
+        ) : (
+          <ul className="space-y-3">
+            {state.routines.map((routine) => (
+              <RoutineCard key={routine.id} routine={routine} link={link} />
+            ))}
+          </ul>
+        ))}
+    </section>
+  );
+}
+
+function RoutineCard({ routine, link }: { readonly routine: RoutineSummary; readonly link: PatientLink }) {
+  const [current] = routine.versions;
+  return (
+    <li>
+      <Card className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
+          <p className="flex flex-wrap items-center gap-2">
+            <span className="font-medium break-words text-ink">{routine.name}</span>
+            {routine.hasDraft && <Badge state="atencao">Rascunho</Badge>}
+          </p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {current === undefined
+              ? "Ainda não publicado. O paciente não vê nada até você publicar."
+              : `Versão ${String(current.version)}, publicada em ${formatDate(current.publishedAt)} · ${routineDays(current.weekdays)}.${
+                  routine.hasDraft ? " O paciente vê esta versão até você publicar a próxima." : ""
+                }`}
+          </p>
+        </div>
+        {link.status === "active" && (
+          <Link href={routineEditorHref(link.id, routine.id)} className={buttonClasses("primary", "md")}>
+            Editar treino
+          </Link>
+        )}
+      </Card>
+    </li>
+  );
+}
+
+export function routineEditorHref(linkId: string, routineId: string): Route {
+  return `/pro/pacientes/${linkId}/treino/${routineId}` as Route;
 }

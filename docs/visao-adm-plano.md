@@ -300,6 +300,17 @@ antes de o Life Pro estar completo).
   Pedro decidir: qualquer registro aprovado libera dieta e treino; "treinador"
   para todos; Hoje só sugere, sem aviso de treino perdido. Acrescentar um
   registro depois da aprovação fica para depois (pede situação por registro).
+  8b, o banco do treino (migração 0038): `prescribed_routines`, versões e
+  rascunho, com o conteúdo no formato das rotinas do app; dias opcionais
+  (sem escolha, nenhum: o paciente faz quando quiser). 8c, o Life Pro: seção
+  "Treino" na página do paciente (A, B, C, cada um um treino) e o editor de
+  treino do app no rascunho (`routine-draft-repository.ts`), sem "Iniciar
+  treino", só com exercícios do catálogo (exercício criado não sincroniza e
+  chegaria ao paciente sem foto nem músculo) e com "Dias do treino" abaixo
+  do nome. Os dias vão na mesma fila do editor; ler o estado e enfileirar
+  com um `await` no meio fazia trocar os dias apagar as edições de antes
+  (visto vermelho no teste de banco). Os dias da semana passaram para
+  `core/domain/weekday.ts`, porque deixaram de ser só da dieta.
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.
