@@ -16,7 +16,7 @@ import { createMeal, createMealItem } from "../services/create-diet";
 import type { Diet } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 import { DietList } from "./diet-list";
-import { PlanOfDay, TodayOption } from "./plan-of-day";
+import { PlanBehindOwnDiet, PlanOfDay, TodayOption } from "./plan-of-day";
 import { PrescribedPlanScreen } from "./prescribed-plan-screen";
 
 vi.mock("next/navigation", () => ({
@@ -185,6 +185,7 @@ describe("no Diário: plano de hoje e opção de hoje", () => {
         await mount(
           <>
             <PlanOfDay plan={PLAN} />
+            <PlanBehindOwnDiet plan={PLAN} dietName="Cutting de verão com refeição livre" planDays={["mon", "tue", "wed", "fri", "sat", "sun"]} />
             <TodayOption meal={{ ...meal, plannedSnapshot: meal.items }} planMeal={meal} onChoose={() => undefined} />
           </>,
         );
@@ -193,6 +194,8 @@ describe("no Diário: plano de hoje e opção de hoje", () => {
         const main = document.querySelector("main")!;
         expect(overflow(), "a página rola de lado").toBeLessThanOrEqual(0);
         expectWhole(source, main);
+        expectWhole(screen.getByText(/Hoje vale a sua dieta/), main);
+        expectTouchable(screen.getByRole("link", { name: "Mudar os dias em Dietas" }));
         const option = screen.getByRole("button", { name: /opção de hoje: Principal/ });
         expectWhole(option.querySelector("span")!, option);
         expectTouchable(option);

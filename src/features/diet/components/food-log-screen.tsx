@@ -30,10 +30,10 @@ import {
   removeItems,
   sameMealYesterday,
 } from "../services/yesterday-meal";
-import { dietOfDay } from "../services/diet-schedule";
+import { dietOfDay, planBehindOwnDiet, planDays } from "../services/diet-schedule";
 import { chooseMealOption } from "../services/plan-option";
 import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
-import { PlanOfDay, TodayOption } from "./plan-of-day";
+import { PlanBehindOwnDiet, PlanOfDay, TodayOption } from "./plan-of-day";
 import {
   addItem,
   addMeal,
@@ -161,6 +161,10 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
       ? dietOfDay(dietList.diets, plans, parsedDay)
       : undefined;
   const planOfDay = plans.find((plan) => plan.id === linkedDiet?.id);
+  const hiddenPlan =
+    dietList.status === "ready" && parsedDay !== null
+      ? planBehindOwnDiet(dietList.diets, plans, parsedDay)
+      : undefined;
 
   /**
    * Days are a query parameter, not a route segment, so the default can be
@@ -296,6 +300,13 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
           )}
 
           {planOfDay !== undefined && <PlanOfDay plan={planOfDay} />}
+          {hiddenPlan !== undefined && linkedDiet !== undefined && dietList.status === "ready" && (
+            <PlanBehindOwnDiet
+              plan={hiddenPlan}
+              dietName={linkedDiet.name}
+              planDays={planDays(hiddenPlan, dietList.diets)}
+            />
+          )}
 
           {/* O check mora aqui, não na tela da Dieta — é o Diário que se
               usa todo dia, e ir até Dietas só para marcar "comi isto" era

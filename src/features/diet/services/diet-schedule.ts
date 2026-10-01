@@ -130,6 +130,24 @@ export function dietOfDay(
   return plan === undefined ? undefined : planAsDiet(plan);
 }
 
+/**
+ * O plano que valeria nesta data se o dia não fosse de uma dieta da pessoa.
+ * Pela regra do Pedro a dieta dela ganha, e o Diário precisa dizer isso:
+ * sem aviso, quem tem nutricionista acha que o plano não chegou (relato
+ * dele, 01/10/2026).
+ */
+export function planBehindOwnDiet(
+  diets: readonly Diet[],
+  plans: readonly PrescribedPlan[],
+  date: Date,
+): PrescribedPlan | undefined {
+  const weekday = weekdayOf(date);
+  if (dietForWeekday(diets, weekday) === undefined) return undefined;
+  return plans.find(
+    (plan) => plan.weekdays.includes(weekday) && endOfDay(date) >= plan.createdAt,
+  );
+}
+
 function endOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime() - 1;
 }

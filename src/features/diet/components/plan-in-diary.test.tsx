@@ -23,7 +23,7 @@ import {
 } from "../data/prescribed-plan-repository";
 import { PrescribedPlanRepositoryProvider } from "../data/prescribed-plan-repository-context";
 import { createDiet, createMeal, createMealItem } from "../services/create-diet";
-import { WEEKDAY_LABELS, weekdayOf, WEEKDAYS } from "../services/diet-schedule";
+import { WEEKDAY_LABELS, WEEKDAY_SHORT_LABELS, weekdayOf, WEEKDAYS } from "../services/diet-schedule";
 import type { Diet, Weekday } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 import type { PrescribedPlan } from "../types/prescribed-plan";
@@ -131,6 +131,11 @@ describe("o plano no Diário", () => {
     await mount(<FoodLogScreen day={TODAY} />, own);
     expect(await screen.findByRole("button", { name: 'Começar de "Minha dieta"' })).toBeInTheDocument();
     expect(screen.queryByText(/Plano de hoje:/)).not.toBeInTheDocument();
+    // E diz por quê, em vez de o plano sumir sem explicação (relato do Pedro).
+    const notice = screen.getByText(/Hoje vale a sua dieta/);
+    expect(notice).toHaveTextContent(/Minha dieta\. O plano de Marina Faria vale em /);
+    expect(notice).not.toHaveTextContent(WEEKDAY_SHORT_LABELS[TODAY_WEEKDAY]);
+    expect(screen.getByRole("link", { name: "Mudar os dias em Dietas" })).toHaveAttribute("href", "/dietas");
   });
 });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight, ClipboardList } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
@@ -9,6 +10,7 @@ import { Dialog } from "@/design-system/components/dialog";
 import { useToast } from "@/design-system/components/toast";
 
 import { mealMacros } from "../services/diet-macros";
+import { WEEKDAY_SHORT_LABELS, type Weekday } from "../services/diet-schedule";
 import { currentOption, type MealOption, mealOptions } from "../services/plan-option";
 import type { Meal } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
@@ -24,6 +26,37 @@ export function PlanOfDay({ plan }: { readonly plan: PrescribedPlan }) {
       <ClipboardList aria-hidden className="mt-0.5 size-4 shrink-0 text-accent-text" />
       <span className="min-w-0 break-words">
         Plano de hoje: <span className="font-medium text-ink">{plan.name}</span>, de {plan.professionalName}
+      </span>
+    </p>
+  );
+}
+
+/**
+ * Quando a dieta da própria pessoa toma o dia de um plano (a regra que o
+ * Pedro escolheu), o Diário diz isso e mostra onde o plano vale, em vez de
+ * o plano simplesmente não aparecer.
+ */
+export function PlanBehindOwnDiet({
+  plan,
+  dietName,
+  planDays,
+}: {
+  readonly plan: PrescribedPlan;
+  readonly dietName: string;
+  /** Os dias em que o plano vale de fato (`planDays`). */
+  readonly planDays: readonly Weekday[];
+}) {
+  return (
+    <p className="mt-4 flex items-start gap-2 rounded-lg bg-muted px-3 py-2 text-sm text-ink-muted">
+      <ClipboardList aria-hidden className="mt-0.5 size-4 shrink-0 text-ink-subtle" />
+      <span className="min-w-0 break-words">
+        Hoje vale a sua dieta <span className="font-medium text-ink">{dietName}</span>.{" "}
+        {planDays.length === 0
+          ? `O plano de ${plan.professionalName} está sem dias, porque todos são das suas dietas.`
+          : `O plano de ${plan.professionalName} vale em ${planDays.map((day) => WEEKDAY_SHORT_LABELS[day]).join(", ")}.`}{" "}
+        <Link href="/dietas" className="inline-flex min-h-11 items-center font-medium text-accent-text underline-offset-4 hover:underline">
+          Mudar os dias em Dietas
+        </Link>
       </span>
     </p>
   );
