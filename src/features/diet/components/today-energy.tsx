@@ -15,7 +15,7 @@ import { useNutritionTargets } from "@/features/profile";
 import { useFoodLogDay } from "../hooks/use-food-log";
 import { eatenMacros, eatenMeals } from "../services/meal-execution";
 import { incompleteQuickCount, quickGaps } from "../services/quick-item";
-import { partialGaps, QuickGapNote } from "./macro-gap";
+import { IncompleteMark, partialGaps, QuickGapNote } from "./macro-gap";
 import { MacroSummary } from "./macro-summary";
 
 /**
@@ -62,7 +62,8 @@ export function TodayEnergy({ day }: { readonly day: string }) {
   const eatenItems = eatenMeals(state.log).flatMap((meal) => meal.items);
   const gaps = quickGaps(eatenItems);
   const incomplete = incompleteQuickCount(eatenItems);
-  const nothingYet = totals.kcal === 0;
+  // Um avulso sem calorias é registro: o dia não está vazio.
+  const nothingYet = totals.kcal === 0 && gaps.kcal === 0;
 
   if (targets === null) {
     // No profile means no ring, so this branch is the whole hero. The way
@@ -108,6 +109,7 @@ export function TodayEnergy({ day }: { readonly day: string }) {
         consumed={totals.kcal}
         target={targets.kcal}
         nothingYet={nothingYet}
+        incomplete={gaps.kcal > 0}
       />
 
       {/* Secondary by construction, not just by convention: smaller size,
@@ -122,7 +124,8 @@ export function TodayEnergy({ day }: { readonly day: string }) {
             // número sozinho exigia lembrar a meta de cor ou abrir o
             // perfil. Só aparece aqui porque este ramo já garantiu
             // `targets !== null`; nunca inventa uma meta que não existe.
-            value={`${formatDecimal(totals[key])}${gaps[key] > 0 ? "*" : ""} / ${formatDecimal(targets[key])}`}
+            value={`${formatDecimal(totals[key])} / ${formatDecimal(targets[key])}`}
+            flag={gaps[key] > 0 ? { label: "incompleto" } : undefined}
             unit="g"
             label={short}
             size="sm"
@@ -176,10 +179,13 @@ function CalorieRing({
   consumed,
   target,
   nothingYet,
+  incomplete,
 }: {
   readonly consumed: number;
   readonly target: number;
   readonly nothingYet: boolean;
+  /** Registro rápido (7.7): algum avulso sem calorias; o número leva o "*" verde. */
+  readonly incomplete: boolean;
 }) {
   const ratio = target === 0 ? 0 : consumed / target;
   const over = consumed > target;
@@ -273,6 +279,7 @@ function CalorieRing({
             )}
           >
             {displayed}
+            {incomplete && <IncompleteMark />}
           </p>
           {/* "Restantes" implies something was eaten. On an empty day nothing
               was, and the same 2.067 is the budget rather than a remainder —

@@ -1,5 +1,4 @@
 import type { Macros } from "@/core/domain/macros";
-import { formatDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { MACRO_CODING } from "@/design-system/macros";
 
@@ -43,7 +42,7 @@ export function MacroSummary({ macros, size = "sm", layout = "inline", gaps }: P
       <dl className="grid grid-cols-4 tabular-nums">
         <div className="text-center">
           <dd className="text-xl font-semibold text-ink">
-            {formatDecimal(macros.kcal)}
+            <MacroNumber value={macros.kcal} gap={gaps?.kcal} />
           </dd>
           <dt className="mt-0.5 text-[0.6875rem] text-ink-subtle">kcal</dt>
         </div>
@@ -75,7 +74,7 @@ export function MacroSummary({ macros, size = "sm", layout = "inline", gaps }: P
         <dd
           className={cn("text-ink", large ? "text-xl font-medium" : "text-sm")}
         >
-          {formatDecimal(macros.kcal)}
+          <MacroNumber value={macros.kcal} gap={gaps?.kcal} />
         </dd>
         <dt
           className={cn(

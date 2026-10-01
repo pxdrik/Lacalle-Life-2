@@ -7,15 +7,15 @@ import type { MealItem, QuickMacro } from "../types/diet";
  * `MealItem.quick` para o formato e o porquê.
  */
 
-export const QUICK_MACROS: readonly QuickMacro[] = ["proteinG", "carbsG", "fatG"];
+export const QUICK_MACROS: readonly QuickMacro[] = ["kcal", "proteinG", "carbsG", "fatG"];
 
 /** O nome de um avulso sem descrição. */
 export const QUICK_DEFAULT_NAME = "Avulso";
 
 export interface QuickInput {
   readonly name: string;
-  readonly kcal: number;
-  /** `null` é "não sei", nunca zero. */
+  /** `null` é "não sei", nunca zero. Pelo menos um dos quatro vem preenchido. */
+  readonly kcal: number | null;
   readonly proteinG: number | null;
   readonly carbsG: number | null;
   readonly fatG: number | null;
@@ -41,7 +41,7 @@ export function quickInputOf(item: MealItem): QuickInput {
 
   return {
     name: item.name === QUICK_DEFAULT_NAME ? "" : item.name,
-    kcal: item.per100g.kcal,
+    kcal: value("kcal"),
     proteinG: value("proteinG"),
     carbsG: value("carbsG"),
     fatG: value("fatG"),
@@ -54,7 +54,7 @@ export function quickInputOf(item: MealItem): QuickInput {
  * acima: o total daquele macro soma só o que se sabe, e a tela diz isso.
  */
 export function quickGaps(items: Iterable<MealItem>): Readonly<Record<QuickMacro, number>> {
-  const gaps = { proteinG: 0, carbsG: 0, fatG: 0 };
+  const gaps = { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 };
   for (const item of items) {
     for (const key of item.quick?.unknownMacros ?? []) gaps[key] += 1;
   }
@@ -82,7 +82,7 @@ function quickItem(id: string, input: QuickInput): MealItem {
     grams: 100,
     unit: "g",
     per100g: {
-      kcal: input.kcal,
+      kcal: input.kcal ?? 0,
       proteinG: input.proteinG ?? 0,
       carbsG: input.carbsG ?? 0,
       fatG: input.fatG ?? 0,

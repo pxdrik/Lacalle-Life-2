@@ -3184,6 +3184,8 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 | 10.3 | **Menos texto em cada linha** | Embaixo do nome, só o essencial (por exemplo, o músculo principal). | `exercise-row.tsx` mostra todos os músculos e todos os equipamentos: "Peito · Tríceps | Barra · Banco". |
 | 10.4 | **Recentes e mais usados** | Seção com o que foi feito por último e o que mais se faz, como os recentes do seletor de alimentos (7.2). | Só Favoritos. |
 
+**Conferido pelo Pedro no celular em 30/09/2026:** a transição só na abertura (8.12), o dia de descanso marcado no celular aparecendo no PC (7.5), o treino com aquecimento (7.6), a água chegando no outro aparelho (8.18), a aba Perfil (9.1) e o registro rápido (7.7). **Ajuste pedido depois (30/09/2026, 7.7):** as calorias também podem ficar em branco (pelo menos um valor preenchido), com o mesmo "*" no total, inclusive no número de calorias do Hoje; e o "*" passa a ser verde (`text-accent-text`), para chamar atenção.
+
 ### Placar dos itens 7, 8, 9 e 10 (atualizado em 30/09/2026)
 
 ✅ entregue · ⬜ falta
@@ -3206,7 +3208,7 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 - ✅ 8.9 Dica da última vez (itálico testado e revertido; texto normal)
 - ✅ 8.10 Verdant mais claro nos botões (só o botão principal, tema claro)
 - ✅ 8.11 Logo verde no cabeçalho
-- ✅ 8.12 Transição de entrada ao abrir uma aba (falta confirmar no iPhone)
+- ✅ 8.12 Transição de entrada ao abrir uma aba (confirmado pelo Pedro em 30/09/2026)
 - ✅ 8.13 Campos da série com 44px e número alinhado
 - ✅ 8.14 "Última vez" só com a data
 - ✅ 8.15 Campos no meio da faixa da série

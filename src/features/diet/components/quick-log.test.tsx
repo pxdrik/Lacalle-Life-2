@@ -58,7 +58,7 @@ describe("registrar", () => {
     expect(screen.queryByRole("button", { name: "Registro rápido" })).not.toBeInTheDocument();
   });
 
-  it("calorias obrigatórias; macro em branco chega como null, não zero", async () => {
+  it("pede pelo menos um valor; o que fica em branco chega como null, não zero", async () => {
     const user = userEvent.setup();
     const onQuickLog = vi.fn();
     mount(meal([]), { onQuickLog });
@@ -67,7 +67,7 @@ describe("registrar", () => {
     const sheet = screen.getByRole("dialog", { name: "Registro rápido no Almoço" });
 
     await user.click(within(sheet).getByRole("button", { name: "Registrar" }));
-    expect(within(sheet).getByText("Informe as calorias.")).toBeInTheDocument();
+    expect(within(sheet).getByText("Preencha pelo menos um valor.")).toBeInTheDocument();
     expect(onQuickLog).not.toHaveBeenCalled();
 
     await user.type(within(sheet).getByLabelText("Descrição (opcional)"), "Almoço no restaurante");
@@ -82,6 +82,29 @@ describe("registrar", () => {
       carbsG: null,
       fatG: null,
     });
+  });
+});
+
+describe("calorias em branco (Pedro, 30/09/2026)", () => {
+  it("registra só com proteína, e o total marca as calorias como incompletas", async () => {
+    const user = userEvent.setup();
+    const onQuickLog = vi.fn();
+    mount(meal([]), { onQuickLog });
+
+    await user.click(screen.getByRole("button", { name: "Registro rápido" }));
+    const sheet = screen.getByRole("dialog", { name: "Registro rápido no Almoço" });
+    await user.type(within(sheet).getByLabelText("Prot. (g)"), "30");
+    await user.click(within(sheet).getByRole("button", { name: "Registrar" }));
+
+    expect(onQuickLog).toHaveBeenCalledExactlyOnceWith({ name: "", kcal: null, proteinG: 30, carbsG: null, fatG: null });
+  });
+
+  it("um avulso sem calorias deixa o total de kcal com * e a nota nomeia as calorias", () => {
+    const shake = createQuickItem({ name: "Whey", kcal: null, proteinG: 30, carbsG: null, fatG: null });
+    mount(meal([RICE, shake]));
+
+    expect(screen.getByText(/^Sem as calorias, o carboidrato e a gordura de 1 item avulso.$/)).toBeInTheDocument();
+    expect(screen.getAllByText(", incompleto")).toHaveLength(3);
   });
 });
 
@@ -101,7 +124,11 @@ describe("o item avulso na refeição", () => {
     mount(meal([RICE, quick]), { onQuickLog: vi.fn() });
 
     expect(screen.getAllByText(", incompleto")).toHaveLength(2);
-    expect(screen.getByText("* Sem o carboidrato e a gordura de 1 item avulso.")).toBeInTheDocument();
+    expect(screen.getByText(/^Sem o carboidrato e a gordura de 1 item avulso.$/)).toBeInTheDocument();
+    // O "*" é verde, para chamar atenção (Pedro, 30/09/2026).
+    const marks = [...document.querySelectorAll("[aria-hidden]")].filter((node) => node.textContent === "*");
+    expect(marks.length).toBeGreaterThan(0);
+    for (const mark of marks) expect(mark.className).toContain("text-accent-text");
   });
 
   it("editar abre a folha preenchida, com o branco em branco, e salva no mesmo item", async () => {

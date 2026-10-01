@@ -769,7 +769,7 @@ describe("FoodLogScreen — registro rápido", () => {
     expect(stored.per100g.kcal).toBe(850);
 
     // O card da refeição e o total do dia dizem que falta.
-    expect(await screen.findAllByText("* Sem o carboidrato e a gordura de 1 item avulso.")).toHaveLength(2);
+    expect(await screen.findAllByText(/^Sem o carboidrato e a gordura de 1 item avulso.$/)).toHaveLength(2);
 
     await user.click(screen.getByRole("button", { name: "Editar Avulso" }));
     const edit = screen.getByRole("dialog", { name: "Editar registro rápido" });

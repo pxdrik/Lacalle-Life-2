@@ -45,6 +45,12 @@ interface Props {
   /** `center` for a metric sitting alone in a grid cell — e.g. the macro strip under a ring. */
   readonly align?: "start" | "center";
   readonly className?: string;
+  /**
+   * Um "*" verde depois do valor, para um número que se sabe incompleto
+   * (registro rápido do Diário, roadmap 7.7). `label` é o que o leitor de
+   * tela ouve no lugar do símbolo; quem marca põe a nota que explica.
+   */
+  readonly flag?: { readonly label: string } | undefined;
 }
 
 export function Metric({
@@ -55,6 +61,7 @@ export function Metric({
   tone,
   align = "start",
   className,
+  flag,
 }: Props) {
   const centered = align === "center";
 
@@ -90,6 +97,12 @@ export function Metric({
           )}
         >
           {value}
+          {flag !== undefined && (
+            <>
+              <span aria-hidden className="font-semibold text-accent-text">*</span>
+              <span className="sr-only">, {flag.label}</span>
+            </>
+          )}
         </span>
         {unit !== undefined && (
           <span className={cn(LABEL[size], "text-ink-subtle")}>{unit}</span>

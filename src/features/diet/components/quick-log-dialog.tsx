@@ -25,8 +25,9 @@ interface Props {
 
 /**
  * A folha do registro rápido (roadmap 7.7, protótipo aprovado em 29/09/2026):
- * para quando se sabe as calorias e não os alimentos. Calorias obrigatórias,
- * o resto opcional, e o que ficar em branco continua em branco.
+ * para quando se sabe as calorias e não os alimentos. Tudo opcional desde
+ * 30/09/2026 (Pedro), calorias inclusive, com pelo menos um valor; o que
+ * ficar em branco continua em branco.
  *
  * Montada a cada abertura (`key` em quem usa) para começar do `initial`
  * certo, em vez de sincronizar estado com efeito.
@@ -46,9 +47,14 @@ export function QuickLogDialog({ open, mealName, initial, onClose, onSave }: Pro
     event.preventDefault();
     const next: Record<string, string> = {};
 
-    const kcalValue = parseDecimal(kcal);
-    if (kcalValue === null || kcalValue <= 0) next["kcal"] = "Informe as calorias.";
-    else if (kcalValue > MAX_KCAL) next["kcal"] = `No máximo ${formatDecimal(MAX_KCAL)} kcal.`;
+    let kcalValue: number | null = null;
+    if (kcal.trim() !== "") {
+      kcalValue = parseDecimal(kcal);
+      if (kcalValue === null || kcalValue < 0 || kcalValue > MAX_KCAL) {
+        next["kcal"] = `Entre 0 e ${formatDecimal(MAX_KCAL)} kcal, ou em branco.`;
+        kcalValue = null;
+      }
+    }
 
     const macro = (key: string, raw: string): number | null => {
       if (raw.trim() === "") return null;
@@ -63,10 +69,21 @@ export function QuickLogDialog({ open, mealName, initial, onClose, onSave }: Pro
     const carbs = macro("carbsG", carbsG);
     const fat = macro("fatG", fatG);
 
-    setErrors(next);
-    if (Object.keys(next).length > 0 || kcalValue === null) return;
+    // Tudo em branco não registra nada: pelo menos um valor.
+    if (Object.keys(next).length === 0 && [kcal, proteinG, carbsG, fatG].every((raw) => raw.trim() === "")) {
+      next["kcal"] = "Preencha pelo menos um valor.";
+    }
 
-    onSave({ name, kcal: Math.round(kcalValue), proteinG: protein, carbsG: carbs, fatG: fat });
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
+
+    onSave({
+      name,
+      kcal: kcalValue === null ? null : Math.round(kcalValue),
+      proteinG: protein,
+      carbsG: carbs,
+      fatG: fat,
+    });
   }
 
   const macroField = (key: string, label: string, value: string, set: (value: string) => void) => (
@@ -121,6 +138,7 @@ export function QuickLogDialog({ open, mealName, initial, onClose, onSave }: Pro
               aria-describedby={describedBy}
               aria-invalid={invalid || undefined}
               inputMode="numeric"
+              placeholder="—"
               value={kcal}
               onChange={(event) => {
                 setKcal(event.target.value);
@@ -136,7 +154,7 @@ export function QuickLogDialog({ open, mealName, initial, onClose, onSave }: Pro
         </div>
 
         <p className="text-xs text-ink-subtle">
-          Macros em branco ficam em branco no total, não viram zero.
+          O que ficar em branco fica em branco no total, não vira zero.
         </p>
 
         <Button type="submit" size="lg" className="w-full">

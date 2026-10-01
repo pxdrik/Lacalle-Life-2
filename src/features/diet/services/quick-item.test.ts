@@ -58,9 +58,10 @@ describe("o que falta no total", () => {
       createQuickItem({ ...RESTAURANT, proteinG: null, carbsG: 30, fatG: 10 }),
     ];
 
-    expect(quickGaps(items)).toEqual({ proteinG: 1, carbsG: 1, fatG: 1 });
+    expect(quickGaps(items)).toEqual({ kcal: 0, proteinG: 1, carbsG: 1, fatG: 1 });
     expect(incompleteQuickCount(items)).toBe(2);
     expect(quickGaps([createQuickItem({ ...RESTAURANT, carbsG: 1, fatG: 1 })])).toEqual({
+      kcal: 0,
       proteinG: 0,
       carbsG: 0,
       fatG: 0,

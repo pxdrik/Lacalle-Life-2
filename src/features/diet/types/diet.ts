@@ -74,8 +74,11 @@ export interface MealItem {
   readonly quick?: { readonly unknownMacros: readonly QuickMacro[] } | undefined;
 }
 
-/** Os macros que um registro rápido pode deixar em branco. Calorias, não. */
-export type QuickMacro = Exclude<keyof Macros, "kcal">;
+/**
+ * O que um registro rápido pode deixar em branco: qualquer um dos quatro,
+ * calorias inclusive (Pedro, 30/09/2026). Pelo menos um vem preenchido.
+ */
+export type QuickMacro = keyof Macros;
 
 /**
  * One other way to eat a meal — a marmita's rice version beside its pasta

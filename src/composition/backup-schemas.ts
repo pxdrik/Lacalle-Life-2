@@ -337,7 +337,7 @@ const mealItemSchema = z
     sugarG: bounded("açúcares inválidos.", 0, 100).optional(),
     // Registro rápido (roadmap 7.7): só nos itens avulsos. Ver `MealItem.quick`.
     quick: z
-      .object({ unknownMacros: z.array(z.enum(["proteinG", "carbsG", "fatG"])).max(3) })
+      .object({ unknownMacros: z.array(z.enum(["kcal", "proteinG", "carbsG", "fatG"])).max(4) })
       .strict()
       .optional(),
   })

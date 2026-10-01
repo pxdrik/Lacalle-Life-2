@@ -139,7 +139,7 @@ export function MacroProgress({
             <dd className={cn(rows && "lg:mt-1")}>
               <div className="flex items-baseline gap-1 text-sm tabular-nums">
                 <span className="text-ink">
-                  <MacroNumber value={value} gap={key === "kcal" ? undefined : gaps?.[key]} />
+                  <MacroNumber value={value} gap={gaps?.[key]} />
                 </span>
                 <span className="text-ink-subtle">
                   /{formatDecimal(target)}
