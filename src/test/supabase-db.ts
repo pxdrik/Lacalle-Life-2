@@ -69,6 +69,91 @@ export interface TestDb {
   readonly as: <T>(userId: string | null, fn: (tx: Transaction) => Promise<T>) => Promise<T>;
 }
 
+type Result = { readonly data: unknown; readonly error: { readonly message: string } | null };
+
+export interface DbQuery extends PromiseLike<Result> {
+  eq(column: string, value: string): DbQuery;
+}
+
+/**
+ * Um cliente no formato do `supabase-js` (só `auth.getUser`, `rpc` e
+ * `from().select().eq()`), que roda cada chamada como `userId` no banco de
+ * teste. Serve para testar um repositório inteiro contra as regras de
+ * verdade, em vez de contra um fake que concorda com ele.
+ *
+ * Como o `supabase-js`: função que devolve um valor só devolve o valor, não
+ * uma linha; erro do banco volta em `error`, não como exceção.
+ */
+// O que o PostgREST entrega é JSON: data vira texto ISO e bigint vira número.
+// O PGlite devolve `Date` e `bigint`; sem isto o repositório seria testado
+// contra um formato que o app nunca recebe.
+function asJson(row: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [
+      key,
+      value instanceof Date ? value.toISOString() : typeof value === "bigint" ? Number(value) : value,
+    ]),
+  );
+}
+
+export function clientAs(t: TestDb, userId: string | null) {
+  const IDENT = /^[a-z_][a-z0-9_]*$/;
+  const run = async (sql: string, params: unknown[]): Promise<Result> => {
+    try {
+      const { rows, fields } = await t.as(userId, (tx) => tx.query<Record<string, unknown>>(sql, params));
+      return { data: { rows: rows.map(asJson), fields: fields.map((field) => field.name) }, error: null };
+    } catch (error) {
+      return { data: null, error: { message: error instanceof Error ? error.message : String(error) } };
+    }
+  };
+
+  return {
+    auth: {
+      getUser: () => Promise.resolve({ data: { user: userId === null ? null : { id: userId } } }),
+    },
+    rpc: async (fn: string, args: Record<string, unknown> = {}): Promise<Result> => {
+      if (!IDENT.test(fn)) throw new Error(`nome de função inválido: ${fn}`);
+      const names = Object.keys(args);
+      names.forEach((name) => {
+        if (!IDENT.test(name)) throw new Error(`argumento inválido: ${name}`);
+      });
+      const call = names.map((name, index) => `${name} => $${String(index + 1)}`).join(", ");
+      const result = await run(`select * from public.${fn}(${call})`, Object.values(args));
+      if (result.error !== null) return result;
+      const { rows, fields } = result.data as { rows: Record<string, unknown>[]; fields: string[] };
+      const scalar = fields.length === 1 && fields[0] === fn;
+      return { data: scalar ? (rows[0]?.[fn] ?? null) : rows, error: null };
+    },
+    from: (table: string) => ({
+      select: (columns: string): DbQuery => {
+        if (!IDENT.test(table)) throw new Error(`tabela inválida: ${table}`);
+        if (!/^[a-z_,]+$/.test(columns)) throw new Error(`colunas inválidas: ${columns}`);
+        const filters: [string, string][] = [];
+        const query: DbQuery = {
+          eq: (column, value) => {
+            if (!IDENT.test(column)) throw new Error(`coluna inválida: ${column}`);
+            filters.push([column, value]);
+            return query;
+          },
+          then: (onfulfilled, onrejected) => {
+            const where = filters.length
+              ? ` where ${filters.map(([column], index) => `${column} = $${String(index + 1)}`).join(" and ")}`
+              : "";
+            return run(`select ${columns} from public.${table}${where}`, filters.map(([, value]) => value))
+              .then((result) =>
+                result.error !== null
+                  ? result
+                  : { data: (result.data as { rows: unknown[] }).rows, error: null },
+              )
+              .then(onfulfilled, onrejected);
+          },
+        };
+        return query;
+      },
+    }),
+  };
+}
+
 export async function createTestDb(): Promise<TestDb> {
   const db = new PGlite();
   await db.exec(BOOTSTRAP);
