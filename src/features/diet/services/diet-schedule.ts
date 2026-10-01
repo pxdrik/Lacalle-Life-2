@@ -1,6 +1,9 @@
 import { revise } from "@/core/domain/entity";
 
 import type { Diet, Weekday } from "../types/diet";
+import type { PrescribedPlan } from "../types/prescribed-plan";
+
+import { planAsDiet } from "./prescribed-plan";
 
 export type { Weekday };
 
@@ -91,4 +94,42 @@ export function dietForWeekday(
   weekday: Weekday,
 ): Diet | undefined {
   return diets.find((diet) => diet.weekdays.includes(weekday));
+}
+
+/**
+ * Os dias em que o plano da nutricionista vale de fato: os escolhidos para
+ * ele, menos os que já são de uma dieta da própria pessoa. Decisão do Pedro
+ * (01/10/2026): a dieta dela manda nos dias que ela escolheu, e nada do que
+ * ela configurou muda sozinho quando um plano chega.
+ */
+export function planDays(
+  plan: Pick<PrescribedPlan, "weekdays">,
+  diets: readonly Diet[],
+): readonly Weekday[] {
+  const own = new Set(diets.flatMap((diet) => diet.weekdays));
+  return WEEKDAYS.filter((day) => plan.weekdays.includes(day) && !own.has(day));
+}
+
+/**
+ * O que está planejado para uma data: a dieta da pessoa vinculada ao dia da
+ * semana, se houver; senão, o plano da nutricionista desse dia, no formato de
+ * dieta. O plano só vale a partir do dia em que existe: a Evolução não cobra
+ * de ninguém, no passado, um plano que ainda não tinha chegado.
+ */
+export function dietOfDay(
+  diets: readonly Diet[],
+  plans: readonly PrescribedPlan[],
+  date: Date,
+): Diet | undefined {
+  const weekday = weekdayOf(date);
+  const own = dietForWeekday(diets, weekday);
+  if (own !== undefined) return own;
+  const plan = plans.find(
+    (candidate) => candidate.weekdays.includes(weekday) && endOfDay(date) >= candidate.createdAt,
+  );
+  return plan === undefined ? undefined : planAsDiet(plan);
+}
+
+function endOfDay(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime() - 1;
 }

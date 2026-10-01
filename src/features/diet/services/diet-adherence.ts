@@ -1,7 +1,8 @@
 import { dayKey } from "@/core/format/day";
 
-import { dietForWeekday, weekdayOf } from "./diet-schedule";
+import { dietOfDay } from "./diet-schedule";
 import { isMealEaten } from "./meal-execution";
+import type { PrescribedPlan } from "../types/prescribed-plan";
 import type { Diet } from "../types/diet";
 import type { FoodLog } from "../types/food-log";
 
@@ -66,6 +67,8 @@ export function adherenceByWeek(
   logs: readonly FoodLog[],
   weeks: number,
   now = Date.now(),
+  // O plano da nutricionista conta nos dias dele (Life Pro, `dietOfDay`).
+  plans: readonly PrescribedPlan[] = [],
 ): readonly AdherencePoint[] {
   const logByDay = new Map(logs.map((log) => [log.day, log]));
 
@@ -91,7 +94,7 @@ export function adherenceByWeek(
     if (bucket === undefined) continue;
 
     const date = new Date(timestamp);
-    const diet = dietForWeekday(diets, weekdayOf(date));
+    const diet = dietOfDay(diets, plans, date);
     if (diet === undefined || diet.meals.length === 0) continue;
 
     const log = logByDay.get(dayKey(date));

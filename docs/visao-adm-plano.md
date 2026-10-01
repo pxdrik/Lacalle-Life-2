@@ -181,6 +181,7 @@ automático (o convite é por link), chat, IA.
 | Opções do convite já marcadas | Marcadas; o paciente desmarca | Etapa 4 |
 | "Dados do perfil" como opção do convite | Sim (idade, altura, objetivo) | Etapa 4 |
 | Plano vale para todos os dias ao chegar | Sim; o paciente muda | Etapa 5 |
+| Dia que já tem dieta do paciente quando o plano chega | **Decidido pelo Pedro (01/10/2026): vale a dieta dele.** O plano cobre os outros dias, e nada do que ele configurou muda sozinho. Escolher dias para o plano é ato dele: esses dias saem das dietas dele | decidido |
 | "O que mudou" na versão nova | Comparação automática + nota da profissional | Etapa 5 |
 | Plano depois de encerrar o vínculo | Continua como leitura, sem versões novas | Etapa 4 |
 | Água e dia de descanso entram no "Diário" liberado | Sim, como parte do diário | Etapa 6 |
@@ -228,8 +229,24 @@ antes de o Life Pro estar completo).
   alimentos não perde edição a caminho (os dois vistos vermelhos). O
   cabeçalho do Life Pro no celular passou a rolar com a página, como o do
   app: grudado no topo, cobria a barra de totais do editor (medido).
-  Falta: o lado do paciente (5b: Dietas, leitura, cópia; 5c: dias da semana,
-  Diário com "Opção de hoje", aviso de versão nova) e a Biblioteca (5d).
+  Do lado do paciente (5b, 01/10/2026): o plano publicado desce para o
+  aparelho numa coleção só de leitura (`prescribedPlans`, IndexedDB v11, fora
+  do backup), ao abrir o app e ao abrir Dietas, filtrando por `patient_id`
+  (rascunho nunca desce; a profissional não puxa os planos que montou; os
+  dois vistos vermelhos). Em Dietas, "Da sua nutricionista" acima de "Suas
+  dietas", com "Profissional" e "Atualizado" até o paciente abrir a versão
+  nova; o plano abre para leitura (`/dietas/plano/[id]`) com orientação e
+  outras opções por refeição; "Fazer uma cópia" vira uma dieta dele.
+  Dias e Diário (5c, 01/10/2026): os dias do plano descem de
+  `plan_schedules`, e a dieta do dia sai de uma função só (`dietOfDay`),
+  usada pelo Diário e pela aderência da Evolução: a dieta da pessoa manda
+  nos dias dela (decisão do Pedro), o plano cobre o resto e só a partir do
+  dia em que chegou. Em Dietas, o cartão do plano mostra os dias em que ele
+  vale de fato; dar dias ao plano grava no servidor e tira esses dias das
+  dietas da pessoa. No Diário, "Plano de hoje" e, nas refeições do plano com
+  outras opções, "Opção de hoje" (só antes de marcar como comida; sem campo
+  novo no registro do dia).
+  Falta: o que mudou na versão nova (5c2) e a Biblioteca (5d).
   Pendente de antes: `/pro` e `/admin` ainda entram no cache do service
   worker (o risco da seção 4 previa que não). As páginas não levam dado de
   paciente, que só chega pelo navegador, então o risco é baixo, mas a

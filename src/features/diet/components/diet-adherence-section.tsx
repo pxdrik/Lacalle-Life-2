@@ -7,6 +7,7 @@ import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 
 import { useDietAdherence } from "../hooks/use-diet-adherence";
+import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
 import { adherenceByWeek, ADHERENCE_WEEKS } from "../services/diet-adherence";
 import type { AdherencePoint } from "../services/diet-adherence";
 import { AdherenceChart } from "./adherence-chart";
@@ -27,6 +28,8 @@ export function DietAdherenceSection() {
   // flags the latter by name in a component body, not the former.
   const now = new Date().getTime();
   const state = useDietAdherence(now);
+  const prescribed = usePrescribedPlans();
+  const plans = prescribed.status === "ready" ? prescribed.plans : [];
 
   if (state.status === "loading") {
     return (
@@ -45,7 +48,8 @@ export function DietAdherenceSection() {
     );
   }
 
-  const hasSchedule = state.diets.some((diet) => diet.weekdays.length > 0);
+  const hasSchedule =
+    state.diets.some((diet) => diet.weekdays.length > 0) || plans.some((plan) => plan.weekdays.length > 0);
 
   if (!hasSchedule) {
     return (
@@ -63,7 +67,7 @@ export function DietAdherenceSection() {
     );
   }
 
-  const points = adherenceByWeek(state.diets, state.logs, ADHERENCE_WEEKS);
+  const points = adherenceByWeek(state.diets, state.logs, ADHERENCE_WEEKS, now, plans);
 
   return (
     <Section

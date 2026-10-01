@@ -7,6 +7,11 @@ import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { LocalDietRepository } from "@/features/diet/data/local-diet-repository";
 import { LocalFoodLogRepository } from "@/features/diet/data/local-food-log-repository";
 import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
+import {
+  LocalPrescribedPlanRepository,
+  PRESCRIBED_PLANS_STORE,
+} from "@/features/diet/data/prescribed-plan-repository";
+import type { PrescribedPlan } from "@/features/diet/types/prescribed-plan";
 import type { Diet } from "@/features/diet/types/diet";
 import type { FoodLog } from "@/features/diet/types/food-log";
 import { LocalProfileRepository } from "@/features/profile/data/local-profile-repository";
@@ -28,6 +33,7 @@ import type { RestDay } from "@/features/workouts/types/rest-day";
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
 import { pullAllDiets, pushAllDiets, resolveDietConflict } from "./diet-sync";
+import { pullPrescribedPlans, type PullPrescribedPlansResult } from "./prescribed-plan-sync";
 import type {
   DietConflictResolution,
   PullDietsResult,
@@ -492,4 +498,18 @@ export async function runRestDaySync(): Promise<RestDaySyncOutcome> {
   notifyStoreChanged("restDays");
 
   return { push, pull };
+}
+
+/**
+ * Traz os planos que a nutricionista publicou (Life Pro, Etapa 5). Só pull:
+ * o paciente não escreve plano. Avisa as telas para relerem.
+ */
+export async function runPrescribedPlanSync(): Promise<PullPrescribedPlansResult> {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const local = new LocalPrescribedPlanRepository(
+    new IndexedDbStore<PrescribedPlan>(db, PRESCRIBED_PLANS_STORE.name),
+  );
+  const pull = await pullPrescribedPlans(getSupabaseBrowserClient(), local);
+  notifyStoreChanged(PRESCRIBED_PLANS_STORE.name);
+  return pull;
 }

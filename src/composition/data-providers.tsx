@@ -9,6 +9,13 @@ import { FoodLogRepositoryProvider } from "@/features/diet/data/food-log-reposit
 import { SyncingFoodLogRepository } from "@/features/diet/data/syncing-food-log-repository";
 import { SyncingDietRepository } from "@/features/diet/data/syncing-diet-repository";
 import type { DietRepository } from "@/features/diet/data/diet-repository";
+import {
+  LocalPrescribedPlanRepository,
+  PRESCRIBED_PLANS_STORE,
+  type PrescribedPlanRepository,
+} from "@/features/diet/data/prescribed-plan-repository";
+import { PrescribedPlanRepositoryProvider } from "@/features/diet/data/prescribed-plan-repository-context";
+import type { PrescribedPlan } from "@/features/diet/types/prescribed-plan";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
 import { WaterRepositoryProvider } from "@/features/hydration/data/water-repository-context";
@@ -37,6 +44,7 @@ import {
 import { getSupabaseBrowserClient } from "@/core/auth/supabase-browser-client";
 import { openDatabase } from "@/core/storage/indexeddb/database";
 import { IndexedDbStore } from "@/core/storage/indexeddb/indexeddb-store";
+import { notifyStoreChanged } from "@/core/storage/store-events";
 import {
   backfillUntracked,
   SYNC_TRACKER_STORE,
@@ -232,7 +240,11 @@ export function FoodLogDataProvider({
       <DietRepositoryProvider repository={dietRepository()}>
         <FoodRepositoryProvider repository={foodRepository()}>
           <ProfileRepositoryProvider repository={profileRepository()}>
-            <WaterDataProvider>{children}</WaterDataProvider>
+            {/* O plano da nutricionista conta como a dieta do dia nos dias
+                que não são de uma dieta da pessoa (Life Pro, Etapa 5). */}
+            <PrescribedPlanRepositoryProvider repository={prescribedPlanRepository()}>
+              <WaterDataProvider>{children}</WaterDataProvider>
+            </PrescribedPlanRepositoryProvider>
           </ProfileRepositoryProvider>
         </FoodRepositoryProvider>
       </DietRepositoryProvider>
@@ -446,11 +458,41 @@ export function DietDataProvider({
       {/* Os alimentos só para a lista de compras agrupar por categoria: o item
           da dieta guarda o `foodId`, e a categoria mora no catálogo. */}
       <FoodRepositoryProvider repository={foodRepository()}>
-        {children}
+        <PrescribedPlanRepositoryProvider repository={prescribedPlanRepository()}>
+          {children}
+        </PrescribedPlanRepositoryProvider>
       </FoodRepositoryProvider>
     </DietRepositoryProvider>
   );
 }
+
+/**
+ * Os planos recebidos da nutricionista (Life Pro). Sem outbox: o paciente não
+ * escreve plano, só a sincronização troca a coleção
+ * (`sync/prescribed-plan-sync.ts`).
+ */
+export const prescribedPlanRepository = once<PrescribedPlanRepository>(async () => {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const local = new LocalPrescribedPlanRepository(
+    new IndexedDbStore<PrescribedPlan>(db, PRESCRIBED_PLANS_STORE.name),
+  );
+  return {
+    listAll: () => local.listAll(),
+    getById: (id) => local.getById(id),
+    markSeen: (id, version) => local.markSeen(id, version),
+    // Servidor primeiro: sem rede, a escolha falha na tela em vez de ficar
+    // só neste aparelho e sumir no próximo pull.
+    setWeekdays: async (id, weekdays) => {
+      const { error } = await getSupabaseBrowserClient().rpc("set_plan_schedule", {
+        p_plan_id: id,
+        p_weekdays: weekdays,
+      });
+      if (error !== null) throw new Error(error.message);
+      await local.setWeekdays(id, weekdays);
+      notifyStoreChanged(PRESCRIBED_PLANS_STORE.name);
+    },
+  };
+});
 
 /**
  * Adherence reads every diet and every food log in the window — nothing
@@ -465,7 +507,9 @@ export function DietAdherenceDataProvider({
   return (
     <DietRepositoryProvider repository={dietRepository()}>
       <FoodLogRepositoryProvider repository={foodLogRepository()}>
-        {children}
+        <PrescribedPlanRepositoryProvider repository={prescribedPlanRepository()}>
+          {children}
+        </PrescribedPlanRepositoryProvider>
       </FoodLogRepositoryProvider>
     </DietRepositoryProvider>
   );

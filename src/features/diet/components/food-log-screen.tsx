@@ -30,7 +30,10 @@ import {
   removeItems,
   sameMealYesterday,
 } from "../services/yesterday-meal";
-import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
+import { dietOfDay } from "../services/diet-schedule";
+import { chooseMealOption } from "../services/plan-option";
+import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
+import { PlanOfDay, TodayOption } from "./plan-of-day";
 import {
   addItem,
   addMeal,
@@ -96,6 +99,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   const { state, saveError, hasConflict, apply, replace, reload } =
     useFoodLogDay(day);
   const { state: dietList } = useDietList();
+  const prescribed = usePrescribedPlans();
+  const plans = prescribed.status === "ready" ? prescribed.plans : [];
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
   const [picking, setPicking] = useState(false);
@@ -148,11 +153,14 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
 
   // The diet scheduled for this weekday, if any — `undefined` while diets
   // are still loading, same as "no link" for the empty state's purposes.
+  // A dieta da pessoa para este dia da semana, ou, se não houver, o plano
+  // da nutricionista (Life Pro: decisão do Pedro, 01/10/2026; `dietOfDay`).
   const parsedDay = parseDayLocal(day);
   const linkedDiet =
     dietList.status === "ready" && parsedDay !== null
-      ? dietForWeekday(dietList.diets, weekdayOf(parsedDay))
+      ? dietOfDay(dietList.diets, plans, parsedDay)
       : undefined;
+  const planOfDay = plans.find((plan) => plan.id === linkedDiet?.id);
 
   /**
    * Days are a query parameter, not a route segment, so the default can be
@@ -287,6 +295,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             </div>
           )}
 
+          {planOfDay !== undefined && <PlanOfDay plan={planOfDay} />}
+
           {/* O check mora aqui, não na tela da Dieta — é o Diário que se
               usa todo dia, e ir até Dietas só para marcar "comi isto" era
               o passo extra que sobrava. Mostra só o que falta: uma vez
@@ -338,9 +348,27 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                     ? mealCheckState(state.log, sourceDietId, sourceMealId)
                     : undefined;
 
+                const planMeal =
+                  planOfDay !== undefined && sourceDietId === planOfDay.id
+                    ? planOfDay.meals.find((candidate) => candidate.id === sourceMealId)
+                    : undefined;
+                const option =
+                  planMeal !== undefined &&
+                  (planMeal.alternatives ?? []).length > 0 &&
+                  checkState === "unchecked" ? (
+                    <TodayOption
+                      meal={meal}
+                      planMeal={planMeal}
+                      onChoose={(chosen) => {
+                        apply((current) => chooseMealOption(current, meal.id, chosen));
+                      }}
+                    />
+                  ) : null;
+
                 return (
+                  <div key={meal.id} className="space-y-2">
+                  {option}
                   <MealCard
-                    key={meal.id}
                     meal={meal}
                     position={index}
                     total={state.log.meals.length}
@@ -462,6 +490,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         : undefined
                     }
                   />
+                  </div>
                 );
               })}
             </div>
