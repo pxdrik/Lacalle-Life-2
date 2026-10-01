@@ -25,7 +25,7 @@ describe("rascunho do plano pelo editor de dieta", () => {
     await t.db.query("insert into public.app_admins (user_id) values ($1)", [admin]);
     marina = await t.createUser("marina@exemplo.com");
     await t.as(marina, (tx) =>
-      tx.query("select public.request_professional_access('nutritionist', 'Marina Faria', 'CRN-3', '1')"),
+      tx.query("select public.request_professional_access('Marina Faria', 'CRN-3', '1', null, null)"),
     );
     await t.as(admin, (tx) => tx.query("select public.admin_review_professional($1, 'approve', null)", [marina]));
     ana = await t.createUser("ana@exemplo.com");

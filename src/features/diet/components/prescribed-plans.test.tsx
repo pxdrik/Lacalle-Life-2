@@ -93,7 +93,7 @@ describe("plano recebido no app do paciente", () => {
     const { wrap } = await setup(0);
     render(wrap(<DietList />, false));
     await screen.findByText("Nenhuma dieta ainda.");
-    expect(screen.queryByText("Da sua nutricionista")).not.toBeInTheDocument();
+    expect(screen.queryByText("Do seu treinador")).not.toBeInTheDocument();
     expect(screen.queryByText("Suas dietas")).not.toBeInTheDocument();
   });
 

@@ -13,7 +13,7 @@ import { PageHeader } from "@/design-system/components/page-header";
 import { useCareRepository } from "../../data/care-repository-context";
 import { useAdminData } from "../../hooks/admin-context";
 import { describeSharing, type PatientLink } from "../../types/care";
-import type { AuditEntry, ProfessionalRecord } from "../../types/professional";
+import { describeRegistrations, type AuditEntry, type ProfessionalRecord } from "../../types/professional";
 import { AdminLoadState } from "./admin-load-state";
 import { AuditList } from "./admin-history";
 import { formatWhen } from "./format";
@@ -59,7 +59,7 @@ export function AdminApproved() {
                   }}
                   className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 px-4 py-3.5 text-left transition-colors duration-(--duration-micro) ease-out hover:bg-muted md:px-5"
                 >
-                  <Person name={record.displayName} detail={`${record.councilRegion} ${record.councilNumber} · ${record.email}`} />
+                  <Person name={record.displayName} detail={`${describeRegistrations(record.registrations).join(" · ")} · ${record.email}`} />
                   <StatusBadge record={record} />
                   <ChevronRight aria-hidden className="size-5 text-ink-subtle" />
                 </button>
@@ -180,11 +180,9 @@ function ProfessionalSheet({
             <StatusBadge record={record} />
           </dd>
           <dt className="text-ink-subtle">Profissão</dt>
-          <dd className="font-medium text-ink">Nutricionista</dd>
+          <dd className="font-medium text-ink">Treinador</dd>
           <dt className="text-ink-subtle">Registro</dt>
-          <dd className="font-medium text-ink tabular-nums">
-            {record.councilRegion} · {record.councilNumber}
-          </dd>
+          <dd className="font-medium text-ink tabular-nums">{describeRegistrations(record.registrations).join(" · ")}</dd>
           <dt className="text-ink-subtle">Conta</dt>
           <dd className="font-medium break-all text-ink">{record.email}</dd>
           {approval !== undefined && (

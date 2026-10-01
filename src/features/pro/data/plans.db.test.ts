@@ -45,7 +45,7 @@ describe("planos (0035)", () => {
     admin = await t.createUser("lacallepm@gmail.com");
     await t.db.query("insert into public.app_admins (user_id) values ($1)", [admin]);
     marina = await t.createUser("marina@exemplo.com");
-    await q(marina, "select public.request_professional_access('nutritionist', 'Marina Faria', 'CRN-3', '1')");
+    await q(marina, "select public.request_professional_access('Marina Faria', 'CRN-3', '1', null, null)");
     await q(admin, "select public.admin_review_professional($1, 'approve', null)", [marina]);
     ana = await t.createUser("ana@exemplo.com");
     const [inv] = await q<{ token: string }>(marina, "select token from public.create_invite('Ana')");
@@ -185,7 +185,7 @@ describe("planos (0035)", () => {
     expect(published!.meals).toHaveLength(1);
 
     const paulo = await t.createUser("paulo@exemplo.com");
-    await q(paulo, "select public.request_professional_access('nutritionist', 'Paulo', 'CRN-1', '2')");
+    await q(paulo, "select public.request_professional_access('Paulo', 'CRN-1', '2', null, null)");
     await q(admin, "select public.admin_review_professional($1, 'approve', null)", [paulo]);
     await expect(q(paulo, "select public.delete_plan_template($1)", [template])).rejects.toThrow(/not found/);
     await q(marina, "select public.delete_plan_template($1)", [template]);

@@ -77,7 +77,7 @@ export async function pullPrescribedPlans(
     received.push({
       id: plan.id,
       name: latest.name,
-      professionalName: link?.professional_name ?? "Sua nutricionista",
+      professionalName: link?.professional_name ?? "Seu treinador",
       version: latest.version,
       changeNote: latest.change_note,
       publishedAt: latest.published_at,

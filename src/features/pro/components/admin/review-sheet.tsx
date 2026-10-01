@@ -8,6 +8,7 @@ import {
   REJECTION_REASON_LABELS,
   REJECTION_REASON_MESSAGES,
   REJECTION_REASONS,
+  describeRegistrations,
   type ProfessionalRecord,
   type RejectionReason,
 } from "../../types/professional";
@@ -36,7 +37,13 @@ export function ReviewSheet({
   const [reason, setReason] = useState<RejectionReason>("council_not_found");
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [copied, setCopied] = useState(false);
+  // Qual número foi copiado: com dois registros, o "Copiado" fica no certo.
+  const [copied, setCopied] = useState<string | null>(null);
+  const { crn, cref } = record.registrations;
+  const toCheck = [
+    ...(cref === null ? [] : [{ key: "cref", number: cref.number, where: `no site do CREF da região ${cref.region}, na consulta de registro`, label: `CREF ${cref.number}/${cref.region}` }]),
+    ...(crn === null ? [] : [{ key: "crn", number: crn.number, where: `no site do ${crn.region}, na consulta de profissionais inscritos`, label: `${crn.region} ${crn.number}` }]),
+  ];
 
   async function run(action: () => Promise<void>) {
     setPending(true);
@@ -112,44 +119,46 @@ export function ReviewSheet({
       <div className="space-y-4">
         <dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[9rem_minmax(0,1fr)]">
           <dt className="text-ink-subtle">Profissão</dt>
-          <dd className="font-medium text-ink">Nutricionista</dd>
-          <dt className="text-ink-subtle">Registro</dt>
-          <dd className="font-medium text-ink tabular-nums">
-            {record.councilRegion} · {record.councilNumber}
-          </dd>
+          <dd className="font-medium text-ink">Treinador</dd>
+          <dt className="text-ink-subtle">{toCheck.length === 1 ? "Registro" : "Registros"}</dt>
+          <dd className="font-medium text-ink tabular-nums">{describeRegistrations(record.registrations).join(" · ")}</dd>
           <dt className="text-ink-subtle">Conta</dt>
           <dd className="font-medium break-all text-ink">{record.email}</dd>
           <dt className="text-ink-subtle">Pedido em</dt>
           <dd className="font-medium text-ink tabular-nums">{formatWhen(record.requestedAt)}</dd>
         </dl>
 
-        <section className="space-y-2 rounded-lg border border-line p-4">
+        <section className="space-y-3 rounded-lg border border-line p-4">
           <h3 className="text-sm font-semibold text-ink">1. Confira no conselho</h3>
-          <p className="text-sm text-ink-muted">
-            Procure o número no site do {record.councilRegion}, na consulta de profissionais inscritos.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <code className="rounded-md bg-muted px-3 py-2 font-semibold text-ink tabular-nums select-all">
-              {record.councilNumber}
-            </code>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                // Copiar pode ser recusado (permissão, navegador antigo); o
-                // número continua selecionável ao lado.
-                navigator.clipboard
-                  ?.writeText(record.councilNumber)
-                  .then(() => {
-                    setCopied(true);
-                  })
-                  .catch(() => undefined);
-              }}
-            >
-              <Copy aria-hidden className="size-4" />
-              {copied ? "Copiado" : "Copiar número"}
-            </Button>
-          </div>
+          {toCheck.map((item) => (
+            <div key={item.key} className="space-y-2">
+              <p className="text-sm text-ink-muted">
+                <span className="font-medium text-ink">{item.label}</span>: procure o número {item.where}.
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <code className="rounded-md bg-muted px-3 py-2 font-semibold text-ink tabular-nums select-all">
+                  {item.number}
+                </code>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    // Copiar pode ser recusado (permissão, navegador antigo); o
+                    // número continua selecionável ao lado.
+                    navigator.clipboard
+                      ?.writeText(item.number)
+                      .then(() => {
+                        setCopied(item.key);
+                      })
+                      .catch(() => undefined);
+                  }}
+                >
+                  <Copy aria-hidden className="size-4" />
+                  {copied === item.key ? "Copiado" : "Copiar número"}
+                </Button>
+              </div>
+            </div>
+          ))}
         </section>
 
         <section className="space-y-2 rounded-lg border border-line p-4">

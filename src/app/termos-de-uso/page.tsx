@@ -95,7 +95,7 @@ const SECTIONS: readonly LegalSection[] = [
   {
     heading: "12. Life Pro, a área para profissionais",
     body: [
-      "Nutricionistas podem pedir acesso ao Life Pro, com a mesma conta, para montar planos alimentares e acompanhar pacientes. O acesso só é liberado depois que a administração do LaCalle Life confere o registro no conselho, e pode ser recusado ou suspenso, por exemplo se o registro não for confirmado ou se houver uso indevido.",
+      "Treinadores, com registro no CREF ou no CRN, podem pedir acesso ao Life Pro, com a mesma conta, para montar planos alimentares e treinos e acompanhar pacientes. O acesso só é liberado depois que a administração do LaCalle Life confere cada registro no conselho, e pode ser recusado ou suspenso, por exemplo se o registro não for confirmado ou se houver uso indevido.",
       "Quem usa o Life Pro se compromete a informar dados profissionais verdadeiros, a usar os dados dos pacientes só para o acompanhamento que eles autorizaram, a respeitar o sigilo e as normas do seu conselho profissional e a responder pelos planos que prescreve. O LaCalle Life é a ferramenta: não presta atendimento de saúde, não confere o conteúdo dos planos e não faz parte da relação entre o profissional e o paciente.",
       <>
         O paciente decide se aceita o acompanhamento, o que libera e quando encerra. Como isso

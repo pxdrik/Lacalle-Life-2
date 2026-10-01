@@ -126,11 +126,11 @@ export function InviteScreen({ token }: { readonly token: string }) {
         </span>
         <div className="min-w-0">
           <p className="font-medium break-words text-ink">{name}</p>
-          <p className="text-xs text-ink-subtle">Nutricionista · {invite.council}</p>
+          <p className="text-xs text-ink-subtle">Treinador · {invite.council}</p>
         </div>
       </div>
       <p className="text-sm text-ink-muted">
-        {name.split(" ")[0]} quer acompanhar sua alimentação pelo LaCalle Life e montar seu plano alimentar.
+        {name.split(" ")[0]} quer acompanhar você pelo LaCalle Life e montar seu plano alimentar e seu treino.
       </p>
     </Card>
   );

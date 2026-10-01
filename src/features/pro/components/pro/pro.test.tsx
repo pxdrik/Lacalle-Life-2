@@ -16,7 +16,7 @@ vi.mock("@/design-system/theme/theme-toggle", () => ({ ThemeToggle: () => null }
 
 const APPROVED: MyAccess = {
   isAdmin: false,
-  professional: { status: "approved", displayName: "Marina Faria", councilRegion: "CRN-3", councilNumber: "1", rejectionReason: null },
+  professional: { status: "approved", displayName: "Marina Faria", registrations: { crn: { region: "CRN-3", number: "1" }, cref: null }, rejectionReason: null },
 };
 
 function mount(access: MyAccess, data: { links?: PatientLink[]; invites?: PendingInvite[] } = {}) {

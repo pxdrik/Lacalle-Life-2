@@ -21,8 +21,7 @@ describe("SupabasePlanRepository contra o banco", () => {
     const uid = await t.createUser(email);
     await createSupabaseProRepository(clientAs(t, uid)).requestAccess({
       displayName: name,
-      councilRegion: "CRN-3",
-      councilNumber: "1",
+      registrations: { crn: { region: "CRN-3", number: "1" }, cref: null },
     });
     return uid;
   }

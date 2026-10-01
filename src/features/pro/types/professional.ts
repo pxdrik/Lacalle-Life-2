@@ -19,7 +19,7 @@ export const REJECTION_REASON_LABELS: Readonly<Record<RejectionReason, string>> 
 /** O que a pessoa lê no Perfil depois da recusa. É o que o administrador vê antes de recusar. */
 export const REJECTION_REASON_MESSAGES: Readonly<Record<RejectionReason, string>> = {
   council_not_found:
-    "Não encontramos esse número de CRN na região informada. Confira o número e a região e envie de novo.",
+    "Não encontramos esse registro no conselho da região informada. Confira o número e a região e envie de novo.",
   name_mismatch:
     "O nome do pedido não confere com o do registro no conselho. Use o nome como está no registro e envie de novo.",
   inactive: "O registro aparece como inativo no conselho. Quando estiver ativo, envie o pedido de novo.",
@@ -31,20 +31,43 @@ export const REJECTION_REASON_MESSAGES: Readonly<Record<RejectionReason, string>
  * Sem os estados de cada um: não estão conferidos numa fonte, e quem
  * administra procura pelo número no site do próprio conselho.
  */
-export const COUNCIL_REGIONS: readonly string[] = Array.from({ length: 11 }, (_, index) => `CRN-${String(index + 1)}`);
+export const CRN_REGIONS: readonly string[] = Array.from({ length: 11 }, (_, index) => `CRN-${String(index + 1)}`);
+
+/** O CREF aparece com a UF da região, como na carteira: 012345-G/SP (0037). */
+export const CREF_REGIONS: readonly string[] = [
+  "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA",
+  "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO",
+];
+
+/**
+ * Os registros do treinador no conselho (0037, decisão do Pedro: "pode ser
+ * que o treinador tenha os 2"). Cada um é opcional; o banco exige pelo menos
+ * um. Qualquer registro aprovado libera dieta e treino.
+ */
+export interface Registrations {
+  readonly crn: { readonly region: string; readonly number: string } | null;
+  readonly cref: { readonly number: string; readonly region: string } | null;
+}
+
+/** Como cada registro aparece na tela: "CRN-3 00000", "CREF 012345-G/SP". */
+export function describeRegistrations(registrations: Registrations): readonly string[] {
+  const { crn, cref } = registrations;
+  return [
+    ...(crn === null ? [] : [`${crn.region} ${crn.number}`]),
+    ...(cref === null ? [] : [`CREF ${cref.number}/${cref.region}`]),
+  ];
+}
 
 export interface ProfessionalRequestInput {
   readonly displayName: string;
-  readonly councilRegion: string;
-  readonly councilNumber: string;
+  readonly registrations: Registrations;
 }
 
 /** O pedido como a própria pessoa o vê. */
 export interface OwnProfessional {
   readonly status: ProfessionalStatus;
   readonly displayName: string;
-  readonly councilRegion: string;
-  readonly councilNumber: string;
+  readonly registrations: Registrations;
   readonly rejectionReason: RejectionReason | null;
 }
 
@@ -59,8 +82,7 @@ export interface ProfessionalRecord {
   readonly userId: string;
   readonly email: string;
   readonly displayName: string;
-  readonly councilRegion: string;
-  readonly councilNumber: string;
+  readonly registrations: Registrations;
   readonly status: ProfessionalStatus;
   readonly rejectionReason: RejectionReason | null;
   readonly requestedAt: string;

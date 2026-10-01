@@ -13,7 +13,7 @@ type Status = { status: string; rejection_reason: string | null; reviewed_by: st
 async function request(t: TestDb, uid: string, name = "Beatriz Nogueira") {
   return t.as(uid, (tx) =>
     tx.query<{ request_professional_access: string }>(
-      "select public.request_professional_access('nutritionist', $1, 'CRN-3', '12345')",
+      "select public.request_professional_access($1, 'CRN-3', '12345', null, null)",
       [name],
     ),
   );
@@ -56,7 +56,7 @@ describe("pedido de acesso e administrador (0033)", () => {
     await expect(
       t.as(uid, (tx) =>
         tx.query(
-          "insert into public.professional_profiles (user_id, profession, display_name, council_region, council_number, status) values (auth.uid(), 'nutritionist', 'X Y', 'CRN-3', '1', 'approved')",
+          "insert into public.professional_profiles (user_id, profession, display_name, council_region, council_number, status) values (auth.uid(), 'trainer', 'X Y', 'CRN-3', '1', 'approved')",
         ),
       ),
     ).rejects.toThrow(/permission denied/);
@@ -188,19 +188,55 @@ describe("pedido de acesso e administrador (0033)", () => {
   it("dados fora do formato são recusados pelo banco", async () => {
     const uid = await t.createUser("formato@exemplo.com");
     await expect(
-      t.as(uid, (tx) => tx.query("select public.request_professional_access('nutritionist', 'Ana', 'CRN-99', '123')")),
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', 'CRN-99', '123', null, null)")),
     ).rejects.toThrow(/check constraint/);
     await expect(
-      t.as(uid, (tx) => tx.query("select public.request_professional_access('nutritionist', 'Ana', 'CRN-3', '12a')")),
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', 'CRN-3', '12a', null, null)")),
     ).rejects.toThrow(/check constraint/);
     await expect(
-      t.as(uid, (tx) => tx.query("select public.request_professional_access('trainer', 'Ana', 'CRN-3', '123')")),
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', null, null, '12345-G', 'SP')")),
+      "CREF com 5 dígitos",
     ).rejects.toThrow(/check constraint/);
+    await expect(
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', null, null, '012345-G', 'São Paulo')")),
+      "região do CREF fora da UF",
+    ).rejects.toThrow(/check constraint/);
+    await expect(
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', 'CRN-3', null, null, null)")),
+      "região sem número",
+    ).rejects.toThrow(/check constraint/);
+    await expect(
+      t.as(uid, (tx) => tx.query("select public.request_professional_access('Ana', null, null, null, null)")),
+      "nenhum registro",
+    ).rejects.toThrow(/some_council/);
+  });
+
+  it("treinador (0037): só CREF, ou os dois registros, e o histórico guarda os dois", async () => {
+    const soCref = await t.createUser("cref@exemplo.com");
+    await t.as(soCref, (tx) => tx.query("select public.request_professional_access('Rafael Moura', null, null, '012345-g', 'SP')"));
+    const dois = await t.createUser("dois@exemplo.com");
+    await t.as(dois, (tx) => tx.query("select public.request_professional_access('Marina Faria', 'CRN-3', '00001', '054321-P', 'RJ')"));
+
+    const list = await t.as(admin, (tx) =>
+      tx.query<{ user_id: string; profession: string; council_region: string | null; council_number: string | null; cref_number: string | null; cref_region: string | null }>(
+        "select user_id, profession, council_region, council_number, cref_number, cref_region from public.admin_list_professionals()",
+      ),
+    );
+    const row = (uid: string) => list.rows.find((r) => r.user_id === uid);
+    expect(row(soCref)).toMatchObject({ profession: "trainer", council_region: null, council_number: null, cref_number: "012345-G", cref_region: "SP" });
+    expect(row(dois)).toMatchObject({ council_region: "CRN-3", council_number: "00001", cref_number: "054321-P", cref_region: "RJ" });
+
+    await t.as(admin, (tx) => tx.query("select public.admin_review_professional($1, 'approve', null)", [dois]));
+    const audit = await t.db.query<{ council: string }>(
+      "select detail->>'council' as council from public.admin_audit_log where target_user_id = $1",
+      [dois],
+    );
+    expect(audit.rows).toEqual([{ council: "CRN-3 00001 · CREF 054321-P/RJ" }]);
   });
 
   it("visitante sem conta não pede acesso", async () => {
     await expect(
-      t.as(null, (tx) => tx.query("select public.request_professional_access('nutritionist', 'Ana', 'CRN-3', '1')")),
+      t.as(null, (tx) => tx.query("select public.request_professional_access('Ana', 'CRN-3', '1', null, null)")),
     ).rejects.toThrow(/permission denied/);
   });
 });

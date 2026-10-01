@@ -39,6 +39,23 @@ describe("Administração", () => {
     expect(screen.queryByText("Beatriz Nogueira")).not.toBeInTheDocument();
   });
 
+  it("treinador com CREF e CRN: os dois registros para conferir, cada um com o próprio número para copiar", async () => {
+    mount(<AdminRequests />, [
+      record({
+        userId: "r",
+        displayName: "Rafael Moura",
+        registrations: { crn: { region: "CRN-3", number: "00001" }, cref: { number: "012345-G", region: "SP" } },
+      }),
+    ]);
+    await userEvent.click(await screen.findByRole("button", { name: "Conferir o pedido de Rafael Moura" }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("CRN-3 00001 · CREF 012345-G/SP")).toBeInTheDocument();
+    expect(within(dialog).getByText("012345-G")).toBeInTheDocument();
+    expect(within(dialog).getByText("00001")).toBeInTheDocument();
+    expect(within(dialog).getAllByRole("button", { name: "Copiar número" })).toHaveLength(2);
+    expect(within(dialog).getByText("Treinador")).toBeInTheDocument();
+  });
+
   it("aprovar só liga depois de confirmar a conferência", async () => {
     const repository = mount(<AdminRequests />, [record({ userId: "b" }), record({ userId: "c", displayName: "Carlos Mendes" })]);
     await userEvent.click(await screen.findByRole("button", { name: "Conferir o pedido de Beatriz Nogueira" }));
@@ -75,7 +92,7 @@ describe("Administração", () => {
     const repository = mount(<AdminApproved />, [record({ userId: "m", displayName: "Marina Faria", status: "approved" })]);
     await userEvent.click(await screen.findByRole("button", { name: "Ver Marina Faria" }));
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByText("CRN-3 · 12345")).toBeInTheDocument();
+    expect(within(dialog).getByText("CRN-3 12345")).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole("button", { name: "Suspender Marina Faria" }));
     expect(repository.calls).toEqual([]);
     await userEvent.click(within(dialog).getByRole("button", { name: /Suspender/ }));

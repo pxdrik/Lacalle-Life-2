@@ -32,12 +32,11 @@ describe("SupabaseProRepository contra o banco", () => {
 
   it("o caminho todo: pedir, administrador ver, recusar, reenviar, aprovar, suspender", async () => {
     const uid = await t.createUser("beatriz@exemplo.com");
-    await repo(uid).requestAccess({ displayName: " Beatriz Nogueira ", councilRegion: "CRN-3", councilNumber: "12345" });
+    await repo(uid).requestAccess({ displayName: " Beatriz Nogueira ", registrations: { crn: { region: "CRN-3", number: "12345" }, cref: null } });
     expect((await repo(uid).getMyAccess())?.professional).toEqual({
       status: "pending",
       displayName: "Beatriz Nogueira",
-      councilRegion: "CRN-3",
-      councilNumber: "12345",
+      registrations: { crn: { region: "CRN-3", number: "12345" }, cref: null },
       rejectionReason: null,
     });
 
@@ -52,7 +51,7 @@ describe("SupabaseProRepository contra o banco", () => {
       rejectionReason: "name_mismatch",
     });
 
-    await repo(uid).requestAccess({ displayName: "Beatriz N. Souza", councilRegion: "CRN-3", councilNumber: "12345" });
+    await repo(uid).requestAccess({ displayName: "Beatriz N. Souza", registrations: { crn: { region: "CRN-3", number: "12345" }, cref: null } });
     await repo(admin).approve(uid);
     await repo(admin).setSuspended(uid, true);
     expect((await repo(uid).getMyAccess())?.professional?.status).toBe("suspended");
@@ -65,7 +64,7 @@ describe("SupabaseProRepository contra o banco", () => {
 
   it("o administrador vê só o próprio pedido em getMyAccess, mesmo lendo os dos outros", async () => {
     const someone = await t.createUser("alguem@exemplo.com");
-    await repo(someone).requestAccess({ displayName: "Alguém", councilRegion: "CRN-1", councilNumber: "1" });
+    await repo(someone).requestAccess({ displayName: "Alguém", registrations: { crn: { region: "CRN-1", number: "1" }, cref: null } });
     expect(await repo(admin).getMyAccess()).toEqual({ isAdmin: true, professional: null });
   });
 

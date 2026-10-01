@@ -72,7 +72,7 @@ export function CareSection() {
               <div className="min-w-0">
                 <p className="font-medium break-words text-ink">{link.professionalName}</p>
                 <p className="text-xs text-ink-subtle">
-                  Nutricionista ·{" "}
+                  Treinador ·{" "}
                   {link.status === "active"
                     ? `desde ${DATE.format(new Date(link.createdAt))}`
                     : `encerrado em ${DATE.format(new Date(link.endedAt ?? link.createdAt))}`}

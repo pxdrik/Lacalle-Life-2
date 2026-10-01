@@ -287,6 +287,19 @@ antes de o Life Pro estar completo).
   a regra da 5c (a dieta da pessoa mandava no dia dela). Mostrar a escolha
   para a profissional fica para o acompanhamento (Etapa 6).
   Falta: a Biblioteca (5d).
+- **Etapa 8, em andamento** (protótipo aprovado em 01/10/2026:
+  https://claude.ai/artifact/FbMLzGtkhwUdNQVgfUTAkN). 8a, treinador e os dois
+  registros (migração 0037): a profissão é uma só, `trainer` (quem já tinha
+  pedido ou sido aprovado virou treinador com o CRN que tinha); o pedido
+  guarda CREF (`012345-G`, UF) e CRN, cada um opcional, pelo menos um, e o
+  banco garante. A administração confere cada registro com o próprio número
+  para copiar. Convite e vínculo mostram os registros por uma função só
+  (`professional_councils`): juntar região e número dava vazio para quem só
+  tem CREF (visto vermelho). No app, "nutricionista" virou "treinador" no que
+  o paciente lê, e a Política e os Termos falam de CREF ou CRN. Padrões até o
+  Pedro decidir: qualquer registro aprovado libera dieta e treino; "treinador"
+  para todos; Hoje só sugere, sem aviso de treino perdido. Acrescentar um
+  registro depois da aprovação fica para depois (pede situação por registro).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.

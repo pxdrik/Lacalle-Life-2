@@ -1,10 +1,11 @@
 import type { ProRepository } from "./pro-repository";
-import type {
-  AuditEntry,
-  MyAccess,
-  ProfessionalRecord,
-  ProfessionalStatus,
-  RejectionReason,
+import {
+  describeRegistrations,
+  type AuditEntry,
+  type MyAccess,
+  type ProfessionalRecord,
+  type ProfessionalStatus,
+  type RejectionReason,
 } from "../types/professional";
 
 /**
@@ -34,7 +35,7 @@ export function fakeProRepository(options: {
       action,
       targetUserId: userId,
       displayName: record.displayName,
-      council: `${record.councilRegion} ${record.councilNumber}`,
+      council: describeRegistrations(record.registrations).join(" · "),
       reason,
       createdAt: "2026-10-01T12:00:00.000Z",
     });
@@ -44,7 +45,7 @@ export function fakeProRepository(options: {
     calls,
     getMyAccess: () => Promise.resolve(access),
     requestAccess: (input) => {
-      calls.push(`request:${input.displayName}|${input.councilRegion}|${input.councilNumber}`);
+      calls.push(`request:${input.displayName}|${describeRegistrations(input.registrations).join("|")}`);
       access = {
         isAdmin: access?.isAdmin ?? false,
         professional: { status: "pending", rejectionReason: null, ...input },
@@ -78,8 +79,7 @@ export function record(overrides: Partial<ProfessionalRecord> & { readonly userI
   return {
     email: `${overrides.userId}@exemplo.com`,
     displayName: "Beatriz Nogueira",
-    councilRegion: "CRN-3",
-    councilNumber: "12345",
+    registrations: { crn: { region: "CRN-3", number: "12345" }, cref: null },
     status: "pending",
     rejectionReason: null,
     requestedAt: "2026-09-29T21:40:00.000Z",

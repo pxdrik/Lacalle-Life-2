@@ -5,7 +5,7 @@ import { PrescribedPlanScreen } from "@/features/diet/components/prescribed-plan
 import { PageShell } from "@/design-system/components/page-shell";
 
 export const metadata: Metadata = {
-  title: "Plano da nutricionista · LaCalle Life",
+  title: "Plano do treinador · LaCalle Life",
 };
 
 /** O plano recebido do Life Pro, só leitura. Vem do aparelho, como as dietas. */

@@ -7,6 +7,7 @@ import { EmptyState } from "@/design-system/components/empty-state";
 import { PageHeader } from "@/design-system/components/page-header";
 
 import { useAdminData } from "../../hooks/admin-context";
+import { describeRegistrations } from "../../types/professional";
 import { AdminLoadState } from "./admin-load-state";
 import { formatWhen } from "./format";
 import { Person } from "./person";
@@ -70,15 +71,19 @@ export function AdminRequests() {
                     <span className="md:hidden">
                       <Person
                         name={record.displayName}
-                        detail={`${record.councilRegion} ${record.councilNumber} · ${formatWhen(record.requestedAt)}`}
+                        detail={`${describeRegistrations(record.registrations).join(" · ")} · ${formatWhen(record.requestedAt)}`}
                       />
                     </span>
                     <span className="hidden md:block">
                       <Person name={record.displayName} detail={record.email} />
                     </span>
-                    <span className="hidden text-sm text-ink-muted md:block">Nutricionista</span>
+                    <span className="hidden text-sm text-ink-muted md:block">Treinador</span>
                     <span className="hidden text-sm text-ink tabular-nums md:block">
-                      {record.councilRegion} {record.councilNumber}
+                      {describeRegistrations(record.registrations).map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
                     </span>
                     <span className="hidden text-sm text-ink-muted tabular-nums md:block">
                       {formatWhen(record.requestedAt)}

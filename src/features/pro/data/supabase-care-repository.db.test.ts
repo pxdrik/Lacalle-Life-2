@@ -22,8 +22,7 @@ describe("SupabaseCareRepository contra o banco", () => {
     marina = await t.createUser("marina@exemplo.com");
     await createSupabaseProRepository(clientAs(t, marina)).requestAccess({
       displayName: "Marina Faria",
-      councilRegion: "CRN-3",
-      councilNumber: "12345",
+      registrations: { crn: { region: "CRN-3", number: "12345" }, cref: null },
     });
     await createSupabaseProRepository(clientAs(t, admin)).approve(marina);
   });

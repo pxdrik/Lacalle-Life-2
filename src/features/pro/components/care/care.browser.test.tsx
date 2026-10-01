@@ -48,7 +48,7 @@ function providers(children: React.ReactNode, care = fakeCareRepository({})) {
         repository={fakeProRepository({
           access: {
             isAdmin: false,
-            professional: { status: "approved", displayName: LONG, councilRegion: "CRN-3", councilNumber: "1", rejectionReason: null },
+            professional: { status: "approved", displayName: LONG, registrations: { crn: { region: "CRN-3", number: "1" }, cref: null }, rejectionReason: null },
           },
         })}
       >

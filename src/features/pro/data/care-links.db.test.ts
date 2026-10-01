@@ -26,7 +26,7 @@ describe("vínculos e convites (0034)", () => {
   async function approvedPro(email: string, name: string): Promise<string> {
     const uid = await t.createUser(email);
     await t.as(uid, (tx) =>
-      tx.query("select public.request_professional_access('nutritionist', $1, 'CRN-3', '12345')", [name]),
+      tx.query("select public.request_professional_access($1, 'CRN-3', '12345', null, null)", [name]),
     );
     await t.as(admin, (tx) => tx.query("select public.admin_review_professional($1, 'approve', null)", [uid]));
     return uid;
@@ -64,7 +64,7 @@ describe("vínculos e convites (0034)", () => {
   it("só profissional aprovado gera convite; o banco guarda o hash, não o código", async () => {
     const pending = await t.createUser("pendente@exemplo.com");
     await t.as(pending, (tx) =>
-      tx.query("select public.request_professional_access('nutritionist', 'Em Análise', 'CRN-3', '1')"),
+      tx.query("select public.request_professional_access('Em Análise', 'CRN-3', '1', null, null)"),
     );
     await expect(t.as(pending, (tx) => tx.query("select * from public.create_invite('X')"))).rejects.toThrow(
       /not an approved professional/,
@@ -80,6 +80,24 @@ describe("vínculos e convites (0034)", () => {
       invite_id,
     ]);
     expect(stored.rows[0]!.token_hash).not.toContain(token);
+  });
+
+  it("treinador só com CREF (0037): o convite e o vínculo mostram o CREF, não vazio", async () => {
+    const rafael = await t.createUser("rafael@exemplo.com");
+    await t.as(rafael, (tx) =>
+      tx.query("select public.request_professional_access('Rafael Moura', null, null, '012345-G', 'SP')"),
+    );
+    await t.as(admin, (tx) => tx.query("select public.admin_review_professional($1, 'approve', null)", [rafael]));
+    const { token } = await invite(rafael);
+    const seen = await t.as(null, (tx) =>
+      tx.query<{ council: string }>("select council from public.get_invite($1)", [token]),
+    );
+    expect(seen.rows).toEqual([{ council: "CREF 012345-G/SP" }]);
+
+    const bia = await t.createUser("bia-cref@exemplo.com");
+    await t.as(bia, (tx) => tx.query("select public.accept_invite($1, false, false, false)", [token]));
+    const links = await t.as(bia, (tx) => tx.query<{ council: string }>("select council from public.my_care_links()"));
+    expect(links.rows).toEqual([{ council: "CREF 012345-G/SP" }]);
   });
 
   it("a página do convite mostra quem convidou, até para visitante, e nada de código errado", async () => {

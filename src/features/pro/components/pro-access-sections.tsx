@@ -10,7 +10,7 @@ import { Section } from "@/design-system/components/section";
 
 import { useProRepository } from "../data/pro-repository-context";
 import { useMyAccess } from "../hooks/use-my-access";
-import { REJECTION_REASON_MESSAGES, type OwnProfessional } from "../types/professional";
+import { describeRegistrations, REJECTION_REASON_MESSAGES, type OwnProfessional } from "../types/professional";
 import { CareSection } from "./care/care-section";
 import { RequestAccessDialog } from "./request-access-dialog";
 
@@ -55,7 +55,7 @@ export function ProAccessSections() {
                 <Badge state="atencao">{String(pendingRequests)}</Badge>
               )}
             </div>
-            <p className="text-sm text-ink-muted">Conferir CRN, aprovar, recusar e suspender profissionais.</p>
+            <p className="text-sm text-ink-muted">Conferir registros, aprovar, recusar e suspender profissionais.</p>
             <Link href="/admin" className={buttonClasses("secondary", "sm")}>
               Abrir administração
             </Link>
@@ -71,8 +71,7 @@ export function ProAccessSections() {
               ? null
               : {
                   displayName: professional.displayName,
-                  councilRegion: professional.councilRegion,
-                  councilNumber: professional.councilNumber,
+                  registrations: professional.registrations,
                 }
           }
           onClose={() => {
@@ -115,9 +114,9 @@ function ProfessionalCard({
   if (professional === null) {
     return (
       <Card className="space-y-3">
-        <p className="font-medium text-ink">Você é nutricionista?</p>
+        <p className="font-medium text-ink">Você é treinador?</p>
         <p className="text-sm text-ink-muted">
-          Com o Life Pro você monta planos e acompanha pacientes, usando esta mesma conta.
+          Com o Life Pro você monta plano alimentar e treino e acompanha pacientes, usando esta mesma conta.
         </p>
         <Button variant="secondary" size="sm" onClick={onAsk}>
           Pedir acesso ao Life Pro
@@ -126,7 +125,7 @@ function ProfessionalCard({
     );
   }
 
-  const registry = `${professional.councilRegion} ${professional.councilNumber}`;
+  const registry = describeRegistrations(professional.registrations).join(" e o ");
 
   switch (professional.status) {
     case "pending":

@@ -39,7 +39,7 @@ const SECTIONS: readonly LegalSection[] = [
   {
     heading: "5. Compartilhamento com profissionais (Life Pro)",
     body: [
-      "Um nutricionista que usa o Life Pro pode convidar você para acompanhamento, por um link. Nada é compartilhado antes de você aceitar o convite com a sua conta. Ao aceitar, você escolhe o que o profissional pode ver: o diário alimentar, a evolução física (peso e medidas) e os dados do perfil (idade, altura e objetivo). Ele identifica você pelo nome que deu ao convite; o seu e-mail e os dados da sua conta não aparecem para ele. Treinos e senha não são compartilhados.",
+      "Um treinador que usa o Life Pro (profissional com registro no CREF ou no CRN) pode convidar você para acompanhamento, por um link, e montar o seu plano alimentar e o seu treino. Nada é compartilhado antes de você aceitar o convite com a sua conta. Ao aceitar, você escolhe o que o profissional pode ver: o diário alimentar, a evolução física (peso e medidas) e os dados do perfil (idade, altura e objetivo). Ele identifica você pelo nome que deu ao convite; o seu e-mail e os dados da sua conta não aparecem para ele. Treinos e senha não são compartilhados.",
       "Você pode mudar o que libera ou encerrar o acompanhamento quando quiser, no Perfil. Encerrar corta o acesso do profissional na hora e não apaga nada: os seus registros continuam seus, e o plano que ele publicou continua com você, só para leitura.",
       "O profissional vê só o que você liberou e só enquanto o vínculo está ativo. Essa regra fica no banco de dados, não só na tela. Esse compartilhamento acontece com o seu consentimento, que você dá ao aceitar o convite e pode retirar a qualquer momento.",
       "Os planos que o profissional publica ficam guardados na sua conta e no seu aparelho. O conteúdo do plano é responsabilidade do profissional que o prescreveu.",
@@ -78,7 +78,7 @@ const SECTIONS: readonly LegalSection[] = [
   {
     heading: "10. Recursos futuros",
     body: [
-      "Se o LaCalle Life passar a usar análise de uso, publicidade, compartilhamento com treinadores ou outros profissionais além dos nutricionistas do Life Pro, ou qualquer tecnologia que mude o que está descrito aqui, esta Política será atualizada antes, dizendo quais dados, para quê, com quem e, quando for o caso, como dar ou retirar o consentimento.",
+      "Se o LaCalle Life passar a usar análise de uso, publicidade, compartilhamento com outros profissionais além dos treinadores do Life Pro, ou qualquer tecnologia que mude o que está descrito aqui, esta Política será atualizada antes, dizendo quais dados, para quê, com quem e, quando for o caso, como dar ou retirar o consentimento.",
     ],
   },
   {

@@ -39,8 +39,7 @@ describe("planos recebidos pela sincronização", () => {
     marina = await t.createUser("marina@exemplo.com");
     await createSupabaseProRepository(clientAs(t, marina)).requestAccess({
       displayName: "Marina Faria",
-      councilRegion: "CRN-3",
-      councilNumber: "1",
+      registrations: { crn: { region: "CRN-3", number: "1" }, cref: null },
     });
     await createSupabaseProRepository(clientAs(t, admin)).approve(marina);
     ana = await t.createUser("ana@exemplo.com");

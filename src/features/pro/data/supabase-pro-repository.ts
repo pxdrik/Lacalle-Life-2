@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import type { ProRepository } from "./pro-repository";
-import { REJECTION_REASONS, type AuditEntry, type RejectionReason } from "../types/professional";
+import { REJECTION_REASONS, type AuditEntry, type Registrations, type RejectionReason } from "../types/professional";
 
 /**
  * O pedaço do cliente Supabase que este repositório usa. Estrutural, como
@@ -29,11 +29,35 @@ export interface ProQuery
 const status = z.enum(["pending", "approved", "rejected", "suspended"]);
 const reason = z.enum(REJECTION_REASONS as [RejectionReason, ...RejectionReason[]]);
 
+// Os dois registros (0037): CRN nas colunas de antes, CREF nas novas, cada
+// par inteiro ou vazio (o banco garante).
+const registrationColumns = {
+  council_region: z.string().nullable(),
+  council_number: z.string().nullable(),
+  cref_number: z.string().nullable(),
+  cref_region: z.string().nullable(),
+};
+
+function registrationsOf(row: {
+  readonly council_region: string | null;
+  readonly council_number: string | null;
+  readonly cref_number: string | null;
+  readonly cref_region: string | null;
+}): Registrations {
+  return {
+    crn:
+      row.council_region === null || row.council_number === null
+        ? null
+        : { region: row.council_region, number: row.council_number },
+    cref:
+      row.cref_number === null || row.cref_region === null ? null : { number: row.cref_number, region: row.cref_region },
+  };
+}
+
 const ownRow = z.object({
   status,
   display_name: z.string(),
-  council_region: z.string(),
-  council_number: z.string(),
+  ...registrationColumns,
   rejection_reason: reason.nullable(),
 });
 
@@ -41,8 +65,7 @@ const listRow = z.object({
   user_id: z.string(),
   email: z.string(),
   display_name: z.string(),
-  council_region: z.string(),
-  council_number: z.string(),
+  ...registrationColumns,
   status,
   rejection_reason: reason.nullable(),
   requested_at: z.string(),
@@ -78,7 +101,7 @@ export function createSupabaseProRepository(client: ProSupabaseClient): ProRepos
         // interessa o dele.
         client
           .from("professional_profiles")
-          .select("user_id,status,display_name,council_region,council_number,rejection_reason")
+          .select("user_id,status,display_name,council_region,council_number,cref_number,cref_region,rejection_reason")
           .eq("user_id", userData.user.id),
       ]);
       fail(admin.error);
@@ -94,19 +117,20 @@ export function createSupabaseProRepository(client: ProSupabaseClient): ProRepos
             : {
                 status: mine.status,
                 displayName: mine.display_name,
-                councilRegion: mine.council_region,
-                councilNumber: mine.council_number,
+                registrations: registrationsOf(mine),
                 rejectionReason: mine.rejection_reason,
               },
       };
     },
 
     async requestAccess(input) {
+      const { crn, cref } = input.registrations;
       const { error } = await client.rpc("request_professional_access", {
-        p_profession: "nutritionist",
         p_display_name: input.displayName,
-        p_council_region: input.councilRegion,
-        p_council_number: input.councilNumber,
+        p_crn_region: crn?.region ?? null,
+        p_crn_number: crn?.number ?? null,
+        p_cref_number: cref?.number ?? null,
+        p_cref_region: cref?.region ?? null,
       });
       fail(error);
     },
@@ -121,8 +145,7 @@ export function createSupabaseProRepository(client: ProSupabaseClient): ProRepos
           userId: row.user_id,
           email: row.email,
           displayName: row.display_name,
-          councilRegion: row.council_region,
-          councilNumber: row.council_number,
+          registrations: registrationsOf(row),
           status: row.status,
           rejectionReason: row.rejection_reason,
           requestedAt: row.requested_at,

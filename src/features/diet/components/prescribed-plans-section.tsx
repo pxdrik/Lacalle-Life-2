@@ -20,7 +20,7 @@ import { PlanChangesNotice } from "./plan-changes-notice";
 const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
 
 /**
- * "Da sua nutricionista" em Dietas (estudo do paciente aprovado em
+ * "Do seu treinador" em Dietas (estudo do paciente aprovado em
  * 30/09/2026): o plano fica separado das dietas da pessoa, com a etiqueta
  * "Profissional", e abre só para leitura. Para mudar algo, "Fazer uma cópia",
  * que vira uma dieta dela.
@@ -40,7 +40,7 @@ export function PrescribedPlansSection({
   return (
     <section aria-labelledby="planos-recebidos" className="space-y-2">
       <h2 id="planos-recebidos" className="text-xs font-medium tracking-wide text-ink-subtle uppercase">
-        Da sua nutricionista
+        Do seu treinador
       </h2>
       <ul className="space-y-2">
         {plans.map((plan) => (

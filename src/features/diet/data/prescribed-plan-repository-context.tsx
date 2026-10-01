@@ -6,7 +6,7 @@ import type { PrescribedPlanRepository } from "./prescribed-plan-repository";
 
 /**
  * Opcional, como o perfil: quem monta Dietas sem planos (a conta anônima, um
- * teste) continua funcionando, só sem a seção "Da sua nutricionista".
+ * teste) continua funcionando, só sem a seção "Do seu treinador".
  */
 const PrescribedPlanRepositoryContext = createContext<Promise<PrescribedPlanRepository> | null>(null);
 
