@@ -96,7 +96,7 @@ export function FoodBrowser() {
             // catálogo curado — "convidaria duplicata" — e 580 alimentos já
             // curados são o mesmo caso, só que maior.
             buttonClasses("secondary"),
-            // Same row as the field beside it — see the note on "Filtros" above.
+            // Same row as the field beside it — see the note on the star above.
             "h-(--input-h)",
           )}
         >
