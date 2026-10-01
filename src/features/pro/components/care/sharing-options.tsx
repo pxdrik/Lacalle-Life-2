@@ -42,8 +42,8 @@ export function SharingOptions({
       <div className="flex items-start gap-3 py-3">
         <Lock aria-hidden className="mt-0.5 size-5 shrink-0 p-0.5 text-ink-subtle" />
         <span className="min-w-0">
-          <span className="block text-sm font-medium text-ink">Seu nome e e-mail</span>
-          <span className="block text-xs text-ink-subtle">Sempre, para ela saber quem é você.</span>
+          <span className="block text-sm font-medium text-ink">O nome que ela deu ao convite</span>
+          <span className="block text-xs text-ink-subtle">É assim que você aparece na lista dela. Seu e-mail não aparece.</span>
         </span>
       </div>
     </div>

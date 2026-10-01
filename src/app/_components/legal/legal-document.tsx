@@ -17,7 +17,7 @@ import { LEGAL_LINKS } from "./legal-links";
  */
 
 /** Data da versão vigente dos três documentos. */
-export const LEGAL_UPDATED_AT = "30 de setembro de 2026";
+export const LEGAL_UPDATED_AT = "1º de outubro de 2026";
 
 /**
  * O canal oficial para contato e para os pedidos de titular (LGPD), criado

@@ -93,35 +93,50 @@ const SECTIONS: readonly LegalSection[] = [
     ],
   },
   {
-    heading: "12. Recursos futuros",
+    heading: "12. Life Pro, a área para profissionais",
     body: [
-      "O LaCalle Life poderá oferecer no futuro recursos para profissionais, como nutricionistas e treinadores, além de pagamentos, notificações ou outras integrações. Nada disso existe nesta versão. Quando existir, estes Termos e a Política de Privacidade serão atualizados antes.",
+      "Nutricionistas podem pedir acesso ao Life Pro, com a mesma conta, para montar planos alimentares e acompanhar pacientes. O acesso só é liberado depois que a administração do LaCalle Life confere o registro no conselho, e pode ser recusado ou suspenso, por exemplo se o registro não for confirmado ou se houver uso indevido.",
+      "Quem usa o Life Pro se compromete a informar dados profissionais verdadeiros, a usar os dados dos pacientes só para o acompanhamento que eles autorizaram, a respeitar o sigilo e as normas do seu conselho profissional e a responder pelos planos que prescreve. O LaCalle Life é a ferramenta: não presta atendimento de saúde, não confere o conteúdo dos planos e não faz parte da relação entre o profissional e o paciente.",
+      <>
+        O paciente decide se aceita o acompanhamento, o que libera e quando encerra. Como isso
+        funciona com os dados está na{" "}
+        <Link href="/politica-de-privacidade" className="text-ink underline underline-offset-4">
+          Política de Privacidade
+        </Link>
+        .
+      </>,
     ],
   },
   {
-    heading: "13. Limitação de responsabilidade",
+    heading: "13. Recursos futuros",
+    body: [
+      "O LaCalle Life poderá oferecer no futuro recursos para outros profissionais, como treinadores, além de pagamentos, notificações ou outras integrações. Nada disso existe nesta versão. Quando existir, estes Termos e a Política de Privacidade serão atualizados antes.",
+    ],
+  },
+  {
+    heading: "14. Limitação de responsabilidade",
     body: [
       "Na medida permitida pela lei, o LaCalle Life não garante funcionamento sempre livre de falhas ou interrupções. Nada nestes Termos afasta direitos ou responsabilidades que a lei não permite afastar, incluindo os direitos do consumidor. O aplicativo não deve ser usado em situações de emergência nem no lugar de atendimento profissional.",
     ],
   },
   {
-    heading: "14. Encerramento da conta",
+    heading: "15. Encerramento da conta",
     body: [
       "Nesta versão, o aplicativo ainda não tem um botão para excluir a conta. Você pode pedir o encerramento da conta e a exclusão dos dados pelo canal de contato abaixo. A exclusão segue a Política de Privacidade e as hipóteses em que a lei exige guardar algum dado.",
     ],
   },
   {
-    heading: "15. Atualizações destes Termos",
+    heading: "16. Atualizações destes Termos",
     body: [
       "Estes Termos podem ser atualizados quando o aplicativo, a lei ou a forma de tratar os dados mudar. A versão vigente fica sempre nesta página, com a data da última atualização.",
     ],
   },
   {
-    heading: "16. Contato",
+    heading: "17. Contato",
     body: [<ContactLine key="contato" subject="dúvidas sobre estes Termos" />],
   },
   {
-    heading: "17. Lei aplicável",
+    heading: "18. Lei aplicável",
     body: [
       "Estes Termos seguem a lei brasileira, respeitados os direitos do consumidor e dos titulares de dados pessoais.",
     ],

@@ -9,6 +9,7 @@ import { Skeleton } from "@/design-system/components/skeleton";
 import { WorkspaceShell } from "@/design-system/components/workspace-shell";
 
 import { useMyAccess } from "../../hooks/use-my-access";
+import { SignInRedirect } from "../sign-in-redirect";
 
 /**
  * O Life Pro (protótipo v3, 28/09/2026), só para profissional aprovado. As
@@ -30,6 +31,9 @@ export function ProShell({ children }: { readonly children: React.ReactNode }) {
       </div>
     );
   }
+
+  // Sem conta, nada da área: vai entrar e volta para cá.
+  if (state.status === "ready" && state.access === null) return <SignInRedirect />;
 
   if (state.status === "error" || state.access?.professional?.status !== "approved") {
     return (

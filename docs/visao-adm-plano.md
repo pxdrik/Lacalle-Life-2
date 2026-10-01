@@ -172,6 +172,15 @@ Life Pro para qualquer profissional.
 Fora desta versão (como a especificação pede): treinadores, cobrança, e-mail
 automático (o convite é por link), chat, IA.
 
+**Próxima etapa, pedida pelo Pedro (01/10/2026): o profissional também monta
+o treino.** Mesmo desenho do plano alimentar: rotina prescrita só de leitura
+para o paciente, com versões e cópia, usando o editor de rotina do app. A
+especificação já pedia a estrutura pronta para fichas de treino. Ponto a
+decidir antes: quem pode prescrever. No Brasil a prescrição de exercício é
+do profissional de Educação Física (CREF); o protótipo previa "educador
+físico entra depois, com as fichas de treino". Se for também a
+nutricionista, vale o Pedro confirmar com quem faz a revisão jurídica.
+
 ## 6. Decisões em aberto (com o padrão que vou usar se ninguém mudar)
 
 | Decisão | Padrão (como no protótipo) | Precisa até |
@@ -254,6 +263,9 @@ antes de o Life Pro estar completo).
   quantidade; orientação; outras opções; total do dia antes e depois). As
   refeições se reconhecem pelo id, não pelo nome. Abrir conta como visto.
   Falta: a Biblioteca (5d).
+  Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
+  Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
+  próprio voltam quando houver app publicado e domínio.
   Pendente de antes: `/pro` e `/admin` ainda entram no cache do service
   worker (o risco da seção 4 previa que não). As páginas não levam dado de
   paciente, que só chega pelo navegador, então o risco é baixo, mas a

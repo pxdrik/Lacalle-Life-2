@@ -10,6 +10,7 @@ import { WorkspaceShell } from "@/design-system/components/workspace-shell";
 
 import { AdminProvider, useAdminData } from "../../hooks/admin-context";
 import { useMyAccess } from "../../hooks/use-my-access";
+import { SignInRedirect } from "../sign-in-redirect";
 
 /**
  * A área de administração (protótipo aprovado em 01/10/2026). Só a conta
@@ -28,6 +29,9 @@ export function AdminShell({ children }: { readonly children: React.ReactNode })
       </div>
     );
   }
+
+  // Sem conta, nada da área: vai entrar e volta para cá.
+  if (state.status === "ready" && state.access === null) return <SignInRedirect />;
 
   if (state.status === "error" || state.access?.isAdmin !== true) {
     return (
