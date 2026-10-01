@@ -184,3 +184,25 @@ automático (o convite é por link), chat, IA.
 | "O que mudou" na versão nova | Comparação automática + nota da profissional | Etapa 5 |
 | Plano depois de encerrar o vínculo | Continua como leitura, sem versões novas | Etapa 4 |
 | Água e dia de descanso entram no "Diário" liberado | Sim, como parte do diário | Etapa 6 |
+
+## 7. Andamento
+
+Branch `life-pro`, pull request #1 em rascunho (nada vai para o site publicado
+antes de o Life Pro estar completo).
+
+- **Etapa 0, entregue 01/10/2026.** PGlite aplica as migrações num Postgres de
+  verdade dentro dos testes (`npm run test:db`, no `verify`). Isolamento entre
+  contas nas 12 tabelas e filtro por `user_id` em toda leitura da
+  sincronização, os dois vistos vermelhos com a falha provocada.
+- **Etapa 1, entregue 01/10/2026.** Migração 0033 aplicada em produção
+  (`20261001033701`). A conta lacallepm@gmail.com **ainda não existe**: quando
+  o Pedro se cadastrar, rodar o `insert into public.app_admins` do fim da
+  migração (com confirmação).
+- **Etapa 2, entregue 01/10/2026.** No Perfil: "Área profissional" (pedir
+  acesso, em análise, não aprovado com motivo, aprovado, suspenso) e, só para
+  o administrador, "Administração". Área `/admin` com casca larga
+  (`WorkspaceShell`, 1600px): Pedidos com conferência do CRN (Aprovar só liga
+  depois da confirmação), Aprovados com detalhes e suspensão em dois toques,
+  Histórico. Os pacientes de cada profissional entram nos detalhes com os
+  vínculos (Etapa 4). Testes de navegador em 320 a 1600px, nas três
+  densidades.

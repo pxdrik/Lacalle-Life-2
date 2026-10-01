@@ -6,6 +6,7 @@ import { ManualSyncButton } from "@/app/(app)/(auth)/conta/manual-sync-button";
 import { Section } from "@/design-system/components/section";
 import { AccountStatus } from "@/features/auth/components/account-status";
 import { useAuth } from "@/features/auth/hooks/use-auth";
+import { ProAccessSections } from "@/features/pro/components/pro-access-sections";
 import { ProfileScreen } from "@/features/profile/components/profile-screen";
 
 import { LEGAL_LINKS } from "../../_components/legal/legal-links";
@@ -18,6 +19,9 @@ import { LEGAL_LINKS } from "../../_components/legal/legal-links";
  * Decide duas coisas que só quem enxerga as duas sabe: sem conta, a conta
  * vem antes de tudo; e "Sincronizar dados" só existe com conta, porque sem
  * ela não há para onde sincronizar.
+ *
+ * Com conta, "Área profissional" e "Administração" (Life Pro, Etapa 2) vêm
+ * logo depois da conta: são dela, não do aparelho.
  */
 export function ProfileTab() {
   const { state } = useAuth();
@@ -28,12 +32,15 @@ export function ProfileTab() {
       <ProfileScreen
         accountFirst={anonymous}
         account={
-          <Section title="Conta e sincronização">
-            <div className="space-y-4">
-              <AccountStatus />
-              {state.status === "authenticated" && <ManualSyncButton />}
-            </div>
-          </Section>
+          <>
+            <Section title="Conta e sincronização">
+              <div className="space-y-4">
+                <AccountStatus />
+                {state.status === "authenticated" && <ManualSyncButton />}
+              </div>
+            </Section>
+            {state.status === "authenticated" && <ProAccessSections />}
+          </>
         }
       />
 

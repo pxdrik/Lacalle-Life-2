@@ -1219,3 +1219,13 @@ html {
     scale: 1 1;
   }
 }
+
+/*
+ * Áreas de trabalho (Administração, Life Pro): o conteúdo acompanha a tela até
+ * 1600px, regra "Largura e escala em tela larga: área profissional" do
+ * `docs/brandbook.md`. Só onde `WorkspaceShell` põe `data-area="pro"`; o app
+ * pessoal continua em 1280.
+ */
+[data-area="pro"] {
+  --content-max: 1600px;
+}
