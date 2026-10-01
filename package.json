@@ -15,8 +15,9 @@
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "test:browser": "vitest run --project browser",
+    "test:db": "vitest run --project db",
     "test:browser:webkit": "vitest run --config vitest.webkit.config.ts",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run test:browser"
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run test:db && npm run test:browser"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
+    "@electric-sql/pglite": "0.5.8",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^7.0.0",
