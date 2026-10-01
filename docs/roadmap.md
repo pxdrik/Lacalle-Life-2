@@ -2841,6 +2841,8 @@ caminhos, e a escolha é de produto:
 
 Gerar por IA está fora: contradiz a regra fundadora do projeto.
 
+**Decidido pelo Pedro em 30/09/2026:** os exercícios sem foto mostram a **logo do LaCalle** no lugar da imagem. Não é nenhum dos três caminhos acima: a foto continua `null` no catálogo (nenhuma foto errada, nenhum casamento inventado), e a logo é só o que a tela desenha quando não há foto. Vem **depois da Visão ADM**, na ordem que o Pedro pediu.
+
 ### 3. Fotos de progresso
 
 A metade da evolução corporal que ficou de fora. Exige infraestrutura que
@@ -3044,6 +3046,17 @@ dados de exemplo; nada disso está no código. A implementação parte dele:
   (Plano, Diário, Evolução, Histórico), editor de plano com versão em
   rascunho, Dietas, Evolução, Biblioteca. Configurações ficou fora da
   navegação.
+
+**Protótipo do lado do paciente e do funcionamento, aprovado em 30/09/2026 ("Agora sim"):**
+https://claude.ai/artifact/7GRUPWh76oDhFcqWdaFhEM. Fecha o modelo:
+
+- **Uma conta por pessoa.** Profissional é a mesma conta com um perfil profissional aprovado pela LaCalle (pedido no Perfil com profissão, nome, CRN e região; "em análise" até a aprovação; só o servidor muda o estado).
+- **Um vínculo por paciente** (quem, o que compartilha, situação: convite, ativo, encerrado). Um paciente pode ter mais de um vínculo; cada um vê só o que foi liberado para ele, com a regra no banco (RLS).
+- **O plano reaproveita o formato da dieta**: a orientação mora em cada refeição (`Meal.notes`) e as opções da refeição são as "Outras sugestões" (`Meal.alternatives`). Sem quadro de orientações gerais. No Diário, o paciente escolhe a "Opção de hoje"; só o dia muda, o plano não.
+- No app do paciente: plano em Dietas numa seção própria, só leitura, com "Fazer uma cópia"; aviso de versão nova com o que mudou; seção "Acompanhamento" no Perfil para mudar o que compartilha e encerrar.
+- Convite por link que a nutricionista envia como quiser (o app não tem envio de e-mail próprio).
+- **Pedido do Pedro para a implementação:** o mesmo cuidado de design das últimas entregas (ele viu linhas sobrepostas no protótipo); cada tela com teste de navegador de sobreposição, transbordo e toque.
+- Decisões ainda abertas estão no painel lateral do protótipo (aprovação manual ou automática, quem aprova, opções do convite marcadas ou não, dias do plano, "o que mudou" automático, plano depois de encerrar).
 
 ### 7. Sete novidades vindas de referência de mercado: aprovadas para implementar (29/09/2026)
 
