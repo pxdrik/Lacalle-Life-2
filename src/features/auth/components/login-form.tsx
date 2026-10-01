@@ -14,7 +14,11 @@ import { hardNavigateTo } from "../data/hard-navigate";
 import { TurnstileWidget } from "./turnstile-widget";
 import { useTurnstile } from "../hooks/use-turnstile";
 
-export function LoginForm() {
+/**
+ * `next`: para onde voltar depois de entrar (um convite do Life Pro, por
+ * exemplo). Quem chama já o validou como caminho do próprio site.
+ */
+export function LoginForm({ next = "/hoje" }: { readonly next?: string }) {
   const repository = useAuthRepository();
   const captcha = useTurnstile();
 
@@ -40,7 +44,7 @@ export function LoginForm() {
         password,
         captcha.token || undefined,
       );
-      hardNavigateTo("/hoje");
+      hardNavigateTo(next);
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);
@@ -84,7 +88,7 @@ export function LoginForm() {
       </Field>
 
       <div className="flex items-center justify-between text-sm">
-        <Link href="/cadastro" className="text-ink-subtle hover:text-ink">
+        <Link href={{ pathname: "/cadastro", query: next === "/hoje" ? {} : { next } }} className="text-ink-subtle hover:text-ink">
           Criar conta
         </Link>
         <Link href="/recuperar-senha" className="text-ink-subtle hover:text-ink">

@@ -16,7 +16,8 @@ import { useTurnstile } from "../hooks/use-turnstile";
 
 const MIN_PASSWORD_LENGTH = 8;
 
-export function SignupForm() {
+/** `next`: como em `LoginForm`. */
+export function SignupForm({ next = "/hoje" }: { readonly next?: string }) {
   const repository = useAuthRepository();
   const captcha = useTurnstile();
 
@@ -78,7 +79,7 @@ export function SignupForm() {
         return;
       }
 
-      hardNavigateTo("/hoje");
+      hardNavigateTo(next);
     } catch (cause) {
       setError(describeAuthError(cause));
       setPending(false);
@@ -91,7 +92,7 @@ export function SignupForm() {
     return (
       <Notice tone="warning" title="Este e-mail já tem conta">
         {email} já está cadastrado. Você pode{" "}
-        <Link href="/entrar" className="underline">
+        <Link href={{ pathname: "/entrar", query: next === "/hoje" ? {} : { next } }} className="underline">
           entrar
         </Link>{" "}
         ou{" "}
@@ -163,7 +164,7 @@ export function SignupForm() {
 
       <p className="text-sm text-ink-subtle">
         Já tem conta?{" "}
-        <Link href="/entrar" className="text-ink hover:underline">
+        <Link href={{ pathname: "/entrar", query: next === "/hoje" ? {} : { next } }} className="text-ink hover:underline">
           Entrar
         </Link>
       </p>
