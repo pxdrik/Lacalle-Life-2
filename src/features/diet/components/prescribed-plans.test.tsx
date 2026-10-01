@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -95,5 +95,27 @@ describe("plano recebido no app do paciente", () => {
     await screen.findByText("Nenhuma dieta ainda.");
     expect(screen.queryByText("Da sua nutricionista")).not.toBeInTheDocument();
     expect(screen.queryByText("Suas dietas")).not.toBeInTheDocument();
+  });
+
+  it("versão nova: o aviso abre o que mudou, com a nota e a comparação, e conta como visto", async () => {
+    const { plans, wrap } = await setup(1);
+    const [meal] = PLAN.meals;
+    await plans.replaceAll([
+      {
+        ...PLAN,
+        changeNote: "Almoço com outro nome",
+        previous: { version: 1, meals: [meal!] },
+        meals: [{ ...meal!, name: "Almoço leve" }],
+      },
+    ]);
+    render(wrap(<DietList />));
+    await userEvent.click(await screen.findByRole("button", { name: "Ver o que mudou" }));
+
+    const sheet = await screen.findByRole("dialog", { name: "O que mudou na versão 2" });
+    expect(within(sheet).getByText("Nota de Marina Faria: “Almoço com outro nome”")).toBeInTheDocument();
+    expect(within(sheet).getByText("Almoço agora se chama Almoço leve")).toBeInTheDocument();
+    await waitFor(async () => {
+      expect((await plans.getById("p"))!.seenVersion).toBe(2);
+    });
   });
 });

@@ -17,6 +17,7 @@ import { isUpdated, planAsDiet } from "../services/prescribed-plan";
 import type { Diet, Weekday } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
 import { MacroSummary } from "./macro-summary";
+import { PlanChangesNotice } from "./plan-changes-notice";
 import { WeekdayPicker } from "./weekday-picker";
 
 const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
@@ -64,6 +65,9 @@ export function PrescribedPlansSection({
             onSchedule={() => {
               setScheduling(plan);
             }}
+            onSeen={() => {
+              void repository?.then((repo) => repo.markSeen(plan.id, plan.version)).catch(() => undefined);
+            }}
           />
         ))}
       </ul>
@@ -106,11 +110,13 @@ function PlanRow({
   days,
   onCopy,
   onSchedule,
+  onSeen,
 }: {
   readonly plan: PrescribedPlan;
   readonly days: readonly Weekday[];
   readonly onCopy: (diet: Diet) => void;
   readonly onSchedule: () => void;
+  readonly onSeen: () => void;
 }) {
   const diet = planAsDiet(plan);
   const meals = plan.meals.length;
@@ -134,6 +140,7 @@ function PlanRow({
             <MacroSummary macros={dietMacros(diet)} />
           </div>
         </Link>
+        {isUpdated(plan) && <PlanChangesNotice plan={plan} onSeen={onSeen} />}
         <div className="flex flex-wrap items-center gap-x-2 border-t border-line px-2 py-1">
           <button
             type="button"

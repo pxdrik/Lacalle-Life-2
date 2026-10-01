@@ -39,7 +39,6 @@ const PLAN: PrescribedPlan = {
   name: NAME,
   professionalName: PRO,
   version: 3,
-  changeNote: "",
   publishedAt: "2026-09-26T12:00:00Z",
   meals: ["Café da manhã", "Almoço"].map((name, index) => ({
     ...createMeal(index + 1, name),
@@ -47,7 +46,11 @@ const PLAN: PrescribedPlan = {
     items: [item("Peito de frango grelhado sem pele"), item("Arroz integral cozido")],
     alternatives: [{ id: `a${String(index)}`, name: "Marmita de macarrão com frango desfiado", items: [item("Macarrão cozido")] }],
   })),
-  previous: null,
+  previous: {
+    version: 2,
+    meals: [{ ...createMeal(1, "Café da manhã"), items: [item("Pão francês com manteiga e queijo minas")] }],
+  },
+  changeNote: "Troquei o jantar e aumentei a proteína do lanche da tarde, como combinamos na consulta.",
   weekdays: ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
   linkEnded: false,
   seenVersion: 2,
@@ -113,6 +116,21 @@ describe("Dietas: da sua nutricionista", () => {
         const days = within(card).getByRole("button", { name: /Dias do plano/ });
         expectTouchable(copy);
         expectTouchable(days);
+        // A versão nova: o aviso quebra linha, e a folha do que mudou cabe na tela.
+        const notice = within(card).getByText(/atualizou seu plano/);
+        expectWhole(notice, card);
+        const changes = within(card).getByRole("button", { name: "Ver o que mudou" });
+        expectTouchable(changes);
+        await userEvent.click(changes);
+        const sheet = await screen.findByRole("dialog");
+        await Promise.all(sheet.getAnimations({ subtree: true }).map((animation) => animation.finished));
+        expectWhole(within(sheet).getByText(/Troquei o jantar/), sheet);
+        expectWhole(within(sheet).getByText(/Café da manhã: saiu do plano/), sheet);
+        expectWhole(within(sheet).getByText(/Total do dia:/), sheet);
+        const sheetBox = sheet.getBoundingClientRect();
+        expect(sheetBox.right, "a folha passa da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
+        await userEvent.click(within(sheet).getByRole("button", { name: "Fechar" }));
+
         // Lado a lado ou um embaixo do outro (quebram em 320px Confortável),
         // nunca um por cima do outro.
         const a = days.getBoundingClientRect();

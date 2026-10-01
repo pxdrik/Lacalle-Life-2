@@ -196,9 +196,10 @@ antes de o Life Pro estar completo).
   contas nas 12 tabelas e filtro por `user_id` em toda leitura da
   sincronização, os dois vistos vermelhos com a falha provocada.
 - **Etapa 1, entregue 01/10/2026.** Migração 0033 aplicada em produção
-  (`20261001033701`). A conta lacallepm@gmail.com **ainda não existe**: quando
-  o Pedro se cadastrar, rodar o `insert into public.app_admins` do fim da
-  migração (com confirmação).
+  (`20261001033701`). A conta lacallepm@gmail.com foi criada e marcada como
+  administradora em 01/10/2026, com o `insert into public.app_admins` do fim
+  da migração, a pedido do Pedro (o e-mail de confirmação caiu fora da caixa
+  de entrada e foi confirmado direto no banco).
 - **Etapa 2, entregue 01/10/2026.** No Perfil: "Área profissional" (pedir
   acesso, em análise, não aprovado com motivo, aprovado, suspenso) e, só para
   o administrador, "Administração". Área `/admin` com casca larga
@@ -246,7 +247,13 @@ antes de o Life Pro estar completo).
   dietas da pessoa. No Diário, "Plano de hoje" e, nas refeições do plano com
   outras opções, "Opção de hoje" (só antes de marcar como comida; sem campo
   novo no registro do dia).
-  Falta: o que mudou na versão nova (5c2) e a Biblioteca (5d).
+  O que mudou (5c2, 01/10/2026): no cartão do plano com versão nova, o
+  aviso "atualizou seu plano" e a folha "O que mudou na versão N", com a
+  nota da nutricionista e a comparação automática com a versão anterior
+  (refeição nova, saiu, renomeada; alimento que entrou, saiu ou mudou de
+  quantidade; orientação; outras opções; total do dia antes e depois). As
+  refeições se reconhecem pelo id, não pelo nome. Abrir conta como visto.
+  Falta: a Biblioteca (5d).
   Pendente de antes: `/pro` e `/admin` ainda entram no cache do service
   worker (o risco da seção 4 previa que não). As páginas não levam dado de
   paciente, que só chega pelo navegador, então o risco é baixo, mas a
