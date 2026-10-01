@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { cn } from "@/design-system/cn";
-import { buttonClasses } from "@/design-system/components/button";
+import { BESIDE_SEARCH, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Input } from "@/design-system/components/input";
 import { useIncrementalReveal } from "@/design-system/hooks/use-incremental-reveal";
@@ -76,9 +76,7 @@ export function FoodBrowser() {
           }}
           className={cn(
             buttonClasses(favoritesOnly ? "primary" : "secondary"),
-            // Matches the field beside it: `--control-h` varies with density,
-            // `--input-h` stays fixed at 44px on purpose (input.tsx).
-            "h-(--input-h)",
+            BESIDE_SEARCH,
           )}
         >
           <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
@@ -96,8 +94,7 @@ export function FoodBrowser() {
             // catálogo curado — "convidaria duplicata" — e 580 alimentos já
             // curados são o mesmo caso, só que maior.
             buttonClasses("secondary"),
-            // Same row as the field beside it — see the note on the star above.
-            "h-(--input-h)",
+            BESIDE_SEARCH,
           )}
         >
           <Plus aria-hidden className="size-4" />

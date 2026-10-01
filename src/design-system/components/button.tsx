@@ -100,6 +100,20 @@ export function buttonClasses(
   return cn(BASE, VARIANTS[variant], SIZES[size]);
 }
 
+/**
+ * Para somar a `buttonClasses()` num botão ao lado do campo de busca, cujo
+ * rótulo some no celular (`hidden sm:inline`). Duas coisas, as duas medidas
+ * em 320px Confortável (roadmap 8.21, 30/09/2026):
+ *
+ * - **A altura do campo**, por `--input-h-beside` (`tokens.css`).
+ *   `h-(--input-h)` dava 57px ao botão e 44 ao campo na mesma linha.
+ * - **Quadrado sem rótulo.** O padding existe para o texto: na Confortável são
+ *   30px de cada lado, e um botão só com a estrela media 100px. Dois deles
+ *   deixavam o campo com 56px ("Bu…").
+ */
+export const BESIDE_SEARCH =
+  "h-(--input-h-beside) min-w-(--input-h-beside) px-0 sm:px-(--control-px)";
+
 export interface ButtonProps extends Omit<
   React.ComponentPropsWithRef<"button">,
   "type"

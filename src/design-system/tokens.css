@@ -525,6 +525,10 @@
   --control-px-lg: 30px;
 
   --input-h: 44px;
+  /* A mesma altura, para um botão ao lado de um campo (roadmap 8.21). O campo
+     cancela o `zoom` da densidade e o botão não, então `h-(--input-h)` no botão
+     media 50,6px no Padrão e 57,2 na Confortável, contra os 44 do campo. */
+  --input-h-beside: calc(var(--input-h) / var(--ui-scale));
   /* Pág. 26. Diferente do botão de propósito: o texto de um campo alinha com o
      rótulo acima dele, e 18 px empurraria os dois para longe. */
   --input-px: 14px;

@@ -217,9 +217,9 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
           className={cn(
             "shrink-0",
             buttonClasses(favoritesOnly ? "primary" : "secondary"),
-            // Matches the field beside it: `--control-h` varies with density,
-            // `--input-h` stays fixed at 44px on purpose (input.tsx).
-            "h-(--input-h)",
+            // Quadrado e da altura do campo, como "Fechar busca": aqui nunca
+            // há rótulo, então não usa `BESIDE_SEARCH` (que o devolve em `sm`).
+            "size-(--input-h-beside) px-0",
           )}
         >
           <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
@@ -230,7 +230,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
           type="button"
           onClick={onCancel}
           aria-label="Fechar busca"
-          className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+          className="flex size-(--input-h-beside) shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
         >
           <X aria-hidden className="size-4" />
         </button>

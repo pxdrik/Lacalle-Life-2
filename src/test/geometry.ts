@@ -63,6 +63,23 @@ export function overflowX(element: Element): number {
   return element.scrollWidth - element.clientWidth - 1;
 }
 
+/**
+ * Quanto sobra (negativo: falta) para o placeholder de um campo caber
+ * inteiro, em pixels. O placeholder não tem nó para um `Range` medir, então
+ * a largura sai do canvas com a fonte que o campo calculou. O campo cancela
+ * o `zoom` da densidade (`tokens.css`), então fonte, padding e caixa estão
+ * todos na mesma escala, a da tela.
+ */
+export function placeholderSlack(input: HTMLInputElement): number {
+  const style = getComputedStyle(input);
+  const context = document.createElement("canvas").getContext("2d")!;
+  // `style.font` volta vazio no Chromium quando as partes vêm de longhands;
+  // montado à mão, senão o canvas cai no padrão de 10px e mede errado.
+  context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  const room = input.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  return room - context.measureText(input.placeholder).width;
+}
+
 /** O centro horizontal de um elemento, em pixels da viewport. */
 export function centerX(element: Element): number {
   const box = element.getBoundingClientRect();

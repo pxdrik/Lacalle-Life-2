@@ -8,6 +8,7 @@ import {
   DESKTOP_WIDTH,
   PHONE_WIDTHS,
   hitTargetsAcross,
+  placeholderSlack,
   setDensity,
   setViewport,
 } from "@/test/geometry";
@@ -106,6 +107,13 @@ describe("10.1 e 10.2 — grupos e regiões", () => {
 
         const grid = await screen.findByRole("group", { name: "Grupos musculares" });
         expect(pageOverflow(), "a página rola de lado").toBeLessThanOrEqual(0);
+        // 8.21: o campo de busca não fica espremido pelos botões ao lado, e
+        // eles têm a altura dele (antes, 57px contra 44 na Confortável).
+        const field = screen.getByRole<HTMLInputElement>("searchbox");
+        expect(placeholderSlack(field), "busca cortada").toBeGreaterThanOrEqual(0);
+        for (const button of [...field.parentElement!.children].filter((child) => child !== field)) {
+          expect(button.getBoundingClientRect().height).toBeCloseTo(field.getBoundingClientRect().height, 0);
+        }
 
         const cards = within(grid).getAllByRole("button");
         expect(cards).toHaveLength(8);

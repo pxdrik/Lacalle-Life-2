@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import { dayKey, formatShortDay, shiftDay } from "@/core/format/day";
 import { cn } from "@/design-system/cn";
-import { Button, buttonClasses } from "@/design-system/components/button";
+import { Button, BESIDE_SEARCH, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { Dialog } from "@/design-system/components/dialog";
 import { Input } from "@/design-system/components/input";
@@ -212,9 +212,7 @@ export function ExerciseBrowser({
             // hover and active opacity, where overriding `secondary` would
             // leave `hover:bg-muted` behind and wash the state out on hover.
             buttonClasses(activeFilterCount > 0 ? "primary" : "secondary"),
-            // Matches the field beside it: `--control-h` varies with density,
-            // `--input-h` stays fixed at 44px on purpose (input.tsx).
-            "h-(--input-h)",
+            BESIDE_SEARCH,
           )}
         >
           <SlidersHorizontal aria-hidden className="size-4" />
@@ -240,7 +238,7 @@ export function ExerciseBrowser({
             setCreating(true);
           }}
           disabled={state.status !== "ready"}
-          className={cn(buttonClasses("secondary"), "h-(--input-h)")}
+          className={cn(buttonClasses("secondary"), BESIDE_SEARCH)}
         >
           <Plus aria-hidden className="size-4" />
           <span className="hidden sm:inline">Novo exercício</span>
