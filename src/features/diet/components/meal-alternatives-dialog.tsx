@@ -103,7 +103,7 @@ export function MealAlternativesDialog({
           <Button
             type="submit"
             size="sm"
-            className="h-(--input-h) shrink-0"
+            className="h-(--input-h-beside) shrink-0"
             disabled={name.trim() === "" || meal.items.length === 0}
           >
             Salvar atual

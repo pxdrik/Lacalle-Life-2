@@ -63,17 +63,18 @@ export function DietList() {
           aria-label="Nome da nova dieta"
           autoComplete="off"
         />
-        {/* `h-(--input-h)`, not the density-driven default: this button is
-            half of a pair with the field beside it, and `--control-h` now
+        {/* The field's height, not the density-driven default: this button
+            is half of a pair with the field beside it, and `--control-h`
             varies with the density preference (40/48/56px) while `Input`
-            stays fixed at 44px on purpose (see input.tsx). Matching
-            `--input-h` explicitly is the same fix `Select`'s `default`
-            variant already uses to sit level with `Input`. */}
+            stays fixed at 44px on purpose (see input.tsx). `--input-h-beside`
+            rather than `--input-h`: the field cancels the density zoom and
+            the button does not, so `--input-h` measured 57px here against
+            the field's 44 in Confortável (roadmap 8.21, tokens.css). */}
         <Button
           type="submit"
           pending={creating}
           disabled={name.trim() === ""}
-          className="h-(--input-h)"
+          className="h-(--input-h-beside)"
         >
           <Plus aria-hidden className="size-4" />
           Criar

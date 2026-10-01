@@ -78,7 +78,7 @@ export function RoutineList() {
           type="submit"
           pending={creating}
           disabled={name.trim() === ""}
-          className="h-(--input-h)"
+          className="h-(--input-h-beside)"
         >
           <Plus aria-hidden className="size-4" />
           Criar
