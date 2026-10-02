@@ -82,23 +82,35 @@ describe("vários alimentos numa ida", () => {
         }
 
         expect(overflow(), "a página rola de lado").toBeLessThanOrEqual(0);
-        const meal = screen.getByRole("region", { name: "Nesta refeição" });
-        const rows = within(meal).getAllByRole("listitem");
-        expect(rows).toHaveLength(2);
-        for (const row of rows) {
-          for (const text of [...row.children].slice(0, 2)) expectWhole(text, row);
-          const remove = within(row).getByRole("button");
-          expectTouchable(remove);
-          expect(remove.getBoundingClientRect().height).toBeGreaterThanOrEqual(43.5);
-        }
+
+        // A linha do alimento escolhido, marcada: nome longo e "Adicionado" inteiros.
+        const marked = screen.getByRole("button", { name: /^Peito de frango.*Adicionado/ });
+        for (const text of marked.firstElementChild!.children) expectWhole(text, marked);
 
         const confirm = screen.getByRole("button", { name: "Confirmar refeição" });
         const bar = confirm.parentElement!;
         bar.scrollIntoView({ block: "end" });
         expect(bar.getBoundingClientRect().bottom, "a barra passa do fim da tela").toBeLessThanOrEqual(window.innerHeight + 0.5);
         expect(bar.getBoundingClientRect().right, "a barra passa da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
-        expect(apart(bar.firstElementChild!.getBoundingClientRect(), confirm.getBoundingClientRect()), "contagem e botão encavalados").toBe(true);
+        const review = screen.getByRole("button", { name: "2 alimentos" });
+        expect(apart(review.getBoundingClientRect(), confirm.getBoundingClientRect()), "contagem e botão encavalados").toBe(true);
         expectTouchable(confirm);
+        expectTouchable(review);
+
+        // A conferência: cada alimento inteiro, a lixeira tocável, a folha dentro da tela.
+        await userEvent.click(review);
+        const sheet = await screen.findByRole("dialog", { name: "Nesta refeição" });
+        await Promise.all(sheet.getAnimations({ subtree: true }).map((animation) => animation.finished));
+        expect(sheet.getBoundingClientRect().right, "a folha passa da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
+        const rows = within(sheet).getAllByRole("listitem");
+        expect(rows).toHaveLength(2);
+        for (const row of rows) {
+          for (const text of row.firstElementChild!.children) expectWhole(text, row);
+          const remove = within(row).getByRole("button");
+          expectTouchable(remove);
+          expect(remove.getBoundingClientRect().height).toBeGreaterThanOrEqual(43.5);
+        }
+        expectTouchable(within(sheet).getByRole("button", { name: "Confirmar refeição" }));
         cleanup();
       });
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Star, X } from "lucide-react";
+import { CircleCheck, Plus, Star, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
@@ -49,6 +49,12 @@ interface Props {
    * one implementation.
    */
   readonly chrome?: boolean;
+  /**
+   * Os alimentos já escolhidos nesta ida, com as gramas (por id), quando o
+   * seletor junta vários antes de confirmar (`/alimentos/selecionar`,
+   * 02/10/2026). A linha deles ganha a marca verde "Adicionado".
+   */
+  readonly selected?: ReadonlyMap<string, number> | undefined;
 }
 
 /**
@@ -71,7 +77,7 @@ interface Props {
  */
 const RESULT_PAGE_SIZE = 20;
 
-export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Props) {
+export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, selected }: Props) {
   const { state } = useFoodCatalogue();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
@@ -287,6 +293,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
                   food={food}
                   grams={recent.grams}
                   detail={recent.detail}
+                  selectedGrams={selected?.get(food.id)}
                   onClick={() => {
                     onPick(food, recent.grams);
                     setText("");
@@ -321,6 +328,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
                   food={food}
                   grams={portion.grams}
                   detail={`${FOOD_CATEGORY_LABELS[food.category]} · ${portion.label}`}
+                  selectedGrams={selected?.get(food.id)}
                   onClick={() => {
                     onPick(food);
                     // Cleared so the next food can be typed straight away.
@@ -366,23 +374,41 @@ function PickRow({
   grams,
   detail,
   onClick,
+  selectedGrams,
 }: {
   readonly food: Food;
   readonly grams: number;
   readonly detail: string;
   readonly onClick: () => void;
+  /**
+   * Já escolhido nesta ida (02/10/2026): a linha fica verde, diz "Adicionado"
+   * com as gramas escolhidas, e os números passam a ser os dessa quantidade.
+   * Tocar de novo abre a quantidade para trocar, não para repetir.
+   */
+  readonly selectedGrams?: number | undefined;
 }) {
-  const macros = roundMacros(scaleMacros(food.per100g, grams));
+  const chosen = selectedGrams !== undefined;
+  const macros = roundMacros(scaleMacros(food.per100g, selectedGrams ?? grams));
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
+      className={cn(
+        "flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out",
+        chosen ? "bg-accent-surface hover:bg-accent-surface" : "hover:bg-muted",
+      )}
     >
       <span className="min-w-0 flex-1">
         <span className="block text-sm text-ink">{food.name}</span>
-        <span className="mt-0.5 block text-xs text-ink-subtle">{detail}</span>
+        {chosen ? (
+          <span className="mt-0.5 flex items-center gap-1 text-xs font-medium text-accent-text">
+            <CircleCheck aria-hidden className="size-3.5 shrink-0" />
+            Adicionado · {formatDecimal(selectedGrams)} {food.unit}
+          </span>
+        ) : (
+          <span className="mt-0.5 block text-xs text-ink-subtle">{detail}</span>
+        )}
       </span>
       <span className="shrink-0 text-right text-xs tabular-nums">
         <span className="block text-ink-muted">{formatDecimal(macros.kcal)} kcal</span>

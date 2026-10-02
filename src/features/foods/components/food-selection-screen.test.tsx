@@ -186,21 +186,50 @@ describe("FoodSelectionScreen", () => {
       await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
     }
 
-    const meal = screen.getByRole("region", { name: "Nesta refeição" });
+    // A conferência abre pela contagem na barra de baixo.
+    await userEvent.click(screen.getByRole("button", { name: "3 alimentos" }));
+    const meal = await screen.findByRole("dialog", { name: "Nesta refeição" });
     expect(within(meal).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "Arroz150 g",
-      "Feijão100 g",
-      "Frango120 g",
+      "Arroz150 g · 300 kcal",
+      "Feijão100 g · 200 kcal",
+      "Frango120 g · 240 kcal",
     ]);
-    expect(screen.getByText("alimentos").parentElement).toHaveTextContent("3 alimentos");
+    expect(meal).toHaveTextContent("Total: 740 kcal");
 
     await userEvent.click(within(meal).getByRole("button", { name: "Tirar Feijão" }));
-    expect(screen.getByText("alimentos").parentElement).toHaveTextContent("2 alimentos");
+    expect(meal).toHaveTextContent("Total: 540 kcal");
 
-    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
+    await userEvent.click(within(meal).getByRole("button", { name: "Confirmar refeição" }));
     expect(mockPush).toHaveBeenCalledWith(
       "/diario?addMealId=m1&addFoodId=arroz&addGrams=150&addFoodId=frango&addGrams=120",
     );
+  });
+
+  it("o alimento escolhido fica marcado na lista; tocar de novo troca as gramas, sem repetir", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Arroz"), food("Feijão")]);
+    await afterLoad();
+
+    await userEvent.click(await screen.findByRole("button", { name: /^Arroz/ }));
+    await userEvent.clear(screen.getByLabelText("Gramas"));
+    await userEvent.type(screen.getByLabelText("Gramas"), "150");
+    await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+
+    const marked = await screen.findByRole("button", { name: /^Arroz/ });
+    expect(marked).toHaveTextContent("Adicionado · 150 g");
+    expect(screen.getByRole("button", { name: /^Feijão/ })).not.toHaveTextContent("Adicionado");
+
+    await userEvent.click(marked);
+    expect(screen.getByLabelText("Gramas"), "não abriu nas gramas escolhidas").toHaveValue("150");
+    await userEvent.clear(screen.getByLabelText("Gramas"));
+    await userEvent.type(screen.getByLabelText("Gramas"), "200");
+    await userEvent.click(screen.getByRole("button", { name: "Salvar quantidade" }));
+
+    expect(await screen.findByRole("button", { name: /^Arroz/ })).toHaveTextContent("Adicionado · 200 g");
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
+    expect(mockPush).toHaveBeenCalledWith("/diario?addMealId=m1&addFoodId=arroz&addGrams=200");
   });
 
   it("voltar com alimentos na lista pede um segundo toque antes de descartar", async () => {
