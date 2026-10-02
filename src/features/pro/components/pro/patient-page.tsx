@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, ClipboardList, Dumbbell, Plus, Users } from "lucide-react";
+import { ArrowLeft, ClipboardList, Dumbbell, NotebookPen, Plus, TrendingUp, Users } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import { EmptyState } from "@/design-system/components/empty-state";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PageHeader } from "@/design-system/components/page-header";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { Tabs, tabPanelId } from "@/design-system/components/tabs";
 
 import { describeRoutineDays } from "@/core/domain/weekday";
 
@@ -23,17 +24,29 @@ import { usePatients } from "../../hooks/use-patients";
 import { describeSharing, type PatientLink } from "../../types/care";
 import type { PlanSummary } from "../../types/plan";
 import type { RoutineSummary } from "../../types/routine";
+import { PatientBody, PatientDiary, PatientWorkouts } from "./patient-follow-up";
 
 const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const formatDate = (iso: string) => DATE.format(new Date(iso));
 
 /**
  * Um paciente no Life Pro (protótipo v3): o plano alimentar e os treinos
- * (Etapa 8, protótipo de 01/10/2026), com as versões publicadas. Diário e Evolução entram com a Etapa 6, quando houver dado real
- * para mostrar (nada de aba de mentira).
+ * (Etapa 8, protótipo de 01/10/2026), com as versões publicadas, e o
+ * acompanhamento (Etapa 6, protótipo de 02/10/2026) em abas: Diário, Treinos
+ * e Evolução, só com vínculo ativo, cada uma dizendo quando o paciente não
+ * libera aquele item.
  */
+const TABS = [
+  { id: "prescricao", label: "Plano e treino", icon: ClipboardList },
+  { id: "diario", label: "Diário", icon: NotebookPen },
+  { id: "treinos", label: "Treinos", icon: Dumbbell },
+  { id: "evolucao", label: "Evolução", icon: TrendingUp },
+] as const;
+type Tab = (typeof TABS)[number]["id"];
+
 export function PatientPage({ linkId }: { readonly linkId: string }) {
   const patients = usePatients();
+  const [tab, setTab] = useState<Tab>("prescricao");
 
   const back = (
     <Link
@@ -86,10 +99,58 @@ export function PatientPage({ linkId }: { readonly linkId: string }) {
           {link.status === "active" ? "Ativo" : "Encerrado"}
         </Badge>
       </PageHeader>
-      <Plans link={link} />
-      <Routines link={link} />
+      {link.status === "active" ? (
+        <>
+          <Tabs
+            idPrefix="paciente"
+            items={TABS}
+            value={tab}
+            onChange={(id) => {
+              setTab(TABS.find((item) => item.id === id)?.id ?? "prescricao");
+            }}
+            className="mt-6 overflow-x-auto"
+          />
+          <div role="tabpanel" id={tabPanelId("paciente", tab)} aria-labelledby={`paciente-tab-${tab}`}>
+            {tab === "prescricao" && (
+              <>
+                <Plans link={link} />
+                <Routines link={link} />
+              </>
+            )}
+            {/* "Plano e treino" já traz o espaço das próprias seções. */}
+            {tab !== "prescricao" && (
+              <div className="mt-6">
+                {tab === "diario" && <DiaryTab link={link} />}
+                {tab === "treinos" && <WorkoutsTab link={link} />}
+                {tab === "evolucao" && <PatientBody linkId={link.id} />}
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <Plans link={link} />
+          <Routines link={link} />
+        </>
+      )}
     </>
   );
+}
+
+/** Os dias da semana vêm dos treinos que o treinador publicou para o paciente. */
+function WorkoutsTab({ link }: { readonly link: PatientLink }) {
+  const { state } = usePatientRoutines(link.id);
+  if (state.status === "loading") return <Skeleton className="h-48" />;
+  const published = state.status === "ready" ? state.routines.filter((routine) => routine.versions.length > 0) : [];
+  return <PatientWorkouts linkId={link.id} routines={published} />;
+}
+
+/** O diário se compara com o plano publicado mais recente. */
+function DiaryTab({ link }: { readonly link: PatientLink }) {
+  const { state } = usePatientPlans(link.id);
+  if (state.status === "loading") return <Skeleton className="h-48" />;
+  const plan = state.status === "ready" ? (state.plans.find((item) => item.versions.length > 0) ?? null) : null;
+  return <PatientDiary linkId={link.id} plan={plan} />;
 }
 
 function Plans({ link }: { readonly link: PatientLink }) {
