@@ -1,4 +1,5 @@
 import { revise } from "@/core/domain/entity";
+import { weekdayOf } from "@/core/domain/weekday";
 
 import type { Diet, Weekday } from "../types/diet";
 import type { PrescribedPlan } from "../types/prescribed-plan";
@@ -13,22 +14,8 @@ export {
   WEEKDAY_LABELS,
   WEEKDAY_SHORT_LABELS,
   describeWeekdays,
+  weekdayOf,
 } from "@/core/domain/weekday";
-
-/** JS's `Date#getDay()` is 0 = Sunday; ours starts the week on Monday. */
-const FROM_JS_DAY: readonly Weekday[] = [
-  "sun",
-  "mon",
-  "tue",
-  "wed",
-  "thu",
-  "fri",
-  "sat",
-];
-
-export function weekdayOf(date: Date): Weekday {
-  return FROM_JS_DAY[date.getDay()]!;
-}
 
 
 /**

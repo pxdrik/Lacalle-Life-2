@@ -324,6 +324,16 @@ antes de o Life Pro estar completo).
   botões descem quando não cabem: com `flex-1`, em 320px Confortável, os
   dias viravam uma coluna de um por linha (visto vermelho no teste de
   navegador).
+  8e, Hoje: num dia do treino do treinador, sem treino em andamento, feito
+  ou descanso marcado, o cartão de Treino sugere ("Treino de hoje · do seu
+  treinador", com "Começar", que inicia esse treino, e "Hoje é descanso").
+  Nos outros dias, o cartão de sempre diz quando o treino é, ou que está em
+  Treinos para quando quiser. Só sugere, sem aviso de treino perdido.
+  Acompanhamento encerrado sai do dia, como o plano sai do Diário. Com dois
+  treinos no mesmo dia, sugere o publicado mais recente. O dia da semana
+  sai de `day` ao meio-dia: `new Date("2026-08-07")` é meia-noite UTC, que
+  no Brasil ainda é o dia anterior (visto vermelho). `weekdayOf` passou para
+  `core/domain/weekday.ts`.
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.

@@ -1,8 +1,9 @@
 "use client";
 
-import { Undo2 } from "lucide-react";
+import { Play, Undo2 } from "lucide-react";
 import Link from "next/link";
 
+import { weekdayOf } from "@/core/domain/weekday";
 import { dayKey } from "@/core/format/day";
 import { formatDecimal } from "@/core/format/decimal";
 import { Button, buttonClasses } from "@/design-system/components/button";
@@ -11,13 +12,22 @@ import { Section } from "@/design-system/components/section";
 import { Skeleton } from "@/design-system/components/skeleton";
 import { ICONS } from "@/design-system/icons";
 
+import { usePrescribedRoutines } from "../hooks/use-prescribed-routines";
 import { useRestDay, type RestDayControl } from "../hooks/use-rest-day";
 import { useSessionHistory } from "../hooks/use-session-history";
+import { useStartRoutine } from "../hooks/use-start-routine";
+import {
+  describeRoutineSize,
+  prescribedAsRoutine,
+  routinesForWeekday,
+  trainerScheduleLine,
+} from "../services/prescribed-routine";
 import {
   formatDuration,
   sessionDurationMs,
   sessionVolumeKg,
 } from "../services/session-stats";
+import type { PrescribedRoutine } from "../types/prescribed-routine";
 import type { Session } from "../types/session";
 import { InProgressBanner } from "./in-progress-banner";
 
@@ -40,8 +50,9 @@ import { InProgressBanner } from "./in-progress-banner";
 export function TodayWorkout({ day }: { readonly day: string }) {
   const state = useSessionHistory();
   const rest = useRestDay(day);
+  const prescribed = usePrescribedRoutines();
 
-  if (state.status === "loading" || rest.state.status === "loading") {
+  if (state.status === "loading" || rest.state.status === "loading" || prescribed.status === "loading") {
     return <Skeleton className="h-40 w-full rounded-lg" />;
   }
 
@@ -59,6 +70,9 @@ export function TodayWorkout({ day }: { readonly day: string }) {
   );
 
   const nothingYet = today.length === 0;
+  // Meio-dia: a data do dia, sem a virada de fuso empurrar para o dia vizinho.
+  const weekday = weekdayOf(new Date(`${day}T12:00:00`));
+  const [due] = routinesForWeekday(prescribed.routines, weekday);
 
   return (
     <Section
@@ -78,7 +92,7 @@ export function TodayWorkout({ day }: { readonly day: string }) {
     >
       <Card tone="default">
         {nothingYet ? (
-          <Empty rest={rest} />
+          <Empty rest={rest} due={due} schedule={trainerScheduleLine(prescribed.routines)} />
         ) : (
           <ul className="space-y-2">
             {today.map((session) => (
@@ -102,7 +116,17 @@ export function TodayWorkout({ day }: { readonly day: string }) {
  * `Começar` is the same link to the same route it has always been; it moved
  * out of the header and put on the button the other block already wore.
  */
-function Empty({ rest }: { readonly rest: RestDayControl }) {
+function Empty({
+  rest,
+  due,
+  schedule,
+}: {
+  readonly rest: RestDayControl;
+  /** O treino do treinador para hoje (Etapa 8e), se houver. */
+  readonly due: PrescribedRoutine | undefined;
+  /** Quando é o treino do treinador, num dia que não é dele. */
+  readonly schedule: string | null;
+}) {
   // Descanso marcado (roadmap 7.5): diz isso sem cobrar nada, e desfaz.
   if (rest.state.status === "ready" && rest.state.isRest) {
     return (
@@ -129,6 +153,8 @@ function Empty({ rest }: { readonly rest: RestDayControl }) {
     );
   }
 
+  if (due !== undefined) return <DueRoutine routine={due} rest={rest} />;
+
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <ICONS.workouts aria-hidden className="size-8 text-ink-subtle" />
@@ -139,7 +165,7 @@ function Empty({ rest }: { readonly rest: RestDayControl }) {
             quase idênticas empilhadas para dois fatos distintos. Cada uma
             agora nomeia o que falta e o que registrar ali resolve. */}
         <p className="mt-1 text-xs text-ink-subtle">
-          Ao finalizar, volume e duração aparecem aqui.
+          {schedule ?? "Ao finalizar, volume e duração aparecem aqui."}
         </p>
       </div>
       <div className="flex flex-wrap justify-center gap-2">
@@ -163,6 +189,52 @@ function Empty({ rest }: { readonly rest: RestDayControl }) {
         )}
       </div>
       <SaveError message={rest.saveError} />
+    </div>
+  );
+}
+
+/**
+ * O dia é de um treino do treinador (protótipo aprovado em 01/10/2026): Hoje
+ * só sugere. "Começar" inicia esse treino como qualquer outro; a pessoa pode
+ * treinar outra coisa por Treinos, ou marcar descanso, e nada avisa treino
+ * perdido (padrão até o Pedro decidir).
+ */
+function DueRoutine({ routine, rest }: { readonly routine: PrescribedRoutine; readonly rest: RestDayControl }) {
+  const { start, starting, startError } = useStartRoutine();
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="min-w-0">
+        <p className="text-xs text-ink-subtle">Treino de hoje · do seu treinador</p>
+        <p className="mt-1 font-medium break-words text-ink">{routine.name}</p>
+        <p className="mt-0.5 text-xs break-words text-ink-subtle">
+          {routine.professionalName} · {describeRoutineSize(routine)}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          size="sm"
+          pending={starting}
+          disabled={routine.exercises.length === 0}
+          onClick={() => void start(prescribedAsRoutine(routine))}
+        >
+          <Play aria-hidden className="size-4" />
+          Começar
+        </Button>
+        {rest.state.status === "ready" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              rest.setRest(true);
+            }}
+          >
+            <ICONS.rest aria-hidden className="size-4" />
+            Hoje é descanso
+          </Button>
+        )}
+      </div>
+      <SaveError message={startError ?? rest.saveError} />
     </div>
   );
 }

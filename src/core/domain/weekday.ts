@@ -30,6 +30,13 @@ export const WEEKDAY_SHORT_LABELS: Record<Weekday, string> = {
   sun: "Dom",
 };
 
+/** JS's `Date#getDay()` is 0 = Sunday; ours starts the week on Monday. */
+const FROM_JS_DAY: readonly Weekday[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+export function weekdayOf(date: Date): Weekday {
+  return FROM_JS_DAY[date.getDay()]!;
+}
+
 /** Os dias de um treino prescrito: sem nenhum, o paciente faz quando quiser (0038). */
 export function describeRoutineDays(days: readonly Weekday[]): string {
   return days.length === 0 ? "Quando quiser" : describeWeekdays(days);
