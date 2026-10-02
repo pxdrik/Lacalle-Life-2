@@ -1,5 +1,7 @@
 import { AlertCircle } from "lucide-react";
 
+import { cn } from "@/design-system/cn";
+
 interface Props {
   /**
    * Node rather than string so a label can carry a mark beside its words —
@@ -13,6 +15,13 @@ interface Props {
   readonly hint?: string | undefined;
   /** Dims the label alongside the control it names. */
   readonly disabled?: boolean;
+  /**
+   * Troca o empilhamento padrão. Lado a lado, use `FIELD_ROW` no par e
+   * `FIELD_IN_ROW` aqui: os dois campos dividem as linhas de uma grade
+   * (rótulo, campo, mensagem), e um rótulo que quebra em duas linhas não
+   * desalinha o campo do vizinho ("Gordura corporal (%)" no celular).
+   */
+  readonly className?: string | undefined;
   readonly children: (control: {
     readonly id: string;
     readonly describedBy: string | undefined;
@@ -44,17 +53,17 @@ interface Props {
  * message is visible but unannounced — the field would look accessible while
  * a screen reader reads the label and stops.
  */
-export function Field({ label, id, error, hint, disabled, children }: Props) {
+export function Field({ label, id, error, hint, disabled, className, children }: Props) {
   const message = error ?? hint;
   const messageId = `${id}-message`;
 
   return (
-    <div
-      className={disabled === true ? "space-y-1.5 opacity-45" : "space-y-1.5"}
-    >
+    <div className={cn(className ?? "space-y-1.5", disabled === true && "opacity-45")}>
+      {/* Embaixo da própria linha: lado a lado, o rótulo curto fica colado
+          no campo, e não no topo de uma linha que o vizinho esticou. */}
       <label
         htmlFor={id}
-        className="flex items-center gap-1.5 text-xs font-medium text-ink"
+        className="flex items-center gap-1.5 self-end text-xs font-medium text-ink"
       >
         {label}
       </label>
@@ -83,3 +92,8 @@ export function Field({ label, id, error, hint, disabled, children }: Props) {
     </div>
   );
 }
+
+/** O par de campos lado a lado (ver `className` em `Field`). */
+export const FIELD_ROW = "grid grid-cols-2 gap-x-3 gap-y-1.5";
+/** Cada campo do par: ocupa as três linhas da grade do pai. */
+export const FIELD_IN_ROW = "row-span-3 grid grid-rows-subgrid";
