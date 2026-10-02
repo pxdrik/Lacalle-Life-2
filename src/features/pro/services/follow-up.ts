@@ -1,7 +1,7 @@
 import { WEEKDAYS, weekdayOf, type Weekday } from "@/core/domain/weekday";
 import { dayKey, shiftDay } from "@/core/format/day";
 
-import type { PatientSession } from "../types/follow-up";
+import { NOT_SHARED, type OverviewRow, type PatientSession, type Shared } from "../types/follow-up";
 import type { RoutineSummary } from "../types/routine";
 
 /**
@@ -61,7 +61,7 @@ export interface WeekDay {
  */
 export function weekOf(
   today: string,
-  sessions: readonly PatientSession[],
+  sessions: readonly Pick<PatientSession, "startedAt" | "name">[],
   routines: readonly RoutineSummary[],
 ): readonly WeekDay[] {
   const start = weekStart(today);
@@ -165,4 +165,88 @@ export function attentionOf(
 
 function daysBetween(from: string, to: string): number {
   return Math.round((Date.parse(`${to}T12:00:00Z`) - Date.parse(`${from}T12:00:00Z`)) / DAY_MS);
+}
+
+export interface OverviewPatient {
+  readonly linkId: string;
+  readonly label: string;
+  readonly lastSessionAt: number | null | undefined;
+  readonly lastDiaryDay: string | null | undefined;
+  readonly weightNow: number | null | undefined;
+  /** Peso agora menos o de 30 dias atrás; `null` sem os dois. */
+  readonly weightChange: number | null;
+  readonly attention: Attention | null;
+}
+
+export interface OverviewSummary {
+  readonly active: number;
+  /** Dos que liberam treinos, quantos treinaram nos últimos 7 dias. */
+  readonly trained: { readonly count: number; readonly of: number };
+  /** Dos que liberam o diário, quantos registraram nos últimos 3 dias. */
+  readonly logged: { readonly count: number; readonly of: number };
+  readonly stale: number;
+  readonly patients: readonly OverviewPatient[];
+}
+
+/**
+ * A Visão geral (Etapa 6): por paciente ativo, só o que ele libera
+ * (`undefined` é "não libera"), e quem precisa de atenção.
+ */
+export function overviewOf(
+  today: string,
+  now: number,
+  links: readonly { readonly id: string; readonly label: string; readonly createdAt: string }[],
+  rows: readonly OverviewRow[],
+  routinesByLink: ReadonlyMap<string, readonly RoutineSummary[]>,
+): OverviewSummary {
+  const byLink = new Map(rows.map((row) => [row.linkId, row]));
+  const patients = links.map((link): OverviewPatient => {
+    const row = byLink.get(link.id);
+    const value = <T,>(shared: Shared<T> | undefined): T | undefined => (shared === undefined || shared === NOT_SHARED ? undefined : shared);
+    const lastSessionAt = value(row?.lastSessionAt);
+    const sessions = value(row?.sessions);
+    const weightNow = value(row?.weightNow);
+    const weightMonthAgo = value(row?.weightMonthAgo);
+    const week =
+      sessions === undefined
+        ? null
+        : (() => {
+            const days = weekOf(today, sessions.map((session) => ({ startedAt: session.startedAt, name: "" })), routinesByLink.get(link.id) ?? []);
+            const elapsed = days.filter((day) => day.day <= today && day.state !== "free");
+            return { due: elapsed.length, done: elapsed.filter((day) => day.state === "done").length };
+          })();
+    return {
+      linkId: link.id,
+      label: link.label,
+      lastSessionAt,
+      lastDiaryDay: value(row?.lastDiaryDay),
+      weightNow,
+      weightChange: weightNow == null || weightMonthAgo == null ? null : weightNow - weightMonthAgo,
+      attention: attentionOf(
+        today,
+        {
+          linkDay: link.createdAt.slice(0, 10),
+          sessionDay: lastSessionAt === undefined ? undefined : lastSessionAt === null ? null : dayOf(lastSessionAt),
+          diaryDay: value(row?.lastDiaryDay),
+        },
+        week,
+      ),
+    };
+  });
+
+  const sharingWorkouts = patients.filter((patient) => patient.lastSessionAt !== undefined);
+  const sharingDiary = patients.filter((patient) => patient.lastDiaryDay !== undefined);
+  return {
+    active: links.length,
+    trained: {
+      count: sharingWorkouts.filter((patient) => patient.lastSessionAt != null && patient.lastSessionAt >= now - 7 * DAY_MS).length,
+      of: sharingWorkouts.length,
+    },
+    logged: {
+      count: sharingDiary.filter((patient) => patient.lastDiaryDay != null && patient.lastDiaryDay >= shiftDay(today, -2)).length,
+      of: sharingDiary.length,
+    },
+    stale: patients.filter((patient) => patient.attention?.kind === "stale").length,
+    patients,
+  };
 }

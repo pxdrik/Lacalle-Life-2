@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import type { PatientSession } from "../types/follow-up";
 import type { RoutineSummary } from "../types/routine";
-import { attentionOf, weekOf, weekStart, workoutTiles } from "./follow-up";
+import { NOT_SHARED } from "../types/follow-up";
+import { attentionOf, overviewOf, weekOf, weekStart, workoutTiles } from "./follow-up";
 
 /**
  * As contas do acompanhamento (Etapa 6): a semana com os dias prescritos, os
@@ -101,5 +102,39 @@ describe("precisa de atenção", () => {
     expect(attentionOf(TODAY, recent, { done: 1, due: 3 })).toEqual({ kind: "few-workouts", done: 1, due: 3 });
     expect(attentionOf(TODAY, recent, { done: 2, due: 4 }), "metade não é menos da metade").toBeNull();
     expect(attentionOf(TODAY, recent, { done: 0, due: 0 })).toBeNull();
+  });
+});
+
+describe("a Visão geral", () => {
+  const links = [
+    { id: "ana", label: "Ana", createdAt: "2026-07-03T12:00:00Z" },
+    { id: "jorge", label: "Jorge", createdAt: "2026-07-03T12:00:00Z" },
+    { id: "bruno", label: "Bruno", createdAt: "2026-07-03T12:00:00Z" },
+    { id: "camila", label: "Camila", createdAt: "2026-07-03T12:00:00Z" },
+  ];
+  const rows = [
+    { linkId: "ana", lastSessionAt: at(TODAY), sessions: ["2026-09-28", "2026-09-30", "2026-10-02"].map((day) => ({ routineId: "ra", startedAt: at(day) })), lastDiaryDay: TODAY, weightNow: 68.6, weightMonthAgo: 69.2 },
+    { linkId: "jorge", lastSessionAt: at("2026-09-28"), sessions: [{ routineId: "ra", startedAt: at("2026-09-28") }], lastDiaryDay: "2026-10-01", weightNow: NOT_SHARED, weightMonthAgo: NOT_SHARED },
+    { linkId: "bruno", lastSessionAt: at("2026-10-01"), sessions: [], lastDiaryDay: NOT_SHARED, weightNow: NOT_SHARED, weightMonthAgo: NOT_SHARED },
+    { linkId: "camila", lastSessionAt: at("2026-09-24"), sessions: [], lastDiaryDay: "2026-09-26", weightNow: 70.2, weightMonthAgo: null },
+  ] as const;
+  const routines = new Map([["ana", [A]], ["jorge", [A]]]);
+
+  it("os números, só pelo que cada um libera", () => {
+    const summary = overviewOf(TODAY, at(TODAY, 12), links, rows, routines);
+    expect(summary).toMatchObject({ active: 4, trained: { count: 3, of: 4 }, logged: { count: 2, of: 3 }, stale: 1 });
+  });
+
+  it("quem precisa de atenção, e por quê", () => {
+    const { patients } = overviewOf(TODAY, at(TODAY, 12), links, rows, routines);
+    expect(patients.map((patient) => [patient.label, patient.attention])).toEqual([
+      ["Ana", null],
+      ["Jorge", { kind: "few-workouts", done: 1, due: 3 }],
+      ["Bruno", null],
+      ["Camila", { kind: "stale", days: 6 }],
+    ]);
+    expect(patients[0]!.weightChange).toBeCloseTo(-0.6);
+    expect(patients[1]!.weightNow, "peso de quem não libera").toBeUndefined();
+    expect(patients[3]!.weightChange, "sem peso de 30 dias atrás").toBeNull();
   });
 });
