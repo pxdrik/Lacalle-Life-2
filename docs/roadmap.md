@@ -3209,6 +3209,21 @@ Pedido do Pedro, depois de ver a explicação: os quatro refinamentos adiados de
 | 8.21 | **Busca espremida na Confortável** | ✅ Bug (30/09/2026) | Em 320px Confortável o campo "Buscar exercício" ficava com ~40px ("Bı…"), e o "Buscar alimento" com 56px na tela Alimentos e no seletor. Duas causas, medidas: os botões só com ícone carregavam o padding do rótulo (30px de cada lado na Confortável, 100px por botão), e `h-(--input-h)` dava 57px ao botão e 44 ao campo, porque o campo cancela o `zoom` da densidade e o botão não. Agora os botões ao lado da busca são quadrados no celular (`BESIDE_SEARCH`, em `button.tsx`) e têm a altura do campo (`--input-h-beside`, em `tokens.css`). No app real, em 320px Confortável, o campo foi de 56 para 170px e o texto cabe com 22px de folga. Testes de navegador em Exercícios, Alimentos e no seletor, vistos vermelhos sem a correção (24 casos). |
 | 8.22 | **Nome da nova dieta/treino espremido na Confortável** | ✅ Bug (30/09/2026) | Em 320px Confortável o campo "Nome da nova dieta" mostrava "Nome da no", porque o "Criar" ao lado, com rótulo e 30px de padding de cada lado, ocupava ~155px. Protótipo com três caminhos; o Pedro escolheu o A: no celular o "Criar" fica só com o "+", quadrado e da altura do campo (`BESIDE_FIELD`, o mesmo da busca no 8.21), e o rótulo volta de `sm` para cima. Para leitor de tela ele se chama "Criar dieta" / "Criar treino". No app real, em 320px Confortável, o campo foi para 224px e o nome cabe com 51px de folga. Teste de navegador visto vermelho com o botão antigo. |
 
+### 11. App nas lojas: Google Play e iPhone (pedido do Pedro, 02/10/2026)
+
+O APK 1.0.0 (Android, Capacitor, abre o site oficial; ver `docs/android.md`)
+foi instalado e funcionou no celular do Pedro em 02/10/2026. Na instalação, o
+Google Play Protect demorou e avisou, porque o APK não veio da loja e o
+desenvolvedor não é conhecido pelo Google. Nenhum ajuste no APK tira isso; o
+que tira é publicar pela loja.
+
+| # | Item | Situação | Notas |
+| --- | --- | --- | --- |
+| 11.1 | **Google Play, teste interno** | Aberto | Até 100 testadores por e-mail, instalam pela Play Store sem aviso e recebem atualização sozinhos. **Não é de graça:** conta de desenvolvedor Google, US$ 25 uma vez só, com verificação de identidade, que só o Pedro cria (play.google.com/console). Do lado do código: gerar o AAB (`./gradlew bundleRelease`) com a mesma chave de `08_Seguranca\LaCalle`. Conta pessoal nova pode exigir um período de teste fechado com testadores antes da produção (regra da Google, conferir no Console ao criar). |
+| 11.2 | **Google Play, produção (público)** | Aberto | Depende do 11.1 e da Etapa 7 do Life Pro: política de privacidade publicada num endereço, formulário de segurança de dados, ficha da loja (ícone 512px, imagens, descrição). Risco conhecido: app que só abre um site pode ser recusado por "funcionalidade mínima"; o app já funciona sem internet depois da primeira abertura, o que conta a favor. |
+| 11.3 | **Verificação de desenvolvedor do Google** | Conferir | O Google anunciou que, a partir de 2026, apps instalados fora da loja em celulares Android certificados precisam ser de desenvolvedor verificado, com o Brasil entre os primeiros países. Se já valer, o APK direto pode passar a ser bloqueado, e não só avisado. A conta do 11.1 cobre a verificação. |
+| 11.4 | **App de iPhone (iOS)** | Aberto | O mesmo caminho do Android (Capacitor abrindo o site), com três diferenças que custam: **(1)** a conta Apple Developer custa **US$ 99 por ano**; **(2)** compilar exige um Mac com Xcode, ou um serviço de build na nuvem (ex.: Codemagic, Ionic Appflow), porque o Windows não compila para iOS; **(3)** não existe "instalar o arquivo" como no Android: para testar, TestFlight (pela conta paga), e para o público, a App Store, cuja revisão costuma ser mais dura com app que só abre um site (regra 4.2, funcionalidade mínima). Antes de começar: decidir Mac ou build na nuvem, e conferir no iPhone os achados já abertos (8.6, zoom ao tocar no campo). |
+
 ### Placar dos itens 7, 8, 9 e 10 (atualizado em 30/09/2026)
 
 ✅ entregue · ⬜ falta
