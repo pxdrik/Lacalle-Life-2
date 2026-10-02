@@ -11,13 +11,16 @@ import { BESIDE_FIELD, Button } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
+import { useToast } from "@/design-system/components/toast";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
 import { useDietList } from "../hooks/use-diet-list";
+import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
 import { dietMacros } from "../services/diet-macros";
 import { WEEKDAY_SHORT_LABELS } from "../services/diet-schedule";
 import type { Diet } from "../types/diet";
 import { MacroSummary } from "./macro-summary";
+import { PrescribedPlansSection } from "./prescribed-plans-section";
 import { ShoppingListButton } from "./shopping-list-dialog";
 import { WeekdayPicker } from "./weekday-picker";
 
@@ -28,6 +31,9 @@ export function DietList() {
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
   const [schedulingId, setSchedulingId] = useState<string | null>(null);
+  const prescribed = usePrescribedPlans();
+  const plans = prescribed.status === "ready" ? prescribed.plans : [];
+  const toast = useToast();
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -87,6 +93,22 @@ export function DietList() {
         <p role="alert" className={noticeClasses()}>
           {writeError}
         </p>
+      )}
+
+      {/* O plano da nutricionista fica separado das dietas da pessoa (Life
+          Pro, Etapa 5): só leitura, e a cópia vira uma dieta dela. */}
+      {plans.length > 0 && (
+        <>
+          <PrescribedPlansSection
+            plans={plans}
+            onCopy={(diet) => {
+              void duplicate(diet).then((copied) => {
+                if (copied) toast("Cópia criada em Suas dietas. O plano continua igual.");
+              });
+            }}
+          />
+          <h2 className="text-xs font-medium tracking-wide text-ink-subtle uppercase">Suas dietas</h2>
+        </>
       )}
 
       {state.status === "loading" && <ListSkeleton />}

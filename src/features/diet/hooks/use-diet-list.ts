@@ -21,7 +21,7 @@ export interface DietList {
   /** Resolves to the new diet's id so the caller can navigate straight into it. */
   readonly create: (name: string) => Promise<string | null>;
   /** Copies a whole diet. Stays on the list — you copied it to keep both. */
-  readonly duplicate: (diet: Diet) => Promise<void>;
+  readonly duplicate: (diet: Diet) => Promise<boolean>;
   readonly remove: (diet: Diet) => Promise<void>;
   /** Links `dietId` to exactly these weekdays, unlinking them from any other diet. */
   readonly setWeekdays: (dietId: string, weekdays: readonly Weekday[]) => Promise<void>;
@@ -82,7 +82,7 @@ export function useDietList(): DietList {
   );
 
   const duplicate = useCallback(
-    async (diet: Diet) => {
+    async (diet: Diet): Promise<boolean> => {
       setWriteError(null);
       const copy = duplicateDiet(diet);
 
@@ -93,8 +93,10 @@ export function useDietList(): DietList {
             ? { status: "ready", diets: [copy, ...current.diets] }
             : current,
         );
+        return true;
       } catch (error) {
         setWriteError(describeDataError(error));
+        return false;
       }
     },
     [repository],

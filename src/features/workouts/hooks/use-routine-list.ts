@@ -19,8 +19,12 @@ export interface RoutineList {
   readonly writeError: string | null;
   /** Resolves to the new routine's id so the caller can open it straight away. */
   readonly create: (name: string) => Promise<string | null>;
-  /** Copies a whole routine. Stays on the list — you copied it to keep both. */
-  readonly duplicate: (routine: Routine) => Promise<void>;
+  /**
+   * Copies a whole routine. Stays on the list — you copied it to keep both.
+   * Resolves to whether it worked, for the toast after copying a trainer's
+   * routine.
+   */
+  readonly duplicate: (routine: Routine) => Promise<boolean>;
   readonly remove: (routine: Routine) => Promise<void>;
 }
 
@@ -75,7 +79,7 @@ export function useRoutineList(): RoutineList {
   );
 
   const duplicate = useCallback(
-    async (routine: Routine) => {
+    async (routine: Routine): Promise<boolean> => {
       setWriteError(null);
       const copy = duplicateRoutine(routine);
 
@@ -86,8 +90,10 @@ export function useRoutineList(): RoutineList {
             ? { status: "ready", routines: [copy, ...current.routines] }
             : current,
         );
+        return true;
       } catch (cause) {
         setWriteError(describeDataError(cause));
+        return false;
       }
     },
     [repositories],

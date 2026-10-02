@@ -3,10 +3,12 @@ import { SYNC_TRACKER_STORE } from "@/core/sync/sync-tracker";
 import { BODY_ENTRIES_STORE } from "@/features/body/data/body-repository";
 import { DIETS_STORE } from "@/features/diet/data/diet-store";
 import { FOOD_LOGS_STORE } from "@/features/diet/data/food-log-repository";
+import { PRESCRIBED_PLANS_STORE } from "@/features/diet/data/prescribed-plan-repository";
 import { FOODS_STORE } from "@/features/foods/data/food-store";
 import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import { PROFILE_STORE } from "@/features/profile/data/profile-repository";
 import { EXERCISES_STORE } from "@/features/workouts/data/exercise-repository";
+import { PRESCRIBED_ROUTINES_STORE } from "@/features/workouts/data/prescribed-routine-repository";
 import { REST_DAYS_STORE } from "@/features/workouts/data/rest-day-repository";
 import { ROUTINES_STORE } from "@/features/workouts/data/routine-repository";
 import { SESSIONS_STORE } from "@/features/workouts/data/session-repository";
@@ -85,5 +87,17 @@ export const MIGRATIONS: readonly Migration[] = [
     description:
       "Rest days: one record per day the person marked as rest, indexed by day.",
     createStores: [REST_DAYS_STORE],
+  },
+  {
+    version: 11,
+    description:
+      "Prescribed plans: what a nutritionist published for this account (Life Pro), read-only, kept apart from diets.",
+    createStores: [PRESCRIBED_PLANS_STORE],
+  },
+  {
+    version: 12,
+    description:
+      "Prescribed routines: what a trainer published for this account (Life Pro), read-only, kept apart from routines.",
+    createStores: [PRESCRIBED_ROUTINES_STORE],
   },
 ];

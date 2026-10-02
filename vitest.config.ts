@@ -55,8 +55,22 @@ export default defineConfig({
           // ele falha na importação, porque `vitest/browser` só existe
           // dentro do Browser Mode. Sem esta linha, `npm run test` fica
           // vermelho por um arquivo que não é dele.
-          exclude: [...configDefaults.exclude, "src/**/*.browser.test.{ts,tsx}"],
+          exclude: [...configDefaults.exclude, "src/**/*.browser.test.{ts,tsx}", "src/**/*.db.test.ts"],
           setupFiles: ["./vitest.setup.ts"],
+        },
+      },
+      {
+        resolve: { alias },
+        test: {
+          // Regras de acesso e funções do banco num Postgres de verdade
+          // (PGlite, `src/test/supabase-db.ts`). Em Node, sem jsdom: não há
+          // tela aqui, e o setup de `unit` mexe em `Element`, que não existe
+          // fora do jsdom. Um banco por arquivo, por isso o tempo maior.
+          name: "db",
+          environment: "node",
+          include: ["src/**/*.db.test.ts"],
+          testTimeout: 30_000,
+          hookTimeout: 120_000,
         },
       },
       {

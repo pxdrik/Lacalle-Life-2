@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { AuthDataProvider } from "@/composition/auth-data-provider";
 import { ProfileScreenDataProvider } from "@/composition/data-providers";
+import { ProDataProvider } from "@/composition/pro-data-provider";
 import { ICONS } from "@/design-system/icons";
 import { PageHeader } from "@/design-system/components/page-header";
 import { PageShell } from "@/design-system/components/page-shell";
@@ -33,7 +34,9 @@ export default function ProfilePage() {
       <div className="mt-8 max-w-lg">
         <AuthDataProvider>
           <ProfileScreenDataProvider>
-            <ProfileTab />
+            <ProDataProvider>
+              <ProfileTab />
+            </ProDataProvider>
           </ProfileScreenDataProvider>
         </AuthDataProvider>
       </div>

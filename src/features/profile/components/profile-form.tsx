@@ -16,7 +16,7 @@ import {
 } from "@/core/nutrition";
 import { Button } from "@/design-system/components/button";
 import { cn } from "@/design-system/cn";
-import { Field } from "@/design-system/components/field";
+import { FIELD_IN_ROW, FIELD_ROW, Field } from "@/design-system/components/field";
 import { Input } from "@/design-system/components/input";
 import { Section } from "@/design-system/components/section";
 import { Select } from "@/design-system/components/select";
@@ -200,8 +200,13 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
       </Section>
 
       <Section title="Opcional" size="compact">
-        <div className="grid grid-cols-2 gap-3">
+        {/* Uma grade para os dois: no celular "Gordura corporal (%)" quebra
+            em duas linhas, e com cada campo empilhado por conta própria o
+            campo dela descia e ficava torto ao lado de "Ritmo" (relatado
+            pelo Pedro, 02/10/2026). */}
+        <div className={FIELD_ROW}>
           <Field
+            className={FIELD_IN_ROW}
             label="Gordura corporal (%)"
             id="bodyFatPercent"
             error={issues["bodyFatPercent"]}
@@ -223,6 +228,7 @@ export function ProfileForm({ initial, pending, onSubmit }: Props) {
           </Field>
 
           <Field
+            className={FIELD_IN_ROW}
             label="Ritmo (kg/semana)"
             id="weeklyChangeKg"
             error={issues["weeklyChangeKg"]}

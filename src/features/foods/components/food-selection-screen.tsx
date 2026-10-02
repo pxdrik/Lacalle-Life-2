@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronUp, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
@@ -8,6 +8,8 @@ import { roundMacros, scaleMacros } from "@/core/domain/macros";
 import { formatDecimal, parseDecimal } from "@/core/format/decimal";
 import { cn } from "@/design-system/cn";
 import { Button } from "@/design-system/components/button";
+import { ConfirmButton } from "@/design-system/components/confirm-button";
+import { Dialog } from "@/design-system/components/dialog";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PageHeader } from "@/design-system/components/page-header";
 import { ICONS } from "@/design-system/icons";
@@ -31,9 +33,18 @@ import { FoodPicker, referencePortion } from "./food-picker";
  *
  * Hands off to `useApplyPickedFood` (`features/diet`) through the URL, not a
  * shared store: `returnTo` says where the meal is, `mealId` says which one,
- * and confirming a quantity here appends `addFoodId`/`addMealId`/`addGrams`
- * to that address before navigating back. The screen that reads them is on
- * the other side of a feature boundary this one does not cross.
+ * and "Confirmar refeição" appends `addMealId` and one `addFoodId`/`addGrams`
+ * pair per food to that address before navigating back. The screen that
+ * reads them is on the other side of a feature boundary this one does not
+ * cross.
+ *
+ * **Vários alimentos por ida, como os exercícios do treino (pedido do
+ * Pedro, 02/10/2026).** Confirmar a quantidade não volta mais para o Diário:
+ * o alimento entra em "Nesta refeição" e a busca volta, até "Confirmar
+ * refeição" levar todos de uma vez. Montar uma refeição é normalmente vários
+ * alimentos seguidos, e sair e voltar a cada um era o trabalho reclamado.
+ * Voltar com alimentos na lista pede um segundo toque, como o treino pede
+ * antes de descartar exercícios marcados.
  */
 export function FoodSelectionScreen({
   recents,
@@ -51,6 +62,10 @@ export function FoodSelectionScreen({
     /** Só de um recente: a quantidade da última vez (roadmap 7.2). */
     readonly grams: number | undefined;
   } | null>(null);
+  // Um por alimento, na ordem em que entraram: escolher de novo troca as
+  // gramas em vez de repetir o alimento (02/10/2026).
+  const [added, setAdded] = useState<readonly { readonly food: Food; readonly grams: number }[]>([]);
+  const [reviewing, setReviewing] = useState(false);
 
   function goBack() {
     router.push(returnTo);
@@ -68,6 +83,7 @@ export function FoodSelectionScreen({
   }
 
   if (picked !== null) {
+    const already = added.some((item) => item.food.id === picked.food.id);
     return (
       <>
         <BackLink
@@ -86,8 +102,14 @@ export function FoodSelectionScreen({
           <QuantityConfirm
             food={picked.food}
             initialGrams={picked.grams}
+            submitLabel={already ? "Salvar quantidade" : "Adicionar à refeição"}
             onConfirm={(grams) => {
-              router.push(buildReturnUrl(returnTo, picked.food.id, mealId, grams));
+              setAdded((current) =>
+                already
+                  ? current.map((item) => (item.food.id === picked.food.id ? { ...item, grams } : item))
+                  : [...current, { food: picked.food, grams }],
+              );
+              setPicked(null);
             }}
           />
         </div>
@@ -95,20 +117,113 @@ export function FoodSelectionScreen({
     );
   }
 
+  const count = added.length;
+
   return (
     <>
-      <BackLink onClick={goBack} label="Voltar" />
+      {count === 0 ? (
+        <BackLink onClick={goBack} label="Voltar" />
+      ) : (
+        <ConfirmButton
+          label="Voltar sem adicionar"
+          confirmLabel={count === 1 ? "Descartar 1 alimento?" : `Descartar ${String(count)} alimentos?`}
+          onConfirm={goBack}
+          className="inline-flex min-h-8 items-center gap-1.5 text-sm"
+        >
+          <ArrowLeft aria-hidden className="size-4" />
+          Voltar
+        </ConfirmButton>
+      )}
       <PageHeader icon={ICONS.foods} title="Adicionar alimento" className="mt-4" />
+
       <div className="mt-6">
         <FoodPicker
           chrome={false}
           onPick={(food, grams) => {
-            setPicked({ food, grams });
+            // Já escolhido: abre nas gramas escolhidas, para trocar.
+            setPicked({ food, grams: added.find((item) => item.food.id === food.id)?.grams ?? grams });
           }}
           onCancel={goBack}
           recents={recents}
+          selected={new Map(added.map((item) => [item.food.id, item.grams]))}
         />
       </div>
+
+      {/* Fixa acima da navegação de baixo, como a barra dos exercícios
+          marcados no treino: a contagem é o retorno de que o alimento entrou
+          enquanto a busca continua. Quebra linha onde o botão não cabe ao
+          lado da contagem (320px Confortável: 26px de rolagem lateral,
+          visto vermelho). */}
+      {count > 0 && (
+        <div className="sticky bottom-(--bottom-nav-h) z-20 -mx-4 mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-line bg-surface px-4 py-3 sm:mx-0 sm:rounded-lg sm:border">
+          {/* A contagem abre a conferência: quais alimentos e quantas gramas,
+              com tirar (pedido do Pedro, 02/10/2026). */}
+          <button
+            type="button"
+            aria-haspopup="dialog"
+            onClick={() => {
+              setReviewing(true);
+            }}
+            className="-ml-2 flex min-h-11 items-center gap-1.5 rounded-md px-2 text-sm text-ink-muted transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+          >
+            <span className="text-ink tabular-nums">{count}</span> {count === 1 ? "alimento" : "alimentos"}
+            <ChevronUp aria-hidden className="size-4" />
+          </button>
+          <Button
+            className="ml-auto"
+            onClick={() => {
+              router.push(buildReturnUrl(returnTo, mealId, added));
+            }}
+          >
+            Confirmar refeição
+          </Button>
+        </div>
+      )}
+
+      <Dialog
+        open={reviewing && count > 0}
+        title="Nesta refeição"
+        onClose={() => {
+          setReviewing(false);
+        }}
+        placement="sheet-bottom"
+      >
+        <ul className="divide-y divide-line">
+          {added.map((item) => (
+            <li key={item.food.id} className="flex min-h-11 items-center gap-3 py-1">
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm break-words text-ink">{item.food.name}</span>
+                <span className="block text-xs text-ink-subtle tabular-nums">
+                  {formatDecimal(item.grams)} {item.food.unit} · {formatDecimal(scaleMacros(item.food.per100g, item.grams).kcal, 0)} kcal
+                </span>
+              </span>
+              <button
+                type="button"
+                aria-label={`Tirar ${item.food.name}`}
+                onClick={() => {
+                  setAdded((current) => current.filter((other) => other.food.id !== item.food.id));
+                }}
+                className="flex size-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors duration-150 ease-out hover:bg-muted hover:text-ink"
+              >
+                <X aria-hidden className="size-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+          <p className="text-sm text-ink-muted tabular-nums">
+            Total: {formatDecimal(added.reduce((sum, item) => sum + scaleMacros(item.food.per100g, item.grams).kcal, 0), 0)} kcal
+          </p>
+          <Button
+            className="ml-auto"
+            onClick={() => {
+              router.push(buildReturnUrl(returnTo, mealId, added));
+            }}
+          >
+            Confirmar refeição
+          </Button>
+        </div>
+      </Dialog>
     </>
   );
 }
@@ -135,11 +250,14 @@ function BackLink({
 function QuantityConfirm({
   food,
   initialGrams,
+  submitLabel,
   onConfirm,
 }: {
   readonly food: Food;
-  /** A quantidade da última vez, quando veio de um recente. */
+  /** A quantidade da última vez, quando veio de um recente; ou a já escolhida nesta ida. */
   readonly initialGrams: number | undefined;
+  /** "Salvar quantidade" quando o alimento já está na refeição. */
+  readonly submitLabel: string;
   readonly onConfirm: (grams: number) => void;
 }) {
   const initial = referencePortion(food);
@@ -204,7 +322,7 @@ function QuantityConfirm({
       </dl>
 
       <Button type="submit" size="lg" disabled={grams <= 0} className="w-full">
-        Adicionar à refeição
+        {submitLabel}
       </Button>
     </form>
   );
@@ -231,16 +349,18 @@ function safeReturnTo(value: string | null): string {
   return value;
 }
 
+/** Um par `addFoodId`/`addGrams` por alimento, na ordem em que entraram. */
 function buildReturnUrl(
   returnTo: string,
-  foodId: string,
   mealId: string,
-  grams: number,
+  foods: readonly { readonly food: Food; readonly grams: number }[],
 ): string {
   const [path, existingQuery] = returnTo.split("?");
   const params = new URLSearchParams(existingQuery ?? "");
-  params.set("addFoodId", foodId);
   params.set("addMealId", mealId);
-  params.set("addGrams", String(grams));
+  for (const { food, grams } of foods) {
+    params.append("addFoodId", food.id);
+    params.append("addGrams", String(grams));
+  }
   return `${path ?? "/diario"}?${params.toString()}`;
 }

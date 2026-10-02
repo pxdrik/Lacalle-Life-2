@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { revise } from "@/core/domain/entity";
 import { dayKey, formatDay, shiftDay } from "@/core/format/day";
 import { Button, buttonClasses } from "@/design-system/components/button";
 import { Card } from "@/design-system/components/card";
@@ -30,7 +31,10 @@ import {
   removeItems,
   sameMealYesterday,
 } from "../services/yesterday-meal";
-import { dietForWeekday, weekdayOf } from "../services/diet-schedule";
+import { dayChoice, dietOfDay } from "../services/diet-schedule";
+import { chooseMealOption } from "../services/plan-option";
+import { usePrescribedPlans } from "../hooks/use-prescribed-plans";
+import { DayChoice, PlanOfDay, TodayOption } from "./plan-of-day";
 import {
   addItem,
   addMeal,
@@ -96,6 +100,8 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
   const { state, saveError, hasConflict, apply, replace, reload } =
     useFoodLogDay(day);
   const { state: dietList } = useDietList();
+  const prescribed = usePrescribedPlans();
+  const plans = prescribed.status === "ready" ? prescribed.plans : [];
   // `null` whenever no profile is filled in, which is the normal case.
   const targets = useNutritionTargets();
   const [picking, setPicking] = useState(false);
@@ -148,10 +154,19 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
 
   // The diet scheduled for this weekday, if any — `undefined` while diets
   // are still loading, same as "no link" for the empty state's purposes.
+  // O plano da nutricionista nos dias dele, a dieta da pessoa nos outros; num
+  // dia dos dois, o que ela escolheu, gravado no dia (Life Pro, Etapa 5e:
+  // decisão do Pedro, 01/10/2026; `dietOfDay`).
   const parsedDay = parseDayLocal(day);
+  const chosenId = state.status === "ready" ? state.log.dietId : null;
   const linkedDiet =
     dietList.status === "ready" && parsedDay !== null
-      ? dietForWeekday(dietList.diets, weekdayOf(parsedDay))
+      ? dietOfDay(dietList.diets, plans, parsedDay, chosenId)
+      : undefined;
+  const planOfDay = plans.find((plan) => plan.id === linkedDiet?.id);
+  const choice =
+    dietList.status === "ready" && parsedDay !== null
+      ? dayChoice(dietList.diets, plans, parsedDay)
       : undefined;
 
   /**
@@ -287,6 +302,19 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
             </div>
           )}
 
+          {choice !== undefined && linkedDiet !== undefined ? (
+            <DayChoice
+              plan={choice.plan}
+              own={choice.own}
+              chosenId={linkedDiet.id}
+              onChoose={(dietId) => {
+                apply((current) => revise(current, { dietId }));
+              }}
+            />
+          ) : (
+            planOfDay !== undefined && <PlanOfDay plan={planOfDay} />
+          )}
+
           {/* O check mora aqui, não na tela da Dieta — é o Diário que se
               usa todo dia, e ir até Dietas só para marcar "comi isto" era
               o passo extra que sobrava. Mostra só o que falta: uma vez
@@ -338,9 +366,27 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                     ? mealCheckState(state.log, sourceDietId, sourceMealId)
                     : undefined;
 
+                const planMeal =
+                  planOfDay !== undefined && sourceDietId === planOfDay.id
+                    ? planOfDay.meals.find((candidate) => candidate.id === sourceMealId)
+                    : undefined;
+                const option =
+                  planMeal !== undefined &&
+                  (planMeal.alternatives ?? []).length > 0 &&
+                  checkState === "unchecked" ? (
+                    <TodayOption
+                      meal={meal}
+                      planMeal={planMeal}
+                      onChoose={(chosen) => {
+                        apply((current) => chooseMealOption(current, meal.id, chosen));
+                      }}
+                    />
+                  ) : null;
+
                 return (
+                  <div key={meal.id} className="space-y-2">
+                  {option}
                   <MealCard
-                    key={meal.id}
                     meal={meal}
                     position={index}
                     total={state.log.meals.length}
@@ -462,6 +508,7 @@ export function FoodLogScreen({ day }: { readonly day: string }) {
                         : undefined
                     }
                   />
+                  </div>
                 );
               })}
             </div>

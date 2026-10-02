@@ -108,6 +108,9 @@ afterEach(() => {
 });
 
 describe("isolamento entre identidades — todas as stores pessoais", () => {
+  // Três sessões do zero, cada uma semeando o catálogo inteiro: 1,5s
+  // sozinho, mas acima dos 5s padrão com a suíte toda em paralelo (medido
+  // em 01/10/2026, com e sem a store v11: o mesmo 1,5s). Daí o limite.
   it("anônimo, conta A e conta B nunca compartilham dado pessoal entre si", async () => {
     const uidA = `test-a-${crypto.randomUUID()}`;
     const uidB = `test-b-${crypto.randomUUID()}`;
@@ -233,7 +236,7 @@ describe("isolamento entre identidades — todas as stores pessoais", () => {
 
     const anonDiets = await backToAnon.repositories.diets.listAll();
     expect(anonDiets.map((diet) => diet.name)).toEqual(["Dieta Anônima"]);
-  });
+  }, 20_000);
 });
 
 describe("backup respeita a identidade atual", () => {

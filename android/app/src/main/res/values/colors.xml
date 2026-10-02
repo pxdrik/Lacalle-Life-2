@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- O fundo do app (o token canvas de src/design-system/tokens.css), atrás da
+     barra de status e na tela de abertura. Tema escuro em values-night. -->
+<resources>
+    <color name="colorPrimary">#2A9162</color>
+    <color name="colorPrimaryDark">#F8FAFC</color>
+    <color name="colorAccent">#2A9162</color>
+    <color name="app_canvas">#F8FAFC</color>
+    <!-- O verde do ícone (emerald-600, o fim do gradiente da marca), atrás do
+         símbolo branco na abertura, igual nos dois temas. -->
+    <color name="brand_icon">#059669</color>
+</resources>

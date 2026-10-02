@@ -72,15 +72,16 @@ function Probe({
 
 function mount(
   apply: (change: (current: FoodLog) => FoodLog) => void,
-  food: Food = CHICKEN,
+  food: Food | readonly Food[] = CHICKEN,
 ) {
   const repository = new LocalFoodRepository(
     new MemoryStore<Food>(FOODS_STORE),
   );
+  const foods = Array.isArray(food) ? food : [food as Food];
 
   return render(
     <FoodRepositoryProvider
-      repository={repository.save(food, null).then(() => repository)}
+      repository={Promise.all(foods.map((item) => repository.save(item, null))).then(() => repository)}
     >
       <Probe apply={apply} />
     </FoodRepositoryProvider>,
@@ -148,5 +149,29 @@ describe("useApplyPickedFood", () => {
 
     const result = apply.mock.results[0]?.value as FoodLog;
     expect(result.meals[0]?.items[0]).toMatchObject({ unit: "ml" });
+  });
+
+  it("vários alimentos numa ida: uma mudança só, na ordem, pulando o que não existe", async () => {
+    const mealId = "m1";
+    const params = new URLSearchParams({ addMealId: mealId });
+    for (const [id, grams] of [[CHICKEN.id, "150"], ["sumiu", "80"], [COCONUT_WATER.id, "200"]] as const) {
+      params.append("addFoodId", id);
+      params.append("addGrams", grams);
+    }
+    mockSearchParams.mockReturnValue(params);
+    const log = emptyLog(mealId);
+    const apply = vi.fn((change: (current: FoodLog) => FoodLog) => change(log));
+
+    mount(apply, [CHICKEN, COCONUT_WATER]);
+
+    await waitFor(() => {
+      expect(apply).toHaveBeenCalledTimes(1);
+    });
+    const result = apply.mock.results[0]?.value as FoodLog;
+    expect(result.meals[0]?.items.map((item) => [item.name, item.grams])).toEqual([
+      ["Peito de frango", 150],
+      ["Água de coco", 200],
+    ]);
+    expect(mockReplace).toHaveBeenCalledWith("/diario");
   });
 });

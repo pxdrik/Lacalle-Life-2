@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">LaCalle Life</string>
+    <string name="title_activity_main">LaCalle Life</string>
+    <string name="package_name">com.lacalle.life</string>
+    <string name="custom_url_scheme">com.lacalle.life</string>
+</resources>

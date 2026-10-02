@@ -1,5 +1,6 @@
 import type { Entity, EntityId } from "@/core/domain/entity";
 import type { Macros } from "@/core/domain/macros";
+import type { Weekday } from "@/core/domain/weekday";
 import type { FoodUnit, PracticalUnit } from "@/features/foods";
 
 /**
@@ -202,9 +203,10 @@ export type MealOwner = Entity & { readonly meals: readonly Meal[] };
  * Monday-first, unlike `Date#getDay()` — see `weekdayOf` in
  * `services/diet-schedule.ts` for the conversion. The week starting on
  * Monday is the convention `formatLongDay` and every date picker in the app
- * already renders in pt-BR.
+ * already renders in pt-BR. Defined in `core/domain/weekday.ts` since the
+ * Life Pro training step: prescribed routines have weekdays too.
  */
-export type Weekday = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+export type { Weekday };
 
 export interface Diet extends Entity {
   readonly name: string;

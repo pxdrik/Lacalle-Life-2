@@ -159,9 +159,106 @@ describe("FoodSelectionScreen", () => {
       screen.getByRole("button", { name: "Adicionar à refeição" }),
     );
 
+    // Volta para a busca, com o alimento em "Nesta refeição" (02/10/2026):
+    // só "Confirmar refeição" leva de volta.
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Buscar alimento para adicionar")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
     expect(mockPush).toHaveBeenCalledWith(
-      "/dietas/abc?addFoodId=frango&addMealId=m1&addGrams=150",
+      "/dietas/abc?addMealId=m1&addFoodId=frango&addGrams=150",
     );
+  });
+
+  it("vários alimentos numa ida: cada um entra em 'Nesta refeição', dá para tirar, e todos voltam juntos", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Arroz"), food("Feijão"), food("Frango")]);
+    await afterLoad();
+
+    for (const [name, grams] of [["Arroz", "150"], ["Feijão", "100"], ["Frango", "120"]] as const) {
+      const search = screen.getByLabelText("Buscar alimento para adicionar");
+      await userEvent.clear(search);
+      await userEvent.type(search, name.toLowerCase());
+      await userEvent.click(await screen.findByRole("button", { name: new RegExp(`^${name}`) }));
+      await userEvent.clear(screen.getByLabelText("Gramas"));
+      await userEvent.type(screen.getByLabelText("Gramas"), grams);
+      await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+    }
+
+    // A conferência abre pela contagem na barra de baixo.
+    await userEvent.click(screen.getByRole("button", { name: "3 alimentos" }));
+    const meal = await screen.findByRole("dialog", { name: "Nesta refeição" });
+    expect(within(meal).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Arroz150 g · 300 kcal",
+      "Feijão100 g · 200 kcal",
+      "Frango120 g · 240 kcal",
+    ]);
+    expect(meal).toHaveTextContent("Total: 740 kcal");
+
+    await userEvent.click(within(meal).getByRole("button", { name: "Tirar Feijão" }));
+    expect(meal).toHaveTextContent("Total: 540 kcal");
+
+    await userEvent.click(within(meal).getByRole("button", { name: "Confirmar refeição" }));
+    expect(mockPush).toHaveBeenCalledWith(
+      "/diario?addMealId=m1&addFoodId=arroz&addGrams=150&addFoodId=frango&addGrams=120",
+    );
+  });
+
+  it("o alimento escolhido fica marcado na lista; tocar de novo troca as gramas, sem repetir", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Arroz"), food("Feijão")]);
+    await afterLoad();
+
+    await userEvent.click(await screen.findByRole("button", { name: /^Arroz/ }));
+    await userEvent.clear(screen.getByLabelText("Gramas"));
+    await userEvent.type(screen.getByLabelText("Gramas"), "150");
+    await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+
+    // No topo, em "Adicionados", e marcado também na lista de todos.
+    const top = await screen.findByRole("region", { name: "Adicionados" });
+    expect(within(top).getAllByRole("button").map((row) => row.textContent)).toEqual([expect.stringContaining("Adicionado · 150 g")]);
+    const [inTop, inAll] = screen.getAllByRole("button", { name: /^Arroz/ });
+    expect(inAll).toHaveTextContent("Adicionado · 150 g");
+    expect(screen.getByRole("button", { name: /^Feijão/ })).not.toHaveTextContent("Adicionado");
+
+    await userEvent.click(inTop!);
+    expect(screen.getByLabelText("Gramas"), "não abriu nas gramas escolhidas").toHaveValue("150");
+    await userEvent.clear(screen.getByLabelText("Gramas"));
+    await userEvent.type(screen.getByLabelText("Gramas"), "200");
+    await userEvent.click(screen.getByRole("button", { name: "Salvar quantidade" }));
+
+    const updated = await screen.findByRole("region", { name: "Adicionados" });
+    expect(within(updated).getAllByRole("button"), "o alimento se repetiu").toHaveLength(1);
+    expect(within(updated).getByRole("button")).toHaveTextContent("Adicionado · 200 g");
+
+    // Procurando outra coisa, a seção some, e o escolhido continua verde nos resultados.
+    await userEvent.type(screen.getByLabelText("Buscar alimento para adicionar"), "arr");
+    expect(screen.queryByRole("region", { name: "Adicionados" })).toBeNull();
+    expect(screen.getByRole("button", { name: /^Arroz/ })).toHaveTextContent("Adicionado · 200 g");
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
+    expect(mockPush).toHaveBeenCalledWith("/diario?addMealId=m1&addFoodId=arroz&addGrams=200");
+  });
+
+  it("voltar com alimentos na lista pede um segundo toque antes de descartar", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Ovo")]);
+    await afterLoad();
+
+    await userEvent.type(screen.getByLabelText("Buscar alimento para adicionar"), "ovo");
+    await userEvent.click(await screen.findByRole("button", { name: /Ovo/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+
+    // O "✕" da busca saía sem confirmar; como página, só "Voltar" sai (02/10/2026).
+    expect(screen.queryByRole("button", { name: "Fechar busca" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Voltar sem adicionar" }));
+    expect(mockPush, "descartou no primeiro toque").not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: /Descartar 1 alimento\?/ }));
+    expect(mockPush).toHaveBeenCalledWith("/diario");
   });
 
   it("keeps returnTo's own query string when appending the add* params", async () => {
@@ -188,6 +285,7 @@ describe("FoodSelectionScreen", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Adicionar à refeição" }),
     );
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
 
     const [url] = mockPush.mock.calls.at(-1) ?? [];
     expect(url).toContain("dia=2026-09-20");

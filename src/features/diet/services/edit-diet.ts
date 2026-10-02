@@ -13,8 +13,10 @@ import type {
   MealAlternative,
   MealItem,
   MealOwner,
+  Weekday,
 } from "../types/diet";
 import { copyMeal, createMeal, nextMealName } from "./create-diet";
+import { WEEKDAYS } from "./diet-schedule";
 
 /**
  * Every edit is a pure function from one meal owner to the next.
@@ -48,6 +50,11 @@ function withMeals<T extends MealOwner>(owner: T, meals: readonly Meal[]): T {
 
 export function renameDiet(diet: Diet, name: string): Diet {
   return revise(diet, { name });
+}
+
+/** Os dias de uma dieta só, na ordem da semana (no Life Pro, os do plano). */
+export function setDietWeekdays(diet: Diet, weekdays: readonly Weekday[]): Diet {
+  return revise(diet, { weekdays: WEEKDAYS.filter((day) => weekdays.includes(day)) });
 }
 
 export function addMeal<T extends MealOwner>(diet: T): T {

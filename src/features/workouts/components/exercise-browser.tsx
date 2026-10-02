@@ -88,6 +88,14 @@ interface Props {
    * asked for it.
    */
   readonly autoFocus?: boolean;
+
+  /**
+   * Só o catálogo do app, sem os exercícios criados por quem está usando e
+   * sem "Criar exercício". No Life Pro (Etapa 8c): exercício criado nunca
+   * sincroniza, então um criado pelo treinador chegaria ao paciente sem
+   * foto, sem músculo e sem cardio.
+   */
+  readonly catalogueOnly?: boolean;
 }
 
 export function ExerciseBrowser({
@@ -97,6 +105,7 @@ export function ExerciseBrowser({
   onSelectionChange,
   persistQuery = true,
   autoFocus = false,
+  catalogueOnly = false,
 }: Props) {
   const { state, writeError, toggleFavorite, createExercise } =
     useExerciseCatalogue();
@@ -136,7 +145,8 @@ export function ExerciseBrowser({
   // Search then filter, both on every render. The catalogue is a few hundred
   // rows over a prepared index, so this costs microseconds — and derived state
   // that can fall out of sync with its inputs is a bug waiting to happen.
-  const searched = state.status === "ready" ? searchExercises(state.index, query.text) : [];
+  const found = state.status === "ready" ? searchExercises(state.index, query.text) : [];
+  const searched = catalogueOnly ? found.filter((exercise) => !exercise.isCustom) : found;
   const results = filterExercises(searched, query.filters);
 
   // Os cartões de grupo (10.1): quantos cada grupo mostraria, com a busca e
@@ -231,18 +241,20 @@ export function ExerciseBrowser({
             estado vazio aparecer. Fica sempre visível, mas do mesmo peso
             visual do botão de Filtros ao lado — não um `primary` chamativo
             sobre 183 exercícios já curados, que convidaria duplicata. */}
-        <button
-          type="button"
-          aria-label="Novo exercício"
-          onClick={() => {
-            setCreating(true);
-          }}
-          disabled={state.status !== "ready"}
-          className={cn(buttonClasses("secondary"), BESIDE_FIELD)}
-        >
-          <Plus aria-hidden className="size-4" />
-          <span className="hidden sm:inline">Novo exercício</span>
-        </button>
+        {!catalogueOnly && (
+          <button
+            type="button"
+            aria-label="Novo exercício"
+            onClick={() => {
+              setCreating(true);
+            }}
+            disabled={state.status !== "ready"}
+            className={cn(buttonClasses("secondary"), BESIDE_FIELD)}
+          >
+            <Plus aria-hidden className="size-4" />
+            <span className="hidden sm:inline">Novo exercício</span>
+          </button>
+        )}
       </div>
 
       {state.status === "ready" && (
@@ -385,9 +397,13 @@ export function ExerciseBrowser({
               searchText={query.text}
               hasQuery={query.text !== "" || activeFilterCount > 0}
               onClear={clear}
-              onCreate={() => {
-                setCreating(true);
-              }}
+              onCreate={
+                catalogueOnly
+                  ? undefined
+                  : () => {
+                      setCreating(true);
+                    }
+              }
             />
           ) : (
             <Card padded={false} className="overflow-hidden">
@@ -422,7 +438,7 @@ export function ExerciseBrowser({
                     has that none of them is — this row pre-fills the name
                     you already typed, which the header button doesn't know
                     about until you retype it. */}
-                {query.text.trim() !== "" && (
+                {!catalogueOnly && query.text.trim() !== "" && (
                   <li>
                     <button
                       type="button"
@@ -511,7 +527,8 @@ function EmptyState({
   readonly searchText: string;
   readonly hasQuery: boolean;
   readonly onClear: () => void;
-  readonly onCreate: () => void;
+  /** Sem ele, só o catálogo (`catalogueOnly`): limpar a busca, sem criar. */
+  readonly onCreate: (() => void) | undefined;
 }) {
   return (
     <Card tone="quiet" className="text-center">
@@ -523,16 +540,20 @@ function EmptyState({
 
       {hasQuery ? (
         <>
-          <p className="mt-1.5 text-sm text-ink-subtle">
-            O que você faz não está no catálogo? Crie e use agora mesmo.
-          </p>
+          {onCreate !== undefined && (
+            <p className="mt-1.5 text-sm text-ink-subtle">
+              O que você faz não está no catálogo? Crie e use agora mesmo.
+            </p>
+          )}
           <div className="mt-5 flex flex-col items-center gap-3">
-            <Button onClick={onCreate}>
-              <Plus aria-hidden className="size-4" />
-              {searchText.trim() === ""
-                ? "Criar exercício"
-                : `Criar “${searchText.trim()}”`}
-            </Button>
+            {onCreate !== undefined && (
+              <Button onClick={onCreate}>
+                <Plus aria-hidden className="size-4" />
+                {searchText.trim() === ""
+                  ? "Criar exercício"
+                  : `Criar “${searchText.trim()}”`}
+              </Button>
+            )}
             <button
               type="button"
               onClick={onClear}

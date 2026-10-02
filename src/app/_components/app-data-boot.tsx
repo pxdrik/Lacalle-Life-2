@@ -11,6 +11,8 @@ import {
   runBodyEntrySync,
   runDietSync,
   runFoodLogSync,
+  runPrescribedPlanSync,
+  runPrescribedRoutineSync,
   runProfileSync,
   runRestDaySync,
   runRoutineSync,
@@ -68,6 +70,10 @@ export function AppDataBoot({
     runRestDaySync().catch(() => undefined);
     // Roadmap 8.18: sem esta linha a água nunca descia para outro aparelho.
     runWaterEntrySync().catch(() => undefined);
+    // Life Pro: o plano que a nutricionista publicou (só desce).
+    runPrescribedPlanSync().catch(() => undefined);
+    // E o treino que o treinador publicou (Etapa 8, também só desce).
+    runPrescribedRoutineSync().catch(() => undefined);
     runFoodLogSync(dayKey(new Date())).catch(() => undefined);
   }, []);
 

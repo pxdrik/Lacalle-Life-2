@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Star, X } from "lucide-react";
+import { CircleCheck, Plus, SlidersHorizontal, Star, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
@@ -49,6 +49,12 @@ interface Props {
    * one implementation.
    */
   readonly chrome?: boolean;
+  /**
+   * Os alimentos já escolhidos nesta ida, com as gramas (por id), quando o
+   * seletor junta vários antes de confirmar (`/alimentos/selecionar`,
+   * 02/10/2026). A linha deles ganha a marca verde "Adicionado".
+   */
+  readonly selected?: ReadonlyMap<string, number> | undefined;
 }
 
 /**
@@ -71,11 +77,14 @@ interface Props {
  */
 const RESULT_PAGE_SIZE = 20;
 
-export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Props) {
+export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, selected }: Props) {
   const { state } = useFoodCatalogue();
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  // Os cartões de categoria ficam atrás de um botão (02/10/2026): abertos
+  // sempre, ocupavam metade da tela do celular antes do primeiro alimento.
+  const [showCategories, setShowCategories] = useState(false);
 
   // The same create/edit machinery `/alimentos/novo` uses — `id: null` means
   // creating. Reusing it here, instead of a second write path, is the whole
@@ -113,6 +122,17 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
       ? recents.flatMap((recent) => {
           const food = state.foods.find((candidate) => candidate.id === recent.foodId);
           return food === undefined ? [] : [{ food, recent }];
+        })
+      : [];
+  // "Adicionados" (02/10/2026): o que já foi escolhido nesta ida, na ordem em
+  // que entrou, no topo da lista e pela mesma regra dos Recentes (só com a
+  // busca vazia). Procurando outra coisa, as linhas continuam verdes nos
+  // resultados.
+  const addedRows =
+    state.status === "ready" && browsing && selected !== undefined
+      ? [...selected].flatMap(([id, grams]) => {
+          const food = state.foods.find((candidate) => candidate.id === id);
+          return food === undefined ? [] : [{ food, grams }];
         })
       : [];
 
@@ -204,6 +224,23 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
+        <button
+          type="button"
+          aria-label="Categorias"
+          aria-expanded={showCategories}
+          aria-controls="food-picker-categories"
+          onClick={() => {
+            setShowCategories((open) => !open);
+          }}
+          className={cn(
+            "shrink-0",
+            // Verde com uma categoria escolhida, aberto ou não: o filtro está valendo.
+            buttonClasses(category !== null ? "primary" : "secondary"),
+            "size-(--input-h-beside) px-0",
+          )}
+        >
+          <SlidersHorizontal aria-hidden className="size-4" />
+        </button>
         {/* Favoritos direto na linha da busca (roadmap 10.5): as categorias
             subiram para os cartões abaixo, e "Filtros" ficaria com a estrela
             sozinha. Mesmo botão da tela Alimentos. */}
@@ -225,27 +262,50 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
           <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
         </button>
         {/* Escape closes it too, but a touch keyboard has no Escape — leaving
-            only that would strand every phone. */}
-        <button
-          type="button"
-          onClick={onCancel}
-          aria-label="Fechar busca"
-          className="flex size-(--input-h-beside) shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
-        >
-          <X aria-hidden className="size-4" />
-        </button>
+            only that would strand every phone. Só no painel embutido: como
+            página, "Voltar" no topo já sai, e com a confirmação de descartar
+            os alimentos escolhidos, que este botão pulava (02/10/2026). */}
+        {chrome && (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Fechar busca"
+            className="flex size-(--input-h-beside) shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+          >
+            <X aria-hidden className="size-4" />
+          </button>
+        )}
       </div>
 
       {/* As categorias como atalho, entre a busca e os Recentes (roadmap
           10.5): o Pedro escolheu os cartões aqui também, sabendo que empurram
           os Recentes para baixo. */}
-      {state.status === "ready" && (
-        <FoodCategoryCards
-          counts={categoryCounts}
-          total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
-          active={category}
-          onSelect={setCategory}
-        />
+      {state.status === "ready" && showCategories && (
+        <div id="food-picker-categories">
+          <FoodCategoryCards
+            counts={categoryCounts}
+            total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
+            active={category}
+            onSelect={setCategory}
+          />
+        </div>
+      )}
+
+      {/* Fechados os cartões, a categoria escolhida continua à vista, e sai num toque. */}
+      {!showCategories && category !== null && (
+        <button
+          type="button"
+          aria-label={`Tirar o filtro ${FOOD_CATEGORY_LABELS[category]}`}
+          onClick={() => {
+            setCategory(null);
+          }}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-1 text-sm font-medium text-accent-text"
+        >
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-accent bg-accent-surface px-3">
+            {FOOD_CATEGORY_LABELS[category]}
+            <X aria-hidden className="size-3.5" />
+          </span>
+        </button>
       )}
 
       {state.status === "error" && (
@@ -272,6 +332,32 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
         </button>
       )}
 
+      {addedRows.length > 0 && (
+        <section aria-labelledby="food-picker-added">
+          <h3
+            id="food-picker-added"
+            className="px-2 pt-2 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase"
+          >
+            Adicionados
+          </h3>
+          <ul className="space-y-1">
+            {addedRows.map(({ food, grams }) => (
+              <li key={`added-${food.id}`}>
+                <PickRow
+                  food={food}
+                  grams={grams}
+                  detail=""
+                  selectedGrams={grams}
+                  onClick={() => {
+                    onPick(food, grams);
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {recentRows.length > 0 && (
         <section aria-labelledby="food-picker-recents">
           <h3
@@ -287,6 +373,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
                   food={food}
                   grams={recent.grams}
                   detail={recent.detail}
+                  selectedGrams={selected?.get(food.id)}
                   onClick={() => {
                     onPick(food, recent.grams);
                     setText("");
@@ -298,7 +385,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
         </section>
       )}
 
-      {recentRows.length > 0 && results.length > 0 && (
+      {recentRows.length + addedRows.length > 0 && results.length > 0 && (
         <h3 className="px-2 pt-3 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
           Todos os alimentos
         </h3>
@@ -321,6 +408,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true }: Pr
                   food={food}
                   grams={portion.grams}
                   detail={`${FOOD_CATEGORY_LABELS[food.category]} · ${portion.label}`}
+                  selectedGrams={selected?.get(food.id)}
                   onClick={() => {
                     onPick(food);
                     // Cleared so the next food can be typed straight away.
@@ -366,23 +454,41 @@ function PickRow({
   grams,
   detail,
   onClick,
+  selectedGrams,
 }: {
   readonly food: Food;
   readonly grams: number;
   readonly detail: string;
   readonly onClick: () => void;
+  /**
+   * Já escolhido nesta ida (02/10/2026): a linha fica verde, diz "Adicionado"
+   * com as gramas escolhidas, e os números passam a ser os dessa quantidade.
+   * Tocar de novo abre a quantidade para trocar, não para repetir.
+   */
+  readonly selectedGrams?: number | undefined;
 }) {
-  const macros = roundMacros(scaleMacros(food.per100g, grams));
+  const chosen = selectedGrams !== undefined;
+  const macros = roundMacros(scaleMacros(food.per100g, selectedGrams ?? grams));
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out hover:bg-muted"
+      className={cn(
+        "flex w-full min-h-11 items-center gap-3 rounded-md px-2 py-2 text-left transition-colors duration-100 ease-out",
+        chosen ? "bg-accent-surface hover:bg-accent-surface" : "hover:bg-muted",
+      )}
     >
       <span className="min-w-0 flex-1">
         <span className="block text-sm text-ink">{food.name}</span>
-        <span className="mt-0.5 block text-xs text-ink-subtle">{detail}</span>
+        {chosen ? (
+          <span className="mt-0.5 flex items-center gap-1 text-xs font-medium text-accent-text">
+            <CircleCheck aria-hidden className="size-3.5 shrink-0" />
+            Adicionado · {formatDecimal(selectedGrams)} {food.unit}
+          </span>
+        ) : (
+          <span className="mt-0.5 block text-xs text-ink-subtle">{detail}</span>
+        )}
       </span>
       <span className="shrink-0 text-right text-xs tabular-nums">
         <span className="block text-ink-muted">{formatDecimal(macros.kcal)} kcal</span>

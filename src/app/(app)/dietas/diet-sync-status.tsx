@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from "@/core/auth/env";
 import {
   resolveDietConflictAndSync,
   runDietSync,
+  runPrescribedPlanSync,
 } from "@/composition/sync/sync-engine";
 import type { DietConflict, DietConflictResolution } from "@/composition/sync/diet-sync";
 import { Button } from "@/design-system/components/button";
@@ -42,6 +43,10 @@ export function DietSyncStatus() {
 
     async function autoSync() {
       if (!isSupabaseConfigured()) return;
+      // O plano da nutricionista também, em silêncio: uma versão nova
+      // aparece ao abrir Dietas, sem esperar o app reabrir. Falha aqui não
+      // tem o que resolver na tela; o plano antigo continua.
+      runPrescribedPlanSync().catch(() => undefined);
 
       try {
         const outcome = await runDietSync();

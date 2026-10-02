@@ -50,39 +50,43 @@ export function useApplyPickedFood<T extends MealOwner>(
   const appliedRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const foodId = searchParams.get("addFoodId");
+    // Um par `addFoodId`/`addGrams` por alimento (vários por ida desde
+    // 02/10/2026, como os exercícios do treino); o link de um alimento só é o
+    // caso de um par.
+    const foodIds = searchParams.getAll("addFoodId");
+    const gramsRaw = searchParams.getAll("addGrams");
     const mealId = searchParams.get("addMealId");
-    const gramsRaw = searchParams.get("addGrams");
-    if (foodId === null || mealId === null || gramsRaw === null) return;
+    if (foodIds.length === 0 || mealId === null || gramsRaw.length === 0) return;
     if (state.status !== "ready") return;
 
-    const instruction = `${foodId}|${mealId}|${gramsRaw}`;
+    const instruction = `${foodIds.join(",")}|${mealId}|${gramsRaw.join(",")}`;
     if (appliedRef.current === instruction) return;
     appliedRef.current = instruction;
 
-    const food = state.foods.find((item) => item.id === foodId);
-    const grams = Number(gramsRaw);
+    const items = foodIds.flatMap((foodId, index) => {
+      const food = state.foods.find((item) => item.id === foodId);
+      const grams = Number(gramsRaw[index]);
+      if (food === undefined || !Number.isFinite(grams) || grams <= 0) return [];
+      return [
+        createMealItem({
+          foodId: food.id,
+          name: food.name,
+          grams,
+          unit: food.unit,
+          per100g: food.per100g,
+          practicalUnit: food.practicalUnit,
+          brand: food.brand,
+          saturatedFatG: food.saturatedFatG,
+          sodiumMg: food.sodiumMg,
+          fiberG: food.fiberG,
+          sugarG: food.sugarG,
+        }),
+      ];
+    });
 
-    if (food !== undefined && Number.isFinite(grams) && grams > 0) {
-      apply((current) =>
-        addItem(
-          current,
-          mealId,
-          createMealItem({
-            foodId: food.id,
-            name: food.name,
-            grams,
-            unit: food.unit,
-            per100g: food.per100g,
-            practicalUnit: food.practicalUnit,
-            brand: food.brand,
-            saturatedFatG: food.saturatedFatG,
-            sodiumMg: food.sodiumMg,
-            fiberG: food.fiberG,
-            sugarG: food.sugarG,
-          }),
-        ),
-      );
+    // Uma mudança só para todos: uma gravação, não uma por alimento.
+    if (items.length > 0) {
+      apply((current) => items.reduce((owner, item) => addItem(owner, mealId, item), current));
     }
 
     const next = new URLSearchParams(searchParams);

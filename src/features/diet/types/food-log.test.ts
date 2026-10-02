@@ -52,6 +52,12 @@ describe("isEmptyLog", () => {
     ).toBe(false);
   });
 
+  it("is false for a day whose diet was chosen before any meal (Etapa 5e)", () => {
+    // "Plano ou minha dieta" no Diário: a escolha vem antes da primeira
+    // refeição, e apagar o dia a desfazia no próximo carregamento.
+    expect(isEmptyLog({ ...createFoodLog("2026-08-14"), dietId: "minha-dieta" })).toBe(false);
+  });
+
   it("is false once there is food, which never regressed", () => {
     expect(
       isEmptyLog(
