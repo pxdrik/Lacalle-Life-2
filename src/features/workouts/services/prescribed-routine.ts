@@ -20,6 +20,11 @@ export function prescribedAsRoutine(routine: PrescribedRoutine): Routine {
   };
 }
 
+/** Versão nova que o paciente ainda não abriu (nunca na primeira que chega), como o plano. */
+export function isUpdated(routine: PrescribedRoutine): boolean {
+  return routine.seenVersion > 0 && routine.seenVersion < routine.version;
+}
+
 /** "5 exercícios · 17 séries", como a linha de um treino da pessoa. */
 export function describeRoutineSize(routine: Pick<Routine, "exercises">): string {
   const exercises = routine.exercises.length;

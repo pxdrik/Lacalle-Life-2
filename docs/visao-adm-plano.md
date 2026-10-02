@@ -334,6 +334,17 @@ antes de o Life Pro estar completo).
   sai de `day` ao meio-dia: `new Date("2026-08-07")` é meia-noite UTC, que
   no Brasil ainda é o dia anterior (visto vermelho). `weekdayOf` passou para
   `core/domain/weekday.ts`.
+  8f, o que mudou: no cartão de Treinos, versão nova ainda não aberta ganha
+  "Atualizado" e o aviso "atualizou seu treino", com a folha "O que mudou na
+  versão N": nota do treinador, dias, exercício que entrou (séries e
+  repetições), saiu ou foi trocado na mesma posição ("no lugar de"), séries,
+  carga, repetições, RPE, duração, descanso e observação, cada um com o de
+  antes riscado. Os exercícios se reconhecem pelo id da posição, como as
+  refeições do plano. Séries com metas diferentes entre si não viram um "de,
+  para" inventado: "as metas das séries mudaram". A ordem não entra. Abrir
+  a folha conta como visto. A seta fica junto do valor novo: com o espaço
+  depois do "para" do leitor de tela no fim da linha, a régua de texto
+  cortado acusava 12px a mais em 320 e 360px (visto vermelho).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.

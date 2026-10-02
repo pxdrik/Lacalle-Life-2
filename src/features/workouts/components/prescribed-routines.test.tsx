@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -93,6 +93,7 @@ describe("treino recebido no app do paciente", () => {
     expect(section).toHaveTextContent("Seg, Qua, Sex");
     expect(screen.getByRole("heading", { name: "Seus treinos" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Dias do treino/ })).toBeNull();
+    expect(screen.queryByText("Atualizado"), "a primeira versão que chega não é atualização").toBeNull();
   });
 
   it("Iniciar cria uma sessão da pessoa que guarda de qual treino veio", async () => {
@@ -143,6 +144,38 @@ describe("treino recebido no app do paciente", () => {
       expect(push).toHaveBeenCalledOnce();
     });
     expect((await sessions.listAll())[0]).toMatchObject({ routineId: PRESCRIBED.id });
+  });
+
+  it("versão nova: Atualizado, e o aviso abre o que mudou, com a nota e a comparação, e conta como visto", async () => {
+    const { prescribed, wrap } = await setup();
+    const [squat] = PRESCRIBED.exercises;
+    await prescribed.replaceAll([
+      {
+        ...PRESCRIBED,
+        changeNote: "Mais carga no agachamento.",
+        previous: {
+          version: 1,
+          exercises: [{ ...squat!, sets: squat!.sets.map((set) => ({ ...set, weightKg: 50 })) }, { ...squat!, id: "ex-0", name: "Cadeira extensora" }],
+          weekdays: ["mon", "wed", "fri"],
+        },
+      },
+    ]);
+    await prescribed.markSeen(PRESCRIBED.id, 1);
+    render(wrap(<RoutineList />));
+
+    expect(await screen.findByText("Atualizado")).toBeInTheDocument();
+    expect(screen.getByText(/Rafael Moura atualizou seu treino/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Ver o que mudou" }));
+
+    const sheet = await screen.findByRole("dialog", { name: "O que mudou na versão 2" });
+    expect(within(sheet).getByText("Nota de Rafael Moura: “Mais carga no agachamento.”")).toBeInTheDocument();
+    const [heavier, removed] = within(sheet).getAllByRole("listitem");
+    expect(heavier).toHaveTextContent(/^Agachamento livre com barra50 kg.*60 kg$/);
+    expect(within(heavier!).getByText("50 kg").tagName, "o valor de antes vem riscado").toBe("S");
+    expect(removed).toHaveTextContent("Cadeira extensoraSaiu do treino");
+    await waitFor(async () => {
+      expect((await prescribed.listAll())[0]!.seenVersion).toBe(2);
+    });
   });
 
   it("sem repositório de treinos recebidos, Treinos fica como antes", async () => {

@@ -1,4 +1,5 @@
 import { cleanup, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { MemoryStore } from "@/core/storage/memory-store";
@@ -59,12 +60,14 @@ const ROUTINE: PrescribedRoutine = {
   updatedAt: 1,
 };
 
-async function mount(page: React.ReactNode) {
+async function mount(page: React.ReactNode, routine: PrescribedRoutine = ROUTINE) {
   const routines = new LocalRoutineRepository(new MemoryStore<Routine>(ROUTINES_STORE));
   await routines.save(createRoutine("Mobilidade"), null);
   const sessions = new LocalSessionRepository(new MemoryStore<Session>(SESSIONS_STORE));
   const prescribed = new LocalPrescribedRoutineRepository(new MemoryStore<PrescribedRoutine>(PRESCRIBED_ROUTINES_STORE));
-  await prescribed.replaceAll([ROUTINE]);
+  await prescribed.replaceAll([routine]);
+  // A versão vista é só do aparelho: a troca não a traz, então entra como entraria ao abrir.
+  await prescribed.markSeen(routine.id, routine.seenVersion);
   const exercises = new LocalExerciseRepository(new MemoryStore<Exercise>(EXERCISES_STORE));
   render(
     <ToastProvider>
@@ -178,6 +181,58 @@ describe("o treino aberto para leitura", () => {
 
         expectTouchable(screen.getByRole("button", { name: "Iniciar treino" }));
         expectTouchable(screen.getByRole("button", { name: "Fazer uma cópia" }));
+        cleanup();
+      });
+    }
+  }
+});
+
+/**
+ * Versão nova (Etapa 8f): o aviso quebra linha no cartão, e a folha do que
+ * mudou cabe na tela, com nome de exercício e nota longos inteiros.
+ */
+const REMOVED = "Cadeira extensora unilateral com pausa no topo";
+const UPDATED: PrescribedRoutine = {
+  ...ROUTINE,
+  seenVersion: 11,
+  changeNote: "Mais carga no agachamento e tirei a extensora, como combinamos na avaliação de setembro.",
+  previous: {
+    version: 11,
+    exercises: [
+      { ...ROUTINE.exercises[0]!, sets: ROUTINE.exercises[0]!.sets.map((set) => ({ ...set, weightKg: 92.5, reps: 10 })) },
+      { ...ROUTINE.exercises[1]!, id: "fora", name: REMOVED },
+    ],
+    weekdays: ["mon", "wed", "fri"],
+  },
+};
+
+describe("Treinos: versão nova do treino", () => {
+  for (const width of WIDTHS) {
+    for (const density of DENSITIES) {
+      it(`${String(width)}px, ${density}`, async () => {
+        await setViewport(width, 900);
+        setDensity(density);
+        await mount(<RoutineList />, UPDATED);
+
+        const card = (await screen.findByText(NAME)).closest("li")!;
+        expect(within(card).getByText("Atualizado").getBoundingClientRect().right).toBeLessThanOrEqual(
+          card.getBoundingClientRect().right + 0.5,
+        );
+        expectWhole(within(card).getByText(/atualizou seu treino/), card);
+        const changes = within(card).getByRole("button", { name: "Ver o que mudou" });
+        expectTouchable(changes);
+        expect(overflow(), "a página rola de lado").toBeLessThanOrEqual(0);
+
+        await userEvent.click(changes);
+        const sheet = await screen.findByRole("dialog", { name: "O que mudou na versão 12" });
+        await Promise.all(sheet.getAnimations({ subtree: true }).map((animation) => animation.finished));
+        expect(sheet.getBoundingClientRect().right, "a folha passa da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
+        expectWhole(within(sheet).getByText(/Mais carga no agachamento/), sheet);
+        for (const line of within(sheet).getAllByRole("listitem")) {
+          for (const text of line.children) expectWhole(text as HTMLElement, sheet);
+        }
+        expect(within(sheet).getByText(REMOVED)).toBeInTheDocument();
+        await userEvent.click(within(sheet).getByRole("button", { name: "Fechar" }));
         cleanup();
       });
     }
