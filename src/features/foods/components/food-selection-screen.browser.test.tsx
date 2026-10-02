@@ -83,9 +83,15 @@ describe("vários alimentos numa ida", () => {
 
         expect(overflow(), "a página rola de lado").toBeLessThanOrEqual(0);
 
-        // A linha do alimento escolhido, marcada: nome longo e "Adicionado" inteiros.
-        const marked = screen.getByRole("button", { name: /^Peito de frango.*Adicionado/ });
-        for (const text of marked.firstElementChild!.children) expectWhole(text, marked);
+        // "Adicionados" no topo da lista: nome longo e "Adicionado" inteiros, cada linha tocável.
+        const top = screen.getByRole("region", { name: "Adicionados" });
+        const marked = within(top).getAllByRole("button");
+        expect(marked).toHaveLength(2);
+        for (const row of marked) {
+          for (const text of row.firstElementChild!.children) expectWhole(text, row);
+          expectTouchable(row);
+        }
+        expect(apart(marked[0]!.getBoundingClientRect(), marked[1]!.getBoundingClientRect()), "linhas encavaladas").toBe(true);
 
         const confirm = screen.getByRole("button", { name: "Confirmar refeição" });
         const bar = confirm.parentElement!;

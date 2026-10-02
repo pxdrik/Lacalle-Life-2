@@ -121,6 +121,17 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
           return food === undefined ? [] : [{ food, recent }];
         })
       : [];
+  // "Adicionados" (02/10/2026): o que já foi escolhido nesta ida, na ordem em
+  // que entrou, no topo da lista e pela mesma regra dos Recentes (só com a
+  // busca vazia). Procurando outra coisa, as linhas continuam verdes nos
+  // resultados.
+  const addedRows =
+    state.status === "ready" && browsing && selected !== undefined
+      ? [...selected].flatMap(([id, grams]) => {
+          const food = state.foods.find((candidate) => candidate.id === id);
+          return food === undefined ? [] : [{ food, grams }];
+        })
+      : [];
 
   // The inline panel opens inside the meal it belongs to — no navigation,
   // no scroll of its own. Found real (17/09/2026): on a meal card already
@@ -278,6 +289,32 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
         </button>
       )}
 
+      {addedRows.length > 0 && (
+        <section aria-labelledby="food-picker-added">
+          <h3
+            id="food-picker-added"
+            className="px-2 pt-2 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase"
+          >
+            Adicionados
+          </h3>
+          <ul className="space-y-1">
+            {addedRows.map(({ food, grams }) => (
+              <li key={`added-${food.id}`}>
+                <PickRow
+                  food={food}
+                  grams={grams}
+                  detail=""
+                  selectedGrams={grams}
+                  onClick={() => {
+                    onPick(food, grams);
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {recentRows.length > 0 && (
         <section aria-labelledby="food-picker-recents">
           <h3
@@ -305,7 +342,7 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
         </section>
       )}
 
-      {recentRows.length > 0 && results.length > 0 && (
+      {recentRows.length + addedRows.length > 0 && results.length > 0 && (
         <h3 className="px-2 pt-3 pb-1 text-xs font-medium tracking-wide text-ink-subtle uppercase">
           Todos os alimentos
         </h3>

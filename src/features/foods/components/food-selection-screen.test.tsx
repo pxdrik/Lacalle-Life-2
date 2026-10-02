@@ -217,17 +217,27 @@ describe("FoodSelectionScreen", () => {
     await userEvent.type(screen.getByLabelText("Gramas"), "150");
     await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
 
-    const marked = await screen.findByRole("button", { name: /^Arroz/ });
-    expect(marked).toHaveTextContent("Adicionado · 150 g");
+    // No topo, em "Adicionados", e marcado também na lista de todos.
+    const top = await screen.findByRole("region", { name: "Adicionados" });
+    expect(within(top).getAllByRole("button").map((row) => row.textContent)).toEqual([expect.stringContaining("Adicionado · 150 g")]);
+    const [inTop, inAll] = screen.getAllByRole("button", { name: /^Arroz/ });
+    expect(inAll).toHaveTextContent("Adicionado · 150 g");
     expect(screen.getByRole("button", { name: /^Feijão/ })).not.toHaveTextContent("Adicionado");
 
-    await userEvent.click(marked);
+    await userEvent.click(inTop!);
     expect(screen.getByLabelText("Gramas"), "não abriu nas gramas escolhidas").toHaveValue("150");
     await userEvent.clear(screen.getByLabelText("Gramas"));
     await userEvent.type(screen.getByLabelText("Gramas"), "200");
     await userEvent.click(screen.getByRole("button", { name: "Salvar quantidade" }));
 
-    expect(await screen.findByRole("button", { name: /^Arroz/ })).toHaveTextContent("Adicionado · 200 g");
+    const updated = await screen.findByRole("region", { name: "Adicionados" });
+    expect(within(updated).getAllByRole("button"), "o alimento se repetiu").toHaveLength(1);
+    expect(within(updated).getByRole("button")).toHaveTextContent("Adicionado · 200 g");
+
+    // Procurando outra coisa, a seção some, e o escolhido continua verde nos resultados.
+    await userEvent.type(screen.getByLabelText("Buscar alimento para adicionar"), "arr");
+    expect(screen.queryByRole("region", { name: "Adicionados" })).toBeNull();
+    expect(screen.getByRole("button", { name: /^Arroz/ })).toHaveTextContent("Adicionado · 200 g");
     await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
     expect(mockPush).toHaveBeenCalledWith("/diario?addMealId=m1&addFoodId=arroz&addGrams=200");
   });
