@@ -23,6 +23,7 @@ const runFoodLogSync = vi.fn();
 const runRestDaySync = vi.fn();
 const runWaterEntrySync = vi.fn();
 const runPrescribedPlanSync = vi.fn();
+const runPrescribedRoutineSync = vi.fn();
 
 vi.mock("@/composition/sync/sync-engine", () => ({
   runProfileSync: () => runProfileSync(),
@@ -34,6 +35,7 @@ vi.mock("@/composition/sync/sync-engine", () => ({
   runRestDaySync: () => runRestDaySync(),
   runWaterEntrySync: () => runWaterEntrySync(),
   runPrescribedPlanSync: () => runPrescribedPlanSync(),
+  runPrescribedRoutineSync: () => runPrescribedRoutineSync(),
 }));
 
 const isSupabaseConfigured = vi.fn();
@@ -59,6 +61,7 @@ describe("AppDataBoot", () => {
       runRestDaySync,
       runWaterEntrySync,
       runPrescribedPlanSync,
+      runPrescribedRoutineSync,
     ]) {
       sync.mockResolvedValue({ push: { status: "ok" }, pull: { status: "ok" } });
     }
@@ -92,6 +95,7 @@ describe("AppDataBoot", () => {
       expect(runRestDaySync).toHaveBeenCalledOnce();
       expect(runWaterEntrySync).toHaveBeenCalledOnce();
       expect(runPrescribedPlanSync).toHaveBeenCalledOnce();
+      expect(runPrescribedRoutineSync).toHaveBeenCalledOnce();
     });
     expect(runFoodLogSync).toHaveBeenCalledExactlyOnceWith(today);
   });
@@ -115,6 +119,7 @@ describe("AppDataBoot", () => {
     expect(runRestDaySync).not.toHaveBeenCalled();
     expect(runWaterEntrySync).not.toHaveBeenCalled();
     expect(runPrescribedPlanSync).not.toHaveBeenCalled();
+    expect(runPrescribedRoutineSync).not.toHaveBeenCalled();
   });
 
   it("never throws when a domain sync rejects — silent, the real screen retries", async () => {

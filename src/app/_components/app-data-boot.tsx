@@ -12,6 +12,7 @@ import {
   runDietSync,
   runFoodLogSync,
   runPrescribedPlanSync,
+  runPrescribedRoutineSync,
   runProfileSync,
   runRestDaySync,
   runRoutineSync,
@@ -71,6 +72,8 @@ export function AppDataBoot({
     runWaterEntrySync().catch(() => undefined);
     // Life Pro: o plano que a nutricionista publicou (só desce).
     runPrescribedPlanSync().catch(() => undefined);
+    // E o treino que o treinador publicou (Etapa 8, também só desce).
+    runPrescribedRoutineSync().catch(() => undefined);
     runFoodLogSync(dayKey(new Date())).catch(() => undefined);
   }, []);
 

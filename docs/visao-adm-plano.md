@@ -311,6 +311,19 @@ antes de o Life Pro estar completo).
   com um `await` no meio fazia trocar os dias apagar as edições de antes
   (visto vermelho no teste de banco). Os dias da semana passaram para
   `core/domain/weekday.ts`, porque deixaram de ser só da dieta.
+  8d, o paciente: em Treinos, "Do seu treinador" acima de "Seus treinos",
+  com "Profissional", versão, dias só para leitura, Iniciar e "Fazer uma
+  cópia"; o treino abre só para leitura em `/treinos/prescrito/[id]` e conta
+  como visto. Desce pela sincronização como o plano (só pull, coleção
+  própria `prescribedRoutines`, IndexedDB versão 12, fora do backup). Iniciar
+  é o `startSession` de sempre, e a sessão guarda o id do treino do treinador
+  em `routineId` (sem chave estrangeira no banco); a cópia é o
+  `duplicateRoutine`, com ids novos. Com o vínculo encerrado, o treino
+  continua podendo ser iniciado e copiado, só sem versões novas (padrão até
+  o Pedro decidir). Na linha do cartão, os dias ficam na largura deles e os
+  botões descem quando não cabem: com `flex-1`, em 320px Confortável, os
+  dias viravam uma coluna de um por linha (visto vermelho no teste de
+  navegador).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.

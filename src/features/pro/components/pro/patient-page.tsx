@@ -15,7 +15,7 @@ import { noticeClasses } from "@/design-system/components/notice";
 import { PageHeader } from "@/design-system/components/page-header";
 import { Skeleton } from "@/design-system/components/skeleton";
 
-import { describeWeekdays, type Weekday } from "@/core/domain/weekday";
+import { describeRoutineDays } from "@/core/domain/weekday";
 
 import { usePatientPlans } from "../../hooks/use-patient-plans";
 import { usePatientRoutines } from "../../hooks/use-patient-routines";
@@ -205,9 +205,6 @@ export function editorHref(linkId: string, planId: string): Route {
   return `/pro/pacientes/${linkId}/plano/${planId}` as Route;
 }
 
-/** Sem dias, o paciente faz quando quiser (0038). */
-const routineDays = (days: readonly Weekday[]) => (days.length === 0 ? "Quando quiser" : describeWeekdays(days));
-
 function Routines({ link }: { readonly link: PatientLink }) {
   const { state, createRoutine } = usePatientRoutines(link.id);
   const router = useRouter();
@@ -296,7 +293,7 @@ function RoutineCard({ routine, link }: { readonly routine: RoutineSummary; read
           <p className="mt-1 text-sm text-ink-muted">
             {current === undefined
               ? "Ainda não publicado. O paciente não vê nada até você publicar."
-              : `Versão ${String(current.version)}, publicada em ${formatDate(current.publishedAt)} · ${routineDays(current.weekdays)}.${
+              : `Versão ${String(current.version)}, publicada em ${formatDate(current.publishedAt)} · ${describeRoutineDays(current.weekdays)}.${
                   routine.hasDraft ? " O paciente vê esta versão até você publicar a próxima." : ""
                 }`}
           </p>

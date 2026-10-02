@@ -4,15 +4,9 @@ import { CalendarDays } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { WeekdayPicker } from "@/features/diet/components/weekday-picker";
-import { describeWeekdays } from "@/features/diet/services/diet-schedule";
-import type { Weekday } from "@/features/diet/types/diet";
+import { describeRoutineDays, type Weekday } from "@/core/domain/weekday";
 
 import { useRoutineDraft } from "./routine-draft-context";
-
-/** Sem dias, o paciente faz quando quiser (0038). */
-export function describeRoutineDays(days: readonly Weekday[]): string {
-  return days.length === 0 ? "Quando quiser" : describeWeekdays(days);
-}
 
 /**
  * Os dias do treino, abaixo do nome no editor do Life Pro (Etapa 8c). O

@@ -28,12 +28,18 @@ import { LocalWaterRepository } from "@/features/hydration/data/local-water-repo
 import { WATER_ENTRIES_STORE } from "@/features/hydration/data/water-repository";
 import type { WaterEntry } from "@/features/hydration/types/water-entry";
 import { LocalRestDayRepository, REST_DAYS_STORE } from "@/features/workouts/data/rest-day-repository";
+import {
+  LocalPrescribedRoutineRepository,
+  PRESCRIBED_ROUTINES_STORE,
+} from "@/features/workouts/data/prescribed-routine-repository";
+import type { PrescribedRoutine } from "@/features/workouts/types/prescribed-routine";
 import type { RestDay } from "@/features/workouts/types/rest-day";
 
 import { currentDatabaseName } from "../identity";
 import { MIGRATIONS } from "../migrations";
 import { pullAllDiets, pushAllDiets, resolveDietConflict } from "./diet-sync";
 import { pullPrescribedPlans, type PullPrescribedPlansResult } from "./prescribed-plan-sync";
+import { pullPrescribedRoutines, type PullPrescribedRoutinesResult } from "./prescribed-routine-sync";
 import type {
   DietConflictResolution,
   PullDietsResult,
@@ -511,5 +517,19 @@ export async function runPrescribedPlanSync(): Promise<PullPrescribedPlansResult
   );
   const pull = await pullPrescribedPlans(getSupabaseBrowserClient(), local);
   notifyStoreChanged(PRESCRIBED_PLANS_STORE.name);
+  return pull;
+}
+
+/**
+ * Traz os treinos que o treinador publicou (Life Pro, Etapa 8). Só pull, como
+ * os planos. Avisa as telas para relerem.
+ */
+export async function runPrescribedRoutineSync(): Promise<PullPrescribedRoutinesResult> {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const local = new LocalPrescribedRoutineRepository(
+    new IndexedDbStore<PrescribedRoutine>(db, PRESCRIBED_ROUTINES_STORE.name),
+  );
+  const pull = await pullPrescribedRoutines(getSupabaseBrowserClient(), local);
+  notifyStoreChanged(PRESCRIBED_ROUTINES_STORE.name);
   return pull;
 }

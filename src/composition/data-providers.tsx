@@ -15,6 +15,13 @@ import {
   type PrescribedPlanRepository,
 } from "@/features/diet/data/prescribed-plan-repository";
 import { PrescribedPlanRepositoryProvider } from "@/features/diet/data/prescribed-plan-repository-context";
+import {
+  LocalPrescribedRoutineRepository,
+  PRESCRIBED_ROUTINES_STORE,
+  type PrescribedRoutineRepository,
+} from "@/features/workouts/data/prescribed-routine-repository";
+import { PrescribedRoutineRepositoryProvider } from "@/features/workouts/data/prescribed-routine-repository-context";
+import type { PrescribedRoutine } from "@/features/workouts/types/prescribed-routine";
 import type { PrescribedPlan } from "@/features/diet/types/prescribed-plan";
 import { FoodRepositoryProvider } from "@/features/foods/data/food-repository-context";
 import type { FoodRepository } from "@/features/foods/data/food-repository";
@@ -430,10 +437,29 @@ export function WorkoutDataProvider({
 }) {
   return (
     <WorkoutRepositoryProvider repositories={workoutRepositories()}>
-      <ExerciseDataProvider>{children}</ExerciseDataProvider>
+      {/* O treino do treinador fica ao lado dos treinos da pessoa (Life Pro,
+          Etapa 8): Treinos lista, e Hoje vai sugerir. */}
+      <PrescribedRoutineRepositoryProvider repository={prescribedRoutineRepository()}>
+        <ExerciseDataProvider>{children}</ExerciseDataProvider>
+      </PrescribedRoutineRepositoryProvider>
     </WorkoutRepositoryProvider>
   );
 }
+
+/**
+ * Os treinos recebidos do treinador (Life Pro). Sem outbox, como os planos:
+ * só a sincronização troca a coleção (`sync/prescribed-routine-sync.ts`).
+ */
+export const prescribedRoutineRepository = once<PrescribedRoutineRepository>(async () => {
+  const db = await openDatabase(await currentDatabaseName(), MIGRATIONS);
+  const local = new LocalPrescribedRoutineRepository(
+    new IndexedDbStore<PrescribedRoutine>(db, PRESCRIBED_ROUTINES_STORE.name),
+  );
+  return {
+    listAll: () => local.listAll(),
+    markSeen: (id, version) => local.markSeen(id, version),
+  };
+});
 
 export function FoodDataProvider({
   children,

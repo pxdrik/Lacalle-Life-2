@@ -30,6 +30,11 @@ export const WEEKDAY_SHORT_LABELS: Record<Weekday, string> = {
   sun: "Dom",
 };
 
+/** Os dias de um treino prescrito: sem nenhum, o paciente faz quando quiser (0038). */
+export function describeRoutineDays(days: readonly Weekday[]): string {
+  return days.length === 0 ? "Quando quiser" : describeWeekdays(days);
+}
+
 /** "Todos os dias", "Nenhum dia" ou "Seg, Qua, Sex", na ordem da semana. */
 export function describeWeekdays(days: readonly Weekday[]): string {
   if (WEEKDAYS.every((day) => days.includes(day))) return "Todos os dias";

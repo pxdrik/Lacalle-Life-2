@@ -14,13 +14,23 @@ import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Input } from "@/design-system/components/input";
 import { useCollapsibleRemove } from "@/design-system/hooks/use-collapsible-remove";
 
+import { useToast } from "@/design-system/components/toast";
+
+import { usePrescribedRoutines } from "../hooks/use-prescribed-routines";
 import { useRoutineList } from "../hooks/use-routine-list";
+import { useStartRoutine } from "../hooks/use-start-routine";
+import { prescribedAsRoutine } from "../services/prescribed-routine";
 import type { Routine } from "../types/routine";
 import { InProgressBanner } from "./in-progress-banner";
+import { PrescribedRoutinesSection } from "./prescribed-routines-section";
 
 export function RoutineList() {
   const router = useRouter();
   const { state, writeError, create, duplicate, remove } = useRoutineList();
+  const prescribedState = usePrescribedRoutines();
+  const prescribed = prescribedState.status === "ready" ? prescribedState.routines : [];
+  const { start, starting, startError } = useStartRoutine();
+  const toast = useToast();
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
 
@@ -86,13 +96,31 @@ export function RoutineList() {
         </Button>
       </form>
 
-      {writeError !== null && (
+      {(writeError ?? startError) !== null && (
         <p role="alert" className={cn("mt-4", noticeClasses())}>
-          {writeError}
+          {writeError ?? startError}
         </p>
       )}
 
-      <div className="mt-7">
+      {/* O treino do treinador fica separado dos treinos da pessoa (Life Pro,
+          Etapa 8d): só leitura, e a cópia vira um treino dela. */}
+      {prescribed.length > 0 && (
+        <div className="mt-7 space-y-2">
+          <PrescribedRoutinesSection
+            routines={prescribed}
+            starting={starting}
+            onStart={(routine) => void start(prescribedAsRoutine(routine))}
+            onCopy={(routine) => {
+              void duplicate(prescribedAsRoutine(routine)).then((copied) => {
+                if (copied) toast("Cópia criada em Seus treinos. O treino do treinador continua igual.");
+              });
+            }}
+          />
+          <h2 className="pt-4 text-xs font-medium tracking-wide text-ink-subtle uppercase">Seus treinos</h2>
+        </div>
+      )}
+
+      <div className={prescribed.length > 0 ? "mt-2" : "mt-7"}>
         {state.status === "loading" && <ListSkeleton />}
 
       {state.status === "error" && (
