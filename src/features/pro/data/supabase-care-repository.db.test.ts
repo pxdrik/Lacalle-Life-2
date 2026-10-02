@@ -41,21 +41,21 @@ describe("SupabaseCareRepository contra o banco", () => {
     expect(pending.invites.map((invite) => invite.label)).toContain("Ana Luísa Prado");
 
     const ana = await t.createUser("ana@exemplo.com");
-    await care(ana).acceptInvite(token, { diary: true, body: false, profile: true });
+    await care(ana).acceptInvite(token, { diary: true, workouts: true, body: false, profile: true });
 
     const [mine] = await care(ana).listMyLinks();
     expect(mine).toMatchObject({
       professionalName: "Marina Faria",
       status: "active",
-      sharing: { diary: true, body: false, profile: true },
+      sharing: { diary: true, workouts: true, body: false, profile: true },
     });
 
     const patients = await care(marina).listMyPatients();
     expect(patients.links).toEqual([expect.objectContaining({ label: "Ana Luísa Prado", status: "active" })]);
     expect(patients.invites.map((invite) => invite.label)).not.toContain("Ana Luísa Prado");
 
-    await care(ana).updateSharing(mine!.linkId, { diary: true, body: true, profile: false });
-    expect((await care(marina).listMyPatients()).links[0]!.sharing).toEqual({ diary: true, body: true, profile: false });
+    await care(ana).updateSharing(mine!.linkId, { diary: true, workouts: false, body: true, profile: false });
+    expect((await care(marina).listMyPatients()).links[0]!.sharing).toEqual({ diary: true, workouts: false, body: true, profile: false });
 
     const adminView = await care(admin).listLinksOf(marina);
     expect(adminView).toHaveLength(1);

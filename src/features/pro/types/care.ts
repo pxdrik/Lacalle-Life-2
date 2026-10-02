@@ -4,6 +4,8 @@
  */
 export interface Sharing {
   readonly diary: boolean;
+  /** Os treinos feitos (Etapa 6, migração 0039). Vínculo de antes começa sem. */
+  readonly workouts: boolean;
   readonly body: boolean;
   readonly profile: boolean;
 }
@@ -11,6 +13,7 @@ export interface Sharing {
 /** As opções que o paciente escolhe, na ordem em que aparecem. */
 export const SHARING_OPTIONS: readonly { readonly key: keyof Sharing; readonly label: string; readonly hint: string }[] = [
   { key: "diary", label: "Diário alimentar", hint: "Refeições, alimentos e quantidades que você registrar." },
+  { key: "workouts", label: "Treinos", hint: "Treinos feitos, séries e carga." },
   { key: "body", label: "Evolução física", hint: "Peso e medidas." },
   { key: "profile", label: "Dados do perfil", hint: "Idade, altura e objetivo." },
 ];

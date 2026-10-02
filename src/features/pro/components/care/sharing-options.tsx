@@ -4,7 +4,7 @@ import { SHARING_OPTIONS, type Sharing } from "../../types/care";
 
 /**
  * O que o paciente libera para quem o acompanha (protótipo aprovado em
- * 30/09/2026): diário, evolução e dados do perfil, cada um com a explicação,
+ * 30/09/2026): diário, treinos (Etapa 6), evolução e dados do perfil, cada um com a explicação,
  * e uma linha fixa dizendo o que sempre vai junto. Usada no aceite do convite
  * e em "Mudar o que ela vê" no Perfil.
  */

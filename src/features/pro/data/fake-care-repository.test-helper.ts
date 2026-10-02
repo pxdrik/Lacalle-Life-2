@@ -16,7 +16,7 @@ export function fakeCareRepository(options: {
   let myLinks = [...(options.myLinks ?? [])];
   let links = [...(options.links ?? [])];
   let invites = [...(options.invites ?? [])];
-  const flags = (s: Sharing) => `${s.diary ? "D" : "-"}${s.body ? "E" : "-"}${s.profile ? "P" : "-"}`;
+  const flags = (s: Sharing) => `${s.diary ? "D" : "-"}${s.workouts ? "T" : "-"}${s.body ? "E" : "-"}${s.profile ? "P" : "-"}`;
 
   return {
     calls,
@@ -61,7 +61,7 @@ export function patientLink(overrides: Partial<PatientLink> & { readonly id: str
   return {
     label: "Ana Luísa Prado",
     status: "active",
-    sharing: { diary: true, body: true, profile: false },
+    sharing: { diary: true, workouts: false, body: true, profile: false },
     createdAt: "2026-07-03T12:00:00.000Z",
     endedAt: null,
     ...overrides,
@@ -73,7 +73,7 @@ export function myLink(overrides: Partial<MyCareLink> & { readonly linkId: strin
     professionalName: "Marina Faria",
     council: "CRN-3 12345",
     status: "active",
-    sharing: { diary: true, body: true, profile: true },
+    sharing: { diary: true, workouts: false, body: true, profile: true },
     createdAt: "2026-07-03T12:00:00.000Z",
     endedAt: null,
     ...overrides,

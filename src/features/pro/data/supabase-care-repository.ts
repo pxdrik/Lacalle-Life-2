@@ -13,18 +13,19 @@ const linkRow = z.object({
   share_diary: z.boolean(),
   share_body: z.boolean(),
   share_profile: z.boolean(),
+  share_workouts: z.boolean(),
   created_at: z.string(),
   ended_at: z.string().nullable(),
 });
 
-const LINK_COLUMNS = "id,patient_label,status,share_diary,share_body,share_profile,created_at,ended_at";
+const LINK_COLUMNS = "id,patient_label,status,share_diary,share_body,share_profile,share_workouts,created_at,ended_at";
 
 function toPatientLink(row: z.infer<typeof linkRow>): PatientLink {
   return {
     id: row.id,
     label: row.patient_label,
     status: row.status,
-    sharing: { diary: row.share_diary, body: row.share_body, profile: row.share_profile },
+    sharing: { diary: row.share_diary, workouts: row.share_workouts, body: row.share_body, profile: row.share_profile },
     createdAt: row.created_at,
     endedAt: row.ended_at,
   };
@@ -71,6 +72,7 @@ export function createSupabaseCareRepository(client: ProSupabaseClient): CareRep
         p_share_diary: sharing.diary,
         p_share_body: sharing.body,
         p_share_profile: sharing.profile,
+        p_share_workouts: sharing.workouts,
       });
       fail(error);
     },
@@ -88,6 +90,7 @@ export function createSupabaseCareRepository(client: ProSupabaseClient): CareRep
             share_diary: z.boolean(),
             share_body: z.boolean(),
             share_profile: z.boolean(),
+            share_workouts: z.boolean(),
             created_at: z.string(),
             ended_at: z.string().nullable(),
           }),
@@ -98,7 +101,7 @@ export function createSupabaseCareRepository(client: ProSupabaseClient): CareRep
           professionalName: row.professional_name,
           council: row.council,
           status: row.status,
-          sharing: { diary: row.share_diary, body: row.share_body, profile: row.share_profile },
+          sharing: { diary: row.share_diary, workouts: row.share_workouts, body: row.share_body, profile: row.share_profile },
           createdAt: row.created_at,
           endedAt: row.ended_at,
         }));
@@ -110,6 +113,7 @@ export function createSupabaseCareRepository(client: ProSupabaseClient): CareRep
         p_share_diary: sharing.diary,
         p_share_body: sharing.body,
         p_share_profile: sharing.profile,
+        p_share_workouts: sharing.workouts,
       });
       fail(error);
     },

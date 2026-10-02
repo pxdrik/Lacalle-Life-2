@@ -60,7 +60,7 @@ describe("treinos recebidos pela sincronização", () => {
     await createSupabaseProRepository(clientAs(t, admin)).approve(rafael);
     ana = await t.createUser("ana@exemplo.com");
     const { token } = await createSupabaseCareRepository(clientAs(t, rafael)).createInvite("Ana");
-    await createSupabaseCareRepository(clientAs(t, ana)).acceptInvite(token, { diary: true, body: true, profile: true });
+    await createSupabaseCareRepository(clientAs(t, ana)).acceptInvite(token, { diary: true, workouts: true, body: true, profile: true });
     [{ id: linkId }] = await createSupabaseCareRepository(clientAs(t, rafael))
       .listMyPatients()
       .then((r) => r.links);

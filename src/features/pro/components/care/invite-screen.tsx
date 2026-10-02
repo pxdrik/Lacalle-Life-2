@@ -31,7 +31,7 @@ export function InviteScreen({ token }: { readonly token: string }) {
   const care = useCareRepository();
   const pro = useProRepository();
   const [screen, setScreen] = useState<Screen>({ status: "loading" });
-  const [sharing, setSharing] = useState<Sharing>({ diary: true, body: true, profile: true });
+  const [sharing, setSharing] = useState<Sharing>({ diary: true, workouts: true, body: true, profile: true });
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 

@@ -27,14 +27,15 @@ function invite(info: InviteInfo, access: MyAccess | null = SIGNED_IN) {
 }
 
 describe("página do convite", () => {
-  it("com conta: as três opções já vêm marcadas, e o aceite manda o que ficou marcado", async () => {
+  it("com conta: as opções já vêm marcadas, Treinos também, e o aceite manda o que ficou marcado", async () => {
     const care = invite(VALID);
     expect(await screen.findByText("Marina Faria")).toBeInTheDocument();
     expect(screen.getByLabelText(/Diário alimentar/)).toBeChecked();
     expect(screen.getByLabelText(/Evolução física/)).toBeChecked();
+    expect(screen.getByLabelText(/^Treinos/)).toBeChecked();
     await userEvent.click(screen.getByLabelText(/Dados do perfil/));
     await userEvent.click(screen.getByRole("button", { name: "Aceitar" }));
-    expect(care.calls).toEqual(["accept:tok123:DE-"]);
+    expect(care.calls).toEqual(["accept:tok123:DTE-"]);
     expect(await screen.findByText("Marina Faria agora acompanha você.")).toBeInTheDocument();
   });
 
@@ -87,8 +88,11 @@ describe("Acompanhamento no Perfil", () => {
     await userEvent.click(screen.getByRole("button", { name: "Mudar o que ela vê" }));
     const dialog = screen.getByRole("dialog");
     await userEvent.click(within(dialog).getByLabelText(/Evolução física/));
+    // Vínculo de antes da Etapa 6: Treinos vem desligado, e o paciente liga aqui.
+    expect(within(dialog).getByLabelText(/^Treinos/)).not.toBeChecked();
+    await userEvent.click(within(dialog).getByLabelText(/^Treinos/));
     await userEvent.click(within(dialog).getByRole("button", { name: "Salvar" }));
-    expect(care.calls).toEqual(["share:l1:D-P"]);
+    expect(care.calls).toEqual(["share:l1:DT-P"]);
   });
 
   it("encerrar pede um segundo toque e não some com o cartão", async () => {
