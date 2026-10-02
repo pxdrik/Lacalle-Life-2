@@ -3005,7 +3005,10 @@ Com isso, a Sprint 1 está fechada.
 
 ### 6. Visão ADM: LaCalle Life Pro (B2B / B2B2C)
 
-**Registrado em 28/09/2026. Em implementação desde 01/10/2026.** Especificação completa em
+**Registrado em 28/09/2026. Em implementação desde 01/10/2026** (branch
+`life-pro`; até 02/10/2026: Etapas 0 a 5 completas, com a Biblioteca, e
+Etapa 8, treino prescrito; faltam 6, acompanhamento, e 7, textos legais; o
+andamento por etapa está na seção 7 do plano). Especificação completa em
 [`docs/visao-adm-pro.md`](visao-adm-pro.md); diagnóstico e plano em etapas em
 [`docs/visao-adm-plano.md`](visao-adm-plano.md).
 

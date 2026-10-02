@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Users } from "lucide-react";
+import { LayoutDashboard, Library, Users } from "lucide-react";
 import Link from "next/link";
 
 import { buttonClasses } from "@/design-system/components/button";
@@ -14,8 +14,8 @@ import { SignInRedirect } from "../sign-in-redirect";
 /**
  * O Life Pro (protótipo v3, 28/09/2026), só para profissional aprovado. As
  * seções entram na navegação quando funcionam (a especificação pede para não
- * pôr seção de mentira no menu): por enquanto Visão geral e Pacientes; Dietas,
- * Evolução e Biblioteca chegam com as Etapas 5 e 6.
+ * pôr seção de mentira no menu): Visão geral, Pacientes e Biblioteca (5d);
+ * Dietas e Evolução chegam com a Etapa 6.
  *
  * Esconder não protege: cada leitura e escrita passa por funções do banco que
  * conferem a aprovação e o vínculo (0033, 0034).
@@ -60,6 +60,7 @@ export function ProShell({ children }: { readonly children: React.ReactNode }) {
       links={[
         { href: "/pro", label: "Visão geral", icon: LayoutDashboard },
         { href: "/pro/pacientes", label: "Pacientes", icon: Users },
+        { href: "/pro/biblioteca", label: "Biblioteca", icon: Library },
       ]}
     >
       {children}

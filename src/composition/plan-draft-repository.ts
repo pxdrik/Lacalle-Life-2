@@ -32,10 +32,7 @@ const weekdays = z.array(z.enum(WEEKDAYS as [Weekday, ...Weekday[]]));
 export function createPlanDraftDietRepository(
   client: ProSupabaseClient,
   plan: { readonly planId: string; readonly linkId: string },
-): DietRepository & { readonly flush: () => Promise<void> } {
-  let latest: Diet | null = null;
-  let running: Promise<void> | null = null;
-
+): QueuedDietRepository {
   async function write(diet: Diet): Promise<void> {
     const { error } = await client.rpc("save_plan_draft", {
       p_plan_id: plan.planId,
@@ -79,13 +76,56 @@ export function createPlanDraftDietRepository(
     return { id: plan.planId, name, meals: meals.parse(raw), weekdays: days, createdAt: updatedAt, updatedAt };
   }
 
+  return queuedDietRepository(plan.planId, load, write, "Um plano não se apaga pelo editor.");
+}
+
+/**
+ * Um modelo da Biblioteca (Etapa 5d) no editor de dieta do app, pelo mesmo
+ * caminho do plano: a "dieta" é a linha de `plan_templates`, gravada por
+ * `save_plan_template` em fila. Sem dias: os dias são de cada plano, e
+ * ficam com o padrão do plano quando o modelo é usado num paciente.
+ */
+export function createTemplateDraftDietRepository(client: ProSupabaseClient, templateId: string): QueuedDietRepository {
+  async function write(diet: Diet): Promise<void> {
+    const { error } = await client.rpc("save_plan_template", {
+      p_template_id: templateId,
+      p_name: diet.name.trim() === "" ? "Modelo" : diet.name,
+      p_meals: diet.meals,
+    });
+    if (error !== null) throw new Error(error.message);
+  }
+
+  async function load(): Promise<Diet | undefined> {
+    const { data, error } = await client.from("plan_templates").select("name,meals,updated_at").eq("id", templateId);
+    if (error !== null) throw new Error(error.message);
+    const [row] = z.array(z.object({ name: z.string(), meals, updated_at: z.string() })).parse(data);
+    if (row === undefined) return undefined;
+    const updatedAt = Date.parse(row.updated_at);
+    return { id: templateId, name: row.name, meals: row.meals, weekdays: [], createdAt: updatedAt, updatedAt };
+  }
+
+  return queuedDietRepository(templateId, load, write, "Um modelo se apaga pela Biblioteca.");
+}
+
+export type QueuedDietRepository = DietRepository & { readonly flush: () => Promise<void> };
+
+/** Uma dieta só, lida da rede e gravada em fila (ver o comentário do topo). */
+function queuedDietRepository(
+  id: string,
+  load: () => Promise<Diet | undefined>,
+  write: (diet: Diet) => Promise<void>,
+  removeMessage: string,
+): QueuedDietRepository {
+  let latest: Diet | null = null;
+  let running: Promise<void> | null = null;
+
   return {
     async listAll() {
       const diet = latest ?? (await load());
       return diet === undefined ? [] : [diet];
     },
-    async getById(id) {
-      if (id !== plan.planId) return undefined;
+    async getById(requested) {
+      if (requested !== id) return undefined;
       return latest ?? (await load());
     },
     save(diet) {
@@ -106,7 +146,7 @@ export function createPlanDraftDietRepository(
       return running;
     },
     remove() {
-      return Promise.reject(new Error("Um plano não se apaga pelo editor."));
+      return Promise.reject(new Error(removeMessage));
     },
     /** Espera a última mudança chegar ao banco: publicar lê o rascunho de lá. */
     flush() {

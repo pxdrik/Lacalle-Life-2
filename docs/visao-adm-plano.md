@@ -286,7 +286,23 @@ antes de o Life Pro estar completo).
   paciente escolheu, e mudar os dias aparece no "o que mudou". Isso substitui
   a regra da 5c (a dieta da pessoa mandava no dia dela). Mostrar a escolha
   para a profissional fica para o acompanhamento (Etapa 6).
-  Falta: a Biblioteca (5d).
+  Biblioteca (5d, 02/10/2026; sem migração, a 0035 já tinha `plan_templates`
+  e as funções): "Biblioteca" na navegação do Life Pro, com os modelos em
+  cartões (refeições, kcal, data), "Novo modelo", Apagar com confirmação e
+  "Usar em paciente". O modelo abre no editor de dieta do app
+  (`/pro/biblioteca/[id]`), pelo mesmo repositório em fila do rascunho do
+  plano, sem dias e sem publicar. "Usar em paciente" oferece só vínculo
+  ativo e cria um plano em rascunho com uma cópia das refeições, com ids
+  novos, numa chamada só (`save_plan_draft`); mudar o modelo depois não mexe
+  no plano. A Biblioteca mora na composição (`composition/template-repository.ts`),
+  porque o Life Pro não importa a dieta. A lista espera a gravação do editor
+  ainda a caminho, para não mostrar o modelo de antes. Só modelos de plano
+  alimentar: modelo de treino, "Usado em N planos" do protótipo (não há
+  registro de qual modelo originou o plano) e "Salvar plano como modelo"
+  ficam para depois. Achados na captura, não nos testes, que passaram: o
+  título encavalava em "Novo modelo" em 390px e "Usar em paciente" caía
+  sozinho numa segunda linha do rodapé; as duas medições entraram no teste
+  e foram vistas vermelhas.
 - **Etapa 8, em andamento** (protótipo aprovado em 01/10/2026:
   https://claude.ai/artifact/FbMLzGtkhwUdNQVgfUTAkN). 8a, treinador e os dois
   registros (migração 0037): a profissão é uma só, `trainer` (quem já tinha
@@ -348,6 +364,10 @@ antes de o Life Pro estar completo).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.
+  Bug de antes, registrado em 02/10/2026 e não corrigido: em Pacientes, no
+  celular, o título fica por baixo de "Adicionar paciente" (390px: 117px de
+  texto numa caixa de 61px). É o `PageHeader` compartilhado com um botão
+  largo ao lado; a Biblioteca contornou com o botão só de ícone no celular.
   Pendente de antes: `/pro` e `/admin` ainda entram no cache do service
   worker (o risco da seção 4 previa que não). As páginas não levam dado de
   paciente, que só chega pelo navegador, então o risco é baixo, mas a
