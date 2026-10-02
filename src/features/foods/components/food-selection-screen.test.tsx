@@ -159,9 +159,65 @@ describe("FoodSelectionScreen", () => {
       screen.getByRole("button", { name: "Adicionar à refeição" }),
     );
 
+    // Volta para a busca, com o alimento em "Nesta refeição" (02/10/2026):
+    // só "Confirmar refeição" leva de volta.
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByLabelText("Buscar alimento para adicionar")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
     expect(mockPush).toHaveBeenCalledWith(
-      "/dietas/abc?addFoodId=frango&addMealId=m1&addGrams=150",
+      "/dietas/abc?addMealId=m1&addFoodId=frango&addGrams=150",
     );
+  });
+
+  it("vários alimentos numa ida: cada um entra em 'Nesta refeição', dá para tirar, e todos voltam juntos", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Arroz"), food("Feijão"), food("Frango")]);
+    await afterLoad();
+
+    for (const [name, grams] of [["Arroz", "150"], ["Feijão", "100"], ["Frango", "120"]] as const) {
+      const search = screen.getByLabelText("Buscar alimento para adicionar");
+      await userEvent.clear(search);
+      await userEvent.type(search, name.toLowerCase());
+      await userEvent.click(await screen.findByRole("button", { name: new RegExp(`^${name}`) }));
+      await userEvent.clear(screen.getByLabelText("Gramas"));
+      await userEvent.type(screen.getByLabelText("Gramas"), grams);
+      await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+    }
+
+    const meal = screen.getByRole("region", { name: "Nesta refeição" });
+    expect(within(meal).getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Arroz150 g",
+      "Feijão100 g",
+      "Frango120 g",
+    ]);
+    expect(screen.getByText("alimentos").parentElement).toHaveTextContent("3 alimentos");
+
+    await userEvent.click(within(meal).getByRole("button", { name: "Tirar Feijão" }));
+    expect(screen.getByText("alimentos").parentElement).toHaveTextContent("2 alimentos");
+
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
+    expect(mockPush).toHaveBeenCalledWith(
+      "/diario?addMealId=m1&addFoodId=arroz&addGrams=150&addFoodId=frango&addGrams=120",
+    );
+  });
+
+  it("voltar com alimentos na lista pede um segundo toque antes de descartar", async () => {
+    mockSearchParams.mockReturnValue(
+      new URLSearchParams({ mealId: "m1", returnTo: "/diario" }),
+    );
+    mount([food("Ovo")]);
+    await afterLoad();
+
+    await userEvent.type(screen.getByLabelText("Buscar alimento para adicionar"), "ovo");
+    await userEvent.click(await screen.findByRole("button", { name: /Ovo/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
+
+    await userEvent.click(screen.getByRole("button", { name: "Voltar sem adicionar" }));
+    expect(mockPush, "descartou no primeiro toque").not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: /Descartar 1 alimento\?/ }));
+    expect(mockPush).toHaveBeenCalledWith("/diario");
   });
 
   it("keeps returnTo's own query string when appending the add* params", async () => {
@@ -188,6 +244,7 @@ describe("FoodSelectionScreen", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Adicionar à refeição" }),
     );
+    await userEvent.click(screen.getByRole("button", { name: "Confirmar refeição" }));
 
     const [url] = mockPush.mock.calls.at(-1) ?? [];
     expect(url).toContain("dia=2026-09-20");
