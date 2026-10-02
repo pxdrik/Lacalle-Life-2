@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, Plus, Star, X } from "lucide-react";
+import { CircleCheck, Plus, SlidersHorizontal, Star, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
@@ -82,6 +82,9 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
   const [text, setText] = useState("");
   const [category, setCategory] = useState<FoodCategory | null>(null);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
+  // Os cartões de categoria ficam atrás de um botão (02/10/2026): abertos
+  // sempre, ocupavam metade da tela do celular antes do primeiro alimento.
+  const [showCategories, setShowCategories] = useState(false);
 
   // The same create/edit machinery `/alimentos/novo` uses — `id: null` means
   // creating. Reusing it here, instead of a second write path, is the whole
@@ -221,6 +224,23 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
           autoComplete="off"
           disabled={state.status !== "ready"}
         />
+        <button
+          type="button"
+          aria-label="Categorias"
+          aria-expanded={showCategories}
+          aria-controls="food-picker-categories"
+          onClick={() => {
+            setShowCategories((open) => !open);
+          }}
+          className={cn(
+            "shrink-0",
+            // Verde com uma categoria escolhida, aberto ou não: o filtro está valendo.
+            buttonClasses(category !== null ? "primary" : "secondary"),
+            "size-(--input-h-beside) px-0",
+          )}
+        >
+          <SlidersHorizontal aria-hidden className="size-4" />
+        </button>
         {/* Favoritos direto na linha da busca (roadmap 10.5): as categorias
             subiram para os cartões abaixo, e "Filtros" ficaria com a estrela
             sozinha. Mesmo botão da tela Alimentos. */}
@@ -242,27 +262,50 @@ export function FoodPicker({ onPick, onCancel, recents = [], chrome = true, sele
           <Star aria-hidden className="size-4" fill={favoritesOnly ? "currentColor" : "none"} />
         </button>
         {/* Escape closes it too, but a touch keyboard has no Escape — leaving
-            only that would strand every phone. */}
-        <button
-          type="button"
-          onClick={onCancel}
-          aria-label="Fechar busca"
-          className="flex size-(--input-h-beside) shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
-        >
-          <X aria-hidden className="size-4" />
-        </button>
+            only that would strand every phone. Só no painel embutido: como
+            página, "Voltar" no topo já sai, e com a confirmação de descartar
+            os alimentos escolhidos, que este botão pulava (02/10/2026). */}
+        {chrome && (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Fechar busca"
+            className="flex size-(--input-h-beside) shrink-0 items-center justify-center rounded-lg border border-line text-ink-subtle transition-colors duration-150 ease-out hover:border-line-strong hover:text-ink"
+          >
+            <X aria-hidden className="size-4" />
+          </button>
+        )}
       </div>
 
       {/* As categorias como atalho, entre a busca e os Recentes (roadmap
           10.5): o Pedro escolheu os cartões aqui também, sabendo que empurram
           os Recentes para baixo. */}
-      {state.status === "ready" && (
-        <FoodCategoryCards
-          counts={categoryCounts}
-          total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
-          active={category}
-          onSelect={setCategory}
-        />
+      {state.status === "ready" && showCategories && (
+        <div id="food-picker-categories">
+          <FoodCategoryCards
+            counts={categoryCounts}
+            total={searchFoods(state.foods, { text, category: null, favoritesOnly }).length}
+            active={category}
+            onSelect={setCategory}
+          />
+        </div>
+      )}
+
+      {/* Fechados os cartões, a categoria escolhida continua à vista, e sai num toque. */}
+      {!showCategories && category !== null && (
+        <button
+          type="button"
+          aria-label={`Tirar o filtro ${FOOD_CATEGORY_LABELS[category]}`}
+          onClick={() => {
+            setCategory(null);
+          }}
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-1 text-sm font-medium text-accent-text"
+        >
+          <span className="inline-flex h-8 items-center gap-1.5 rounded-full border border-accent bg-accent-surface px-3">
+            {FOOD_CATEGORY_LABELS[category]}
+            <X aria-hidden className="size-3.5" />
+          </span>
+        </button>
       )}
 
       {state.status === "error" && (

@@ -253,6 +253,8 @@ describe("FoodSelectionScreen", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Ovo/ }));
     await userEvent.click(screen.getByRole("button", { name: "Adicionar à refeição" }));
 
+    // O "✕" da busca saía sem confirmar; como página, só "Voltar" sai (02/10/2026).
+    expect(screen.queryByRole("button", { name: "Fechar busca" })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Voltar sem adicionar" }));
     expect(mockPush, "descartou no primeiro toque").not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole("button", { name: /Descartar 1 alimento\?/ }));

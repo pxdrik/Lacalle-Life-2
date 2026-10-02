@@ -87,8 +87,8 @@ describe("FoodPicker", () => {
     ).not.toBeInTheDocument();
   });
 
-  // Roadmap 10.5 (30/09/2026): as categorias são cartões no topo, as mesmas
-  // da tela Alimentos; não há mais "Filtros" para abrir.
+  // Roadmap 10.5 (30/09/2026): as categorias são os cartões da tela
+  // Alimentos; desde 02/10/2026 ficam atrás do botão "Categorias".
   it("filters by category through the same category cards as the full browser", async () => {
     mount([
       food("Frango grelhado", { category: "protein" }),
@@ -96,6 +96,7 @@ describe("FoodPicker", () => {
     ]);
     await afterLoad();
 
+    await userEvent.click(screen.getByRole("button", { name: "Categorias" }));
     const cards = screen.getByRole("group", { name: "Categorias" });
     await userEvent.click(within(cards).getByRole("button", { name: /^Carboidratos/ }));
 
@@ -128,6 +129,7 @@ describe("FoodPicker", () => {
     ]);
     await afterLoad();
 
+    await userEvent.click(screen.getByRole("button", { name: "Categorias" }));
     const cards = screen.getByRole("group", { name: "Categorias" });
     await userEvent.click(within(cards).getByRole("button", { name: /^Proteínas/ }));
     await userEvent.click(
@@ -369,6 +371,7 @@ describe("FoodPicker — cartões de categoria", () => {
     ]);
     await afterLoad();
 
+    await userEvent.click(screen.getByRole("button", { name: "Categorias" }));
     const cards = screen.getByRole("group", { name: "Categorias" });
     const proteins = within(cards).getByRole("button", { name: /^Proteínas/ });
     expect(proteins).toHaveTextContent("2");
@@ -380,6 +383,28 @@ describe("FoodPicker — cartões de categoria", () => {
 
     await userEvent.click(within(cards).getByRole("button", { name: /^Todos/ }));
     expect(await screen.findByRole("button", { name: /Arroz branco/ })).toBeInTheDocument();
+  });
+
+  it("ficam fechados até o botão; com uma escolhida e fechados, a etiqueta mostra e limpa", async () => {
+    mount([
+      food("Frango grelhado", { category: "protein" }),
+      food("Arroz branco", { category: "carb" }),
+    ]);
+    await afterLoad();
+
+    const toggle = screen.getByRole("button", { name: "Categorias" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("group", { name: "Categorias" }), "cartões abertos de saída").toBeNull();
+
+    await userEvent.click(toggle);
+    await userEvent.click(within(screen.getByRole("group", { name: "Categorias" })).getByRole("button", { name: /^Proteínas/ }));
+    await userEvent.click(toggle);
+    expect(screen.queryByRole("group", { name: "Categorias" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Arroz branco/ }), "fechar desfez o filtro").not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Tirar o filtro Proteínas" }));
+    expect(await screen.findByRole("button", { name: /Arroz branco/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Tirar o filtro/ })).toBeNull();
   });
 
   it("a estrela mostra só favoritos e diz quando está ligada", async () => {
