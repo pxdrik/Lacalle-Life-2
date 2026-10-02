@@ -40,7 +40,7 @@ function draftFor(routineId: string, linkId: string) {
   return draft;
 }
 
-const NO_SESSIONS: SessionRepository = {
+export const NO_SESSIONS: SessionRepository = {
   listAll: () => Promise.resolve([]),
   findInProgress: () => Promise.resolve(undefined),
   getById: () => Promise.resolve(undefined),

@@ -38,6 +38,10 @@ function mount() {
     createTemplate: () => Promise.resolve("t"),
     deleteTemplate: () => Promise.resolve(),
     applyToPatient: () => new Promise<string>(() => undefined),
+    listRoutineTemplates: () => Promise.resolve([]),
+    createRoutineTemplate: () => Promise.resolve("t"),
+    deleteRoutineTemplate: () => Promise.resolve(),
+    applyRoutineToPatient: () => new Promise<string>(() => undefined),
   };
   render(
     <ThemeProvider>
@@ -91,6 +95,13 @@ describe("Biblioteca do Life Pro", () => {
         expectWhole(title, title);
         expect(apart(title.getBoundingClientRect(), create.getBoundingClientRect()), "título e Novo modelo encavalados").toBe(true);
         expectTouchable(create);
+        // As abas do tipo de modelo: tocáveis e lado a lado, sem passar da tela.
+        const [plans, routines] = screen.getAllByRole("tab");
+        for (const tab of [plans!, routines!]) {
+          expectTouchable(tab);
+          expect(tab.getBoundingClientRect().right, "aba fora da tela").toBeLessThanOrEqual(window.innerWidth + 0.5);
+        }
+        expect(apart(plans!.getBoundingClientRect(), routines!.getBoundingClientRect()), "abas encavaladas").toBe(true);
         const cards = screen.getAllByRole("listitem");
         const card = name.closest("li")!;
         expectWhole(name, card);

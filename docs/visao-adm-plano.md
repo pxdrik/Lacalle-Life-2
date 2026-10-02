@@ -361,6 +361,35 @@ antes de o Life Pro estar completo).
   a folha conta como visto. A seta fica junto do valor novo: com o espaço
   depois do "para" do leitor de tela no fim da linha, a régua de texto
   cortado acusava 12px a mais em 320 e 360px (visto vermelho).
+- **Etapa 6, acompanhamento** (protótipo aprovado em 02/10/2026:
+  https://claude.ai/artifact/G9aujUmqExhv2V3Hgvr37x, "pode implementar em
+  uat"). 6a, banco (migração 0039): "Treinos" é um item novo no que o
+  paciente libera (decisão do Pedro), desligado nos vínculos de antes e
+  marcado no convite novo; o aceite e a mudança sem o item novo continuam
+  funcionando. Leitura só por funções (`pro_patient_sessions`, `_diary`,
+  `_body`, `pro_overview`), cada uma conferindo vínculo ativo, treinador
+  aprovado e item liberado, sem lápide e sem treino em andamento. 6b, a
+  página do paciente ganha as abas Diário, Treinos e Evolução (só com
+  vínculo ativo; "não libera" é estado, não erro): em Treinos, os números
+  da semana, a semana com os dias prescritos e o prescrito ao lado do
+  feito, série por série, com a carga comparada ao treino anterior; no
+  Diário, cada refeição do plano por dia, comparada pelo conteúdo (a
+  referência que o Diário usa não atravessa a rede); em Evolução, peso e
+  medidas. Mora em `composition/follow-up-repository.ts`. 6c, a Visão
+  geral: quem treinou e registrou, a lista com último treino, diário e
+  peso, e "Precisa de atenção" (parado há 5 dias, contando o dia do aceite;
+  menos da metade dos dias do treino na semana). Padrões assumidos: os
+  treinos por conta própria aparecem, marcados; só treino finalizado.
+  Achados medindo: carga com unidade cortada na coluna da série em 390px,
+  a semana em quatro colunas no celular, e as colunas da série espalhadas
+  no computador (captura).
+- **Modelo de treino na Biblioteca** (migração 0040, `routine_templates`):
+  a Biblioteca ganha as abas Planos alimentares e Treinos. O modelo de
+  treino abre no editor do treino prescrito (catálogo, sem dias, sem
+  iniciar), gravado pela mesma fila do rascunho (a fila virou genérica,
+  `queuedRepository`). "Usar em paciente" cria um treino em rascunho, sem
+  dias, com cópia de ids novos. "Salvar plano ou treino como modelo" fica
+  para depois (padrão).
   Decidido pelo Pedro (01/10/2026): o link do convite fica no endereço do
   Vercel por enquanto. Abrir direto no app (Android App Links) e domínio
   próprio voltam quando houver app publicado e domínio.

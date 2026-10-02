@@ -11,8 +11,17 @@ export interface PlanTemplate {
   readonly updatedAt: string;
 }
 
+/** Um modelo de treino da Biblioteca (0040), o par do modelo de plano. */
+export interface RoutineTemplate {
+  readonly id: string;
+  readonly name: string;
+  readonly exerciseCount: number;
+  readonly setCount: number;
+  readonly updatedAt: string;
+}
+
 /**
- * A Biblioteca da profissional (Etapa 5d). O modelo em si é editado pelo
+ * A Biblioteca da profissional (Etapa 5d; modelos de treino desde 0040). O modelo em si é editado pelo
  * editor de dieta do app (`composition/template-repository.ts`); este lista,
  * cria, apaga e usa num paciente.
  */
@@ -27,4 +36,13 @@ export interface TemplateRepository {
    * do modelo, e devolve o id do plano. Mudar o modelo depois não mexe nele.
    */
   applyToPatient(templateId: string, linkId: string): Promise<string>;
+
+  listRoutineTemplates(): Promise<readonly RoutineTemplate[]>;
+  createRoutineTemplate(name: string): Promise<string>;
+  deleteRoutineTemplate(id: string): Promise<void>;
+  /**
+   * Cria um treino novo no vínculo, em rascunho e sem dias, com uma cópia dos
+   * exercícios do modelo, e devolve o id do treino.
+   */
+  applyRoutineToPatient(templateId: string, linkId: string): Promise<string>;
 }

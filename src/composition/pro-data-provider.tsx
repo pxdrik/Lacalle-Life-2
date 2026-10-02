@@ -15,6 +15,7 @@ import { createSupabaseRoutineRepository } from "@/features/pro/data/supabase-ro
 import { TemplateRepositoryProvider } from "@/features/pro/data/template-repository-context";
 
 import { createFollowUpRepository } from "./follow-up-repository";
+import { flushRoutineTemplateDrafts } from "./routine-template-editor-data-provider";
 import { flushTemplateDrafts } from "./template-editor-data-provider";
 import { createTemplateRepository } from "./template-repository";
 
@@ -31,7 +32,7 @@ export function ProDataProvider({ children }: { readonly children: React.ReactNo
       care: createSupabaseCareRepository(client),
       plans: createSupabasePlanRepository(client),
       routines: createSupabaseRoutineRepository(client),
-      templates: createTemplateRepository(client, flushTemplateDrafts),
+      templates: createTemplateRepository(client, () => Promise.all([flushTemplateDrafts(), flushRoutineTemplateDrafts()])),
       followUp: createFollowUpRepository(client),
     };
   });

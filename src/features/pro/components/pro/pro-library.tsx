@@ -8,44 +8,91 @@ import { useState } from "react";
 
 import { formatDecimal } from "@/core/format/decimal";
 import { Button, buttonClasses } from "@/design-system/components/button";
-import { Card } from "@/design-system/components/card";
+import { Card as CardBox } from "@/design-system/components/card";
 import { ConfirmButton } from "@/design-system/components/confirm-button";
 import { Dialog } from "@/design-system/components/dialog";
 import { EmptyState } from "@/design-system/components/empty-state";
 import { noticeClasses } from "@/design-system/components/notice";
 import { PageHeader } from "@/design-system/components/page-header";
 import { Skeleton } from "@/design-system/components/skeleton";
+import { Tabs, tabPanelId } from "@/design-system/components/tabs";
 
-import type { PlanTemplate } from "../../data/template-repository";
 import { usePatients } from "../../hooks/use-patients";
-import { useTemplates } from "../../hooks/use-templates";
-import { editorHref } from "./patient-page";
+import { useTemplates, type TemplateKind } from "../../hooks/use-templates";
+import { editorHref, routineEditorHref } from "./patient-page";
 
 const DATE = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" });
 
 export const templateHref = (id: string) => `/pro/biblioteca/${id}` as Route;
+export const routineTemplateHref = (id: string) => `/pro/biblioteca/treino/${id}` as Route;
+
+/** Um modelo como o cartão mostra, de qualquer tipo. */
+interface Card {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly updatedAt: string;
+}
+
+const KINDS: Readonly<
+  Record<
+    TemplateKind,
+    {
+      readonly label: string;
+      readonly emptyTitle: string;
+      readonly empty: string;
+      readonly newName: string;
+      readonly href: (id: string) => Route;
+      readonly what: string;
+      readonly open: (linkId: string, id: string) => Route;
+    }
+  >
+> = {
+  plans: {
+    label: "Planos alimentares",
+    emptyTitle: "Nenhum modelo de plano ainda.",
+    empty: "Monte um plano que você usa com frequência e comece os próximos pacientes por ele.",
+    newName: "Modelo novo",
+    href: templateHref,
+    what: "um plano novo para o paciente, em rascunho, com as refeições do modelo",
+    open: editorHref,
+  },
+  routines: {
+    label: "Treinos",
+    emptyTitle: "Nenhum modelo de treino ainda.",
+    empty: "Monte um treino que você passa com frequência e comece os próximos pacientes por ele. Os dias você escolhe em cada paciente.",
+    newName: "Treino novo",
+    href: routineTemplateHref,
+    what: "um treino novo para o paciente, em rascunho, com os exercícios do modelo e sem dias",
+    open: routineEditorHref,
+  },
+};
+
+const plural = (n: number, one: string, many: string) => `${String(n)} ${n === 1 ? one : many}`;
 
 /**
- * A Biblioteca (protótipo v3, 28/09/2026; Etapa 5d): os modelos de plano
- * alimentar da profissional. O modelo abre no editor de dieta do app, como o
- * plano. "Usar em paciente" cria um plano novo, em rascunho, com uma cópia
- * das refeições: mudar o modelo depois não mexe em plano nenhum, e o
- * paciente só vê depois de publicar. Sem compartilhar modelo com ninguém.
+ * A Biblioteca (protótipo v3, 28/09/2026; Etapa 5d; modelos de treino no
+ * protótipo de 02/10/2026): os modelos do treinador, de plano alimentar e de
+ * treino. Cada modelo abre no editor do app, como o que ele prescreve. "Usar
+ * em paciente" cria uma cópia em rascunho: mudar o modelo depois não mexe em
+ * nada publicado, e o paciente só vê depois de publicar. Sem compartilhar
+ * modelo com ninguém.
  */
 export function ProLibrary() {
   const library = useTemplates();
   const router = useRouter();
+  const [kind, setKind] = useState<TemplateKind>("plans");
   const [creating, setCreating] = useState(false);
   const [failed, setFailed] = useState<string | null>(null);
-  const [applying, setApplying] = useState<PlanTemplate | null>(null);
+  const [applying, setApplying] = useState<{ readonly kind: TemplateKind; readonly card: Card } | null>(null);
 
   const create = () => {
     setCreating(true);
     setFailed(null);
     library
-      .create("Modelo novo")
+      .create(kind, KINDS[kind].newName)
       .then((id) => {
-        router.push(templateHref(id));
+        router.push(KINDS[kind].href(id));
       })
       .catch(() => {
         setCreating(false);
@@ -53,12 +100,31 @@ export function ProLibrary() {
       });
   };
 
+  const cards: Readonly<Record<TemplateKind, readonly Card[]>> | null =
+    library.state.status === "ready"
+      ? {
+          plans: library.state.plans.map((template) => ({
+            id: template.id,
+            name: template.name,
+            description: `${plural(template.mealCount, "refeição", "refeições")} · ${formatDecimal(template.kcal, 0)} kcal`,
+            updatedAt: template.updatedAt,
+          })),
+          routines: library.state.routines.map((template) => ({
+            id: template.id,
+            name: template.name,
+            description: `${plural(template.exerciseCount, "exercício", "exercícios")} · ${plural(template.setCount, "série", "séries")}`,
+            updatedAt: template.updatedAt,
+          })),
+        }
+      : null;
+  const list = cards?.[kind] ?? [];
+
   return (
     <>
       <PageHeader
         icon={Library}
         title="Biblioteca"
-        subtitle="Seus modelos. Usar um modelo cria uma cópia; editar o modelo não muda planos publicados."
+        subtitle="Seus modelos. Usar um modelo cria uma cópia; editar o modelo não muda o que já foi publicado."
         // Em 320px Confortável, "Biblioteca" ficava 1px maior que a coluna com o gap de 16.
         className="gap-2 sm:gap-4"
       >
@@ -71,7 +137,20 @@ export function ProLibrary() {
         </Button>
       </PageHeader>
 
-      <div className="mt-8 space-y-4">
+      <Tabs
+        idPrefix="biblioteca"
+        items={(["plans", "routines"] as const).map((id) => ({
+          id,
+          label: cards === null ? KINDS[id].label : `${KINDS[id].label} · ${String(cards[id].length)}`,
+        }))}
+        value={kind}
+        onChange={(id) => {
+          setKind(id === "routines" ? "routines" : "plans");
+        }}
+        className="mt-6 overflow-x-auto"
+      />
+
+      <div role="tabpanel" id={tabPanelId("biblioteca", kind)} aria-labelledby={`biblioteca-tab-${kind}`} className="mt-6 space-y-4">
         {failed !== null && (
           <p role="alert" className={noticeClasses("danger", "block")}>
             {failed}
@@ -84,26 +163,27 @@ export function ProLibrary() {
             <p className="mt-1.5 text-sm text-ink-muted">Confira a conexão e recarregue a página.</p>
           </div>
         )}
-        {library.state.status === "ready" &&
-          (library.state.templates.length === 0 ? (
+        {cards !== null &&
+          (list.length === 0 ? (
             <EmptyState
               icon={Library}
-              title="Nenhum modelo ainda."
-              caption="Monte um plano que você usa com frequência e comece os próximos pacientes por ele."
+              title={KINDS[kind].emptyTitle}
+              caption={KINDS[kind].empty}
               action={{ label: "Novo modelo", onClick: create, icon: Plus }}
             />
           ) : (
             <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {library.state.templates.map((template) => (
+              {list.map((card) => (
                 <TemplateCard
-                  key={template.id}
-                  template={template}
+                  key={card.id}
+                  card={card}
+                  href={KINDS[kind].href(card.id)}
                   onApply={() => {
-                    setApplying(template);
+                    setApplying({ kind, card });
                   }}
                   onRemove={() => {
                     setFailed(null);
-                    library.remove(template.id).catch(() => {
+                    library.remove(kind, card.id).catch(() => {
                       setFailed("Não foi possível apagar o modelo. Confira a conexão e tente de novo.");
                     });
                   }}
@@ -115,8 +195,10 @@ export function ProLibrary() {
 
       {applying !== null && (
         <ApplyDialog
-          template={applying}
-          apply={library.applyToPatient}
+          card={applying.card}
+          what={KINDS[applying.kind].what}
+          apply={(linkId) => library.applyToPatient(applying.kind, applying.card.id, linkId)}
+          open={KINDS[applying.kind].open}
           onClose={() => {
             setApplying(null);
           }}
@@ -126,59 +208,55 @@ export function ProLibrary() {
   );
 }
 
-function describeTemplate(template: PlanTemplate): string {
-  const meals = template.mealCount;
-  return `${String(meals)} ${meals === 1 ? "refeição" : "refeições"} · ${formatDecimal(template.kcal, 0)} kcal`;
-}
-
 function TemplateCard({
-  template,
+  card,
+  href,
   onApply,
   onRemove,
 }: {
-  readonly template: PlanTemplate;
+  readonly card: Card;
+  readonly href: Route;
   readonly onApply: () => void;
   readonly onRemove: () => void;
 }) {
   return (
-    <Card as="li" padded={false} className="flex flex-col transition-colors duration-150 ease-out hover:border-line-strong">
-      <Link href={templateHref(template.id)} className="block flex-1 p-4">
-        <h3 className="font-semibold break-words text-ink">{template.name}</h3>
-        <p className="mt-1 text-sm text-ink-subtle">{describeTemplate(template)}</p>
-        <p className="mt-1 text-xs text-ink-subtle">Atualizado em {DATE.format(new Date(template.updatedAt))}</p>
+    <CardBox as="li" padded={false} className="flex flex-col transition-colors duration-150 ease-out hover:border-line-strong">
+      <Link href={href} className="block flex-1 p-4">
+        <h3 className="font-semibold break-words text-ink">{card.name}</h3>
+        <p className="mt-1 text-sm text-ink-subtle">{card.description}</p>
+        <p className="mt-1 text-xs text-ink-subtle">Atualizado em {DATE.format(new Date(card.updatedAt))}</p>
       </Link>
       {/* Data no corpo: com ela no rodapé, "Usar em paciente" descia sozinho
           para uma segunda linha mesmo na grade de três colunas. Apagar é a
           lixeira, como em Treinos: com a palavra, as fontes do Linux (CI)
           quebravam o rodapé em 320px Confortável. */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-2 py-1">
-        <ConfirmButton
-          label={`Apagar ${template.name}`}
-          confirmLabel="Apagar?"
-          onConfirm={onRemove}
-          className="min-h-11 min-w-11"
-        >
+        <ConfirmButton label={`Apagar ${card.name}`} confirmLabel="Apagar?" onConfirm={onRemove} className="min-h-11 min-w-11">
           <Trash2 aria-hidden className="size-4" />
         </ConfirmButton>
         <Button variant="ghost" size="sm" onClick={onApply}>
           Usar em paciente
         </Button>
       </div>
-    </Card>
+    </CardBox>
   );
 }
 
 /**
- * Para quem é o plano novo: só vínculo ativo, porque o banco recusa plano em
- * vínculo encerrado. Escolher cria o plano e abre o editor dele.
+ * Para quem é a cópia: só vínculo ativo, porque o banco recusa plano e treino
+ * em vínculo encerrado. Escolher cria a cópia e abre o editor dela.
  */
 function ApplyDialog({
-  template,
+  card,
+  what,
   apply,
+  open,
   onClose,
 }: {
-  readonly template: PlanTemplate;
-  readonly apply: (template: PlanTemplate, linkId: string) => Promise<string>;
+  readonly card: Card;
+  readonly what: string;
+  readonly apply: (linkId: string) => Promise<string>;
+  readonly open: (linkId: string, id: string) => Route;
   readonly onClose: () => void;
 }) {
   const { state } = usePatients();
@@ -190,9 +268,9 @@ function ApplyDialog({
   const choose = (linkId: string) => {
     setPending(linkId);
     setFailed(false);
-    apply(template, linkId)
-      .then((planId) => {
-        router.push(editorHref(linkId, planId));
+    apply(linkId)
+      .then((id) => {
+        router.push(open(linkId, id));
       })
       .catch(() => {
         setPending(null);
@@ -201,13 +279,11 @@ function ApplyDialog({
   };
 
   return (
-    <Dialog open title={`Usar ${template.name}`} onClose={onClose}>
-      <p className="text-sm text-ink-muted">
-        Cria um plano novo para o paciente, em rascunho, com as refeições do modelo. Ele só vê depois que você publicar.
-      </p>
+    <Dialog open title={`Usar ${card.name}`} onClose={onClose}>
+      <p className="text-sm text-ink-muted">Cria {what}. Ele só vê depois que você publicar.</p>
       {failed && (
         <p role="alert" className={`mt-3 ${noticeClasses("danger", "block")}`}>
-          Não foi possível criar o plano. Confira a conexão e tente de novo.
+          Não foi possível criar a cópia. Confira a conexão e tente de novo.
         </p>
       )}
       {state.status === "loading" && <Skeleton className="mt-4 h-24" />}

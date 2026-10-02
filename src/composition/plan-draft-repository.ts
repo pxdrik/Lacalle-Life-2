@@ -76,7 +76,7 @@ export function createPlanDraftDietRepository(
     return { id: plan.planId, name, meals: meals.parse(raw), weekdays: days, createdAt: updatedAt, updatedAt };
   }
 
-  return queuedDietRepository(plan.planId, load, write, "Um plano não se apaga pelo editor.");
+  return queuedRepository<Diet>(plan.planId, load, write, "Um plano não se apaga pelo editor.");
 }
 
 /**
@@ -104,36 +104,48 @@ export function createTemplateDraftDietRepository(client: ProSupabaseClient, tem
     return { id: templateId, name: row.name, meals: row.meals, weekdays: [], createdAt: updatedAt, updatedAt };
   }
 
-  return queuedDietRepository(templateId, load, write, "Um modelo se apaga pela Biblioteca.");
+  return queuedRepository<Diet>(templateId, load, write, "Um modelo se apaga pela Biblioteca.");
 }
 
 export type QueuedDietRepository = DietRepository & { readonly flush: () => Promise<void> };
 
-/** Uma dieta só, lida da rede e gravada em fila (ver o comentário do topo). */
-function queuedDietRepository(
+/**
+ * Um registro só, lido da rede e gravado em fila (ver o comentário do topo):
+ * o rascunho do plano, o modelo de plano e o modelo de treino da Biblioteca.
+ */
+export interface QueuedRepository<T> {
+  listAll(): Promise<readonly T[]>;
+  getById(id: string): Promise<T | undefined>;
+  save(entity: T): Promise<void>;
+  remove(id: string): Promise<void>;
+  /** Espera a última mudança chegar ao banco: publicar e listar leem de lá. */
+  flush(): Promise<void>;
+}
+
+export function queuedRepository<T>(
   id: string,
-  load: () => Promise<Diet | undefined>,
-  write: (diet: Diet) => Promise<void>,
+  load: () => Promise<T | undefined>,
+  write: (entity: T) => Promise<void>,
   removeMessage: string,
-): QueuedDietRepository {
-  let latest: Diet | null = null;
+): QueuedRepository<T> {
+  let latest: T | null = null;
   let running: Promise<void> | null = null;
 
   return {
     async listAll() {
-      const diet = latest ?? (await load());
-      return diet === undefined ? [] : [diet];
+      const entity = latest ?? (await load());
+      return entity === undefined ? [] : [entity];
     },
     async getById(requested) {
       if (requested !== id) return undefined;
       return latest ?? (await load());
     },
-    save(diet) {
-      latest = diet;
+    save(entity) {
+      latest = entity;
       if (running === null) {
         running = (async () => {
           let next = latest;
-          let sent: Diet | null = null;
+          let sent: T | null = null;
           while (next !== null && next !== sent) {
             sent = next;
             await write(next);
@@ -148,7 +160,6 @@ function queuedDietRepository(
     remove() {
       return Promise.reject(new Error(removeMessage));
     },
-    /** Espera a última mudança chegar ao banco: publicar lê o rascunho de lá. */
     flush() {
       return running ?? Promise.resolve();
     },

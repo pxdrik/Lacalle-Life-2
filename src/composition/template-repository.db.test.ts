@@ -5,7 +5,7 @@ import type { Meal } from "@/features/diet/types/diet";
 import { clientAs, createTestDb, type TestDb } from "@/test/supabase-db";
 
 import { createTemplateDraftDietRepository } from "./plan-draft-repository";
-import { createTemplateRepository } from "./template-repository";
+import { createRoutineTemplateDraftRepository, createTemplateRepository } from "./template-repository";
 
 /**
  * A Biblioteca (Etapa 5d) contra o banco de verdade (0035): o modelo é
@@ -120,5 +120,44 @@ describe("Biblioteca de modelos", () => {
 
     await mine.deleteTemplate(template!.id);
     expect(await mine.listTemplates()).toEqual([]);
+  });
+
+  it("modelo de treino: edita pelo editor de treino, lista exercícios e séries, e usar vira um treino sem dias com cópia", async () => {
+    const library = createTemplateRepository(clientAs(t, marina), none);
+    const id = await library.createRoutineTemplate("Treino A");
+    expect(await library.listRoutineTemplates()).toMatchObject([{ id, name: "Treino A", exerciseCount: 0, setCount: 0 }]);
+
+    const editor = createRoutineTemplateDraftRepository(clientAs(t, marina), id);
+    const opened = (await editor.getById(id))!;
+    const squat = {
+      id: "x1",
+      exerciseId: "cat-agachamento",
+      name: "Agachamento",
+      sets: [1, 2, 3].map((n) => ({ id: `s${String(n)}`, reps: 8, weightKg: 60, rpe: 8, durationSeconds: null })),
+      restSeconds: 120,
+      notes: "Desça até a coxa ficar paralela.",
+    };
+    await editor.save({ ...opened, name: "Treino A, inferiores", exercises: [squat], updatedAt: opened.updatedAt + 1 });
+    expect(await library.listRoutineTemplates()).toMatchObject([{ id, name: "Treino A, inferiores", exerciseCount: 1, setCount: 3 }]);
+
+    const routineId = await library.applyRoutineToPatient(id, linkId);
+    const draft = await t.as(marina, (tx) =>
+      tx.query<{ name: string; exercises: { id: string; exerciseId: string; sets: { id: string }[] }[]; weekdays: string[] }>(
+        "select name, exercises, weekdays from public.prescribed_routine_drafts where routine_id = $1",
+        [routineId],
+      ),
+    );
+    const [routine] = draft.rows;
+    expect(routine).toMatchObject({ name: "Treino A, inferiores", weekdays: [] });
+    expect(routine!.exercises[0]).toMatchObject({ exerciseId: "cat-agachamento" });
+    expect(routine!.exercises[0]!.id, "o treino divide o id do exercício com o modelo").not.toBe("x1");
+    expect(routine!.exercises[0]!.sets[0]!.id, "o treino divide o id da série com o modelo").not.toBe("s1");
+
+    const other = createTemplateRepository(clientAs(t, paulo), none);
+    expect(await other.listRoutineTemplates()).toEqual([]);
+    await expect(other.applyRoutineToPatient(id, linkId)).rejects.toThrow(/not found/);
+    await expect(other.deleteRoutineTemplate(id)).rejects.toThrow(/not found/);
+    await library.deleteRoutineTemplate(id);
+    expect(await library.listRoutineTemplates()).toEqual([]);
   });
 });

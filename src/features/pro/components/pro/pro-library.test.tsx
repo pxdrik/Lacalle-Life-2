@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { CareRepositoryProvider } from "../../data/care-repository-context";
 import { fakeCareRepository, patientLink } from "../../data/fake-care-repository.test-helper";
-import type { PlanTemplate, TemplateRepository } from "../../data/template-repository";
+import type { PlanTemplate, RoutineTemplate, TemplateRepository } from "../../data/template-repository";
 import { TemplateRepositoryProvider } from "../../data/template-repository-context";
 import { ProLibrary } from "./pro-library";
 
@@ -22,9 +22,14 @@ const TEMPLATES: PlanTemplate[] = [
   { id: "t2", name: "Hipertrofia", mealCount: 1, kcal: 2800, updatedAt: "2026-09-20T12:00:00Z" },
 ];
 
-function fakeTemplates(initial: readonly PlanTemplate[]): TemplateRepository & { readonly calls: string[] } {
+const ROUTINES: RoutineTemplate[] = [
+  { id: "r1", name: "Treino A, inferiores", exerciseCount: 5, setCount: 17, updatedAt: "2026-09-30T12:00:00Z" },
+];
+
+function fakeTemplates(initial: readonly PlanTemplate[], routinesInitial: readonly RoutineTemplate[] = ROUTINES): TemplateRepository & { readonly calls: string[] } {
   const calls: string[] = [];
   let templates = [...initial];
+  let routines = [...routinesInitial];
   return {
     calls,
     listTemplates: () => Promise.resolve(templates),
@@ -41,12 +46,26 @@ function fakeTemplates(initial: readonly PlanTemplate[]): TemplateRepository & {
       calls.push(`apply:${templateId}:${linkId}`);
       return Promise.resolve("plano-novo");
     },
+    listRoutineTemplates: () => Promise.resolve(routines),
+    createRoutineTemplate: (name) => {
+      calls.push(`create-routine:${name}`);
+      return Promise.resolve("treino-modelo");
+    },
+    deleteRoutineTemplate: (id) => {
+      calls.push(`delete-routine:${id}`);
+      routines = routines.filter((routine) => routine.id !== id);
+      return Promise.resolve();
+    },
+    applyRoutineToPatient: (templateId, linkId) => {
+      calls.push(`apply-routine:${templateId}:${linkId}`);
+      return Promise.resolve("treino-novo");
+    },
   };
 }
 
-function mount(templates: readonly PlanTemplate[] = TEMPLATES) {
+function mount(templates: readonly PlanTemplate[] = TEMPLATES, routines: readonly RoutineTemplate[] = ROUTINES) {
   push.mockClear();
-  const repository = fakeTemplates(templates);
+  const repository = fakeTemplates(templates, routines);
   const care = fakeCareRepository({
     links: [
       patientLink({ id: "l1", label: "Ana Luísa Prado" }),
@@ -75,7 +94,7 @@ describe("Biblioteca do Life Pro", () => {
 
   it("sem modelos, o estado vazio também cria", async () => {
     const repository = mount([]);
-    expect(await screen.findByText("Nenhum modelo ainda.")).toBeInTheDocument();
+    expect(await screen.findByText("Nenhum modelo de plano ainda.")).toBeInTheDocument();
     await userEvent.click(screen.getAllByRole("button", { name: "Novo modelo" }).at(-1)!);
     await waitFor(() => {
       expect(push).toHaveBeenCalledWith("/pro/biblioteca/novo");
@@ -108,5 +127,34 @@ describe("Biblioteca do Life Pro", () => {
       expect(screen.queryByRole("heading", { name: "Déficit moderado" })).toBeNull();
     });
     expect(repository.calls).toEqual(["delete:t1"]);
+  });
+
+  it("modelos de treino: na aba Treinos, com exercícios e séries; novo abre o editor de treino", async () => {
+    const repository = mount([], []);
+    await userEvent.click(await screen.findByRole("tab", { name: /Treinos · 0/ }));
+    expect(await screen.findByText("Nenhum modelo de treino ainda.")).toBeInTheDocument();
+    await userEvent.click(screen.getAllByRole("button", { name: "Novo modelo" }).at(-1)!);
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/pro/biblioteca/treino/treino-modelo");
+    });
+    expect(repository.calls).toEqual(["create-routine:Treino novo"]);
+  });
+
+  it("usar um modelo de treino cria o treino do paciente e abre o editor dele", async () => {
+    const repository = mount();
+    expect(await screen.findByRole("tab", { name: "Planos alimentares · 2" })).toHaveAttribute("aria-selected", "true");
+    await userEvent.click(screen.getByRole("tab", { name: "Treinos · 1" }));
+    const card = (await screen.findByRole("heading", { name: "Treino A, inferiores" })).closest("li")!;
+    expect(card).toHaveTextContent("5 exercícios · 17 séries");
+    expect(within(card).getByRole("link")).toHaveAttribute("href", "/pro/biblioteca/treino/r1");
+    await userEvent.click(within(card).getByRole("button", { name: "Usar em paciente" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Usar Treino A, inferiores" });
+    expect(dialog).toHaveTextContent("sem dias");
+    await userEvent.click(await within(dialog).findByRole("button", { name: /Ana Luísa Prado/ }));
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith("/pro/pacientes/l1/treino/treino-novo");
+    });
+    expect(repository.calls).toEqual(["apply-routine:r1:l1"]);
   });
 });
