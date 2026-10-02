@@ -102,7 +102,7 @@ describe("Biblioteca do Life Pro", () => {
     const card = (await screen.findByRole("heading", { name: "Déficit moderado" })).closest("li")!;
     await userEvent.click(within(card).getByRole("button", { name: "Apagar Déficit moderado" }));
     expect(repository.calls, "apagou sem confirmar").toEqual([]);
-    await userEvent.click(within(card).getByRole("button", { name: /Apagar mesmo/ }));
+    await userEvent.click(within(card).getByRole("button", { name: /Apagar\?/ }));
 
     await waitFor(() => {
       expect(screen.queryByRole("heading", { name: "Déficit moderado" })).toBeNull();

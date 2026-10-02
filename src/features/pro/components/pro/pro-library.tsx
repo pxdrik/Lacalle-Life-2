@@ -1,6 +1,6 @@
 "use client";
 
-import { Library, Plus } from "lucide-react";
+import { Library, Plus, Trash2 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -148,15 +148,17 @@ function TemplateCard({
         <p className="mt-1 text-xs text-ink-subtle">Atualizado em {DATE.format(new Date(template.updatedAt))}</p>
       </Link>
       {/* Data no corpo: com ela no rodapé, "Usar em paciente" descia sozinho
-          para uma segunda linha mesmo na grade de três colunas. */}
+          para uma segunda linha mesmo na grade de três colunas. Apagar é a
+          lixeira, como em Treinos: com a palavra, as fontes do Linux (CI)
+          quebravam o rodapé em 320px Confortável. */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-2 py-1">
         <ConfirmButton
           label={`Apagar ${template.name}`}
-          confirmLabel="Apagar mesmo?"
+          confirmLabel="Apagar?"
           onConfirm={onRemove}
-          className="h-(--control-h-sm) px-3 text-[0.8125rem]"
+          className="min-h-11 min-w-11"
         >
-          Apagar
+          <Trash2 aria-hidden className="size-4" />
         </ConfirmButton>
         <Button variant="ghost" size="sm" onClick={onApply}>
           Usar em paciente

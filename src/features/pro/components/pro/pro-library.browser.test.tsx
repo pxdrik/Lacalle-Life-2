@@ -108,7 +108,9 @@ describe("Biblioteca do Life Pro", () => {
         expect(apart(remove.getBoundingClientRect(), apply.getBoundingClientRect()), "Apagar e Usar encavalados").toBe(true);
         // Os dois na mesma linha: "Usar em paciente" sozinho embaixo era o
         // rodapé quebrado (visto na captura em 1280px, três colunas).
-        expect(Math.abs(remove.getBoundingClientRect().top - apply.getBoundingClientRect().top), "rodapé quebrou em duas linhas").toBeLessThanOrEqual(1);
+        // Pelo centro: a lixeira (44px) e o botão têm alturas diferentes.
+        const middle = (box: DOMRect) => box.top + box.height / 2;
+        expect(Math.abs(middle(remove.getBoundingClientRect()) - middle(apply.getBoundingClientRect())), "rodapé quebrou em duas linhas").toBeLessThanOrEqual(1);
         expectTouchable(within(card).getByRole("link"));
 
         await userEvent.click(apply);
